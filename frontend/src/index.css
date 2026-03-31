@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.glass-effect {
+  @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-800/20;
+}
+
+.bottom-nav-shadow {
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

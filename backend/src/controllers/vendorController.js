@@ -1,0 +1,476 @@
+const Vendor = require('../models/Vendor');
+const Service = require('../models/Service');
+const User = require('../models/User');
+const Booking = require('../models/Booking');
+const Offer = require('../models/Offer');
+const cloudinary = require('../config/cloudinary');
+const moment = require('moment-timezone');
+const NotificationService = require('../services/notificationService');
+
+// ... (registerVendor, uploadDocs, getVendorProfile preserved)
+
+const registerVendor = async (req, res) => {
+  try {
+    const { shopName, category, address, location, serviceLevel } = req.body;
+    const existingVendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (existingVendor) return res.status(400).json({ message: 'Vendor already exists' });
+
+    console.log('[DEBUG] Registering Vendor for user:', req.user._id);
+    const vendor = await Vendor.create({
+      shopName,
+      category,
+      address,
+      location,
+      ownerId: req.user._id,
+      status: 'pending',
+      serviceLevel: serviceLevel || 'basic'
+    });
+    console.log('[DEBUG] Vendor Record Created:', vendor._id, 'with ownerId:', vendor.ownerId);
+    await User.findByIdAndUpdate(req.user._id, { role: 'vendor' });
+
+    const admins = await User.find({ role: 'admin' });
+    if (admins.length > 0) {
+      NotificationService.sendNotification({
+        userIds: admins.map(a => a._id), role: 'admin', type: 'NEW_VENDOR_REGISTRATION',
+        title: 'New Vendor Registration', message: `A new vendor "${shopName}" has registered and is pending approval.`,
+        data: { vendorId: vendor._id }, referenceId: `NEW_VENDOR_${vendor._id}`
+      });
+    }
+
+    res.status(201).json(vendor);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const uploadDocs = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+    if (!req.files) return res.status(400).json({ message: 'No files' });
+
+    const uploadToCloudinary = (fileBuffer, isVideo = false) => {
+      return new Promise((resolve, reject) => {
+        const options = {
+          folder: 'zerone/vendors',
+          resource_type: isVideo ? 'video' : 'auto'
+        };
+        const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
+          if (error) reject(error); else resolve(result.secure_url);
+        });
+        uploadStream.end(fileBuffer);
+      });
+    };
+
+    const files = req.files;
+    if (files.aadhaar) vendor.aadhaar = await uploadToCloudinary(files.aadhaar[0].buffer);
+    if (files.panCard) vendor.panCard = await uploadToCloudinary(files.panCard[0].buffer);
+    if (files.shopImage) vendor.shopImage = await uploadToCloudinary(files.shopImage[0].buffer);
+    if (files.vendorPhoto) vendor.vendorPhoto = await uploadToCloudinary(files.vendorPhoto[0].buffer);
+
+    // 🎨 NEW: Gallery & Video
+    if (files.gallery) {
+      const galleryUrls = await Promise.all(
+        files.gallery.map(file => uploadToCloudinary(file.buffer))
+      );
+      vendor.galleryImages = [...(vendor.galleryImages || []), ...galleryUrls];
+    }
+    if (files.video) {
+      vendor.shopVideo = await uploadToCloudinary(files.video[0].buffer, true);
+    }
+
+    if (vendor.aadhaar && vendor.panCard && vendor.shopImage && vendor.vendorPhoto) {
+      vendor.isProfileComplete = true;
+    }
+    await vendor.save();
+    res.status(200).json(vendor);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const getVendorProfile = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('category', 'name');
+    if (!vendor) {
+      console.log('[DEBUG] Vendor NOT FOUND for user:', req.user._id);
+      return res.status(404).json({ message: 'Vendor not found' });
+    }
+    console.log('[DEBUG] getVendorProfile SUCCESS. User:', req.user._id, 'Status:', vendor.status);
+    res.status(200).json(vendor);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+// 📍 UPDATED: Search + Multi-Category Support
+const getNearbyVendors = async (req, res) => {
+  try {
+    const { lng, lat, category, search, page = 1, limit = 10 } = req.query;
+    if (!lng || !lat) return res.status(400).json({ message: 'Lng/Lat required' });
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const filter = {
+      status: 'active',
+      location: {
+        $near: {
+          $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
+          $maxDistance: parseInt(process.env.VENDOR_DISCOVERY_RADIUS) || 10000
+        }
+      }
+    };
+
+    if (category) filter.category = { $in: category.split(',') };
+
+    if (search) {
+      const matchingServices = await Service.find({
+        name: { $regex: search, $options: 'i' },
+        isActive: true
+      }).select('vendorId');
+
+      const vendorIds = matchingServices.map(s => s.vendorId);
+      filter.$or = [
+        { shopName: { $regex: search, $options: 'i' } },
+        { _id: { $in: vendorIds } }
+      ];
+    }
+
+    // Execute query with pagination
+    const vendors = await Vendor.find(filter)
+      .populate('category', 'name')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    // Enrich with minPrice and specific services
+    const enrichedVendors = await Promise.all(vendors.map(async (v) => {
+      const allServices = await Service.find({ vendorId: v._id, isActive: true }).select('name price').sort({ price: 1 });
+      const services = allServices.slice(0, 1);
+      return {
+        ...v,
+        service: services[0]?.name || 'Beauty Service',
+        price: services[0]?.price || 0,
+        serviceCount: allServices.length
+      };
+    }));
+
+    // 🚀 ENGAGEMENT TRACKING: Increment profileViews (Throttled)
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress;
+    const cacheKey = `view:${ip}`;
+
+    // Bulk update views for vendors not recently viewed by this IP
+    for (const v of enrichedVendors) {
+      const vendorId = v._id.toString();
+      const uniqueKey = `${cacheKey}:${vendorId}`;
+
+      if (!global.viewThrottle) global.viewThrottle = new Map();
+      const lastViewed = global.viewThrottle.get(uniqueKey);
+      const ONE_HOUR = 60 * 60 * 1000;
+
+      if (!lastViewed || (Date.now() - lastViewed > ONE_HOUR)) {
+        await Vendor.findByIdAndUpdate(v._id, { $inc: { profileViews: 1 } });
+        global.viewThrottle.set(uniqueKey, Date.now());
+      }
+    }
+
+    res.status(200).json(enrichedVendors);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const updateShopStatus = async (req, res) => {
+  try {
+    const { isShopOpen, isClosedToday, closedDates } = req.body;
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    if (isShopOpen !== undefined) vendor.isShopOpen = isShopOpen;
+    if (isClosedToday !== undefined) vendor.isClosedToday = isClosedToday;
+    if (closedDates) vendor.closedDates = closedDates;
+
+    await vendor.save();
+    res.status(200).json(vendor);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const createOffer = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const offer = await Offer.create({ ...req.body, vendorId: vendor._id });
+    res.status(201).json(offer);
+  } catch (error) { res.status(400).json({ message: error.message }); }
+};
+
+const getOffers = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const offers = await Offer.find({ vendorId: vendor._id });
+    res.status(200).json(offers);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const updateOffer = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const offer = await Offer.findOneAndUpdate({ _id: req.params.id, vendorId: vendor._id }, req.body, { new: true });
+    res.status(200).json(offer);
+  } catch (error) { res.status(400).json({ message: error.message }); }
+};
+
+const getVendorBookings = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const { from, to, status } = req.query;
+    const filter = { vendorId: vendor._id };
+
+    if (from && to) {
+      filter.startTime = { $gte: moment(from).startOf('day').toDate(), $lt: moment(to).endOf('day').toDate() };
+    }
+    const allowedStatus = ['confirmed', 'completed', 'cancelled'];
+    if (status && allowedStatus.includes(status)) {
+      filter.status = status;
+    }
+
+    const bookings = await Booking.find(filter)
+      .populate('userId', 'name phone')
+      .populate('staffId', 'name')
+      .sort({ startTime: -1 });
+
+    const now = moment().tz('Asia/Kolkata');
+    const formatted = bookings.map(b => {
+      const doc = b.toObject();
+      const startTime = moment(doc.startTime).tz('Asia/Kolkata');
+      const bufferTime = startTime.clone().subtract(30, 'minutes');
+
+      // SOP Level Flags
+      doc.canCancel = !now.isSameOrAfter(bufferTime) && doc.status === 'confirmed';
+      doc.canContact = now.isSameOrAfter(bufferTime) && doc.status === 'confirmed' && now.isBefore(startTime);
+
+      return doc;
+    });
+
+    res.status(200).json(formatted);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const getVendorDashboard = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const todayStart = moment().startOf('day').toDate();
+    const todayEnd = moment().endOf('day').toDate();
+    const weekStart = moment().startOf('week').toDate();
+
+    // 📅 Today's Bookings
+    const todayBookings = await Booking.find({
+      vendorId: vendor._id,
+      startTime: { $gte: todayStart, $lt: todayEnd }
+    }).populate('userId', 'name').sort({ startTime: 1 });
+
+    // 💰 Today's Earnings
+    const todayEarnings = todayBookings
+      .filter(b => b.status === 'confirmed' || b.status === 'completed')
+      .reduce((sum, b) => sum + b.totalPrice, 0);
+
+    // 💰 Weekly Earnings
+    const weekBookings = await Booking.find({
+      vendorId: vendor._id,
+      startTime: { $gte: weekStart, $lt: todayEnd },
+      status: { $in: ['confirmed', 'completed'] }
+    });
+    const weekEarnings = weekBookings.reduce((sum, b) => sum + b.totalPrice, 0);
+
+    // 💰 Total Earnings (All time confirmed/completed)
+    const allBookings = await Booking.find({
+      vendorId: vendor._id,
+      status: { $in: ['confirmed', 'completed'] }
+    });
+    const totalEarnings = allBookings.reduce((sum, b) => sum + b.totalPrice, 0);
+
+    // 👨‍🔧 Active Staff
+    const Staff = require('../models/Staff');
+    const activeStaffCount = await Staff.countDocuments({ vendorId: vendor._id, isActive: true });
+
+    const isTrialActive = vendor.freeTrial?.isActive && new Date(vendor.freeTrial.expiryDate) > new Date();
+    const isMonthlyActive = vendor.planType === 'monthly' && new Date(vendor.expiryDate) > new Date();
+    const isDailyActive = vendor.planType === 'daily' && vendor.walletBalance >= 100 && vendor.lastDeductionDate && moment(vendor.lastDeductionDate).isSame(moment(), 'day');
+
+    const isActive = isTrialActive || isMonthlyActive || isDailyActive;
+
+    res.status(200).json({
+      shopName: vendor.shopName,
+      address: vendor.address,
+      rating: vendor.rating,
+      isShopOpen: vendor.isShopOpen,
+      isClosedToday: vendor.isClosedToday,
+      walletBalance: vendor.walletBalance,
+      subscription: {
+        currentPlan: isTrialActive ? 'trial' : vendor.planType,
+        serviceLevel: vendor.serviceLevel,
+        planExpiry: isTrialActive ? vendor.freeTrial.expiryDate : (isMonthlyActive ? vendor.expiryDate : null),
+        nextDeduction: vendor.planType === 'daily' ? moment().add(1, 'day').startOf('day').toDate() : null,
+        isActive
+      },
+      engagement: {
+        profileViews: vendor.profileViews || 0,
+        serviceClicks: vendor.serviceClicks || 0,
+        customerLoss: !isActive ? (vendor.profileViews || 0) : 0
+      },
+      stats: {
+        todayBookings: todayBookings.length,
+        todayEarnings,
+        weekEarnings,
+        totalEarnings,
+        activeStaff: activeStaffCount,
+        avgRating: vendor.rating
+      },
+      revenueHistory: await Promise.all([...Array(7)].map(async (_, i) => {
+        const d = moment().subtract(i, 'days');
+        const start = d.clone().startOf('day').toDate();
+        const end = d.clone().endOf('day').toDate();
+        const bookings = await Booking.find({
+          vendorId: vendor._id,
+          startTime: { $gte: start, $lt: end },
+          status: { $in: ['confirmed', 'completed'] }
+        });
+        return {
+          day: d.format('MMM D'),
+          revenue: bookings.reduce((sum, b) => sum + b.totalPrice, 0)
+        };
+      })).then(res => res.reverse()),
+      schedule: todayBookings.map(b => ({
+        id: b._id,
+        time: moment(b.startTime).format('hh:mm A'),
+        customerName: b.userId?.name || 'Customer',
+        service: b.services.map(s => s.name).join(', '),
+        status: b.status
+      }))
+    });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const getVendorTransactions = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const { from, to } = req.query;
+    const filter = { vendorId: vendor._id };
+
+    if (from && to) {
+      filter.timestamp = {
+        $gte: moment(from).startOf('day').toDate(),
+        $lte: moment(to).endOf('day').toDate()
+      };
+    }
+
+    const WalletTransaction = require('../models/WalletTransaction');
+    const transactions = await WalletTransaction.find(filter).sort({ timestamp: -1 });
+
+    res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getVendorDetail = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.params.id).populate('category', 'name').lean();
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+    res.status(200).json(vendor);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const updateShopProfile = async (req, res) => {
+  try {
+    const { workingHours, shopName, address } = req.body;
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    if (workingHours) vendor.workingHours = workingHours;
+    if (shopName) vendor.shopName = shopName;
+    if (address) vendor.address = address;
+
+    await vendor.save();
+    res.status(200).json(vendor);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const createWalkIn = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const { name, phone, staffId, services, startTime, totalPrice, totalDuration } = req.body;
+    
+    const booking = await Booking.create({
+      vendorId: vendor._id,
+      staffId,
+      isWalkIn: true,
+      walkInCustomerName: name,
+      walkInCustomerPhone: phone,
+      services,
+      totalPrice,
+      totalDuration: totalDuration || 30,
+      startTime: startTime || new Date(),
+      endTime: moment(startTime || new Date()).add(totalDuration || 30, 'minutes').toDate(),
+      status: 'completed', // Walk-ins are usually marked as completed immediately
+      type: 'shop'
+    });
+
+    res.status(201).json(booking);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const createManualBooking = async (req, res) => {
+  try {
+    const { name, phone, serviceIds, staffId, startTime, type } = req.body;
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+    const vendorId = vendor._id;
+
+    if (!name || !serviceIds || !staffId || !startTime) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const Service = require('../models/Service');
+    const services = await Service.find({ _id: { $in: serviceIds }, vendorId });
+    if (services.length === 0) return res.status(404).json({ message: 'Services not found' });
+
+    const totalDuration = services.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
+    const totalPrice = services.reduce((acc, s) => acc + (s.price || 0), 0);
+    const endTime = moment(startTime).add(totalDuration, 'minutes').toDate();
+
+    const existing = await Booking.findOne({
+      staffId,
+      status: { $ne: 'cancelled' },
+      $or: [
+        { startTime: { $lt: endTime, $gte: new Date(startTime) } },
+        { endTime: { $gt: new Date(startTime), $lte: endTime } }
+      ]
+    });
+    if (existing) return res.status(400).json({ message: 'Staff is busy at this time' });
+
+    const booking = await Booking.create({
+      vendorId,
+      staffId,
+      isWalkIn: true,
+      walkInCustomerName: name,
+      walkInCustomerPhone: phone,
+      services: services.map(s => ({ serviceId: s._id, name: s.name, price: s.price, duration: s.duration })),
+      totalPrice,
+      totalDuration,
+      startTime: new Date(startTime),
+      endTime,
+      type: type || 'shop',
+      status: 'confirmed'
+    });
+
+    res.status(201).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  registerVendor, uploadDocs, getVendorProfile, getNearbyVendors, getVendorDetail,
+  updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings, getVendorDashboard,
+  updateShopProfile, createWalkIn, createManualBooking
+};
