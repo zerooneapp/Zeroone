@@ -158,7 +158,7 @@ const sendOTP = async (req, res) => {
     console.log(`[AUTH] OTP for ${phone}: ${otp}`);
     console.log(`-----------------------------------\n`);
 
-    res.status(200).json({ message: 'OTP sent successfully', otp: process.env.NODE_ENV === 'development' ? otp : undefined });
+    res.status(200).json({ message: 'OTP sent successfully', otp });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
