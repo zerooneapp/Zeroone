@@ -34,11 +34,11 @@ const Header = () => {
   }, [user]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl px-4 py-2 border-b border-gray-50 dark:border-gray-900/50">
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl px-4 py-2 border-b border-[#1C2C4E]/10 dark:border-[#1C2C4E]/20">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Brand & Location HUD */}
         <div className="flex flex-col gap-0.5 min-w-0">
-          <h1 className="text-[20px] font-black text-[#1C2C4E] dark:text-white tracking-tighter uppercase leading-none">
+          <h1 className="text-[20px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none">
             ZeroOne
           </h1>
           <button 

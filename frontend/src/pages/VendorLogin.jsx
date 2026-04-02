@@ -27,31 +27,18 @@ const VendorAuth = () => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  const handleKeyPress = (num) => {
-    if (step === 'phone') {
-      if (phone.length < 10) setPhone(prev => prev + num);
-    } else {
-      const index = otp.findIndex(d => d === '');
-      if (index !== -1) {
-        const newOtp = [...otp];
-        newOtp[index] = num;
-        setOtp(newOtp);
-      }
-    }
+  const handlePhoneChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setPhone(val);
   };
 
-  const handleDelete = () => {
-    if (step === 'phone') {
-      setPhone(prev => prev.slice(0, -1));
-    } else {
-      const lastFilledIndex = [...otp].reverse().findIndex(d => d !== '');
-      if (lastFilledIndex !== -1) {
-        const index = 4 - lastFilledIndex;
-        const newOtp = [...otp];
-        newOtp[index] = '';
-        setOtp(newOtp);
-      }
-    }
+  const handleOTPChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 5);
+    const newOtp = ['', '', '', '', ''];
+    val.split('').forEach((char, i) => {
+      newOtp[i] = char;
+    });
+    setOtp(newOtp);
   };
 
   const handleSendOTP = async (e) => {
@@ -127,14 +114,14 @@ const VendorAuth = () => {
                     <div className="flex items-center gap-2 border-r border-gray-100 dark:border-gray-800 pr-4">
                        <span className="font-black text-gray-400 text-lg">+91</span>
                     </div>
-                    <div className="flex-1 font-black text-xl text-gray-900 dark:text-white">
-                       {phone || <span className="text-gray-300 dark:text-gray-700 font-bold text-lg">Phone Number</span>}
-                       <motion.span 
-                        animate={{ opacity: [0, 1, 0] }}
-                        transition={{ repeat: Infinity, duration: 0.8 }}
-                        className="inline-block w-[2px] h-6 bg-primary ml-1 align-middle"
-                       />
-                    </div>
+                    <input 
+                      type="tel"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      placeholder="Phone Number"
+                      autoFocus
+                      className="flex-1 bg-transparent border-none outline-none font-black text-xl text-gray-900 dark:text-white tracking-widest placeholder:text-gray-300 dark:placeholder:text-gray-700 placeholder:font-bold placeholder:text-lg"
+                    />
                   </div>
 
                   <Button 
@@ -171,18 +158,28 @@ const VendorAuth = () => {
                   </p>
                 </div>
 
-                <div className="flex justify-between gap-3 px-2">
-                  {otp.map((digit, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-14 h-16 bg-white dark:bg-gray-900 rounded-2xl border-2 flex items-center justify-center font-black text-2xl shadow-sm transition-all",
-                        digit ? "border-primary text-primary" : "border-gray-50 dark:border-gray-800 text-gray-300 dark:text-gray-700"
-                      )}
-                    >
-                      {digit}
-                    </div>
-                  ))}
+                <div className="relative">
+                  <input 
+                    type="tel"
+                    maxLength={5}
+                    value={otp.join('')}
+                    onChange={handleOTPChange}
+                    autoFocus
+                    className="absolute inset-0 opacity-0 cursor-default"
+                  />
+                  <div className="flex justify-between gap-3 px-2 pointer-events-none">
+                    {otp.map((digit, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "w-14 h-16 bg-white dark:bg-gray-900 rounded-2xl border-2 flex items-center justify-center font-black text-2xl shadow-sm transition-all",
+                          digit ? "border-primary text-primary" : "border-gray-50 dark:border-gray-800 text-gray-300 dark:text-gray-700"
+                        )}
+                      >
+                        {digit}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-6">
@@ -221,21 +218,6 @@ const VendorAuth = () => {
           </AnimatePresence>
         </div>
       </div>
-
-      {/* Theme Aware Numeric Keypad at Bottom */}
-      <motion.div 
-        initial={{ y: 300 }}
-        animate={{ y: 0 }}
-        className="w-full"
-      >
-        <div className="text-center py-4 bg-white/80 dark:bg-[#1A1C1E] backdrop-blur-3xl">
-           <p className="text-[8px] uppercase tracking-[0.6em] text-gray-300 dark:text-gray-800 font-black">Partner Services Portal</p>
-        </div>
-        <NumericKeypad 
-          onKeyPress={handleKeyPress}
-          onDelete={handleDelete}
-        />
-      </motion.div>
     </div>
   );
 };

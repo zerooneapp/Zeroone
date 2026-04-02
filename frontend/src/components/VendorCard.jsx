@@ -11,16 +11,16 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
   return (
     <Card 
       className={cn(
-        "p-0 overflow-hidden border-none shadow-xl shadow-black/[0.01] border-2 border-gray-100/50 dark:border-gray-800 transition-all w-full h-auto"
+        "p-0 overflow-hidden border-2 border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_12px_45px_rgba(0,0,0,0.08)] dark:shadow-none backdrop-blur-xl transition-all duration-500 w-full h-auto bg-white/70 dark:bg-gray-900/80 rounded-[28px] relative"
       )} 
       onClick={() => navigate(`/service/${vendor._id}`)}
     >
-      {/* Top: Image HUB (Extreme Slim) */}
-      <div className="relative w-full aspect-[16/4.5] min-h-[90px] overflow-hidden">
+      {/* Top: Image HUB (Balanced Visual) */}
+      <div className="relative w-full aspect-[16/5.2] min-h-[110px] overflow-hidden">
         <img 
           src={vendor.shopImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'} 
           alt={vendor.shopName} 
-          className="w-full h-full object-cover bg-gray-100 opacity-90"
+          className="w-full h-full object-cover bg-gray-100 opacity-90 transition-transform duration-700"
           onError={(e) => {
             e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200';
           }}
@@ -32,8 +32,8 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
         )}
       </div>
 
-      {/* Bottom: Content HUD (Extreme Density) */}
-      <div className={cn("p-2 flex flex-col justify-between space-y-1.5")}>
+      {/* Bottom: Content HUB (Elite Density) */}
+      <div className={cn("p-3 flex flex-col justify-between space-y-2")}>
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
             <h3 className={cn("font-black text-[#1C2C4E] dark:text-white truncate uppercase tracking-tighter leading-none text-[13px]")}>

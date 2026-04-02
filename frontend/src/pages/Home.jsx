@@ -15,7 +15,7 @@ const Home = () => {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [search, setSearch] = useState('');
   const [selectedCats, setSelectedCats] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,7 +61,7 @@ const Home = () => {
   }, [location, debouncedSearch, selectedCats]);
 
   const toggleCategory = (id) => {
-    setSelectedCats(prev => 
+    setSelectedCats(prev =>
       prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
   };
@@ -78,38 +78,45 @@ const Home = () => {
   };
 
   return (
-    <div className="pb-24 animate-in fade-in duration-700 bg-white dark:bg-gray-950 min-h-screen">
-      {/* Search Bar HUD (Sleek Wide) */}
-      <div className="px-3 py-1">
-        <div className="relative group animate-in slide-in-from-top-1 duration-500 w-full">
-          <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#1C2C4E] transition-colors">
-            <Search size={20} strokeWidth={3} />
+    <div className="pb-24 animate-in fade-in duration-700 bg-transparent min-h-screen">
+      {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
+      <div className="px-4 pt-4 pb-1 mb-1">
+        <div className="relative group animate-in slide-in-from-top-3 duration-700 w-full">
+          {/* Multi-layered Soft Glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#1C2C4E]/10 via-blue-500/5 to-[#1C2C4E]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
+
+          <div className="relative">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400/80 group-focus-within:text-[#1C2C4E] dark:group-focus-within:text-blue-400 z-10 pointer-events-none transition-all duration-300">
+              <Search size={20} strokeWidth={2.5} />
+            </div>
+            <input
+              type="text"
+              placeholder="Search salon, beauty parlour, makeup artist..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-[48px] pl-14 pr-6 bg-white dark:bg-gray-950/80 backdrop-blur-xl border-2 border-[#1C2C4E]/40 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_15px_35px_-5px_rgba(0,0,0,0.05)] focus:border-[#1C2C4E] focus:ring-[10px] focus:ring-[#1C2C4E]/5 dark:focus:ring-blue-500/5 transition-all duration-500 outline-none placeholder:text-gray-400 placeholder:font-semibold"
+            />
           </div>
-          <input 
-            type="text"
-            placeholder="Search salon, beauty parlour, makeup artist..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-12 pl-16 pr-6 bg-white dark:bg-gray-950 border-2 border-gray-200/60 dark:border-gray-800 rounded-2xl text-[12px] font-bold dark:text-white shadow-xl shadow-black/[0.05] focus:border-[#1C2C4E]/20 focus:ring-4 focus:ring-[#1C2C4E]/5 transition-all outline-none placeholder:text-gray-300 placeholder:font-medium"
-          />
         </div>
       </div>
 
-      {/* Boutique Category Filter (Sleek Fit) */}
-      <div className="flex gap-2.5 overflow-x-auto px-3 py-1.5 no-scrollbar justify-start sm:justify-center">
+      {/* Modern Category Pill Filters */}
+      <div className="flex gap-3 overflow-x-auto px-4 py-2 no-scrollbar justify-start sm:justify-center items-center">
         {categories.map((cat) => {
           const isActive = selectedCats.includes(cat._id);
           return (
             <button
               key={cat._id}
               onClick={() => toggleCategory(cat._id)}
-              className={`px-5 py-2 rounded-2xl whitespace-nowrap text-[12px] font-black tracking-tight transition-all border-2 ${
-                isActive 
-                  ? 'bg-[#1C2C4E] text-white border-[#1C2C4E] shadow-xl shadow-[#1C2C4E]/30 scale-105' 
-                  : 'bg-white dark:bg-gray-900 text-[#1C2C4E] dark:text-gray-400 border-gray-200/50 dark:border-gray-800 hover:border-gray-400 shadow-md shadow-black/[0.02]'
-              }`}
+              className={`relative px-6 py-2.5 rounded-[12px] whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 ${isActive
+                  ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
+                  : 'bg-white dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+                }`}
             >
-              {cat.name}
+              <span className="relative z-10">{cat.name}</span>
+              {isActive && (
+                <div className="absolute inset-x-0 bottom-0 top-0 rounded-[12px] bg-white/10" />
+              )}
             </button>
           );
         })}
@@ -124,15 +131,15 @@ const Home = () => {
 
       {/* Nearby Professionals (Ultra-Wide Stack) */}
       <section className="mt-1 px-3">
-        <SectionTitle 
-          title="Nearby Professionals" 
-          actionLabel={`${vendors.length} Total`} 
+        <SectionTitle
+          title="Nearby Professionals"
+          actionLabel={`${vendors.length} Total`}
           className="mb-2 px-2"
         />
-        
-        <div className="space-y-3">
+
+        <div className="space-y-4">
           {loading ? (
-             <VendorSkeleton />
+            <VendorSkeleton />
           ) : (
             <AnimatePresence mode="wait">
               <motion.div
@@ -141,7 +148,7 @@ const Home = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-3"
+                className="space-y-6"
               >
                 {currentVendors.length > 0 ? (
                   currentVendors.map((vendor) => (
@@ -167,7 +174,7 @@ const Home = () => {
             >
               <ChevronRight className="rotate-180" size={18} strokeWidth={3} />
             </button>
-            
+
             <div className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 rounded-2xl border border-gray-100">
               <span className="text-[11px] font-black text-[#1C2C4E]">{currentPage}</span>
               <span className="text-[10px] font-bold text-gray-300">/</span>

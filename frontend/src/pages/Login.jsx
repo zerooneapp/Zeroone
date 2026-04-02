@@ -27,31 +27,18 @@ const CustomerAuth = () => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  const handleKeyPress = (num) => {
-    if (step === 'phone') {
-      if (phone.length < 10) setPhone(prev => prev + num);
-    } else {
-      const index = otp.findIndex(d => d === '');
-      if (index !== -1) {
-        const newOtp = [...otp];
-        newOtp[index] = num;
-        setOtp(newOtp);
-      }
-    }
+  const handlePhoneChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setPhone(val);
   };
 
-  const handleDelete = () => {
-    if (step === 'phone') {
-      setPhone(prev => prev.slice(0, -1));
-    } else {
-      const lastFilledIndex = [...otp].reverse().findIndex(d => d !== '');
-      if (lastFilledIndex !== -1) {
-        const index = 4 - lastFilledIndex;
-        const newOtp = [...otp];
-        newOtp[index] = '';
-        setOtp(newOtp);
-      }
-    }
+  const handleOTPChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 5);
+    const newOtp = ['', '', '', '', ''];
+    val.split('').forEach((char, i) => {
+      newOtp[i] = char;
+    });
+    setOtp(newOtp);
   };
 
   const handleSendOTP = async (e) => {
@@ -115,14 +102,14 @@ const CustomerAuth = () => {
                        <img src="https://flagcdn.com/in.svg" className="w-6 rounded-sm shadow-sm" alt="IN" />
                        <span className="font-bold text-[#1C2C4E] text-lg">+91</span>
                     </div>
-                    <div className="flex-1 font-bold text-xl text-[#1C2C4E] tracking-widest">
-                       {phone || <span className="text-gray-200 font-medium tracking-normal">Phone Number</span>}
-                       <motion.span 
-                        animate={{ opacity: [0, 1, 0] }}
-                        transition={{ repeat: Infinity, duration: 0.8 }}
-                        className="inline-block w-[2px] h-6 bg-[#1C2C4E] ml-1 align-middle"
-                       />
-                    </div>
+                    <input 
+                      type="tel"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      placeholder="Phone Number"
+                      autoFocus
+                      className="flex-1 bg-transparent border-none outline-none font-bold text-xl text-[#1C2C4E] tracking-widest placeholder:text-gray-200 placeholder:font-medium placeholder:tracking-normal"
+                    />
                   </div>
 
                   <Button 
@@ -159,18 +146,28 @@ const CustomerAuth = () => {
                   </p>
                 </div>
 
-                <div className="flex justify-center gap-3 px-2">
-                  {otp.map((digit, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-12 h-12 bg-white rounded-full border-2 flex items-center justify-center font-black text-2xl shadow-sm transition-all",
-                        digit ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-100 text-gray-200"
-                      )}
-                    >
-                      {digit}
-                    </div>
-                  ))}
+                <div className="relative">
+                  <input 
+                    type="tel"
+                    maxLength={5}
+                    value={otp.join('')}
+                    onChange={handleOTPChange}
+                    autoFocus
+                    className="absolute inset-0 opacity-0 cursor-default"
+                  />
+                  <div className="flex justify-center gap-3 px-2 pointer-events-none">
+                    {otp.map((digit, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "w-12 h-12 bg-white rounded-full border-2 flex items-center justify-center font-black text-2xl shadow-sm transition-all",
+                          digit ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-100 text-gray-200"
+                        )}
+                      >
+                        {digit}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-6">
@@ -208,15 +205,6 @@ const CustomerAuth = () => {
             )}
           </AnimatePresence>
         </div>
-      </div>
-
-      {/* Fixed Bottom UI (Mobile) / Flow Block (Desktop) */}
-      <div className="w-full relative z-20 pb-16 lg:pb-8 pb-[env(safe-area-inset-bottom)]">
-        <NumericKeypad 
-          onKeyPress={handleKeyPress}
-          onDelete={handleDelete}
-          className="rounded-none border-none !bg-transparent"
-        />
       </div>
     </div>
   );
