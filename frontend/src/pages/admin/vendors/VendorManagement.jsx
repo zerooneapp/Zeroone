@@ -122,7 +122,7 @@ const VendorManagement = () => {
       {/* 🔍 TOP CONTROL BAR */}
       <div className="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 className="text-2xl font-black dark:text-white tracking-tight italic">Vendor Fleet 🏪</h1>
+            <h1 className="text-2xl font-black dark:text-white tracking-tight">Vendor Fleet 🏪</h1>
             <div className="flex items-center gap-2">
                <button onClick={fetchVendors} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 hover:text-primary transition-colors">
                   <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
@@ -264,7 +264,7 @@ const VendorManagement = () => {
                {/* Drawer Header */}
                <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                     <div className="w-14 h-14 bg-primary text-white rounded-[1.5rem] flex items-center justify-center font-black text-2xl italic">
+                     <div className="w-14 h-14 bg-primary text-white rounded-[1.5rem] flex items-center justify-center font-black text-2xl">
                         {selectedVendor.shopName.charAt(0)}
                      </div>
                      <div>
@@ -381,7 +381,7 @@ const VendorManagement = () => {
                           </a>
                         </div>
                       ) : (
-                        <div className="h-48 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center text-[10px] font-black text-gray-300 uppercase italic">PAN Missing</div>
+                        <div className="h-48 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center text-[10px] font-black text-gray-300 uppercase">PAN Missing</div>
                       )}
                       
                       {selectedVendor.aadhaar ? (
@@ -395,7 +395,7 @@ const VendorManagement = () => {
                           </a>
                         </div>
                       ) : (
-                        <div className="h-48 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center text-[10px] font-black text-gray-300 uppercase italic">Aadhaar Missing</div>
+                        <div className="h-48 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center text-[10px] font-black text-gray-300 uppercase">Aadhaar Missing</div>
                       )}
                     </div>
                   </Section>

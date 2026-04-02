@@ -64,7 +64,7 @@ const AdminBookingDetail = () => {
        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-primary font-black uppercase text-xs mx-auto">
           <ArrowLeft size={16} /> Portfolio Back
        </button>
-       <h1 className="text-2xl font-black dark:text-white uppercase tracking-tighter italic">Transaction Expired or Not Found</h1>
+       <h1 className="text-2xl font-black dark:text-white uppercase tracking-tighter">Transaction Expired or Not Found</h1>
     </div>
   );
 
@@ -97,7 +97,7 @@ const AdminBookingDetail = () => {
          <div className="lg:col-span-1 space-y-8">
             <Section title="Customer Intelligence" icon={User}>
                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-primary/5 text-primary rounded-xl flex items-center justify-center font-black text-xl italic border border-primary/10">
+                  <div className="w-12 h-12 bg-primary/5 text-primary rounded-xl flex items-center justify-center font-black text-xl border border-primary/10">
                      {booking.userId?.name?.charAt(0)}
                   </div>
                   <div>
@@ -110,7 +110,7 @@ const AdminBookingDetail = () => {
 
             <Section title="Vendor Compliance" icon={Store}>
                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-amber-500/5 text-amber-500 rounded-xl flex items-center justify-center font-black text-xl italic border border-amber-500/10">
+                  <div className="w-12 h-12 bg-amber-500/5 text-amber-500 rounded-xl flex items-center justify-center font-black text-xl border border-amber-500/10">
                      {booking.vendorId?.shopName?.charAt(0)}
                   </div>
                   <div>
@@ -127,8 +127,8 @@ const AdminBookingDetail = () => {
                <InfoItem label="Reference Code" value={booking.bookingId || 'NONE'} />
                <InfoItem label="Creation Timestamp" value={new Date(booking.createdAt).toLocaleString()} />
                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 italic">Administrative Note</p>
-                  <p className="text-[10px] font-bold text-gray-500 italic">This transaction is subject to platform-wide governance. Overrides are logged.</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Administrative Note</p>
+                  <p className="text-[10px] font-bold text-gray-500">This transaction is subject to platform-wide governance. Overrides are logged.</p>
                </div>
             </Section>
          </div>
@@ -142,12 +142,12 @@ const AdminBookingDetail = () => {
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Live Status</p>
                   <div className="flex items-center gap-3">
                      <BookingStatusLarge status={booking.status} />
-                     <span className="text-xs font-black text-gray-300 uppercase italic tracking-widest">Global State</span>
+                     <span className="text-xs font-black text-gray-300 uppercase tracking-widest">Global State</span>
                   </div>
                </div>
                <div className="text-right">
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Settlement</p>
-                  <h3 className="text-3xl font-black text-primary italic">₹{booking.totalPrice}</h3>
+                  <h3 className="text-3xl font-black text-primary">₹{booking.totalPrice}</h3>
                </div>
             </div>
 
@@ -160,13 +160,13 @@ const AdminBookingDetail = () => {
                           <Bookmark size={16} className="text-primary" />
                           <span className="text-xs font-black uppercase dark:text-white tracking-widest">{s.name}</span>
                        </div>
-                       <span className="text-xs font-black text-primary italic font-serif">₹{s.price}</span>
+                       <span className="text-xs font-black text-primary font-serif">₹{s.price}</span>
                     </div>
                   ))}
                </div>
                <div className="pt-4 mt-6 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center px-2">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Price Breakdown</span>
-                  <span className="text-xl font-black dark:text-white italic tracking-tighter">₹{booking.totalPrice}</span>
+                  <span className="text-xl font-black dark:text-white tracking-tighter">₹{booking.totalPrice}</span>
                </div>
             </Section>
 
@@ -245,7 +245,7 @@ const BookingStatusLarge = ({ status }) => {
     ongoing: "bg-indigo-50 text-indigo-500 border-indigo-200"
   };
   return (
-    <span className={cn("text-lg font-black uppercase px-6 py-2 rounded-2xl border-2 italic tracking-tighter shadow-sm", styles[status] || styles.pending)}>
+    <span className={cn("text-lg font-black uppercase px-6 py-2 rounded-2xl border-2 tracking-tighter shadow-sm", styles[status] || styles.pending)}>
       {status}
     </span>
   );

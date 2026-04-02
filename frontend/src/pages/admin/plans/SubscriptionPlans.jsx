@@ -71,8 +71,8 @@ const SubscriptionPlans = () => {
       {/* 💰 HEADER */}
       <div className="p-8 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
          <div>
-            <h1 className="text-2xl font-black dark:text-white tracking-tight italic text-primary">Monetization Engine 💰</h1>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Control platform-wide subscription yields</p>
+            <h1 className="text-2xl font-black dark:text-white tracking-tight text-primary">Monetization Engine 💰</h1>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Control platform-wide subscription yields</p>
          </div>
          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 px-6 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center gap-4">
             <Info size={18} className="text-primary" />
@@ -121,7 +121,7 @@ const SubscriptionPlans = () => {
       {/* 📊 ANALYTICS HINT */}
       <div className="p-10 bg-primary/5 dark:bg-primary/10 rounded-[4rem] border border-primary/10 flex flex-col lg:flex-row items-center justify-between gap-8 border-dashed">
          <div className="space-y-4 text-center lg:text-left">
-            <h2 className="text-xl font-black text-primary uppercase tracking-tighter italic">Tiered Yield Strategy</h2>
+            <h2 className="text-xl font-black text-primary uppercase tracking-tighter">Tiered Yield Strategy</h2>
             <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest leading-relaxed max-w-lg">
                Basic tier is for organic growth. Standard tier should be optimized for mass adoption. Premium tier leverages platform exclusivity for high-yield returns.
             </p>
@@ -158,7 +158,7 @@ const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, i
        </div>
 
        <div>
-          <h3 className="text-2xl font-black dark:text-white uppercase tracking-tighter italic">{level}</h3>
+          <h3 className="text-2xl font-black dark:text-white uppercase tracking-tighter">{level}</h3>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pricing Configuration Layer</p>
        </div>
 
@@ -167,7 +167,7 @@ const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, i
           <div className="space-y-3">
              <div className="flex justify-between items-center px-1">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Daily Rate</span>
-                <span className="text-[10px] font-black text-primary uppercase italic">Per Active Day</span>
+                <span className="text-[10px] font-black text-primary uppercase">Per Active Day</span>
              </div>
              <div className="relative">
                 <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-gray-400 shadow-sm">₹</span>
@@ -185,7 +185,7 @@ const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, i
           <div className="space-y-3">
              <div className="flex justify-between items-center px-1">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Monthly Rate</span>
-                <span className="text-[10px] font-black text-gray-300 uppercase italic">30 Days Cycle</span>
+                <span className="text-[10px] font-black text-gray-300 uppercase">30 Days Cycle</span>
              </div>
              <div className="relative">
                 <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-gray-400 shadow-sm">₹</span>

@@ -102,7 +102,7 @@ const CategoryManagement = () => {
       {/* 🏷️ HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-8 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
          <div>
-            <h1 className="text-2xl font-black dark:text-white tracking-tight italic text-primary">Catalog Mastery 🏷️</h1>
+            <h1 className="text-2xl font-black dark:text-white tracking-tight text-primary">Catalog Mastery 🏷️</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Manage global service classifications</p>
          </div>
          <button 
@@ -170,10 +170,10 @@ const CategoryManagement = () => {
 
       {!loading && categories.length === 0 && (
         <div className="p-20 text-center space-y-4 bg-white dark:bg-gray-900 rounded-[3rem] border border-dashed border-gray-200 dark:border-gray-800">
-           <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mx-auto text-gray-300 italic font-black text-4xl">
+           <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mx-auto text-gray-300 font-black text-4xl">
               ?
            </div>
-           <p className="font-black text-gray-400 uppercase tracking-widest text-sm italic">
+           <p className="font-black text-gray-400 uppercase tracking-widest text-sm">
               No categories yet — create one to start
            </p>
         </div>
@@ -197,7 +197,7 @@ const CategoryManagement = () => {
                 className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 p-8 shadow-2xl"
               >
                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-black dark:text-white uppercase tracking-tighter italic">
+                    <h2 className="text-xl font-black dark:text-white uppercase tracking-tighter">
                        {editingCategory ? "Update Class" : "Define New Class"}
                     </h2>
                     <button onClick={() => setIsModalOpen(false)} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 hover:text-red-500 transition-colors">
@@ -207,7 +207,7 @@ const CategoryManagement = () => {
 
                  <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 italic">Class Name</label>
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Class Name</label>
                        <input 
                          type="text"
                          required
@@ -218,7 +218,7 @@ const CategoryManagement = () => {
                        />
                     </div>
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 italic">Description</label>
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Description</label>
                        <textarea 
                          className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all h-24 resize-none"
                          value={formData.description}
@@ -227,7 +227,7 @@ const CategoryManagement = () => {
                        />
                     </div>
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 italic">Icon URL (Optional)</label>
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Icon URL (Optional)</label>
                        <input 
                          type="text"
                          className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-sm font-medium focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all"
@@ -238,7 +238,7 @@ const CategoryManagement = () => {
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/40 rounded-2xl mt-4">
-                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">Live Status</span>
+                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Status</span>
                        <button 
                          type="button"
                          onClick={() => setFormData({...formData, isActive: !formData.isActive})}
@@ -285,7 +285,7 @@ const CategoryManagement = () => {
                      <AlertCircle size={40} />
                   </div>
                   <div>
-                     <h3 className="text-xl font-black dark:text-white uppercase tracking-tighter italic">Destructive Action</h3>
+                     <h3 className="text-xl font-black dark:text-white uppercase tracking-tighter">Destructive Action</h3>
                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 px-4 leading-relaxed">
                         Are you sure? This classification removal may disrupt active vendor services.
                      </p>

@@ -54,8 +54,8 @@ const BroadcastSystem = () => {
       {/* 📡 HEADER */}
       <div className="p-10 bg-white dark:bg-gray-900 rounded-[3.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-8 border-b-4 border-b-primary/10">
          <div className="space-y-2">
-            <h1 className="text-3xl font-black dark:text-white tracking-tighter italic text-primary uppercase">Broadcast Center 📡</h1>
-            <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] italic">Mass scale cognitive dissemination</p>
+            <h1 className="text-3xl font-black dark:text-white tracking-tighter text-primary uppercase">Broadcast Center 📡</h1>
+            <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Mass scale cognitive dissemination</p>
          </div>
          <div className="p-4 bg-gray-50 dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-800 flex items-center gap-4">
             <ShieldAlert size={20} className="text-primary" />
@@ -70,7 +70,7 @@ const BroadcastSystem = () => {
          {/* 🎯 TARGET SELECTION */}
          <div className="lg:col-span-1 space-y-6">
             <div className="px-6 py-2">
-               <h3 className="text-xs font-black dark:text-white uppercase tracking-widest italic">1. Select Target Demographic</h3>
+               <h3 className="text-xs font-black dark:text-white uppercase tracking-widest">1. Select Target Demographic</h3>
             </div>
             <div className="space-y-3">
                {targets.map((t) => (
@@ -102,7 +102,7 @@ const BroadcastSystem = () => {
          {/* ✍️ MESSAGE CRAFTING */}
          <div className="lg:col-span-2 space-y-6">
             <div className="px-6 py-2">
-               <h3 className="text-xs font-black dark:text-white uppercase tracking-widest italic">2. Craft Intelligence Payload</h3>
+               <h3 className="text-xs font-black dark:text-white uppercase tracking-widest">2. Craft Intelligence Payload</h3>
             </div>
             
             <form onSubmit={handlePreSubmit} className="p-10 bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-xl space-y-8 relative overflow-hidden group">
@@ -113,7 +113,7 @@ const BroadcastSystem = () => {
                </div>
 
                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 italic flex items-center gap-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 flex items-center gap-2">
                      <Zap size={14} className="text-primary" /> Transmission Title
                   </label>
                   <input 
@@ -128,7 +128,7 @@ const BroadcastSystem = () => {
                </div>
 
                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 italic flex items-center gap-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 flex items-center gap-2">
                      <MessageSquare size={14} className="text-primary" /> Cognitive Message Payload
                   </label>
                   <textarea 
@@ -145,7 +145,7 @@ const BroadcastSystem = () => {
                   <p className="text-[10px] font-black text-gray-400 px-2 uppercase tracking-widest mb-1">Pre-flight Intelligence Check</p>
                   <div className="flex items-center gap-4 text-emerald-500">
                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm" />
-                     <p className="text-[9px] font-bold uppercase tracking-widest italic">All systems ready for mass dissipation.</p>
+                     <p className="text-[9px] font-bold uppercase tracking-widest">All systems ready for mass dissipation.</p>
                   </div>
                </div>
 
@@ -189,7 +189,7 @@ const BroadcastSystem = () => {
                      <BellRing size={40} />
                   </div>
                   <div>
-                     <h3 className="text-xl font-black dark:text-white uppercase tracking-tighter italic">Dissemination Alert</h3>
+                     <h3 className="text-xl font-black dark:text-white uppercase tracking-tighter">Dissemination Alert</h3>
                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 px-4 leading-relaxed">
                         Are you sure? This broadcast will instantly reach all {formData.targetAudience} entities. This action is absolute.
                      </p>

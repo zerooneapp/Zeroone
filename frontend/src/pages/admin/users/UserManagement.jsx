@@ -88,7 +88,7 @@ const UserManagement = () => {
       {/* 🔍 TOP CONTROL BAR */}
       <div className="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 className="text-2xl font-black dark:text-white tracking-tight italic text-primary">User Base 👤</h1>
+            <h1 className="text-2xl font-black dark:text-white tracking-tight text-primary">User Base 👤</h1>
             <div className="flex items-center gap-2">
                <button onClick={fetchUsers} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 hover:text-primary transition-colors">
                   <RefreshCw size={18} className={loading ? "animate-spin" : ""} />

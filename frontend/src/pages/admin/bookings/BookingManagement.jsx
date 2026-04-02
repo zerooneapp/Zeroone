@@ -94,7 +94,7 @@ const BookingManagement = () => {
       {/* 🔍 GLOBAL FILTERS */}
       <div className="p-6 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 className="text-2xl font-black dark:text-white tracking-tight italic text-primary">Global Ledger 📋</h1>
+            <h1 className="text-2xl font-black dark:text-white tracking-tight text-primary">Global Ledger 📋</h1>
             <div className="flex items-center gap-2">
                <button onClick={fetchBookings} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 hover:text-primary transition-colors">
                   <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
@@ -215,7 +215,7 @@ const BookingManagement = () => {
               <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-[2rem] flex items-center justify-center mx-auto text-gray-300">
                  <Package size={40} />
               </div>
-              <p className="font-black text-gray-400 uppercase tracking-widest text-sm italic">
+              <p className="font-black text-gray-400 uppercase tracking-widest text-sm">
                  {filters.search || filters.status || filters.date ? "No bookings found for selected filters" : "No bookings found"}
               </p>
            </div>

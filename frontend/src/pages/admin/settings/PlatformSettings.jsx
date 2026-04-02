@@ -84,8 +84,8 @@ const PlatformSettings = () => {
       {/* ⚙️ HEADER */}
       <div className="p-10 bg-white dark:bg-gray-900 rounded-[3.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-8 border-b-4 border-b-primary/10">
          <div className="space-y-2">
-            <h1 className="text-3xl font-black dark:text-white tracking-tighter italic text-primary uppercase">Platform Core 🛠️</h1>
-            <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] italic">Manage master governance parameters</p>
+            <h1 className="text-3xl font-black dark:text-white tracking-tighter text-primary uppercase">Platform Core 🛠️</h1>
+            <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Manage master governance parameters</p>
          </div>
          <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 flex items-center gap-6">
             <ShieldAlert size={28} className="text-primary hidden sm:block" />
@@ -200,7 +200,7 @@ const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisable
           onChange={(e) => onChange(e.target.value)}
           disabled={isDisabled}
         />
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400 uppercase italic">
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400 uppercase">
            {unit}
         </div>
      </div>

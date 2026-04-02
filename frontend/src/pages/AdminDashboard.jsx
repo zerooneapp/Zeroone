@@ -216,7 +216,7 @@ const AdminDashboard = () => {
          {/* RECENT VENDORS (APPROVAL) */}
          <div className="space-y-4">
             <div className="flex items-center justify-between px-2">
-               <h2 className="text-xl font-black dark:text-white tracking-tight italic">New Requests 🏪</h2>
+               <h2 className="text-xl font-black dark:text-white tracking-tight">New Requests 🏪</h2>
                <button className="text-[10px] font-black text-primary uppercase tracking-widest">See All</button>
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-50 dark:border-gray-800 shadow-sm overflow-hidden">
@@ -261,7 +261,7 @@ const AdminDashboard = () => {
          {/* RECENT USERS */}
          <div className="space-y-4">
             <div className="flex items-center justify-between px-2">
-               <h2 className="text-xl font-black dark:text-white tracking-tight italic">Platform Users 👥</h2>
+               <h2 className="text-xl font-black dark:text-white tracking-tight">Platform Users 👥</h2>
                <button className="text-[10px] font-black text-primary uppercase tracking-widest">Manage All</button>
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-50 dark:border-gray-800 shadow-sm overflow-hidden text-sm">
@@ -288,7 +288,7 @@ const AdminDashboard = () => {
       {/* ⭐ REVIEWS MODERATION */}
       <section className="space-y-4">
          <div className="flex items-center justify-between px-2">
-            <h2 className="text-xl font-black dark:text-white tracking-tight italic">Quality Control 🛡️</h2>
+            <h2 className="text-xl font-black dark:text-white tracking-tight">Quality Control 🛡️</h2>
             <button className="text-[10px] font-black text-primary uppercase tracking-widest">Full Audit</button>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -300,7 +300,7 @@ const AdminDashboard = () => {
                     </div>
                     <span className="text-[8px] font-black text-gray-400 uppercase font-bold tracking-widest">{review.vendorId?.shopName}</span>
                  </div>
-                 <p className="text-xs font-medium text-gray-600 dark:text-gray-400 line-clamp-3 leading-relaxed italic">"{review.comment}"</p>
+                 <p className="text-xs font-medium text-gray-600 dark:text-gray-400 line-clamp-3 leading-relaxed">"{review.comment}"</p>
                  <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-800">
                     <span className="text-[10px] font-black dark:text-white uppercase">{review.userId?.name}</span>
                     <button className="text-[8px] font-black text-red-500 uppercase hover:underline">Block User</button>

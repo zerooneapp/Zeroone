@@ -104,7 +104,7 @@ const UserDetail = () => {
          {/* LEFT: USER DETAILS */}
          <div className="lg:col-span-1 space-y-8">
             <div className="p-8 bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm text-center">
-               <div className="w-24 h-24 bg-primary/5 text-primary rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-4xl font-black italic">
+               <div className="w-24 h-24 bg-primary/5 text-primary rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-4xl font-black">
                   {user.name?.charAt(0)}
                </div>
                <h2 className="text-2xl font-black dark:text-white uppercase tracking-tighter mb-1">{user.name}</h2>
