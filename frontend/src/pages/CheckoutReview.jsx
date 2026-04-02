@@ -8,6 +8,7 @@ import Button from '../components/Button';
 import SectionTitle from '../components/SectionTitle';
 import api from '../services/api';
 import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 
 const CheckoutReview = () => {
   const location = useLocation();
