@@ -66,8 +66,14 @@ const CustomerAuth = () => {
         navigate('/signup', { state: { phone, role: 'customer' } });
       } else {
         toast.success(`Welcome back!`);
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
+        const { role } = res.data;
+        if (role === 'admin') navigate('/admin');
+        else if (role === 'vendor') navigate('/vendor');
+        else if (role === 'staff') navigate('/staff');
+        else {
+          const from = location.state?.from?.pathname || '/';
+          navigate(from, { replace: true });
+        }
       }
     } else {
       toast.error(res.message);

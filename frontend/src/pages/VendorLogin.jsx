@@ -73,7 +73,8 @@ const VendorAuth = () => {
         if (intendedPath) {
           navigate(intendedPath, { replace: true });
         } else {
-          if (role === 'vendor' || role === 'admin') navigate('/vendor');
+          if (role === 'admin') navigate('/admin');
+          else if (role === 'vendor') navigate('/vendor');
           else if (role === 'staff') navigate('/staff');
           else navigate('/');
         }
