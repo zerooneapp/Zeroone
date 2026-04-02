@@ -29,25 +29,25 @@ const AdminLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark flex overflow-hidden">
+    <div className="h-screen bg-background-light dark:bg-background-dark flex overflow-hidden">
       
       {/* 🖥️ DESKTOP SIDEBAR */}
       <aside className={cn(
-        "hidden md:flex flex-col w-72 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-300 z-50",
+        "hidden md:flex flex-col h-full w-72 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-300 z-50",
         !isSidebarOpen && "w-20"
       )}>
         <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shrink-0">
-            <Zap size={24} className="fill-white" />
+          <div className="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           {isSidebarOpen && (
-            <span className="text-xl font-black tracking-tighter text-gray-900 dark:text-white uppercase italic">
-              ZerOne <span className="text-primary text-[10px] lowercase not-italic block -mt-1">Admin Panel</span>
+            <span className="text-xl font-black tracking-tighter text-gray-900 dark:text-white leading-none">
+              Zerone <span className="text-primary text-[10px] lowercase not-italic block mt-0.5">admin panel</span>
             </span>
           )}
         </div>
 
-        <nav className="flex-1 px-4 mt-4 space-y-1 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-4 mt-4 space-y-1 overflow-y-auto no-scrollbar">
           {adminRoutes.map((route) => (
             <NavLink
               key={route.path}
@@ -94,8 +94,12 @@ const AdminLayout = () => {
       )}>
         <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white italic font-black">Z</div>
-              <span className="text-lg font-black dark:text-white uppercase tracking-tighter">ZerOne Admin</span>
+              <div className="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center overflow-hidden">
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-lg font-black dark:text-white tracking-tighter leading-none">
+                Zerone <span className="text-primary text-[8px] lowercase block">admin panel</span>
+              </span>
            </div>
            <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-gray-400"><X size={20} /></button>
         </div>
@@ -177,7 +181,7 @@ const AdminLayout = () => {
         </header>
 
         {/* ⚡ CONTENT SCROLL AREA */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar">
            <Outlet />
         </main>
       </div>

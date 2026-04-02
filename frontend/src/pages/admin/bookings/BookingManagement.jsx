@@ -133,16 +133,16 @@ const BookingManagement = () => {
       </div>
 
       {/* 📋 TRANSACTIONS TABLE */}
-      <div className="bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto">
-         <table className="w-full text-left border-collapse min-w-[1000px]">
+      <div className="bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto no-scrollbar">
+         <table className="w-full text-left border-collapse">
             <thead>
                <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Transaction ID</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Participants</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Price</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Date & Time</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Actions</th>
+                   <th className="px-5 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Transaction ID</th>
+                   <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Participants</th>
+                   <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Price</th>
+                   <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Date & Time</th>
+                   <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+                   <th className="px-5 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Actions</th>
                </tr>
             </thead>
             <tbody>
@@ -155,34 +155,34 @@ const BookingManagement = () => {
                       exit={{ opacity: 0 }}
                       className="group border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50/80 dark:hover:bg-gray-800/80 transition-colors"
                     >
-                       <td className="px-8 py-6">
-                          <code className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-lg uppercase tracking-wider">
-                             #{booking.bookingId || booking._id.slice(-6)}
-                          </code>
-                       </td>
-                       <td className="px-6 py-6">
-                          <div className="space-y-1">
-                             <div className="flex items-center gap-1 text-[10px] font-black uppercase dark:text-white">
-                                <User size={10} className="text-gray-400" /> {booking.user?.name}
-                             </div>
-                             <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                <Store size={10} /> {booking.vendor?.shopName}
-                             </div>
-                          </div>
-                       </td>
-                       <td className="px-6 py-6 text-center">
-                          <span className="text-sm font-black dark:text-white">
-                             ₹{booking.totalPrice}
-                          </span>
-                       </td>
-                       <td className="px-6 py-6 space-y-1 text-[10px] font-bold text-gray-400 uppercase">
-                          <div className="flex items-center gap-1"><Calendar size={10}/> {new Date(booking.createdAt).toLocaleDateString()}</div>
-                          <div className="flex items-center gap-1"><Clock size={10}/> {new Date(booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                       </td>
-                       <td className="px-6 py-6">
-                          {getStatusBadge(booking.status)}
-                       </td>
-                       <td className="px-8 py-6 text-right">
+                        <td className="px-5 py-6">
+                           <code className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-lg uppercase tracking-wider">
+                              #{booking.bookingId || booking._id.slice(-6)}
+                           </code>
+                        </td>
+                        <td className="px-3 py-6">
+                           <div className="space-y-1">
+                              <div className="flex items-center gap-1 text-[10px] font-black uppercase dark:text-white">
+                                 <User size={10} className="text-gray-400" /> {booking.user?.name}
+                              </div>
+                              <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                 <Store size={10} /> {booking.vendor?.shopName}
+                              </div>
+                           </div>
+                        </td>
+                        <td className="px-3 py-6 text-center">
+                           <span className="text-sm font-black dark:text-white">
+                              ₹{booking.totalPrice}
+                           </span>
+                        </td>
+                        <td className="px-3 py-6 space-y-1 text-[10px] font-bold text-gray-400 uppercase">
+                           <div className="flex items-center gap-1"><Calendar size={10}/> {new Date(booking.createdAt).toLocaleDateString()}</div>
+                           <div className="flex items-center gap-1"><Clock size={10}/> {new Date(booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        </td>
+                        <td className="px-3 py-6">
+                           {getStatusBadge(booking.status)}
+                        </td>
+                        <td className="px-5 py-6 text-right">
                           <div className="flex items-center justify-end gap-2">
                              <button 
                                onClick={() => navigate(`/admin/bookings/${booking._id}`)}

@@ -159,17 +159,17 @@ const VendorManagement = () => {
       </div>
 
       {/* 📋 TABLE VIEW */}
-      <div className="bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto">
-         <table className="w-full text-left border-collapse min-w-[1000px]">
+      <div className="bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto no-scrollbar">
+         <table className="w-full text-left border-collapse">
             <thead>
                <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Shop Details</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Owner</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Level & Plan</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Wallet</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Active</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Actions</th>
+                  <th className="px-5 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Shop Details</th>
+                  <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Owner</th>
+                  <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Level & Plan</th>
+                  <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Wallet</th>
+                  <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+                  <th className="px-3 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Active</th>
+                  <th className="px-5 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Actions</th>
                </tr>
             </thead>
             <tbody>
@@ -183,7 +183,7 @@ const VendorManagement = () => {
                       onClick={() => { setSelectedVendor(vendor); setIsDrawerOpen(true); }}
                       className="group border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50/80 dark:hover:bg-gray-800/80 cursor-pointer transition-colors"
                     >
-                       <td className="px-8 py-6">
+                       <td className="px-5 py-6">
                           <div className="flex items-center gap-4">
                              <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary font-black text-lg">
                                 {vendor.shopName.charAt(0)}
@@ -196,16 +196,16 @@ const VendorManagement = () => {
                              </div>
                           </div>
                        </td>
-                       <td className="px-6 py-6 text-xs font-black dark:text-white uppercase">
+                       <td className="px-3 py-6 text-xs font-black dark:text-white uppercase text-nowrap">
                           {vendor.ownerId?.name}
                        </td>
-                       <td className="px-6 py-6 space-y-2">
+                       <td className="px-3 py-6 space-y-2">
                           {getLevelBadge(vendor.serviceLevel)}
                           <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest pl-1">
                              {vendor.subscription?.type || 'No Plan'}
                           </div>
                        </td>
-                       <td className="px-6 py-6">
+                       <td className="px-3 py-6">
                           <span className={cn(
                             "text-sm font-black",
                             vendor.walletBalance < 100 ? "text-red-500" : "text-emerald-500"
@@ -213,16 +213,16 @@ const VendorManagement = () => {
                              ₹{vendor.walletBalance.toFixed(2)}
                           </span>
                        </td>
-                       <td className="px-6 py-6">
+                       <td className="px-3 py-6">
                           {getStatusBadge(vendor.status)}
                        </td>
-                       <td className="px-6 py-6 text-center">
+                       <td className="px-3 py-6 text-center">
                           <div className={cn(
                             "inline-flex w-3 h-3 rounded-full border-2 border-white dark:border-gray-900 shadow-sm",
                             vendor.isActive ? "bg-emerald-500" : "bg-red-500"
                           )} />
                        </td>
-                       <td className="px-8 py-6 text-right">
+                       <td className="px-5 py-6 text-right">
                           <button className="p-2 text-gray-300 hover:text-primary transition-colors">
                              <ChevronRight size={20} />
                           </button>
@@ -284,7 +284,7 @@ const VendorManagement = () => {
                </div>
 
                {/* Drawer Content */}
-               <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+               <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
                   
                   {/* HARD BLOCK WARNING */}
                   {(selectedVendor.walletBalance < 100 || !selectedVendor.subscription?.isActive) && (
