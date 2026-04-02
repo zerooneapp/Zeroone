@@ -80,7 +80,7 @@ const Home = () => {
   return (
     <div className="pb-24 animate-in fade-in duration-700 bg-transparent min-h-screen">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
-      <div className="px-4 pt-4 pb-1 mb-1">
+      <div className="px-4 pt-2 pb-1 mb-1">
         <div className="relative group animate-in slide-in-from-top-3 duration-700 w-full">
           {/* Multi-layered Soft Glow */}
           <div className="absolute -inset-1 bg-gradient-to-r from-[#1C2C4E]/10 via-blue-500/5 to-[#1C2C4E]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
@@ -94,7 +94,7 @@ const Home = () => {
               placeholder="Search salon, beauty parlour, makeup artist..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[48px] pl-14 pr-6 bg-white dark:bg-gray-950/80 backdrop-blur-xl border-2 border-[#1C2C4E]/40 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_15px_35px_-5px_rgba(0,0,0,0.05)] focus:border-[#1C2C4E] focus:ring-[10px] focus:ring-[#1C2C4E]/5 dark:focus:ring-blue-500/5 transition-all duration-500 outline-none placeholder:text-gray-400 placeholder:font-semibold"
+              className="w-full h-[37px] pl-14 pr-6 bg-white dark:bg-gray-950/80 backdrop-blur-xl border-2 border-[#1C2C4E]/40 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_15px_35px_-5px_rgba(0,0,0,0.05)] focus:border-[#1C2C4E] focus:ring-[10px] focus:ring-[#1C2C4E]/5 dark:focus:ring-blue-500/5 transition-all duration-500 outline-none placeholder:text-gray-400 placeholder:font-semibold"
             />
           </div>
         </div>
@@ -108,9 +108,9 @@ const Home = () => {
             <button
               key={cat._id}
               onClick={() => toggleCategory(cat._id)}
-              className={`relative px-6 py-2.5 rounded-[12px] whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 ${isActive
-                  ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
-                  : 'bg-white dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+              className={`relative px-6 py-1.5 rounded-[12px] whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 ${isActive
+                ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
+                : 'bg-white dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
                 }`}
             >
               <span className="relative z-10">{cat.name}</span>

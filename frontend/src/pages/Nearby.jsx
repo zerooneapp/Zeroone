@@ -121,7 +121,7 @@ const Nearby = () => {
               icon={Search}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-12 text-sm border-none shadow-sm"
+              className="h-[42px] text-sm border-none shadow-sm"
             />
           </div>
         </div>
@@ -132,9 +132,9 @@ const Nearby = () => {
             <button
               key={cat._id}
               onClick={() => toggleCategory(cat._id)}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap text-[11px] font-bold uppercase tracking-wider transition-all ${
+              className={`px-4 py-1.5 rounded-xl whitespace-nowrap text-[11px] font-bold uppercase tracking-wider transition-all ${
                 selectedCats.includes(cat._id) 
-                  ? 'bg-primary text-white' 
+                  ? 'bg-primary text-white shadow-md' 
                   : 'bg-white dark:bg-gray-800 text-gray-500'
               }`}
             >

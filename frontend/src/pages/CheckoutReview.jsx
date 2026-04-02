@@ -93,7 +93,7 @@ const CheckoutReview = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-48 animate-in fade-in duration-500">
       <div className="p-5 flex items-center justify-between sticky top-0 bg-background-light dark:bg-background-dark z-50">
         <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
           <ArrowLeft size={20} />
@@ -110,16 +110,16 @@ const CheckoutReview = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-primary text-white p-6 rounded-[2.5rem] shadow-xl shadow-primary/20 space-y-4"
+          className="bg-primary text-white p-4 px-5 rounded-[2.5rem] shadow-xl shadow-primary/20 space-y-2.5"
         >
           <div>
-            <h1 className="text-2xl font-black truncate">{vendor.shopName}</h1>
-            <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest flex items-center gap-1">
-               <MapPin size={10} /> {vendor.address || 'Vendor Location'}
+            <h1 className="text-lg font-black truncate uppercase tracking-tight">{vendor.shopName}</h1>
+            <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest flex items-center gap-1">
+               <MapPin size={9} /> {vendor.address || 'Vendor Location'}
             </p>
           </div>
           
-          <div className="flex gap-4 pt-4 border-t border-white/10">
+          <div className="flex gap-4 pt-2.5 border-t border-white/10">
             <div className="space-y-1">
                <p className="text-[10px] font-bold opacity-40 uppercase">Date</p>
                <div className="flex items-center gap-2">
@@ -138,9 +138,9 @@ const CheckoutReview = () => {
         </motion.div>
 
         {/* Selected Services */}
-        <section className="space-y-3">
+        <section className="space-y-2">
           <SectionTitle title="Services" subtitle={`${items.length} items selected`} />
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+          <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-4 border border-gray-100 dark:border-gray-800 shadow-sm space-y-3">
             {items.map((item) => (
               <div key={item._id} className="flex justify-between items-center">
                 <div className="space-y-0.5">
@@ -188,7 +188,7 @@ const CheckoutReview = () => {
                     <CreditCard size={20} />
                  </div>
                  <div>
-                    <p className="font-bold text-sm dark:text-white">Pay at Salon</p>
+                    <p className="font-bold text-sm dark:text-white">Pay at Shop</p>
                     <p className="text-[10px] text-gray-400 font-medium">Safe and secure payment</p>
                  </div>
               </div>
@@ -198,11 +198,11 @@ const CheckoutReview = () => {
       </div>
 
       {/* Confirmation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 glass-effect border-t border-gray-100 dark:border-gray-800 z-50">
+      <div className="fixed bottom-16 left-0 right-0 p-4 pt-3 glass-effect border-t border-[#1C2C4E]/5 dark:border-gray-800 z-50">
         <div className="max-w-md mx-auto">
            <Button 
             size="lg" 
-            className="w-full h-14 shadow-2xl shadow-primary/30 text-lg font-black tracking-tight flex items-center justify-center gap-3"
+            className="w-full h-12 shadow-2xl shadow-primary/30 text-sm font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 rounded-full"
             onClick={handleConfirm}
             disabled={loading}
            >
@@ -212,7 +212,7 @@ const CheckoutReview = () => {
                'Confirm Booking'
              )}
            </Button>
-           <p className="text-center text-[10px] text-gray-400 mt-4 font-bold uppercase tracking-widest">
+           <p className="text-center text-[8px] text-gray-400 mt-2 font-bold uppercase tracking-widest">
              By clicking confirm, you agree to our terms.
            </p>
         </div>
