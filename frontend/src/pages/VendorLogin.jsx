@@ -84,13 +84,12 @@ const VendorAuth = () => {
   };
 
   return (
-    <div className="h-screen bg-background-light dark:bg-background-dark flex flex-col relative overflow-hidden text-gray-900 dark:text-white transition-colors duration-500">
+    <div className="h-screen bg-[#F3F2F7] flex flex-col relative overflow-hidden text-[#1C2C4E] transition-colors duration-500 font-sans">
       {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-5%] left-[-10%] w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute inset-0 opacity-[0.06] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/linen.png')]" />
 
       {/* Content Area */}
-      <div className="flex-1 flex flex-col items-center p-6 pt-16 overflow-y-auto no-scrollbar relative z-10">
+      <div className="flex-1 flex flex-col items-center p-6 pt-16 relative z-10">
         <div className="w-full max-w-sm">
           <AnimatePresence mode="wait">
             {step === 'phone' ? (
@@ -101,18 +100,19 @@ const VendorAuth = () => {
                 exit={{ opacity: 0, y: -15 }}
                 className="space-y-10"
               >
-                <div className="space-y-2 text-center pt-8">
-                  <div className="w-16 h-16 bg-primary/5 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-primary/10 dark:border-white/5 shadow-inner">
-                     <Briefcase size={32} className="text-primary" />
+                <div className="space-y-4 text-center">
+                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-200/50 shadow-sm">
+                     <Briefcase size={32} className="text-[#1C2C4E]" />
                   </div>
-                  <h1 className="text-[32px] font-black text-gray-900 dark:text-white tracking-tight leading-tight">Partner Login</h1>
-                  <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Dashboard access for vendors & staff</p>
+                  <h1 className="text-[32px] font-bold text-[#1C2C4E] tracking-tight leading-tight">Partner Login</h1>
+                  <p className="text-[#1C2C4E]/60 font-medium text-sm">Dashboard access for vendors & staff</p>
                 </div>
 
                 <div className="space-y-6">
-                  <div className="bg-white dark:bg-gray-900 px-6 py-4 rounded-3xl border border-gray-100 dark:border-gray-800 flex items-center gap-4 h-16 shadow-xl shadow-black/5 ring-1 ring-black/5">
-                    <div className="flex items-center gap-2 border-r border-gray-100 dark:border-gray-800 pr-4">
-                       <span className="font-black text-gray-400 text-lg">+91</span>
+                  <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/50 flex items-center gap-4 h-12 shadow-sm">
+                    <div className="flex items-center gap-3 pr-2">
+                       <span className="font-medium text-[#1C2C4E] text-base">+91</span>
+                       <div className="w-[1px] h-6 bg-gray-200/80 ml-2" />
                     </div>
                     <input 
                       type="tel"
@@ -120,13 +120,16 @@ const VendorAuth = () => {
                       onChange={handlePhoneChange}
                       placeholder="Phone Number"
                       autoFocus
-                      className="flex-1 bg-transparent border-none outline-none font-black text-xl text-gray-900 dark:text-white tracking-widest placeholder:text-gray-300 dark:placeholder:text-gray-700 placeholder:font-bold placeholder:text-lg"
+                      className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#1C2C4E] placeholder:text-gray-300"
                     />
                   </div>
 
                   <Button 
                     size="lg" 
-                    className="w-full h-14 rounded-2xl bg-primary text-white text-lg font-black shadow-2xl shadow-primary/20"
+                    className={cn(
+                      "w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#1C2C4E] shadow-sm active:scale-[0.98]",
+                      phone.length !== 10 && "opacity-90 grayscale-[0.2]"
+                    )}
                     onClick={handleSendOTP}
                     loading={loading}
                     disabled={phone.length < 10}
@@ -137,7 +140,7 @@ const VendorAuth = () => {
                 
               </motion.div>
             ) : (
-              <motion.div
+            <motion.div
                 key="otp-step"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -146,15 +149,15 @@ const VendorAuth = () => {
               >
                 <button 
                   onClick={() => setStep('phone')}
-                  className="p-3 -ml-2 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors bg-white dark:bg-gray-900 rounded-2xl shadow-sm"
+                  className="p-3 -ml-2 text-[#1C2C4E]/50 hover:text-[#1C2C4E] transition-colors bg-white rounded-2xl shadow-sm"
                 >
                   <ChevronLeft size={20} strokeWidth={3} />
                 </button>
 
                 <div className="space-y-2 text-center">
-                  <h1 className="text-[28px] font-black text-gray-900 dark:text-white">Enter Code</h1>
-                  <p className="text-gray-400 font-bold text-[10px] uppercase tracking-widest">
-                    Verification code sent to <span className="text-primary">+91 {phone}</span>
+                  <h1 className="text-[28px] font-bold text-[#1C2C4E]">Enter Code</h1>
+                  <p className="text-[#1C2C4E]/60 font-medium text-[11px] uppercase tracking-widest">
+                    Verification code sent to <span className="text-[#1C2C4E] font-bold">+91 {phone}</span>
                   </p>
                 </div>
 
@@ -172,8 +175,8 @@ const VendorAuth = () => {
                       <div
                         key={i}
                         className={cn(
-                          "w-14 h-16 bg-white dark:bg-gray-900 rounded-2xl border-2 flex items-center justify-center font-black text-2xl shadow-sm transition-all",
-                          digit ? "border-primary text-primary" : "border-gray-50 dark:border-gray-800 text-gray-300 dark:text-gray-700"
+                          "w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
+                          digit ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-50 text-gray-300"
                         )}
                       >
                         {digit}
@@ -185,7 +188,7 @@ const VendorAuth = () => {
                 <div className="space-y-6">
                   <Button 
                     size="lg" 
-                    className="w-full h-14 rounded-2xl bg-primary text-white text-lg font-black shadow-2xl shadow-primary/20"
+                    className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
                     onClick={handleVerifyOTP}
                     loading={loading}
                     disabled={otp.includes('')}
@@ -200,14 +203,14 @@ const VendorAuth = () => {
                         disabled={!canResend}
                         onClick={handleSendOTP}
                         className={`text-[10px] font-black uppercase tracking-[0.2em] border-b border-current pb-0.5 transition-all ${
-                          canResend ? 'text-primary' : 'text-gray-300 dark:text-gray-700'
+                          canResend ? 'text-[#1C2C4E]' : 'text-gray-300'
                         }`}
                       >
                         Resend OTP
                       </button>
                     </div>
                     {!canResend && (
-                      <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                         Resend in 00:{timer < 10 ? `0${timer}` : timer}
                       </p>
                     )}

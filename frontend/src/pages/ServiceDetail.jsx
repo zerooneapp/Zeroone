@@ -136,24 +136,17 @@ const ServiceDetail = () => {
   const gallery = [vendor.shopImage, ...(vendor.gallery || [])].filter(Boolean).slice(0, 5);
 
   return (
-    <div className="bg-white dark:bg-gray-950 min-h-screen pb-40 animate-in fade-in duration-500">
+    <div className="bg-white dark:bg-gray-950 min-h-screen pb-40">
       {/* Header & Elite Gallery HUD */}
       <div className="relative bg-white dark:bg-gray-950">
         <div className="relative group">
           <div className="h-48 relative overflow-hidden bg-gray-100 dark:bg-gray-900">
-              <AnimatePresence mode="wait">
-                <motion.img 
-                  key={activeImage}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4 }}
-                  src={activeImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'} 
-                  className="w-full h-full object-cover"
-                  alt={vendor.shopName}
-                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
-                />
-              </AnimatePresence>
+              <img 
+                src={activeImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'} 
+                className="w-full h-full object-cover"
+                alt={vendor.shopName}
+                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
+              />
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent " />
               
               {/* Action Buttons HUD */}
@@ -270,13 +263,9 @@ const ServiceDetail = () => {
       {/* Selected Services (Boxes) */}
       <div className="px-3 mt-4 space-y-2">
         <SectionTitle title="Selected Services" className="mb-1" />
-        <AnimatePresence mode="popLayout">
-          {cartItems.length > 0 && hasItemsFromThisVendor ? (
-             cartItems.map((item) => (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
+            {cartItems.length > 0 && hasItemsFromThisVendor ? (
+              cartItems.map((item) => (
+                <div 
                   key={item._id}
                   className="bg-gray-50 dark:bg-gray-900 border border-[#1C2C4E]/10 rounded-2xl p-2.5 relative"
                 >
@@ -295,7 +284,7 @@ const ServiceDetail = () => {
                      </div>
                      <div className="flex items-center gap-2">
                         <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#1C2C4E] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm">
-                          PayAtSalon
+                          PayAtShop
                         </div>
                         <button 
                             onClick={() => removeItem(item._id)}
@@ -305,14 +294,13 @@ const ServiceDetail = () => {
                         </button>
                      </div>
                   </div>
-                </motion.div>
-             ))
-          ) : (
+                </div>
+              ))
+           ) : (
             <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest italic">Tap items below to add them</p>
             </div>
-          )}
-        </AnimatePresence>
+           )}
       </div>
 
       {/* Available Offerings */}
@@ -324,10 +312,7 @@ const ServiceDetail = () => {
             if (isSelected) return null; 
 
             return (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+              <div 
                 key={service._id}
                 className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
               >
@@ -339,7 +324,7 @@ const ServiceDetail = () => {
                   <p className="text-[10px] font-black text-[#1C2C4E] dark:text-white leading-none">₹{service.price}</p>
                 </div>
                 <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#1C2C4E] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm">
-                   PayAtSalon
+                   PayAtShop
                 </div>
                 <button 
                   onClick={() => toggleService(service)}
@@ -347,7 +332,7 @@ const ServiceDetail = () => {
                 >
                   <Plus size={16} strokeWidth={3} />
                 </button>
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -373,26 +358,23 @@ const ServiceDetail = () => {
       </div>
 
       {/* Sticky Bottom Appointment Bar (Full Width Flush with Nav) */}
-      <motion.div 
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="fixed bottom-[64px] left-0 right-0 bg-[#1C2C4E] dark:bg-gray-950 backdrop-blur-3xl p-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]"
+      <div 
+        className="fixed bottom-[64px] left-0 right-0 bg-[#1C2C4E] dark:bg-gray-950 backdrop-blur-3xl py-2.5 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]"
       >
          <div className="flex items-center justify-between max-w-lg mx-auto">
             <div className="flex flex-col">
-               <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5 leading-none">Net Total</p>
-               <p className="text-xl font-black text-white leading-none">₹{totalPrice}</p>
+               <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5 leading-none">Net Total</p>
+               <p className="text-lg font-black text-white leading-none">₹{totalPrice}</p>
             </div>
             <button 
               onClick={() => navigate('/cart')}
               disabled={cartItems.length === 0}
-              className="px-8 py-3 bg-white text-[#1C2C4E] rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[3px] border-gray-100"
+              className="px-8 py-2.5 bg-white text-[#1C2C4E] rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[2px] border-gray-100"
             >
                Book Now
             </button>
          </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

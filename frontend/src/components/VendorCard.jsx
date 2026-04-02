@@ -33,13 +33,13 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
       </div>
 
       {/* Bottom: Content HUB (Elite Density) */}
-      <div className={cn("p-3 flex flex-col justify-between space-y-2")}>
+      <div className={cn("p-2.5 flex flex-col justify-between space-y-1")}>
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
             <h3 className={cn("font-black text-[#1C2C4E] dark:text-white truncate uppercase tracking-tighter leading-none text-[13px]")}>
               {vendor.shopName}
             </h3>
-            <div className="flex items-center gap-1 mt-0.5 opacity-80">
+            <div className="flex items-center gap-1 mt-0 opacity-80">
               <MapPin size={10} className="text-[#1C2C4E] dark:text-blue-400 shrink-0" />
               <span className="text-[10px] font-bold uppercase truncate text-gray-700 dark:text-gray-300">
                 {((vendor.dist?.calculated || 1100) / 1000).toFixed(1)} km away
@@ -52,7 +52,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-1.5 border-t border-gray-100 dark:border-gray-800/50">
+        <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-800/50">
            <div className="flex items-center gap-2">
               <p className="text-[12px] font-black text-[#1C2C4E] dark:text-white">₹{vendor.price || '120'}</p>
               {vendor.serviceCount > 1 && (

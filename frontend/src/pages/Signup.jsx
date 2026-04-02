@@ -70,9 +70,9 @@ const Signup = () => {
       <div className="absolute top-0 left-0 right-0 p-6 z-20">
         <button 
           onClick={() => navigate('/login')}
-          className="p-3 text-[#1C2C4E] bg-white rounded-2xl shadow-sm border border-gray-100 active:scale-95 transition-all"
+          className="p-2.5 text-[#1C2C4E] bg-white rounded-xl shadow-sm border border-gray-100 active:scale-95 transition-all"
         >
-          <ChevronLeft size={20} strokeWidth={3} />
+          <ChevronLeft size={18} strokeWidth={3} />
         </button>
       </div>
 
@@ -109,8 +109,8 @@ const Signup = () => {
                   </div>
                 </label>
             </div>
-            <h1 className="text-[32px] font-black text-[#1C2C4E] tracking-tight leading-none">Complete Profile</h1>
-            <p className="text-gray-500 font-medium text-[12px] tracking-tight opacity-70">Help us personalize your experience</p>
+            <h1 className="text-[28px] font-black text-[#1C2C4E] tracking-tight leading-none">Complete Profile</h1>
+            <p className="text-gray-500 font-medium text-[11px] tracking-tight opacity-70">Help us personalize your experience</p>
           </div>
 
           <motion.div 
@@ -121,30 +121,30 @@ const Signup = () => {
           >
             {/* Minimalist Input HUD */}
             <div className="space-y-4">
-              <div className="bg-white px-5 py-4 rounded-[1.5rem] border border-gray-200/60 flex items-center gap-4 h-16 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] transition-focus-within focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
-                <div className="bg-[#F8F9FA] p-2 rounded-xl">
-                  <User size={18} className="text-[#1C2C4E]" />
+              <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
+                <div className="bg-[#F8F9FA] p-1.5 rounded-lg">
+                  <User size={16} className="text-[#1C2C4E]" />
                 </div>
                 <input 
                   type="text" 
                   placeholder="Full Name *"
                   value={profileData.name}
                   onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                  className="flex-1 bg-transparent border-none outline-none font-bold text-lg text-[#1C2C4E] placeholder:text-gray-300"
+                  className="flex-1 bg-transparent border-none outline-none font-bold text-base text-[#1C2C4E] placeholder:text-gray-300"
                 />
               </div>
 
-              <div className="bg-white px-5 py-4 rounded-[1.5rem] border border-gray-200/60 flex items-center gap-4 h-16 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] transition-focus-within focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
-                <div className="bg-[#F8F9FA] p-2 rounded-xl">
-                  <Calendar size={18} className="text-[#1C2C4E]" />
+              <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
+                <div className="bg-[#F8F9FA] p-1.5 rounded-lg">
+                  <Calendar size={16} className="text-[#1C2C4E]" />
                 </div>
                 <div className="flex-1 flex flex-col">
-                  <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Date of Birth</span>
+                  <span className="text-[7px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Date of Birth</span>
                   <input 
                     type="date"
                     value={profileData.dob}
                     onChange={(e) => setProfileData({...profileData, dob: e.target.value})}
-                    className="bg-transparent border-none outline-none font-black text-[#1C2C4E] uppercase tracking-tighter"
+                    className="bg-transparent border-none outline-none font-black text-sm text-[#1C2C4E] uppercase tracking-tighter"
                   />
                 </div>
               </div>
@@ -153,12 +153,12 @@ const Signup = () => {
             <div className="space-y-6">
               <Button 
                 size="lg" 
-                className="w-full h-16 rounded-[1.5rem] bg-[#1C2C4E] text-white text-lg font-bold shadow-2xl shadow-[#1C2C4E]/30 flex items-center justify-center gap-3 active:scale-95 transition-all"
+                className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"
                 onClick={handleCompleteRegistration}
                 loading={loading}
               >
                 Create Account
-                <ArrowRight size={22} strokeWidth={3} />
+                <ArrowRight size={16} strokeWidth={3} />
               </Button>
 
               <div className="text-center px-10">

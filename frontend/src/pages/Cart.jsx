@@ -20,6 +20,7 @@ const Cart = () => {
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingStaff, setLoadingStaff] = useState(false);
+  const [showFullCalendar, setShowFullCalendar] = useState(false);
 
   // 🔄 INITIALIZE RESCHEDULE MODE (If navigated from Status Details)
   useEffect(() => {
@@ -35,8 +36,8 @@ const Cart = () => {
     }
   }, [location.state]);
 
-  // 1. Generate Next 7 Days
-  const dates = Array.from({ length: 7 }, (_, i) => {
+  // 1. Generate Next 30 Days
+  const dates = Array.from({ length: 30 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
     return {
@@ -153,25 +154,79 @@ const Cart = () => {
       </div>
 
       <div className="px-5 space-y-6">
-        {/* Date Selection (High-Density Boxes) */}
+        {/* Date Selection */}
         <section>
-          <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
-            {dates.map((d) => (
-              <button
-                key={d.full}
-                onClick={() => setSelectedDate(d.full)}
-                className={cn(
-                  "flex flex-col items-center min-w-[55px] py-2.5 rounded-2xl transition-all border-2",
-                  selectedDate === d.full 
-                    ? "bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-xl scale-105" 
-                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400"
-                )}
-              >
-                <span className="text-[9px] uppercase font-black opacity-80">{d.day}</span>
-                <span className="text-sm font-black mt-0.5">{d.date}</span>
-              </button>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+             <SectionTitle title="Select Booking Date" className="mb-0" />
+             <button 
+                onClick={() => setShowFullCalendar(!showFullCalendar)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-[10px] font-black uppercase text-[#1C2C4E] dark:text-gray-300 pointer-events-auto transition-all active:scale-95"
+             >
+                <Calendar size={12} strokeWidth={2.5} />
+                {showFullCalendar ? 'List' : 'Calendar'}
+             </button>
           </div>
+
+          <AnimatePresence mode="wait">
+            {!showFullCalendar ? (
+              <motion.div 
+                key="list-view"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1"
+              >
+                {dates.map((d) => (
+                  <button
+                    key={d.full}
+                    onClick={() => setSelectedDate(d.full)}
+                    className={cn(
+                      "flex flex-col items-center min-w-[55px] py-2.5 rounded-2xl transition-all border-2",
+                      selectedDate === d.full 
+                        ? "bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-xl scale-105" 
+                        : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400"
+                    )}
+                  >
+                    <span className="text-[9px] uppercase font-black opacity-80">{d.day}</span>
+                    <span className="text-sm font-black mt-0.5">{d.date}</span>
+                  </button>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="grid-view"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="grid grid-cols-7 gap-1.5 bg-white dark:bg-gray-900 p-3 rounded-[2.5rem] border border-gray-100 dark:border-gray-800"
+              >
+                {['M','T','W','T','F','S','S'].map((day, i) => (
+                  <div key={i} className="text-[9px] font-black text-gray-300 dark:text-gray-600 text-center uppercase py-1">{day}</div>
+                ))}
+                {/* Placeholder for days before today in the current week */}
+                {Array.from({ length: (new Date().getDay() + 6) % 7 }).map((_, i) => (
+                  <div key={`pad-${i}`} className="aspect-square" />
+                ))}
+                {dates.map((d) => (
+                  <button
+                    key={d.full}
+                    onClick={() => setSelectedDate(d.full)}
+                    className={cn(
+                      "aspect-square flex flex-col items-center justify-center rounded-2xl transition-all text-[11px] font-black relative overflow-hidden",
+                      selectedDate === d.full
+                        ? "bg-[#1C2C4E] text-white shadow-lg"
+                        : "bg-gray-50/50 dark:bg-gray-800/20 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    )}
+                  >
+                    <span className="relative z-10">{d.date}</span>
+                    {d.date === new Date().getDate() && d.full === new Date().toISOString().split('T')[0] && (
+                       <div className="absolute bottom-1 w-1 h-1 bg-current rounded-full opacity-50" />
+                    )}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
 
         {/* Selected Services Summary (Shown Initially) */}

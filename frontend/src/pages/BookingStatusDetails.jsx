@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Calendar, ShieldCheck, MapPin, Phone, MessageSquare, AlertTriangle, XCircle, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import api from '../services/api';
 import Button from '../components/Button';
 import SectionTitle from '../components/SectionTitle';
@@ -49,7 +48,7 @@ const BookingStatusDetails = () => {
   };
 
   if (loading) return (
-    <div className="p-10 text-center animate-pulse">
+    <div className="p-10 text-center">
        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto" />
        <p className="mt-4 text-gray-400">Loading details...</p>
     </div>
@@ -63,7 +62,7 @@ const BookingStatusDetails = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32 animate-in slide-in-from-bottom-6 duration-700">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       <div className="p-5 flex items-center justify-between sticky top-0 bg-background-light dark:bg-background-dark z-50">
         <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
           <ArrowLeft size={20} />
@@ -104,7 +103,7 @@ const BookingStatusDetails = () => {
              
              {booking.canContact && (
                 <div className="flex gap-2">
-                   <a href={`tel:${booking.staffId?.phone}`} className="p-3 bg-primary/10 text-primary rounded-2xl active:scale-95 transition-transform">
+                   <a href={`tel:${booking.staffId?.phone}`} className="p-3 bg-primary/10 text-primary rounded-2xl">
                       <Phone size={18} />
                    </a>
                 </div>
