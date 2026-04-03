@@ -49,135 +49,133 @@ const BookingStatusDetails = () => {
 
   if (loading) return (
     <div className="p-10 text-center">
-       <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto" />
-       <p className="mt-4 text-gray-400">Loading details...</p>
+      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto" />
+      <p className="mt-4 text-gray-400">Loading details...</p>
     </div>
   );
 
   if (!booking) return (
     <div className="p-10 text-center">
-       <p className="text-gray-500">Booking not found</p>
-       <Button className="mt-4" onClick={() => navigate('/bookings')}>Back to History</Button>
+      <p className="text-gray-500">Booking not found</p>
+      <Button className="mt-4" onClick={() => navigate('/bookings')}>Back to History</Button>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <div className="p-5 flex items-center justify-between sticky top-0 bg-background-light dark:bg-background-dark z-50">
-        <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
-          <ArrowLeft size={20} />
+    <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in fade-in duration-500">
+      <div className="p-3.5 pt-4 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
+          <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
-        <h2 className="font-black text-sm uppercase tracking-widest">Booking Status</h2>
+        <span className="font-black text-[11px] uppercase tracking-widest text-slate-400">Booking Status</span>
         <div className="w-10"></div>
       </div>
 
-      <div className="px-5 space-y-6">
+      <div className="px-5 mt-4 space-y-4 pb-20">
         {/* Live Status Badge */}
-        <div className="flex flex-col items-center py-6">
-           <div className={`p-4 rounded-[2rem] border-4 mb-4 ${
-             booking.status === 'confirmed' ? 'bg-blue-500 text-white border-blue-100 dark:border-blue-900/30 shadow-xl shadow-blue-500/20' :
-             booking.status === 'completed' ? 'bg-green-500 text-white border-green-100 dark:border-green-900/30 shadow-xl shadow-green-500/20' :
-             'bg-red-500 text-white border-red-100 dark:border-red-900/30'
-           }`}>
-              {booking.status === 'confirmed' ? <Clock size={32} /> :
-               booking.status === 'completed' ? <CheckCircle2 size={32} /> : 
-               <XCircle size={32} />}
-           </div>
-           <h1 className="text-2xl font-black capitalize tracking-tight">{booking.status}</h1>
-           <p className="text-[10px] uppercase font-black tracking-widest text-gray-400 mt-1">Order #{booking._id.slice(-6).toUpperCase()}</p>
+        <div className="flex flex-col items-center py-4 bg-white dark:bg-gray-900/50 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
+          <div className={`p-3 rounded-2xl border-2 mb-3 shadow-xl ${booking.status === 'confirmed' ? 'bg-blue-500 text-white border-blue-100 dark:border-blue-900/30' :
+              booking.status === 'completed' ? 'bg-green-500 text-white border-green-100 dark:border-green-900/30' :
+                'bg-red-500 text-white border-red-100 dark:border-red-900/30'
+            }`}>
+            {booking.status === 'confirmed' ? <Clock size={24} strokeWidth={3} /> :
+              booking.status === 'completed' ? <CheckCircle2 size={24} strokeWidth={3} /> :
+                <XCircle size={24} strokeWidth={3} />}
+          </div>
+          <h1 className="text-lg font-black capitalize tracking-tight text-gray-900 dark:text-white leading-none">{booking.status}</h1>
+          <p className="text-[8px] uppercase font-black tracking-widest text-slate-400 mt-1.5 opacity-60">Order #{booking._id.slice(-6).toUpperCase()}</p>
         </div>
 
         {/* Professional Details (Contact Rule Applies) */}
-        <section>
-          <SectionTitle title="Service Provider" />
-          <div className="bg-white dark:bg-gray-900 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 mt-3">
-             <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                <img src={booking.staffId?.image || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
-             </div>
-             <div className="flex-1">
-                <p className="font-bold dark:text-white">{booking.staffId?.name || 'Assigning soon...'}</p>
-                <div className="flex items-center gap-1.5 text-blue-500 font-bold text-[10px] uppercase">
-                   <ShieldCheck size={12} /> Verified Specialist
-                </div>
-             </div>
-             
-             {booking.canContact && (
-                <div className="flex gap-2">
-                   <a href={`tel:${booking.staffId?.phone}`} className="p-3 bg-primary/10 text-primary rounded-2xl">
-                      <Phone size={18} />
-                   </a>
-                </div>
-             )}
+        <section className="space-y-2">
+          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest px-1">Service Provider</p>
+          <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex items-center gap-3">
+            <div className="w-11 h-11 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 overflow-hidden shadow-inner shrink-0">
+              <img src={booking.staffId?.image || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 leading-none">
+              <p className="font-extrabold text-[13px] text-gray-900 dark:text-white uppercase tracking-tight">{booking.staffId?.name || 'Assigning soon...'}</p>
+              <div className="flex items-center gap-1.5 text-blue-500 font-black text-[8px] uppercase tracking-widest mt-1">
+                <ShieldCheck size={10} strokeWidth={3} /> Verified Specialist
+              </div>
+            </div>
+
+            {booking.canContact && (
+              <div className="flex gap-2">
+                <a href={`tel:${booking.staffId?.phone}`} className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20 shadow-sm active:scale-90 transition-all">
+                  <Phone size={16} strokeWidth={3} />
+                </a>
+              </div>
+            )}
           </div>
-          
+
           {!booking.canContact && booking.status === 'confirmed' && (
-             <div className="mt-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/20 flex items-start gap-3">
-                <AlertTriangle size={16} className="text-amber-500 mt-0.5" />
-                <p className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-400 leading-tight">
-                  Contact details will be visible 30 mins before the appointment schedule.
-                </p>
-             </div>
+            <div className="p-2.5 bg-amber-500/5 dark:bg-amber-900/10 rounded-xl border border-amber-500/10 dark:border-amber-900/20 flex items-start gap-2 active:scale-95 transition-all">
+              <AlertTriangle size={12} className="text-amber-500 mt-0.5" />
+              <p className="text-[8px] font-black uppercase text-amber-600 dark:text-amber-400 leading-tight tracking-tight">
+                Contact details will be visible 30 mins before the appointment schedule.
+              </p>
+            </div>
           )}
         </section>
 
         {/* Schedule Info */}
-        <section className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
-           <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Scheduled Date</p>
-                 <div className="flex items-center gap-2 text-sm font-bold dark:text-white">
-                    <Calendar size={16} className="text-primary" />
-                    {dayjs(booking.startTime).format('dddd, DD MMMM')}
-                 </div>
+        <section className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-3.5">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-none">Scheduled Date</p>
+              <div className="flex items-center gap-1.5 text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tighter mt-1 leading-none">
+                <Calendar size={12} strokeWidth={3} className="text-primary" />
+                {dayjs(booking.startTime).format('dddd, DD MMMM')}
               </div>
-              <div className="space-y-1 text-right">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Arrival Time</p>
-                 <div className="flex items-center gap-2 text-sm font-bold dark:text-white justify-end">
-                    <Clock size={16} className="text-primary" />
-                    {dayjs(booking.startTime).format('hh:mm A')}
-                 </div>
-              </div>
-           </div>
-           
-            <div className="pt-4 border-t border-gray-50 dark:border-gray-800 flex items-center gap-2">
-              <MapPin size={16} className="text-gray-400" />
-              <p className="text-xs font-medium text-gray-500">
-                {booking.serviceAddress || booking.vendorId?.address || 'Location information unavailable'}
-              </p>
             </div>
+            <div className="space-y-1 text-right flex flex-col items-end">
+              <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-none">Arrival Time</p>
+              <div className="flex items-center gap-1.5 text-[11px] font-black text-primary uppercase tracking-tighter mt-1 leading-none">
+                <Clock size={12} strokeWidth={3} />
+                {dayjs(booking.startTime).format('hh:mm A')}
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 flex items-start gap-2">
+            <MapPin size={12} strokeWidth={3} className="text-slate-300 mt-0.5 shrink-0" />
+            <p className="text-[10px] font-black uppercase tracking-tight text-slate-400 leading-tight">
+              {booking.serviceAddress || booking.vendorId?.address || 'Location information unavailable'}
+            </p>
+          </div>
         </section>
 
         {/* Action Buttons */}
         {booking.status === 'confirmed' && (
-           <div className="space-y-3 pt-4">
-              <Button 
-                className="w-full h-14 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 font-black gap-2"
-                onClick={() => navigate('/cart', { 
-                  state: { 
-                    rescheduleBookingId: id,
-                    vendor: booking.vendorId,
-                    rescheduleItems: booking.services.map(s => ({ _id: s.serviceId, name: s.name, price: s.price, duration: s.duration }))
-                  } 
-                })}
-                disabled={!booking.canReschedule}
-              >
-                Reschedule Booking
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full h-12 rounded-2xl border-red-100 text-red-500 hover:bg-red-50 dark:border-red-900/20 dark:hover:bg-red-900/10 gap-2 font-bold"
-                onClick={handleCancel}
-                disabled={!booking.canCancel || cancelling}
-              >
-                {cancelling ? 'Processing...' : 'Cancel Booking'}
-              </Button>
-              {!booking.canCancel && (
-                 <p className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                    You can only cancel 30 minutes before schedule.
-                 </p>
-              )}
-           </div>
+          <div className="space-y-2 pt-2">
+            <button
+              className="w-full h-11 bg-primary text-white rounded-xl shadow-xl shadow-primary/20 font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all border border-white/10 disabled:opacity-50"
+              onClick={() => navigate('/cart', {
+                state: {
+                  rescheduleBookingId: id,
+                  vendor: booking.vendorId,
+                  rescheduleItems: booking.services.map(s => ({ _id: s.serviceId, name: s.name, price: s.price, duration: s.duration }))
+                }
+              })}
+              disabled={!booking.canReschedule}
+            >
+              Reschedule Booking
+            </button>
+
+            <button
+              className="w-full h-10 bg-slate-50 dark:bg-gray-800/80 text-red-500 rounded-xl border border-slate-100 dark:border-gray-700 font-black uppercase text-[9px] tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+              onClick={handleCancel}
+              disabled={!booking.canCancel || cancelling}
+            >
+              {cancelling ? 'Processing...' : 'Cancel Booking'}
+            </button>
+            {!booking.canCancel && (
+              <p className="text-center text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60 leading-none pt-1">
+                You can only cancel 30 minutes before schedule.
+              </p>
+            )}
+          </div>
         )}
       </div>
     </div>

@@ -23,7 +23,7 @@ const registerVendor = async (req, res) => {
       location,
       ownerId: req.user._id,
       status: 'pending',
-      serviceLevel: serviceLevel || 'basic'
+      serviceLevel: serviceLevel || 'standard'
     });
     console.log('[DEBUG] Vendor Record Created:', vendor._id, 'with ownerId:', vendor.ownerId);
     await User.findByIdAndUpdate(req.user._id, { role: 'vendor' });

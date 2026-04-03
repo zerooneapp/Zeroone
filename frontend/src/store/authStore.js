@@ -15,7 +15,7 @@ export const useAuthStore = create(
         isActive: false,
         currentPlan: null,
         wallet: 0,
-        serviceLevel: 'basic'
+        serviceLevel: 'standard'
       },
 
       login: async (credentials) => {
@@ -23,12 +23,12 @@ export const useAuthStore = create(
         try {
           const res = await api.post('/auth/login', credentials);
           const { user, token, role } = res.data;
-          
-          set({ 
-            user: res.data, 
-            token, 
-            role, 
-            isAuthenticated: true 
+
+          set({
+            user: res.data,
+            token,
+            role,
+            isAuthenticated: true
           });
 
           localStorage.setItem('token', token);
@@ -66,9 +66,9 @@ export const useAuthStore = create(
 
           // NEW: Always set token so subsequent profile completion (protected routes) work
           if (token) {
-            set({ 
-              token, 
-              role, 
+            set({
+              token,
+              role,
               isAuthenticated: !needsRegistration, // Not fully authenticated till registration complete
               user: needsRegistration ? null : res.data
             });
@@ -85,16 +85,16 @@ export const useAuthStore = create(
       },
 
       logout: () => {
-        set({ 
-          user: null, 
-          token: null, 
-          role: null, 
+        set({
+          user: null,
+          token: null,
+          role: null,
           isAuthenticated: false,
           vendorStatus: {
             isActive: false,
             currentPlan: null,
             wallet: 0,
-            serviceLevel: 'basic'
+            serviceLevel: 'standard'
           }
         });
         localStorage.removeItem('auth-storage');
@@ -105,7 +105,7 @@ export const useAuthStore = create(
         try {
           const res = await api.get('/vendor/dashboard');
           const { subscription, walletBalance } = res.data;
-          set({ 
+          set({
             vendorStatus: {
               isActive: subscription?.isActive || false,
               currentPlan: subscription?.currentPlan || null,
@@ -128,10 +128,10 @@ export const useAuthStore = create(
         try {
           set({ loading: true });
           const res = await api.get('/auth/me');
-          set({ 
-            user: res.data.user, 
-            role: res.data.role, 
-            isAuthenticated: true 
+          set({
+            user: res.data.user,
+            role: res.data.role,
+            isAuthenticated: true
           });
 
           if (res.data.role === 'vendor') {

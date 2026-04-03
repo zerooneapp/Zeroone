@@ -34,6 +34,7 @@ import VendorProfile from './pages/VendorProfile';
 import ServiceForm from './pages/ServiceForm';
 import StaffForm from './pages/StaffForm';
 import OfferForm from './pages/OfferForm';
+import PendingVerification from './pages/PendingVerification';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -46,9 +47,10 @@ import CategoryManagement from './pages/admin/categories/CategoryManagement';
 import SubscriptionPlans from './pages/admin/plans/SubscriptionPlans';
 import PlatformSettings from './pages/admin/settings/PlatformSettings';
 import BroadcastSystem from './pages/admin/notifications/BroadcastSystem';
-import { 
-  AdminTransactions, 
-  AdminReviews, AdminNotifications 
+import TransactionManagement from './pages/admin/transactions/TransactionManagement';
+import ReviewManagement from './pages/admin/reviews/ReviewManagement';
+import {
+  AdminNotifications
 } from './pages/AdminModulePlaceholders';
 
 // Components & Utils
@@ -83,6 +85,7 @@ function App() {
         <Route path="/vendor-login" element={<VendorLogin />} />
         <Route path="/vendor-signup" element={<VendorSignup />} />
         <Route path="/vendor-verification" element={<VendorVerification />} />
+        <Route path="/vendor-pending" element={<PendingVerification />} />
 
         {/* CUSTOMER PANEL (WITH MAIN LAYOUT) */}
         <Route path="/" element={<MainLayout />}>
@@ -92,7 +95,7 @@ function App() {
           <Route path="services/:id" element={<ServiceDetail />} />
           <Route path="favorites" element={<Favorites />} />
           <Route path="cart" element={<Cart />} />
-          
+
           <Route element={<ProtectedRoute allowedRoles={['customer', 'vendor', 'admin', 'staff']} />}>
             <Route path="checkout-review" element={<CheckoutReview />} />
             <Route path="booking-success" element={<BookingSuccess />} />
@@ -103,8 +106,8 @@ function App() {
         </Route>
 
         {/* VENDOR PANEL (WITH VENDOR LAYOUT) */}
-        <Route 
-          path="/vendor" 
+        <Route
+          path="/vendor"
           element={
             <ProtectedRoute allowedRoles={['vendor']}>
               <VendorLayout />
@@ -142,8 +145,8 @@ function App() {
         </Route>
 
         {/* ADMIN PANEL (WITH ADMIN LAYOUT) */}
-        <Route 
-          path="/admin" 
+        <Route
+          path="/admin"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminLayout />
@@ -165,11 +168,11 @@ function App() {
           <Route path="plans" element={<SubscriptionPlans />} />
           <Route path="settings" element={<PlatformSettings />} />
           <Route path="notifications" element={<BroadcastSystem />} />
-          <Route path="transactions" element={<AdminTransactions />} />
-          <Route path="reviews" element={<AdminReviews />} />
+          <Route path="transactions" element={<TransactionManagement />} />
+          <Route path="reviews" element={<ReviewManagement />} />
         </Route>
       </Routes>
-      
+
       <AddressPopup />
       <Toaster position="top-center" reverseOrder={false} />
     </Router>

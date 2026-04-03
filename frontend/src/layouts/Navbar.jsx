@@ -15,38 +15,51 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-t border-[#1C2C4E]/20 dark:border-[#1C2C4E]/40  h-16 flex items-center shadow-[0_-8px_30px_rgb(0,0,0,0.02)]">
-      <div className="w-full flex items-center justify-between">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => cn(
-              'flex flex-col items-center justify-center gap-1 transition-all duration-300 min-w-0 flex-1 relative py-1 text-[#1C2C4E] dark:text-white'
-            )}
-          >
-            {({ isActive }) => (
-              <>
-                <div className="relative">
-                  <item.icon size={20} className="transition-transform duration-300" strokeWidth={isActive ? 2.5 : 1.8} />
+    <div className="fixed bottom-4 left-0 right-0 z-50 px-4 max-w-sm mx-auto">
+      <nav className="bg-[#1C2C4E] dark:bg-gray-900 shadow-2xl rounded-full h-16 flex items-center px-2 border border-white/5 backdrop-blur-xl">
+        <div className="w-full flex items-center justify-between gap-1">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => cn(
+                'relative flex-1 flex flex-col items-center justify-center gap-1 h-12 rounded-full transition-all duration-500 min-w-0 overflow-hidden',
+                isActive ? 'bg-white/10' : 'hover:bg-white/5 active:scale-95'
+              )}
+            >
+              {({ isActive }) => (
+                <>
+                  <div className="relative z-10">
+                    <item.icon
+                      size={20}
+                      className={cn(
+                        "transition-all duration-300",
+                        isActive ? "text-white scale-110" : "text-gray-400 opacity-60"
+                      )}
+                      strokeWidth={isActive ? 2.5 : 1.8}
+                    />
+                  </div>
+                  <span className={cn(
+                    "text-[8px] font-black uppercase tracking-widest leading-none transition-all relative z-10",
+                    isActive ? "text-white mt-1" : "text-gray-500 opacity-60"
+                  )}>
+                    {item.label}
+                  </span>
+
                   {isActive && (
                     <motion.div
-                      layoutId="active-pill"
-                      className="absolute -top-2 -right-1.5 w-7 h-[3px] bg-[#1C2C4E] dark:bg-blue-400 rounded-full shadow-sm"
+                      layoutId="nav-pill"
+                      className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"
+                      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                     />
                   )}
-                </div>
-                <span className={cn(
-                  "text-[9px] font-black uppercase tracking-widest leading-none transition-all text-[#1C2C4E]"
-                )}>
-                  {item.label}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
-      </div>
-    </nav>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+    </div>
   );
 };
 

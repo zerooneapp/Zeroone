@@ -29,15 +29,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to={dashboardMap[role] || '/'} replace />;
   }
 
-  // 🛡️ HARD BLOCK LOGIC FOR VENDORS (Only for /vendor routes)
-  if (role === 'vendor' && !vendorStatus.isActive && location.pathname.startsWith('/vendor')) {
-    const allowedPathways = ['/vendor/dashboard', '/vendor/wallet'];
-    const currentPath = location.pathname;
-    
-    const isAllowed = allowedPathways.some(path => currentPath === path || currentPath.startsWith(path));
-
-    if (!isAllowed) {
-      return <Navigate to="/vendor/dashboard" replace />;
+  // 🛡️ HARD BLOCK LOGIC FOR VENDORS (Strict Verification Lock)
+  if (role === 'vendor' && location.pathname.startsWith('/vendor')) {
+    const user = useAuthStore.getState().user;
+    if (user?.status === 'pending' && location.pathname !== '/vendor-pending') {
+      return <Navigate to="/vendor-pending" replace />;
     }
   }
 

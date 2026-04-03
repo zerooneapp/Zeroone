@@ -109,42 +109,42 @@ const ServiceForm = () => {
    };
 
    return (
-      <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-         <header className="px-6 pt-8 pb-6 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/50">
-            <div className="flex items-center gap-4">
+      <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
+         <header className="px-4 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800 shadow-sm">
+            <div className="flex items-center gap-3">
                <button
                   onClick={() => navigate(-1)}
-                  className="p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 active:scale-90 transition-all"
+                  className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
                >
-                  <ArrowLeft size={18} />
+                  <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
                </button>
-               <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+               <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
                   {isEdit ? 'Edit Service' : 'Add Service'}
                </h1>
             </div>
             <button
                form="service-form"
                disabled={loading}
-               className="p-3 bg-primary text-white rounded-2xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50"
+               className="p-2.5 bg-slate-900 dark:bg-primary text-white rounded-xl shadow-lg shadow-black/10 active:scale-95 transition-all disabled:opacity-50 font-bold border border-white/10"
             >
-               {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={20} />}
+               {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
             </button>
          </header>
 
-         <main className="px-6 mt-8">
-            <form id="service-form" onSubmit={handleSubmit} className="space-y-8 pb-12">
+         <main className="px-4 mt-6">
+            <form id="service-form" onSubmit={handleSubmit} className="space-y-6 pb-12 max-w-2xl mx-auto">
                {/* Elite 4-Image Grid Upload */}
                <section className="space-y-4">
                   <div className="flex items-center justify-between px-1">
-                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Service Gallery (Max 4)</label>
-                     <span className="text-[9px] font-bold text-gray-300 uppercase italic">Main Image First</span>
+                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Service Gallery (Max 4)</label>
+                     <span className="text-[8px] font-black text-primary uppercase italic tracking-tighter opacity-70">Main Image First</span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                      {previews.map((prev, idx) => (
                         <div
                            key={idx}
-                           className={`relative aspect-square rounded-[2rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${prev ? 'border-primary/20 bg-primary/5' : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950'
+                           className={`relative aspect-square rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${prev ? 'border-primary/20 bg-primary/5' : 'border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900/50'
                               }`}
                         >
                            {prev ? (
@@ -155,16 +155,18 @@ const ServiceForm = () => {
                                     onClick={() => removeImage(idx)}
                                     className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                                  >
-                                    <X size={14} strokeWidth={3} />
+                                    <X size={12} strokeWidth={3} />
                                  </button>
                               </>
                            ) : (
                               <div
                                  onClick={() => document.getElementById(`img-upload-${idx}`).click()}
-                                 className="flex flex-col items-center gap-2 text-gray-300 dark:text-gray-700 cursor-pointer w-full h-full justify-center"
+                                 className="flex flex-col items-center gap-1.5 text-slate-300 dark:text-gray-700 cursor-pointer w-full h-full justify-center active:scale-95 transition-transform"
                               >
-                                 <Upload size={24} />
-                                 <span className="text-[8px] font-black uppercase tracking-tighter">Add Photo</span>
+                                 <div className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700">
+                                    <Upload size={18} className="text-gray-400 group-hover:text-primary transition-colors" />
+                                 </div>
+                                 <span className="text-[7px] font-black uppercase tracking-widest opacity-60 mt-1">Add Photo</span>
                               </div>
                            )}
                            <input
@@ -179,56 +181,56 @@ const ServiceForm = () => {
                   </div>
                </section>
 
-               <div className="space-y-6">
+               <div className="space-y-4">
                   {/* Category Field */}
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Service Category</label>
+                  <div className="space-y-1.5">
+                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Service Category</label>
                      <input
                         required
                         type="text"
                         placeholder="e.g. Haircut, Hair Color, Facial"
                         value={formData.category}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                        className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-slate-300"
                      />
                   </div>
                   {/* Name */}
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Service Name</label>
+                  <div className="space-y-1.5">
+                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Service Name</label>
                      <input
                         required
                         type="text"
                         placeholder="e.g. Premium Haircut"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                        className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-slate-300"
                      />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                      {/* Price */}
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Price (₹)</label>
+                     <div className="space-y-1.5">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Price (₹)</label>
                         <input
                            required
                            type="number"
                            placeholder="500"
                            value={formData.price}
                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                           className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
+                           className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all"
                         />
                      </div>
                      {/* Duration */}
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Duration (Min)</label>
+                     <div className="space-y-1.5">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Duration (Min)</label>
                         <div className="relative">
                            <select
                               value={formData.duration}
                               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                              className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold appearance-none"
+                              className="w-full py-3 px-4 pr-10 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none appearance-none focus:ring-2 focus:ring-primary/10"
                            >
                               {Array.from({ length: 16 }, (_, i) => (i + 1) * 15).map(m => (
-                                 <option key={m} value={m}>{m} Min</option>
+                                 <option key={m} value={m} className="font-bold">{m} Min</option>
                               ))}
                            </select>
                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
@@ -241,20 +243,20 @@ const ServiceForm = () => {
                   {/* Buffer Time */}
                   <div className="space-y-2">
                      <div className="flex items-center justify-between px-1">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Buffer Time (Min)</label>
-                        <span className="text-[10px] text-gray-400 font-bold italic flex items-center gap-1">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Buffer Time (Min)</label>
+                        <span className="text-[8px] text-gray-400 font-black uppercase italic tracking-tighter flex items-center gap-1 opacity-70">
                            <Info size={10} /> cooldown between bookings
                         </span>
                      </div>
-                     <div className="flex gap-3 overflow-x-auto no-scrollbar py-1">
+                     <div className="flex gap-2 lg:gap-3 overflow-x-auto no-scrollbar py-1">
                         {[0, 5, 10, 15, 30].map(m => (
                            <button
                               key={m}
                               type="button"
                               onClick={() => setFormData({ ...formData, bufferTime: m })}
-                              className={`px-5 py-3 rounded-xl text-xs font-black uppercase transition-all whitespace-nowrap min-w-[70px] ${formData.bufferTime === m
-                                 ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105'
-                                 : 'bg-white dark:bg-gray-900 text-gray-400 border border-gray-100 dark:border-gray-800'
+                              className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap min-w-[64px] border ${formData.bufferTime === m
+                                 ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
+                                 : 'bg-white dark:bg-gray-900 text-gray-400 border-slate-100 dark:border-gray-800 shadow-sm'
                                  }`}
                            >
                               {m === 0 ? 'None' : `${m}m`}
@@ -264,22 +266,24 @@ const ServiceForm = () => {
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Description (Optional)</label>
+                  <div className="space-y-1.5">
+                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Description (Optional)</label>
                      <textarea
-                        rows="4"
+                        rows="3"
                         placeholder="Describe your premium service..."
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold resize-none"
+                        className="w-full py-3 px-4 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all resize-none placeholder:text-slate-300"
                      />
                   </div>
                </div>
 
-               <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30 flex items-start gap-3">
-                  <Info className="text-blue-500 mt-0.5" size={18} />
-                  <p className="text-[10px] font-bold text-blue-600/70 leading-relaxed uppercase">
-                     Your service will be visible to customers as soon as you save. Ensure price and duration are accurate to avoid booking conflicts.
+               <div className="p-3.5 bg-blue-500/5 dark:bg-blue-900/10 rounded-xl border border-blue-500/10 dark:border-blue-900/30 flex items-start gap-2.5">
+                  <div className="p-1.5 bg-blue-500/10 rounded-lg shrink-0">
+                     <Info className="text-blue-500" size={14} />
+                  </div>
+                  <p className="text-[8px] font-black text-blue-600/80 dark:text-blue-400/80 leading-relaxed uppercase tracking-widest">
+                     As soon as you save, this service is visible. Ensure accuracy to avoid conflict.
                   </p>
                </div>
             </form>

@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import NotificationDrawer from '../components/NotificationDrawer';
 import AddWalkInModal from '../components/AddWalkInModal';
 import CreateSlotModal from '../components/CreateSlotModal';
+import { cn } from '../utils/cn';
 
 const VendorDashboard = () => {
    const navigate = useNavigate();
@@ -32,6 +33,8 @@ const VendorDashboard = () => {
    const [unreadCount, setUnreadCount] = useState(0);
    const [isWalkInOpen, setIsWalkInOpen] = useState(false);
    const [isCreateSlotOpen, setIsCreateSlotOpen] = useState(false);
+   const [showWalletValue, setShowWalletValue] = useState(false);
+   const [showMoreActions, setShowMoreActions] = useState(false);
 
    const fetchDashboard = async () => {
       try {
@@ -51,6 +54,10 @@ const VendorDashboard = () => {
 
    useEffect(() => {
       fetchDashboard();
+      const timer = setInterval(() => {
+         setShowWalletValue(prev => !prev);
+      }, 3000);
+      return () => clearInterval(timer);
    }, []);
 
    useEffect(() => {
@@ -127,7 +134,7 @@ const VendorDashboard = () => {
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-40 transition-colors duration-500 overflow-x-hidden">
 
          {/* 🏙️ PREMIUM HEADER */}
-         <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-3 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+         <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
             <div className="space-y-0.5">
                <div className="flex items-center gap-2">
                   <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tighter leading-none uppercase">
@@ -144,126 +151,130 @@ const VendorDashboard = () => {
                </div>
             </div>
 
-            <div className="flex items-center gap-2">
-               <button onClick={toggleTheme} className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90">
-                  {isDarkMode ? <Sun size={16} className="text-amber-500" /> : <Moon size={16} className="text-slate-600" />}
+            <div className="flex items-center gap-1.5 shrink-0">
+               <button onClick={toggleTheme} className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90 shadow-sm">
+                  {isDarkMode ? <Sun size={15} className="text-amber-500" /> : <Moon size={15} className="text-slate-600" />}
                </button>
                <button onClick={() => setIsNotificationsOpen(true)} className="relative w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90">
-                  <Bell size={16} className="text-slate-600 dark:text-gray-400" />
-                  {unreadCount > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-gray-950 rounded-full" />}
+                  <Bell size={15} className="text-slate-600 dark:text-gray-400" />
+                  {unreadCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 border-2 border-white dark:border-gray-950 rounded-full" />}
                </button>
-               <div className="w-9 h-9 bg-slate-900 dark:bg-primary rounded-xl flex items-center justify-center text-white border border-slate-900 transition-transform active:scale-90 shadow-sm shadow-slate-900/10">
-                  <User size={16} />
-               </div>
+
+               {/* 🏮 STATUS TOGGLE MOVED TO RIGHT */}
+               <button
+                  onClick={handleToggleStatus}
+                  disabled={!data.subscription?.isActive || statusLoading}
+                  className={cn(
+                     "h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all border shrink-0",
+                     data.isShopOpen && !data.isClosedToday
+                        ? 'bg-emerald-500 text-white border-emerald-400 active:scale-95 shadow-lg shadow-emerald-500/20'
+                        : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 border-slate-100 dark:border-gray-700'
+                  )}
+               >
+                  <Power size={11} className={cn(data.isShopOpen && !data.isClosedToday ? "text-white" : "text-slate-400 dark:text-gray-600")} />
+                  <span className="text-[7.5px] font-black uppercase tracking-[0.05em] hidden sm:inline">
+                     {data.isShopOpen ? 'Online' : 'Offline'}
+                  </span>
+               </button>
             </div>
          </header>
 
-         <main className="px-5 pt-20 space-y-5">
+         <main className={cn("px-2.5 space-y-1.5", loading ? "pt-12" : "pt-[60px]")}>
 
-            {/* 🛡️ ULTRA-COMPACT STATUS & SUBSCRIPTION BAR */}
-            <section className="bg-slate-900 dark:bg-gray-900 p-5 rounded-[2.5rem] shadow-xl relative overflow-hidden group border border-white/5">
-               <div className="flex items-center justify-between relative z-10 mb-4">
-                  <div className="flex items-center gap-3">
-                     <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                        <ShieldCheck size={20} />
-                     </div>
-                     <div className="space-y-0 text-left">
-                        <h4 className="text-[10px] font-black text-white uppercase tracking-widest opacity-60 leading-none">Subscription Plan</h4>
-                        <p className="text-xs font-black text-white uppercase mt-0.5 tracking-tight group-hover:text-primary transition-colors">{(data.subscription?.currentPlan || 'TRIAL').toUpperCase()}</p>
-                     </div>
-                  </div>
-                  <div className="text-right">
-                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Account Wallet</p>
-                     <h3 className="text-lg font-black text-white leading-tight mt-0.5">₹{data.walletBalance.toLocaleString()}</h3>
-                  </div>
-               </div>
 
-               <div className="pt-4 border-t border-white/10 flex items-center justify-between relative z-10">
-                  <div className="flex items-center gap-2.5">
-                     <div className={`w-2 h-2 rounded-full ${data.isShopOpen && !data.isClosedToday ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`} />
-                     <h2 className="text-[10px] font-black text-white/90 uppercase tracking-widest">
-                        {data.isClosedToday ? 'Currently Closed' : (data.isShopOpen ? 'Online & Available' : 'Shop Offline')}
-                     </h2>
-                  </div>
-                  <div className="flex items-center gap-2">
-                     <button
-                        onClick={handleToggleStatus}
-                        disabled={!data.subscription?.isActive || statusLoading}
-                        className={`h-9 px-4 rounded-xl flex items-center justify-center gap-2 transition-all border ${data.isShopOpen && !data.isClosedToday ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-slate-800 text-slate-500 border-slate-700'}`}
-                     >
-                        <Power size={12} />
-                        <span className="text-[8px] font-black uppercase tracking-widest">{data.isShopOpen ? 'Online' : 'Offline'}</span>
-                     </button>
-                     <button
-                        onClick={handleToggleClosedToday}
-                        disabled={!data.subscription?.isActive || statusLoading}
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all bg-slate-800 border border-slate-700 ${data.isClosedToday ? 'text-amber-500 border-amber-500/50' : 'text-slate-500'}`}
-                     >
-                        <Calendar size={14} />
-                     </button>
-                  </div>
-               </div>
-
-               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/20 transition-all pointer-events-none" />
+            {/* 🏃 DYNAMIC ACTION TILES HUD */}
+            <section className="grid grid-cols-5 gap-1.5 px-0.5">
+               <AnimatePresence mode="wait">
+                  {!showMoreActions ? (
+                     <motion.div key="main" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="col-span-5 grid grid-cols-5 gap-1.5">
+                        {[
+                           { label: 'Walk-in', icon: UserPlus, onClick: () => setIsWalkInOpen(true) },
+                           { label: 'Create', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
+                           { label: 'Services', icon: LayoutGrid, path: '/vendor/services' },
+                           { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' },
+                           { label: 'More', icon: ChevronRight, onClick: () => setShowMoreActions(true) }
+                        ].map((action, i) => (
+                           <button
+                              key={i}
+                              onClick={action.onClick || (() => navigate(action.path))}
+                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-slate-200 dark:border-gray-800 shadow-md active:scale-95 transition-all group"
+                           >
+                              <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-8">
+                                 {action.label === 'Wallet' ? (
+                                    <AnimatePresence mode="wait">
+                                       {showWalletValue ? (
+                                          <motion.span key="val" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} className="text-[10px] font-black text-slate-900 dark:text-white absolute">
+                                             ₹{data.walletBalance.toLocaleString()}
+                                          </motion.span>
+                                       ) : (
+                                          <motion.div key="ico" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} className="absolute">
+                                             <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
+                                          </motion.div>
+                                       )}
+                                    </AnimatePresence>
+                                 ) : (
+                                    <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
+                                 )}
+                              </div>
+                              <div className="px-1 text-center">
+                                 <span className="text-[7.5px] font-black uppercase text-slate-500 dark:text-gray-400 tracking-tighter leading-none block">{action.label}</span>
+                              </div>
+                           </button>
+                        ))}
+                     </motion.div>
+                  ) : (
+                     <motion.div key="extra" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="col-span-5 grid grid-cols-5 gap-1.5">
+                        {[
+                           { label: 'Staff', icon: Briefcase, path: '/vendor/staff' },
+                           { label: 'Offers', icon: Percent, path: '/vendor/offers' },
+                           { label: 'Info', icon: Store, path: '/vendor/profile' },
+                           { label: 'Config', icon: Settings, path: '/vendor/profile' },
+                           { label: 'Back', icon: X, onClick: () => setShowMoreActions(false) }
+                        ].map((action, i) => (
+                           <button
+                              key={i}
+                              onClick={action.onClick || (() => navigate(action.path))}
+                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-slate-200 dark:border-gray-800 shadow-md active:scale-95 transition-all group"
+                           >
+                              <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-8">
+                                 <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
+                              </div>
+                              <div className="px-1 text-center">
+                                 <span className="text-[7.5px] font-black uppercase text-slate-500 dark:text-gray-400 tracking-tighter leading-none block">{action.label}</span>
+                              </div>
+                           </button>
+                        ))}
+                     </motion.div>
+                  )}
+               </AnimatePresence>
             </section>
 
-            {/* 🏃 ACTION TILES */}
-            <section className="grid grid-cols-4 gap-2.5 bg-white dark:bg-gray-900 p-2 rounded-[2.2rem] border border-slate-100 dark:border-gray-800/50 shadow-sm">
-               {[
-                  { label: 'Walk-in', icon: UserPlus, onClick: () => setIsWalkInOpen(true) },
-                  { label: 'Create Slot', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
-                  { label: 'Services', icon: LayoutGrid, path: '/vendor/services' },
-                  { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' }
-               ].map((action, i) => (
-                  <button
-                     key={i}
-                     onClick={action.onClick || (() => navigate(action.path))}
-                     className="flex flex-col items-center justify-center gap-1.5 py-4 rounded-[1.8rem] hover:bg-slate-50 dark:hover:bg-gray-800 transition-all active:scale-95 group"
-                  >
-                     <div className="p-2.5 bg-slate-50 dark:bg-gray-800/60 rounded-2xl text-slate-400 group-hover:text-primary transition-colors border border-slate-100/10">
-                        <action.icon size={16} strokeWidth={2.5} />
-                     </div>
-                     <span className="text-[8px] font-black uppercase text-slate-400 tracking-tight">{action.label.split(' ')[0]}</span>
-                  </button>
-               ))}
-            </section>
-
-            {/* 📊 METRICS VIEW */}
-            <section className="space-y-2.5">
-               <div className="grid grid-cols-2 gap-2.5">
-                  <div className="bg-slate-900 dark:bg-gray-900 p-5 rounded-[2rem] shadow-xl relative overflow-hidden group">
-                     <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-4">Today Revenue</p>
-                     <div className="flex items-baseline gap-1.5">
-                        <h3 className="text-2xl font-black text-white">₹{data.stats.todayEarnings.toLocaleString()}</h3>
-                        <TrendingUp size={12} className="text-emerald-500" />
-                     </div>
-                     <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all pointer-events-none" />
+            {/* 📊 COMPACT METRICS HUD */}
+            <section className="px-0.5">
+               <div className="grid grid-cols-4 gap-1.5">
+                  {/* Today Revenue - Dark Highlight */}
+                  <div className="bg-slate-900 dark:bg-gray-900 p-2.5 rounded-2xl shadow-lg border border-slate-800 flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-white/50 uppercase tracking-widest leading-none mb-1.5">Today Revenue</p>
+                     <h3 className="text-sm font-black text-white leading-none">₹{data.stats.todayEarnings.toLocaleString()}</h3>
                   </div>
 
-                  <div className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-slate-100 dark:border-gray-800 shadow-sm group overflow-hidden relative">
-                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-4">Daily Bookings</p>
-                     <div className="flex items-baseline gap-1">
-                        <h3 className="text-2xl font-black text-slate-900 dark:text-white">{data.stats.todayBookings}</h3>
-                        <span className="text-[8px] font-black text-primary uppercase">Orders</span>
-                     </div>
-                     <Users size={40} className="absolute -bottom-3 -right-3 text-primary/5 group-hover:text-primary/10 transition-all pointer-events-none" />
+                  {/* Today Clients */}
+                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-md flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Today Clients</p>
+                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.stats.todayBookings}</h3>
                   </div>
-               </div>
 
-               <div className="grid grid-cols-3 gap-2.5">
-                  {[
-                     { label: 'Visibility', val: data.engagement.profileViews, icon: Star, color: 'text-amber-500' },
-                     { label: 'Interest', val: data.engagement.serviceClicks, icon: Zap, color: 'text-blue-500' },
-                     { label: 'Active Staff', val: data.stats.activeStaff || 0, icon: ShieldCheck, color: 'text-emerald-500' }
-                  ].map((m, i) => (
-                     <div key={i} className="bg-white dark:bg-gray-900 p-3 rounded-2xl border border-slate-100 dark:border-gray-800 text-center flex flex-col items-center justify-center gap-1 shadow-sm">
-                        <p className="text-[7px] font-black uppercase text-slate-400 tracking-widest leading-none truncate w-full">{m.label}</p>
-                        <div className="flex items-center gap-1">
-                           <m.icon size={9} className={m.color} />
-                           <span className="text-[11px] font-black text-slate-900 dark:text-gray-200">{m.val}</span>
-                        </div>
-                     </div>
-                  ))}
+                  {/* Services Done */}
+                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-md flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Services Done</p>
+                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'completed').length || 0}</h3>
+                  </div>
+
+                  {/* Pending Bookings */}
+                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-md flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">Pending Bookings</p>
+                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'confirmed').length || 0}</h3>
+                  </div>
                </div>
             </section>
 
@@ -319,29 +330,11 @@ const VendorDashboard = () => {
                </div>
             </section>
 
-            {/* 🛡️ PILL BUTTONS (MANAGEMENT) */}
-            <section className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-               {[
-                  { label: 'Staff', icon: Briefcase, path: '/vendor/staff' },
-                  { label: 'Offers', icon: Percent, path: '/vendor/offers' },
-                  { label: 'Shop Info', icon: Store, path: '/vendor/profile' },
-                  { label: 'Settings', icon: Settings, path: '/vendor/profile' }
-               ].map((m, i) => (
-                  <button
-                     key={i}
-                     onClick={() => navigate(m.path)}
-                     className="flex-shrink-0 flex items-center gap-2 px-5 py-3.5 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm"
-                  >
-                     <m.icon size={12} className="text-primary" />
-                     <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">{m.label}</span>
-                  </button>
-               ))}
-            </section>
 
             {/* 📊 REVENUE ANALYSIS */}
-            <section className="space-y-3 pb-8">
-               <h2 className="text-sm font-black text-slate-800 dark:text-white px-1 tracking-widest uppercase">Revenue History</h2>
-               <div className="bg-white dark:bg-gray-900 p-5 rounded-[2.5rem] border border-slate-100 dark:border-gray-800 shadow-sm h-64 w-full relative overflow-hidden group">
+            <section className="space-y-2 pb-8 px-0.5">
+               <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest uppercase opacity-80">Revenue History</h2>
+               <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-[2rem] border border-slate-200/60 dark:border-gray-800 shadow-md h-56 w-full relative overflow-hidden group">
                   <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={data.revenueHistory || []}>
                         <defs>
@@ -350,13 +343,40 @@ const VendorDashboard = () => {
                               <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                            </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 900 }} dy={8} />
+                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={isDarkMode ? "#1e293b" : "#f1f5f9"} />
+                        <XAxis
+                           dataKey="day"
+                           axisLine={false}
+                           tickLine={false}
+                           tick={{ fontSize: 7, fill: isDarkMode ? '#475569' : '#94a3b8', fontWeight: 900 }}
+                           dy={10}
+                        />
                         <YAxis hide domain={[0, 'auto']} />
-                        <Tooltip contentStyle={{ borderRadius: '1.2rem', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', fontSize: '9px', fontWeight: 900 }} />
-                        <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={5} fillOpacity={1} fill="url(#colorRev)" />
+                        <Tooltip
+                           contentStyle={{
+                              borderRadius: '1rem',
+                              background: isDarkMode ? '#0f172a' : '#ffffff',
+                              border: isDarkMode ? '1px solid #1e293b' : '1px solid #f1f5f9',
+                              boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                              fontSize: '9px',
+                              fontWeight: 900,
+                              padding: '8px 12px'
+                           }}
+                        />
+                        <Area
+                           type="monotone"
+                           dataKey="revenue"
+                           stroke="#3b82f6"
+                           strokeWidth={4}
+                           fillOpacity={1}
+                           fill="url(#colorRev)"
+                           animationDuration={2000}
+                        />
                      </AreaChart>
                   </ResponsiveContainer>
+
+                  {/* Subtle Top Border Highlight */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
                </div>
             </section>
 

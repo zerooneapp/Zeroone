@@ -57,7 +57,7 @@ const broadcastNotification = async (req, res) => {
 const getSubscriptionPlans = async (req, res) => {
   try {
     let plans = await SubscriptionPlan.find();
-    
+
     // Auto-seed if missing (6 Tiers)
     if (plans.length < 6) {
       const tiers = ['basic', 'standard', 'premium'];
@@ -65,10 +65,12 @@ const getSubscriptionPlans = async (req, res) => {
       const defaultPrices = {
         basic_daily: 10, basic_monthly: 250,
         standard_daily: 250, standard_monthly: 5000,
-        premium_daily: 500, premium_monthly: 10000
+        premium_daily: 500, premium_monthly: 10000,
+        luxury_daily: 1000, luxury_monthly: 20000
       };
 
-      for (const level of tiers) {
+      const allTiers = ['standard', 'premium', 'luxury'];
+      for (const level of allTiers) {
         for (const type of types) {
           const key = `${level}_${type}`;
           await SubscriptionPlan.findOneAndUpdate(
@@ -80,7 +82,7 @@ const getSubscriptionPlans = async (req, res) => {
       }
       plans = await SubscriptionPlan.find();
     }
-    
+
     res.status(200).json(plans);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -104,20 +106,21 @@ const approveVendor = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
     if (!vendor.isProfileComplete) {
       const missing = [];
-      if (!vendor.aadhaar) missing.push('aadhaar');
+      if (!vendor.aadhaarFront) missing.push('aadhaarFront');
+      if (!vendor.aadhaarBack) missing.push('aadhaarBack');
       if (!vendor.panCard) missing.push('panCard');
       if (!vendor.shopImage) missing.push('shopImage');
       if (!vendor.vendorPhoto) missing.push('vendorPhoto');
       console.log('[DEBUG] Approval FAILED. isProfileComplete is FALSE. Missing:', missing.join(', '));
-      return res.status(400).json({ 
-        message: 'Incomplete profile', 
-        missingFields: missing 
+      return res.status(400).json({
+        message: 'Incomplete profile',
+        missingFields: missing
       });
     }
 
     vendor.status = 'active';
     vendor.isActive = true;
-    
+
     const { freeTrialDays = 7 } = req.body || {};
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + freeTrialDays);
@@ -236,26 +239,30 @@ const getAllUsers = async (req, res) => {
         { phone: { $regex: search, $options: 'i' } }
       ];
     }
-    
+
     if (status === 'blocked') filter.isBlocked = true;
     if (status === 'active') filter.isBlocked = false;
 
     // Aggregate with total bookings count
     const users = await User.aggregate([
       { $match: filter },
-      { $lookup: {
+      {
+        $lookup: {
           from: 'bookings',
           localField: '_id',
           foreignField: 'userId',
           as: 'bookings'
-      }},
-      { $project: {
+        }
+      },
+      {
+        $project: {
           name: 1,
           phone: 1,
           createdAt: 1,
           isBlocked: 1,
           bookingCount: { $size: '$bookings' }
-      }},
+        }
+      },
       { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: parseInt(limit) }
@@ -279,9 +286,9 @@ const getUserDetail = async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
     const user = await User.findById(req.params.id).select('-otp -otpExpires');
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
+
     const bookingCount = await Booking.countDocuments({ userId: user._id });
-    
+
     res.status(200).json({
       ...user._doc,
       bookingCount
@@ -308,7 +315,7 @@ const getFilteredBookings = async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
     const { status, date, vendorId, search, page = 1, limit = 10 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     // Base Match Stage
     const matchLine = {};
     const allowedStatus = ['confirmed', 'completed', 'cancelled'];
@@ -317,27 +324,31 @@ const getFilteredBookings = async (req, res) => {
     }
     if (vendorId) matchLine.vendorId = require('mongoose').Types.ObjectId(vendorId);
     if (date) {
-      matchLine.createdAt = { 
-        $gte: moment(date).startOf('day').toDate(), 
-        $lt: moment(date).endOf('day').toDate() 
+      matchLine.createdAt = {
+        $gte: moment(date).startOf('day').toDate(),
+        $lt: moment(date).endOf('day').toDate()
       };
     }
 
     const pipeline = [
       { $match: matchLine },
-      { $lookup: {
+      {
+        $lookup: {
           from: 'users',
           localField: 'userId',
           foreignField: '_id',
           as: 'user'
-      }},
+        }
+      },
       { $unwind: '$user' },
-      { $lookup: {
+      {
+        $lookup: {
           from: 'vendors',
           localField: 'vendorId',
           foreignField: '_id',
           as: 'vendor'
-      }},
+        }
+      },
       { $unwind: '$vendor' }
     ];
 
@@ -355,10 +366,12 @@ const getFilteredBookings = async (req, res) => {
 
     pipeline.push(
       { $sort: { createdAt: -1 } },
-      { $facet: {
+      {
+        $facet: {
           metadata: [{ $count: "total" }],
           data: [{ $skip: skip }, { $limit: parseInt(limit) }]
-      }}
+        }
+      }
     );
 
     const result = await Booking.aggregate(pipeline);
@@ -387,7 +400,7 @@ const getBookingDetail = async (req, res) => {
         populate: { path: 'ownerId', select: 'name phone' }
       })
       .populate('staffId', 'name phone');
-    
+
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(booking);
   } catch (error) {
@@ -400,16 +413,16 @@ const adminCancelBooking = async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
-    
+
     booking.status = 'cancelled';
     booking.cancelledBy = 'admin';
     booking.cancelledAt = new Date();
     booking.cancellationReason = req.body.reason || 'Cancelled by Admin';
-    
+
     await booking.save();
-    
+
     // Logic for refund/wallet could be added here if needed
-    
+
     res.status(200).json({ message: 'Booking forced cancelled by Admin', booking });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -439,7 +452,7 @@ const getAdminDashboard = async (req, res) => {
   try {
     const { range = '7d' } = req.query;
     const days = parseInt(range) || 7;
-    
+
     const today = moment().tz('Asia/Kolkata').startOf('day');
     const yesterday = moment().tz('Asia/Kolkata').subtract(1, 'day').startOf('day');
     const rangeStart = moment().subtract(days, 'days').startOf('day').toDate();
@@ -491,10 +504,12 @@ const getAdminDashboard = async (req, res) => {
       // 12. Revenue Graph (Dynamic Range)
       require('../models/WalletTransaction').aggregate([
         { $match: { type: 'debit', reason: 'daily_subscription', timestamp: { $gte: rangeStart } } },
-        { $group: { 
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } }, 
-            total: { $sum: "$amount" } 
-        }},
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
+            total: { $sum: "$amount" }
+          }
+        },
         { $sort: { _id: 1 } }
       ])
     ]);
@@ -572,9 +587,9 @@ const rejectVendor = async (req, res) => {
   try {
     const { rejectionReason } = req.body;
     if (!rejectionReason) return res.status(400).json({ message: 'Reason required' });
-    const vendor = await Vendor.findByIdAndUpdate(req.params.id, { 
-       status: 'rejected', 
-       rejectionReason 
+    const vendor = await Vendor.findByIdAndUpdate(req.params.id, {
+      status: 'rejected',
+      rejectionReason
     }, { new: true });
     res.status(200).json(vendor);
   } catch (error) {
@@ -586,7 +601,7 @@ const toggleBlockVendor = async (req, res) => {
   try {
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
-    
+
     vendor.status = vendor.status === 'blocked' ? 'active' : 'blocked';
     await vendor.save();
     res.status(200).json(vendor);
@@ -599,7 +614,7 @@ const toggleVendorActive = async (req, res) => {
   try {
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
-    
+
     vendor.isActive = !vendor.isActive;
     await vendor.save();
     res.status(200).json(vendor);
@@ -610,7 +625,7 @@ const toggleVendorActive = async (req, res) => {
 
 module.exports = {
   getPendingVendors, approveVendor, rejectVendor, toggleBlockUser, addBalance,
-  createPlan, updatePlan, getRevenueReport, getAllUsers, getUserBookings, 
+  createPlan, updatePlan, getRevenueReport, getAllUsers, getUserBookings,
   getFilteredBookings, createCategory, getCategories, getAdminDashboard,
   getVendors, toggleBlockVendor, toggleVendorActive, getUserDetail,
   getBookingDetail, adminCancelBooking,

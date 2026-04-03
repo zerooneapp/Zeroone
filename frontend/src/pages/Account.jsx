@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, Mail, Phone, MapPin, LogOut, 
-  ChevronRight, Shield, CreditCard, Bell, Settings 
+import {
+  User, Mail, Phone, MapPin, LogOut,
+  ChevronRight, Shield, CreditCard, Bell, Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Button from '../components/Button';
@@ -27,57 +27,57 @@ const Account = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-20">
-      <div className="px-5 pt-10">
-        <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Profile</h1>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Manage your account</p>
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20 animate-in fade-in duration-500">
+      <div className="px-4 pt-8">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none uppercase">Profile</h1>
+        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1.5 opacity-60">Manage your elite account</p>
       </div>
 
-      <div className="px-5 mt-8">
-        <div 
-          className="bg-primary p-4 rounded-3xl text-white shadow-xl shadow-primary/30 relative overflow-hidden"
+      <div className="px-4 mt-6">
+        <div
+          className="bg-slate-900 p-3.5 rounded-2xl text-white shadow-2xl relative overflow-hidden border border-white/5"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          <div className="relative z-10 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
-               <User size={24} className="text-white" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16" />
+          <div className="relative z-10 flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+              <User size={20} strokeWidth={3} className="text-white" />
             </div>
-            <div className="space-y-0.5">
-               <h2 className="text-lg font-black truncate max-w-[200px]">{user?.name || 'Guest User'}</h2>
-               <p className="text-[9px] font-bold opacity-60 uppercase tracking-widest">{user?.role || 'Customer'}</p>
-               <div className="flex items-center gap-2 mt-2 opacity-80">
-                  <span className="px-2 py-0.5 rounded-lg bg-white/20 text-[10px] font-black uppercase tracking-tighter shadow-sm border border-white/10">PRO USER</span>
-               </div>
+            <div className="space-y-0.5 leading-none">
+              <h2 className="text-[14px] font-black uppercase tracking-tight truncate max-w-[180px]">{user?.name || 'Guest User'}</h2>
+              <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mt-0.5">{user?.role || 'Customer'}</p>
+              <div className="flex items-center gap-2 mt-2 opacity-80">
+                <span className="px-2 py-0.5 rounded-lg bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest shadow-sm border border-white/10 italic">PRO USER</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-5 mt-6 space-y-4">
+      <div className="px-4 mt-4 space-y-2">
         {menuItems.map((item, i) => (
-          <div 
+          <div
             key={item.label}
-            className="group bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-50 dark:border-gray-800 flex items-center gap-3 hover:shadow-md transition-all active:scale-[0.98]"
+            className="group bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-gray-800 flex items-center gap-3 active:scale-[0.98] transition-all"
           >
-            <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:bg-primary/5 group-hover:text-primary transition-colors">
-               <item.icon size={18} />
+            <div className="w-9 h-9 rounded-[10px] bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-400 group-hover:bg-primary/5 group-hover:text-primary transition-colors border border-slate-100 dark:border-gray-700">
+              <item.icon size={16} strokeWidth={3} />
             </div>
-            <div className="flex-1">
-               <p className="font-bold text-sm dark:text-gray-200">{item.label}</p>
-               <p className="text-[10px] text-gray-400 font-medium">{item.sub}</p>
+            <div className="flex-1 leading-none">
+              <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{item.label}</p>
+              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 mt-0.5 opacity-60 truncate">{item.sub}</p>
             </div>
-            <ChevronRight size={18} className="text-gray-300 group-hover:text-primary transition-colors" />
+            <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
           </div>
         ))}
       </div>
 
       {/* Logout Action */}
-      <div className="px-5 mt-6">
-        <button 
+      <div className="px-4 mt-4">
+        <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-500 font-black uppercase tracking-widest text-[10px] hover:bg-red-500 hover:text-white transition-all group"
+          className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-red-900/10 border border-slate-200/60 dark:border-red-900/20 text-red-500 font-black uppercase tracking-widest text-[9px] active:scale-95 transition-all shadow-sm border-b-2 border-slate-100"
         >
-          <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+          <LogOut size={16} strokeWidth={3} />
           Sign Out of Account
         </button>
       </div>

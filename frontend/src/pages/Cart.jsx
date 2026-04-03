@@ -27,10 +27,10 @@ const Cart = () => {
     if (location.state?.rescheduleBookingId) {
       clearCart();
       setRescheduleBookingId(location.state.rescheduleBookingId);
-      
+
       if (location.state.rescheduleItems && location.state.vendor) {
         location.state.rescheduleItems.forEach(item => {
-           addItem(location.state.vendor, item);
+          addItem(location.state.vendor, item);
         });
       }
     }
@@ -55,14 +55,14 @@ const Cart = () => {
       try {
         setLoadingSlots(true);
         setLoadingStaff(true);
-        
+
         const [slotsRes, staffRes] = await Promise.all([
-          api.get('/slots', { 
-            params: { 
-              vendorId: vendor?._id, 
+          api.get('/slots', {
+            params: {
+              vendorId: vendor?._id,
               date: selectedDate,
               serviceIds: items?.map(i => i?._id).filter(id => !!id).join(',')
-            } 
+            }
           }),
           api.get('/staff', { params: { vendorId: vendor?._id } })
         ]);
@@ -83,7 +83,7 @@ const Cart = () => {
   // 3. Filter Staff based on selected slot and services
   const availableStaff = (allStaff || []).filter(s => {
     // Must support all selected services
-    const supportsAll = (items || []).every(item => 
+    const supportsAll = (items || []).every(item =>
       s.services?.some(svcId => String(svcId) === String(item._id))
     );
 
@@ -92,7 +92,7 @@ const Cart = () => {
       return selectedSlot.availableStaff.includes(s._id);
     }
 
-    return true; 
+    return true;
   });
 
   // Reset states when dependencies change for progressive reveal
@@ -107,16 +107,16 @@ const Cart = () => {
 
   const handleContinue = () => {
     if (!selectedSlot) return alert("Please select a time slot");
-    
-    navigate('/checkout-review', { 
-      state: { 
-        selectedDate, 
-        selectedSlot: selectedSlot.time, 
-        selectedStaff, 
-        items, 
+
+    navigate('/checkout-review', {
+      state: {
+        selectedDate,
+        selectedSlot: selectedSlot.time,
+        selectedStaff,
+        items,
         vendor,
         rescheduleBookingId
-      } 
+      }
     });
   };
 
@@ -140,55 +140,55 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-40 animate-in slide-in-from-right-4 duration-500">
+    <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in slide-in-from-right-4 duration-500">
       {/* Header */}
-      <div className="p-5 flex items-center justify-between sticky top-0 bg-background-light dark:bg-background-dark z-50">
-        <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
-          <ArrowLeft size={20} />
+      <div className="p-3.5 pt-4 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
+          <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
-        <div className="text-center">
-           <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Step 1 of 3</p>
-           <h2 className="font-bold text-sm">Select Date & Time</h2>
+        <div className="text-center leading-none">
+          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Step 1 of 3</p>
+          <h1 className="font-extrabold text-[11px] text-gray-900 dark:text-white uppercase tracking-tight mt-1">Select Date & Time</h1>
         </div>
         <div className="w-10"></div>
       </div>
 
-      <div className="px-5 space-y-6">
+      <div className="px-5 mt-5 space-y-5 pb-24">
         {/* Date Selection */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-             <SectionTitle title="Select Booking Date" className="mb-0" />
-             <button 
-                onClick={() => setShowFullCalendar(!showFullCalendar)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-[10px] font-black uppercase text-[#1C2C4E] dark:text-gray-300 pointer-events-auto transition-all active:scale-95"
-             >
-                <Calendar size={12} strokeWidth={2.5} />
-                {showFullCalendar ? 'List' : 'Calendar'}
-             </button>
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Select Booking Date</span>
+            <button
+              onClick={() => setShowFullCalendar(!showFullCalendar)}
+              className="flex items-center gap-1 px-2 py-1 bg-slate-50 dark:bg-gray-800 rounded-lg text-[8px] font-black uppercase text-primary tracking-widest border border-slate-100 dark:border-gray-700 active:scale-95 transition-all"
+            >
+              <Calendar size={10} strokeWidth={3} />
+              {showFullCalendar ? 'List' : 'Calendar'}
+            </button>
           </div>
 
           <AnimatePresence mode="wait">
             {!showFullCalendar ? (
-              <motion.div 
+              <motion.div
                 key="list-view"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1"
+                className="flex gap-2 overflow-x-auto no-scrollbar pb-1"
               >
                 {dates.map((d) => (
                   <button
                     key={d.full}
                     onClick={() => setSelectedDate(d.full)}
                     className={cn(
-                      "flex flex-col items-center min-w-[55px] py-2.5 rounded-2xl transition-all border-2",
-                      selectedDate === d.full 
-                        ? "bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-xl scale-105" 
-                        : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400"
+                      "flex flex-col items-center min-w-[50px] py-2 rounded-xl transition-all border shadow-sm",
+                      selectedDate === d.full
+                        ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-105"
+                        : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800 text-slate-400"
                     )}
                   >
-                    <span className="text-[9px] uppercase font-black opacity-80">{d.day}</span>
-                    <span className="text-sm font-black mt-0.5">{d.date}</span>
+                    <span className="text-[8px] uppercase font-black opacity-60 tracking-widest">{d.day}</span>
+                    <span className="text-xs font-black mt-0.5 tracking-tighter">{d.date}</span>
                   </button>
                 ))}
               </motion.div>
@@ -198,12 +198,11 @@ const Cart = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="grid grid-cols-7 gap-1.5 bg-white dark:bg-gray-900 p-3 rounded-[2.5rem] border border-gray-100 dark:border-gray-800"
+                className="grid grid-cols-7 gap-1 bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm"
               >
-                {['M','T','W','T','F','S','S'].map((day, i) => (
-                  <div key={i} className="text-[9px] font-black text-gray-300 dark:text-gray-600 text-center uppercase py-1">{day}</div>
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                  <div key={i} className="text-[8px] font-black text-slate-300 dark:text-slate-600 text-center uppercase py-1 tracking-widest">{day}</div>
                 ))}
-                {/* Placeholder for days before today in the current week */}
                 {Array.from({ length: (new Date().getDay() + 6) % 7 }).map((_, i) => (
                   <div key={`pad-${i}`} className="aspect-square" />
                 ))}
@@ -212,15 +211,15 @@ const Cart = () => {
                     key={d.full}
                     onClick={() => setSelectedDate(d.full)}
                     className={cn(
-                      "aspect-square flex flex-col items-center justify-center rounded-2xl transition-all text-[11px] font-black relative overflow-hidden",
+                      "aspect-square flex flex-col items-center justify-center rounded-xl transition-all text-[10px] font-black relative active:scale-90",
                       selectedDate === d.full
-                        ? "bg-[#1C2C4E] text-white shadow-lg"
-                        : "bg-gray-50/50 dark:bg-gray-800/20 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        ? "bg-slate-900 text-white shadow-md"
+                        : "bg-slate-50/50 dark:bg-gray-800/20 text-slate-400 hover:bg-slate-100 border border-slate-50 dark:border-transparent"
                     )}
                   >
                     <span className="relative z-10">{d.date}</span>
                     {d.date === new Date().getDate() && d.full === new Date().toISOString().split('T')[0] && (
-                       <div className="absolute bottom-1 w-1 h-1 bg-current rounded-full opacity-50" />
+                      <div className="absolute bottom-1 w-1 h-1 bg-current rounded-full opacity-50" />
                     )}
                   </button>
                 ))}
@@ -229,133 +228,143 @@ const Cart = () => {
           </AnimatePresence>
         </section>
 
-        {/* Selected Services Summary (Shown Initially) */}
-        <section className="bg-gray-50/50 dark:bg-gray-900/50 p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <SectionTitle title="Booking Summary" className="mb-3" />
-          <div className="space-y-2.5">
+        {/* Selected Services Summary */}
+        <section className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-gray-800 shadow-sm">
+          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2 px-1">Booking Summary</p>
+          <div className="space-y-1.5">
             {items.map(item => (
-              <div key={item._id} className="flex justify-between items-center text-xs">
+              <div key={item._id} className="flex justify-between items-center px-1">
                 <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-[#1C2C4E]" />
-                   <span className="font-bold text-[#1C2C4E] dark:text-white uppercase tracking-tighter">{item?.name || 'Service'}</span>
+                  <div className="w-1 h-1 rounded-full bg-primary" />
+                  <span className="font-extrabold text-[9px] text-gray-900 dark:text-white uppercase tracking-tight truncate max-w-[200px]">{item?.name || 'Service'}</span>
                 </div>
-                <span className="font-black text-[#1C2C4E] dark:text-gray-300">₹{item?.price || 0}</span>
+                <span className="font-black text-[10px] text-gray-900 dark:text-gray-300 italic tracking-tighter">₹{item?.price || 0}</span>
               </div>
             ))}
-            <div className="h-[1px] bg-gray-200 dark:bg-gray-800 my-1" />
-            <div className="flex justify-between items-center font-black text-[#1C2C4E] dark:text-white tracking-widest uppercase text-xs">
-               <span>Total</span>
-               <span>₹{getTotalPrice()}</span>
+            <div className="h-[1px] bg-slate-50 dark:bg-gray-800 my-0.5" />
+            <div className="flex justify-between items-center font-black text-gray-900 dark:text-white tracking-widest uppercase text-[10px] px-1">
+              <span>Total Value</span>
+              <span className="text-primary italic tracking-tighter">₹{getTotalPrice()}</span>
             </div>
           </div>
         </section>
 
-        {/* Time Slots (Revealed after Date Selection) */}
+        {/* Time Slots */}
         <AnimatePresence>
           {selectedDate && (
-             <motion.section
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-             >
-                <SectionTitle title="Select Time" subtitle={`Available slots for ${items.length} services`} />
-                {loadingSlots ? (
-                   <div className="grid grid-cols-3 gap-2 mt-3">
-                      {[1,2,3,4,5,6].map(i => <div key={i} className="h-10 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />)}
-                   </div>
-                ) : slots.length === 0 ? (
-                   <div className="p-5 text-center bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20 mt-3">
-                      <AlertCircle className="mx-auto text-red-500 mb-1.5" size={20} />
-                      <p className="text-[10px] text-red-600 dark:text-red-400 font-bold uppercase tracking-tight">
-                        All staff are busy. Try another day.
-                      </p>
-                   </div>
-                ) : (
-                   <div className="grid grid-cols-3 gap-2 mt-3">
-                     {slots.map((slot) => (
-                       <button
-                         key={slot.time}
-                         onClick={() => setSelectedSlot(slot)}
-                         className={cn(
-                           "py-2.5 rounded-xl font-black text-[10px] transition-all border-2 text-center uppercase tracking-widest",
-                           selectedSlot?.time === slot.time
-                             ? "bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-md scale-105"
-                             : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500"
-                         )}
-                       >
-                         {formatTo12H(slot.time)}
-                       </button>
-                     ))}
-                   </div>
-                )}
-             </motion.section>
+            <motion.section
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-2"
+            >
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Select Time</span>
+                <span className="text-[7px] font-black uppercase text-emerald-500 tracking-widest italic">{items.length} services ready</span>
+              </div>
+              {loadingSlots ? (
+                <div className="grid grid-cols-3 gap-1.5 mt-2">
+                  {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-9 bg-slate-50 dark:bg-gray-800 rounded-lg animate-pulse border border-slate-100 dark:border-gray-800" />)}
+                </div>
+              ) : slots.length === 0 ? (
+                <div className="p-4 text-center bg-red-500/5 rounded-xl border border-red-500/10 mt-2">
+                  <AlertCircle className="mx-auto text-red-500 mb-1" size={16} strokeWidth={3} />
+                  <p className="text-[8px] text-red-600 dark:text-red-400 font-black uppercase tracking-widest">
+                    Full House. Try another day.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-1.5">
+                  {slots.map((slot) => (
+                    <button
+                      key={slot.time}
+                      onClick={() => setSelectedSlot(slot)}
+                      className={cn(
+                        "py-2 rounded-lg font-black text-[9px] transition-all border border-slate-100 dark:border-gray-800 text-center uppercase tracking-widest shadow-sm active:scale-95",
+                        selectedSlot?.time === slot.time
+                          ? "bg-slate-900 border-slate-900 text-white shadow-lg"
+                          : "bg-white dark:bg-gray-900 text-slate-400"
+                      )}
+                    >
+                      {formatTo12H(slot.time)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.section>
           )}
         </AnimatePresence>
 
-        {/* Staff Selection (Revealed after Time Selection) */}
+        {/* Staff Selection */}
         <AnimatePresence>
-           {selectedSlot && (
-              <motion.section
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <SectionTitle title="Choose Professional" subtitle="Elite staff assigned to your services" />
-                <div className="flex gap-3 overflow-x-auto no-scrollbar py-3 px-1">
-                   {availableStaff.map((s) => (
-                     <button
-                       key={s._id}
-                       onClick={() => setSelectedStaff(selectedStaff?._id === s._id ? null : s)}
-                       className={cn(
-                         "relative flex flex-col items-center min-w-[90px] p-2.5 rounded-2xl border-2 transition-all",
-                         selectedStaff?._id === s._id
-                          ? "bg-[#1C2C4E]/5 border-[#1C2C4E] shadow-sm scale-105"
-                          : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800"
-                       )}
-                     >
-                       <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden mb-2 shadow-sm">
-                          <img src={s.image || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
-                       </div>
-                       <span className="text-[10px] font-black text-[#1C2C4E] dark:text-white truncate w-full text-center uppercase tracking-tighter">{s.name?.split(' ')[0] || 'Staff'}</span>
-                       
-                       {selectedStaff?._id === s._id && (
-                         <div className="absolute top-1 right-1 bg-[#1C2C4E] text-white p-0.5 rounded-full ring-2 ring-white dark:ring-gray-900 shadow-lg">
-                            <CheckCircle2 size={10} />
-                         </div>
-                       )}
-                     </button>
-                   ))}
-                   {availableStaff.length === 0 && !loadingStaff && (
-                     <div className="w-full bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl text-center border border-dashed border-gray-200 dark:border-gray-800">
-                       <p className="text-[10px] text-gray-400 font-bold uppercase italic tracking-widest">No matching staff available.</p>
-                     </div>
-                   )}
-                </div>
-              </motion.section>
-           )}
+          {selectedSlot && (
+            <motion.section
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-2"
+            >
+              <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest px-1">Choose Professional</p>
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
+                {availableStaff.map((s) => (
+                  <button
+                    key={s._id}
+                    onClick={() => setSelectedStaff(selectedStaff?._id === s._id ? null : s)}
+                    className={cn(
+                      "relative flex flex-col items-center min-w-[80px] p-2 rounded-xl border transition-all active:scale-95 shadow-sm",
+                      selectedStaff?._id === s._id
+                        ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-105"
+                        : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800"
+                    )}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden mb-1.5 border border-slate-100 dark:border-gray-700 shadow-inner">
+                      <img src={s.image || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
+                    </div>
+                    <span className={cn(
+                      "text-[8px] font-black truncate w-full text-center uppercase tracking-widest leading-tight",
+                      selectedStaff?._id === s._id ? "text-white" : "text-slate-400"
+                    )}>
+                      {s.name?.split(' ')[0] || 'Staff'}
+                    </span>
+
+                    {selectedStaff?._id === s._id && (
+                      <div className="absolute top-1 right-1 bg-emerald-500 text-white p-0.5 rounded-full ring-2 ring-slate-900 shadow-lg">
+                        <CheckCircle2 size={10} strokeWidth={3} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+                {availableStaff.length === 0 && !loadingStaff && (
+                  <div className="w-full bg-slate-50 dark:bg-gray-900/50 p-3 rounded-xl text-center border border-dashed border-slate-200 dark:border-gray-800">
+                    <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">No matching agents</p>
+                  </div>
+                )}
+              </div>
+            </motion.section>
+          )}
         </AnimatePresence>
       </div>
 
-      {/* Sticky Bottom Bar (Elite Pill) */}
-      <motion.div 
+      {/* Sticky Bottom Bar */}
+      <motion.div
         initial={{ y: 100, opacity: 0, scale: 0.9 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
-        className="fixed bottom-24 left-6 right-6 bg-[#1C2C4E]/95 dark:bg-gray-950/95 backdrop-blur-3xl p-3 px-6 rounded-[2.5rem] shadow-2xl z-50 border border-white/10"
+        className="fixed bottom-4 left-4 right-4 bg-slate-900 dark:bg-gray-950 p-2.5 px-5 rounded-2xl shadow-2xl z-50 border border-white/10"
       >
         <div className="flex items-center justify-between">
-           <div>
-              <p className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5 leading-none">Net Payable</p>
-              <p className="text-xl font-black text-white leading-none">₹{getTotalPrice()}</p>
-           </div>
-           <button 
+          <div className="leading-none">
+            <p className="text-[7px] font-black text-white/40 uppercase tracking-widest mb-1.5">Net Payable</p>
+            <p className="text-lg font-black text-white italic tracking-tighter leading-none">₹{getTotalPrice()}</p>
+          </div>
+          <button
             disabled={!selectedSlot}
             onClick={handleContinue}
-            className="px-6 py-2.5 bg-white text-[#1C2C4E] rounded-full font-black text-[10px] uppercase tracking-[0.1em] shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-2 border-gray-100 flex items-center gap-1"
-           >
-             {rescheduleBookingId ? 'Confirm Reschedule' : 'Continue'}
-             <ChevronRight size={14} strokeWidth={3} />
-           </button>
+            className="px-4 py-2 bg-white text-slate-900 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 disabled:opacity-30 transition-all flex items-center gap-1.5 border-b-2 border-slate-200"
+          >
+            {rescheduleBookingId ? 'Reschedule' : 'Continue'}
+            <ChevronRight size={14} strokeWidth={3} />
+          </button>
         </div>
       </motion.div>
     </div>

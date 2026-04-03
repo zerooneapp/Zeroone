@@ -39,12 +39,20 @@ const login = async (req, res) => {
       finalUser = staff;
     }
 
+    let status = undefined;
+    if (role === 'vendor') {
+      const Vendor = require('../models/Vendor');
+      const vendor = await Vendor.findOne({ ownerId: finalUser._id });
+      if (vendor) status = vendor.status;
+    }
+
     res.status(200).json({
       _id: finalUser._id,
       name: finalUser.name,
       phone: finalUser.phone,
-      image: finalUser.image, // 📸 Return image
+      image: finalUser.image,
       role: role,
+      status: status,
       token: generateToken(finalUser._id),
       isFirstLogin: role === 'staff' ? finalUser.isFirstLogin : undefined
     });
@@ -110,14 +118,23 @@ const me = async (req, res) => {
     const user = req.user || req.staff;
     if (!user) return res.status(404).json({ message: 'Session expired' });
 
-    res.status(200).json({
+    let responseData = {
       _id: user._id,
       name: user.name,
       phone: user.phone,
-      image: user.image, // 📸 Return image
+      image: user.image,
       role: user.role || (req.staff ? 'staff' : (req.user ? req.user.role : 'customer')),
-      user
-    });
+    };
+
+    if (responseData.role === 'vendor') {
+      const Vendor = require('../models/Vendor');
+      const vendor = await Vendor.findOne({ ownerId: user._id });
+      if (vendor) {
+        responseData.status = vendor.status;
+      }
+    }
+
+    res.status(200).json(responseData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
