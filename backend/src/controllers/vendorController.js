@@ -61,7 +61,8 @@ const uploadDocs = async (req, res) => {
     };
 
     const files = req.files;
-    if (files.aadhaar) vendor.aadhaar = await uploadToCloudinary(files.aadhaar[0].buffer);
+    if (files.aadhaarFront) vendor.aadhaarFront = await uploadToCloudinary(files.aadhaarFront[0].buffer);
+    if (files.aadhaarBack) vendor.aadhaarBack = await uploadToCloudinary(files.aadhaarBack[0].buffer);
     if (files.panCard) vendor.panCard = await uploadToCloudinary(files.panCard[0].buffer);
     if (files.shopImage) vendor.shopImage = await uploadToCloudinary(files.shopImage[0].buffer);
     if (files.vendorPhoto) vendor.vendorPhoto = await uploadToCloudinary(files.vendorPhoto[0].buffer);
@@ -77,7 +78,7 @@ const uploadDocs = async (req, res) => {
       vendor.shopVideo = await uploadToCloudinary(files.video[0].buffer, true);
     }
 
-    if (vendor.aadhaar && vendor.panCard && vendor.shopImage && vendor.vendorPhoto) {
+    if (vendor.aadhaarFront && vendor.aadhaarBack && vendor.panCard && vendor.shopImage && vendor.vendorPhoto) {
       vendor.isProfileComplete = true;
     }
     await vendor.save();
@@ -397,7 +398,7 @@ const createWalkIn = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
     const { name, phone, staffId, services, startTime, totalPrice, totalDuration } = req.body;
-    
+
     const booking = await Booking.create({
       vendorId: vendor._id,
       staffId,

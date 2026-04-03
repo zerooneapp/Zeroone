@@ -1,5 +1,5 @@
 const express = require('express');
-const { 
+const {
   registerVendor, uploadDocs, getVendorProfile, getNearbyVendors,
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings,
   getVendorDashboard, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking
@@ -36,7 +36,8 @@ router.post(
   '/upload-docs',
   protect,
   upload.fields([
-    { name: 'aadhaar', maxCount: 1 },
+    { name: 'aadhaarFront', maxCount: 1 },
+    { name: 'aadhaarBack', maxCount: 1 },
     { name: 'panCard', maxCount: 1 },
     { name: 'shopImage', maxCount: 1 },
     { name: 'vendorPhoto', maxCount: 1 },

@@ -9,16 +9,8 @@ const Navbar = () => {
   const { role } = useAuthStore();
 
   const navItems = [
-    { icon: Home, label: 'Home', path: role === 'staff' ? '/staff' : '/' },
-    {
-      icon: Calendar,
-      label: 'Bookings',
-      path: role === 'vendor'
-        ? '/vendor/bookings'
-        : (role === 'admin'
-          ? '/bookings'
-          : (role === 'staff' ? '/staff/bookings' : '/bookings'))
-    },
+    { icon: Home, label: 'Home', path: '/' },
+    { icon: Calendar, label: 'Bookings', path: '/bookings' },
     { icon: User, label: 'Account', path: '/account' },
   ];
 

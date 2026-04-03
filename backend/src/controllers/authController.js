@@ -15,8 +15,8 @@ const login = async (req, res) => {
     }
 
     // 1. Check User Model (Admin, Vendor, Customer)
-    let user = await User.findOne({ 
-      $or: [{ phone: phone || '' }, { email: email || '' }] 
+    let user = await User.findOne({
+      $or: [{ phone: phone || '' }, { email: email || '' }]
     });
 
     let role = user ? user.role : null;
@@ -30,7 +30,7 @@ const login = async (req, res) => {
       // 2. Check Staff Model
       const staff = await Staff.findOne({ phone });
       if (!staff) return res.status(401).json({ message: 'Invalid credentials' });
-      
+
       const isMatch = await staff.comparePassword(password);
       if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
       if (!staff.isActive) return res.status(403).json({ message: 'Staff account is inactive' });
@@ -59,12 +59,12 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   try {
     const { phone, name, password, role, email, gender, dob, referralCode, image } = req.body;
-    
+
     let user = await User.findOne({ phone });
-    
+
     if (user) {
-      if (user.name && !req.body.forceUpdate) return res.status(400).json({ message: 'User already exists' });
-      
+      if (user.name && !req.body.forceUpdate && user.role !== 'vendor') return res.status(400).json({ message: 'User already exists' });
+
       user.name = name;
       if (password) user.password = password;
       if (email) user.email = email;

@@ -10,7 +10,8 @@ const vendorSchema = new mongoose.Schema({
   },
   address: { type: String },
   panCard: { type: String },
-  aadhaar: { type: String },
+  aadhaarFront: { type: String },
+  aadhaarBack: { type: String },
   shopImage: { type: String },
   galleryImages: [{ type: String }], // Array of URLs
   shopVideo: { type: String }, // Video URL
@@ -26,7 +27,7 @@ const vendorSchema = new mongoose.Schema({
   walletBalance: { type: Number, default: 0 },
   status: { type: String, enum: ['pending', 'approved', 'active', 'inactive'], default: 'pending' },
   planType: { type: String, enum: ['daily', 'monthly', 'trial'], default: 'trial' },
-  serviceLevel: { type: String, enum: ['basic', 'standard', 'premium'], default: 'basic' },
+  serviceLevel: { type: String, enum: ['standard', 'premium', 'luxury'], default: 'standard' },
   profileViews: { type: Number, default: 0 },
   serviceClicks: { type: Number, default: 0 },
   lastDeductionDate: { type: Date },
