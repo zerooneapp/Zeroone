@@ -147,8 +147,8 @@ const Cart = () => {
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
         <div className="text-center leading-none">
-          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Step 1 of 3</p>
-          <h1 className="font-extrabold text-[11px] text-gray-900 dark:text-white uppercase tracking-tight mt-1">Select Date & Time</h1>
+          <p className="text-[8px] font-black tracking-widest text-slate-400">Step 1 of 3</p>
+          <h1 className="font-extrabold text-[11px] text-gray-900 dark:text-white tracking-tight mt-1">Select Date & Time</h1>
         </div>
         <div className="w-10"></div>
       </div>
@@ -157,12 +157,12 @@ const Cart = () => {
         {/* Date Selection */}
         <section>
           <div className="flex items-center justify-between mb-2 px-1">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Select Booking Date</span>
+            <span className="text-[9px] font-black text-slate-400 tracking-widest">Select booking date</span>
             <button
               onClick={() => setShowFullCalendar(!showFullCalendar)}
-              className="flex items-center gap-1 px-2 py-1 bg-slate-50 dark:bg-gray-800 rounded-lg text-[8px] font-black uppercase text-primary tracking-widest border border-slate-100 dark:border-gray-700 active:scale-95 transition-all"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 dark:bg-blue-500/10 rounded-lg text-[9px] font-black text-primary dark:text-blue-400 tracking-widest border border-slate-100 dark:border-blue-500/20 active:scale-95 transition-all shadow-sm"
             >
-              <Calendar size={10} strokeWidth={3} />
+              <Calendar size={11} strokeWidth={3} />
               {showFullCalendar ? 'List' : 'Calendar'}
             </button>
           </div>
@@ -184,7 +184,7 @@ const Cart = () => {
                       "flex flex-col items-center min-w-[50px] py-2 rounded-xl transition-all border shadow-sm",
                       selectedDate === d.full
                         ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-105"
-                        : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800 text-slate-400"
+                        : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 text-slate-400 shadow-sm"
                     )}
                   >
                     <span className="text-[8px] uppercase font-black opacity-60 tracking-widest">{d.day}</span>
@@ -229,8 +229,8 @@ const Cart = () => {
         </section>
 
         {/* Selected Services Summary */}
-        <section className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-gray-800 shadow-sm">
-          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2 px-1">Booking Summary</p>
+        <section className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+          <p className="text-[9px] font-black text-slate-400 tracking-widest mb-2 px-1">Booking summary</p>
           <div className="space-y-1.5">
             {items.map(item => (
               <div key={item._id} className="flex justify-between items-center px-1">
@@ -259,8 +259,8 @@ const Cart = () => {
               className="space-y-2"
             >
               <div className="flex items-center justify-between px-1">
-                <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Select Time</span>
-                <span className="text-[7px] font-black uppercase text-emerald-500 tracking-widest italic">{items.length} services ready</span>
+                <span className="text-[9px] font-black text-slate-400 tracking-widest">Select time</span>
+                <span className="text-[7px] font-black text-emerald-500 tracking-widest italic">{items.length} Services ready</span>
               </div>
               {loadingSlots ? (
                 <div className="grid grid-cols-3 gap-1.5 mt-2">
@@ -283,7 +283,7 @@ const Cart = () => {
                         "py-2 rounded-lg font-black text-[9px] transition-all border border-slate-100 dark:border-gray-800 text-center uppercase tracking-widest shadow-sm active:scale-95",
                         selectedSlot?.time === slot.time
                           ? "bg-slate-900 border-slate-900 text-white shadow-lg"
-                          : "bg-white dark:bg-gray-900 text-slate-400"
+                          : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#1C2C4E]/10"
                       )}
                     >
                       {formatTo12H(slot.time)}
@@ -304,7 +304,7 @@ const Cart = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-2"
             >
-              <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest px-1">Choose Professional</p>
+              <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Choose professional</p>
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
                 {availableStaff.map((s) => (
                   <button
@@ -314,14 +314,14 @@ const Cart = () => {
                       "relative flex flex-col items-center min-w-[80px] p-2 rounded-xl border transition-all active:scale-95 shadow-sm",
                       selectedStaff?._id === s._id
                         ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-105"
-                        : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800"
+                        : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm"
                     )}
                   >
                     <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden mb-1.5 border border-slate-100 dark:border-gray-700 shadow-inner">
                       <img src={s.image || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
                     </div>
                     <span className={cn(
-                      "text-[8px] font-black truncate w-full text-center uppercase tracking-widest leading-tight",
+                      "text-[8px] font-black truncate w-full text-center tracking-widest leading-tight",
                       selectedStaff?._id === s._id ? "text-white" : "text-slate-400"
                     )}>
                       {s.name?.split(' ')[0] || 'Staff'}
@@ -350,17 +350,17 @@ const Cart = () => {
         initial={{ y: 100, opacity: 0, scale: 0.9 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
-        className="fixed bottom-4 left-4 right-4 bg-slate-900 dark:bg-gray-950 p-2.5 px-5 rounded-2xl shadow-2xl z-50 border border-white/10"
+        className="fixed bottom-[82px] left-4 right-4 bg-slate-900 dark:bg-gray-900 p-2.5 px-5 rounded-3xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
       >
         <div className="flex items-center justify-between">
           <div className="leading-none">
-            <p className="text-[7px] font-black text-white/40 uppercase tracking-widest mb-1.5">Net Payable</p>
+            <p className="text-[7px] font-black text-white/40 tracking-widest mb-1.5">Net payable</p>
             <p className="text-lg font-black text-white italic tracking-tighter leading-none">₹{getTotalPrice()}</p>
           </div>
           <button
             disabled={!selectedSlot}
             onClick={handleContinue}
-            className="px-4 py-2 bg-white text-slate-900 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 disabled:opacity-30 transition-all flex items-center gap-1.5 border-b-2 border-slate-200"
+            className="px-4 py-2 bg-white text-slate-900 rounded-xl font-black text-[9px] tracking-widest shadow-xl active:scale-95 disabled:opacity-30 transition-all flex items-center gap-1.5 border-b-2 border-slate-200"
           >
             {rescheduleBookingId ? 'Reschedule' : 'Continue'}
             <ChevronRight size={14} strokeWidth={3} />

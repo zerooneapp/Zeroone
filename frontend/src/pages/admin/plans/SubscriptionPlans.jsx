@@ -36,8 +36,6 @@ const SubscriptionPlans = () => {
 
   const handleSave = async (level) => {
     const levelPlans = plans.filter(p => p.level === level);
-
-    // Validation
     const invalidPlan = levelPlans.find(p => p.price <= 0);
     if (invalidPlan) {
       toast.error(`Pricing Error: ${level.toUpperCase()} ${invalidPlan.type} price must be greater than 0`);
@@ -45,7 +43,6 @@ const SubscriptionPlans = () => {
     }
 
     setSavingId(level);
-
     try {
       await Promise.all(levelPlans.map(p =>
         api.patch(`/admin/plans/${p._id}`, { price: p.price })
@@ -53,7 +50,7 @@ const SubscriptionPlans = () => {
       toast.success(`${level.toUpperCase()} Pricing Updated 💰`);
     } catch (err) {
       toast.error(`Failed to update ${level} plans`);
-      fetchPlans(); // Reset
+      fetchPlans();
     } finally {
       setSavingId(null);
     }
@@ -66,28 +63,31 @@ const SubscriptionPlans = () => {
   };
 
   return (
-    <div className="space-y-3 pb-4 animate-in fade-in duration-500 h-full flex flex-col justify-between">
+    <div className="space-y-5 pb-20 animate-in fade-in duration-500">
 
-      {/* 💰 COMPACT HEADER */}
-      <div className="p-4 bg-white dark:bg-gray-900 rounded-[1.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-black dark:text-white tracking-tight text-primary">Pricing Hub 💰</h1>
-          <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Platform Subscription Yields</p>
+      {/* 💰 ELITE PRICING HEADER */}
+      <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-primary/20">
+        <div className="space-y-1">
+          <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tighter uppercase italic leading-none">Pricing Hub</h1>
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">Platform Subscription Yields</p>
         </div>
-        <div className="hidden sm:flex bg-gray-50 dark:bg-gray-800/40 p-2 px-4 rounded-xl border border-gray-100 dark:border-gray-800 items-center gap-2">
-          <Info size={12} className="text-primary" />
-          <p className="text-[8px] font-black text-gray-400 uppercase tracking-tight leading-none">
-            Dynamic pricing engine active.
-          </p>
+        <div className="p-3 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center gap-4 group hover:border-primary/20 transition-all">
+          <div className="w-10 h-10 bg-white dark:bg-gray-900 rounded-lg flex items-center justify-center text-primary shadow-sm border border-slate-100 dark:border-gray-800 group-hover:scale-110 transition-transform">
+             <Info size={20} strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Dynamic Engine</p>
+            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Real-time valuation active</p>
+          </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[1, 2, 3].map(i => <div key={i} className="h-96 bg-gray-50 animate-pulse rounded-[3rem]" />)}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[1, 2, 3].map(i => <div key={i} className="h-96 bg-gray-50/50 animate-pulse rounded-2xl border border-slate-100" />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-w-7xl mx-auto">
           <PlanCard
             level="Standard"
             icon={ShieldCheck}
@@ -118,22 +118,30 @@ const SubscriptionPlans = () => {
         </div>
       )}
 
-      {/* 📊 ANALYTICS HINT */}
-      <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-[1.5rem] border border-primary/10 flex items-center justify-between gap-4 border-dashed">
-        <div className="space-y-1">
-          <h2 className="text-[10px] font-black text-primary uppercase tracking-tighter leading-none">Yield Strategy</h2>
-          <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none">
-            Standard, Premium, and Luxury configurations active.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-white dark:bg-gray-900 rounded-lg flex items-center justify-center text-primary shadow-sm border border-primary/5">
-            <TrendingUp size={14} />
-          </div>
-          <div className="w-8 h-8 bg-white dark:bg-gray-900 rounded-lg flex items-center justify-center text-primary shadow-sm border border-primary/5">
-            <HandCoins size={14} />
-          </div>
-        </div>
+      {/* 📊 YIELD STRATEGY HUD */}
+      <div className="p-5 bg-slate-900 dark:bg-primary rounded-2xl shadow-xl shadow-slate-900/10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+         <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+         <div className="flex items-center gap-5 relative z-10">
+            <div className="w-14 h-14 bg-white/10 rounded-2xl backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+               <TrendingUp size={28} strokeWidth={2.5} />
+            </div>
+            <div>
+               <h2 className="text-[16px] font-black text-white uppercase tracking-tighter italic">Dissemination Strategy</h2>
+               <p className="text-[8.5px] font-black text-white/60 uppercase tracking-[0.2em] mt-1.5 leading-relaxed">
+                  Active Tier Configurations: Standard • Premium • Luxury
+               </p>
+            </div>
+         </div>
+         <div className="flex gap-2 relative z-10">
+            <div className="px-5 py-2.5 bg-white/10 rounded-xl border border-white/20 flex flex-col items-center">
+               <p className="text-[14px] font-black text-white leading-none">3</p>
+               <p className="text-[7px] font-black text-white/40 uppercase tracking-widest mt-1">Active Tiers</p>
+            </div>
+            <div className="px-5 py-2.5 bg-white/10 rounded-xl border border-white/20 flex flex-col items-center">
+               <p className="text-[14px] font-black text-white leading-none">24/7</p>
+               <p className="text-[7px] font-black text-white/40 uppercase tracking-widest mt-1">Pricing Uptime</p>
+            </div>
+         </div>
       </div>
 
     </div>
@@ -142,59 +150,61 @@ const SubscriptionPlans = () => {
 
 const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, isSaving }) => {
   const colors = {
-    emerald: "text-emerald-500 bg-emerald-50 border-emerald-100",
-    blue: "text-blue-500 bg-blue-50 border-blue-100",
-    amber: "text-amber-500 bg-amber-50 border-amber-100"
+    emerald: "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20",
+    blue: "text-blue-600 bg-blue-50 border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/20",
+    amber: "text-amber-600 bg-amber-50 border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20"
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-4 bg-white dark:bg-gray-900 rounded-[1.5rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-3 relative overflow-hidden"
+      className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-5 relative group hover:border-primary/30 transition-all"
     >
-      <div className={cn("p-2 w-8 h-8 rounded-lg flex items-center justify-center border", colors[color])}>
-        <Icon size={16} />
+      <div className="flex items-center justify-between">
+         <div className={cn("p-2.5 w-11 h-11 rounded-xl flex items-center justify-center border shadow-sm", colors[color])}>
+           <Icon size={22} strokeWidth={2.5} />
+         </div>
+         <div className="text-right">
+            <h3 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tighter italic leading-none">{level}</h3>
+            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">Pricing Layer</p>
+         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-black dark:text-white uppercase tracking-tighter leading-tight">{level}</h3>
-        <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest leading-none">Pricing Layer</p>
-      </div>
-
-      <div className="space-y-3">
-        {/* DAILY PLAN */}
-        <div className="space-y-1">
+      <div className="space-y-4">
+        {/* DAILY RATE */}
+        <div className="space-y-2">
           <div className="flex justify-between items-center px-1">
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Daily Rate</span>
-            <span className="text-[7px] font-black text-primary uppercase">Active Day</span>
+            <span className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest opacity-80">Daily Transmission</span>
+            <div className="flex items-center gap-1.5">
+               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+               <span className="text-[7.5px] font-black text-emerald-600 uppercase italic">Live Yield</span>
+            </div>
           </div>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400 text-xs">₹</span>
+          <div className="relative group/input">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[10px] group-focus-within/input:text-primary transition-colors italic">₹</div>
             <input
               type="number"
-              className="w-full pl-8 pr-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-none rounded-xl text-sm font-black dark:text-white focus:ring-1 ring-primary/20 outline-none transition-all appearance-none"
+              className="w-full h-11 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[13px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none italic"
               value={planData.daily?.price || 0}
               onChange={(e) => onPriceChange(planData.daily?._id, e.target.value)}
-              placeholder="0"
             />
           </div>
         </div>
 
-        {/* MONTHLY PLAN */}
-        <div className="space-y-1">
+        {/* MONTHLY RATE */}
+        <div className="space-y-2">
           <div className="flex justify-between items-center px-1">
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Monthly Rate</span>
-            <span className="text-[7px] font-black text-gray-300 uppercase">30 Days</span>
+            <span className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest opacity-80">Cycle Retainer (30D)</span>
+            <span className="text-[7.5px] font-black text-slate-300 dark:text-slate-600 uppercase italic leading-none">Vault Protected</span>
           </div>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400 text-xs">₹</span>
+          <div className="relative group/input">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[10px] group-focus-within/input:text-primary transition-colors italic">₹</div>
             <input
               type="number"
-              className="w-full pl-8 pr-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-none rounded-xl text-sm font-black dark:text-white focus:ring-1 ring-primary/20 outline-none transition-all appearance-none"
+              className="w-full h-11 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[13px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none italic"
               value={planData.monthly?.price || 0}
               onChange={(e) => onPriceChange(planData.monthly?._id, e.target.value)}
-              placeholder="0"
             />
           </div>
         </div>
@@ -204,12 +214,14 @@ const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, i
         onClick={onSave}
         disabled={isSaving}
         className={cn(
-          "w-full py-2 rounded-xl font-black text-[9px] uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-2",
-          isSaving ? "bg-gray-100 text-gray-400" : "bg-primary text-white shadow-md shadow-primary/10 active:scale-95 group"
+          "w-full h-11 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 italic",
+          isSaving 
+            ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+            : "bg-slate-900 dark:bg-primary text-white hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-slate-900/10 group/btn border border-slate-800"
         )}
       >
-        {isSaving ? <RefreshCw className="animate-spin" size={12} /> : <Save size={12} className="group-hover:translate-y-[-1px] transition-transform" />}
-        {isSaving ? "Syncing..." : "Update Tier"}
+        {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} className="group-hover/btn:scale-110 transition-transform" strokeWidth={3} />}
+        {isSaving ? "SYNCING..." : "COMMIT TIER"}
       </button>
     </motion.div>
   );

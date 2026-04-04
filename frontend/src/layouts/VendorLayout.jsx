@@ -51,7 +51,7 @@ const VendorLayout = () => {
                   }`} 
                 />
                 
-                <span className={`relative z-10 text-[8px] font-black uppercase tracking-widest mt-1 transition-all duration-300 ${
+                <span className={`relative z-10 text-[8px] font-black tracking-widest mt-1 transition-all duration-300 ${
                   isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'
                 }`}>
                   {item.label}

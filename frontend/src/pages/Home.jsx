@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Star, MapPin, AlertCircle, ChevronRight } from 'lucide-react';
-import { cn } from '../utils/cn';
 import SectionTitle from '../components/SectionTitle';
 import VendorCard from '../components/VendorCard';
 import Button from '../components/Button';
@@ -81,38 +80,43 @@ const Home = () => {
   return (
     <div className="pb-24 animate-in fade-in duration-700 bg-transparent min-h-screen">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
-      <div className="px-4 pt-4 pb-1 mb-2">
+      <div className="px-4 pt-2 pb-1 mb-1">
         <div className="relative group animate-in slide-in-from-top-3 duration-700 w-full">
+          {/* Multi-layered Soft Glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#1C2C4E]/10 via-blue-500/5 to-[#1C2C4E]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
+
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none">
-              <Search size={16} strokeWidth={3} />
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400/80 group-focus-within:text-[#1C2C4E] dark:group-focus-within:text-blue-400 z-10 pointer-events-none transition-all duration-300">
+              <Search size={20} strokeWidth={2.5} />
             </div>
             <input
               type="text"
               placeholder="Search salon, beauty parlour, makeup artist..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-10 pl-11 pr-4 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl text-[11px] font-black text-slate-900 dark:text-white shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none placeholder:text-slate-400 uppercase tracking-tight"
+              className="w-full h-[37px] pl-14 pr-6 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#1C2C4E]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#1C2C4E]/30 transition-all duration-500 outline-none placeholder:text-[#0B1222]/40 placeholder:font-semibold"
             />
           </div>
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto px-4 py-1.5 no-scrollbar items-center">
+      {/* Modern Category Pill Filters */}
+      <div className="flex gap-1.5 overflow-x-auto px-4 py-2 no-scrollbar justify-start sm:justify-center items-center">
         {categories.map((cat) => {
           const isActive = selectedCats.includes(cat._id);
           return (
             <button
               key={cat._id}
               onClick={() => toggleCategory(cat._id)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg whitespace-nowrap text-[8px] font-black uppercase tracking-widest border transition-all active:scale-95",
-                isActive
-                  ? 'bg-slate-900 border-slate-900 text-white shadow-lg scale-105'
-                  : 'bg-white dark:bg-gray-900 text-slate-400 border-slate-100 dark:border-gray-800'
-              )}
+              className={`relative px-2.5 py-1.5 rounded-[12px] whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 ${isActive
+                ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
+                : 'bg-white dark:bg-gray-900/50 text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
+                }`}
             >
-              {cat.name}
+              <span className="relative z-10">{cat.name}</span>
+              {isActive && (
+                <div className="absolute inset-x-0 bottom-0 top-0 rounded-[12px] bg-white/10" />
+              )}
             </button>
           );
         })}
@@ -144,7 +148,7 @@ const Home = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-6"
+                className="space-y-2.5"
               >
                 {currentVendors.length > 0 ? (
                   currentVendors.map((vendor) => (
@@ -152,7 +156,7 @@ const Home = () => {
                   ))
                 ) : (
                   <div className="py-20 text-center">
-                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">No Professionals Found</p>
+                    <p className="text-[10px] font-black text-[#0B1222] uppercase tracking-widest opacity-25">No Professionals Found</p>
                   </div>
                 )}
               </motion.div>
@@ -162,27 +166,27 @@ const Home = () => {
 
         {/* Elite Pagination HUD */}
         {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8 pb-10">
+          <div className="flex items-center justify-center gap-3 mt-8 pb-4">
             <button
               onClick={() => paginate(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2.5 rounded-lg border border-slate-100 dark:border-gray-800 disabled:opacity-20 text-slate-900 bg-white shadow-sm active:scale-90 transition-all font-black"
+              className="p-3 rounded-xl border border-gray-100 disabled:opacity-20 text-[#1C2C4E] font-black active:scale-90 transition-all bg-white shadow-sm"
             >
-              <ChevronRight className="rotate-180" size={16} strokeWidth={3} />
+              <ChevronRight className="rotate-180" size={18} strokeWidth={3} />
             </button>
 
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-gray-900 rounded-xl border border-slate-100 dark:border-gray-800 shadow-inner">
-              <span className="text-[10px] font-black text-slate-900 dark:text-white leading-none">{currentPage}</span>
-              <span className="text-[8px] font-black text-slate-300 leading-none">/</span>
-              <span className="text-[9px] font-black text-slate-400 leading-none">{totalPages}</span>
+            <div className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 rounded-2xl border border-gray-100">
+              <span className="text-[11px] font-black text-[#0B1222]">{currentPage}</span>
+              <span className="text-[10px] font-bold text-[#0B1222] opacity-10">/</span>
+              <span className="text-[10px] font-bold text-[#0B1222] opacity-40">{totalPages}</span>
             </div>
 
             <button
               onClick={() => paginate(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="p-2.5 rounded-lg border border-slate-100 dark:border-gray-800 disabled:opacity-20 text-slate-900 bg-white shadow-sm active:scale-90 transition-all font-black"
+              className="p-3 rounded-xl border border-[#1C2C4E]/10 disabled:opacity-20 text-[#1C2C4E] font-black active:scale-90 transition-all bg-white shadow-sm"
             >
-              <ChevronRight size={16} strokeWidth={3} />
+              <ChevronRight size={18} strokeWidth={3} />
             </button>
           </div>
         )}

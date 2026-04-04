@@ -15,44 +15,42 @@ const Navbar = () => {
   ];
 
   return (
-    <div className="fixed bottom-4 left-0 right-0 z-50 px-4 max-w-sm mx-auto">
-      <nav className="bg-[#1C2C4E] dark:bg-gray-900 shadow-2xl rounded-full h-16 flex items-center px-2 border border-white/5 backdrop-blur-xl">
-        <div className="w-full flex items-center justify-between gap-1">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
+      <nav className="w-full max-w-lg bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-slate-100 dark:border-gray-800 shadow-[0_-10px_35px_rgba(0,0,0,0.05)] pt-2.5 pb-4 px-6 rounded-t-[32px]">
+        <div className="flex items-center justify-between">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) => cn(
-                'relative flex-1 flex flex-col items-center justify-center gap-1 h-12 rounded-full transition-all duration-500 min-w-0 overflow-hidden',
-                isActive ? 'bg-white/10' : 'hover:bg-white/5 active:scale-95'
+                'flex flex-col items-center justify-center gap-1.5 min-w-[70px] transition-all duration-300 active:scale-90',
+                isActive ? 'opacity-100' : 'opacity-70 hover:opacity-100'
               )}
             >
               {({ isActive }) => (
                 <>
-                  <div className="relative z-10">
+                  <div className="relative">
                     <item.icon
-                      size={20}
+                      size={24}
                       className={cn(
                         "transition-all duration-300",
-                        isActive ? "text-white scale-110" : "text-gray-400 opacity-60"
+                        isActive ? "text-[#0B1222] dark:text-white" : "text-slate-500 dark:text-gray-500"
                       )}
-                      strokeWidth={isActive ? 2.5 : 1.8}
+                      strokeWidth={isActive ? 2.5 : 2}
                     />
+                    {isActive && (
+                      <motion.div 
+                        layoutId="active-dot"
+                        className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
+                      />
+                    )}
                   </div>
                   <span className={cn(
-                    "text-[8px] font-black uppercase tracking-widest leading-none transition-all relative z-10",
-                    isActive ? "text-white mt-1" : "text-gray-500 opacity-60"
+                    "text-[11px] font-bold tracking-tight transition-all",
+                    isActive ? "text-[#0B1222] dark:text-white" : "text-slate-500 dark:text-gray-500"
                   )}>
                     {item.label}
                   </span>
-
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-pill"
-                      className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"
-                      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    />
-                  )}
                 </>
               )}
             </NavLink>

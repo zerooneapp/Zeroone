@@ -140,12 +140,13 @@ const getNearbyVendors = async (req, res) => {
 
     // Enrich with minPrice and specific services
     const enrichedVendors = await Promise.all(vendors.map(async (v) => {
-      const allServices = await Service.find({ vendorId: v._id, isActive: true }).select('name price').sort({ price: 1 });
+      const allServices = await Service.find({ vendorId: v._id, isActive: true }).select('name price image').sort({ price: 1 });
       const services = allServices.slice(0, 1);
       return {
         ...v,
         service: services[0]?.name || 'Beauty Service',
         price: services[0]?.price || 0,
+        serviceImage: services[0]?.image || '',
         serviceCount: allServices.length
       };
     }));

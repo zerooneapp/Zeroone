@@ -99,8 +99,8 @@ const CheckoutReview = () => {
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
         <div className="text-center leading-none">
-          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Step 2 of 3</p>
-          <h1 className="font-extrabold text-[11px] text-gray-900 dark:text-white uppercase tracking-tight mt-1">Review & Confirm</h1>
+          <p className="text-[8px] font-black tracking-widest text-slate-400">Step 2 of 3</p>
+          <h1 className="font-extrabold text-[11px] text-gray-900 dark:text-white tracking-tight mt-1">Review & Confirm</h1>
         </div>
         <div className="w-10"></div>
       </div>
@@ -112,26 +112,26 @@ const CheckoutReview = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="bg-slate-900 dark:bg-primary text-white p-3 px-4 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-primary/10 space-y-2 border border-white/10"
         >
-          <div className="leading-none">
-            <h2 className="text-base font-black truncate uppercase tracking-tight">{vendor.shopName}</h2>
-            <p className="text-[8px] font-black opacity-60 uppercase tracking-widest flex items-center gap-1 mt-1">
-              <MapPin size={10} strokeWidth={3} /> <span className="line-clamp-1">{vendor.address || 'Vendor Location'}</span>
+          <div className="leading-none text-center">
+            <h2 className="text-base font-black truncate tracking-tight">{vendor.shopName}</h2>
+            <p className="text-[8px] font-black opacity-60 flex items-center justify-center gap-1 mt-1 tracking-widest">
+              <MapPin size={10} strokeWidth={3} /> <span className="line-clamp-1">{vendor.address || 'Vendor location'}</span>
             </p>
           </div>
 
-          <div className="flex gap-4 pt-2 border-t border-white/10">
-            <div className="space-y-1">
-              <p className="text-[8px] font-black opacity-40 uppercase tracking-widest leading-none">Date</p>
-              <div className="flex items-center gap-1.5 leading-none">
+          <div className="flex justify-center gap-6 pt-2 border-t border-white/10">
+            <div className="space-y-1 text-center">
+              <p className="text-[8px] font-black opacity-40 tracking-widest leading-none">Date</p>
+              <div className="flex items-center justify-center gap-1.5 leading-none">
                 <Calendar size={12} className="opacity-60" />
-                <span className="font-black text-xs uppercase tracking-tighter">{selectedDate}</span>
+                <span className="font-black text-xs tracking-tighter">{selectedDate}</span>
               </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-[8px] font-black opacity-40 uppercase tracking-widest leading-none">Time</p>
-              <div className="flex items-center gap-1.5 leading-none">
+            <div className="space-y-1 text-center">
+              <p className="text-[8px] font-black opacity-40 tracking-widest leading-none">Time</p>
+              <div className="flex items-center justify-center gap-1.5 leading-none">
                 <Clock size={12} className="opacity-60" />
-                <span className="font-black text-xs uppercase tracking-tighter">{selectedSlot}</span>
+                <span className="font-black text-xs tracking-tighter">{selectedSlot}</span>
               </div>
             </div>
           </div>
@@ -140,25 +140,25 @@ const CheckoutReview = () => {
         {/* Selected Services */}
         <section className="space-y-2">
           <div className="flex items-center justify-between px-1">
-            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Services</span>
-            <span className="text-[8px] font-black uppercase text-primary tracking-tighter italic opacity-80">{items.length} items</span>
+            <span className="text-[9px] font-black text-slate-400 tracking-widest">Services</span>
+            <span className="text-[8px] font-black text-primary tracking-tighter italic opacity-80">{items.length} Items</span>
           </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-3 border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-2.5">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-3 border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] space-y-2.5">
             {items.map((item) => (
               <div key={item._id} className="flex justify-between items-center leading-none">
                 <div className="space-y-0.5">
-                  <p className="font-black text-xs text-gray-900 dark:text-white uppercase tracking-tight">{item.name}</p>
-                  <p className="text-[8px] text-slate-400 font-black uppercase tracking-tighter">{item.duration}m • {item.bufferTime || 0}m buffer</p>
+                  <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight">{item.name}</p>
+                  <p className="text-[8px] text-slate-400 font-black tracking-tighter">{item.duration}m • {item.bufferTime || 0}m Buffer</p>
                 </div>
                 <span className="font-black text-gray-900 dark:text-white text-xs italic">₹{item.price}</span>
               </div>
             ))}
             <div className="border-t border-slate-50 dark:border-gray-800 pt-2 flex justify-between items-center leading-none">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Convenience Fee</span>
-              <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">FREE</span>
+              <span className="text-[9px] font-black text-slate-400 tracking-widest">Convenience fee</span>
+              <span className="text-[9px] font-black text-emerald-500 tracking-widest italic">Free</span>
             </div>
             <div className="flex justify-between items-center pt-1 leading-none">
-              <span className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-tight">To Pay</span>
+              <span className="font-black text-sm text-gray-900 dark:text-white tracking-tight">To pay</span>
               <span className="font-black text-lg text-primary dark:text-white italic tracking-tighter">₹{totalPrice}</span>
             </div>
           </div>
@@ -166,33 +166,33 @@ const CheckoutReview = () => {
 
         {/* Staff Card */}
         <section className="space-y-2">
-          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest px-1">Assigned Professional</p>
-          <div className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex items-center gap-3 active:scale-95 transition-all">
+          <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Assigned professional</p>
+          <div className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center gap-3 active:scale-95 transition-all">
             <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shadow-inner shrink-0">
               <img src={selectedStaff?.image || `https://i.pravatar.cc/150?u=${vendor._id}`} className="w-full h-full object-cover" />
             </div>
             <div className="leading-none overflow-hidden pr-2">
-              <p className="font-black text-xs text-gray-900 dark:text-white uppercase tracking-tight truncate">{selectedStaff?.name || 'Auto Assigned'}</p>
-              <p className="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-widest">Professional Specialist</p>
+              <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight truncate">{selectedStaff?.name || 'Auto assigned'}</p>
+              <p className="text-[8px] text-slate-400 font-black mt-1 tracking-widest">Professional specialist</p>
             </div>
-            <div className="ml-auto flex items-center gap-1 text-blue-500 bg-blue-500/5 dark:bg-blue-900/10 px-2.5 py-1.5 rounded-lg border border-blue-500/10 dark:border-blue-900/30 shrink-0">
+            <div className="ml-auto flex items-center gap-1 text-blue-500 bg-blue-500/5 dark:bg-blue-900/10 px-2.5 py-1.5 rounded-lg border border-blue-500/10 dark:border-blue-900/30 shrink-0 shadow-sm">
               <ShieldCheck size={12} strokeWidth={3} />
-              <span className="text-[8px] font-black uppercase tracking-widest">Verified</span>
+              <span className="text-[8px] font-black tracking-widest">Verified</span>
             </div>
           </div>
         </section>
 
         {/* Payment Method */}
         <section className="space-y-2">
-          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest px-1">Payment Method</p>
-          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border-2 border-primary/20 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all">
+          <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Payment method</p>
+          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center justify-between active:scale-[0.98] transition-all">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/5 rounded-lg text-primary border border-primary/10 shadow-inner">
                 <CreditCard size={18} />
               </div>
               <div className="leading-none">
-                <p className="font-black text-xs text-gray-900 dark:text-white uppercase tracking-tight">Pay at Shop</p>
-                <p className="text-[8px] text-slate-400 font-black uppercase mt-1 tracking-widest">Safe & Secure Payment</p>
+                <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight">Pay at shop</p>
+                <p className="text-[8px] text-slate-400 font-black mt-1 tracking-widest">Safe & secure payment</p>
               </div>
             </div>
             <div className="w-5 h-5 rounded-full border-4 border-primary bg-white shadow-lg" />
@@ -201,20 +201,20 @@ const CheckoutReview = () => {
       </div>
 
       {/* Confirmation Bar */}
-      <div className="fixed bottom-4 left-4 right-4 p-4 glass-effect border border-slate-200/40 dark:border-gray-800 rounded-2xl z-50 shadow-2xl">
+      <div className="fixed bottom-[82px] left-4 right-4 p-4 glass-effect border border-slate-200/40 dark:border-gray-800 rounded-[28px] z-50 shadow-2xl">
         <div className="max-w-md mx-auto">
           <button
-            className="w-full h-11 bg-slate-900 dark:bg-primary text-white shadow-xl shadow-black/10 dark:shadow-primary/20 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50"
+            className="w-full h-11 bg-slate-900 dark:bg-primary text-white shadow-xl shadow-black/10 dark:shadow-primary/20 text-[10px] font-black tracking-widest flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50"
             onClick={handleConfirm}
             disabled={loading}
           >
             {loading ? (
               <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              'Confirm Booking'
+              'Confirm booking'
             )}
           </button>
-          <p className="text-center text-[7px] text-slate-400 mt-2 font-black uppercase tracking-widest opacity-60 leading-none">
+          <p className="text-center text-[7px] text-slate-400 mt-2 font-black tracking-widest opacity-60 leading-none">
             By clicking confirm, you agree to our terms.
           </p>
         </div>

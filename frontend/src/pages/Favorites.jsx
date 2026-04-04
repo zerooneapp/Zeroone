@@ -48,8 +48,8 @@ const Favorites = () => {
                   <ArrowLeft size={18} strokeWidth={3} />
                </button>
                <div className="leading-none">
-                  <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase">My Wishlist</h1>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">{favorites.length} Saved Salons</p>
+                  <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">My wishlist</h1>
+                  <p className="text-[8px] font-black text-slate-400 tracking-[0.2em] mt-1">{favorites.length} Saved salons</p>
                </div>
             </div>
          </div>
@@ -69,7 +69,7 @@ const Favorites = () => {
                            animate={{ opacity: 1, y: 0 }}
                            transition={{ delay: idx * 0.05 }}
                            key={vendor._id}
-                           className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden group active:scale-[0.98] transition-all"
+                           className="bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] overflow-hidden group active:scale-[0.98] transition-all"
                         >
                            <div className="relative h-32 overflow-hidden bg-slate-50 dark:bg-gray-800 border-b border-slate-50 dark:border-gray-800">
                               <img
@@ -104,18 +104,18 @@ const Favorites = () => {
 
                            <div className="p-3.5 px-4 flex items-center justify-between">
                               <div className="space-y-1.5 leading-none">
-                                 <h3 className="text-[13px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[120px]">{vendor.shopName}</h3>
+                                 <h3 className="text-[13px] font-black text-slate-900 dark:text-white tracking-tight truncate max-w-[120px]">{vendor.shopName}</h3>
                                  <div className="flex items-center gap-1 opacity-60">
                                     <MapPin size={10} strokeWidth={3} className="text-slate-400" />
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest truncate">{vendor.address?.split(',')[0]}</span>
+                                    <span className="text-[9px] font-black text-slate-400 tracking-widest truncate">{vendor.address?.split(',')[0]}</span>
                                  </div>
                               </div>
 
                               <button
                                  onClick={() => navigate(`/service/${vendor._id}`)}
-                                 className="h-10 px-6 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[9px] uppercase tracking-widest active:scale-95 transition-all border-b-2 border-white/10 shadow-lg"
+                                 className="h-10 px-6 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[9px] tracking-widest active:scale-95 transition-all border-b-2 border-white/10 shadow-lg"
                               >
-                                 Book Now
+                                 Book now
                               </button>
                            </div>
                         </motion.div>
@@ -127,17 +127,17 @@ const Favorites = () => {
                         <ShoppingBag size={40} className="text-slate-200 dark:text-gray-700" />
                      </div>
                      <div className="space-y-1.5">
-                        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Wishlist Empty</h2>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] max-w-[180px] mx-auto leading-relaxed opacity-60">
+                        <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Wishlist empty</h2>
+                        <p className="text-[8px] font-black text-slate-400 tracking-[0.2em] max-w-[180px] mx-auto leading-relaxed opacity-60">
                            You haven't saved any <br /> elite salons yet.
                         </p>
                      </div>
                      <button
                         onClick={() => navigate('/')}
-                        className="px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center gap-2 mx-auto border-b-2 border-white/10"
+                        className="px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-[9px] tracking-widest shadow-xl active:scale-95 transition-all flex items-center gap-2 mx-auto border-b-2 border-white/10"
                      >
                         <Search size={14} strokeWidth={3} />
-                        Find Services
+                        Find services
                      </button>
                   </div>
                )}

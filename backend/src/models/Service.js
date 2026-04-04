@@ -17,6 +17,7 @@ const serviceSchema = new mongoose.Schema({
   },
   bufferTime: { type: Number, default: 0 },
   image: { type: String },
+  images: { type: [String], default: [] },
   type: { type: String, enum: ['shop', 'home'], default: 'shop' },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });

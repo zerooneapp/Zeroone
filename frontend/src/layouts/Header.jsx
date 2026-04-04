@@ -54,26 +54,26 @@ const Header = () => {
         <div className="flex items-center gap-1">
           <button 
             onClick={toggleTheme}
-            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-[#1C2C4E] active:scale-90 transition-all"
+            className="p-1.5 text-[#0B1222] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
-            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+            {isDarkMode ? <Sun size={17} strokeWidth={2.5} /> : <Moon size={17} strokeWidth={2.5} />}
           </button>
 
           <button 
             onClick={() => setShowNotifications(true)}
-            className="relative p-1.5 text-gray-400 dark:text-gray-500 hover:text-[#1C2C4E] active:scale-90 transition-all"
+            className="relative p-1.5 text-[#0B1222] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
-            <Bell size={17} />
+            <Bell size={18} strokeWidth={2.5} />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 shadow-sm" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 shadow-sm animate-pulse" />
             )}
           </button>
           
           <button 
             onClick={() => navigate('/favorites')}
-            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-[#1C2C4E] active:scale-90 transition-all"
+            className="p-1.5 text-[#0B1222] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
-            <Heart size={18} />
+            <Heart size={19} strokeWidth={2.5} />
           </button>
         </div>
       </div>

@@ -137,17 +137,17 @@ const VendorDashboard = () => {
          <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
             <div className="space-y-0.5">
                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tighter leading-none uppercase">
+                  <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
                      {data.shopName?.split(' ')[0] || 'ram'}
                   </h1>
                   <div className="flex items-center gap-1 bg-emerald-500 px-1.5 py-0.5 rounded-full">
                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                     <span className="text-[6px] font-black text-white tracking-widest uppercase">Live</span>
+                     <span className="text-[6px] font-black text-white tracking-widest">Live</span>
                   </div>
                </div>
                <div className="flex items-center gap-1.5 text-slate-400 dark:text-gray-500">
                   <MapPin size={8} strokeWidth={3} />
-                  <span className="text-[8px] font-black uppercase tracking-widest">{data.address?.split(',').slice(-1)[0]?.trim().split(' ')[0] || 'INDORE'}</span>
+                  <span className="text-[8px] font-black tracking-widest">{data.address?.split(',').slice(-1)[0]?.trim().split(' ')[0] || 'Indore'}</span>
                </div>
             </div>
 
@@ -197,7 +197,7 @@ const VendorDashboard = () => {
                            <button
                               key={i}
                               onClick={action.onClick || (() => navigate(action.path))}
-                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-slate-200 dark:border-gray-800 shadow-md active:scale-95 transition-all group"
+                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
                            >
                               <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-8">
                                  {action.label === 'Wallet' ? (
@@ -217,7 +217,7 @@ const VendorDashboard = () => {
                                  )}
                               </div>
                               <div className="px-1 text-center">
-                                 <span className="text-[7.5px] font-black uppercase text-slate-500 dark:text-gray-400 tracking-tighter leading-none block">{action.label}</span>
+                                 <span className="text-[7.5px] font-black text-slate-500 dark:text-gray-400 tracking-tighter leading-none block">{action.label}</span>
                               </div>
                            </button>
                         ))}
@@ -234,13 +234,13 @@ const VendorDashboard = () => {
                            <button
                               key={i}
                               onClick={action.onClick || (() => navigate(action.path))}
-                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-slate-200 dark:border-gray-800 shadow-md active:scale-95 transition-all group"
+                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
                            >
                               <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-8">
                                  <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
                               </div>
                               <div className="px-1 text-center">
-                                 <span className="text-[7.5px] font-black uppercase text-slate-500 dark:text-gray-400 tracking-tighter leading-none block">{action.label}</span>
+                                 <span className="text-[7.5px] font-black text-slate-500 dark:text-gray-400 tracking-tighter leading-none block">{action.label}</span>
                               </div>
                            </button>
                         ))}
@@ -253,26 +253,26 @@ const VendorDashboard = () => {
             <section className="px-0.5">
                <div className="grid grid-cols-4 gap-1.5">
                   {/* Today Revenue - Dark Highlight */}
-                  <div className="bg-slate-900 dark:bg-gray-900 p-2.5 rounded-2xl shadow-lg border border-slate-800 flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-white/50 uppercase tracking-widest leading-none mb-1.5">Today Revenue</p>
+                  <div className="bg-slate-900 dark:bg-gray-900 p-2.5 rounded-2xl shadow-lg border border-[#1C2C4E]/10 flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-white/50 tracking-widest leading-none mb-1.5">Today revenue</p>
                      <h3 className="text-sm font-black text-white leading-none">₹{data.stats.todayEarnings.toLocaleString()}</h3>
                   </div>
 
                   {/* Today Clients */}
-                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-md flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Today Clients</p>
+                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Today clients</p>
                      <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.stats.todayBookings}</h3>
                   </div>
 
                   {/* Services Done */}
-                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-md flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Services Done</p>
+                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Services done</p>
                      <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'completed').length || 0}</h3>
                   </div>
 
                   {/* Pending Bookings */}
-                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-md flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">Pending Bookings</p>
+                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center h-[74px]">
+                     <p className="text-[6px] font-black text-slate-400 tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">Pending bookings</p>
                      <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'confirmed').length || 0}</h3>
                   </div>
                </div>
@@ -281,12 +281,12 @@ const VendorDashboard = () => {
             {/* 📋 SCHEDULER SECTION */}
             <section className="space-y-3 pt-1">
                <div className="flex items-center justify-between px-1">
-                  <h2 className="text-sm font-black text-slate-800 dark:text-white tracking-widest uppercase">Live Schedule</h2>
+                  <h2 className="text-sm font-black text-slate-800 dark:text-white tracking-widest">Live schedule</h2>
                   <button
                      onClick={() => navigate('/vendor/bookings')}
-                     className="text-[8px] font-black text-primary uppercase tracking-widest px-3 py-1.5 bg-primary/5 rounded-full border border-primary/10 transition-all active:scale-95"
+                     className="text-[8px] font-black text-primary tracking-widest px-3 py-1.5 bg-primary/5 rounded-full border border-primary/10 transition-all active:scale-95"
                   >
-                     View All <ChevronRight size={8} className="inline ml-1" />
+                     View all <ChevronRight size={8} className="inline ml-1" />
                   </button>
                </div>
 
@@ -296,18 +296,18 @@ const VendorDashboard = () => {
                         <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-slate-200 group-hover:text-primary transition-colors">
                            <Calendar size={18} />
                         </div>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">No appointments for today</p>
+                        <p className="text-[8px] font-black text-slate-400 tracking-widest">No appointments for today</p>
                      </div>
                   ) : (
                      data.schedule.map((item, idx) => (
-                        <motion.div key={idx} whileTap={{ scale: 0.98 }} className="bg-white dark:bg-gray-900 p-3.5 rounded-[1.8rem] shadow-sm border border-slate-100 dark:border-gray-800 flex items-center justify-between group">
+                        <motion.div key={idx} whileTap={{ scale: 0.98 }} className="bg-white dark:bg-gray-900 p-3.5 rounded-[1.8rem] shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group">
                            <div className="flex items-center gap-3">
                               <div className="w-11 h-11 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
                                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.customerName}${idx}`} alt="Avatar" className="w-full h-full object-cover" />
                               </div>
                               <div className="space-y-0">
-                                 <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight">{item.customerName}</h4>
-                                 <div className="flex items-center gap-2 text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                                 <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">{item.customerName}</h4>
+                                 <div className="flex items-center gap-2 text-[8px] font-bold text-slate-400 tracking-widest">
                                     <span className="text-primary">{item.time}</span>
                                     <span className="opacity-20">•</span>
                                     <span className="truncate max-w-[80px]">{item.service}</span>
@@ -315,13 +315,13 @@ const VendorDashboard = () => {
                               </div>
                            </div>
                            {item.status === 'confirmed' ? (
-                              <button onClick={() => handleCompleteBooking(item.id)} className="px-4 py-2 bg-slate-900 dark:bg-primary text-white rounded-lg text-[8px] font-black uppercase tracking-widest active:scale-90 shadow-lg shadow-slate-900/10 transition-all">
+                              <button onClick={() => handleCompleteBooking(item.id)} className="px-4 py-2 bg-slate-900 dark:bg-primary text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-slate-900/10 transition-all">
                                  Done
                               </button>
                            ) : (
                               <div className="bg-emerald-500/10 text-emerald-500 px-2.5 py-1.5 rounded-lg flex items-center gap-1 border border-emerald-500/10">
                                  <ShieldCheck size={10} />
-                                 <span className="text-[7px] font-black uppercase">Cleared</span>
+                                 <span className="text-[7px] font-black">Cleared</span>
                               </div>
                            )}
                         </motion.div>
@@ -333,8 +333,8 @@ const VendorDashboard = () => {
 
             {/* 📊 REVENUE ANALYSIS */}
             <section className="space-y-2 pb-8 px-0.5">
-               <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest uppercase opacity-80">Revenue History</h2>
-               <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-[2rem] border border-slate-200/60 dark:border-gray-800 shadow-md h-56 w-full relative overflow-hidden group">
+               <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80">Revenue history</h2>
+               <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-[2rem] border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm h-56 w-full relative overflow-hidden group">
                   <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={data.revenueHistory || []}>
                         <defs>
