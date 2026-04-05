@@ -48,7 +48,6 @@ const ServiceDetail = () => {
         // Set initial active image from vendor shop image or gallery
         setActiveImage(fetchedVendor.shopImage || fetchedVendor.gallery?.[0]);
 
-        // ðŸš€ AUTO-SELECT LOGIC
         if (fetchedServices.length > 0) {
           const isSameVendor = cartVendor?._id === id;
           if (!isSameVendor || cartItems.length === 0) {
@@ -114,12 +113,10 @@ const ServiceDetail = () => {
     }
   };
 
-  // Elite Gallery Strategy (Pre-Return Logic)
   const gallery = vendor ? (services.some(s => s.images?.length > 0)
     ? services.flatMap(s => s.images).filter(Boolean).slice(0, 10)
     : [vendor.shopImage, ...(vendor.gallery || [])].filter(Boolean).slice(0, 5)) : [];
 
-  // 🚀 AUTO-SWAP ANIMATION LOGIC (Pre-Return)
   useEffect(() => {
     if (gallery.length <= 1) return;
     const interval = setInterval(() => {
@@ -159,13 +156,27 @@ const ServiceDetail = () => {
   const hasItemsFromThisVendor = cartVendor?._id === vendor._id;
   const filteredServices = selectedCat === 'All' ? services : services.filter(s => s.category === selectedCat);
 
-
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-40">
+      {/* Redesigned Secondary Navbar (Screenshot Sync) */}
+      <div className="bg-[#1C2C4E] text-white px-4 py-3 sticky top-0 z-[60] flex items-center justify-between shadow-md shrink-0 h-[60px]">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
+            <ArrowLeft size={20} strokeWidth={3} />
+          </button>
+          <h2 className="text-[15px] font-black tracking-tight truncate max-w-[200px]">
+            {vendor.shopName}
+          </h2>
+        </div>
+        <button onClick={handleWhatsAppShare} className="w-[42px] h-[42px] flex items-center justify-center active:scale-90 transition-all">
+          <Share2 size={24} strokeWidth={2} />
+        </button>
+      </div>
+
       {/* Header & Elite Gallery HUD */}
       <div className="relative bg-white dark:bg-gray-950">
         <div className="relative group">
-          <div className="h-40 relative overflow-hidden bg-gray-100 dark:bg-gray-900">
+          <div className="h-48 relative overflow-hidden bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50">
             <AnimatePresence mode="wait">
               <motion.img
                 key={activeImage}
@@ -179,78 +190,35 @@ const ServiceDetail = () => {
                 onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
               />
             </AnimatePresence>
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent " />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent " />
 
-            {/* Action Buttons HUD */}
-            <div className="absolute top-5 left-4 right-4 flex items-center justify-between z-30">
-              <button
-                onClick={() => navigate(-1)}
-                className="p-2.5 bg-black/20 backdrop-blur-3xl border border-white/20 rounded-full text-white active:scale-90 transition-all shadow-xl"
-              >
-                <ArrowLeft size={20} strokeWidth={3} />
-              </button>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleWhatsAppShare}
-                  className="p-2.5 bg-black/20 backdrop-blur-3xl border border-white/20 rounded-full text-white active:scale-90 transition-all shadow-xl group"
-                >
-                  <Share2 size={20} className="group-hover:rotate-12 transition-transform" />
-                </button>
-                <button
-                  onClick={handleToggleFavorite}
-                  className={`p-2.5 rounded-full shadow-2xl backdrop-blur-3xl border border-white/20 transition-all active:scale-90 ${isFavorited ? 'bg-[#1C2C4E] text-white' : 'bg-black/20 text-white'}`}
-                >
-                  <Heart size={20} fill={isFavorited ? "currentColor" : "none"} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Compact Gallery Strip (Screenshot Sync) */}
-          <div className="px-3 py-1.5 bg-white dark:bg-gray-950 border-b border-gray-50 dark:border-gray-900/50">
-            <div className="flex gap-2.5 overflow-x-auto no-scrollbar">
-              {gallery.map((img, i) => {
-                const isActive = activeImage === img;
-                const isLast = i === gallery.length - 1 && gallery.length > 4;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(img)}
-                    className={cn(
-                      "h-16 w-24 rounded-xl overflow-hidden border-[2px] transition-all active:scale-95 shadow-md flex-shrink-0 relative group",
-                      isActive ? "border-primary scale-105 z-10" : "border-transparent"
-                    )}
-                  >
-                    <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Gallery" />
-
-                    {i === 3 && (gallery.length > 4) && (
-                      <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 backdrop-blur-md rounded-lg flex items-center gap-1 border border-white/20">
-                        <Plus size={8} className="text-white" strokeWidth={4} />
-                        <span className="text-[10px] font-black text-white leading-none">{gallery.length - 4}</span>
-                      </div>
-                    )}
-
-                    <div className={cn(
-                      "absolute inset-0 bg-primary/10 transition-opacity",
-                      isActive ? "opacity-100" : "opacity-0"
-                    )} />
-                  </button>
-                );
-              })}
-            </div>
+            {/* Redesigned Like/Heart Overlay - Fixed Dimensions & New Color */}
+            <button
+              onClick={handleToggleFavorite}
+              className={cn(
+                "absolute top-4 right-3 w-[40px] h-[40px] rounded-full shadow-2xl backdrop-blur-md transition-all active:scale-90 z-30 flex items-center justify-center",
+                isFavorited ? "bg-white text-[#1C2C4E]" : "bg-white text-[#1C2C4E]/40"
+              )}
+            >
+              <Heart
+                size={24}
+                fill={isFavorited ? "#1C2C4E" : "none"}
+                strokeWidth={isFavorited ? 0 : 2}
+              />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Info Grid (Visible Layout) */}
-      <div className="px-3 mt-1.5 grid grid-cols-2 gap-y-2 gap-x-4">
+      {/* Info Grid - Updated Typography Spacing */}
+      <div className="px-5 mt-4 grid grid-cols-2 gap-y-3 gap-x-6">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
             <MapPin size={14} className="text-[#1C2C4E] dark:text-blue-400" />
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter truncate">{vendor.address?.split(',')[0] || 'Local Address'}</p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-widest">Location</p>
+            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter truncate">{vendor.address?.split(',')[0] || 'Local Address'}</p>
+            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Location</p>
           </div>
         </div>
 
@@ -259,10 +227,10 @@ const ServiceDetail = () => {
             <Clock size={14} className="text-[#1C2C4E] dark:text-blue-400" />
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-black text-[#0B1222] dark:text-white leading-tight tracking-tighter">
+            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight tracking-tighter whitespace-nowrap">
               {vendor.workingHours?.start || '09:00 AM'} - {vendor.workingHours?.end || '09:00 PM'}
             </p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-widest">Open today</p>
+            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Open today</p>
           </div>
         </div>
 
@@ -271,8 +239,8 @@ const ServiceDetail = () => {
             <Star size={14} fill="#FACC15" className="text-yellow-400 border-none" />
           </div>
           <div>
-            <p className="text-[13px] font-black text-[#0B1222] dark:text-white leading-tight">{vendor.totalReviews || '320'} Reviews</p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-widest">Elite rating</p>
+            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight">{vendor.totalReviews || '320'} Reviews</p>
+            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Elite rating</p>
           </div>
         </div>
 
@@ -281,16 +249,15 @@ const ServiceDetail = () => {
             <ShieldCheck size={14} className="text-[#1C2C4E] dark:text-blue-400" />
           </div>
           <div>
-            <p className="text-[13px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter">
+            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter">
               Premium Shop
             </p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-widest">Trust secured</p>
+            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Trust secured</p>
           </div>
         </div>
       </div>
 
-      {/* Dynamic Category HUD (Home-Page Mirror Design) */}
-      <div className="flex gap-2 px-3 mt-5 overflow-x-auto no-scrollbar">
+      <div className="flex gap-2 px-3 mt-6 overflow-x-auto no-scrollbar">
         {categories.map(cat => (
           <button
             key={cat}
@@ -305,7 +272,6 @@ const ServiceDetail = () => {
         ))}
       </div>
 
-      {/* Selected Services (Boxes) */}
       <div className="px-3 mt-4 space-y-2">
         <SectionTitle title="Selected Services" className="mb-1" />
         {cartItems.length > 0 && hasItemsFromThisVendor ? (
@@ -328,8 +294,8 @@ const ServiceDetail = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm">
-                    PayAtShop
+                  <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                    Pay At Shop
                   </div>
                   <button
                     onClick={() => removeItem(item._id)}
@@ -348,7 +314,6 @@ const ServiceDetail = () => {
         )}
       </div>
 
-      {/* Available Offerings */}
       <div className="px-3 mt-4 space-y-2">
         <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
         <div className="space-y-2">
@@ -366,11 +331,11 @@ const ServiceDetail = () => {
                 </div>
                 <div className="flex-1">
                   <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
-                  <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">â‚¹{service.price}</p>
+                  <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
                 </div>
-                <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm">
-                  PayAtShop
-                </div>
+                  <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                    Pay At Shop
+                  </div>
                 <button
                   onClick={() => toggleService(service)}
                   className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1C2C4E] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
@@ -383,7 +348,6 @@ const ServiceDetail = () => {
         </div>
       </div>
 
-      {/* Instant Tag HUD (Synced with Service Box Size) */}
       <div className="px-3 mt-4">
         <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#1C2C4E]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
           <div className="flex items-center gap-2.5">
@@ -402,7 +366,6 @@ const ServiceDetail = () => {
         </div>
       </div>
 
-      {/* Sticky Bottom Appointment Bar (Full Width Flush with Nav) */}
       <div
         className="fixed bottom-[82px] left-0 right-0 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] mx-3 rounded-[32px]"
       >
@@ -414,7 +377,7 @@ const ServiceDetail = () => {
           <button
             onClick={() => navigate('/cart')}
             disabled={cartItems.length === 0}
-            className="px-8 py-2 bg-white text-[#0B1222] rounded-2xl font-black text-[14px] uppercase font-bold tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[2px] border-gray-100 flex items-center justify-center"
+            className="px-8 py-2 bg-white text-[#0B1222] rounded-2xl font-black text-[14px] uppercase tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[2px] border-gray-100 flex items-center justify-center"
           >
             Book Now
           </button>

@@ -5,17 +5,19 @@ import { Phone, ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/Button';
 import NumericKeypad from '../components/NumericKeypad';
+import logo from '../assests/logo.jpeg';
 import toast from 'react-hot-toast';
 
 const CustomerAuth = () => {
   const navigate = useNavigate();
   const { requestOTP, verifyOTP, loading } = useAuthStore();
-  
+
   const [step, setStep] = useState('phone'); // phone, otp
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '']); 
+  const [otp, setOtp] = useState(['', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const [isOTPFocused, setIsOTPFocused] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -44,7 +46,7 @@ const CustomerAuth = () => {
   const handleSendOTP = async (e) => {
     e?.preventDefault();
     if (phone.length < 10) return toast.error('Please enter a valid phone number');
-    
+
     const res = await requestOTP(phone);
     if (res.success) {
       toast.success(`Verification code sent! Your OTP is: ${res.otp}`, { duration: 8000 });
@@ -98,6 +100,7 @@ const CustomerAuth = () => {
                 className="space-y-10 lg:space-y-12"
               >
                 <div className="space-y-4 text-center">
+                  <img src={logo} alt="ZeroOne Logo" className="w-20 h-20 mx-auto rounded-2xl object-cover mb-2" />
                   <h1 className="text-[42px] font-bold text-[#1C2C4E] tracking-tight leading-none">Welcome!</h1>
                   <p className="text-[#1C2C4E]/70 font-medium text-[15px]">Login to continue with your mobile number</p>
                 </div>
@@ -105,11 +108,10 @@ const CustomerAuth = () => {
                 <div className="space-y-6">
                   <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/50 flex items-center gap-4 h-12 shadow-sm">
                     <div className="flex items-center gap-3 pr-2">
-                       <img src="https://flagcdn.com/in.svg" className="w-5 rounded-[2px] shadow-sm" alt="IN" />
-                       <span className="font-medium text-[#1C2C4E] text-base">+91</span>
-                       <div className="w-[1px] h-6 bg-gray-200/80 ml-2" />
+                      <span className="font-medium text-[#1C2C4E] text-base">+91</span>
+                      <div className="w-[1px] h-6 bg-gray-200/80 ml-2" />
                     </div>
-                    <input 
+                    <input
                       type="tel"
                       value={phone}
                       onChange={handlePhoneChange}
@@ -119,8 +121,8 @@ const CustomerAuth = () => {
                     />
                   </div>
 
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className={cn(
                       "w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#1C2C4E] shadow-sm active:scale-[0.98]",
                       phone.length !== 10 && "opacity-90 grayscale-[0.2]"
@@ -142,7 +144,7 @@ const CustomerAuth = () => {
                 className="space-y-6 lg:space-y-10 flex-1 flex flex-col justify-center max-h-screen overflow-hidden relative"
               >
                 {/* Subtle Back Button */}
-                <button 
+                <button
                   onClick={() => setStep('phone')}
                   className="absolute top-0 left-0 p-2 text-[#1C2C4E] opacity-50 hover:opacity-100 transition-opacity"
                 >
@@ -156,50 +158,51 @@ const CustomerAuth = () => {
                   </p>
                 </div>
 
-                  <div className="relative">
-                    <input 
-                      type="tel"
-                      maxLength={5}
-                      value={otp.join('')}
-                      onChange={handleOTPChange}
-                      autoFocus
-                      className="absolute inset-0 opacity-0 cursor-default"
-                    />
-                    <div className="flex justify-center gap-3 px-2 pointer-events-none">
-                      {otp.map((digit, i) => (
-                        <div
-                          key={i}
-                          className={cn(
-                            "w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
-                            digit ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-50 text-gray-200"
-                          )}
-                        >
-                          {digit}
-                        </div>
-                      ))}
-                    </div>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    maxLength={5}
+                    value={otp.join('')}
+                    onChange={handleOTPChange}
+                    onFocus={() => setIsOTPFocused(true)}
+                    onBlur={() => setIsOTPFocused(false)}
+                    autoFocus
+                    className="absolute inset-0 opacity-0 cursor-default"
+                  />
+                  <div className="flex justify-center gap-3 px-2 pointer-events-none">
+                    {otp.map((digit, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
+                          digit || (isOTPFocused && i === otp.join('').length) ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-50 text-gray-200"
+                        )}
+                      >
+                        {digit}
+                      </div>
+                    ))}
                   </div>
+                </div>
 
-                  <div className="space-y-6">
-                    <Button 
-                      size="lg" 
-                      className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
-                      onClick={handleVerifyOTP}
-                      loading={loading}
-                      disabled={otp.includes('')}
-                    >
-                      Verify & Proceed
-                    </Button>
+                <div className="space-y-6">
+                  <Button
+                    size="lg"
+                    className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
+                    onClick={handleVerifyOTP}
+                    loading={loading}
+                    disabled={otp.includes('')}
+                  >
+                    Verify & Proceed
+                  </Button>
 
                   <div className="text-center space-y-3">
-                    <p className="text-[10px] font-black text-[#1C2C4E]/60 uppercase tracking-widest">Didn't receive the code?</p>
+                    <p className="text-[10px] font-black text-[#1C2C4E]/60 uppercase tracking-widest">Did'nt receive the code?</p>
                     <div className="flex flex-col items-center gap-2">
-                      <button 
+                      <button
                         disabled={!canResend}
                         onClick={handleSendOTP}
-                        className={`text-[12px] font-black border-b-2 border-current pb-0.5 transition-all ${
-                          canResend ? 'text-[#1C2C4E]' : 'text-gray-300'
-                        }`}
+                        className={`text-[12px] font-black border-b-2 border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E]' : 'text-gray-300'
+                          }`}
                       >
                         Resend OTP
                       </button>
@@ -215,6 +218,12 @@ const CustomerAuth = () => {
             )}
           </AnimatePresence>
         </div>
+      </div>
+
+      {/* Footer Branding */}
+      <div className="pb-8 flex items-center justify-center gap-2 relative z-10">
+        <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] uppercase tracking-wider leading-none">MADE IN INDIA</span>
+        <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
       </div>
     </div>
   );

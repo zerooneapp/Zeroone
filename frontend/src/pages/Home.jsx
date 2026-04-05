@@ -80,8 +80,8 @@ const Home = () => {
   return (
     <div className="pb-24 animate-in fade-in duration-700 bg-transparent min-h-screen">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
-      <div className="px-4 pt-2 pb-0.5 mb-0">
-        <div className="relative group animate-in slide-in-from-top-3 duration-700 w-full">
+      <div className="px-4 pt-2 pb-0.5 mb-2">
+        <div className="relative group animate-in slide-in-from-top-3 duration-700 w-full mx-auto">
           {/* Multi-layered Soft Glow */}
           <div className="absolute -inset-1 bg-gradient-to-r from-[#1C2C4E]/10 via-blue-500/5 to-[#1C2C4E]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
 
@@ -101,25 +101,29 @@ const Home = () => {
       </div>
 
       {/* Modern Category Pill Filters */}
-      <div className="flex gap-1.5 overflow-x-auto px-4 py-1 no-scrollbar justify-start sm:justify-center items-center">
-        {categories.map((cat) => {
-          const isActive = selectedCats.includes(cat._id);
-          return (
-            <button
-              key={cat._id}
-              onClick={() => toggleCategory(cat._id)}
-              className={`relative px-2.5 py-1.5 rounded-[12px] whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 ${isActive
-                ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
-                : 'bg-white dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
-                }`}
-            >
-              <span className="relative z-10">{cat.name}</span>
-              {isActive && (
-                <div className="absolute inset-x-0 bottom-0 top-0 rounded-[12px] bg-white/10" />
-              )}
-            </button>
-          );
-        })}
+      <div className="px-4 mb-4">
+        <div className="overflow-x-auto no-scrollbar scroll-smooth">
+          <div className="flex gap-2.5 items-center min-w-max pb-1">
+            {categories.map((cat) => {
+              const isActive = selectedCats.includes(cat._id);
+              return (
+                <button
+                  key={cat._id}
+                  onClick={() => toggleCategory(cat._id)}
+                  className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 ${isActive
+                    ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
+                    : 'bg-white dark:bg-gray-900/50 text-[#1C2C4E]/60 dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
+                    }`}
+                >
+                  <span className="relative z-10">{cat.name}</span>
+                  {isActive && (
+                    <div className="absolute inset-x-0 bottom-0 top-0 rounded-xl bg-white/10" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {error && (

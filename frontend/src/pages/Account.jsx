@@ -45,7 +45,7 @@ const Account = () => {
 
       <div className="px-4 mt-2">
         <div
-          className="bg-slate-900 p-3.5 rounded-2xl text-white shadow-2xl relative overflow-hidden border border-white/5"
+          className="bg-[#1C2C4E] p-3.5 rounded-2xl text-white shadow-2xl relative overflow-hidden border border-white/5"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16" />
           <div className="relative z-10 flex items-center gap-3.5">
@@ -72,7 +72,7 @@ const Account = () => {
             </div>
             <div className="flex-1 leading-none">
               <p className="text-[14px] font-black text-slate-900 dark:text-white tracking-tight">{item.label}</p>
-              <p className="text-[11px] font-black text-[#1C2C4E]/60 dark:text-slate-500 tracking-widest mt-0.5 truncate">{item.sub}</p>
+              <p className="text-[11px] font-black text-[#1C2C4E]/60 dark:text-slate-500 tracking-tight mt-0.5 truncate">{item.sub}</p>
             </div>
             <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
           </div>

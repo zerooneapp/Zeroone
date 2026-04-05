@@ -123,15 +123,15 @@ const BookingStatusDetails = () => {
         <section className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm space-y-3.5">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-[8px] font-black tracking-widest text-slate-400 leading-none">Scheduled date</p>
+              <p className="text-[8px] font-black tracking-widest text-slate-400 dark:text-white/40 leading-none uppercase">Scheduled date</p>
               <div className="flex items-center gap-1.5 text-[11px] font-black text-gray-900 dark:text-white tracking-tighter mt-1 leading-none">
                 <Calendar size={12} strokeWidth={3} className="text-primary" />
                 {dayjs(booking.startTime).format('dddd, DD MMMM')}
               </div>
             </div>
             <div className="space-y-1 text-right flex flex-col items-end">
-              <p className="text-[8px] font-black tracking-widest text-slate-400 leading-none">Arrival time</p>
-              <div className="flex items-center gap-1.5 text-[11px] font-black text-primary tracking-tighter mt-1 leading-none">
+              <p className="text-[8px] font-black tracking-widest text-slate-400 dark:text-white/40 leading-none uppercase">Arrival time</p>
+              <div className="flex items-center gap-1.5 text-[11px] font-black text-primary dark:text-blue-400 tracking-tighter mt-1 leading-none">
                 <Clock size={12} strokeWidth={3} />
                 {dayjs(booking.startTime).format('hh:mm A')}
               </div>
@@ -139,8 +139,8 @@ const BookingStatusDetails = () => {
           </div>
 
           <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 flex items-start gap-2">
-            <MapPin size={12} strokeWidth={3} className="text-slate-300 mt-0.5 shrink-0" />
-            <p className="text-[10px] font-black tracking-tight text-slate-400 leading-tight">
+            <MapPin size={12} strokeWidth={3} className="text-slate-300 dark:text-gray-600 mt-0.5 shrink-0" />
+            <p className="text-[10px] font-black tracking-tight text-slate-400 dark:text-white/60 leading-tight">
               {booking.serviceAddress || booking.vendorId?.address || 'Location information unavailable'}
             </p>
           </div>

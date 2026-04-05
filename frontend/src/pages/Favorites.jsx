@@ -39,7 +39,7 @@ const Favorites = () => {
    return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32">
          {/* Header (Elite Minimal) */}
-         <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800 p-4 pt-8">
+         <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800 p-3 pt-2">
             <div className="flex items-center gap-3">
                <button
                   onClick={() => navigate(-1)}
@@ -113,7 +113,7 @@ const Favorites = () => {
 
                               <button
                                  onClick={() => navigate(`/service/${vendor._id}`)}
-                                 className="h-10 px-6 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[9px] tracking-widest active:scale-95 transition-all border-b-2 border-white/10 shadow-lg"
+                                 className="h-10 px-6 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[12px] tracking-tight active:scale-95 transition-all border-b-2 border-white/10 shadow-lg capitalize"
                               >
                                  Book now
                               </button>

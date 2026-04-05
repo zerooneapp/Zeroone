@@ -73,16 +73,16 @@ const NotificationSettings = () => {
       <header className="px-4 pt-4 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate(-1)}
-            className="p-1 px-2 -ml-2 text-[#1C2C4E] dark:text-blue-400 active:scale-90 transition-all font-black"
+            type="button"
+            onClick={() => navigate('/account')}
+            className="p-2 -ml-2 text-[#1C2C4E] dark:text-blue-400 active:scale-95 transition-all font-black cursor-pointer z-50 flex items-center justify-center rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800"
           >
-            <ChevronLeft size={20} strokeWidth={3} />
+            <ChevronLeft size={22} strokeWidth={3.5} />
           </button>
           <h1 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">
             Notification settings
           </h1>
         </div>
-        <p className="text-[9px] font-black text-[#1C2C4E]/60 tracking-widest mt-2 ml-1 opacity-80 uppercase">Elite Alert Engine</p>
       </header>
 
       <main className="flex-1 overflow-y-auto px-5 py-6 space-y-6">

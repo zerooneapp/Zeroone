@@ -147,8 +147,8 @@ const Cart = () => {
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
         <div className="text-center leading-none">
-          <p className="text-[8px] font-black tracking-widest text-slate-400">Step 1 of 3</p>
-          <h1 className="font-extrabold text-[11px] text-gray-900 dark:text-white tracking-tight mt-1">Select Date & Time</h1>
+          <p className="text-[10px] font-black tracking-widest text-slate-400">Step 1 of 3</p>
+          <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight mt-1">Select Date & Time</h1>
         </div>
         <div className="w-10"></div>
       </div>
@@ -157,12 +157,12 @@ const Cart = () => {
         {/* Date Selection */}
         <section>
           <div className="flex items-center justify-between mb-2 px-1">
-            <span className="text-[9px] font-black text-slate-400 tracking-widest">Select booking date</span>
+            <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Select booking date</span>
             <button
               onClick={() => setShowFullCalendar(!showFullCalendar)}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 dark:bg-blue-500/10 rounded-lg text-[9px] font-black text-primary dark:text-blue-400 tracking-widest border border-slate-100 dark:border-blue-500/20 active:scale-95 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-blue-500/10 rounded-lg text-[10px] font-black text-[#1C2C4E] dark:text-blue-400 tracking-widest border border-slate-100 dark:border-blue-500/20 active:scale-95 transition-all shadow-sm"
             >
-              <Calendar size={11} strokeWidth={3} />
+              <Calendar size={13} strokeWidth={3} />
               {showFullCalendar ? 'List' : 'Calendar'}
             </button>
           </div>
@@ -187,8 +187,8 @@ const Cart = () => {
                         : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 text-slate-400 shadow-sm"
                     )}
                   >
-                    <span className="text-[8px] uppercase font-black opacity-60 tracking-widest">{d.day}</span>
-                    <span className="text-xs font-black mt-0.5 tracking-tighter">{d.date}</span>
+                    <span className="text-[9px] uppercase font-black opacity-60 tracking-widest leading-none">{d.day}</span>
+                    <span className="text-[14px] font-black mt-1 tracking-tighter leading-none">{d.date}</span>
                   </button>
                 ))}
               </motion.div>
@@ -229,22 +229,22 @@ const Cart = () => {
         </section>
 
         {/* Selected Services Summary */}
-        <section className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
-          <p className="text-[9px] font-black text-slate-400 tracking-widest mb-2 px-1">Booking summary</p>
-          <div className="space-y-1.5">
+        <section className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+          <p className="text-[11px] font-black text-slate-400 tracking-widest mb-3 px-1 leading-none capitalize">Booking summary</p>
+          <div className="space-y-2.5">
             {items.map(item => (
               <div key={item._id} className="flex justify-between items-center px-1">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-primary" />
-                  <span className="font-extrabold text-[9px] text-gray-900 dark:text-white uppercase tracking-tight truncate max-w-[200px]">{item?.name || 'Service'}</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#1C2C4E]" />
+                  <span className="font-black text-[12px] text-gray-900 dark:text-white tracking-tight truncate max-w-[200px] leading-none capitalize">{item?.name || 'Service'}</span>
                 </div>
-                <span className="font-black text-[10px] text-gray-900 dark:text-gray-300 italic tracking-tighter">₹{item?.price || 0}</span>
+                <span className="font-black text-[13px] text-gray-900 dark:text-gray-300 tracking-tighter leading-none">₹{item?.price || 0}</span>
               </div>
             ))}
-            <div className="h-[1px] bg-slate-50 dark:bg-gray-800 my-0.5" />
-            <div className="flex justify-between items-center font-black text-gray-900 dark:text-white tracking-widest uppercase text-[10px] px-1">
+            <div className="h-[1px] bg-slate-50 dark:bg-gray-800 my-1" />
+            <div className="flex justify-between items-center font-black text-gray-900 dark:text-white tracking-widest capitalize text-[12px] px-1 leading-none">
               <span>Total Value</span>
-              <span className="text-primary italic tracking-tighter">₹{getTotalPrice()}</span>
+              <span className="text-[#1C2C4E] tracking-tighter">₹{getTotalPrice()}</span>
             </div>
           </div>
         </section>
@@ -259,8 +259,8 @@ const Cart = () => {
               className="space-y-2"
             >
               <div className="flex items-center justify-between px-1">
-                <span className="text-[9px] font-black text-slate-400 tracking-widest">Select time</span>
-                <span className="text-[7px] font-black text-emerald-500 tracking-widest italic">{items.length} Services ready</span>
+                <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Select time</span>
+                <span className="text-[9px] font-black text-emerald-500 tracking-widest capitalize">{items.length} services ready</span>
               </div>
               {loadingSlots ? (
                 <div className="grid grid-cols-3 gap-1.5 mt-2">
@@ -280,7 +280,7 @@ const Cart = () => {
                       key={slot.time}
                       onClick={() => setSelectedSlot(slot)}
                       className={cn(
-                        "py-2 rounded-lg font-black text-[9px] transition-all border border-slate-100 dark:border-gray-800 text-center uppercase tracking-widest shadow-sm active:scale-95",
+                        "py-3 rounded-lg font-black text-[11px] transition-all border border-slate-100 dark:border-gray-800 text-center capitalize tracking-widest shadow-sm active:scale-95",
                         selectedSlot?.time === slot.time
                           ? "bg-slate-900 border-slate-900 text-white shadow-lg"
                           : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#1C2C4E]/10"
@@ -304,7 +304,7 @@ const Cart = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-2"
             >
-              <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Choose professional</p>
+              <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 capitalize leading-none">Choose professional</p>
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
                 {availableStaff.map((s) => (
                   <button
@@ -321,7 +321,7 @@ const Cart = () => {
                       <img src={s.image || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
                     </div>
                     <span className={cn(
-                      "text-[8px] font-black truncate w-full text-center tracking-widest leading-tight",
+                      "text-[10px] font-black truncate w-full text-center tracking-widest leading-tight capitalize",
                       selectedStaff?._id === s._id ? "text-white" : "text-slate-400"
                     )}>
                       {s.name?.split(' ')[0] || 'Staff'}
@@ -354,16 +354,16 @@ const Cart = () => {
       >
         <div className="flex items-center justify-between">
           <div className="leading-none">
-            <p className="text-[7px] font-black text-white/40 tracking-widest mb-1.5">Net payable</p>
-            <p className="text-lg font-black text-white italic tracking-tighter leading-none">₹{getTotalPrice()}</p>
+            <p className="text-[9px] font-black text-white/40 tracking-widest mb-2 leading-none capitalize">Net payable</p>
+            <p className="text-[20px] font-black text-white tracking-tighter leading-none">₹{getTotalPrice()}</p>
           </div>
           <button
             disabled={!selectedSlot}
             onClick={handleContinue}
-            className="px-4 py-2 bg-white text-slate-900 rounded-xl font-black text-[9px] tracking-widest shadow-xl active:scale-95 disabled:opacity-30 transition-all flex items-center gap-1.5 border-b-2 border-slate-200"
+            className="px-5 py-2.5 bg-white text-slate-900 rounded-xl font-black text-[12px] tracking-widest shadow-xl active:scale-95 disabled:opacity-30 transition-all flex items-center gap-1.5 border-b-2 border-slate-200 capitalize"
           >
             {rescheduleBookingId ? 'Reschedule' : 'Continue'}
-            <ChevronRight size={14} strokeWidth={3} />
+            <ChevronRight size={16} strokeWidth={3} />
           </button>
         </div>
       </motion.div>

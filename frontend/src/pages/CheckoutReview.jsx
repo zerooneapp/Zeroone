@@ -99,8 +99,8 @@ const CheckoutReview = () => {
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
         <div className="text-center leading-none">
-          <p className="text-[8px] font-black tracking-widest text-slate-400">Step 2 of 3</p>
-          <h1 className="font-extrabold text-[11px] text-gray-900 dark:text-white tracking-tight mt-1">Review & Confirm</h1>
+          <p className="text-[10px] font-black tracking-widest text-slate-400 capitalize">Step 2 of 3</p>
+          <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight mt-1">Review & Confirm</h1>
         </div>
         <div className="w-10"></div>
       </div>
@@ -114,24 +114,24 @@ const CheckoutReview = () => {
         >
           <div className="leading-none text-center">
             <h2 className="text-base font-black truncate tracking-tight">{vendor.shopName}</h2>
-            <p className="text-[8px] font-black opacity-60 flex items-center justify-center gap-1 mt-1 tracking-widest">
+            <p className="text-[8px] font-black opacity-60 flex items-center justify-center gap-1 mt-1 tracking-widest capitalize">
               <MapPin size={10} strokeWidth={3} /> <span className="line-clamp-1">{vendor.address || 'Vendor location'}</span>
             </p>
           </div>
 
-          <div className="flex justify-center gap-6 pt-2 border-t border-white/10">
-            <div className="space-y-1 text-center">
-              <p className="text-[8px] font-black opacity-40 tracking-widest leading-none">Date</p>
-              <div className="flex items-center justify-center gap-1.5 leading-none">
-                <Calendar size={12} className="opacity-60" />
-                <span className="font-black text-xs tracking-tighter">{selectedDate}</span>
+          <div className="flex justify-center gap-6 pt-3 border-t border-white/10">
+            <div className="space-y-1.5 text-center">
+              <p className="text-[9px] font-black opacity-40 tracking-widest leading-none capitalize">Date</p>
+              <div className="flex items-center justify-center gap-1.5 leading-none mt-1">
+                <Calendar size={13} className="opacity-60 text-blue-400" />
+                <span className="font-black text-[13px] tracking-tighter">{selectedDate}</span>
               </div>
             </div>
-            <div className="space-y-1 text-center">
-              <p className="text-[8px] font-black opacity-40 tracking-widest leading-none">Time</p>
-              <div className="flex items-center justify-center gap-1.5 leading-none">
-                <Clock size={12} className="opacity-60" />
-                <span className="font-black text-xs tracking-tighter">{selectedSlot}</span>
+            <div className="space-y-1.5 text-center">
+              <p className="text-[9px] font-black opacity-40 tracking-widest leading-none capitalize">Time</p>
+              <div className="flex items-center justify-center gap-1.5 leading-none mt-1">
+                <Clock size={13} className="opacity-60 text-blue-400" />
+                <span className="font-black text-[13px] tracking-tighter">{selectedSlot}</span>
               </div>
             </div>
           </div>
@@ -140,62 +140,62 @@ const CheckoutReview = () => {
         {/* Selected Services */}
         <section className="space-y-2">
           <div className="flex items-center justify-between px-1">
-            <span className="text-[9px] font-black text-slate-400 tracking-widest">Services</span>
-            <span className="text-[8px] font-black text-primary tracking-tighter italic opacity-80">{items.length} Items</span>
+            <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Services</span>
+            <span className="text-[9px] font-black text-[#1C2C4E] tracking-tighter capitalize opacity-80">{items.length} Items</span>
           </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-3 border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] space-y-2.5">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] space-y-3">
             {items.map((item) => (
               <div key={item._id} className="flex justify-between items-center leading-none">
-                <div className="space-y-0.5">
-                  <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight">{item.name}</p>
-                  <p className="text-[8px] text-slate-400 font-black tracking-tighter">{item.duration}m • {item.bufferTime || 0}m Buffer</p>
+                <div className="space-y-1">
+                  <p className="font-black text-[13px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">{item.name}</p>
+                  <p className="text-[9px] text-slate-400 font-black tracking-tighter leading-none capitalize">{item.duration}m • {item.bufferTime || 0}m Buffer</p>
                 </div>
-                <span className="font-black text-gray-900 dark:text-white text-xs italic">₹{item.price}</span>
+                <span className="font-black text-gray-900 dark:text-white text-[13px]">₹{item.price}</span>
               </div>
             ))}
-            <div className="border-t border-slate-50 dark:border-gray-800 pt-2 flex justify-between items-center leading-none">
-              <span className="text-[9px] font-black text-slate-400 tracking-widest">Convenience fee</span>
-              <span className="text-[9px] font-black text-emerald-500 tracking-widest italic">Free</span>
+            <div className="border-t border-slate-50 dark:border-gray-800 pt-3 flex justify-between items-center leading-none">
+              <span className="text-[10px] font-black text-slate-400 tracking-widest leading-none capitalize">Convenience fee</span>
+              <span className="text-[10px] font-black text-emerald-500 tracking-widest leading-none capitalize">Free</span>
             </div>
-            <div className="flex justify-between items-center pt-1 leading-none">
-              <span className="font-black text-sm text-gray-900 dark:text-white tracking-tight">To pay</span>
-              <span className="font-black text-lg text-primary dark:text-white italic tracking-tighter">₹{totalPrice}</span>
+            <div className="flex justify-between items-center pt-1.5 leading-none">
+              <span className="font-black text-[15px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">To pay</span>
+              <span className="font-black text-[20px] text-[#1C2C4E] dark:text-white tracking-tighter leading-none">₹{totalPrice}</span>
             </div>
           </div>
         </section>
 
         {/* Staff Card */}
         <section className="space-y-2">
-          <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Assigned professional</p>
-          <div className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center gap-3 active:scale-95 transition-all">
-            <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shadow-inner shrink-0">
+          <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 leading-none capitalize">Assigned professional</p>
+          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center gap-3 active:scale-95 transition-all">
+            <div className="w-12 h-12 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shadow-inner shrink-0">
               <img src={selectedStaff?.image || `https://i.pravatar.cc/150?u=${vendor._id}`} className="w-full h-full object-cover" />
             </div>
             <div className="leading-none overflow-hidden pr-2">
-              <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight truncate">{selectedStaff?.name || 'Auto assigned'}</p>
-              <p className="text-[8px] text-slate-400 font-black mt-1 tracking-widest">Professional specialist</p>
+              <p className="font-black text-[14px] text-gray-900 dark:text-white tracking-tight truncate leading-none capitalize">{selectedStaff?.name || 'Auto assigned'}</p>
+              <p className="text-[10px] text-slate-400 font-black mt-1.5 tracking-widest leading-none capitalize">Professional specialist</p>
             </div>
-            <div className="ml-auto flex items-center gap-1 text-blue-500 bg-blue-500/5 dark:bg-blue-900/10 px-2.5 py-1.5 rounded-lg border border-blue-500/10 dark:border-blue-900/30 shrink-0 shadow-sm">
-              <ShieldCheck size={12} strokeWidth={3} />
-              <span className="text-[8px] font-black tracking-widest">Verified</span>
+            <div className="ml-auto flex items-center gap-1.5 text-blue-500 bg-blue-500/5 dark:bg-blue-900/10 px-3 py-2 rounded-lg border border-blue-500/10 dark:border-blue-900/30 shrink-0 shadow-sm">
+              <ShieldCheck size={14} strokeWidth={3} />
+              <span className="text-[10px] font-black tracking-widest leading-none capitalize">Verified</span>
             </div>
           </div>
         </section>
 
         {/* Payment Method */}
         <section className="space-y-2">
-          <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Payment method</p>
-          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center justify-between active:scale-[0.98] transition-all">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/5 rounded-lg text-primary border border-primary/10 shadow-inner">
-                <CreditCard size={18} />
+          <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 leading-none capitalize">Payment method</p>
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center justify-between active:scale-[0.98] transition-all">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-primary/5 rounded-lg text-primary border border-primary/10 shadow-inner">
+                <CreditCard size={20} />
               </div>
               <div className="leading-none">
-                <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight">Pay at shop</p>
-                <p className="text-[8px] text-slate-400 font-black mt-1 tracking-widest">Safe & secure payment</p>
+                <p className="font-black text-[14px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">Pay at shop</p>
+                <p className="text-[10px] text-slate-400 font-black mt-1.5 tracking-widest leading-none capitalize">Safe & secure payment</p>
               </div>
             </div>
-            <div className="w-5 h-5 rounded-full border-4 border-primary bg-white shadow-lg" />
+            <div className="w-6 h-6 rounded-full border-[5px] border-[#1C2C4E] bg-white shadow-lg" />
           </div>
         </section>
       </div>
@@ -204,12 +204,12 @@ const CheckoutReview = () => {
       <div className="fixed bottom-[82px] left-4 right-4 p-4 glass-effect border border-slate-200/40 dark:border-gray-800 rounded-[28px] z-50 shadow-2xl">
         <div className="max-w-md mx-auto">
           <button
-            className="w-full h-11 bg-slate-900 dark:bg-primary text-white shadow-xl shadow-black/10 dark:shadow-primary/20 text-[10px] font-black tracking-widest flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50"
+            className="w-full h-12 bg-slate-900 dark:bg-primary text-white shadow-xl shadow-black/10 dark:shadow-primary/20 text-[15px] font-black tracking-tight flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50 capitalize"
             onClick={handleConfirm}
             disabled={loading}
           >
             {loading ? (
-              <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               'Confirm booking'
             )}

@@ -2,8 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
-import { Moon, Sun, Bell, MapPin, User, Heart } from 'lucide-react';
+import { Moon, Sun, Bell, MapPin, User, Heart, ChevronDown } from 'lucide-react';
 import NotificationDrawer from '../components/NotificationDrawer';
+import api from '../services/api';
 
 const Header = () => {
   const { isDarkMode, toggleTheme } = useThemeStore();
@@ -11,42 +12,42 @@ const Header = () => {
   const [showNotifications, setShowNotifications] = React.useState(false);
   const [unreadCount, setUnreadCount] = React.useState(0);
   const navigate = useNavigate();
-  const today = new Date();
 
   React.useEffect(() => {
     if (user) {
       const fetchUnread = async () => {
         const token = localStorage.getItem('token');
-        if (!token) return; // Wait for token
+        if (!token) return;
 
         try {
           const res = await api.get('/notifications/unread-count');
           setUnreadCount(res.data.count);
         } catch (err) {
-          // Silent log during development polling
           console.debug('Unread sync pending...');
         }
       };
       fetchUnread();
-      const interval = setInterval(fetchUnread, 30000); // Poll every 30s
+      const interval = setInterval(fetchUnread, 30000);
       return () => clearInterval(interval);
     }
   }, [user]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl px-4 py-2 border-b border-[#1C2C4E]/10 dark:border-[#1C2C4E]/20">
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl px-4 py-2 border-b border-slate-100 dark:border-gray-800 shadow-sm">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Brand & Location HUD */}
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <h1 className="text-[24px] font-black text-[#1C2C4E] dark:text-white tracking-wide leading-none">
-            ZeroOne
+        <div className="flex flex-col gap-1 min-w-0">
+          <h1 className="text-[28px] font-extrabold tracking-tighter leading-none flex items-center">
+            <span className="text-[#1C2C4E] dark:text-white">Zero</span>
+            <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
           </h1>
           <button 
             onClick={() => navigate('/account/addresses')}
-            className="flex items-center gap-1 text-[10px] font-bold text-gray-500 hover:text-[#1C2C4E] transition-colors group"
+            className="flex items-center gap-1 text-[10px] font-black text-slate-400 hover:text-[#1C2C4E] transition-colors group"
           >
             <MapPin size={10} className="text-[#1C2C4E] dark:text-blue-400 group-hover:scale-110 transition-transform" />
-            <span className="truncate max-w-[150px] uppercase tracking-wider">{user?.address?.split(',')[0] || 'Select Location'}</span>
+            <span className="truncate max-w-[150px] uppercase tracking-widest">{user?.address?.split(',')[0] || 'Select Location'}</span>
+            <ChevronDown size={10} strokeWidth={4} className="text-slate-400 opacity-60 group-hover:text-[#1C2C4E] transition-colors" />
           </button>
         </div>
         
