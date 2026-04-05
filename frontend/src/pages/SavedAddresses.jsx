@@ -136,7 +136,7 @@ const SavedAddresses = () => {
                 value={manualAddress}
                 onChange={(e) => setManualAddress(e.target.value)}
                 placeholder="Enter complete address manually..."
-                className="w-full h-32 p-4 pt-10 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 text-xs font-bold text-slate-900 dark:text-white tracking-tight focus:border-primary transition-all outline-none resize-none shadow-sm"
+                className="w-full h-24 p-4 pt-8 bg-white dark:bg-gray-900 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 text-xs font-bold text-slate-900 dark:text-white tracking-tight focus:border-primary transition-all outline-none resize-none shadow-sm"
               />
               <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none opacity-40">
                  <Search size={14} className="text-[#1C2C4E]" />
