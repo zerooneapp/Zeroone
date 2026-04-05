@@ -38,7 +38,7 @@ const Header = () => {
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Brand & Location HUD */}
         <div className="flex flex-col gap-0.5 min-w-0">
-          <h1 className="text-[20px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none">
+          <h1 className="text-[24px] font-black text-[#1C2C4E] dark:text-white tracking-wide leading-none">
             ZeroOne
           </h1>
           <button 
@@ -54,14 +54,14 @@ const Header = () => {
         <div className="flex items-center gap-1">
           <button 
             onClick={toggleTheme}
-            className="p-1.5 text-[#0B1222] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
+            className="p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
             {isDarkMode ? <Sun size={17} strokeWidth={2.5} /> : <Moon size={17} strokeWidth={2.5} />}
           </button>
 
           <button 
             onClick={() => setShowNotifications(true)}
-            className="relative p-1.5 text-[#0B1222] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
+            className="relative p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
             <Bell size={18} strokeWidth={2.5} />
             {unreadCount > 0 && (
@@ -71,7 +71,7 @@ const Header = () => {
           
           <button 
             onClick={() => navigate('/favorites')}
-            className="p-1.5 text-[#0B1222] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
+            className="p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
             <Heart size={19} strokeWidth={2.5} />
           </button>

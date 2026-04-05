@@ -62,7 +62,7 @@ const BookingStatusDetails = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
       <div className="p-3.5 pt-4 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />

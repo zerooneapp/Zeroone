@@ -36,12 +36,12 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
       <div className={cn("p-2.5 flex flex-col justify-between space-y-1")}>
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
-            <h3 className={cn("font-black text-[#1C2C4E] dark:text-white truncate uppercase tracking-tighter leading-none text-[13px]")}>
+            <h3 className={cn("font-black text-[#1C2C4E] dark:text-white truncate capitalize tracking-tighter leading-none text-[13px]")}>
               {vendor.shopName}
             </h3>
             <div className="flex items-center gap-1 mt-0 opacity-80">
               <MapPin size={10} className="text-[#0B1222] dark:text-blue-400 shrink-0" />
-              <span className="text-[10px] font-bold uppercase truncate text-[#0B1222] dark:text-gray-300">
+              <span className="text-[10px] font-bold capitalize truncate text-[#0B1222] dark:text-gray-300">
                 {((vendor.dist?.calculated || 1100) / 1000).toFixed(1)} km away
               </span>
             </div>
@@ -67,7 +67,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
 
            <button 
              className={cn(
-               "font-black tracking-widest bg-[#1C2C4E] text-white shadow-sm transition-all px-3 py-1.5 text-[9px] rounded-lg"
+               "font-black tracking-wider capitalize bg-[#1C2C4E] text-white shadow-sm transition-all px-3 py-1.5 text-[11px] rounded-lg"
              )}
              onClick={(e) => {
                e.stopPropagation();
