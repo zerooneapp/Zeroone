@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Star, MapPin, AlertCircle, ChevronRight } from 'lucide-react';
+import { Search, Star, MapPin, AlertCircle, ChevronRight, Mic } from 'lucide-react';
 import SectionTitle from '../components/SectionTitle';
 import VendorCard from '../components/VendorCard';
 import Button from '../components/Button';
@@ -91,17 +91,20 @@ const Home = () => {
             </div>
             <input
               type="text"
-              placeholder="Search salon, beauty parlour, makeup artist..."
+              placeholder="Search salon, beauty parlour..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[37px] pl-14 pr-6 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#1C2C4E]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#1C2C4E]/30 transition-all duration-500 outline-none placeholder:text-[#0B1222]/40 dark:placeholder:text-gray-500 placeholder:font-semibold"
+              className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#1C2C4E]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#1C2C4E]/30 transition-all duration-500 outline-none placeholder:text-[#0B1222]/40 dark:placeholder:text-gray-500 placeholder:font-semibold"
             />
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400/60 group-focus-within:text-[#1C2C4E] dark:group-focus-within:text-blue-400 z-10 transition-all duration-300">
+              <Mic size={18} strokeWidth={2.5} />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Modern Category Pill Filters */}
-      <div className="px-4 mb-4">
+      <div className="px-4 mb-1">
         <div className="overflow-x-auto no-scrollbar scroll-smooth">
           <div className="flex gap-2.5 items-center min-w-max pb-1">
             {categories.map((cat) => {
@@ -134,7 +137,7 @@ const Home = () => {
       )}
 
       {/* Nearby Professionals (Ultra-Wide Stack) */}
-      <section className="mt-1 px-3">
+      <section className="mt-0 px-3">
         <SectionTitle
           title="Nearby Professionals"
           actionLabel="More"

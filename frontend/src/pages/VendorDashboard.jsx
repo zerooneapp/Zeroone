@@ -122,16 +122,16 @@ const VendorDashboard = () => {
 
    if (loading || !data) return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 p-6 space-y-6 pt-24 animate-pulse">
-         <div className="flex justify-between items-start h-16 bg-white dark:bg-gray-900 rounded-[2rem]" />
-         <div className="h-32 bg-white dark:bg-gray-900 rounded-[2.5rem]" />
+         <div className="flex justify-between items-start h-16 bg-white dark:bg-gray-900 rounded-lg" />
+         <div className="h-32 bg-white dark:bg-gray-900 rounded-lg" />
          <div className="grid grid-cols-4 gap-3">
-            {[1, 2, 3, 4].map(i => <div key={i} className="aspect-square bg-white dark:bg-gray-900 rounded-3xl" />)}
+            {[1, 2, 3, 4].map(i => <div key={i} className="aspect-square bg-white dark:bg-gray-900 rounded-lg" />)}
          </div>
       </div>
    );
 
    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-40 transition-colors duration-500 overflow-x-hidden">
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-16 transition-colors duration-500 overflow-x-hidden">
 
          {/* 🏙️ PREMIUM HEADER */}
          <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
@@ -152,10 +152,10 @@ const VendorDashboard = () => {
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
-               <button onClick={toggleTheme} className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90 shadow-sm">
+               <button onClick={toggleTheme} className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90 shadow-sm">
                   {isDarkMode ? <Sun size={15} className="text-amber-500" /> : <Moon size={15} className="text-slate-600" />}
                </button>
-               <button onClick={() => setIsNotificationsOpen(true)} className="relative w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90">
+               <button onClick={() => setIsNotificationsOpen(true)} className="relative w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90">
                   <Bell size={15} className="text-slate-600 dark:text-gray-400" />
                   {unreadCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 border-2 border-white dark:border-gray-950 rounded-full" />}
                </button>
@@ -165,7 +165,7 @@ const VendorDashboard = () => {
                   onClick={handleToggleStatus}
                   disabled={!data.subscription?.isActive || statusLoading}
                   className={cn(
-                     "h-9 px-3 rounded-xl flex items-center justify-center gap-2 transition-all border shrink-0",
+                     "h-9 px-3 rounded-lg flex items-center justify-center gap-2 transition-all border shrink-0",
                      data.isShopOpen && !data.isClosedToday
                         ? 'bg-emerald-500 text-white border-emerald-400 active:scale-95 shadow-lg shadow-emerald-500/20'
                         : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 border-slate-100 dark:border-gray-700'
@@ -179,7 +179,7 @@ const VendorDashboard = () => {
             </div>
          </header>
 
-         <main className={cn("px-2.5 space-y-1.5", loading ? "pt-12" : "pt-[60px]")}>
+         <main className={cn("px-2.5 space-y-1.5", loading ? "pt-12" : "pt-[65px]")}>
 
 
             {/* 🏃 DYNAMIC ACTION TILES HUD */}
@@ -197,7 +197,7 @@ const VendorDashboard = () => {
                            <button
                               key={i}
                               onClick={action.onClick || (() => navigate(action.path))}
-                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
+                              className="flex flex-col items-center justify-center gap-1.5 py-2.5 bg-white dark:bg-gray-900 rounded-md border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
                            >
                               <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-8">
                                  {action.label === 'Wallet' ? (
@@ -234,7 +234,7 @@ const VendorDashboard = () => {
                            <button
                               key={i}
                               onClick={action.onClick || (() => navigate(action.path))}
-                              className="flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white dark:bg-gray-900 rounded-[1.8rem] border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
+                              className="flex flex-col items-center justify-center gap-1.5 py-2.5 bg-white dark:bg-gray-900 rounded-md border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
                            >
                               <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-8">
                                  <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
@@ -249,29 +249,29 @@ const VendorDashboard = () => {
                </AnimatePresence>
             </section>
 
-            {/* 📊 COMPACT METRICS HUD */}
+            {/* 📊 COMPACT METRICS HUD - HORIZONTAL SCROLL */}
             <section className="px-0.5">
-               <div className="grid grid-cols-4 gap-1.5">
+               <div className="flex overflow-x-auto gap-2 no-scrollbar pb-1">
                   {/* Today Revenue - Dark Highlight */}
-                  <div className="bg-slate-900 dark:bg-gray-900 py-3 px-2.5 rounded-2xl shadow-lg border border-[#1C2C4E]/10 flex flex-col">
+                  <div className="bg-slate-900 dark:bg-gray-900 py-3 px-2.5 rounded-lg shadow-lg border border-[#1C2C4E]/10 flex flex-col min-w-[140px] shrink-0">
                      <p className="text-[9px] font-black text-white/50 tracking-widest leading-none mb-1.5">Today revenue</p>
                      <p className="text-sm font-black text-white leading-none">₹{data.stats.todayEarnings.toLocaleString()}</p>
                   </div>
 
                   {/* Today Clients */}
-                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col">
+                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[140px] shrink-0">
                      <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Today clients</p>
                      <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.stats.todayBookings}</p>
                   </div>
 
                   {/* Services Done */}
-                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col">
+                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[140px] shrink-0">
                      <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Services done</p>
                      <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'completed').length || 0}</p>
                   </div>
 
                   {/* Pending Bookings */}
-                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col">
+                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[140px] shrink-0">
                      <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">Pending bookings</p>
                      <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'confirmed').length || 0}</p>
                   </div>
@@ -284,7 +284,7 @@ const VendorDashboard = () => {
                   <h2 className="text-sm font-black text-slate-800 dark:text-white tracking-widest">Live schedule</h2>
                   <button
                      onClick={() => navigate('/vendor/bookings')}
-                     className="text-[8px] font-black text-primary tracking-widest px-3 py-1.5 bg-primary/5 rounded-full border border-primary/10 transition-all active:scale-95"
+                     className="text-[8px] font-black text-primary dark:text-white tracking-widest px-3 py-1.5 bg-primary/5 dark:bg-white/10 rounded-full border border-primary/10 dark:border-white/20 transition-all active:scale-95"
                   >
                      View all <ChevronRight size={8} className="inline ml-1" />
                   </button>
@@ -292,17 +292,17 @@ const VendorDashboard = () => {
 
                <div className="space-y-2.5">
                   {data.schedule.length === 0 ? (
-                     <div className="py-10 bg-white dark:bg-gray-900 rounded-[2rem] border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center gap-2 group">
-                        <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-slate-200 group-hover:text-primary transition-colors">
+                     <div className="py-10 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center gap-2 group">
+                        <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-200 group-hover:text-primary transition-colors">
                            <Calendar size={18} />
                         </div>
                         <p className="text-[8px] font-black text-slate-400 tracking-widest">No appointments for today</p>
                      </div>
                   ) : (
                      data.schedule.map((item, idx) => (
-                        <motion.div key={idx} whileTap={{ scale: 0.98 }} className="bg-white dark:bg-gray-900 p-3.5 rounded-[1.8rem] shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group">
+                        <motion.div key={idx} whileTap={{ scale: 0.98 }} className="bg-white dark:bg-gray-900 p-3.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group">
                            <div className="flex items-center gap-3">
-                              <div className="w-11 h-11 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
+                              <div className="w-11 h-11 bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
                                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.customerName}${idx}`} alt="Avatar" className="w-full h-full object-cover" />
                               </div>
                               <div className="space-y-0">
@@ -332,9 +332,9 @@ const VendorDashboard = () => {
 
 
             {/* 📊 REVENUE ANALYSIS */}
-            <section className="space-y-2 pb-8 px-0.5">
-               <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80">Revenue history</h2>
-               <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-[2rem] border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm h-56 w-full relative overflow-hidden group">
+            <section className="space-y-2 px-0.5">
+               <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80 uppercase">Revenue history</h2>
+               <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm h-56 w-full relative overflow-hidden group">
                   <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={data.revenueHistory || []}>
                         <defs>
@@ -354,7 +354,7 @@ const VendorDashboard = () => {
                         <YAxis hide domain={[0, 'auto']} />
                         <Tooltip
                            contentStyle={{
-                              borderRadius: '1rem',
+                              borderRadius: '0.5rem',
                               background: isDarkMode ? '#0f172a' : '#ffffff',
                               border: isDarkMode ? '1px solid #1e293b' : '1px solid #f1f5f9',
                               boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
@@ -380,6 +380,43 @@ const VendorDashboard = () => {
                </div>
             </section>
 
+            {/* 💸 RECENT PAYMENTS */}
+            <section className="space-y-2 pb-4 px-0.5">
+               <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80 uppercase">Recent Payments</h2>
+               <div className="bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm overflow-hidden">
+                  {[
+                     { name: 'Rajesh Gupta', service: 'Pedicure', amount: 800, method: 'UPI' },
+                     { name: 'Anita Mishra', service: 'Hair Color', amount: 1500, method: 'Card' }
+                  ].map((p, i, arr) => (
+                     <div 
+                        key={i} 
+                        className={cn(
+                           "p-3 flex items-center justify-between group active:bg-slate-50 dark:active:bg-gray-800 transition-colors",
+                           i !== arr.length - 1 && "border-b border-slate-50 dark:border-gray-800"
+                        )}
+                     >
+                        <div className="flex items-center gap-3">
+                           <div className="space-y-0.5">
+                              <h4 className="text-[11px] font-black text-slate-800 dark:text-white items-center flex gap-2">
+                                 {p.name}
+                                 <span className="text-[8px] font-bold text-slate-400 opacity-60 tracking-wider font-sans">{p.service}</span>
+                              </h4>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                           <div className="text-right">
+                              <p className="text-[11px] font-black text-slate-800 dark:text-white">₹ {p.amount}</p>
+                           </div>
+                           <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter opacity-60">{p.method}</span>
+                              <ChevronRight size={10} className="text-slate-300" />
+                           </div>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </section>
+
          </main>
 
          {/* 🚨 RETENTION MODAL */}
@@ -387,19 +424,19 @@ const VendorDashboard = () => {
             {showRetentionModal && (
                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 pb-32">
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowRetentionModal(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" />
-                  <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[3rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] relative z-10">
-                     <button onClick={() => setShowRetentionModal(false)} className="absolute top-6 right-6 p-2 bg-slate-50 dark:bg-gray-800 rounded-xl">
+                  <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-md overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] relative z-10">
+                     <button onClick={() => setShowRetentionModal(false)} className="absolute top-6 right-6 p-2 bg-slate-50 dark:bg-gray-800 rounded-lg">
                         <X size={16} />
                      </button>
                      <div className="p-10 space-y-8">
-                        <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-[2.5rem] flex items-center justify-center mx-auto text-4xl shadow-inner shadow-rose-500/5">🚨</div>
+                        <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-lg flex items-center justify-center mx-auto text-4xl shadow-inner shadow-rose-500/5">🚨</div>
                         <div className="text-center space-y-3">
                            <h2 className="text-2xl font-black tracking-tight dark:text-white leading-tight italic uppercase">Profile Restricted</h2>
                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-6 opacity-80">
                               Reconnect with customers. Restores slot visibility instantly.
                            </p>
                         </div>
-                        <button onClick={() => { setShowRetentionModal(false); navigate('/vendor/wallet'); }} className="w-full py-5 bg-slate-900 dark:bg-primary text-white font-black uppercase text-xs tracking-[0.2em] rounded-2xl active:scale-95 shadow-2xl shadow-slate-900/20 dark:shadow-primary/20 transition-all italic">
+                        <button onClick={() => { setShowRetentionModal(false); navigate('/vendor/wallet'); }} className="w-full py-5 bg-slate-900 dark:bg-primary text-white font-black uppercase text-xs tracking-[0.2em] rounded-lg active:scale-95 shadow-2xl shadow-slate-900/20 dark:shadow-primary/20 transition-all italic">
                            Boost Visibility Now
                         </button>
                      </div>

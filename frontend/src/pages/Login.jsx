@@ -141,16 +141,8 @@ const CustomerAuth = () => {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.02 }}
-                className="space-y-6 lg:space-y-10 flex-1 flex flex-col justify-center max-h-screen overflow-hidden relative"
+                className="space-y-4 flex-1 flex flex-col justify-center max-h-screen overflow-hidden relative"
               >
-                {/* Subtle Back Button */}
-                <button
-                  onClick={() => setStep('phone')}
-                  className="absolute top-0 left-0 p-2 text-[#1C2C4E] opacity-50 hover:opacity-100 transition-opacity"
-                >
-                  <ChevronLeft size={24} strokeWidth={3} />
-                </button>
-
                 <div className="space-y-2 text-center">
                   <h1 className="text-[36px] font-black text-[#1C2C4E] tracking-tight leading-none">Verify OTP</h1>
                   <p className="text-gray-500 font-medium text-[11px] uppercase tracking-widest">
@@ -184,7 +176,7 @@ const CustomerAuth = () => {
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <Button
                     size="lg"
                     className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"

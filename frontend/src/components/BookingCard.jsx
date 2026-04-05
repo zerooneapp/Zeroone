@@ -77,7 +77,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
          <div className="flex items-center justify-between relative z-10">
             <div className="flex flex-col leading-none">
                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Value</span>
-               <span className="text-lg font-black text-gray-900 dark:text-white italic tracking-tighter leading-none">₹{booking.totalPrice}</span>
+               <span className="text-lg font-black text-gray-900 dark:text-white tracking-tighter leading-none">₹{booking.totalPrice}</span>
             </div>
 
             {booking.status === 'confirmed' && (

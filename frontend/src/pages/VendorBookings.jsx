@@ -78,7 +78,7 @@ const VendorBookings = () => {
             </button>
             <div>
               <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-none">Management</h1>
-              <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] mt-1 opacity-80">Bookings Roster</p>
+              <p className="text-[9px] font-black text-primary dark:text-white/60 uppercase tracking-[0.2em] mt-1 opacity-80">Bookings Roster</p>
             </div>
           </div>
           <button

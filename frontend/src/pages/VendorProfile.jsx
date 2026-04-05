@@ -95,7 +95,7 @@ const VendorProfile = () => {
 
          <main className="px-4 mt-3.5 space-y-4 max-w-2xl mx-auto">
             {/* 📋 BASIC INFO SECTION */}
-            <section className="bg-white dark:bg-gray-900 rounded-[2rem] p-5 shadow-sm border border-slate-200/60 dark:border-gray-800 space-y-5">
+            <section className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-sm border border-slate-200/60 dark:border-gray-800 space-y-3">
                <div className="flex items-center gap-2.5">
                   <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
                      <Store size={18} />
@@ -110,7 +110,7 @@ const VendorProfile = () => {
                         type="text"
                         value={data.shopName}
                         onChange={(e) => setData({ ...data, shopName: e.target.value })}
-                        className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
+                        className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
                         placeholder="Enter shop name"
                      />
                   </div>
@@ -120,7 +120,7 @@ const VendorProfile = () => {
                      <textarea
                         value={data.address}
                         onChange={(e) => setData({ ...data, address: e.target.value })}
-                        className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10 min-h-[80px]"
+                        className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10 min-h-[60px]"
                         placeholder="Street, City, ZIP"
                      />
                   </div>
@@ -132,7 +132,7 @@ const VendorProfile = () => {
                            type="text"
                            value={data.workingHours.start}
                            onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, start: e.target.value } })}
-                           className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
+                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
                            placeholder="09:00 AM"
                         />
                      </div>
@@ -142,13 +142,13 @@ const VendorProfile = () => {
                            type="text"
                            value={data.workingHours.end}
                            onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, end: e.target.value } })}
-                           className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
+                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
                            placeholder="09:00 PM"
                         />
                      </div>
                   </div>
 
-                  <Button type="submit" loading={loading} className="w-full rounded-xl py-4 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all active:scale-95">
+                  <Button type="submit" loading={loading} className="w-full rounded-lg py-3 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all active:scale-95">
                      Save Changes
                   </Button>
                </form>

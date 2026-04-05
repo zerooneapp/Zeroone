@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
+import { ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
+import logo from '../assests/logo.jpeg';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/Button';
 import NumericKeypad from '../components/NumericKeypad';
@@ -16,6 +17,7 @@ const VendorAuth = () => {
   const [otp, setOtp] = useState(['', '', '', '', '']); 
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const [isOTPFocused, setIsOTPFocused] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -90,8 +92,8 @@ const VendorAuth = () => {
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/linen.png')]" />
 
       {/* Content Area */}
-      <div className="flex-1 flex flex-col items-center p-6 pt-16 relative z-10">
-        <div className="w-full max-w-sm">
+      <div className="flex-1 flex flex-col items-center p-6 pt-8 relative z-10">
+        <div className="w-full max-w-sm flex-1 flex flex-col justify-center">
           <AnimatePresence mode="wait">
             {step === 'phone' ? (
               <motion.div
@@ -102,11 +104,9 @@ const VendorAuth = () => {
                 className="space-y-10"
               >
                 <div className="space-y-4 text-center">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-200/50 shadow-sm">
-                     <Briefcase size={32} className="text-[#1C2C4E]" />
-                  </div>
-                  <h1 className="text-[32px] font-bold text-[#1C2C4E] tracking-tight leading-tight">Partner Login</h1>
-                  <p className="text-[#1C2C4E]/60 font-medium text-sm">Dashboard access for vendors & staff</p>
+                  <img src={logo} alt="ZeroOne Logo" className="w-20 h-20 mx-auto rounded-2xl object-cover mb-2" />
+                  <h1 className="text-[42px] font-bold text-[#1C2C4E] tracking-tight leading-none">Partner Login</h1>
+                  <p className="text-[#1C2C4E]/70 font-medium text-[15px]">Dashboard access for partners & staff</p>
                 </div>
 
                 <div className="space-y-6">
@@ -146,14 +146,8 @@ const VendorAuth = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
-                className="space-y-10"
+                className="space-y-4"
               >
-                <button 
-                  onClick={() => setStep('phone')}
-                  className="p-3 -ml-2 text-[#1C2C4E]/50 hover:text-[#1C2C4E] transition-colors bg-white rounded-2xl shadow-sm"
-                >
-                  <ChevronLeft size={20} strokeWidth={3} />
-                </button>
 
                 <div className="space-y-2 text-center">
                   <h1 className="text-[28px] font-bold text-[#1C2C4E]">Enter Code</h1>
@@ -168,6 +162,8 @@ const VendorAuth = () => {
                     maxLength={5}
                     value={otp.join('')}
                     onChange={handleOTPChange}
+                    onFocus={() => setIsOTPFocused(true)}
+                    onBlur={() => setIsOTPFocused(false)}
                     autoFocus
                     className="absolute inset-0 opacity-0 cursor-default"
                   />
@@ -177,7 +173,7 @@ const VendorAuth = () => {
                         key={i}
                         className={cn(
                           "w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
-                          digit ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-50 text-gray-300"
+                          digit || (isOTPFocused && i === otp.join('').length) ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-50 text-gray-300"
                         )}
                       >
                         {digit}
@@ -186,7 +182,7 @@ const VendorAuth = () => {
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <Button 
                     size="lg" 
                     className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
@@ -221,6 +217,12 @@ const VendorAuth = () => {
             )}
           </AnimatePresence>
         </div>
+      </div>
+      
+      {/* Footer Branding */}
+      <div className="pb-8 flex items-center justify-center gap-2 relative z-10">
+        <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] uppercase tracking-wider leading-none">MADE IN INDIA</span>
+        <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
       </div>
     </div>
   );

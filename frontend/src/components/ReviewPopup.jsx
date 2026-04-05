@@ -49,7 +49,7 @@ const ReviewPopup = ({ booking, onClose }) => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "100%", opacity: 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-lg bg-white dark:bg-gray-950 rounded-t-[3rem] sm:rounded-[3.5rem] p-8 sm:p-10 shadow-2xl space-y-8 overflow-hidden"
+          className="relative w-full max-w-lg bg-white dark:bg-gray-950 rounded-t-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl space-y-6 overflow-hidden"
         >
           {/* Elite Background Graphic */}
           <div className="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
@@ -57,18 +57,18 @@ const ReviewPopup = ({ booking, onClose }) => {
 
           {/* Header */}
           <div className="text-center space-y-3 relative z-10">
-             <div className="w-16 h-16 bg-primary/10 text-primary rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 rotate-[-8deg] shadow-lg shadow-primary/5">
-                <Heart size={32} fill="currentColor" className="animate-pulse" />
+             <div className="w-12 h-12 bg-primary/10 text-primary rounded-[1rem] flex items-center justify-center mx-auto mb-2 rotate-[-8deg] shadow-lg shadow-primary/5">
+                <Heart size={24} fill="currentColor" className="animate-pulse" />
              </div>
-             <h2 className="text-2xl font-black dark:text-white uppercase tracking-tighter">How was your service?</h2>
+             <h2 className="text-xl font-black dark:text-white uppercase tracking-tighter">How was your service?</h2>
              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-relaxed">
                 Your feedback helps us keep the <br /> ZeroOne standard elite.
              </p>
           </div>
 
           {/* Expert Card Snapshot */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-[2rem] border border-gray-100 dark:border-gray-800 flex items-center gap-4 relative z-10 transition-all">
-             <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+          <div className="bg-gray-50 dark:bg-gray-900/50 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center gap-3.5 relative z-10 transition-all">
+             <div className="w-12 h-12 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
                 <img src={booking.staffId?.image || `https://i.pravatar.cc/150?u=${booking._id}`} className="w-full h-full object-cover" />
              </div>
              <div>
@@ -99,9 +99,9 @@ const ReviewPopup = ({ booking, onClose }) => {
                     className="p-1 transition-transform"
                   >
                     <Star 
-                      size={40} 
+                      size={32} 
                       className={`${(hoverRating || rating) >= s ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-gray-800'}`} 
-                      strokeWidth={1.5}
+                      strokeWidth={2}
                     />
                   </motion.button>
                 ))}
@@ -117,27 +117,27 @@ const ReviewPopup = ({ booking, onClose }) => {
 
           {/* Comment Box */}
           <div className="relative group z-10">
-             <div className="absolute left-6 top-5 text-gray-400">
-                <MessageSquare size={18} />
-             </div>
-             <textarea 
-               placeholder="Anything else we should know? (Optional)"
-               className="w-full pl-16 pr-8 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[2rem] text-sm font-bold dark:text-white focus:ring-4 ring-primary/10 transition-all min-h-[100px] resize-none"
-               value={comment}
-               onChange={(e) => setComment(e.target.value)}
-             />
+              <div className="absolute left-4 top-4 text-gray-400">
+                 <MessageSquare size={16} />
+              </div>
+              <textarea 
+                placeholder="Anything else we should know? (Optional)"
+                className="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-[13px] font-bold dark:text-white focus:ring-4 ring-primary/10 transition-all min-h-[80px] resize-none"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 relative z-10 pb-4 sm:pb-0">
+          <div className="flex gap-3 relative z-10 pb-2 sm:pb-0">
              <button 
                onClick={onClose}
-               className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-colors"
+               className="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-colors"
              >
                 Maybe Later
              </button>
              <Button 
-               className="flex-1 py-6 bg-primary text-white rounded-[2.5rem] font-black uppercase tracking-widest shadow-xl shadow-primary/20"
+               className="flex-1 py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20"
                onClick={handleSubmit}
                disabled={submitting}
              >

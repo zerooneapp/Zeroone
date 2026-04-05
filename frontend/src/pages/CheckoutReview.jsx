@@ -201,7 +201,7 @@ const CheckoutReview = () => {
       </div>
 
       {/* Confirmation Bar */}
-      <div className="fixed bottom-[82px] left-4 right-4 p-4 glass-effect border border-slate-200/40 dark:border-gray-800 rounded-[28px] z-50 shadow-2xl">
+      <div className="fixed bottom-[66px] left-4 right-4 p-4 glass-effect border border-slate-200/40 dark:border-gray-800 rounded-[28px] z-50 shadow-2xl">
         <div className="max-w-md mx-auto">
           <button
             className="w-full h-12 bg-slate-900 dark:bg-primary text-white shadow-xl shadow-black/10 dark:shadow-primary/20 text-[15px] font-black tracking-tight flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50 capitalize"
