@@ -18,6 +18,7 @@ const Signup = () => {
   const [profileData, setProfileData] = useState({
     name: '',
     dob: '',
+    gender: 'male',
     image: null
   });
 
@@ -147,6 +148,26 @@ const Signup = () => {
                     className="bg-transparent border-none outline-none font-black text-sm text-[#1C2C4E] uppercase tracking-tighter"
                   />
                 </div>
+              </div>
+
+              {/* 👥 GENDER SELECTION HUD */}
+              <div className="space-y-1">
+                 <p className="text-[8px] font-black text-[#1C2C4E]/40 tracking-widest ml-1">Select gender</p>
+                 <div className="flex gap-1.5 p-1 bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 dark:border-gray-800 rounded-xl">
+                    {['male', 'female', 'other'].map(g => (
+                       <button
+                          key={g}
+                          onClick={() => setProfileData({...profileData, gender: g})}
+                          className={`flex-1 py-2 text-[11px] font-black tracking-widest rounded-lg transition-all capitalize ${
+                             profileData.gender === g 
+                             ? 'bg-[#1C2C4E] text-white shadow-lg' 
+                             : 'text-gray-400 hover:text-[#1C2C4E]'
+                          }`}
+                       >
+                          {g}
+                       </button>
+                    ))}
+                 </div>
               </div>
             </div>
 

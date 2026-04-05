@@ -253,27 +253,27 @@ const VendorDashboard = () => {
             <section className="px-0.5">
                <div className="grid grid-cols-4 gap-1.5">
                   {/* Today Revenue - Dark Highlight */}
-                  <div className="bg-slate-900 dark:bg-gray-900 p-2.5 rounded-2xl shadow-lg border border-[#1C2C4E]/10 flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-white/50 tracking-widest leading-none mb-1.5">Today revenue</p>
-                     <h3 className="text-sm font-black text-white leading-none">₹{data.stats.todayEarnings.toLocaleString()}</h3>
+                  <div className="bg-slate-900 dark:bg-gray-900 py-3 px-2.5 rounded-2xl shadow-lg border border-[#1C2C4E]/10 flex flex-col">
+                     <p className="text-[9px] font-black text-white/50 tracking-widest leading-none mb-1.5">Today revenue</p>
+                     <p className="text-sm font-black text-white leading-none">₹{data.stats.todayEarnings.toLocaleString()}</p>
                   </div>
 
                   {/* Today Clients */}
-                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Today clients</p>
-                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.stats.todayBookings}</h3>
+                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col">
+                     <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Today clients</p>
+                     <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.stats.todayBookings}</p>
                   </div>
 
                   {/* Services Done */}
-                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Services done</p>
-                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'completed').length || 0}</h3>
+                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col">
+                     <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Services done</p>
+                     <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'completed').length || 0}</p>
                   </div>
 
                   {/* Pending Bookings */}
-                  <div className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center h-[74px]">
-                     <p className="text-[6px] font-black text-slate-400 tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">Pending bookings</p>
-                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'confirmed').length || 0}</h3>
+                  <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col">
+                     <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">Pending bookings</p>
+                     <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.schedule.filter(s => s.status === 'confirmed').length || 0}</p>
                   </div>
                </div>
             </section>

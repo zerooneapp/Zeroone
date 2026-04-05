@@ -15,6 +15,12 @@ import MyBookings from './pages/MyBookings';
 import BookingStatusDetails from './pages/BookingStatusDetails';
 import Account from './pages/Account';
 import Favorites from './pages/Favorites';
+import PersonalInformation from './pages/PersonalInformation';
+import SavedAddresses from './pages/SavedAddresses';
+import NotificationSettings from './pages/NotificationSettings';
+import PaymentMethods from './pages/PaymentMethods';
+import SecuritySettings from './pages/SecuritySettings';
+import Preferences from './pages/Preferences';
 
 // Auth
 import Login from './pages/Login';
@@ -102,6 +108,12 @@ function App() {
             <Route path="bookings" element={<MyBookings />} />
             <Route path="booking-status/:id" element={<BookingStatusDetails />} />
             <Route path="account" element={<Account />} />
+            <Route path="account/info" element={<PersonalInformation />} />
+            <Route path="account/addresses" element={<SavedAddresses />} />
+            <Route path="account/notifications" element={<NotificationSettings />} />
+            <Route path="account/payments" element={<PaymentMethods />} />
+            <Route path="account/security" element={<SecuritySettings />} />
+            <Route path="account/preferences" element={<Preferences />} />
           </Route>
         </Route>
 

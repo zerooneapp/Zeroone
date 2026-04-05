@@ -42,7 +42,7 @@ const Header = () => {
             ZeroOne
           </h1>
           <button 
-            onClick={() => navigate('/location')}
+            onClick={() => navigate('/account/addresses')}
             className="flex items-center gap-1 text-[10px] font-bold text-gray-500 hover:text-[#1C2C4E] transition-colors group"
           >
             <MapPin size={10} className="text-[#1C2C4E] dark:text-blue-400 group-hover:scale-110 transition-transform" />

@@ -1,0 +1,269 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { ChevronLeft, Shield, Lock, Smartphone, Monitor, Trash2, SmartphoneNfc, ArrowRight, ShieldCheck, Fingerprint, X, Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
+import api from '../services/api';
+
+const SecuritySettings = () => {
+  const navigate = useNavigate();
+  const { user, updateUser, logout } = useAuthStore();
+  
+  const [toggles, setToggles] = useState({
+    twoFactor: user?.is2FAEnabled ?? false,
+    biometrics: user?.isBiometricEnabled ?? false,
+  });
+
+  const [passwordModal, setPasswordModal] = useState(false);
+  const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+
+  const handleToggle = async (key) => {
+    const newVal = !toggles[key];
+    setToggles(prev => ({ ...prev, [key]: newVal }));
+    try {
+      const res = await api.patch('/users/profile', { [key === 'twoFactor' ? 'is2FAEnabled' : 'isBiometricEnabled']: newVal });
+      updateUser(res.data);
+      toast.success(`${key === 'twoFactor' ? '2FA' : 'Biometrics'} updated!`);
+    } catch (err) {
+      setToggles(prev => ({ ...prev, [key]: !newVal }));
+      toast.error('Failed to update security setting');
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    if (e) e.preventDefault();
+    if (passwords.new !== passwords.confirm) return toast.error('Passwords do not match');
+    
+    setLoading(true);
+    try {
+      await api.patch('/users/profile', { 
+        currentPassword: passwords.current, 
+        newPassword: passwords.new 
+      });
+      toast.success('Password updated successfully!', { icon: '🔐' });
+      setPasswordModal(false);
+      setPasswords({ current: '', new: '', confirm: '' });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Update failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you absolutely sure? This action is permanent!')) return;
+    
+    setLoading(true);
+    try {
+      await api.delete('/users/profile');
+      toast.success('Account deleted. Logging out...');
+      logout();
+      navigate('/login');
+    } catch (err) {
+      toast.error('Deletion failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const SecurityItem = ({ icon: Icon, title, sub, action, type = "normal" }) => (
+    <div className={`p-4 bg-white dark:bg-gray-900 rounded-2xl border ${type === 'danger' ? 'border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.05)]' : 'border-[#1C2C4E]/10 dark:border-gray-800'} shadow-sm flex items-center justify-between group active:scale-[0.99] transition-all`}>
+       <div className="flex items-center gap-3.5">
+          <div className={`w-10 h-10 rounded-xl ${type === 'danger' ? 'bg-red-50' : 'bg-slate-50 dark:bg-gray-800'} flex items-center justify-center border ${type === 'danger' ? 'border-red-100' : 'border-slate-100 dark:border-gray-700'}`}>
+             <Icon size={18} className={type === 'danger' ? 'text-red-500' : 'text-[#1C2C4E] dark:text-blue-400'} strokeWidth={2.5} />
+          </div>
+          <div className="space-y-0.5">
+             <h3 className={`text-[13px] font-black tracking-tight leading-none ${type === 'danger' ? 'text-red-600' : 'text-[#1C2C4E] dark:text-white'}`}>{title}</h3>
+             <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500">{sub}</p>
+          </div>
+       </div>
+       <button onClick={action} className="p-2 opacity-40 hover:opacity-100 transition-opacity">
+          <ArrowRight size={16} strokeWidth={3} />
+       </button>
+    </div>
+  );
+
+  return (
+    <div className="h-[100dvh] bg-slate-50 dark:bg-gray-950 flex flex-col overflow-hidden animate-in fade-in duration-500">
+      {/* 🛡️ ELITE HEADER */}
+      <header className="px-4 pt-4 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-1 px-2 -ml-2 text-[#1C2C4E] dark:text-blue-400 active:scale-90 transition-all font-black"
+          >
+            <ChevronLeft size={20} strokeWidth={3} />
+          </button>
+          <h1 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">
+            Security
+          </h1>
+        </div>
+        <p className="text-[9px] font-black text-[#1C2C4E]/60 tracking-widest mt-2 ml-1 opacity-80 uppercase">Elite Account Protection</p>
+      </header>
+
+      <main className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
+        {/* 🔐 ACCESS CONTROL */}
+        <section className="space-y-3">
+          <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase">Auth Controls</label>
+          <div className="space-y-3">
+             <SecurityItem 
+               icon={Lock} 
+               title="Change password" 
+               sub="Update account credentials"
+               action={() => setPasswordModal(true)}
+             />
+             <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center justify-between">
+                <div className="flex items-center gap-3.5">
+                   <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
+                      <SmartphoneNfc size={18} className="text-orange-500" strokeWidth={2.5} />
+                   </div>
+                   <div className="space-y-0.5">
+                      <h3 className="text-[13px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">Two-factor authentication</h3>
+                      <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500">Enhanced login verification</p>
+                   </div>
+                </div>
+                <button 
+                  onClick={() => handleToggle('twoFactor')}
+                  className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${toggles.twoFactor ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-gray-800'}`}
+                >
+                   <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${toggles.twoFactor ? 'left-6' : 'left-1'}`} />
+                </button>
+             </div>
+          </div>
+        </section>
+
+        {/* 📱 ACTIVE SESSIONS */}
+        <section className="space-y-3">
+           <div className="flex items-center justify-between px-1">
+              <label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Active devices</label>
+           </div>
+           <div className="space-y-2">
+              {user?.fcmTokens?.length > 0 ? (
+                 user.fcmTokens.map((t, idx) => (
+                    <div key={idx} className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center gap-3 shadow-sm relative overflow-hidden">
+                       <div className="bg-emerald-500 w-1 h-8 absolute left-0 top-1/2 -translate-y-1/2 rounded-r-full" />
+                       {t.deviceType === 'web' ? <Monitor size={18} className="text-slate-400 ml-1" /> : <Smartphone size={18} className="text-slate-400 ml-1" />}
+                       <div className="flex-1 space-y-0.5">
+                          <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-none capitalize">{t.deviceType || 'Unknown Device'} • Current</h4>
+                          <p className="text-[9px] font-bold text-slate-400 italic">Last active: {new Date(t.lastUsedAt).toLocaleString()}</p>
+                       </div>
+                    </div>
+                 ))
+              ) : (
+                <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center gap-3 opacity-60">
+                   <Monitor size={18} className="text-slate-400" />
+                   <div className="flex-1">
+                      <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-none">No active tokens found</h4>
+                   </div>
+                </div>
+              )}
+           </div>
+        </section>
+
+        {/* ⚠️ DANGER ZONE */}
+        <section className="space-y-3 pt-4">
+           <SecurityItem 
+             icon={Trash2} 
+             title="Delete account" 
+             sub="Permanently remove all data"
+             type="danger"
+             action={handleDeleteAccount}
+           />
+        </section>
+
+        {/* 🛡️ SECURITY STATUS BADGE */}
+        <div className="mt-4 flex flex-col items-center justify-center space-y-2 p-6 bg-slate-900/5 rounded-[2rem] border border-dashed border-[#1C2C4E]/10">
+           <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+              <ShieldCheck size={24} className="text-emerald-500" strokeWidth={3} />
+           </div>
+           <h5 className="text-[12px] font-black text-[#1C2C4E] tracking-tight">Your account is secured</h5>
+           <p className="text-[9px] font-medium text-slate-400 text-center leading-relaxed">
+             Advanced threat-detection and real-time encryption are actively protecting your elite credentials.
+           </p>
+        </div>
+      </main>
+
+      {/* 🔐 PASSWORD UPDATE MODAL */}
+      <AnimatePresence>
+         {passwordModal && (
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="fixed inset-0 z-[100] flex items-center justify-center px-5 bg-black/60 backdrop-blur-md"
+            >
+               <motion.div 
+                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                  className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden"
+               >
+                  <div className="absolute top-0 right-0 p-6">
+                     <button onClick={() => setPasswordModal(false)} className="p-2 bg-slate-50 dark:bg-gray-800 rounded-full text-slate-400 active:scale-90 transition-all">
+                        <X size={18} />
+                     </button>
+                  </div>
+                  <header className="mb-6">
+                     <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center mb-3">
+                        <Lock size={24} className="text-white" strokeWidth={2.5} />
+                     </div>
+                     <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Security update</h2>
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Change Account Password</p>
+                  </header>
+
+                  <form onSubmit={handleUpdatePassword} className="space-y-4">
+                     <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 tracking-widest ml-1">CURRENT PASSWORD</label>
+                        <div className="relative">
+                           <input
+                              type={showPass ? 'text' : 'password'}
+                              required
+                              value={passwords.current}
+                              onChange={e => setPasswords({...passwords, current: e.target.value})}
+                              className="w-full h-11 bg-slate-50 dark:bg-gray-800 rounded-xl px-4 text-sm font-bold outline-none focus:ring-2 focus:ring-slate-200 transition-all dark:text-white"
+                           />
+                           <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 opacity-30 text-slate-900 dark:text-white">
+                              {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                           </button>
+                        </div>
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 tracking-widest ml-1">NEW PASSWORD</label>
+                        <input
+                           type="password"
+                           required
+                           value={passwords.new}
+                           onChange={e => setPasswords({...passwords, new: e.target.value})}
+                           className="w-full h-11 bg-slate-50 dark:bg-gray-800 rounded-xl px-4 text-sm font-bold outline-none focus:ring-2 focus:ring-slate-200 transition-all dark:text-white"
+                        />
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 tracking-widest ml-1">CONFIRM NEW PASSWORD</label>
+                        <input
+                           type="password"
+                           required
+                           value={passwords.confirm}
+                           onChange={e => setPasswords({...passwords, confirm: e.target.value})}
+                           className="w-full h-11 bg-slate-50 dark:bg-gray-800 rounded-xl px-4 text-sm font-bold outline-none focus:ring-2 focus:ring-slate-200 transition-all dark:text-white"
+                        />
+                     </div>
+
+                     <button 
+                        disabled={loading}
+                        className="w-full h-12 bg-slate-900 dark:bg-primary text-white rounded-2xl font-black text-xs tracking-widest uppercase mt-4 shadow-xl active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
+                     >
+                        {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Confirm security update'}
+                     </button>
+                  </form>
+               </motion.div>
+            </motion.div>
+         )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default SecuritySettings;

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Plus, Minus, 
   Heart, Play, Verified, ShieldCheck, 
-  Calendar, CheckCircle2, ChevronRight, Info, AlertCircle
+  Calendar, CheckCircle2, ChevronRight, Info, AlertCircle, Share2
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -96,6 +96,15 @@ const ServiceDetail = () => {
     }
   };
 
+  const handleWhatsAppShare = () => {
+    const serviceDetails = cartItems.length > 0 
+      ? `Services: ${cartItems.map(i => i.name).join(', ')}\nTotal: ₹${getTotalPrice()}`
+      : `Check out ${vendor?.shopName} on ZeroOne!`;
+    
+    const text = `*ZeroOne App - Elite Services*\n\n${serviceDetails}\n\n📍 Location: ${vendor?.address}\n🔗 View on App: ${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
   const toggleService = (service) => {
     const isSelected = cartItems.find(item => item._id === service._id);
     if (isSelected) {
@@ -181,6 +190,12 @@ const ServiceDetail = () => {
                   <ArrowLeft size={20} strokeWidth={3} />
                 </button>
                 <div className="flex items-center gap-3">
+                  <button 
+                    onClick={handleWhatsAppShare}
+                    className="p-2.5 bg-black/20 backdrop-blur-3xl border border-white/20 rounded-full text-white active:scale-90 transition-all shadow-xl group"
+                  >
+                    <Share2 size={20} className="group-hover:rotate-12 transition-transform" />
+                  </button>
                   <button 
                     onClick={handleToggleFavorite}
                     className={`p-2.5 rounded-full shadow-2xl backdrop-blur-3xl border border-white/20 transition-all active:scale-90 ${isFavorited ? 'bg-[#1C2C4E] text-white' : 'bg-black/20 text-white'}`}

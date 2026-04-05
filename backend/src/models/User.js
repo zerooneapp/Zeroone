@@ -22,6 +22,20 @@ const userSchema = new mongoose.Schema({
   dob: { type: Date },
   referralCode: { type: String },
   favoriteVendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' }],
+  is2FAEnabled: { type: Boolean, default: false },
+  isBiometricEnabled: { type: Boolean, default: false },
+  notificationSettings: {
+    push: { type: Boolean, default: true },
+    orders: { type: Boolean, default: true },
+    promotional: { type: Boolean, default: false },
+    sound: { type: Boolean, default: true },
+    vibration: { type: Boolean, default: true }
+  },
+  preferences: {
+    language: { type: String, default: 'English (In)' },
+    currency: { type: String, default: 'INR (₹)' },
+    region: { type: String, default: 'India' }
+  },
   otp: { type: String },
   otpExpires: { type: Date }
 }, { timestamps: true });
