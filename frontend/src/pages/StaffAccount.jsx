@@ -7,19 +7,33 @@ import {
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
 import Navbar from '../layouts/Navbar';
 
 const StaffAccount = () => {
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
   const [profile, setProfile] = useState(null);
+  const [stats, setStats] = useState({
+    skills: 0,
+    upcoming: 0,
+    completed: 0
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/staff/profile');
-      setProfile(res.data);
+      const [profileRes, bookingsRes] = await Promise.all([
+        api.get('/staff/profile'),
+        api.get('/bookings/my')
+      ]);
+
+      const bookingList = bookingsRes.data || [];
+      setProfile(profileRes.data);
+      setStats({
+        skills: profileRes.data?.services?.length || 0,
+        upcoming: bookingList.filter((booking) => booking.status === 'confirmed' || booking.status === 'assigned').length,
+        completed: bookingList.filter((booking) => booking.status === 'completed').length
+      });
     } catch (err) {
       toast.error('Failed to load professional profile');
     } finally {
@@ -60,17 +74,17 @@ const StaffAccount = () => {
           <div className="grid grid-cols-3 gap-2 mt-10">
              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl text-center">
                 <Award size={20} className="text-primary mx-auto mb-2" />
-                <p className="text-xs font-black text-gray-900 dark:text-white">Elite</p>
+                <p className="text-xs font-black text-gray-900 dark:text-white">{stats.skills} Skills</p>
              </div>
              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl text-center">
                 <CheckCircle size={20} className="text-emerald-500 mx-auto mb-2" />
-                <p className="text-xs font-black text-gray-900 dark:text-white">Active</p>
+                <p className="text-xs font-black text-gray-900 dark:text-white">{profile?.isActive ? 'Active' : 'Inactive'}</p>
              </div>
              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-3xl text-center">
                 <TrendingUp size={20} className="text-blue-500 mx-auto mb-2" />
-                <p className="text-xs font-black text-gray-900 dark:text-white">98%</p>
-             </div>
-          </div>
+                <p className="text-xs font-black text-gray-900 dark:text-white">{stats.completed} Done</p>
+              </div>
+           </div>
        </div>
 
        {/* Professional Details Section */}
@@ -94,7 +108,7 @@ const StaffAccount = () => {
                       <Briefcase size={20} />
                    </div>
                    <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Skill Authorization</p>
+                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Skill Authorization</p>
                       <div className="flex flex-wrap gap-1 mt-1.5">
                          {profile?.services?.map(s => (
                            <span key={s._id} className="text-[8px] font-black bg-gray-50 dark:bg-gray-800 px-2.5 py-1 rounded-full text-gray-500 uppercase tracking-widest">{s.name}</span>
@@ -114,10 +128,13 @@ const StaffAccount = () => {
                       <div className="w-10 h-10 bg-primary/5 dark:bg-primary/20 text-primary rounded-xl flex items-center justify-center">
                          <ShieldCheck size={20} />
                       </div>
-                      <div>
-                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Shop / Boss</p>
-                         <p className="text-sm font-black text-gray-900 dark:text-white mt-1">{profile?.vendorId?.shopName || 'Partner Hub'}</p>
-                      </div>
+                     <div>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Shop / Boss</p>
+                        <p className="text-sm font-black text-gray-900 dark:text-white mt-1">{profile?.vendorId?.shopName || 'Partner Hub'}</p>
+                        <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-wider">
+                          {stats.upcoming} upcoming assignments
+                        </p>
+                     </div>
                    </div>
                    {profile?.vendorId?.ownerId?.phone && (
                      <a href={`tel:${profile.vendorId.ownerId.phone}`} className="p-3 bg-gray-50 dark:bg-gray-800 text-primary rounded-xl border border-gray-100 dark:border-gray-800">

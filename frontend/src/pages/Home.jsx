@@ -22,6 +22,25 @@ const Home = () => {
   const itemsPerPage = 10;
   const [location, setLocation] = useState({ lng: 77.4126, lat: 23.2599 }); // Default: Bhopal
   const debouncedSearch = useDebounce(search, 300);
+  const serviceCards = vendors.flatMap((vendor) => {
+    const vendorServices = vendor.services?.length
+      ? vendor.services
+      : [{
+          _id: `fallback-${vendor._id}`,
+          name: vendor.service || 'Beauty Service',
+          price: vendor.price || 0,
+          image: vendor.serviceImage || ''
+        }];
+
+    return vendorServices.map((service) => ({
+      ...vendor,
+      cardKey: `${vendor._id}-${service._id}`,
+      service: service.name,
+      price: service.price,
+      serviceImage: service.image || vendor.serviceImage || vendor.shopImage || '',
+      serviceCount: 1
+    }));
+  });
 
   // 1. Get Location
   useEffect(() => {
@@ -69,8 +88,8 @@ const Home = () => {
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentVendors = vendors.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(vendors.length / itemsPerPage);
+  const currentVendors = serviceCards.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(serviceCards.length / itemsPerPage);
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -156,7 +175,7 @@ const Home = () => {
               >
                 {currentVendors.length > 0 ? (
                   currentVendors.map((vendor) => (
-                    <VendorCard key={vendor._id} vendor={vendor} variant="full" />
+                    <VendorCard key={vendor.cardKey || vendor._id} vendor={vendor} variant="full" />
                   ))
                 ) : (
                   <div className="py-20 text-center">

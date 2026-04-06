@@ -1,10 +1,23 @@
 const Notification = require('../models/Notification');
 
+const getNotificationOwnerIds = (req) => {
+  if (req.user?._id) {
+    return [req.user._id];
+  }
+
+  if (req.staff?._id) {
+    return [req.staff.userId, req.staff._id].filter(Boolean);
+  }
+
+  return [];
+};
+
 // @desc    Get user notifications
 // @route   GET /api/notifications
 const getNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({ userId: req.user._id })
+    const ownerIds = getNotificationOwnerIds(req);
+    const notifications = await Notification.find({ userId: { $in: ownerIds } })
       .sort({ createdAt: -1 })
       .limit(50);
     res.status(200).json(notifications);
@@ -17,8 +30,9 @@ const getNotifications = async (req, res) => {
 // @route   PATCH /api/notifications/:id/read
 const markAsRead = async (req, res) => {
   try {
+    const ownerIds = getNotificationOwnerIds(req);
     const notification = await Notification.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user._id },
+      { _id: req.params.id, userId: { $in: ownerIds } },
       { isRead: true },
       { new: true }
     );
@@ -33,8 +47,9 @@ const markAsRead = async (req, res) => {
 // @route   GET /api/notifications/unread-count
 const getUnreadCount = async (req, res) => {
   try {
+    const ownerIds = getNotificationOwnerIds(req);
     const count = await Notification.countDocuments({ 
-      userId: req.user._id, 
+      userId: { $in: ownerIds },
       isRead: false 
     });
     res.status(200).json({ count });

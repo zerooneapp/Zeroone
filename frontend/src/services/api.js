@@ -1,5 +1,30 @@
 import axios from 'axios';
 
+const getStoredRole = () => {
+  try {
+    const authStorage = localStorage.getItem('auth-storage');
+    if (!authStorage) return null;
+
+    const parsed = JSON.parse(authStorage);
+    return parsed?.state?.role || null;
+  } catch {
+    return null;
+  }
+};
+
+const buildLoginRedirect = () => {
+  const currentPath = `${window.location.pathname}${window.location.search}`;
+  const storedRole = getStoredRole();
+  const isBusinessArea = ['/vendor', '/staff', '/admin'].some((prefix) =>
+    window.location.pathname.startsWith(prefix)
+  );
+  const loginPath = isBusinessArea || ['vendor', 'staff', 'admin'].includes(storedRole)
+    ? '/vendor-login'
+    : '/login';
+
+  return `${loginPath}?redirect=${encodeURIComponent(currentPath)}`;
+};
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
@@ -23,7 +48,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('auth-storage');
-      window.location.href = '/login';
+      window.location.href = buildLoginRedirect();
     }
     return Promise.reject(error);
   }

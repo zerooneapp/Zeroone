@@ -8,11 +8,17 @@ import { useAuthStore } from '../store/authStore';
 const Navbar = () => {
   const { role } = useAuthStore();
 
-  const navItems = [
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: Calendar, label: 'Bookings', path: '/bookings' },
-    { icon: User, label: 'Account', path: '/account' },
-  ];
+  const navItems = role === 'staff'
+    ? [
+      { icon: Home, label: 'Home', path: '/staff' },
+      { icon: Calendar, label: 'Bookings', path: '/staff/bookings' },
+      { icon: User, label: 'Account', path: '/staff/account' },
+    ]
+    : [
+      { icon: Home, label: 'Home', path: '/' },
+      { icon: Calendar, label: 'Bookings', path: '/bookings' },
+      { icon: User, label: 'Account', path: '/account' },
+    ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">

@@ -1,12 +1,22 @@
 const Vendor = require('../models/Vendor');
 const User = require('../models/User');
+const Staff = require('../models/Staff');
 const Booking = require('../models/Booking');
 const SubscriptionPlan = require('../models/SubscriptionPlan');
 const Category = require('../models/Category');
 const GlobalSettings = require('../models/GlobalSettings');
 const NotificationService = require('../services/notificationService');
 const moment = require('moment-timezone');
-const { addFunds } = require('../services/walletService');
+const {
+  PLAN_LEVELS,
+  addFunds,
+  ensureSubscriptionPlans,
+  getBillingSettings,
+  getVendorSubscriptionState
+} = require('../services/walletService');
+
+const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin']);
+const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
 
 // ... (existing functions)
 
@@ -41,48 +51,69 @@ const updateGlobalSettings = async (req, res) => {
 
 const broadcastNotification = async (req, res) => {
   try {
-    const { title, message, targetRole } = req.body;
-    const users = await User.find({ role: targetRole });
+    const { title, message } = req.body;
+    const targetRole = req.body.targetRole || req.body.targetAudience;
+
+    if (!title?.trim() || !message?.trim()) {
+      return res.status(400).json({ message: 'Title and message are required' });
+    }
+
+    if (!BROADCAST_TARGETS.has(targetRole)) {
+      return res.status(400).json({ message: 'Invalid broadcast target' });
+    }
+
+    const recipients = [];
+
+    if (targetRole === 'all' || ['customer', 'vendor', 'admin'].includes(targetRole)) {
+      const userRoles = targetRole === 'all' ? ['customer', 'vendor', 'admin'] : [targetRole];
+      const users = await User.find({ role: { $in: userRoles } }).select('_id role');
+      recipients.push(...users.map((user) => ({
+        userId: user._id,
+        role: user.role
+      })));
+    }
+
+    if (targetRole === 'all' || targetRole === 'staff') {
+      const staffMembers = await Staff.find({ isActive: true }).select('_id userId');
+      recipients.push(
+        ...staffMembers
+          .map((staff) => ({
+            userId: getStaffNotificationTarget(staff),
+            role: 'staff'
+          }))
+          .filter((recipient) => recipient.userId)
+      );
+    }
+
+    if (recipients.length === 0) {
+      return res.status(404).json({ message: 'No recipients found for this broadcast' });
+    }
+
+    const uniqueRecipients = Array.from(
+      new Map(
+        recipients.map((recipient) => [`${recipient.role}:${recipient.userId}`, recipient])
+      ).values()
+    );
+
     await NotificationService.sendNotification({
-      userIds: users.map(u => u._id),
-      role: targetRole,
+      recipients: uniqueRecipients,
       type: 'BROADCAST',
-      title,
-      message
+      title: title.trim(),
+      message: message.trim(),
+      referenceId: `BROADCAST_${Date.now()}`
     });
-    res.status(200).json({ message: 'Broadcast sent' });
+
+    res.status(200).json({
+      message: `Broadcast sent to ${uniqueRecipients.length} recipients`,
+      count: uniqueRecipients.length
+    });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
 const getSubscriptionPlans = async (req, res) => {
   try {
-    let plans = await SubscriptionPlan.find();
-
-    // Auto-seed if missing (6 Tiers)
-    if (plans.length < 6) {
-      const tiers = ['basic', 'standard', 'premium'];
-      const types = ['daily', 'monthly'];
-      const defaultPrices = {
-        basic_daily: 10, basic_monthly: 250,
-        standard_daily: 250, standard_monthly: 5000,
-        premium_daily: 500, premium_monthly: 10000,
-        luxury_daily: 1000, luxury_monthly: 20000
-      };
-
-      const allTiers = ['standard', 'premium', 'luxury'];
-      for (const level of allTiers) {
-        for (const type of types) {
-          const key = `${level}_${type}`;
-          await SubscriptionPlan.findOneAndUpdate(
-            { level, type },
-            { $setOnInsert: { price: defaultPrices[key] } },
-            { upsert: true, new: true }
-          );
-        }
-      }
-      plans = await SubscriptionPlan.find();
-    }
-
+    await ensureSubscriptionPlans();
+    const plans = await SubscriptionPlan.find({ level: { $in: PLAN_LEVELS } }).sort({ level: 1, type: 1 });
     res.status(200).json(plans);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -120,6 +151,7 @@ const approveVendor = async (req, res) => {
 
     vendor.status = 'active';
     vendor.isActive = true;
+    vendor.rejectionReason = undefined;
 
     const { freeTrialDays = 7 } = req.body || {};
     const expiryDate = new Date();
@@ -452,6 +484,8 @@ const getAdminDashboard = async (req, res) => {
   try {
     const { range = '7d' } = req.query;
     const days = parseInt(range) || 7;
+    const settings = await getBillingSettings();
+    const minimumWalletThreshold = settings.minWalletThreshold || 100;
 
     const today = moment().tz('Asia/Kolkata').startOf('day');
     const yesterday = moment().tz('Asia/Kolkata').subtract(1, 'day').startOf('day');
@@ -473,12 +507,26 @@ const getAdminDashboard = async (req, res) => {
     ] = await Promise.all([
       // 1. Today Revenue
       require('../models/WalletTransaction').aggregate([
-        { $match: { type: 'debit', reason: 'daily_subscription', timestamp: { $gte: today.toDate() } } },
+        {
+          $match: {
+            type: 'debit',
+            status: 'completed',
+            reason: { $in: ['daily_subscription', 'monthly_subscription'] },
+            timestamp: { $gte: today.toDate() }
+          }
+        },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]),
       // 2. Yesterday Revenue
       require('../models/WalletTransaction').aggregate([
-        { $match: { type: 'debit', reason: 'daily_subscription', timestamp: { $gte: yesterday.toDate(), $lt: today.toDate() } } },
+        {
+          $match: {
+            type: 'debit',
+            status: 'completed',
+            reason: { $in: ['daily_subscription', 'monthly_subscription'] },
+            timestamp: { $gte: yesterday.toDate(), $lt: today.toDate() }
+          }
+        },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]),
       // 3. New Vendors
@@ -498,12 +546,24 @@ const getAdminDashboard = async (req, res) => {
       // 9. Recent Reviews
       require('../models/Review').find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName'),
       // 10. Low Balance Alert
-      Vendor.countDocuments({ walletBalance: { $lt: 100 } }),
+      Vendor.countDocuments({ walletBalance: { $lt: minimumWalletThreshold } }),
       // 11. Inactive Vendors (Real Check)
-      Vendor.countDocuments({ isActive: false }),
+      Vendor.countDocuments({
+        $or: [
+          { isActive: false },
+          { status: { $in: ['inactive', 'blocked', 'rejected'] } }
+        ]
+      }),
       // 12. Revenue Graph (Dynamic Range)
       require('../models/WalletTransaction').aggregate([
-        { $match: { type: 'debit', reason: 'daily_subscription', timestamp: { $gte: rangeStart } } },
+        {
+          $match: {
+            type: 'debit',
+            status: 'completed',
+            reason: { $in: ['daily_subscription', 'monthly_subscription'] },
+            timestamp: { $gte: rangeStart }
+          }
+        },
         {
           $group: {
             _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
@@ -548,6 +608,7 @@ const getVendors = async (req, res) => {
   try {
     const { search, status, serviceLevel, planType, isActive, page = 1, limit = 10 } = req.query;
     const filter = {};
+    const settings = await getBillingSettings();
 
     if (search) {
       filter.shopName = { $regex: search, $options: 'i' };
@@ -565,15 +626,20 @@ const getVendors = async (req, res) => {
       .skip((page - 1) * limit);
 
     const count = await Vendor.countDocuments(filter);
-
-    res.status(200).json({
-      vendors: vendors.map(v => ({
+    const hydratedVendors = await Promise.all(vendors.map(async (v) => {
+      const subscriptionState = await getVendorSubscriptionState(v);
+      return {
         ...v._doc,
         subscription: {
-          type: v.planType || 'trial',
-          isActive: (v.planType === 'trial' && v.freeTrial?.isActive) || (v.planType !== 'trial')
+          type: subscriptionState.currentPlan,
+          isActive: subscriptionState.isActive
         }
-      })),
+      };
+    }));
+
+    res.status(200).json({
+      vendors: hydratedVendors,
+      minimumWalletThreshold: settings.minWalletThreshold || 100,
       totalPages: Math.ceil(count / limit),
       currentPage: Number(page),
       totalVendors: count
@@ -587,10 +653,13 @@ const rejectVendor = async (req, res) => {
   try {
     const { rejectionReason } = req.body;
     if (!rejectionReason) return res.status(400).json({ message: 'Reason required' });
-    const vendor = await Vendor.findByIdAndUpdate(req.params.id, {
-      status: 'rejected',
-      rejectionReason
-    }, { new: true });
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    vendor.status = 'rejected';
+    vendor.isActive = false;
+    vendor.rejectionReason = rejectionReason;
+    await vendor.save();
     res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -602,7 +671,13 @@ const toggleBlockVendor = async (req, res) => {
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
-    vendor.status = vendor.status === 'blocked' ? 'active' : 'blocked';
+    if (vendor.status === 'blocked') {
+      const subscriptionState = await getVendorSubscriptionState(vendor);
+      vendor.status = subscriptionState.isActive ? 'active' : 'inactive';
+    } else {
+      vendor.status = 'blocked';
+    }
+
     await vendor.save();
     res.status(200).json(vendor);
   } catch (error) {

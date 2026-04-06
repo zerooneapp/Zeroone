@@ -135,10 +135,10 @@ const StaffBookings = () => {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-300 overflow-hidden">
-                             {booking.customerId?.image ? <img src={booking.customerId.image} className="w-full h-full object-cover" /> : <User size={20} />}
+                             {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={20} />}
                            </div>
                            <div>
-                              <h3 className="text-sm font-black text-gray-900 dark:text-white leading-none">{booking.customerId?.name || 'Client'}</h3>
+                              <h3 className="text-sm font-black text-gray-900 dark:text-white leading-none">{booking.userId?.name || 'Client'}</h3>
                               <p className="text-[9px] font-black text-primary uppercase tracking-widest mt-1.5 flex items-center gap-1">
                                  <Clock size={10} /> {formatTime(booking.startTime)}
                               </p>
@@ -147,7 +147,7 @@ const StaffBookings = () => {
                         
                         {/* 🔒 LOGIC RE-CONFIRMED: 30m Lock */}
                         {isContactVisible(booking.startTime) ? (
-                           <a href={`tel:${booking.customerId?.phone}`} className="p-3 bg-primary text-white rounded-xl shadow-lg shadow-primary/20">
+                           <a href={`tel:${booking.userId?.phone}`} className="p-3 bg-primary text-white rounded-xl shadow-lg shadow-primary/20">
                               <Phone size={18} />
                            </a>
                         ) : (
@@ -162,7 +162,7 @@ const StaffBookings = () => {
                           {booking.services?.map((s, idx) => (
                             <div key={idx} className="text-[11px] font-bold text-gray-400 dark:text-gray-500 flex items-center gap-2">
                                <div className="w-1 h-1 bg-primary rounded-full shadow-[0_0_5px_var(--primary)]" />
-                               {s.serviceId?.name || 'Service Task'}
+                               {s.name || s.serviceId?.name || 'Service Task'}
                             </div>
                           ))}
                         </div>

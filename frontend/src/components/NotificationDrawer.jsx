@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, CheckCircle2, AlertCircle, ShoppingBag, CreditCard } from 'lucide-react';
+import { Bell, X, CheckCircle2, AlertCircle, ShoppingBag, CreditCard, Clock3 } from 'lucide-react';
 import api from '../services/api';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { cn } from '../utils/cn';
 
 dayjs.extend(relativeTime);
 
@@ -42,7 +43,7 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
     switch (type) {
       case 'BOOKING_CONFIRMED': return <CheckCircle2 size={16} className="text-emerald-500" />;
       case 'BOOKING_CANCELLED': return <AlertCircle size={16} className="text-red-500" />;
-      case 'BOOKING_RESCHEDULED': return <Clock size={16} className="text-blue-500" />;
+      case 'BOOKING_RESCHEDULED': return <Clock3 size={16} className="text-blue-500" />;
       case 'ASSIGNMENT_RECEIVED': return <ShoppingBag size={16} className="text-primary" />;
       case 'LOW_BALANCE': return <CreditCard size={16} className="text-orange-500" />;
       default: return <Bell size={16} className="text-primary" />;
@@ -53,7 +54,6 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -62,18 +62,19 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
             className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110]"
           />
 
-          {/* Drawer */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            className="fixed right-0 top-0 h-full w-full max-w-sm bg-background-light dark:bg-gray-950 shadow-2xl z-[120] flex flex-col border-l border-slate-100 dark:border-gray-800"
+            className="fixed right-0 top-0 h-full w-full max-w-sm bg-slate-50 dark:bg-gray-950 shadow-2xl z-[120] flex flex-col border-l border-slate-100 dark:border-gray-800"
           >
             <div className="px-4 pt-5 pb-3 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl">
               <div>
                 <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Notifications</h2>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">Updates & Alerts</p>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">
+                  {notifications.length > 0 ? `${notifications.length} updates & alerts` : 'Updates & alerts'}
+                </p>
               </div>
               <button
                 onClick={onClose}
@@ -100,12 +101,14 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                 notifications.map((n) => (
                   <motion.div
                     key={n._id}
-                    layoutProps
+                    layout
                     whileTap={{ scale: 0.98 }}
-                    className={`p-3.5 rounded-2xl border transition-all ${n.isRead
-                        ? 'bg-white dark:bg-gray-900/30 border-slate-100 dark:border-gray-800 shadow-sm'
-                        : 'bg-primary/5 dark:bg-primary/10 border-primary/20 shadow-md dark:shadow-none'
-                      }`}
+                    className={cn(
+                      "p-3.5 rounded-2xl border transition-all",
+                      n.isRead
+                        ? "bg-white dark:bg-gray-900/30 border-slate-100 dark:border-gray-800 shadow-sm"
+                        : "bg-primary/5 dark:bg-primary/10 border-primary/20 shadow-md dark:shadow-none"
+                    )}
                     onClick={() => !n.isRead && markRead(n._id)}
                   >
                     <div className="flex gap-3">
@@ -114,8 +117,19 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className={`text-[11px] font-black uppercase tracking-tight truncate ${n.isRead ? 'text-gray-500' : 'text-gray-900 dark:text-white'}`}>{n.title}</p>
-                          <span className="text-[8px] text-gray-400 font-black uppercase tracking-tighter shrink-0 mt-0.5">{dayjs(n.createdAt).fromNow()}</span>
+                          <div className="min-w-0">
+                            <p
+                              className={cn(
+                                "text-[11px] font-black uppercase tracking-tight truncate",
+                                n.isRead ? 'text-gray-500' : 'text-gray-900 dark:text-white'
+                              )}
+                            >
+                              {n.title}
+                            </p>
+                          </div>
+                          <span className="text-[8px] text-gray-400 font-black uppercase tracking-tighter shrink-0 mt-0.5">
+                            {dayjs(n.createdAt).fromNow()}
+                          </span>
                         </div>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-snug font-bold mt-0.5 uppercase tracking-tighter opacity-80">
                           {n.message}

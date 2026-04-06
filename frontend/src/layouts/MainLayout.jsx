@@ -3,12 +3,14 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Navbar from './Navbar';
 import ReviewPopup from '../components/ReviewPopup';
+import NotificationDrawer from '../components/NotificationDrawer';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 
 const MainLayout = () => {
   const { role, isAuthenticated } = useAuthStore();
   const [unreviewed, setUnreviewed] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
 
   const checkUnreviewed = async () => {
@@ -27,11 +29,17 @@ const MainLayout = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-white/80 to-blue-50/30 dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-950 dark:to-blue-950/10 text-text-light dark:text-text-dark pb-24">
-      {!['/account', '/booking-status', '/cart', '/checkout-review', '/booking-success', '/service', '/favorites', '/bookings'].some(path => location.pathname.startsWith(path)) && <Header />}
+      {!['/account', '/booking-status', '/cart', '/checkout-review', '/booking-success', '/service', '/favorites', '/bookings'].some(path => location.pathname.startsWith(path)) && (
+        <Header onOpenNotifications={() => setShowNotifications(true)} />
+      )}
       <main className="max-w-4xl mx-auto animate-in fade-in duration-500">
         <Outlet />
       </main>
       <Navbar />
+      <NotificationDrawer
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
 
       {unreviewed && (
         <ReviewPopup 

@@ -13,7 +13,7 @@ const isActiveVendor = async (req, res, next) => {
     }
 
     // Real-time status re-evaluation (Fallbacks for mid-day expiry/balance drops)
-    const currentStatus = getUpdatedStatus(vendor);
+    const currentStatus = await getUpdatedStatus(vendor);
     if (vendor.status !== currentStatus) {
       vendor.status = currentStatus;
       await vendor.save();
@@ -46,6 +46,10 @@ const isApprovedVendor = async (req, res, next) => {
 
     if (vendor.status === 'pending') {
       return res.status(403).json({ message: 'Vendor profile is pending admin approval' });
+    }
+
+    if (['blocked', 'rejected'].includes(vendor.status)) {
+      return res.status(403).json({ message: `Vendor access restricted. Current status: ${vendor.status}` });
     }
 
     req.vendor = vendor;

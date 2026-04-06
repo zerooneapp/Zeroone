@@ -1,6 +1,8 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
+const VALID_ROLES = new Set(['customer', 'vendor', 'staff', 'admin']);
+
 /**
  * Centrally manages all system notifications (In-App + Push)
  */
@@ -29,6 +31,7 @@ class NotificationService {
    * Send notification to a single user or multiple users (Bulk)
    */
   static async sendNotification({ 
+    recipients,
     userIds, 
     role, 
     type, 
@@ -38,20 +41,45 @@ class NotificationService {
     referenceId = '', 
     isSilent = false 
   }) {
-    const ids = Array.isArray(userIds) ? userIds : [userIds];
+    let resolvedRecipients = [];
+
+    if (Array.isArray(recipients) && recipients.length > 0) {
+      resolvedRecipients = recipients
+        .filter((recipient) => recipient?.userId && VALID_ROLES.has(recipient.role))
+        .map((recipient) => ({
+          userId: recipient.userId,
+          role: recipient.role
+        }));
+    } else {
+      if (!VALID_ROLES.has(role)) {
+        throw new Error(`Invalid notification role: ${role}`);
+      }
+
+      const ids = Array.isArray(userIds) ? userIds : [userIds];
+      resolvedRecipients = ids
+        .filter(Boolean)
+        .map((userId) => ({ userId, role }));
+    }
     
     // 1. Create In-App Notifications (MongoDB)
     const notifications = [];
-    for (const userId of ids) {
+    for (const recipient of resolvedRecipients) {
       try {
         const notif = await Notification.create({
-          userId, role, type, title, message, data, referenceId, isSilent
+          userId: recipient.userId,
+          role: recipient.role,
+          type,
+          title,
+          message,
+          data,
+          referenceId,
+          isSilent
         });
         notifications.push(notif);
         
         // 2. Dispatch Push (Async - Don't await)
         if (!isSilent) {
-          this._dispatchPush(userId, {
+          this._dispatchPush(recipient.userId, {
             notification: { title, body: message },
             data: { ...data, type }
           });

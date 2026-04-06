@@ -6,6 +6,8 @@ const Staff = require('../models/Staff');
 const { processDailyDeduction } = require('./walletService');
 const NotificationService = require('./notificationService');
 
+const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
+
 const initCronJobs = () => {
   // 1. Subscription Deduction (Midnight)
   cron.schedule('0 0 * * *', async () => {
@@ -40,9 +42,9 @@ const initCronJobs = () => {
 
         // Notify Staff
         const staff = await Staff.findById(booking.staffId);
-        if (staff && staff.userId) {
+        if (getStaffNotificationTarget(staff)) {
           NotificationService.sendNotification({
-            userIds: staff.userId, role: 'staff', type: 'REMINDER_30M',
+            userIds: getStaffNotificationTarget(staff), role: 'staff', type: 'REMINDER_30M',
             title: 'Upcoming Assignment', message: `Reminder: Your assignment at ${booking.vendorId.shopName} starts in 30 minutes.`,
             data: { bookingId: booking._id }, referenceId: `REMIND_STAFF_${booking._id}`
           });

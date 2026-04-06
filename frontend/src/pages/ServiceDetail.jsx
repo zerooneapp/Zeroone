@@ -6,7 +6,6 @@ import {
   Calendar, CheckCircle2, ChevronRight, Info, AlertCircle, Share2
 } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import SectionTitle from '../components/SectionTitle';
@@ -29,6 +28,8 @@ const ServiceDetail = () => {
   const [selectedCat, setSelectedCat] = useState('All');
   const [categories, setCategories] = useState(['All']);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [servicePricing, setServicePricing] = useState({});
+  const [cartPricing, setCartPricing] = useState(null);
   const { role, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
@@ -84,6 +85,58 @@ const ServiceDetail = () => {
     checkFavorite();
   }, [id, isAuthenticated]);
 
+  useEffect(() => {
+    if (!vendor?._id || services.length === 0) {
+      setServicePricing({});
+      return;
+    }
+
+    const fetchServicePricing = async () => {
+      try {
+        const res = await api.get('/pricing/preview', {
+          params: {
+            vendorId: vendor._id,
+            serviceIds: services.map((service) => service._id).join(',')
+          }
+        });
+
+        const pricingMap = (res.data?.services || []).reduce((acc, service) => {
+          acc[service.serviceId] = service;
+          return acc;
+        }, {});
+
+        setServicePricing(pricingMap);
+      } catch (err) {
+        setServicePricing({});
+      }
+    };
+
+    fetchServicePricing();
+  }, [vendor?._id, services]);
+
+  useEffect(() => {
+    if (!vendor?._id || cartVendor?._id !== vendor._id || cartItems.length === 0) {
+      setCartPricing(null);
+      return;
+    }
+
+    const fetchCartPricing = async () => {
+      try {
+        const res = await api.get('/pricing/preview', {
+          params: {
+            vendorId: vendor._id,
+            serviceIds: cartItems.map((item) => item._id).join(',')
+          }
+        });
+        setCartPricing(res.data);
+      } catch (err) {
+        setCartPricing(null);
+      }
+    };
+
+    fetchCartPricing();
+  }, [vendor?._id, cartVendor?._id, cartItems]);
+
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) return navigate('/login');
     try {
@@ -96,12 +149,23 @@ const ServiceDetail = () => {
   };
 
   const handleWhatsAppShare = () => {
+    const sharedTotal = cartPricing?.finalTotal ?? getTotalPrice();
     const serviceDetails = cartItems.length > 0
-      ? `Services: ${cartItems.map(i => i.name).join(', ')}\nTotal: ₹${getTotalPrice()}`
+      ? `Services: ${cartItems.map(i => i.name).join(', ')}\nTotal: ₹${sharedTotal}`
       : `Check out ${vendor?.shopName} on ZeroOne!`;
 
     const text = `*ZeroOne App - Elite Services*\n\n${serviceDetails}\n\n📍 Location: ${vendor?.address}\n🔗 View on App: ${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const handleOpenLocation = () => {
+    const [lng, lat] = vendor?.location?.coordinates || [];
+    const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng);
+    const mapsUrl = hasCoordinates
+      ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendor?.address || vendor?.shopName || 'Salon')}`;
+
+    window.open(mapsUrl, '_blank', 'noopener,noreferrer');
   };
 
   const toggleService = (service) => {
@@ -116,17 +180,11 @@ const ServiceDetail = () => {
   const gallery = vendor ? (services.some(s => s.images?.length > 0)
     ? services.flatMap(s => s.images).filter(Boolean).slice(0, 10)
     : [vendor.shopImage, ...(vendor.gallery || [])].filter(Boolean).slice(0, 5)) : [];
+  const galleryPreview = gallery.slice(0, 4);
 
   useEffect(() => {
-    if (gallery.length <= 1) return;
-    const interval = setInterval(() => {
-      setActiveImage(prev => {
-        const currentIndex = gallery.indexOf(prev);
-        const nextIndex = (currentIndex + 1) % gallery.length;
-        return gallery[nextIndex];
-      });
-    }, 4500);
-    return () => clearInterval(interval);
+    if (gallery.length === 0) return;
+    setActiveImage((prev) => (gallery.includes(prev) ? prev : gallery[0]));
   }, [gallery]);
 
   if (loading) return (
@@ -153,6 +211,9 @@ const ServiceDetail = () => {
   );
 
   const totalPrice = getTotalPrice();
+  const displayTotal = cartPricing?.finalTotal ?? totalPrice;
+  const originalTotal = cartPricing?.originalTotal ?? totalPrice;
+  const totalSavings = cartPricing?.totalDiscount ?? 0;
   const hasItemsFromThisVendor = cartVendor?._id === vendor._id;
   const filteredServices = selectedCat === 'All' ? services : services.filter(s => s.category === selectedCat);
 
@@ -177,19 +238,12 @@ const ServiceDetail = () => {
       <div className="relative bg-white dark:bg-gray-950">
         <div className="relative group">
           <div className="h-48 relative overflow-hidden bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50">
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={activeImage}
-                src={activeImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.8, ease: "circOut" }}
-                className="w-full h-full object-cover"
-                alt={vendor.shopName}
-                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
-              />
-            </AnimatePresence>
+            <img
+              src={activeImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'}
+              className="w-full h-full object-cover"
+              alt={vendor.shopName}
+              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
+            />
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent " />
 
             {/* Redesigned Like/Heart Overlay - Fixed Dimensions & New Color */}
@@ -207,12 +261,68 @@ const ServiceDetail = () => {
               />
             </button>
           </div>
+
+          {galleryPreview.length > 1 && (
+            <div className="px-3 pt-3 space-y-2">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                {galleryPreview.map((image, index) => {
+                  const isActive = activeImage === image;
+
+                  return (
+                    <button
+                      key={`${image}-${index}`}
+                      type="button"
+                      onClick={() => setActiveImage(image)}
+                      className={cn(
+                        "relative shrink-0 w-[72px] h-[56px] rounded-2xl overflow-hidden border transition-all",
+                        isActive
+                          ? "border-[#1C2C4E] shadow-lg"
+                          : "border-[#1C2C4E]/10 opacity-70"
+                      )}
+                    >
+                      <img
+                        src={image}
+                        alt={`${vendor.shopName} preview ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {index === galleryPreview.length - 1 && gallery.length > galleryPreview.length && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-[10px] font-black tracking-widest">
+                          +{gallery.length - galleryPreview.length}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-center gap-1.5">
+                {galleryPreview.map((image, index) => (
+                  <button
+                    key={`dot-${index}`}
+                    type="button"
+                    onClick={() => setActiveImage(image)}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all",
+                      activeImage === image
+                        ? "w-5 bg-[#1C2C4E]"
+                        : "w-1.5 bg-[#1C2C4E]/20"
+                    )}
+                    aria-label={`Show image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Info Grid - Updated Typography Spacing */}
       <div className="px-5 mt-4 grid grid-cols-2 gap-y-3 gap-x-6">
-        <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          onClick={handleOpenLocation}
+          className="flex items-center gap-2.5 text-left active:scale-[0.98] transition-all"
+        >
           <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
             <MapPin size={14} className="text-[#1C2C4E] dark:text-blue-400" />
           </div>
@@ -220,7 +330,7 @@ const ServiceDetail = () => {
             <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter truncate">{vendor.address?.split(',')[0] || 'Local Address'}</p>
             <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Location</p>
           </div>
-        </div>
+        </button>
 
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
@@ -275,7 +385,14 @@ const ServiceDetail = () => {
       <div className="px-3 mt-4 space-y-2">
         <SectionTitle title="Selected Services" className="mb-1" />
         {cartItems.length > 0 && hasItemsFromThisVendor ? (
-          cartItems.map((item) => (
+          cartItems.map((item) => {
+            const priceMeta = servicePricing[item._id] || {
+              originalPrice: item.price,
+              finalPrice: item.price,
+              discount: 0
+            };
+
+            return (
             <div
               key={item._id}
               className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
@@ -292,6 +409,11 @@ const ServiceDetail = () => {
                     </span>
                     <span className="text-xs font-black text-[#0B1222] dark:text-white leading-none">₹{item.price}</span>
                   </div>
+                  {priceMeta.discount > 0 && (
+                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
+                      Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
@@ -306,7 +428,8 @@ const ServiceDetail = () => {
                 </div>
               </div>
             </div>
-          ))
+            );
+          })
         ) : (
           <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
             <p className="text-[8px] font-black text-[#0B1222]/30 uppercase tracking-widest italic">Tap items below to add them</p>
@@ -320,6 +443,11 @@ const ServiceDetail = () => {
           {filteredServices.map((service, index) => {
             const isSelected = cartItems.find(item => item._id === service._id);
             if (isSelected) return null;
+            const priceMeta = servicePricing[service._id] || {
+              originalPrice: service.price,
+              finalPrice: service.price,
+              discount: 0
+            };
 
             return (
               <div
@@ -332,6 +460,11 @@ const ServiceDetail = () => {
                 <div className="flex-1">
                   <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
                   <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
+                  {priceMeta.discount > 0 && (
+                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
+                      Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                    </p>
+                  )}
                 </div>
                   <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
                     Pay At Shop
@@ -372,7 +505,13 @@ const ServiceDetail = () => {
         <div className="flex items-center justify-between max-w-lg mx-auto">
           <div className="flex flex-col">
             <p className="text-[8px] font-black text-white/40 capitalize tracking-widest mb-0.5 leading-none">Net total</p>
-            <p className="text-lg font-black text-white leading-none">₹{totalPrice}</p>
+            {totalSavings > 0 && (
+              <p className="text-[8px] font-black text-white/40 line-through leading-none mb-1">₹{originalTotal}</p>
+            )}
+            <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
+            {totalSavings > 0 && (
+              <p className="text-[8px] font-black text-emerald-400 tracking-widest mt-1 leading-none">SAVE ₹{totalSavings}</p>
+            )}
           </div>
           <button
             onClick={() => navigate('/cart')}

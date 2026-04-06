@@ -9,6 +9,8 @@ const Service = require('../models/Service');
 const Vendor = require('../models/Vendor');
 const User = require('../models/User');
 const cloudinary = require('../config/cloudinary');
+const StaffAvailability = require('../models/StaffAvailability');
+const moment = require('moment-timezone');
 
 const addStaff = async (req, res) => {
   try {
@@ -139,13 +141,15 @@ const deleteStaff = async (req, res) => {
 
 const getStaffProfile = async (req, res) => {
   try {
-    console.log('[DEBUG] Fetching profile for User ID:', req.user?._id);
+    const authUserId = req.user?._id || req.staff?.userId || null;
+    const authStaffId = req.staff?._id || null;
 
-    if (!req.user || !req.user._id) {
+    if (!authUserId && !authStaffId) {
        return res.status(401).json({ message: 'Authentication context missing' });
     }
 
-    const staff = await Staff.findOne({ userId: req.user._id })
+    const staffQuery = authStaffId ? { _id: authStaffId } : { userId: authUserId };
+    const staff = await Staff.findOne(staffQuery)
       .populate('services')
       .populate({
         path: 'vendorId',
@@ -170,6 +174,144 @@ const getStaffProfile = async (req, res) => {
   }
 };
 
+const buildDayRange = (dateValue) => {
+  const day = moment.tz(dateValue, 'Asia/Kolkata').startOf('day');
+  return {
+    start: day.toDate(),
+    end: day.clone().add(1, 'day').toDate(),
+    day
+  };
+};
+
+const normalizeAvailabilityPayload = (body = {}) => {
+  const useVendorHours = body.useVendorHours === true || body.useVendorHours === 'true';
+  const isOffDay = body.isOffDay === true || body.isOffDay === 'true';
+  const startTime = body.startTime || '';
+  const endTime = body.endTime || '';
+  const breakStart = body.breakStart || '';
+  const breakEnd = body.breakEnd || '';
+
+  if (useVendorHours) {
+    return { useVendorHours: true, workingHours: [], slots: [] };
+  }
+
+  if (isOffDay) {
+    return { useVendorHours: false, workingHours: [], slots: [] };
+  }
+
+  if (!startTime || !endTime) {
+    throw new Error('Start and end time are required');
+  }
+
+  const workingHours = [];
+  if (breakStart && breakEnd) {
+    workingHours.push({ startTime, endTime: breakStart });
+    workingHours.push({ startTime: breakEnd, endTime });
+  } else {
+    workingHours.push({ startTime, endTime });
+  }
+
+  return { useVendorHours: false, workingHours, slots: [] };
+};
+
+const getStaffAvailabilityForDate = async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) return res.status(400).json({ message: 'Date is required' });
+
+    const staff = await Staff.findOne({ _id: req.params.id, vendorId: req.vendor._id });
+    if (!staff) return res.status(404).json({ message: 'Staff not found' });
+
+    const { start, end } = buildDayRange(date);
+    const record = await StaffAvailability.findOne({
+      staffId: staff._id,
+      date: { $gte: start, $lt: end }
+    }).lean();
+
+    if (!record) {
+      return res.status(200).json({
+        date,
+        useVendorHours: true,
+        isOffDay: false,
+        startTime: '',
+        endTime: '',
+        breakStart: '',
+        breakEnd: ''
+      });
+    }
+
+    const windows = record.workingHours || [];
+    const isOffDay = windows.length === 0;
+    const firstWindow = windows[0] || {};
+    const secondWindow = windows[1] || {};
+
+    res.status(200).json({
+      date,
+      useVendorHours: false,
+      isOffDay,
+      startTime: firstWindow.startTime || '',
+      endTime: secondWindow.endTime || firstWindow.endTime || '',
+      breakStart: windows.length > 1 ? firstWindow.endTime || '' : '',
+      breakEnd: windows.length > 1 ? secondWindow.startTime || '' : ''
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const upsertStaffAvailabilityForDate = async (req, res) => {
+  try {
+    const { date } = req.body;
+    if (!date) return res.status(400).json({ message: 'Date is required' });
+
+    const staff = await Staff.findOne({ _id: req.params.id, vendorId: req.vendor._id });
+    if (!staff) return res.status(404).json({ message: 'Staff not found' });
+
+    const { start, end, day } = buildDayRange(date);
+    const normalized = normalizeAvailabilityPayload(req.body);
+
+    if (normalized.useVendorHours) {
+      await StaffAvailability.deleteMany({
+        staffId: staff._id,
+        date: { $gte: start, $lt: end }
+      });
+      return res.status(200).json({
+        message: 'Staff availability reset to vendor working hours',
+        date,
+        useVendorHours: true,
+        isOffDay: false
+      });
+    }
+
+    const record = await StaffAvailability.findOneAndUpdate(
+      {
+        staffId: staff._id,
+        date: { $gte: start, $lt: end }
+      },
+      {
+        $set: {
+          staffId: staff._id,
+          date: day.toDate(),
+          workingHours: normalized.workingHours,
+          slots: normalized.slots
+        }
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true
+      }
+    );
+
+    res.status(200).json({
+      message: 'Staff availability updated',
+      record
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addStaff,
   listStaff,
@@ -177,4 +319,6 @@ module.exports = {
   deleteStaff,
   getStaffById,
   getStaffProfile,
+  getStaffAvailabilityForDate,
+  upsertStaffAvailabilityForDate,
 };

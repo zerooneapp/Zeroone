@@ -21,8 +21,11 @@ const bookingSchema = new mongoose.Schema({
   serviceAddress: { type: String },
   status: { type: String, enum: ['pending', 'confirmed', 'completed', 'cancelled'], default: 'pending' },
   completedAt: { type: Date },
+  cancelReason: { type: String },
+  cancelledByRole: { type: String, enum: ['customer', 'vendor', 'staff', 'admin'] },
   cancelledAt: { Date },
   rescheduledAt: { Date },
+  rescheduledByRole: { type: String, enum: ['customer', 'vendor', 'staff', 'admin'] },
   isReviewed: { type: Boolean, default: false }
 }, { timestamps: true });
 

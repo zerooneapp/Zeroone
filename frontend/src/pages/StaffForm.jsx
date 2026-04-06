@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Upload, Info, Scissors, User, Phone, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Info, Scissors, User, Phone, CalendarClock, Coffee } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -19,6 +19,17 @@ const StaffForm = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [availabilityDate, setAvailabilityDate] = useState(new Date().toISOString().split('T')[0]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [savingAvailability, setSavingAvailability] = useState(false);
+  const [availability, setAvailability] = useState({
+    useVendorHours: true,
+    isOffDay: false,
+    startTime: '',
+    endTime: '',
+    breakStart: '',
+    breakEnd: ''
+  });
 
   useEffect(() => {
     const init = async () => {
@@ -43,6 +54,31 @@ const StaffForm = () => {
     };
     init();
   }, [id, isEdit]);
+
+  useEffect(() => {
+    if (!isEdit || !id || !availabilityDate) return;
+
+    const fetchAvailability = async () => {
+      try {
+        setAvailabilityLoading(true);
+        const res = await api.get(`/staff/${id}/availability`, { params: { date: availabilityDate } });
+        setAvailability({
+          useVendorHours: Boolean(res.data?.useVendorHours),
+          isOffDay: Boolean(res.data?.isOffDay),
+          startTime: res.data?.startTime || '',
+          endTime: res.data?.endTime || '',
+          breakStart: res.data?.breakStart || '',
+          breakEnd: res.data?.breakEnd || ''
+        });
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Failed to load staff schedule');
+      } finally {
+        setAvailabilityLoading(false);
+      }
+    };
+
+    fetchAvailability();
+  }, [availabilityDate, id, isEdit]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -94,6 +130,38 @@ const StaffForm = () => {
       toast.error(err.response?.data?.message || 'Failed to save staff');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveAvailability = async () => {
+    if (!isEdit) return;
+
+    if (!availability.useVendorHours && !availability.isOffDay) {
+      if (!availability.startTime || !availability.endTime) {
+        return toast.error('Select working start and end time');
+      }
+
+      if (availability.breakStart && availability.breakEnd && availability.breakStart >= availability.breakEnd) {
+        return toast.error('Break end must be after break start');
+      }
+    }
+
+    try {
+      setSavingAvailability(true);
+      await api.put(`/staff/${id}/availability`, {
+        date: availabilityDate,
+        useVendorHours: availability.useVendorHours,
+        isOffDay: availability.isOffDay,
+        startTime: availability.startTime,
+        endTime: availability.endTime,
+        breakStart: availability.breakStart,
+        breakEnd: availability.breakEnd
+      });
+      toast.success('Staff schedule updated');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update staff schedule');
+    } finally {
+      setSavingAvailability(false);
     }
   };
 
@@ -210,6 +278,115 @@ const StaffForm = () => {
               Note: Only staff who are assigned to a service will be visible to customers during the booking process.
             </p>
           </div>
+
+          {isEdit && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between px-0.5">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date Availability</label>
+                <button
+                  type="button"
+                  onClick={saveAvailability}
+                  disabled={availabilityLoading || savingAvailability}
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.18em] transition-all ${availabilityLoading || savingAvailability ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-900 dark:bg-primary text-white shadow-lg shadow-slate-900/10 active:scale-[0.98]'}`}
+                >
+                  {savingAvailability ? 'Saving...' : 'Save Schedule'}
+                </button>
+              </div>
+
+              <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Schedule Date</label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={availabilityDate}
+                      onChange={(e) => setAvailabilityDate(e.target.value)}
+                      className="w-full py-3 pl-11 pr-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
+                    />
+                    <CalendarClock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
+
+                {availabilityLoading ? (
+                  <div className="h-28 bg-slate-50 dark:bg-gray-800 rounded-xl animate-pulse" />
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setAvailability((prev) => ({ ...prev, useVendorHours: true, isOffDay: false }))}
+                        className={`h-11 rounded-xl border text-[9px] font-black uppercase tracking-[0.16em] transition-all ${availability.useVendorHours ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-slate-50 dark:bg-gray-800 border-slate-200/60 dark:border-gray-700 text-gray-500'}`}
+                      >
+                        Use Shop Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvailability((prev) => ({ ...prev, useVendorHours: false, isOffDay: !prev.isOffDay }))}
+                        className={`h-11 rounded-xl border text-[9px] font-black uppercase tracking-[0.16em] transition-all ${!availability.useVendorHours && availability.isOffDay ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/20' : 'bg-slate-50 dark:bg-gray-800 border-slate-200/60 dark:border-gray-700 text-gray-500'}`}
+                      >
+                        Mark Off Day
+                      </button>
+                    </div>
+
+                    {!availability.useVendorHours && !availability.isOffDay && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Start</label>
+                            <input
+                              type="time"
+                              value={availability.startTime}
+                              onChange={(e) => setAvailability((prev) => ({ ...prev, startTime: e.target.value }))}
+                              className="w-full py-3 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">End</label>
+                            <input
+                              type="time"
+                              value={availability.endTime}
+                              onChange={(e) => setAvailability((prev) => ({ ...prev, endTime: e.target.value }))}
+                              className="w-full py-3 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Break Start</label>
+                            <div className="relative">
+                              <input
+                                type="time"
+                                value={availability.breakStart}
+                                onChange={(e) => setAvailability((prev) => ({ ...prev, breakStart: e.target.value }))}
+                                className="w-full py-3 pl-11 pr-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
+                              />
+                              <Coffee size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Break End</label>
+                            <input
+                              type="time"
+                              value={availability.breakEnd}
+                              onChange={(e) => setAvailability((prev) => ({ ...prev, breakEnd: e.target.value }))}
+                              className="w-full py-3 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
+                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-relaxed">
+                        Use shop hours for default timing, mark off day for leave, or set custom hours with one optional break.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </section>
+          )}
         </form>
       </main>
     </div>

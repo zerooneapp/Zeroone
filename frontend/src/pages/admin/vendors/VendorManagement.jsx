@@ -17,6 +17,7 @@ const VendorManagement = () => {
    const [loading, setLoading] = useState(true);
    const [selectedVendor, setSelectedVendor] = useState(null);
    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+   const [minimumWalletThreshold, setMinimumWalletThreshold] = useState(100);
 
    // Filters State
    const [filters, setFilters] = useState({
@@ -43,6 +44,7 @@ const VendorManagement = () => {
          const res = await api.get('/admin/vendors', { params });
          setVendors(res.data.vendors);
          setTotalPages(res.data.totalPages);
+         setMinimumWalletThreshold(res.data.minimumWalletThreshold || 100);
       } catch (err) {
          toast.error('Failed to fetch vendors');
       } finally {
@@ -106,6 +108,7 @@ const VendorManagement = () => {
       const styles = {
          pending: "bg-amber-50 text-amber-500 border-amber-100/50",
          active: "bg-emerald-50 text-emerald-500 border-emerald-100/50",
+         inactive: "bg-orange-50 text-orange-500 border-orange-100/50",
          approved: "bg-blue-50 text-blue-500 border-blue-100/50",
          blocked: "bg-red-50 text-red-500 border-red-100/50",
          rejected: "bg-slate-50 text-slate-300 border-slate-200"
@@ -153,10 +156,10 @@ const VendorManagement = () => {
                      onChange={(e) => setFilters({ ...filters, [f]: e.target.value })}
                   >
                      <option value="">{f.toUpperCase()}</option>
-                     {f === 'status' && ['pending', 'active', 'blocked'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
+                     {f === 'status' && ['pending', 'active', 'inactive', 'blocked', 'rejected'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
                      {f === 'serviceLevel' && ['standard', 'premium', 'luxury'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
                      {f === 'planType' && ['daily', 'monthly', 'trial'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
-                     {f === 'isActive' && [<option key="t" value="true">VISIBILE</option>, <option key="f" value="false">HIDDEN</option>]}
+                     {f === 'isActive' && [<option key="t" value="true">VISIBLE</option>, <option key="f" value="false">HIDDEN</option>]}
                   </select>
                ))}
             </div>
@@ -221,19 +224,13 @@ const VendorManagement = () => {
                            <td className="px-3 py-3.5">
                               <span className={cn(
                                  "text-[13px] font-black italic tracking-tighter",
-                                 vendor.walletBalance < 100 ? "text-red-500" : "text-emerald-500"
+                                 vendor.walletBalance < minimumWalletThreshold ? "text-red-500" : "text-emerald-500"
                               )}>
                                  ₹{vendor.walletBalance.toFixed(2)}
                               </span>
                            </td>
                            <td className="px-3 py-3.5">
-                              <span className={cn("text-[8px] font-black uppercase px-2 py-1 rounded-lg",
-                                 vendor.status === 'active' ? "bg-emerald-50 text-emerald-500" :
-                                    vendor.status === 'pending' ? "bg-amber-50 text-amber-500" :
-                                       "bg-red-50 text-red-500"
-                              )}>
-                                 {vendor.status}
-                              </span>
+                              {getStatusBadge(vendor.status)}
                            </td>
                            <td className="px-3 py-3.5 text-center">
                               <div className={cn(
@@ -306,7 +303,7 @@ const VendorManagement = () => {
                      <div className="flex-1 overflow-y-auto p-6 px-7 space-y-6 no-scrollbar pb-32">
 
                         {/* HARD BLOCK WARNING */}
-                        {(selectedVendor.walletBalance < 100 || !selectedVendor.subscription?.isActive) && (
+                        {(selectedVendor.walletBalance < minimumWalletThreshold || !selectedVendor.subscription?.isActive) && (
                            <div className="p-3.5 px-5 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl flex items-center gap-4 text-red-500">
                               <AlertCircle size={20} strokeWidth={3} className="shrink-0" />
                               <p className="text-[9px] font-black uppercase tracking-widest leading-normal">
@@ -338,7 +335,7 @@ const VendorManagement = () => {
                            <div className="space-y-6">
                               <Section title="Financials" icon={CreditCard}>
                                  <InfoItem label="Active Plan" value={selectedVendor.subscription?.type?.toUpperCase() || 'NONE'} />
-                                 <InfoItem label="Vault Balance" value={`₹${selectedVendor.walletBalance.toFixed(2)}`} highlight={selectedVendor.walletBalance < 100} />
+                                 <InfoItem label="Vault Balance" value={`₹${selectedVendor.walletBalance.toFixed(2)}`} highlight={selectedVendor.walletBalance < minimumWalletThreshold} />
                                  <InfoItem label="Next Sync" value={selectedVendor.subscription?.nextDeductionDate ? new Date(selectedVendor.subscription.nextDeductionDate).toLocaleDateString() : 'N/A'} />
                                  <div className="mt-4">
                                     <button

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Filter, RefreshCcw, Calendar as CalendarIcon, ChevronRight } from 'lucide-react';
+import { ArrowLeft, RefreshCcw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import BookingCard from '../components/BookingCard';
 import StatusTabs from '../components/StatusTabs';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
+import EmergencyClosureModal from '../components/EmergencyClosureModal';
 
 const VendorBookings = () => {
   const navigate = useNavigate();
@@ -17,6 +18,11 @@ const VendorBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [closures, setClosures] = useState([]);
+  const [closuresLoading, setClosuresLoading] = useState(true);
+  const [closureActionId, setClosureActionId] = useState(null);
+  const [endingClosureId, setEndingClosureId] = useState(null);
+  const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
 
   const fetchBookings = async () => {
     if (dayjs(fromDate).isAfter(toDate)) {
@@ -38,12 +44,43 @@ const VendorBookings = () => {
     }
   };
 
+  const fetchClosures = async () => {
+    try {
+      setClosuresLoading(true);
+      const res = await api.get('/vendor/closures');
+      setClosures(res.data || []);
+    } catch (err) {
+      toast.error('Failed to load emergency closures');
+    } finally {
+      setClosuresLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchBookings();
   }, [status, fromDate, toDate]);
 
+  useEffect(() => {
+    fetchClosures();
+  }, []);
+
   const handleAction = async (id, action) => {
     if (actionLoadingId === id) return;
+    let reason = '';
+
+    if (action === 'cancel') {
+      const input = window.prompt('Please enter the cancellation reason for the customer:');
+      if (input === null) {
+        return;
+      }
+
+      reason = input.trim();
+      if (!reason) {
+        toast.error('Cancellation reason is required');
+        return;
+      }
+    }
+
     const originalBookings = [...bookings];
     setBookings(prev => prev.map(b =>
       b._id === id
@@ -53,7 +90,7 @@ const VendorBookings = () => {
 
     try {
       setActionLoadingId(id);
-      await api.patch(`/bookings/${id}/status`, { action });
+      await api.patch(`/bookings/${id}/status`, { action, reason });
       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
     } catch (err) {
       setBookings(originalBookings);
@@ -61,6 +98,52 @@ const VendorBookings = () => {
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const refreshAll = async () => {
+    await Promise.all([fetchBookings(), fetchClosures()]);
+  };
+
+  const handleEmergencyCancel = async (bookingId, reason, closureId) => {
+    try {
+      setClosureActionId(bookingId);
+      await api.patch(`/vendor/bookings/${bookingId}/emergency-cancel`, { reason, closureId });
+      toast.success('Booking cancelled for closure');
+      await refreshAll();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Emergency cancel failed');
+    } finally {
+      setClosureActionId(null);
+    }
+  };
+
+  const handleEndClosure = async (closureId) => {
+    try {
+      setEndingClosureId(closureId);
+      await api.patch(`/vendor/closures/${closureId}/end`);
+      toast.success('Emergency closure ended');
+      await refreshAll();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to end closure');
+    } finally {
+      setEndingClosureId(null);
+    }
+  };
+
+  const handleEmergencyReschedule = (booking, vendor) => {
+    navigate('/cart', {
+      state: {
+        rescheduleBookingId: booking._id,
+        vendor,
+        rescheduleItems: booking.services.map(service => ({
+          _id: service.serviceId,
+          name: service.name,
+          price: service.price,
+          duration: service.duration
+        })),
+        rescheduleTotalDuration: booking.totalDuration
+      }
+    });
   };
 
   const filteredBookings = bookings.filter(b => b.status === status);
@@ -82,12 +165,19 @@ const VendorBookings = () => {
             </div>
           </div>
           <button
-            onClick={fetchBookings}
+            onClick={refreshAll}
             className={`p-2.5 bg-slate-50 dark:bg-gray-800/80 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-800 active:rotate-180 transition-all duration-500 shadow-sm ${loading ? 'animate-spin' : ''}`}
           >
             <RefreshCcw size={16} />
           </button>
         </div>
+
+        <button
+          onClick={() => setIsClosureModalOpen(true)}
+          className="w-full mb-3 h-11 rounded-2xl bg-amber-500 text-white text-[10px] font-black uppercase tracking-[0.22em] shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all"
+        >
+          Emergency Close Window
+        </button>
 
         <StatusTabs activeTab={status} onTabChange={setStatus} />
 
@@ -118,6 +208,93 @@ const VendorBookings = () => {
       </header>
 
       <main className="px-4 mt-4 max-w-2xl mx-auto space-y-3">
+        {!closuresLoading && closures.length > 0 && (
+          <section className="space-y-3">
+            {closures.map(({ closure, impactedBookings, vendor }) => (
+              <div
+                key={closure._id}
+                className="p-4 rounded-[1.8rem] bg-amber-50/70 dark:bg-amber-900/10 border border-amber-200/70 dark:border-amber-900/30 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+                      <AlertTriangle size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-[0.24em] text-amber-600 dark:text-amber-400">Active Closure</p>
+                      <h2 className="text-[14px] font-black text-slate-900 dark:text-white mt-1">
+                        {dayjs(closure.startTime).format('DD MMM, hh:mm A')} to {dayjs(closure.endTime).format('DD MMM, hh:mm A')}
+                      </h2>
+                      <p className="text-[10px] font-bold text-slate-500 dark:text-gray-400 mt-1">
+                        {closure.reason || 'Temporary emergency closure'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Impacted</p>
+                    <p className="text-lg font-black text-amber-600 dark:text-amber-400">{impactedBookings.length}</p>
+                    <button
+                      onClick={() => handleEndClosure(closure._id)}
+                      disabled={endingClosureId === closure._id}
+                      className="mt-3 h-9 px-3 bg-white dark:bg-gray-950 text-slate-900 dark:text-white rounded-xl border border-amber-200 dark:border-gray-800 text-[8px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
+                    >
+                      {endingClosureId === closure._id ? 'Ending...' : 'End Closure'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  {impactedBookings.length === 0 ? (
+                    <div className="p-3 rounded-xl bg-white/70 dark:bg-gray-950/40 border border-dashed border-amber-200 dark:border-amber-900/30">
+                      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-gray-400 text-center">
+                        All affected bookings are already resolved
+                      </p>
+                    </div>
+                  ) : (
+                    impactedBookings.map((booking) => (
+                      <div
+                        key={booking._id}
+                        className="p-3 rounded-xl bg-white dark:bg-gray-950 border border-amber-100 dark:border-gray-800 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[12px] font-black text-slate-900 dark:text-white">
+                              {booking.userId?.name || booking.walkInCustomerName || 'Customer'}
+                            </p>
+                            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 mt-1">
+                              <Clock3 size={10} />
+                              <span>{dayjs(booking.startTime).format('DD MMM, hh:mm A')}</span>
+                            </div>
+                            <p className="text-[10px] font-bold text-slate-500 dark:text-gray-400 mt-2">
+                              {booking.services.map(service => service.name).join(' • ')}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              onClick={() => handleEmergencyReschedule(booking, vendor)}
+                              disabled={closureActionId === booking._id}
+                              className="h-10 px-3 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
+                            >
+                              Reschedule
+                            </button>
+                            <button
+                              onClick={() => handleEmergencyCancel(booking._id, closure.reason, closure._id)}
+                              disabled={closureActionId === booking._id}
+                              className="h-10 px-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 rounded-xl border border-rose-100 dark:border-rose-900/30 text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
+                            >
+                              {closureActionId === booking._id ? 'Working...' : 'Cancel'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div key="loading" className="space-y-3">
@@ -169,6 +346,12 @@ const VendorBookings = () => {
           )}
         </AnimatePresence>
       </main>
+
+      <EmergencyClosureModal
+        isOpen={isClosureModalOpen}
+        onClose={() => setIsClosureModalOpen(false)}
+        onCreated={refreshAll}
+      />
     </div>
   );
 };

@@ -14,6 +14,13 @@ const {
   createCategory,
   getCategories
 } = require('../controllers/adminController');
+const { getAdminTransactions } = require('../controllers/transactionController');
+const {
+  getAdminReviews,
+  approveReview,
+  approveAllReviews,
+  deleteReview
+} = require('../controllers/reviewController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -40,6 +47,11 @@ router.patch('/plans/:id', updatePlan);
 
 // Revenue & Reporting
 router.get('/revenue', getRevenueReport);
+router.get('/transactions', getAdminTransactions);
+router.get('/reviews', getAdminReviews);
+router.post('/reviews/approve-all', approveAllReviews);
+router.post('/reviews/:id/approve', approveReview);
+router.delete('/reviews/:id', deleteReview);
 
 // User & Booking Management
 router.patch('/users/:id/block', toggleBlockUser);

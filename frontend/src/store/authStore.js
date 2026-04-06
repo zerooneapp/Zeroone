@@ -110,7 +110,7 @@ export const useAuthStore = create(
               isActive: subscription?.isActive || false,
               currentPlan: subscription?.currentPlan || null,
               wallet: walletBalance || 0,
-              serviceLevel: subscription?.serviceLevel || 'basic'
+              serviceLevel: subscription?.serviceLevel || 'standard'
             }
           });
         } catch (err) {
@@ -128,8 +128,9 @@ export const useAuthStore = create(
         try {
           set({ loading: true });
           const res = await api.get('/auth/me');
+          // res.data IS the user object directly (not res.data.user)
           set({
-            user: res.data.user,
+            user: res.data,
             role: res.data.role,
             isAuthenticated: true
           });

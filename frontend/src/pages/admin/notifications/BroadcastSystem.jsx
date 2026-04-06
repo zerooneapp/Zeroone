@@ -36,11 +36,15 @@ const BroadcastSystem = () => {
       setIsConfirmOpen(false);
       try {
          setLoading(true);
-         const res = await api.post('/admin/broadcast', formData);
+         const res = await api.post('/admin/broadcast', {
+            title: formData.title,
+            message: formData.message,
+            targetRole: formData.targetAudience
+         });
          toast.success(res.data.message || 'Transmission Successful 📡');
          setFormData({ title: '', message: '', targetAudience: 'all' });
       } catch (err) {
-         toast.error('Transmission Failure: Check Infrastructure');
+         toast.error(err.response?.data?.message || 'Transmission Failure: Check Infrastructure');
       } finally {
          setLoading(false);
       }

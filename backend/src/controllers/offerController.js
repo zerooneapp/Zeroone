@@ -5,6 +5,7 @@ const {
   updateOffer, 
   deleteOffer 
 } = require('../services/offerService');
+const { getPricingPreviewForServiceIds } = require('../services/offerPricingService');
 
 const addOffer = async (req, res) => {
   try {
@@ -71,10 +72,36 @@ const removeOffer = async (req, res) => {
   }
 };
 
+const previewPublicPricing = async (req, res) => {
+  try {
+    const { vendorId, serviceIds } = req.query;
+    if (!vendorId || !serviceIds) {
+      return res.status(400).json({ message: 'vendorId and serviceIds are required' });
+    }
+
+    const normalizedServiceIds = Array.isArray(serviceIds)
+      ? serviceIds
+      : String(serviceIds)
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean);
+
+    if (normalizedServiceIds.length === 0) {
+      return res.status(400).json({ message: 'At least one serviceId is required' });
+    }
+
+    const preview = await getPricingPreviewForServiceIds(vendorId, normalizedServiceIds);
+    res.status(200).json(preview);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addOffer,
   listOffers,
   getOfferDetails,
   patchOffer,
-  removeOffer
+  removeOffer,
+  previewPublicPricing
 };

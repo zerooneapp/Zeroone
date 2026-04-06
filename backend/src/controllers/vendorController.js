@@ -6,6 +6,48 @@ const Offer = require('../models/Offer');
 const cloudinary = require('../config/cloudinary');
 const moment = require('moment-timezone');
 const NotificationService = require('../services/notificationService');
+const {
+  getBillingSettings,
+  getSubscriptionPlanForVendor,
+  getVendorSubscriptionState
+} = require('../services/walletService');
+
+const buildPublicVendorResponse = (vendor, extra = {}) => ({
+  _id: vendor._id,
+  shopName: vendor.shopName,
+  category: vendor.category,
+  location: vendor.location,
+  address: vendor.address,
+  shopImage: vendor.shopImage,
+  galleryImages: vendor.galleryImages || [],
+  gallery: vendor.galleryImages || [],
+  shopVideo: vendor.shopVideo || '',
+  workingHours: vendor.workingHours,
+  rating: vendor.rating,
+  totalReviews: vendor.totalReviews,
+  serviceLevel: vendor.serviceLevel,
+  isShopOpen: vendor.isShopOpen,
+  isClosedToday: vendor.isClosedToday,
+  offers: vendor.offers || [],
+  createdAt: vendor.createdAt,
+  updatedAt: vendor.updatedAt,
+  ...extra
+});
+
+const calculateDistanceInMeters = (fromLat, fromLng, toLat, toLng) => {
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const earthRadiusInMeters = 6371000;
+  const deltaLat = toRadians(toLat - fromLat);
+  const deltaLng = toRadians(toLng - fromLng);
+  const originLat = toRadians(fromLat);
+  const destinationLat = toRadians(toLat);
+
+  const haversine =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(originLat) * Math.cos(destinationLat) * Math.sin(deltaLng / 2) ** 2;
+
+  return 2 * earthRadiusInMeters * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+};
 
 // ... (registerVendor, uploadDocs, getVendorProfile preserved)
 
@@ -104,14 +146,18 @@ const getNearbyVendors = async (req, res) => {
     const { lng, lat, category, search, page = 1, limit = 10 } = req.query;
     if (!lng || !lat) return res.status(400).json({ message: 'Lng/Lat required' });
 
+    const parsedLng = parseFloat(lng);
+    const parsedLat = parseFloat(lat);
+    const discoveryRadius = parseInt(process.env.VENDOR_DISCOVERY_RADIUS, 10) || 10000;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const filter = {
       status: 'active',
+      isActive: true,
       location: {
         $near: {
-          $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
-          $maxDistance: parseInt(process.env.VENDOR_DISCOVERY_RADIUS) || 10000
+          $geometry: { type: 'Point', coordinates: [parsedLng, parsedLat] },
+          $maxDistance: discoveryRadius
         }
       }
     };
@@ -140,15 +186,24 @@ const getNearbyVendors = async (req, res) => {
 
     // Enrich with minPrice and specific services
     const enrichedVendors = await Promise.all(vendors.map(async (v) => {
-      const allServices = await Service.find({ vendorId: v._id, isActive: true }).select('name price image').sort({ price: 1 });
+      const allServices = await Service.find({ vendorId: v._id, isActive: true })
+        .select('_id name price image images')
+        .sort({ price: 1 });
       const services = allServices.slice(0, 1);
-      return {
-        ...v,
+      const [vendorLng, vendorLat] = v.location?.coordinates || [];
+      const hasCoordinates = Number.isFinite(vendorLat) && Number.isFinite(vendorLng);
+      const calculatedDistance = hasCoordinates
+        ? Math.round(calculateDistanceInMeters(parsedLat, parsedLng, vendorLat, vendorLng))
+        : null;
+
+      return buildPublicVendorResponse(v, {
+        dist: calculatedDistance === null ? undefined : { calculated: calculatedDistance },
         service: services[0]?.name || 'Beauty Service',
         price: services[0]?.price || 0,
-        serviceImage: services[0]?.image || '',
-        serviceCount: allServices.length
-      };
+        serviceImage: services[0]?.image || services[0]?.images?.[0] || '',
+        serviceCount: allServices.length,
+        services: allServices
+      });
     }));
 
     // 🚀 ENGAGEMENT TRACKING: Increment profileViews (Throttled)
@@ -262,7 +317,7 @@ const getVendorDashboard = async (req, res) => {
     const todayBookings = await Booking.find({
       vendorId: vendor._id,
       startTime: { $gte: todayStart, $lt: todayEnd }
-    }).populate('userId', 'name').sort({ startTime: 1 });
+    }).populate('userId', 'name image').sort({ startTime: 1 });
 
     // 💰 Today's Earnings
     const todayEarnings = todayBookings
@@ -287,12 +342,12 @@ const getVendorDashboard = async (req, res) => {
     // 👨‍🔧 Active Staff
     const Staff = require('../models/Staff');
     const activeStaffCount = await Staff.countDocuments({ vendorId: vendor._id, isActive: true });
-
-    const isTrialActive = vendor.freeTrial?.isActive && new Date(vendor.freeTrial.expiryDate) > new Date();
-    const isMonthlyActive = vendor.planType === 'monthly' && new Date(vendor.expiryDate) > new Date();
-    const isDailyActive = vendor.planType === 'daily' && vendor.walletBalance >= 100 && vendor.lastDeductionDate && moment(vendor.lastDeductionDate).isSame(moment(), 'day');
-
-    const isActive = isTrialActive || isMonthlyActive || isDailyActive;
+    const [billingSettings, subscriptionState, dailyPlan, monthlyPlan] = await Promise.all([
+      getBillingSettings(),
+      getVendorSubscriptionState(vendor),
+      getSubscriptionPlanForVendor('daily', vendor.serviceLevel),
+      getSubscriptionPlanForVendor('monthly', vendor.serviceLevel)
+    ]);
 
     res.status(200).json({
       shopName: vendor.shopName,
@@ -301,17 +356,22 @@ const getVendorDashboard = async (req, res) => {
       isShopOpen: vendor.isShopOpen,
       isClosedToday: vendor.isClosedToday,
       walletBalance: vendor.walletBalance,
+      minimumWalletThreshold: billingSettings.minWalletThreshold || 100,
       subscription: {
-        currentPlan: isTrialActive ? 'trial' : vendor.planType,
+        currentPlan: subscriptionState.currentPlan,
         serviceLevel: vendor.serviceLevel,
-        planExpiry: isTrialActive ? vendor.freeTrial.expiryDate : (isMonthlyActive ? vendor.expiryDate : null),
+        planExpiry: subscriptionState.isTrialActive
+          ? vendor.freeTrial?.expiryDate || null
+          : (subscriptionState.isMonthlyActive ? vendor.expiryDate || null : null),
         nextDeduction: vendor.planType === 'daily' ? moment().add(1, 'day').startOf('day').toDate() : null,
-        isActive
+        isActive: subscriptionState.isActive,
+        dailyPrice: dailyPlan.price,
+        monthlyPrice: monthlyPlan.price
       },
       engagement: {
         profileViews: vendor.profileViews || 0,
         serviceClicks: vendor.serviceClicks || 0,
-        customerLoss: !isActive ? (vendor.profileViews || 0) : 0
+        customerLoss: !subscriptionState.isActive ? (vendor.profileViews || 0) : 0
       },
       stats: {
         todayBookings: todayBookings.length,
@@ -339,6 +399,7 @@ const getVendorDashboard = async (req, res) => {
         id: b._id,
         time: moment(b.startTime).format('hh:mm A'),
         customerName: b.userId?.name || 'Customer',
+        customerImage: b.userId?.image || '',
         service: b.services.map(s => s.name).join(', '),
         status: b.status
       }))
@@ -372,9 +433,13 @@ const getVendorTransactions = async (req, res) => {
 
 const getVendorDetail = async (req, res) => {
   try {
-    const vendor = await Vendor.findById(req.params.id).populate('category', 'name').lean();
+    const vendor = await Vendor.findOne({
+      _id: req.params.id,
+      status: 'active',
+      isActive: true
+    }).populate('category', 'name').lean();
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
-    res.status(200).json(vendor);
+    res.status(200).json(buildPublicVendorResponse(vendor));
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
@@ -443,10 +508,8 @@ const createManualBooking = async (req, res) => {
     const existing = await Booking.findOne({
       staffId,
       status: { $ne: 'cancelled' },
-      $or: [
-        { startTime: { $lt: endTime, $gte: new Date(startTime) } },
-        { endTime: { $gt: new Date(startTime), $lte: endTime } }
-      ]
+      startTime: { $lt: endTime },
+      endTime: { $gt: new Date(startTime) }
     });
     if (existing) return res.status(400).json({ message: 'Staff is busy at this time' });
 

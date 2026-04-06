@@ -26,7 +26,7 @@ const ServiceForm = () => {
       if (isEdit) {
          const fetchService = async () => {
             try {
-               const servicesRes = await api.get('/services', { params: { includeInactive: true } });
+               const servicesRes = await api.get('/services/manage/all', { params: { includeInactive: true } });
                const service = servicesRes.data.find(s => s._id === id);
                if (service) {
                   setFormData({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 
 const CustomerAuth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { requestOTP, verifyOTP, loading } = useAuthStore();
 
   const [step, setStep] = useState('phone'); // phone, otp
@@ -18,6 +19,10 @@ const CustomerAuth = () => {
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const [isOTPFocused, setIsOTPFocused] = useState(false);
+  const redirectPath =
+    location.state?.from?.pathname ||
+    new URLSearchParams(location.search).get('redirect') ||
+    '/';
 
   useEffect(() => {
     let interval;
@@ -49,7 +54,10 @@ const CustomerAuth = () => {
 
     const res = await requestOTP(phone);
     if (res.success) {
-      toast.success(`Verification code sent! Your OTP is: ${res.otp}`, { duration: 8000 });
+      toast.success(
+        res.otp ? `Verification code sent! Your OTP is: ${res.otp}` : 'Verification code sent successfully',
+        { duration: res.otp ? 8000 : 4000 }
+      );
       setStep('otp');
       setTimer(30);
       setCanResend(false);
@@ -73,8 +81,7 @@ const CustomerAuth = () => {
         else if (role === 'vendor') navigate('/vendor');
         else if (role === 'staff') navigate('/staff');
         else {
-          const from = location.state?.from?.pathname || '/';
-          navigate(from, { replace: true });
+          navigate(redirectPath, { replace: true });
         }
       }
     } else {

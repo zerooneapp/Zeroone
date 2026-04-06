@@ -92,28 +92,28 @@ const SubscriptionPlans = () => {
             level="Standard"
             icon={ShieldCheck}
             color="emerald"
-            planData={getPlanByLevelInfo('basic')}
-            onPriceChange={handlePriceChange}
-            onSave={() => handleSave('basic')}
-            isSaving={savingId === 'basic'}
-          />
-          <PlanCard
-            level="Premium"
-            icon={Zap}
-            color="blue"
             planData={getPlanByLevelInfo('standard')}
             onPriceChange={handlePriceChange}
             onSave={() => handleSave('standard')}
             isSaving={savingId === 'standard'}
           />
           <PlanCard
-            level="Luxury"
-            icon={Crown}
-            color="amber"
+            level="Premium"
+            icon={Zap}
+            color="blue"
             planData={getPlanByLevelInfo('premium')}
             onPriceChange={handlePriceChange}
             onSave={() => handleSave('premium')}
             isSaving={savingId === 'premium'}
+          />
+          <PlanCard
+            level="Luxury"
+            icon={Crown}
+            color="amber"
+            planData={getPlanByLevelInfo('luxury')}
+            onPriceChange={handlePriceChange}
+            onSave={() => handleSave('luxury')}
+            isSaving={savingId === 'luxury'}
           />
         </div>
       )}

@@ -5,7 +5,9 @@ const {
   getStaffById,
   patchStaff,
   deleteStaff,
-  getStaffProfile
+  getStaffProfile,
+  getStaffAvailabilityForDate,
+  upsertStaffAvailabilityForDate
 } = require('../controllers/staffController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { isApprovedVendor } = require('../middleware/vendorMiddleware');
@@ -24,6 +26,8 @@ router.get('/:id', getStaffById);
 // Protected routes (Vendor management)
 router.use(protect, isApprovedVendor);
 router.get('/manage/all', listStaff);
+router.get('/:id/availability', getStaffAvailabilityForDate);
+router.put('/:id/availability', upsertStaffAvailabilityForDate);
 router.post('/', upload.single('image'), addStaff);
 router.patch('/:id', upload.single('image'), patchStaff);
 router.delete('/:id', deleteStaff);

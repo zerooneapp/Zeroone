@@ -12,6 +12,8 @@ const Cart = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { items, vendor, clearCart, rescheduleBookingId, setRescheduleBookingId, addItem, getTotalPrice } = useCartStore();
+  const rescheduleTotalDuration = location.state?.rescheduleTotalDuration || null;
+  const formatPrice = (amount) => `Rs. ${Number(amount || 0).toFixed(2).replace(/\.00$/, '')}`;
 
   const [selectedDate, setSelectedDate] = useState(null); // Null initially for progressive reveal
   const [slots, setSlots] = useState([]);
@@ -21,6 +23,7 @@ const Cart = () => {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingStaff, setLoadingStaff] = useState(false);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
+  const [pricingPreview, setPricingPreview] = useState(null);
 
   // 🔄 INITIALIZE RESCHEDULE MODE (If navigated from Status Details)
   useEffect(() => {
@@ -80,16 +83,41 @@ const Cart = () => {
     fetchBookingReadyData();
   }, [vendor, items, selectedDate]);
 
+  useEffect(() => {
+    if (!vendor?._id || items.length === 0) {
+      setPricingPreview(null);
+      return;
+    }
+
+    const fetchPricingPreview = async () => {
+      try {
+        const res = await api.get('/pricing/preview', {
+          params: {
+            vendorId: vendor._id,
+            serviceIds: items.map((item) => item._id).join(',')
+          }
+        });
+        setPricingPreview(res.data);
+      } catch (err) {
+        setPricingPreview(null);
+      }
+    };
+
+    fetchPricingPreview();
+  }, [vendor?._id, items]);
+
   // 3. Filter Staff based on selected slot and services
-  const availableStaff = (allStaff || []).filter(s => {
-    // Must support all selected services
-    const supportsAll = (items || []).every(item =>
-      s.services?.some(svcId => String(svcId) === String(item._id))
+  const availableStaff = (allStaff || []).filter((staff) => {
+    const supportsAllSelectedServices = (items || []).every((item) =>
+      staff.services?.some((serviceId) => String(serviceId) === String(item._id))
     );
 
-    // Staff must be free in the SELECTED SLOT
+    if (!supportsAllSelectedServices) {
+      return false;
+    }
+
     if (selectedSlot?.availableStaff) {
-      return selectedSlot.availableStaff.includes(s._id);
+      return selectedSlot.availableStaff.some((availableStaffId) => String(availableStaffId) === String(staff._id));
     }
 
     return true;
@@ -115,7 +143,8 @@ const Cart = () => {
         selectedStaff,
         items,
         vendor,
-        rescheduleBookingId
+        rescheduleBookingId,
+        totalDurationOverride: rescheduleTotalDuration
       }
     });
   };
@@ -138,6 +167,14 @@ const Cart = () => {
       </div>
     );
   }
+
+  const pricingMap = (pricingPreview?.services || []).reduce((acc, service) => {
+    acc[service.serviceId] = service;
+    return acc;
+  }, {});
+  const displayTotal = pricingPreview?.finalTotal ?? getTotalPrice();
+  const originalTotal = pricingPreview?.originalTotal ?? getTotalPrice();
+  const totalSavings = pricingPreview?.totalDiscount ?? 0;
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in slide-in-from-right-4 duration-500">
@@ -232,20 +269,54 @@ const Cart = () => {
         <section className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
           <p className="text-[11px] font-black text-slate-400 tracking-widest mb-3 px-1 leading-none capitalize">Booking summary</p>
           <div className="space-y-2.5">
-            {items.map(item => (
+            {items.map(item => {
+              const priceMeta = pricingMap[item._id] || {
+                originalPrice: item.price,
+                finalPrice: item.price,
+                discount: 0
+              };
+
+              return (
               <div key={item._id} className="flex justify-between items-center px-1">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#1C2C4E]" />
-                  <span className="font-black text-[12px] text-gray-900 dark:text-white tracking-tight truncate max-w-[200px] leading-none capitalize">{item?.name || 'Service'}</span>
+                  <div className="flex flex-col">
+                    <span className="font-black text-[12px] text-gray-900 dark:text-white tracking-tight truncate max-w-[200px] leading-none capitalize">{item?.name || 'Service'}</span>
+                    {priceMeta.discount > 0 && (
+                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1">Offer applied</span>
+                    )}
+                    {priceMeta.discount > 0 && (
+                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1">
+                        Now {formatPrice(priceMeta.finalPrice)}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <span className="font-black text-[13px] text-gray-900 dark:text-gray-300 tracking-tighter leading-none">₹{item?.price || 0}</span>
+                {false && priceMeta.discount > 0 && (
+                  <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest text-right ml-2">
+                    Now â‚¹{priceMeta.finalPrice}
+                  </p>
+                )}
               </div>
-            ))}
+            )})}
             <div className="h-[1px] bg-slate-50 dark:bg-gray-800 my-1" />
             <div className="flex justify-between items-center font-black text-gray-900 dark:text-white tracking-widest capitalize text-[12px] px-1 leading-none">
               <span>Total Value</span>
-              <span className="text-[#1C2C4E] tracking-tighter">₹{getTotalPrice()}</span>
+              <span className="text-[#1C2C4E] tracking-tighter">{formatPrice(originalTotal)}</span>
             </div>
+            {totalSavings > 0 && (
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1 text-emerald-500">
+                <span>Discounted Total</span>
+                <span>{formatPrice(displayTotal)}</span>
+              </div>
+            )}
+            {totalSavings > 0 && (
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1 text-slate-400">
+                <span>You Save</span>
+                <span>{formatPrice(totalSavings)}</span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -355,7 +426,17 @@ const Cart = () => {
         <div className="flex items-center justify-between">
           <div className="leading-none">
             <p className="text-[9px] font-black text-white/40 tracking-widest mb-2 leading-none capitalize">Net payable</p>
-            <p className="text-[20px] font-black text-white tracking-tighter leading-none">₹{getTotalPrice()}</p>
+            {totalSavings > 0 && (
+              <p className="text-[8px] font-black text-white/40 line-through tracking-widest mb-2 leading-none">
+                {formatPrice(originalTotal)}
+              </p>
+            )}
+            <p className="text-[20px] font-black text-white tracking-tighter leading-none">{formatPrice(displayTotal)}</p>
+            {totalSavings > 0 && (
+              <p className="text-[8px] font-black text-emerald-400 tracking-widest mt-2 leading-none">
+                Save {formatPrice(totalSavings)}
+              </p>
+            )}
           </div>
           <button
             disabled={!selectedSlot}

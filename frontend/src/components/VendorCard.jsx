@@ -7,6 +7,10 @@ import { useNavigate } from 'react-router-dom';
 const VendorCard = ({ vendor, variant = 'full' }) => {
   const navigate = useNavigate();
   const isSmall = variant === 'small';
+  const distanceInKm =
+    typeof vendor.dist?.calculated === 'number'
+      ? vendor.dist.calculated / 1000
+      : null;
 
   return (
     <Card 
@@ -18,7 +22,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
       {/* Top: Image HUB (Balanced Visual) */}
       <div className="relative w-full aspect-[16/5.2] min-h-[110px] overflow-hidden">
         <img 
-          src={vendor.serviceImage || vendor.shopImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'} 
+          src={vendor.serviceImage || vendor.images?.[0] || vendor.shopImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'} 
           alt={vendor.shopName} 
           className="w-full h-full object-cover bg-gray-100 opacity-90 transition-transform duration-700"
           onError={(e) => {
@@ -42,7 +46,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
             <div className="flex items-center gap-1 mt-0 opacity-80">
               <MapPin size={10} className="text-[#0B1222] dark:text-blue-400 shrink-0" />
               <span className="text-[10px] font-bold capitalize truncate text-[#0B1222] dark:text-gray-300">
-                {((vendor.dist?.calculated || 1100) / 1000).toFixed(1)} km away
+                {distanceInKm !== null ? `${distanceInKm.toFixed(1)} km away` : 'Nearby'}
               </span>
             </div>
           </div>

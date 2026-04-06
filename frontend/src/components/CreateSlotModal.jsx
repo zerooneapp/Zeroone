@@ -44,6 +44,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
 
   const resetForm = () => {
     setStep(1);
+    setAvailableSlots([]);
     setFormData({
       name: '',
       phone: '',
@@ -79,8 +80,9 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
           date: formData.date
         }
       });
-      setAvailableSlots(res.data);
+      setAvailableSlots(res.data?.availableSlots || []);
     } catch (err) {
+      setAvailableSlots([]);
       console.error('Slot fetch failed:', err);
     } finally {
       setSlotsLoading(false);

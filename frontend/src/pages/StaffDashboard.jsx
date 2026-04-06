@@ -135,10 +135,10 @@ const StaffDashboard = () => {
                         <div className="flex items-center justify-between mb-4">
                            <div className="flex items-center gap-3.5">
                               <div className="w-11 h-11 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-300 overflow-hidden border border-slate-100 dark:border-gray-700">
-                                 {currentTask.customerId?.image ? <img src={currentTask.customerId.image} className="w-full h-full object-cover" /> : <User size={20} strokeWidth={3} />}
+                                 {currentTask.userId?.image ? <img src={currentTask.userId.image} className="w-full h-full object-cover" alt={currentTask.userId?.name || 'Customer'} /> : <User size={20} strokeWidth={3} />}
                               </div>
                               <div className="leading-none">
-                                 <h4 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[140px]">{currentTask.customerId?.name || 'Client'}</h4>
+                                 <h4 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[140px]">{currentTask.userId?.name || 'Client'}</h4>
                                  <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-2 italic shadow-sm">{formatTime(currentTask.startTime)} DEPLOYMENT</p>
                               </div>
                            </div>
@@ -151,7 +151,7 @@ const StaffDashboard = () => {
                            {currentTask.services?.map((s, idx) => (
                               <div key={idx} className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 opacity-80">
                                  <div className="w-1.5 h-1.5 bg-primary rounded-full opacity-60" />
-                                 {s.serviceId?.name || 'Task Node'}
+                                 {s.name || s.serviceId?.name || 'Task Node'}
                               </div>
                            ))}
                         </div>
@@ -168,7 +168,7 @@ const StaffDashboard = () => {
 
                         <div className="grid grid-cols-4 gap-2.5">
                            {isContactVisible(currentTask.startTime) ? (
-                              <a href={`tel:${currentTask.customerId?.phone}`} className="h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
+                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
                                  <Phone size={18} strokeWidth={3} />
                               </a>
                            ) : (

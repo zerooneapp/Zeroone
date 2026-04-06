@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
+import { ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
+import logo from '../assests/logo.jpeg';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/Button';
 import NumericKeypad from '../components/NumericKeypad';
@@ -9,18 +10,20 @@ import toast from 'react-hot-toast';
 
 const VendorAuth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { requestOTP, verifyOTP, loading } = useAuthStore();
-  
-  const [step, setStep] = useState('phone'); // phone, otp
+
+  const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '']); 
+  const [otp, setOtp] = useState(['', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const [isOTPFocused, setIsOTPFocused] = useState(false);
 
   useEffect(() => {
     let interval;
     if (step === 'otp' && timer > 0) {
-      interval = setInterval(() => setTimer(prev => prev - 1), 1000);
+      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setCanResend(true);
     }
@@ -44,7 +47,7 @@ const VendorAuth = () => {
   const handleSendOTP = async (e) => {
     e?.preventDefault();
     if (phone.length < 10) return toast.error('Please enter a valid phone number');
-    
+
     const res = await requestOTP(phone);
     if (res.success) {
       toast.success(`Verification code sent! Your OTP is: ${res.otp}`, { duration: 8000 });
@@ -66,9 +69,8 @@ const VendorAuth = () => {
       if (needsRegistration) {
         navigate('/vendor-signup', { state: { phone, role: 'vendor' } });
       } else {
-        toast.success(`Welcome back!`);
-        
-        // 🚀 ROLE-AWARE REDIRECTION
+        toast.success('Welcome back!');
+
         const intendedPath = location.state?.from?.pathname;
         if (intendedPath) {
           navigate(intendedPath, { replace: true });
@@ -86,12 +88,10 @@ const VendorAuth = () => {
 
   return (
     <div className="h-screen bg-[#F3F2F7] flex flex-col relative overflow-hidden text-[#1C2C4E] transition-colors duration-500 font-sans">
-      {/* Decorative Background Elements */}
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/linen.png')]" />
 
-      {/* Content Area */}
-      <div className="flex-1 flex flex-col items-center p-6 pt-16 relative z-10">
-        <div className="w-full max-w-sm">
+      <div className="flex-1 flex flex-col items-center p-6 pt-8 relative z-10">
+        <div className="w-full max-w-sm flex-1 flex flex-col justify-center">
           <AnimatePresence mode="wait">
             {step === 'phone' ? (
               <motion.div
@@ -102,20 +102,18 @@ const VendorAuth = () => {
                 className="space-y-10"
               >
                 <div className="space-y-4 text-center">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-200/50 shadow-sm">
-                     <Briefcase size={32} className="text-[#1C2C4E]" />
-                  </div>
-                  <h1 className="text-[32px] font-bold text-[#1C2C4E] tracking-tight leading-tight">Partner Login</h1>
-                  <p className="text-[#1C2C4E]/60 font-medium text-sm">Dashboard access for vendors & staff</p>
+                  <img src={logo} alt="ZeroOne Logo" className="w-20 h-20 mx-auto rounded-2xl object-cover mb-2" />
+                  <h1 className="text-[42px] font-bold text-[#1C2C4E] tracking-tight leading-none">Partner Login</h1>
+                  <p className="text-[#1C2C4E]/70 font-medium text-[15px]">Dashboard access for partners & staff</p>
                 </div>
 
                 <div className="space-y-6">
                   <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/50 flex items-center gap-4 h-12 shadow-sm">
                     <div className="flex items-center gap-3 pr-2">
-                       <span className="font-medium text-[#1C2C4E] text-base">+91</span>
-                       <div className="w-[1px] h-6 bg-gray-200/80 ml-2" />
+                      <span className="font-medium text-[#1C2C4E] text-base">+91</span>
+                      <div className="w-[1px] h-6 bg-gray-200/80 ml-2" />
                     </div>
-                    <input 
+                    <input
                       type="tel"
                       value={phone}
                       onChange={handlePhoneChange}
@@ -125,11 +123,11 @@ const VendorAuth = () => {
                     />
                   </div>
 
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className={cn(
-                      "w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#1C2C4E] shadow-sm active:scale-[0.98]",
-                      phone.length !== 10 && "opacity-90 grayscale-[0.2]"
+                      'w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#1C2C4E] shadow-sm active:scale-[0.98]',
+                      phone.length !== 10 && 'opacity-90 grayscale-[0.2]'
                     )}
                     onClick={handleSendOTP}
                     loading={loading}
@@ -138,23 +136,15 @@ const VendorAuth = () => {
                     Send OTP
                   </Button>
                 </div>
-                
               </motion.div>
             ) : (
-            <motion.div
+              <motion.div
                 key="otp-step"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
-                className="space-y-10"
+                className="space-y-4"
               >
-                <button 
-                  onClick={() => setStep('phone')}
-                  className="p-3 -ml-2 text-[#1C2C4E]/50 hover:text-[#1C2C4E] transition-colors bg-white rounded-2xl shadow-sm"
-                >
-                  <ChevronLeft size={20} strokeWidth={3} />
-                </button>
-
                 <div className="space-y-2 text-center">
                   <h1 className="text-[28px] font-bold text-[#1C2C4E]">Enter Code</h1>
                   <p className="text-[#1C2C4E]/60 font-medium text-[11px] uppercase tracking-widest">
@@ -163,11 +153,13 @@ const VendorAuth = () => {
                 </div>
 
                 <div className="relative">
-                  <input 
+                  <input
                     type="tel"
                     maxLength={5}
                     value={otp.join('')}
                     onChange={handleOTPChange}
+                    onFocus={() => setIsOTPFocused(true)}
+                    onBlur={() => setIsOTPFocused(false)}
                     autoFocus
                     className="absolute inset-0 opacity-0 cursor-default"
                   />
@@ -176,8 +168,10 @@ const VendorAuth = () => {
                       <div
                         key={i}
                         className={cn(
-                          "w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
-                          digit ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-50 text-gray-300"
+                          'w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all',
+                          digit || (isOTPFocused && i === otp.join('').length)
+                            ? 'border-[#1C2C4E] text-[#1C2C4E]'
+                            : 'border-gray-50 text-gray-300'
                         )}
                       >
                         {digit}
@@ -186,9 +180,9 @@ const VendorAuth = () => {
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <Button 
-                    size="lg" 
+                <div className="space-y-4">
+                  <Button
+                    size="lg"
                     className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
                     onClick={handleVerifyOTP}
                     loading={loading}
@@ -197,10 +191,10 @@ const VendorAuth = () => {
                     Verify & Proceed
                   </Button>
 
-                <div className="text-center space-y-3">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Didn't receive the code?</p>
+                  <div className="text-center space-y-3">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Didn&apos;t receive the code?</p>
                     <div>
-                      <button 
+                      <button
                         disabled={!canResend}
                         onClick={handleSendOTP}
                         className={`text-[10px] font-black uppercase tracking-[0.2em] border-b border-current pb-0.5 transition-all ${
@@ -221,6 +215,11 @@ const VendorAuth = () => {
             )}
           </AnimatePresence>
         </div>
+      </div>
+
+      <div className="pb-8 flex items-center justify-center gap-2 relative z-10">
+        <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] uppercase tracking-wider leading-none">MADE IN INDIA</span>
+        <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
       </div>
     </div>
   );

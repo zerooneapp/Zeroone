@@ -1,91 +1,402 @@
 const WalletTransaction = require('../models/WalletTransaction');
+const GlobalSettings = require('../models/GlobalSettings');
+const SubscriptionPlan = require('../models/SubscriptionPlan');
 const moment = require('moment-timezone');
 const NotificationService = require('./notificationService');
 
-const MIN_WALLET_BALANCE = 100;
-
-const getUpdatedStatus = (vendor) => {
-  const now = new Date();
-  
-  // 1. Check Free Trial
-  if (vendor.freeTrial && vendor.freeTrial.isActive && vendor.freeTrial.expiryDate > now) {
-    return 'active';
-  }
-
-  // 2. Check Monthly Plan
-  if (vendor.planType === 'monthly' && vendor.expiryDate > now) {
-    return 'active';
-  }
-
-  // 3. Check Daily Plan (Balance Based)
-  if (vendor.planType === 'daily') {
-    return vendor.walletBalance >= MIN_WALLET_BALANCE ? 'active' : 'inactive';
-  }
-
-  return vendor.status || 'inactive';
+const PLAN_LEVELS = ['standard', 'premium', 'luxury'];
+const DEFAULT_PLAN_PRICES = {
+  standard: { daily: 250, monthly: 5000 },
+  premium: { daily: 500, monthly: 10000 },
+  luxury: { daily: 1000, monthly: 20000 }
 };
 
-const processDailyDeduction = async (vendor) => {
-  const today = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
-  if (vendor.lastDeductionDate && moment(vendor.lastDeductionDate).tz('Asia/Kolkata').format('YYYY-MM-DD') === today) return vendor;
+const getNormalizedServiceLevel = (serviceLevel = 'standard') => (
+  PLAN_LEVELS.includes(serviceLevel) ? serviceLevel : 'standard'
+);
 
+const getEffectivePlanType = (vendor) => {
   const now = new Date();
-  if ((vendor.freeTrial && vendor.freeTrial.isActive && vendor.freeTrial.expiryDate > now) || (vendor.planType === 'monthly' && vendor.expiryDate > now)) {
-    vendor.status = 'active'; return await vendor.save();
+  const isTrialCurrentlyActive = Boolean(
+    vendor.freeTrial?.isActive &&
+    vendor.freeTrial?.expiryDate &&
+    new Date(vendor.freeTrial.expiryDate) > now
+  );
+  const isMonthlyCurrentlyActive = Boolean(
+    vendor.planType === 'monthly' &&
+    vendor.expiryDate &&
+    new Date(vendor.expiryDate) > now
+  );
+
+  if (isTrialCurrentlyActive) {
+    return 'trial';
   }
 
-  // 💰 DYNAMIC PRICING FETCH
-  const SubscriptionPlan = require('../models/SubscriptionPlan');
-  const plan = await SubscriptionPlan.findOne({ type: 'daily', level: vendor.serviceLevel || 'basic' });
+  if (isMonthlyCurrentlyActive) {
+    return 'monthly';
+  }
 
-  // 🛡️ FALLBACK SAFETY (MANDATORY)
+  return 'daily';
+};
+
+const normalizeVendorPlanState = (vendor) => {
+  const effectivePlanType = getEffectivePlanType(vendor);
+  let didChange = false;
+
+  if (vendor.planType !== effectivePlanType) {
+    vendor.planType = effectivePlanType;
+    didChange = true;
+  }
+
+  if (effectivePlanType === 'daily') {
+    if (vendor.freeTrial?.isActive) {
+      vendor.freeTrial = {
+        ...(vendor.freeTrial || {}),
+        isActive: false
+      };
+      didChange = true;
+    }
+
+    if (vendor.expiryDate && new Date(vendor.expiryDate) <= new Date()) {
+      vendor.expiryDate = undefined;
+      didChange = true;
+    }
+  }
+
+  return { effectivePlanType, didChange };
+};
+
+const upsertWalletTransactionRecord = async (existingTransaction, payload) => {
+  if (existingTransaction) {
+    Object.assign(existingTransaction, payload);
+    return existingTransaction.save();
+  }
+
+  return createWalletTransaction(payload);
+};
+
+const getBillingSettings = async () => {
+  let settings = await GlobalSettings.findOne();
+  if (!settings) {
+    settings = await GlobalSettings.create({});
+  }
+  return settings;
+};
+
+const ensureSubscriptionPlans = async () => {
+  const operations = [];
+
+  for (const level of PLAN_LEVELS) {
+    for (const type of ['daily', 'monthly']) {
+      operations.push(
+        SubscriptionPlan.findOneAndUpdate(
+          { level, type },
+          { $setOnInsert: { price: DEFAULT_PLAN_PRICES[level][type] } },
+          { upsert: true, new: true }
+        )
+      );
+    }
+  }
+
+  await Promise.all(operations);
+};
+
+const getSubscriptionPlanForVendor = async (type, serviceLevel) => {
+  await ensureSubscriptionPlans();
+  const normalizedLevel = getNormalizedServiceLevel(serviceLevel);
+
+  let plan = await SubscriptionPlan.findOne({ type, level: normalizedLevel });
+  if (!plan && normalizedLevel === 'standard') {
+    plan = await SubscriptionPlan.findOne({ type, level: 'basic' });
+  }
+
   if (!plan) {
-    console.error(`Subscription plan missing for type: daily, level: ${vendor.serviceLevel}`);
-    throw new Error('Subscription plan not configured. Please contact support.');
+    throw new Error(`Subscription plan missing for type: ${type}, level: ${normalizedLevel}`);
   }
 
-  const dailyPrice = plan.price;
+  return plan;
+};
 
-  if (vendor.walletBalance < MIN_WALLET_BALANCE) {
+const getVendorSubscriptionState = async (vendor) => {
+  const settings = await getBillingSettings();
+  const minimumWalletThreshold = settings.minWalletThreshold || 100;
+  const now = new Date();
+  const effectivePlanType = getEffectivePlanType(vendor);
+  const isTrialActive = Boolean(
+    vendor.freeTrial?.isActive &&
+    vendor.freeTrial?.expiryDate &&
+    new Date(vendor.freeTrial.expiryDate) > now
+  );
+  const isMonthlyActive = Boolean(
+    vendor.planType === 'monthly' &&
+    vendor.expiryDate &&
+    new Date(vendor.expiryDate) > now
+  );
+  const isDailyBalanceSufficient = vendor.walletBalance >= minimumWalletThreshold;
+  const didDeductToday = Boolean(
+    vendor.lastDeductionDate &&
+    moment(vendor.lastDeductionDate).tz('Asia/Kolkata').isSame(moment().tz('Asia/Kolkata'), 'day')
+  );
+  const isDailyActive = effectivePlanType === 'daily' && isDailyBalanceSufficient && didDeductToday;
+
+  return {
+    settings,
+    minimumWalletThreshold,
+    isTrialActive,
+    isMonthlyActive,
+    isDailyActive,
+    isDailyBalanceSufficient,
+    currentPlan: effectivePlanType,
+    isActive: isTrialActive || isMonthlyActive || isDailyActive
+  };
+};
+
+const getUpdatedStatus = async (vendor) => {
+  if (['pending', 'blocked', 'rejected'].includes(vendor.status)) {
+    return vendor.status;
+  }
+
+  const { didChange } = normalizeVendorPlanState(vendor);
+  if (didChange) {
+    await vendor.save();
+  }
+  const { isActive } = await getVendorSubscriptionState(vendor);
+  return isActive ? 'active' : 'inactive';
+};
+
+const createWalletTransaction = async ({
+  vendorId,
+  initiatedByUserId = null,
+  amount,
+  type,
+  reason,
+  category,
+  status = 'completed',
+  paymentGateway = 'system',
+  paymentMethod = '',
+  gatewayOrderId = '',
+  gatewayPaymentId = '',
+  gatewaySignature = '',
+  referenceId = '',
+  description = '',
+  metadata = {}
+}) => WalletTransaction.create({
+  vendorId,
+  initiatedByUserId,
+  amount,
+  type,
+  reason,
+  category,
+  status,
+  paymentGateway,
+  paymentMethod,
+  gatewayOrderId,
+  gatewayPaymentId,
+  gatewaySignature,
+  referenceId,
+  description,
+  metadata
+});
+
+const formatInr = (amount = 0) => `Rs ${Number(amount || 0).toLocaleString('en-IN')}`;
+
+const processDailyDeduction = async (vendor) => {
+  normalizeVendorPlanState(vendor);
+  const today = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+  if (
+    vendor.lastDeductionDate &&
+    moment(vendor.lastDeductionDate).tz('Asia/Kolkata').format('YYYY-MM-DD') === today
+  ) {
+    vendor.status = await getUpdatedStatus(vendor);
+    return vendor.save();
+  }
+
+  const state = await getVendorSubscriptionState(vendor);
+  if (state.isTrialActive || state.isMonthlyActive) {
+    vendor.status = 'active';
+    return vendor.save();
+  }
+
+  const dailyPlan = await getSubscriptionPlanForVendor('daily', vendor.serviceLevel);
+  const dailyPrice = dailyPlan.price;
+  const minimumRequiredBalance = state.minimumWalletThreshold + dailyPrice;
+  const shortfall = Math.max(minimumRequiredBalance - vendor.walletBalance, 0);
+
+  if (vendor.walletBalance < minimumRequiredBalance) {
     vendor.status = 'inactive';
-    NotificationService.sendNotification({
-      userIds: vendor.ownerId, role: 'vendor', type: 'LOW_BALANCE',
-      title: 'Wallet Balance Low', message: `Your balance is below ₹100. Shop is now inactive. Please top up to resume service.`,
-      referenceId: `LOW_BAL_${today}`
+    await NotificationService.sendNotification({
+      userIds: vendor.ownerId,
+      role: 'vendor',
+      type: 'LOW_BALANCE',
+      title: 'Wallet Balance Low',
+      message: `Keep at least ${formatInr(minimumRequiredBalance)} in your wallet. Current balance: ${formatInr(vendor.walletBalance)}. Add ${formatInr(shortfall)} to stay live on daily mode.`,
+      referenceId: `LOW_BAL_${vendor._id}_${today}`
     });
-    return await vendor.save();
+    await NotificationService.sendNotification({
+      userIds: vendor.ownerId,
+      role: 'vendor',
+      type: 'SERVICE_PAUSED',
+      title: 'Bookings Paused',
+      message: `New bookings are paused because your wallet is short by ${formatInr(shortfall)}. Top up your wallet or buy the monthly plan to go live again.`,
+      referenceId: `SERVICE_PAUSED_${vendor._id}_${today}`
+    });
+    return vendor.save();
   }
 
   vendor.walletBalance -= dailyPrice;
-  vendor.lastDeductionDate = now;
-  vendor.status = vendor.walletBalance >= MIN_WALLET_BALANCE ? 'active' : 'inactive';
+  vendor.lastDeductionDate = new Date();
+  vendor.status = vendor.walletBalance >= state.minimumWalletThreshold ? 'active' : 'inactive';
 
-  await WalletTransaction.create({ vendorId: vendor._id, amount: dailyPrice, type: 'debit', reason: 'daily_subscription' });
-
-  // 🔔 DEDUCTION NOTIFICATION
-  NotificationService.sendNotification({
-    userIds: vendor.ownerId, role: 'vendor', type: 'WALLET_DEDUCTION',
-    title: 'Daily Deduction', message: `₹${dailyPrice} deducted for your ${vendor.serviceLevel} plan. Remaining balance: ₹${vendor.walletBalance}.`,
-    referenceId: `DEDUCT_${today}`
+  await createWalletTransaction({
+    vendorId: vendor._id,
+    initiatedByUserId: vendor.ownerId,
+    amount: dailyPrice,
+    type: 'debit',
+    reason: 'daily_subscription',
+    category: 'daily_subscription',
+    paymentGateway: 'system',
+    paymentMethod: 'wallet',
+    referenceId: `DAILY_${vendor._id}_${today}`,
+    description: `${getNormalizedServiceLevel(vendor.serviceLevel)} daily subscription deduction`
   });
 
-  return await vendor.save();
+  await NotificationService.sendNotification({
+    userIds: vendor.ownerId,
+    role: 'vendor',
+    type: 'WALLET_DEDUCTION',
+    title: 'Daily Deduction',
+    message: `${formatInr(dailyPrice)} deducted for your ${getNormalizedServiceLevel(vendor.serviceLevel)} plan. Remaining balance: ${formatInr(vendor.walletBalance)}.`,
+    referenceId: `DEDUCT_${vendor._id}_${today}`
+  });
+
+  if (vendor.walletBalance < minimumRequiredBalance) {
+    const nextCycleShortfall = Math.max(minimumRequiredBalance - vendor.walletBalance, 0);
+    await NotificationService.sendNotification({
+      userIds: vendor.ownerId,
+      role: 'vendor',
+      type: 'LOW_BALANCE_WARNING',
+      title: 'Recharge Before Next Cycle',
+      message: `Your wallet needs ${formatInr(nextCycleShortfall)} more before the next daily deduction. Top up soon or switch to the monthly plan.`,
+      referenceId: `LOW_BAL_WARN_${vendor._id}_${today}`
+    });
+  }
+
+  return vendor.save();
 };
 
-const addFunds = async (vendor, amount, reason = 'admin_topup') => {
+const addFunds = async (vendor, amount, reason = 'admin_topup', options = {}) => {
+  normalizeVendorPlanState(vendor);
   vendor.walletBalance += amount;
-  vendor.status = getUpdatedStatus(vendor);
 
-  await WalletTransaction.create({ vendorId: vendor._id, amount, type: 'credit', reason });
-
-  // 🔔 TOP UP NOTIFICATION
-  NotificationService.sendNotification({
-    userIds: vendor.ownerId, role: 'vendor', type: 'WALLET_TOPUP',
-    title: 'Wallet Top-up', message: `₹${amount} has been credited to your wallet. Current balance: ₹${vendor.walletBalance}.`,
-    referenceId: `TOPUP_${new Date().getTime()}`
+  await upsertWalletTransactionRecord(options.existingTransaction, {
+    vendorId: vendor._id,
+    initiatedByUserId: options.initiatedByUserId || vendor.ownerId,
+    amount,
+    type: 'credit',
+    reason,
+    category: options.category || 'admin_topup',
+    status: options.status || 'completed',
+    paymentGateway: options.paymentGateway || 'admin',
+    paymentMethod: options.paymentMethod || 'admin_manual',
+    gatewayOrderId: options.gatewayOrderId || '',
+    gatewayPaymentId: options.gatewayPaymentId || '',
+    gatewaySignature: options.gatewaySignature || '',
+    referenceId: options.referenceId || `TOPUP_${vendor._id}_${Date.now()}`,
+    description: options.description || 'Wallet balance credited',
+    metadata: options.metadata || {}
   });
 
-  return await vendor.save();
+  if (vendor.planType === 'daily') {
+    const didDeductToday = Boolean(
+      vendor.lastDeductionDate &&
+      moment(vendor.lastDeductionDate).tz('Asia/Kolkata').isSame(moment().tz('Asia/Kolkata'), 'day')
+    );
+
+    if (!didDeductToday) {
+      await processDailyDeduction(vendor);
+    } else {
+      vendor.status = await getUpdatedStatus(vendor);
+      await vendor.save();
+    }
+  } else {
+    vendor.status = await getUpdatedStatus(vendor);
+    await vendor.save();
+  }
+
+  await NotificationService.sendNotification({
+    userIds: vendor.ownerId,
+    role: 'vendor',
+    type: 'WALLET_TOPUP',
+    title: 'Wallet Top-up',
+    message: `${formatInr(amount)} has been credited to your wallet. Current balance: ${formatInr(vendor.walletBalance)}.`,
+    referenceId: options.notificationReferenceId || `TOPUP_NOTIFY_${vendor._id}_${Date.now()}`
+  });
+
+  return vendor;
 };
 
-module.exports = { getUpdatedStatus, processDailyDeduction, addFunds };
+const activateMonthlySubscription = async (vendor, options = {}) => {
+  normalizeVendorPlanState(vendor);
+  const monthlyPlan = await getSubscriptionPlanForVendor('monthly', vendor.serviceLevel);
+  const baseDate =
+    vendor.planType === 'monthly' && vendor.expiryDate && new Date(vendor.expiryDate) > new Date()
+      ? moment(vendor.expiryDate)
+      : moment();
+
+  vendor.planType = 'monthly';
+  vendor.expiryDate = baseDate.add(30, 'days').toDate();
+  vendor.freeTrial = {
+    ...(vendor.freeTrial || {}),
+    isActive: false
+  };
+  vendor.status = 'active';
+  await vendor.save();
+
+  await upsertWalletTransactionRecord(options.existingTransaction, {
+    vendorId: vendor._id,
+    initiatedByUserId: options.initiatedByUserId || vendor.ownerId,
+    amount: monthlyPlan.price,
+    type: 'debit',
+    reason: 'monthly_subscription',
+    category: 'monthly_subscription',
+    status: options.status || 'completed',
+    paymentGateway: options.paymentGateway || 'razorpay',
+    paymentMethod: options.paymentMethod || 'razorpay',
+    gatewayOrderId: options.gatewayOrderId || '',
+    gatewayPaymentId: options.gatewayPaymentId || '',
+    gatewaySignature: options.gatewaySignature || '',
+    referenceId: options.referenceId || `MONTHLY_${vendor._id}_${Date.now()}`,
+    description: `${getNormalizedServiceLevel(vendor.serviceLevel)} monthly subscription purchase`,
+    metadata: options.metadata || {}
+  });
+
+  await NotificationService.sendNotification({
+    userIds: vendor.ownerId,
+    role: 'vendor',
+    type: 'SUBSCRIPTION_ACTIVE',
+    title: 'Monthly Subscription Activated',
+    message: `Your ${getNormalizedServiceLevel(vendor.serviceLevel)} monthly plan is active until ${moment(vendor.expiryDate).format('DD MMM YYYY')}. Daily wallet deductions are paused until then.`,
+    referenceId: options.notificationReferenceId || `MONTHLY_NOTIFY_${vendor._id}_${Date.now()}`
+  });
+
+  return {
+    vendor,
+    monthlyPlan
+  };
+};
+
+module.exports = {
+  PLAN_LEVELS,
+  DEFAULT_PLAN_PRICES,
+  getNormalizedServiceLevel,
+  getEffectivePlanType,
+  getBillingSettings,
+  ensureSubscriptionPlans,
+  getSubscriptionPlanForVendor,
+  getVendorSubscriptionState,
+  getUpdatedStatus,
+  createWalletTransaction,
+  processDailyDeduction,
+  addFunds,
+  activateMonthlySubscription
+};

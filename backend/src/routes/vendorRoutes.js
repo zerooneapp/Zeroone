@@ -4,6 +4,20 @@ const {
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings,
   getVendorDashboard, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking
 } = require('../controllers/vendorController');
+const {
+  previewClosure,
+  createClosure,
+  listActiveClosures,
+  endClosure
+} = require('../controllers/vendorClosureController');
+const {
+  getVendorWalletOverview,
+  createWalletTopupOrder,
+  verifyWalletTopup,
+  createMonthlySubscriptionOrder,
+  verifyMonthlySubscription
+} = require('../controllers/billingController');
+const { vendorEmergencyCancel } = require('../controllers/bookingController');
 const { getTransactions } = require('../controllers/transactionController');
 const { protect } = require('../middleware/authMiddleware');
 const { isApprovedVendor } = require('../middleware/vendorMiddleware');
@@ -16,10 +30,19 @@ router.get('/profile', protect, getVendorProfile);
 router.get('/dashboard', protect, isApprovedVendor, getVendorDashboard);
 router.get('/nearby', getNearbyVendors); // Public discovery
 router.get('/transactions', protect, isApprovedVendor, getTransactions);
+router.get('/wallet/overview', protect, isApprovedVendor, getVendorWalletOverview);
+router.post('/wallet/topup/order', protect, isApprovedVendor, createWalletTopupOrder);
+router.post('/wallet/topup/verify', protect, isApprovedVendor, verifyWalletTopup);
+router.post('/wallet/subscription/order', protect, isApprovedVendor, createMonthlySubscriptionOrder);
+router.post('/wallet/subscription/verify', protect, isApprovedVendor, verifyMonthlySubscription);
 
 // 1. Shop Control
 router.patch('/shop-status', protect, isApprovedVendor, updateShopStatus);
 router.patch('/update-profile', protect, isApprovedVendor, updateShopProfile);
+router.post('/closures/preview', protect, isApprovedVendor, previewClosure);
+router.post('/closures', protect, isApprovedVendor, createClosure);
+router.get('/closures', protect, isApprovedVendor, listActiveClosures);
+router.patch('/closures/:id/end', protect, isApprovedVendor, endClosure);
 
 // 2. Offer Management
 router.post('/offers', protect, isApprovedVendor, createOffer);
@@ -28,6 +51,7 @@ router.patch('/offers/:id', protect, isApprovedVendor, updateOffer);
 
 // 3. Filtered Bookings
 router.get('/bookings', protect, isApprovedVendor, getVendorBookings);
+router.patch('/bookings/:id/emergency-cancel', protect, isApprovedVendor, vendorEmergencyCancel);
 router.post('/walk-in', protect, isApprovedVendor, createWalkIn);
 router.post('/manual-booking', protect, isApprovedVendor, createManualBooking);
 

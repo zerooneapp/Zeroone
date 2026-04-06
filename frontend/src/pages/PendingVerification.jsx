@@ -1,20 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { Clock, CheckCircle2, ShieldCheck, Loader2, LogOut } from 'lucide-react';
+import { Clock, CheckCircle2, ShieldCheck, Loader2, LogOut, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const PendingVerification = () => {
-    const { logout, user } = useAuthStore();
+    const { logout, restoreSession } = useAuthStore();
     const navigate = useNavigate();
+    const [checking, setChecking] = useState(false);
 
     const handleLogout = () => {
         logout();
         navigate('/vendor-login');
     };
 
+    // 🔄 AUTO-POLL: Check vendor status every 8 seconds
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                setChecking(true);
+                const res = await api.get('/auth/me');
+                const vendorStatus = res.data?.status;
+
+                if (vendorStatus === 'active' || vendorStatus === 'approved') {
+                    // Re-hydrate store with latest data
+                    await restoreSession();
+                    navigate('/vendor/dashboard', { replace: true });
+                }
+            } catch (err) {
+                // Silent fail — user still sees the page
+            } finally {
+                setChecking(false);
+            }
+        };
+
+        // Check immediately on mount
+        checkStatus();
+
+        // Then poll every 8 seconds
+        const interval = setInterval(checkStatus, 8000);
+        return () => clearInterval(interval);
+    }, [navigate, restoreSession]);
+
     return (
         <div className="min-h-screen bg-[#0A0F1D] text-white flex flex-col items-center justify-center p-6 font-sans">
-            {/* status Icon */}
+            {/* Status Icon */}
             <div className="relative mb-12">
                 <div className="w-32 h-32 rounded-full border-2 border-dashed border-gray-700 flex items-center justify-center animate-pulse">
                     <div className="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center border border-gray-800">
@@ -63,8 +93,16 @@ const PendingVerification = () => {
                 </div>
             </div>
 
+            {/* Live Status Indicator */}
+            <div className="mt-6 flex items-center gap-2 text-gray-500">
+                <RefreshCw size={11} className={`${checking ? 'animate-spin text-amber-400' : 'text-gray-600'} transition-all`} />
+                <span className="text-[9px] font-black uppercase tracking-widest">
+                    {checking ? 'Checking approval status...' : 'Auto-checking every 8 seconds'}
+                </span>
+            </div>
+
             {/* Footer Branding */}
-            <div className="mt-12 flex items-center gap-2 text-gray-500 grayscale opacity-50">
+            <div className="mt-6 flex items-center gap-2 text-gray-500 grayscale opacity-50">
                 <ShieldCheck size={14} className="text-emerald-500" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Secure & Encrypted Verification</span>
             </div>
@@ -81,3 +119,5 @@ const PendingVerification = () => {
 };
 
 export default PendingVerification;
+
+

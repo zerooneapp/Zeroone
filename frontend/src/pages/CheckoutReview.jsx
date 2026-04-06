@@ -1,11 +1,10 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Calendar, User, MapPin, CreditCard, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, MapPin, CreditCard, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import Button from '../components/Button';
-import SectionTitle from '../components/SectionTitle';
 import api from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
@@ -26,51 +25,79 @@ const CheckoutReview = () => {
   }
 
   const { selectedDate, selectedSlot, selectedStaff, items, vendor } = bookingData;
-  const totalPrice = items.reduce((sum, i) => sum + i.price, 0);
-  const totalDuration = items.reduce((sum, i) => sum + (i.duration || 0) + (i.bufferTime || 0), 0);
+  const totalDuration =
+    bookingData.totalDurationOverride ||
+    items.reduce((sum, item) => sum + (item.duration || 0) + (item.bufferTime || 0), 0);
   const [loading, setLoading] = React.useState(false);
+  const [pricingPreview, setPricingPreview] = React.useState(null);
+  const formatPrice = (amount) => `Rs. ${Number(amount || 0).toFixed(2).replace(/\.00$/, '')}`;
+
+  React.useEffect(() => {
+    if (!vendor?._id || !items?.length) {
+      setPricingPreview(null);
+      return;
+    }
+
+    const fetchPricingPreview = async () => {
+      try {
+        const res = await api.get('/pricing/preview', {
+          params: {
+            vendorId: vendor._id,
+            serviceIds: items.map((item) => item._id).join(',')
+          }
+        });
+        setPricingPreview(res.data);
+      } catch (err) {
+        setPricingPreview(null);
+      }
+    };
+
+    fetchPricingPreview();
+  }, [vendor?._id, items]);
+
+  const pricingMap = (pricingPreview?.services || []).reduce((acc, service) => {
+    acc[service.serviceId] = service;
+    return acc;
+  }, {});
+  const totalPrice = pricingPreview?.originalTotal ?? items.reduce((sum, item) => sum + item.price, 0);
+  const discountedTotal = pricingPreview?.finalTotal ?? totalPrice;
+  const totalSavings = pricingPreview?.totalDiscount ?? 0;
 
   const handleConfirm = async () => {
-    // 🛡️ DOUBLE CLICK PROTECTION
     if (loading) return;
 
     try {
       setLoading(true);
 
-      // 📅 FIX TIME FORMAT BUG
       const startDateTime = dayjs(`${selectedDate} ${selectedSlot}`).toISOString();
 
-      // 2. Lock Slot First (Critical Production Step)
-      const lockRes = await api.post('/slots/lock', {
+      await api.post('/slots/lock', {
         vendorId: vendor._id,
         startTime: startDateTime,
         duration: totalDuration,
-        serviceIds: items.map(i => i._id),
+        serviceIds: items.map((item) => item._id),
         staffId: selectedStaff?._id
       });
 
-      // 3. Finalize Booking (Check if Rescheduling)
       const { user } = useAuthStore.getState();
       const serviceAddress = user?.address || vendor?.address;
 
       const res = bookingData.rescheduleBookingId
         ? await api.patch(`/bookings/${bookingData.rescheduleBookingId}/reschedule`, {
-          startTime: startDateTime,
-          staffId: selectedStaff?._id,
-          serviceAddress
-        })
+            startTime: startDateTime,
+            staffId: selectedStaff?._id,
+            serviceAddress
+          })
         : await api.post('/bookings', {
-          vendorId: vendor._id,
-          staffId: selectedStaff?._id,
-          serviceIds: items.map(i => i._id),
-          startTime: startDateTime,
-          serviceAddress
-        });
+            vendorId: vendor._id,
+            staffId: selectedStaff?._id,
+            serviceIds: items.map((item) => item._id),
+            startTime: startDateTime,
+            serviceAddress
+          });
 
-      // 🧹 CLEAR CART AFTER SUCCESS
       clearCart();
 
-      // 4. Success Navigation
       navigate('/booking-success', {
         state: {
           booking: res.data,
@@ -82,10 +109,10 @@ const CheckoutReview = () => {
       });
     } catch (err) {
       if (err.response?.status === 409) {
-        toast.error("Slot just got booked 😔 Try another slot");
+        toast.error('Slot just got booked. Try another slot');
         navigate('/cart');
       } else {
-        toast.error(err.response?.data?.message || "Booking failed");
+        toast.error(err.response?.data?.message || 'Booking failed');
       }
     } finally {
       setLoading(false);
@@ -106,7 +133,6 @@ const CheckoutReview = () => {
       </div>
 
       <div className="px-4 mt-6 space-y-4 pb-20">
-        {/* Vendor & Schedule Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -137,34 +163,77 @@ const CheckoutReview = () => {
           </div>
         </motion.div>
 
-        {/* Selected Services */}
         <section className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Services</span>
             <span className="text-[9px] font-black text-[#1C2C4E] tracking-tighter capitalize opacity-80">{items.length} Items</span>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] space-y-3">
-            {items.map((item) => (
-              <div key={item._id} className="flex justify-between items-center leading-none">
-                <div className="space-y-1">
-                  <p className="font-black text-[13px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">{item.name}</p>
-                  <p className="text-[9px] text-slate-400 font-black tracking-tighter leading-none capitalize">{item.duration}m • {item.bufferTime || 0}m Buffer</p>
+            {items.map((item) => {
+              const priceMeta = pricingMap[item._id] || {
+                originalPrice: item.price,
+                finalPrice: item.price,
+                discount: 0
+              };
+
+              return (
+                <div key={item._id} className="flex justify-between items-center leading-none">
+                  <div className="space-y-1">
+                    <p className="font-black text-[13px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">{item.name}</p>
+                    <p className="text-[9px] text-slate-400 font-black tracking-tighter leading-none capitalize">
+                      {item.duration}m • {item.bufferTime || 0}m Buffer
+                    </p>
+                    {priceMeta.discount > 0 && (
+                      <p className="text-[8px] font-black text-emerald-500 tracking-widest uppercase leading-none">
+                        Offer price {formatPrice(priceMeta.finalPrice)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span
+                      className={`font-black text-[13px] ${
+                        priceMeta.discount > 0 ? 'text-slate-400 line-through' : 'text-gray-900 dark:text-white'
+                      }`}
+                    >
+                      {formatPrice(item.price)}
+                    </span>
+                    {priceMeta.discount > 0 && (
+                      <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase">
+                        Save {formatPrice(priceMeta.discount)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span className="font-black text-gray-900 dark:text-white text-[13px]">₹{item.price}</span>
-              </div>
-            ))}
+              );
+            })}
             <div className="border-t border-slate-50 dark:border-gray-800 pt-3 flex justify-between items-center leading-none">
               <span className="text-[10px] font-black text-slate-400 tracking-widest leading-none capitalize">Convenience fee</span>
               <span className="text-[10px] font-black text-emerald-500 tracking-widest leading-none capitalize">Free</span>
             </div>
+            {totalSavings > 0 && (
+              <div className="flex justify-between items-center leading-none">
+                <span className="text-[10px] font-black text-slate-400 tracking-widest leading-none capitalize">Discount</span>
+                <span className="text-[10px] font-black text-emerald-500 tracking-widest leading-none">
+                  -{formatPrice(totalSavings)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center pt-1.5 leading-none">
               <span className="font-black text-[15px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">To pay</span>
-              <span className="font-black text-[20px] text-[#1C2C4E] dark:text-white tracking-tighter leading-none">₹{totalPrice}</span>
+              <div className="flex flex-col items-end">
+                {totalSavings > 0 && (
+                  <span className="text-[10px] font-black text-slate-400 line-through tracking-widest leading-none mb-1">
+                    {formatPrice(totalPrice)}
+                  </span>
+                )}
+                <span className="font-black text-[20px] text-[#1C2C4E] dark:text-white tracking-tighter leading-none">
+                  {formatPrice(discountedTotal)}
+                </span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Staff Card */}
         <section className="space-y-2">
           <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 leading-none capitalize">Assigned professional</p>
           <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center gap-3 active:scale-95 transition-all">
@@ -182,7 +251,6 @@ const CheckoutReview = () => {
           </div>
         </section>
 
-        {/* Payment Method */}
         <section className="space-y-2">
           <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 leading-none capitalize">Payment method</p>
           <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center justify-between active:scale-[0.98] transition-all">
@@ -200,7 +268,6 @@ const CheckoutReview = () => {
         </section>
       </div>
 
-      {/* Confirmation Bar */}
       <div className="fixed bottom-[82px] left-4 right-4 p-4 glass-effect border border-slate-200/40 dark:border-gray-800 rounded-[28px] z-50 shadow-2xl">
         <div className="max-w-md mx-auto">
           <button

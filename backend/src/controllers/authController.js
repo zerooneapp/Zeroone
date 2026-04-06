@@ -2,6 +2,15 @@ const User = require('../models/User');
 const Staff = require('../models/Staff');
 const generateToken = require('../utils/generateToken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+
+const shouldExposeOtpInResponse =
+  process.env.ALLOW_OTP_IN_RESPONSE === 'true' ||
+  (process.env.NODE_ENV !== 'production' && process.env.ALLOW_OTP_IN_RESPONSE !== 'false');
+const shouldLogOtpToConsole =
+  process.env.ALLOW_OTP_CONSOLE_LOG === 'true' || process.env.NODE_ENV !== 'production';
+
+const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
 
 // @desc    Login user / vendor / staff / admin
 // @route   POST /api/auth/login
@@ -67,6 +76,8 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   try {
     const { phone, name, password, role, email, gender, dob, referralCode, image } = req.body;
+    const requestedRole = role || 'customer';
+    const effectivePassword = password || (requestedRole === 'vendor' ? generateTemporaryPassword() : undefined);
 
     let user = await User.findOne({ phone });
 
@@ -74,25 +85,25 @@ const register = async (req, res) => {
       if (user.name && !req.body.forceUpdate && user.role !== 'vendor') return res.status(400).json({ message: 'User already exists' });
 
       user.name = name;
-      if (password) user.password = password;
+      if (effectivePassword) user.password = effectivePassword;
       if (email) user.email = email;
       if (gender) user.gender = gender;
       if (dob) user.dob = dob;
       if (referralCode) user.referralCode = referralCode;
       if (image) user.image = image;
-      user.role = role || 'customer';
+      user.role = requestedRole;
       await user.save();
     } else {
       user = await User.create({
         phone,
         name,
-        password,
+        password: effectivePassword,
         email,
         gender,
         dob,
         referralCode,
         image,
-        role: role || 'customer'
+        role: requestedRole
       });
     }
 
@@ -170,12 +181,18 @@ const sendOTP = async (req, res) => {
       await User.create({ phone, otp, otpExpires, role: 'customer' });
     }
 
-    // MOCK SMS LOGGING
-    console.log(`\n-----------------------------------`);
-    console.log(`[AUTH] OTP for ${phone}: ${otp}`);
-    console.log(`-----------------------------------\n`);
+    if (shouldLogOtpToConsole) {
+      console.log(`\n-----------------------------------`);
+      console.log(`[AUTH] OTP for ${phone}: ${otp}`);
+      console.log(`-----------------------------------\n`);
+    }
 
-    res.status(200).json({ message: 'OTP sent successfully', otp });
+    const responsePayload = { message: 'OTP sent successfully' };
+    if (shouldExposeOtpInResponse) {
+      responsePayload.otp = otp;
+    }
+
+    res.status(200).json(responsePayload);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

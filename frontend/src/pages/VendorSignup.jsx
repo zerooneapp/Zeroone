@@ -72,7 +72,6 @@ const VendorSignup = () => {
         phone,
         name: formData.shopName,
         role: 'vendor',
-        password: 'password123', // Default for vendor profiles
         forceUpdate: true
       });
 

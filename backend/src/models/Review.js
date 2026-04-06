@@ -5,7 +5,14 @@ const reviewSchema = new mongoose.Schema({
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
   bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', required: true },
   rating: { type: Number, required: true, min: 1, max: 5 },
-  comment: { type: String }
+  comment: { type: String },
+  status: {
+    type: String,
+    enum: ['approved', 'pending'],
+    default: 'pending'
+  },
+  moderatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  moderatedAt: { type: Date }
 }, { timestamps: true });
 
 // Prevent duplicate reviews for same booking

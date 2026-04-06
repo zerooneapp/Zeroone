@@ -86,6 +86,29 @@ const BookingStatusDetails = () => {
           <p className="text-[8px] font-black tracking-widest text-slate-400 mt-1.5 opacity-60">Order #{booking._id.slice(-6).toUpperCase()}</p>
         </div>
 
+        {booking.status === 'cancelled' && booking.cancelReason && (
+          <section className="p-3.5 bg-rose-50/70 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-900/20 shadow-sm space-y-2">
+            <div className="flex items-start gap-2">
+              <div className="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/20">
+                <AlertTriangle size={15} />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[8px] font-black uppercase tracking-[0.22em] text-rose-500">
+                  Cancellation Reason
+                </p>
+                <p className="text-[11px] font-black text-slate-900 dark:text-white leading-tight">
+                  {booking.cancelReason}
+                </p>
+                {booking.cancelledByRole && (
+                  <p className="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-white/50">
+                    Cancelled by {booking.cancelledByRole}
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Professional Details (Contact Rule Applies) */}
         <section className="space-y-2">
           <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Service provider</p>
@@ -155,7 +178,8 @@ const BookingStatusDetails = () => {
                 state: {
                   rescheduleBookingId: id,
                   vendor: booking.vendorId,
-                  rescheduleItems: booking.services.map(s => ({ _id: s.serviceId, name: s.name, price: s.price, duration: s.duration }))
+                  rescheduleItems: booking.services.map(s => ({ _id: s.serviceId, name: s.name, price: s.price, duration: s.duration })),
+                  rescheduleTotalDuration: booking.totalDuration
                 }
               })}
               disabled={!booking.canReschedule}

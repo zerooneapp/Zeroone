@@ -3,13 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
 import { Moon, Sun, Bell, MapPin, User, Heart, ChevronDown } from 'lucide-react';
-import NotificationDrawer from '../components/NotificationDrawer';
 import api from '../services/api';
 
-const Header = () => {
+const Header = ({ onOpenNotifications }) => {
   const { isDarkMode, toggleTheme } = useThemeStore();
   const { user } = useAuthStore();
-  const [showNotifications, setShowNotifications] = React.useState(false);
   const [unreadCount, setUnreadCount] = React.useState(0);
   const navigate = useNavigate();
 
@@ -61,7 +59,7 @@ const Header = () => {
           </button>
 
           <button 
-            onClick={() => setShowNotifications(true)}
+            onClick={onOpenNotifications}
             className="relative p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
             <Bell size={18} strokeWidth={2.5} />
@@ -79,10 +77,6 @@ const Header = () => {
         </div>
       </div>
 
-      <NotificationDrawer 
-        isOpen={showNotifications} 
-        onClose={() => setShowNotifications(false)} 
-      />
     </header>
   );
 };

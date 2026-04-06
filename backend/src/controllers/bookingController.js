@@ -1,8 +1,30 @@
-const { finalizeBooking, markBookingComplete, cancelBooking } = require('../services/bookingService');
+const {
+  finalizeBooking,
+  markBookingComplete,
+  cancelBooking,
+  emergencyCancelBooking
+} = require('../services/bookingService');
 const Booking = require('../models/Booking');
 const Vendor = require('../models/Vendor');
 const Staff = require('../models/Staff');
 const moment = require('moment-timezone');
+
+const getActorRole = (req) => req.user?.role || (req.staff ? 'staff' : null);
+
+const getActorUserId = (req) => req.user?._id || req.staff?.userId || req.staff?._id || null;
+
+const resolveActorStaffId = async (req) => {
+  if (req.staff?._id) {
+    return req.staff._id;
+  }
+
+  if (req.user?.role === 'staff') {
+    const staff = await Staff.findOne({ userId: req.user._id }).select('_id');
+    return staff?._id || null;
+  }
+
+  return null;
+};
 
 /**
  * Helper to add visibility flags and sanitize contact info
@@ -24,6 +46,10 @@ const formatBookingResponse = (booking, role) => {
   // Sanitize Staff Phone based on contact rule
   if (role === 'customer' && !b.canContact) {
     if (b.staffId) b.staffId.phone = '**********'; // Hide until 30m before
+  }
+
+  if (role === 'staff' && !b.canContact) {
+    if (b.userId) b.userId.phone = '**********';
   }
 
   return b;
@@ -50,7 +76,7 @@ const createBooking = async (req, res) => {
     const booking = await finalizeBooking(req.user._id, vendorId, staffId, serviceIds, startTime, serviceAddress);
     // Reload to get populated staff for the response
     const populated = await Booking.findById(booking._id).populate('staffId', 'name phone');
-    res.status(201).json(formatBookingResponse(populated, req.user.role));
+    res.status(201).json(formatBookingResponse(populated, getActorRole(req)));
   } catch (error) {
     if (error.message === 'Slot occupied') {
       return res.status(409).json({ message: 'Slot occupied', nextAvailableSlots: error.nextAvailableSlots });
@@ -61,26 +87,27 @@ const createBooking = async (req, res) => {
 
 const getMyBookings = async (req, res) => {
   try {
+    const actorRole = getActorRole(req);
     const filter = {};
-    if (req.user.role === 'customer') {
+    if (actorRole === 'customer') {
       filter.userId = req.user._id;
-    } else if (req.user.role === 'vendor') {
+    } else if (actorRole === 'vendor') {
       const vendor = await Vendor.findOne({ ownerId: req.user._id });
       if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
       filter.vendorId = vendor._id;
-    } else if (req.user.role === 'staff') {
-      const staff = await Staff.findOne({ userId: req.user._id });
-      if (!staff) return res.status(404).json({ message: 'Staff not found' });
-      filter.staffId = staff._id;
+    } else if (actorRole === 'staff') {
+      const actorStaffId = await resolveActorStaffId(req);
+      if (!actorStaffId) return res.status(404).json({ message: 'Staff not found' });
+      filter.staffId = actorStaffId;
     }
 
     const bookings = await Booking.find(filter)
-      .populate('userId', 'name phone')
+      .populate('userId', 'name phone image')
       .populate('vendorId', 'shopName address')
       .populate('staffId', 'name phone')
       .sort({ startTime: -1 });
 
-    const formatted = bookings.map(b => formatBookingResponse(b, req.user.role));
+    const formatted = bookings.map(b => formatBookingResponse(b, actorRole));
     res.status(200).json(formatted);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,20 +116,23 @@ const getMyBookings = async (req, res) => {
 
 const updateBookingStatus = async (req, res) => {
   try {
-    const { action } = req.body;
+    const { action, reason } = req.body;
     const bookingId = req.params.id;
+    const actorRole = getActorRole(req);
+    const actorUserId = getActorUserId(req);
+    const actorStaffId = await resolveActorStaffId(req);
 
     let result;
     if (action === 'complete') {
-      result = await markBookingComplete(req.user._id, bookingId); 
+      result = await markBookingComplete(actorUserId, bookingId, actorStaffId);
     } else if (action === 'cancel') {
-      result = await cancelBooking(req.user._id, bookingId, req.user.role);
+      result = await cancelBooking(actorUserId, bookingId, actorRole, reason, actorStaffId);
     } else {
       return res.status(400).json({ message: 'Invalid action' });
     }
 
     if (!result) return res.status(404).json({ message: 'Error updating status' });
-    res.status(200).json(formatBookingResponse(result, req.user.role));
+    res.status(200).json(formatBookingResponse(result, actorRole));
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -112,19 +142,41 @@ const rescheduleBooking = async (req, res) => {
   try {
     const { startTime, staffId, serviceAddress } = req.body;
     const bookingId = req.params.id;
+    const actorRole = getActorRole(req);
+    const actorUserId = getActorUserId(req);
+    const actorStaffId = await resolveActorStaffId(req);
 
     const result = await require('../services/bookingService').rescheduleBooking(
-      req.user._id, 
+      actorUserId,
+      actorRole,
       bookingId, 
       startTime, 
       staffId,
-      serviceAddress
+      serviceAddress,
+      actorStaffId
     );
 
-    res.status(200).json(formatBookingResponse(result, req.user.role));
+    res.status(200).json(formatBookingResponse(result, actorRole));
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-module.exports = { createBooking, getMyBookings, updateBookingStatus, rescheduleBooking };
+const vendorEmergencyCancel = async (req, res) => {
+  try {
+    const bookingId = req.params.id;
+    const { reason, closureId } = req.body;
+    const result = await emergencyCancelBooking(req.user._id, bookingId, reason, closureId);
+    res.status(200).json(formatBookingResponse(result, getActorRole(req)));
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  createBooking,
+  getMyBookings,
+  updateBookingStatus,
+  rescheduleBooking,
+  vendorEmergencyCancel
+};
