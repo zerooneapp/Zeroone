@@ -181,7 +181,7 @@ const CheckoutReview = () => {
                   <div className="space-y-1">
                     <p className="font-black text-[13px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">{item.name}</p>
                     <p className="text-[9px] text-slate-400 font-black tracking-tighter leading-none capitalize">
-                      {item.duration}m • {item.bufferTime || 0}m Buffer
+                      {item.duration}m | {item.bufferTime || 0}m Buffer
                     </p>
                     {priceMeta.discount > 0 && (
                       <p className="text-[8px] font-black text-emerald-500 tracking-widest uppercase leading-none">

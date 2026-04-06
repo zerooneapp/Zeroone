@@ -1,8 +1,9 @@
 import React from 'react';
 import { Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { RiHomeHeartFill, RiTeamFill } from 'react-icons/ri';
+import { IoPersonCircleSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
-import { House, Users, CircleUserRound } from 'lucide-react';
 
 const VendorLayout = () => {
   const { role } = useAuthStore();
@@ -14,9 +15,9 @@ const VendorLayout = () => {
   }
 
   const menuItems = [
-    { label: 'Home', icon: House, path: '/vendor/dashboard' },
-    { label: 'Clients', icon: Users, path: '/vendor/bookings' },
-    { label: 'Account', icon: CircleUserRound, path: '/vendor/profile' },
+    { label: 'Home', icon: RiHomeHeartFill, path: '/vendor/dashboard' },
+    { label: 'Clients', icon: RiTeamFill, path: '/vendor/bookings' },
+    { label: 'Account', icon: IoPersonCircleSharp, path: '/vendor/profile' },
   ];
 
   return (

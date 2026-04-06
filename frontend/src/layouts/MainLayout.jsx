@@ -12,6 +12,8 @@ const MainLayout = () => {
   const [unreviewed, setUnreviewed] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
+  const shouldHideHeader = ['/account', '/booking-status', '/cart', '/checkout-review', '/booking-success', '/service', '/favorites', '/bookings']
+    .some(path => location.pathname.startsWith(path));
 
   const checkUnreviewed = async () => {
     if (!isAuthenticated || role !== 'customer') return;
@@ -29,7 +31,7 @@ const MainLayout = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-white/80 to-blue-50/30 dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-950 dark:to-blue-950/10 text-text-light dark:text-text-dark pb-24">
-      {!['/account', '/booking-status', '/cart', '/checkout-review', '/booking-success', '/service', '/favorites', '/bookings'].some(path => location.pathname.startsWith(path)) && (
+      {!shouldHideHeader && (
         <Header onOpenNotifications={() => setShowNotifications(true)} />
       )}
       <main className="max-w-4xl mx-auto animate-in fade-in duration-500">
@@ -42,9 +44,9 @@ const MainLayout = () => {
       />
 
       {unreviewed && (
-        <ReviewPopup 
-          booking={unreviewed} 
-          onClose={() => setUnreviewed(null)} 
+        <ReviewPopup
+          booking={unreviewed}
+          onClose={() => setUnreviewed(null)}
         />
       )}
     </div>

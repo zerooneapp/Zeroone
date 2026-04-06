@@ -421,7 +421,7 @@ const Cart = () => {
         initial={{ y: 100, opacity: 0, scale: 0.9 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
-        className="fixed bottom-[82px] left-4 right-4 bg-slate-900 dark:bg-gray-900 p-2.5 px-5 rounded-3xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
+        className="fixed bottom-[52px] left-4 right-4 bg-slate-900 dark:bg-gray-900 p-3 px-5 rounded-2xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
       >
         <div className="flex items-center justify-between">
           <div className="leading-none">

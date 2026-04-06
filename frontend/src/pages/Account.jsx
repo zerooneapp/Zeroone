@@ -27,7 +27,7 @@ const Account = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500">
       <header className="px-4 pt-4 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-2">
           <button
@@ -40,10 +40,9 @@ const Account = () => {
             Profile
           </h1>
         </div>
-        <p className="text-[9px] font-black text-[#1C2C4E]/60 tracking-widest mt-2 ml-1 opacity-80">Manage your elite account</p>
       </header>
 
-      <div className="px-4 mt-2">
+      <div className="px-4 mt-4">
         <div
           className="bg-[#1C2C4E] p-3.5 rounded-2xl text-white shadow-2xl relative overflow-hidden border border-white/5"
         >

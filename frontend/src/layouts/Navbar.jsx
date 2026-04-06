@@ -23,7 +23,7 @@ const Navbar = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
       <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] px-6">
-        <div className="flex items-center justify-between max-w-lg mx-auto h-[58px]">
+        <div className="flex items-center justify-between max-w-lg mx-auto h-[50px]">
           {navItems.map((item) => (
             <NavLink
               key={item.path}

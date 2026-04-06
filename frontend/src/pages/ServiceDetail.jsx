@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Star, MapPin, Clock, Plus, Minus,
@@ -220,7 +220,7 @@ const ServiceDetail = () => {
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-40">
       {/* Redesigned Secondary Navbar (Screenshot Sync) */}
-      <div className="bg-[#1C2C4E] text-white px-4 py-3 sticky top-0 z-[60] flex items-center justify-between shadow-md shrink-0 h-[60px]">
+      <div className="bg-white text-[#1C2C4E] px-4 py-2 sticky top-0 z-[60] flex items-center justify-between border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 shrink-0 h-[50px]">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
             <ArrowLeft size={20} strokeWidth={3} />
@@ -250,12 +250,12 @@ const ServiceDetail = () => {
             <button
               onClick={handleToggleFavorite}
               className={cn(
-                "absolute top-4 right-3 w-[40px] h-[40px] rounded-full shadow-2xl backdrop-blur-md transition-all active:scale-90 z-30 flex items-center justify-center",
+                "absolute top-4 right-3 w-[32px] h-[32px] rounded-full shadow-2xl backdrop-blur-md transition-all active:scale-90 z-30 flex items-center justify-center",
                 isFavorited ? "bg-white text-[#1C2C4E]" : "bg-white text-[#1C2C4E]/40"
               )}
             >
               <Heart
-                size={24}
+                size={18}
                 fill={isFavorited ? "#1C2C4E" : "none"}
                 strokeWidth={isFavorited ? 0 : 2}
               />
@@ -368,139 +368,139 @@ const ServiceDetail = () => {
       </div>
 
       <div className="flex gap-2 px-3 mt-6 overflow-x-auto no-scrollbar">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCat(cat)}
-            className={`px-3 py-1.5 rounded-[12px] whitespace-nowrap text-[10px] font-black tracking-widest transition-all ${selectedCat === cat
-              ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-xl shadow-[#1C2C4E]/20 scale-105'
-              : 'bg-white dark:bg-gray-900 text-[#0B1222] border border-[#1C2C4E]/10 shadow-sm'
-              }`}
-          >
-            {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
-          </button>
-        ))}
-      </div>
-
-      <div className="px-3 mt-4 space-y-2">
-        <SectionTitle title="Selected Services" className="mb-1" />
-        {cartItems.length > 0 && hasItemsFromThisVendor ? (
-          cartItems.map((item) => {
-            const priceMeta = servicePricing[item._id] || {
-              originalPrice: item.price,
-              finalPrice: item.price,
-              discount: 0
-            };
-
-            return (
-            <div
-              key={item._id}
-              className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
-                  <img src={item.image || vendor.shopImage} className="w-full h-full object-cover" alt={item.name} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
-                      <Clock size={8} /> {item.duration}m
-                    </span>
-                    <span className="text-xs font-black text-[#0B1222] dark:text-white leading-none">₹{item.price}</span>
-                  </div>
-                  {priceMeta.discount > 0 && (
-                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
-                      Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
-                    Pay At Shop
-                  </div>
-                  <button
-                    onClick={() => removeItem(item._id)}
-                    className="w-8 h-8 bg-black dark:bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center shadow-lg"
-                  >
-                    <Minus size={14} strokeWidth={3} />
-                  </button>
-                </div>
-              </div>
-            </div>
-            );
-          })
-        ) : (
-          <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
-            <p className="text-[8px] font-black text-[#0B1222]/30 uppercase tracking-widest italic">Tap items below to add them</p>
-          </div>
-        )}
-      </div>
-
-      <div className="px-3 mt-4 space-y-2">
-        <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
-        <div className="space-y-2">
-          {filteredServices.map((service, index) => {
-            const isSelected = cartItems.find(item => item._id === service._id);
-            if (isSelected) return null;
-            const priceMeta = servicePricing[service._id] || {
-              originalPrice: service.price,
-              finalPrice: service.price,
-              discount: 0
-            };
-
-            return (
-              <div
-                key={service._id}
-                className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCat(cat)}
+                className={`px-3 py-1.5 rounded-[12px] whitespace-nowrap text-[10px] font-black tracking-widest transition-all ${selectedCat === cat
+                  ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-xl shadow-[#1C2C4E]/20 scale-105'
+                  : 'bg-white dark:bg-gray-900 text-[#0B1222] border border-[#1C2C4E]/10 shadow-sm'
+                  }`}
               >
-                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
-                  <img src={service.image || vendor.shopImage} className="w-full h-full object-cover" alt={service.name} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
-                  <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
-                  {priceMeta.discount > 0 && (
-                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
-                      Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
-                    </p>
-                  )}
-                </div>
-                  <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
-                    Pay At Shop
+                {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
+              </button>
+            ))}
+      </div>
+
+      <div className="px-3 mt-4 space-y-2">
+            <SectionTitle title="Selected Services" className="mb-1" />
+            {cartItems.length > 0 && hasItemsFromThisVendor ? (
+              cartItems.map((item) => {
+                const priceMeta = servicePricing[item._id] || {
+                  originalPrice: item.price,
+                  finalPrice: item.price,
+                  discount: 0
+                };
+
+                return (
+                  <div
+                    key={item._id}
+                    className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+                        <img src={item.image || vendor.shopImage} className="w-full h-full object-cover" alt={item.name} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
+                            <Clock size={8} /> {item.duration}m
+                          </span>
+                          <span className="text-xs font-black text-[#0B1222] dark:text-white leading-none">₹{item.price}</span>
+                        </div>
+                        {priceMeta.discount > 0 && (
+                          <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
+                            Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                          Pay At Shop
+                        </div>
+                        <button
+                          onClick={() => removeItem(item._id)}
+                          className="w-8 h-8 bg-black dark:bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center shadow-lg"
+                        >
+                          <Minus size={14} strokeWidth={3} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                <button
-                  onClick={() => toggleService(service)}
-                  className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1C2C4E] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
-                >
-                  <Plus size={16} strokeWidth={3} />
-                </button>
+                );
+              })
+            ) : (
+              <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
+                <p className="text-[8px] font-black text-[#0B1222]/30 uppercase tracking-widest italic">Tap items below to add them</p>
               </div>
-            );
-          })}
-        </div>
+            )}
+      </div>
+
+      <div className="px-3 mt-4 space-y-2">
+            <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
+            <div className="space-y-2">
+              {filteredServices.map((service, index) => {
+                const isSelected = cartItems.find(item => item._id === service._id);
+                if (isSelected) return null;
+                const priceMeta = servicePricing[service._id] || {
+                  originalPrice: service.price,
+                  finalPrice: service.price,
+                  discount: 0
+                };
+
+                return (
+                  <div
+                    key={service._id}
+                    className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
+                      <img src={service.image || vendor.shopImage} className="w-full h-full object-cover" alt={service.name} />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
+                      <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
+                      {priceMeta.discount > 0 && (
+                        <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
+                          Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                        </p>
+                      )}
+                    </div>
+                    <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                      Pay At Shop
+                    </div>
+                    <button
+                      onClick={() => toggleService(service)}
+                      className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1C2C4E] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
+                    >
+                      <Plus size={16} strokeWidth={3} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
       </div>
 
       <div className="px-3 mt-4">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#1C2C4E]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
-          <div className="flex items-center gap-2.5">
-            <div className="text-green-500 bg-white dark:bg-gray-800 p-1 rounded-full shadow-sm">
-              <CheckCircle2 size={14} />
-            </div>
-            <p className="text-[10px] font-black text-[#0B1222] dark:text-white tracking-tight">Instant Booking Available</p>
-          </div>
-          <div className="flex -space-x-1.5">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden shadow-sm">
-                <img src={`https://i.pravatar.cc/100?u=${i}`} alt="avatar" />
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#1C2C4E]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+              <div className="flex items-center gap-2.5">
+                <div className="text-green-500 bg-white dark:bg-gray-800 p-1 rounded-full shadow-sm">
+                  <CheckCircle2 size={14} />
+                </div>
+                <p className="text-[10px] font-black text-[#0B1222] dark:text-white tracking-tight">Instant Booking Available</p>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="flex -space-x-1.5">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden shadow-sm">
+                    <img src={`https://i.pravatar.cc/100?u=${i}`} alt="avatar" />
+                  </div>
+                ))}
+              </div>
+            </div>
       </div>
 
       <div
-        className="fixed bottom-[82px] left-0 right-0 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] mx-3 rounded-[32px]"
+        className="fixed bottom-[52px] left-0 right-0 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-1.5 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] mx-2 rounded-[24px]"
       >
         <div className="flex items-center justify-between max-w-lg mx-auto">
           <div className="flex flex-col">

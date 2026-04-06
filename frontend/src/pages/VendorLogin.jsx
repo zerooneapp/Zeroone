@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
 import logo from '../assests/logo.jpeg';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/Button';
-import NumericKeypad from '../components/NumericKeypad';
 import toast from 'react-hot-toast';
 
 const VendorAuth = () => {
@@ -37,16 +35,18 @@ const VendorAuth = () => {
 
   const handleOTPChange = (e) => {
     const val = e.target.value.replace(/\D/g, '').slice(0, 5);
-    const newOtp = ['', '', '', '', ''];
-    val.split('').forEach((char, i) => {
-      newOtp[i] = char;
+    const nextOtp = ['', '', '', '', ''];
+    val.split('').forEach((char, index) => {
+      nextOtp[index] = char;
     });
-    setOtp(newOtp);
+    setOtp(nextOtp);
   };
 
   const handleSendOTP = async (e) => {
     e?.preventDefault();
-    if (phone.length < 10) return toast.error('Please enter a valid phone number');
+    if (phone.length < 10) {
+      return toast.error('Please enter a valid phone number');
+    }
 
     const res = await requestOTP(phone);
     if (res.success) {
@@ -61,25 +61,30 @@ const VendorAuth = () => {
 
   const handleVerifyOTP = async () => {
     const otpValue = otp.join('');
-    if (otpValue.length < 5) return toast.error('Please enter the full code');
+    if (otpValue.length < 5) {
+      return toast.error('Please enter the full code');
+    }
 
     const res = await verifyOTP(phone, otpValue);
     if (res.success) {
       const { role, needsRegistration } = res.data;
       if (needsRegistration) {
         navigate('/vendor-signup', { state: { phone, role: 'vendor' } });
-      } else {
-        toast.success('Welcome back!');
+        return;
+      }
 
-        const intendedPath = location.state?.from?.pathname;
-        if (intendedPath) {
-          navigate(intendedPath, { replace: true });
-        } else {
-          if (role === 'admin') navigate('/admin');
-          else if (role === 'vendor') navigate('/vendor');
-          else if (role === 'staff') navigate('/staff');
-          else navigate('/');
-        }
+      toast.success('Welcome back!');
+      const intendedPath = location.state?.from?.pathname;
+      if (intendedPath) {
+        navigate(intendedPath, { replace: true });
+      } else if (role === 'admin') {
+        navigate('/admin');
+      } else if (role === 'vendor') {
+        navigate('/vendor');
+      } else if (role === 'staff') {
+        navigate('/staff');
+      } else {
+        navigate('/');
       }
     } else {
       toast.error(res.message);
@@ -164,12 +169,12 @@ const VendorAuth = () => {
                     className="absolute inset-0 opacity-0 cursor-default"
                   />
                   <div className="flex justify-between gap-3 px-2 pointer-events-none">
-                    {otp.map((digit, i) => (
+                    {otp.map((digit, index) => (
                       <div
-                        key={i}
+                        key={index}
                         className={cn(
                           'w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all',
-                          digit || (isOTPFocused && i === otp.join('').length)
+                          digit || (isOTPFocused && index === otp.join('').length)
                             ? 'border-[#1C2C4E] text-[#1C2C4E]'
                             : 'border-gray-50 text-gray-300'
                         )}

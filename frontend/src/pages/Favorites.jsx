@@ -49,8 +49,7 @@ const Favorites = () => {
                </button>
                <div className="leading-none">
                   <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">My wishlist</h1>
-                  <p className="text-[8px] font-black text-slate-400 tracking-[0.2em] mt-1">{favorites.length} Saved salons</p>
-               </div>
+                </div>
             </div>
          </div>
 

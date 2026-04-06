@@ -39,7 +39,7 @@ const Header = ({ onOpenNotifications }) => {
             <span className="text-[#1C2C4E] dark:text-white">Zero</span>
             <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
           </h1>
-          <button 
+          <button
             onClick={() => navigate('/account/addresses')}
             className="flex items-center gap-1 text-[10px] font-black text-slate-400 hover:text-[#1C2C4E] transition-colors group"
           >
@@ -48,17 +48,17 @@ const Header = ({ onOpenNotifications }) => {
             <ChevronDown size={10} strokeWidth={4} className="text-slate-400 opacity-60 group-hover:text-[#1C2C4E] transition-colors" />
           </button>
         </div>
-        
+
         {/* Right: Premium Action HUD */}
         <div className="flex items-center gap-1">
-          <button 
+          <button
             onClick={toggleTheme}
             className="p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
             {isDarkMode ? <Sun size={17} strokeWidth={2.5} /> : <Moon size={17} strokeWidth={2.5} />}
           </button>
 
-          <button 
+          <button
             onClick={onOpenNotifications}
             className="relative p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
@@ -67,8 +67,8 @@ const Header = ({ onOpenNotifications }) => {
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 shadow-sm animate-pulse" />
             )}
           </button>
-          
-          <button 
+
+          <button
             onClick={() => navigate('/favorites')}
             className="p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
@@ -76,6 +76,7 @@ const Header = ({ onOpenNotifications }) => {
           </button>
         </div>
       </div>
+
 
     </header>
   );

@@ -21,6 +21,7 @@ import NotificationSettings from './pages/NotificationSettings';
 import PaymentMethods from './pages/PaymentMethods';
 import SecuritySettings from './pages/SecuritySettings';
 import Preferences from './pages/Preferences';
+import Notifications from './pages/Notifications';
 
 // Auth
 import Login from './pages/Login';
@@ -101,6 +102,7 @@ function App() {
           <Route path="services/:id" element={<ServiceDetail />} />
           <Route path="favorites" element={<Favorites />} />
           <Route path="cart" element={<Cart />} />
+          <Route path="notifications" element={<Notifications />} />
 
           <Route element={<ProtectedRoute allowedRoles={['customer', 'vendor', 'admin', 'staff']} />}>
             <Route path="checkout-review" element={<CheckoutReview />} />

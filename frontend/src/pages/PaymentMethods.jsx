@@ -148,7 +148,7 @@ const PaymentMethods = () => {
       </main>
 
       {/* 🚀 ACTION FOOTER */}
-      <div className="p-5 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-t border-slate-100 dark:border-gray-800">
+      <div className="p-5 pb-[62px] bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-t border-slate-100 dark:border-gray-800">
          <motion.button
            whileTap={{ scale: 0.95 }}
            onClick={handleAddMethod}
