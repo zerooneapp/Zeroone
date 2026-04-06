@@ -136,14 +136,14 @@ const VendorDashboard = () => {
 
   const actionTiles = [
     { label: 'Create', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
-    { label: 'Offers', icon: Percent, path: '/vendor/offers' },
+    { label: 'Create Offers', icon: Percent, path: '/vendor/offers' },
     { label: 'Staff', icon: Briefcase, path: '/vendor/staff' },
     { label: 'Services', icon: LayoutGrid, path: '/vendor/services' },
     { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-24 transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-12 transition-colors duration-500 overflow-x-hidden">
       <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      <main className="px-2.5 space-y-1.5 pt-[65px]">
+      <main className="px-2.5 space-y-1 pt-[65px]">
         <section className="grid grid-cols-5 gap-1.5 px-0.5">
           {actionTiles.map((action) => (
             <button
@@ -247,22 +247,22 @@ const VendorDashboard = () => {
         </section>
 
         <section className="px-0.5">
-          <div className="flex overflow-x-auto gap-2 no-scrollbar pb-1">
-            <div className="bg-slate-900 dark:bg-gray-900 py-3 px-2.5 rounded-lg shadow-lg border border-[#1C2C4E]/10 flex flex-col min-w-[140px] shrink-0">
+          <div className="flex overflow-x-auto gap-2 no-scrollbar pb-0">
+            <div className="bg-slate-900 dark:bg-gray-900 py-3 px-2.5 rounded-lg shadow-lg border border-[#1C2C4E]/10 flex flex-col min-w-[130px] shrink-0">
               <p className="text-[9px] font-black text-white/50 tracking-widest leading-none mb-1.5">Today revenue</p>
               <p className="text-sm font-black text-white leading-none">₹{data.stats.todayEarnings.toLocaleString()}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[140px] shrink-0">
+            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[130px] shrink-0">
               <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Today clients</p>
               <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.stats.todayBookings}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[140px] shrink-0">
+            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[130px] shrink-0">
               <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Services done</p>
               <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">
                 {data.schedule.filter((item) => item.status === 'completed').length || 0}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[140px] shrink-0">
+            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[130px] shrink-0">
               <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">
                 Pending bookings
               </p>
@@ -273,9 +273,9 @@ const VendorDashboard = () => {
           </div>
         </section>
 
-        <section className="space-y-3 pt-1">
+        <section className="space-y-2 pt-0">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-sm font-black text-slate-800 dark:text-white tracking-widest">Live schedule</h2>
+            <h2 className="text-sm font-black text-slate-800 dark:text-white tracking-widest capitalize">Today's clients</h2>
             <button
               onClick={() => navigate('/vendor/bookings')}
               className="text-[8px] font-black text-primary dark:text-white tracking-widest px-3 py-1.5 bg-primary/5 dark:bg-white/10 rounded-full border border-primary/10 dark:border-white/20 transition-all active:scale-95"
@@ -284,7 +284,7 @@ const VendorDashboard = () => {
             </button>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-1">
             {data.schedule.length === 0 ? (
               <div className="py-10 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center gap-2 group">
                 <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-200 group-hover:text-primary transition-colors">
@@ -297,10 +297,10 @@ const VendorDashboard = () => {
                 <motion.div
                   key={idx}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-white dark:bg-gray-900 p-3.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group"
+                  className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
                       <img
                         src={item.customerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.customerName}${idx}`}
                         alt={item.customerName || 'Customer'}
@@ -326,10 +326,13 @@ const VendorDashboard = () => {
                       Done
                     </button>
                   ) : (
-                    <div className="bg-emerald-500/10 text-emerald-500 px-2.5 py-1.5 rounded-lg flex items-center gap-1 border border-emerald-500/10">
-                      <ShieldCheck size={10} />
-                      <span className="text-[7px] font-black">Cleared</span>
-                    </div>
+                    <button
+                      onClick={() => navigate('/vendor/bookings')}
+                      className="bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[10px] font-bold flex items-center gap-1"
+                    >
+                      View Details
+                      <ChevronRight size={10} className="text-primary" />
+                    </button>
                   )}
                 </motion.div>
               ))
@@ -337,11 +340,11 @@ const VendorDashboard = () => {
           </div>
         </section>
 
-        <section className="space-y-2 px-0.5">
-          <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80 uppercase">Revenue history</h2>
-          <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm h-56 w-full relative overflow-hidden group">
+        <section className="space-y-1 px-0.5">
+          <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80 uppercase">Revenue Analytics</h2>
+          <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm h-40 w-full relative overflow-hidden group">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.revenueHistory || []}>
+              <AreaChart data={(data.revenueHistory || []).slice(0, 5)} margin={{ left: 10, right: 35, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
@@ -353,7 +356,7 @@ const VendorDashboard = () => {
                   dataKey="day"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 7, fill: isDarkMode ? '#475569' : '#94a3b8', fontWeight: 900 }}
+                  tick={{ fontSize: 9, fill: isDarkMode ? '#CBD5E1' : '#1E293B', fontWeight: 800, dx: -10 }}
                   dy={10}
                 />
                 <YAxis hide domain={[0, 'auto']} />
@@ -383,7 +386,7 @@ const VendorDashboard = () => {
           </div>
         </section>
 
-        <section className="space-y-2 pb-4 px-0.5">
+        <section className="space-y-1 pb-0 px-0.5">
           <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80 uppercase">Recent Payments</h2>
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm overflow-hidden">
             {recentTransactions.length === 0 ? (
@@ -422,7 +425,7 @@ const VendorDashboard = () => {
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter opacity-60">
                         {transaction.paymentMethod || transaction.paymentGateway || 'system'}
                       </span>
-                      <ChevronRight size={10} className="text-slate-300" />
+                      <ChevronRight size={10} className="text-blue-500/30" />
                     </div>
                   </div>
                 </div>
