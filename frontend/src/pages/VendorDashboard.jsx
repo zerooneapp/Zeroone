@@ -212,7 +212,7 @@ const VendorDashboard = () => {
         </section>
 
         <section className="px-0.5">
-          <div className="grid grid-cols-4 gap-1.5 pb-0">
+          <div className="grid gap-1.5 pb-0" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 0.85fr' }}>
             <div className="bg-slate-900 dark:bg-gray-900 py-2.5 px-1.5 rounded-lg shadow-lg border border-[#1C2C4E]/10 flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-white/50 tracking-widest leading-none mb-1.5 truncate">Today revenue</p>
               <p className="text-[17px] font-black text-white leading-none truncate">₹{data.stats.todayEarnings.toLocaleString()}</p>
