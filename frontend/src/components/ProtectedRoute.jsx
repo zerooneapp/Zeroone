@@ -3,19 +3,26 @@ import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { isAuthenticated, role, vendorStatus, loading, isInitialized } = useAuthStore();
+  const { isAuthenticated, role, vendorStatus, loading, isInitialized, user } = useAuthStore();
   const location = useLocation();
 
-  if (!isInitialized || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-alabaster dark:bg-onyx">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  // Optimistic Rendering: Wait if not initialized, UNLESS we already have complete cached auth state
+  if (!isInitialized) {
+    if (!isAuthenticated || !user) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-alabaster dark:bg-onyx">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      );
+    }
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const isBusinessArea = ['/vendor', '/staff', '/admin'].some((prefix) =>
+      location.pathname.startsWith(prefix)
+    );
+    const loginPath = isBusinessArea ? '/vendor-login' : '/login';
+    return <Navigate to={loginPath} state={{ from: location }} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {

@@ -281,6 +281,22 @@ const VendorWallet = () => {
           </div>
           <Wallet size={80} className="absolute -right-4 -bottom-4 text-white/5 -rotate-12" />
         </div>
+
+        {wallet?.isLowBalanceWarning && wallet?.subscription?.isActive && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-3 mx-1 p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-3 shadow-sm"
+          >
+            <AlertCircle className="text-amber-500 mt-0.5 shrink-0" size={16} />
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Low Balance Warning</p>
+              <p className="text-[10px] font-bold text-amber-500/80 leading-relaxed uppercase tracking-tight">
+                Your balance is close to the limit. Add ₹{Math.ceil(wallet.recommendedTopup)} to avoid service pause tomorrow.
+              </p>
+            </div>
+          </motion.div>
+        )}
       </header>
 
       <main className="px-3 mt-3.5 space-y-4">
@@ -425,6 +441,9 @@ const VendorWallet = () => {
                   <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase mt-1">
                     {moneyFormatter.format(dailyPlan?.price || 0)} / day
                   </h3>
+                  {dailyPlan?.gstPercent > 0 && (
+                    <p className="text-[7.5px] font-bold text-amber-500 uppercase mt-1 tracking-widest">Includes {dailyPlan.gstPercent}% GST</p>
+                  )}
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                   <Wallet size={16} />
@@ -448,6 +467,9 @@ const VendorWallet = () => {
                   <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase mt-1">
                     {moneyFormatter.format(monthlyPlan?.price || 0)} / 30 days
                   </h3>
+                  {monthlyPlan?.gstPercent > 0 && (
+                    <p className="text-[7.5px] font-bold text-amber-500 uppercase mt-1 tracking-widest">Includes {monthlyPlan.gstPercent}% GST</p>
+                  )}
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
                   <Crown size={16} />
@@ -517,6 +539,9 @@ const VendorWallet = () => {
                       <div>
                         <p className="text-[9px] font-black text-gray-900 dark:text-white uppercase truncate max-w-[150px]">
                           {prettifyLabel(transaction.category || transaction.reason || 'Transaction')}
+                        </p>
+                        <p className="text-[7.5px] font-bold text-gray-400 leading-none mb-1">
+                          {transaction.description || 'System transaction'}
                         </p>
                         <p className="text-[7px] font-bold text-gray-400">
                           {dayjs(transaction.timestamp).format('DD MMM, hh:mm A')}

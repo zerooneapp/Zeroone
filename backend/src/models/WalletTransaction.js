@@ -8,7 +8,7 @@ const transactionSchema = new mongoose.Schema({
   reason: { type: String },
   category: {
     type: String,
-    enum: ['wallet_topup', 'daily_subscription', 'monthly_subscription', 'admin_topup'],
+    enum: ['wallet_topup', 'daily_subscription', 'monthly_subscription', 'admin_topup', 'booking_revenue'],
     default: 'wallet_topup'
   },
   status: {

@@ -20,12 +20,21 @@ const StaffCard = ({ staff, onToggle, onEdit }) => {
       </div>
 
       <div className="flex-1 min-w-0">
-         <h3 className="font-black text-gray-900 dark:text-white truncate tracking-tight">{staff.name}</h3>
-         <div className="flex flex-col gap-1 mt-1">
-            <p className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400">
+         <div className="flex items-center gap-2">
+            <h3 className="font-black text-gray-900 dark:text-white truncate tracking-tight">{staff.name}</h3>
+            {staff.totalEarnings > 0 && (
+               <div className="bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-tighter whitespace-nowrap">
+                  ₹{staff.totalEarnings.toLocaleString()} Earned
+               </div>
+            )}
+         </div>
+         <p className="text-[9px] font-bold text-gray-400 capitalize tracking-tight leading-none mt-0.5">{staff.designation || 'Staff Member'}</p>
+         
+         <div className="flex flex-col gap-1 mt-2">
+            <p className="flex items-center gap-1.5 text-[9px] font-bold text-gray-400 opacity-60">
                <Phone size={10} /> {staff.phone}
             </p>
-            <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase overflow-hidden">
+            <div className="flex items-center gap-1.5 text-[9px] font-black text-primary uppercase overflow-hidden">
                <Scissors size={10} /> 
                <span className="truncate">
                   {staff.services?.map(s => s.name).join(', ') || 'No skills assigned'}

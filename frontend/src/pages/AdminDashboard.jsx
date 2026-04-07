@@ -17,20 +17,33 @@ const AdminDashboard = () => {
    const [loading, setLoading] = useState(true);
    const [chartRange, setChartRange] = useState('7d');
 
-   const fetchDashboard = async () => {
+   const fetchDashboard = async (showLoading = true) => {
       try {
-         setLoading(true);
+         if (showLoading) setLoading(true);
          const res = await api.get(`/admin/dashboard?range=${chartRange}`);
          setData(res.data);
       } catch (err) {
          toast.error('Failed to load dashboard data');
       } finally {
-         setLoading(false);
+         if (showLoading) setLoading(false);
       }
    };
 
    useEffect(() => {
-      fetchDashboard();
+      fetchDashboard(true);
+
+      // 🛰️ AUTO-PULSE: Listen for system-wide events to refresh stats live
+      const handleAdminSocketEvent = (e) => {
+         const notification = e.detail;
+         // Refresh for critical platform events
+         const criticalTypes = ['NEW_BOOKING', 'BOOKING_COMPLETED', 'VENDOR_SIGNUP', 'LOW_BALANCE', 'NEW_REVIEW'];
+         if (criticalTypes.includes(notification?.type)) {
+            fetchDashboard(false); // Silent refresh (No pulse loader)
+         }
+      };
+
+      window.addEventListener('new-socket-notification', handleAdminSocketEvent);
+      return () => window.removeEventListener('new-socket-notification', handleAdminSocketEvent);
    }, [chartRange]);
 
    const handleVendorAction = async (id, action) => {

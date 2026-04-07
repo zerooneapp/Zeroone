@@ -97,8 +97,7 @@ export const useAuthStore = create(
             serviceLevel: 'standard'
           }
         });
-        localStorage.removeItem('auth-storage');
-        localStorage.removeItem('token');
+        localStorage.clear(); // Nuclear clear for all local states
       },
 
       syncVendorStatus: async () => {
@@ -119,14 +118,16 @@ export const useAuthStore = create(
       },
 
       restoreSession: async () => {
-        const { token } = get();
+        const { token, user } = get();
         if (!token) {
-          set({ isInitialized: true });
+          set({ isInitialized: true, loading: false });
           return;
         }
 
         try {
-          set({ loading: true });
+          // If no cached user, show loading. Otherwise do silent background refresh!
+          if (!user) set({ loading: true });
+          
           const res = await api.get('/auth/me');
           // res.data IS the user object directly (not res.data.user)
           set({
@@ -163,7 +164,13 @@ export const useAuthStore = create(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ token: state.token, role: state.role, isAuthenticated: state.isAuthenticated })
+      partialize: (state) => ({ 
+        token: state.token, 
+        role: state.role, 
+        isAuthenticated: state.isAuthenticated,
+        user: state.user,
+        vendorStatus: state.vendorStatus
+      })
     }
   )
 );

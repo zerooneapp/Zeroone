@@ -6,15 +6,16 @@ import ReviewPopup from '../components/ReviewPopup';
 import NotificationDrawer from '../components/NotificationDrawer';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
+import useSocket from '../hooks/useSocket';
 
 const MainLayout = () => {
-  const { role, isAuthenticated } = useAuthStore();
+  const { role, isAuthenticated, user } = useAuthStore();
+  useSocket(user?._id);
   const [unreviewed, setUnreviewed] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
   const shouldHideHeader = ['/account', '/booking-status', '/cart', '/checkout-review', '/booking-success', '/service', '/favorites', '/bookings']
     .some(path => location.pathname.startsWith(path));
-
   const checkUnreviewed = async () => {
     if (!isAuthenticated || role !== 'customer') return;
     try {

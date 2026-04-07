@@ -76,11 +76,24 @@ function App() {
 
   useEffect(() => {
     restoreSession();
+    
+    // Smooth Session Expiration Handler
+    const handleUnauthorized = () => {
+      useAuthStore.getState().logout();
+      // Toast notification for user clarity
+      toast.error('Session expired, please log in again.');
+    };
+    window.addEventListener('auth-unauthorized', handleUnauthorized);
+
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    return () => {
+      window.removeEventListener('auth-unauthorized', handleUnauthorized);
+    };
   }, [isDarkMode, restoreSession]);
 
   return (

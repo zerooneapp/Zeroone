@@ -10,17 +10,31 @@ import { useThemeStore } from '../store/themeStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import useNotificationStore from '../store/notificationStore';
+import useSocket from '../hooks/useSocket';
 import Navbar from '../layouts/Navbar';
 import NotificationDrawer from '../components/NotificationDrawer';
 
 const StaffDashboard = () => {
    const { user, logout } = useAuthStore();
    const { isDarkMode, toggleTheme } = useThemeStore();
+   const { unreadCount, fetchNotifications } = useNotificationStore();
+   useSocket(user?._id);
 
    const [bookings, setBookings] = useState([]);
    const [loading, setLoading] = useState(true);
    const [showNotifications, setShowNotifications] = useState(false);
-   const [unreadCount, setUnreadCount] = useState(0);
+
+   const handleStatusUpdate = async (bookingId, action) => {
+      if (action === 'complete' && !window.confirm('Mark this booking as completed?')) return;
+      try {
+         await api.patch(`/bookings/${bookingId}/status`, { action });
+         toast.success(`Booking updated successfully!`);
+         fetchBookings();
+      } catch (err) {
+         toast.error('Failed to update status');
+      }
+   };
 
    const fetchBookings = async (showLoading = true) => {
       try {
@@ -29,9 +43,7 @@ const StaffDashboard = () => {
          // 🚀 QUEUE LOGIC: Keep it sorted by time for "Immediate Next" delivery
          const sorted = (res.data || []).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
          setBookings(sorted);
-
-         const notifRes = await api.get('/notifications/unread-count');
-         setUnreadCount(notifRes.data.count);
+         fetchNotifications(); // Sync global unread count
       } catch (err) {
          console.error('Core sync failed');
       } finally {
@@ -41,27 +53,17 @@ const StaffDashboard = () => {
 
    useEffect(() => {
       fetchBookings(true);
-      const interval = setInterval(() => fetchBookings(false), 60000);
-      return () => clearInterval(interval);
+      
+      // Real-time Event Listener: Listen for NEW_NOTIFICATION from socket to auto-refresh queue
+      const handleGlobalEvent = (e) => {
+         if (e.detail?.type === 'ASSIGNMENT_RECEIVED' || e.detail?.type === 'NEW_BOOKING') {
+            fetchBookings(false);
+         }
+      };
+      
+      window.addEventListener('new-socket-notification', handleGlobalEvent);
+      return () => window.removeEventListener('new-socket-notification', handleGlobalEvent);
    }, []);
-
-   const handleComplete = async (bookingId) => {
-      try {
-         await api.patch(`/bookings/${bookingId}/status`, { action: 'complete' });
-         toast.success('Job completed!');
-         // 🔄 REAL-TIME QUEUE: Background sync for zero-flicker transition
-         fetchBookings(false);
-      } catch (err) {
-         toast.error('Failed to complete job');
-      }
-   };
-
-   const isContactVisible = (startTime) => {
-      const now = new Date();
-      const start = new Date(startTime);
-      const diffInMinutes = (start - now) / (1000 * 60);
-      return diffInMinutes <= 30;
-   };
 
    // 🎯 CORE LOGIC: Find the single most immediate CONFIRMED task
    const currentTask = bookings.find(b => b.status === 'confirmed' || b.status === 'assigned');
@@ -107,17 +109,17 @@ const StaffDashboard = () => {
             <div className="grid grid-cols-2 gap-2.5">
                <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
                   <p className="text-[16px] font-black text-slate-900 dark:text-white leading-none">{todayCompleted}</p>
-                  <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
+                  <div className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Today Done
-                  </p>
+                  </div>
                </div>
                <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
                   <p className="text-[16px] font-black text-slate-900 dark:text-white leading-none">
                      {bookings.filter(b => b.status === 'confirmed' || b.status === 'assigned').length}
                   </p>
-                  <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
+                  <div className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
                      <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Remainder
-                  </p>
+                  </div>
                </div>
             </div>
 
@@ -139,7 +141,7 @@ const StaffDashboard = () => {
                               </div>
                               <div className="leading-none">
                                  <h4 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[140px]">{currentTask.userId?.name || 'Client'}</h4>
-                                 <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-2 italic shadow-sm">{formatTime(currentTask.startTime)}</p>
+                                 <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-2 shadow-sm">{formatTime(currentTask.startTime)}</p>
                               </div>
                            </div>
                            <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-95 transition-all">
@@ -156,6 +158,26 @@ const StaffDashboard = () => {
                            ))}
                         </div>
 
+                        {/* 📍 LOCATION AWARENESS */}
+                        <div className="flex items-center justify-between mb-4">
+                           <div className="flex items-center gap-2">
+                              <MapPin size={12} className="text-gray-400" />
+                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[170px]">
+                                 {currentTask.serviceAddress || 'Shop Service'}
+                              </p>
+                           </div>
+                           {currentTask.serviceAddress && (
+                              <a 
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[9px] font-black text-primary uppercase tracking-widest underline decoration-dotted"
+                              >
+                                Navigate
+                              </a>
+                           )}
+                        </div>
+
                         {/* 💰 SERVICE PRICE DISPLAY */}
                         <div className="flex items-center justify-between mb-5 bg-slate-50/50 dark:bg-gray-800/50 p-3 rounded-xl border border-slate-50 dark:border-gray-800/50">
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Service Price</p>
@@ -164,8 +186,8 @@ const StaffDashboard = () => {
                            </p>
                         </div>
 
-                        <div className="grid grid-cols-4 gap-2.5">
-                           {isContactVisible(currentTask.startTime) ? (
+                        <div className="grid grid-cols-5 gap-2.5">
+                           {currentTask.canContact ? (
                               <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
                                  <Phone size={18} strokeWidth={3} />
                               </a>
@@ -175,9 +197,24 @@ const StaffDashboard = () => {
                               </div>
                            )}
 
+                           {currentTask.serviceAddress && (
+                              <a 
+                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="h-11 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10"
+                              >
+                                 <MapPin size={18} strokeWidth={3} />
+                              </a>
+                           )}
+
                            <button
-                              onClick={() => handleComplete(currentTask._id)}
-                              className="col-span-3 h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10"
+                              onClick={() => {
+                                 if (window.confirm('Are you sure the service is fully completed? This will release revenue to the vendor.')) {
+                                    handleStatusUpdate(currentTask._id, 'complete');
+                                 }
+                              }}
+                              className={`${currentTask.serviceAddress ? 'col-span-3' : 'col-span-4'} h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10`}
                            >
                               <CheckCircle size={16} strokeWidth={3} />
                               Complete Job

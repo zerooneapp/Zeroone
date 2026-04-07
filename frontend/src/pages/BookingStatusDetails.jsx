@@ -14,23 +14,33 @@ const BookingStatusDetails = () => {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
 
-  const fetchDetails = async () => {
+  const fetchDetails = async (showLoading = true) => {
     try {
-      setLoading(true);
-      // We could use GET /api/bookings/:id but getMyBookings returns all. 
-      // For precision, let's assume we have a single fetch or use the main list.
+      if (showLoading) setLoading(true);
       const res = await api.get('/bookings/my');
       const found = res.data.find(b => b._id === id);
       setBooking(found);
     } catch (err) {
       toast.error('Failed to load details');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDetails();
+    fetchDetails(true);
+
+    // 🚀 LIVE SYNC: Listen for real-time status updates from vendor
+    const handleStatusUpdateEvent = (e) => {
+      const notification = e.detail;
+      // If notification is about THIS booking, refresh details immediately
+      if (notification?.data?.bookingId === id) {
+        fetchDetails(false);
+      }
+    };
+
+    window.addEventListener('new-socket-notification', handleStatusUpdateEvent);
+    return () => window.removeEventListener('new-socket-notification', handleStatusUpdateEvent);
   }, [id]);
 
   const handleCancel = async () => {
@@ -39,7 +49,7 @@ const BookingStatusDetails = () => {
       setCancelling(true);
       await api.patch(`/bookings/${id}/status`, { action: 'cancel' });
       toast.success('Booking cancelled successfully');
-      fetchDetails();
+      fetchDetails(false);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Cancellation failed');
     } finally {

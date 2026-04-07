@@ -5,8 +5,11 @@ import { RiHomeHeartFill, RiTeamFill } from 'react-icons/ri';
 import { IoPersonCircleSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
 
+import useSocket from '../hooks/useSocket';
+
 const VendorLayout = () => {
-  const { role } = useAuthStore();
+  const { role, user } = useAuthStore();
+  useSocket(user?._id);
   const location = useLocation();
   const navigate = useNavigate();
 

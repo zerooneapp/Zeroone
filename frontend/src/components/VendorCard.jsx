@@ -61,7 +61,22 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
               <span className="text-[11px] font-bold text-[#1C2C4E] dark:text-gray-300 truncate flex-shrink">
                  {vendor.service || 'Service'}
               </span>
-              <p className="text-[13px] font-black text-[#1C2C4E] dark:text-white whitespace-nowrap">₹{vendor.price || '120'}</p>
+               <div className="flex flex-col items-start gap-0.5">
+                  <div className="flex items-center gap-1.5 leading-none">
+                     <p className="text-[14px] font-black text-[#1C2C4E] dark:text-white whitespace-nowrap">
+                        ₹{vendor.discountedPrice || vendor.price || '120'}
+                     </p>
+                     {vendor.discountedPrice && (
+                        <span className="text-[10px] font-bold text-gray-400 line-through">₹{vendor.price}</span>
+                     )}
+                  </div>
+                  {vendor.offerLabel && (
+                     <div className="flex items-center gap-1 bg-red-500 rounded-md px-1 py-0.5 shadow-sm shadow-red-500/10">
+                        <Tag size={6} className="text-white fill-white" />
+                        <span className="text-[7.5px] font-black text-white uppercase tracking-wider">{vendor.offerLabel}</span>
+                     </div>
+                  )}
+               </div>
               {vendor.serviceCount > 1 && (
                 <span className="text-[8px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 px-1.5 py-0.5 rounded-lg uppercase tracking-tighter shrink-0">
                   + {vendor.serviceCount - 1}

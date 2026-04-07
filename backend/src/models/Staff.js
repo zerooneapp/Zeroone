@@ -7,6 +7,7 @@ const staffSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   password: { type: String },
   role: { type: String, default: 'staff' },
+  designation: { type: String, default: 'Staff' },
   image: { type: String },
   services: {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Service' }],
@@ -37,5 +38,7 @@ staffSchema.methods.comparePassword = async function(enteredPassword) {
 };
 
 staffSchema.index({ vendorId: 1 });
+staffSchema.index({ vendorId: 1, isOwner: 1 }, { unique: true, partialFilterExpression: { isOwner: true } });
+staffSchema.index({ vendorId: 1, phone: 1 }, { unique: true });
 
 module.exports = mongoose.model('Staff', staffSchema);

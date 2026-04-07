@@ -46,9 +46,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      // Clear the basic token to prevent looping, but rely on the main store for full cleanup
       localStorage.removeItem('token');
-      localStorage.removeItem('auth-storage');
-      window.location.href = buildLoginRedirect();
+      window.dispatchEvent(new Event('auth-unauthorized'));
     }
     return Promise.reject(error);
   }

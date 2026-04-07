@@ -52,6 +52,78 @@ const initCronJobs = () => {
       }
     } catch (error) { console.error('Reminder Cron Error:', error); }
   }, { timezone: "Asia/Kolkata" });
+
+  // 3. Auto-sync Shop Working Hours (Every minute precise check)
+  cron.schedule('* * * * *', async () => {
+    try {
+      const now = moment().tz('Asia/Kolkata');
+      const timeStrPad = now.format('hh:mm A'); // "09:00 AM"
+      const timeStrNoPad = now.format('h:mm A'); // "9:00 AM"
+      const timeStrMilitary = now.format('HH:mm'); // "21:00" or "09:00"
+
+      // 🌅 AUTO-OPEN at workingHours.start
+      const startMatchVendors = await Vendor.find({
+        isShopOpen: false,
+        'workingHours.start': { $in: [timeStrPad, timeStrNoPad, timeStrMilitary] }
+      });
+      
+      for (const v of startMatchVendors) {
+         v.isShopOpen = true; 
+         v.isClosedToday = false; // Fresh start for the day
+         await v.save();
+      }
+
+      // 🌃 AUTO-CLOSE at workingHours.end
+      const endMatchVendors = await Vendor.find({
+        isShopOpen: true,
+        'workingHours.end': { $in: [timeStrPad, timeStrNoPad, timeStrMilitary] }
+      });
+
+      for (const v of endMatchVendors) {
+         v.isShopOpen = false;
+         await v.save();
+      }
+
+    } catch (error) { console.error('Shop Status Cron Error:', error); }
+  }, { timezone: "Asia/Kolkata" });
+
+  // 4. Subscription Expiry Reminders (10:00 AM Daily)
+  cron.schedule('0 10 * * *', async () => {
+    console.log('--- Expiry Reminder Cron ---');
+    try {
+      const now = moment().tz('Asia/Kolkata');
+      const monthlyVendors = await Vendor.find({ 
+        planType: 'monthly', 
+        status: 'active',
+        expiryDate: { $exists: true } 
+      });
+
+      for (const vendor of monthlyVendors) {
+        const expiry = moment(vendor.expiryDate).tz('Asia/Kolkata');
+        const diffDays = Math.ceil(expiry.diff(now, 'hours') / 24);
+
+        if (diffDays === 2) {
+          await NotificationService.sendNotification({
+            userIds: vendor.ownerId,
+            role: 'vendor',
+            type: 'SUBSCRIPTION_EXPIRY_WARNING',
+            title: '48H Expiry Warning',
+            message: `Your Monthly Subscription will expire in 48 hours. Maintain sufficient balance for the upcoming daily billing cycle to stay live.`,
+            referenceId: `EXP_48H_${vendor._id}_${expiry.format('YYYYMMDD')}`
+          });
+        } else if (diffDays === 1) {
+          await NotificationService.sendNotification({
+            userIds: vendor.ownerId,
+            role: 'vendor',
+            type: 'SUBSCRIPTION_EXPIRY_FINAL',
+            title: 'Final Reminder: Expiry Tomorrow',
+            message: `Your subscription ends tomorrow. To avoid service interruptions, please recharge your wallet for daily mode or renew your monthly plan.`,
+            referenceId: `EXP_24H_${vendor._id}_${expiry.format('YYYYMMDD')}`
+          });
+        }
+      }
+    } catch (error) { console.error('Expiry Cron Error:', error); }
+  }, { timezone: "Asia/Kolkata" });
 };
 
 module.exports = { initCronJobs };

@@ -1,5 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const { emitNotification } = require('./socketService');
 
 const VALID_ROLES = new Set(['customer', 'vendor', 'staff', 'admin']);
 
@@ -77,7 +78,10 @@ class NotificationService {
         });
         notifications.push(notif);
         
-        // 2. Dispatch Push (Async - Don't await)
+        // 2. Dispatch Real-time (Socket.io)
+        emitNotification(recipient.userId, notif);
+        
+        // 3. Dispatch Push (Async - Don't await)
         if (!isSilent) {
           this._dispatchPush(recipient.userId, {
             notification: { title, body: message },

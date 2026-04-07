@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Vendor = require('../models/Vendor');
 const Service = require('../models/Service');
 const User = require('../models/User');
@@ -151,19 +152,26 @@ const getNearbyVendors = async (req, res) => {
     const discoveryRadius = parseInt(process.env.VENDOR_DISCOVERY_RADIUS, 10) || 10000;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    const filter = {
-      status: 'active',
-      isActive: true,
-      location: {
-        $near: {
-          $geometry: { type: 'Point', coordinates: [parsedLng, parsedLat] },
-          $maxDistance: discoveryRadius
+    // 🚀 AGGREGATION PIPELINE: High-Performance Geospatial Search
+    const pipeline = [
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [parsedLng, parsedLat] },
+          distanceField: 'dist.calculated',
+          maxDistance: discoveryRadius,
+          query: { status: 'active', isActive: true },
+          spherical: true
         }
       }
-    };
+    ];
 
-    if (category) filter.category = { $in: category.split(',') };
+    // Filter by Category
+    if (category) {
+      const catIds = category.split(',').map(id => new mongoose.Types.ObjectId(id));
+      pipeline.push({ $match: { category: { $in: catIds } } });
+    }
 
+    // Search Logic: Intelligent Matching
     if (search) {
       const matchingServices = await Service.find({
         name: { $regex: search, $options: 'i' },
@@ -171,40 +179,86 @@ const getNearbyVendors = async (req, res) => {
       }).select('vendorId');
 
       const vendorIds = matchingServices.map(s => s.vendorId);
-      filter.$or = [
-        { shopName: { $regex: search, $options: 'i' } },
-        { _id: { $in: vendorIds } }
-      ];
+      pipeline.push({
+        $match: {
+          $or: [
+            { shopName: { $regex: search, $options: 'i' } },
+            { _id: { $in: vendorIds } }
+          ]
+        }
+      });
     }
 
-    // Execute query with pagination
-    const vendors = await Vendor.find(filter)
-      .populate('category', 'name')
-      .skip(skip)
-      .limit(parseInt(limit))
-      .lean();
+    // Pagination
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: parseInt(limit) });
 
-    // Enrich with minPrice and specific services
+    // Lookup Category and Services
+    pipeline.push(
+      { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
+      { $unwind: '$category' }
+    );
+
+    const vendors = await Vendor.aggregate(pipeline);
+
+    // Enrich with Intelligent Service Selection & Offers
     const enrichedVendors = await Promise.all(vendors.map(async (v) => {
       const allServices = await Service.find({ vendorId: v._id, isActive: true })
-        .select('_id name price image images')
-        .sort({ price: 1 });
-      const services = allServices.slice(0, 1);
-      const [vendorLng, vendorLat] = v.location?.coordinates || [];
-      const hasCoordinates = Number.isFinite(vendorLat) && Number.isFinite(vendorLng);
-      const calculatedDistance = hasCoordinates
-        ? Math.round(calculateDistanceInMeters(parsedLat, parsedLng, vendorLat, vendorLng))
-        : null;
+        .select('_id name price image images duration')
+        .sort({ price: 1 })
+        .lean();
+
+      // 🧠 SEARCH INTELLIGENCE: Find the service that matches the search query best
+      let primaryService = allServices[0];
+      if (search) {
+        const matched = allServices.find(s => s.name.toLowerCase().includes(search.toLowerCase()));
+        if (matched) primaryService = matched;
+      }
+
+      // 🎁 CALCULATE DISCOUNTS (Same logic as before but applied to primaryService)
+      const activeOffers = await Offer.find({ 
+        vendorId: v._id, 
+        isActive: true,
+        $or: [{ expiryDate: { $gt: new Date() } }, { expiryDate: null }]
+      });
+
+      const mainPrice = primaryService?.price || 0;
+      let discountedPrice = mainPrice;
+      let offerLabel = '';
+
+      if (activeOffers.length > 0) {
+        const applicableOffers = activeOffers.filter(o => 
+          (!o.serviceIds || o.serviceIds.length === 0 || o.serviceIds.includes(primaryService?._id)) &&
+          (mainPrice >= (o.minPurchaseAmount || 0))
+        );
+
+        if (applicableOffers.length > 0) {
+          const bestOffer = applicableOffers.reduce((prev, curr) => {
+            let prevD = prev.discountType === 'percentage' ? (mainPrice * prev.value / 100) : prev.value;
+            let currD = curr.discountType === 'percentage' ? (mainPrice * curr.value / 100) : curr.value;
+            return currD > prevD ? curr : prev;
+          });
+
+          let reduction = bestOffer.discountType === 'percentage' ? (mainPrice * bestOffer.value / 100) : bestOffer.value;
+          if (bestOffer.maxDiscountLimit > 0) reduction = Math.min(reduction, bestOffer.maxDiscountLimit);
+          discountedPrice = Math.max(0, mainPrice - reduction);
+          offerLabel = bestOffer.discountType === 'percentage' ? `${bestOffer.value}% OFF` : `₹${bestOffer.value} OFF`;
+        }
+      }
 
       return buildPublicVendorResponse(v, {
-        dist: calculatedDistance === null ? undefined : { calculated: calculatedDistance },
-        service: services[0]?.name || 'Beauty Service',
-        price: services[0]?.price || 0,
-        serviceImage: services[0]?.image || services[0]?.images?.[0] || '',
+        dist: v.dist,
+        service: primaryService?.name || 'Beauty Service',
+        price: mainPrice,
+        discountedPrice: discountedPrice < mainPrice ? Math.round(discountedPrice) : null,
+        offerLabel,
+        serviceImage: primaryService?.image || primaryService?.images?.[0] || '',
         serviceCount: allServices.length,
         services: allServices
       });
     }));
+
+    res.json(enrichedVendors);
 
     // 🚀 ENGAGEMENT TRACKING: Increment profileViews (Throttled)
     const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress;
@@ -283,7 +337,7 @@ const getVendorBookings = async (req, res) => {
     }
 
     const bookings = await Booking.find(filter)
-      .populate('userId', 'name phone')
+      .populate('userId', 'name phone image')
       .populate('staffId', 'name')
       .sort({ startTime: -1 });
 
@@ -293,9 +347,11 @@ const getVendorBookings = async (req, res) => {
       const startTime = moment(doc.startTime).tz('Asia/Kolkata');
       const bufferTime = startTime.clone().subtract(30, 'minutes');
 
+      const endTime = moment(doc.endTime).tz('Asia/Kolkata');
+
       // SOP Level Flags
       doc.canCancel = !now.isSameOrAfter(bufferTime) && doc.status === 'confirmed';
-      doc.canContact = now.isSameOrAfter(bufferTime) && doc.status === 'confirmed' && now.isBefore(startTime);
+      doc.canContact = now.isSameOrAfter(bufferTime) && doc.status === 'confirmed' && now.isBefore(endTime);
 
       return doc;
     });
@@ -355,6 +411,7 @@ const getVendorDashboard = async (req, res) => {
       rating: vendor.rating,
       isShopOpen: vendor.isShopOpen,
       isClosedToday: vendor.isClosedToday,
+      workingHours: vendor.workingHours,
       walletBalance: vendor.walletBalance,
       minimumWalletThreshold: billingSettings.minWalletThreshold || 100,
       subscription: {
@@ -439,19 +496,27 @@ const getVendorDetail = async (req, res) => {
       isActive: true
     }).populate('category', 'name').lean();
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
-    res.status(200).json(buildPublicVendorResponse(vendor));
+    // Enrich vendor detail with current offers
+    const activeOffers = await Offer.find({ 
+      vendorId: vendor._id, 
+      isActive: true,
+      $or: [{ expiryDate: { $gt: new Date() } }, { expiryDate: null }]
+    });
+
+    res.status(200).json(buildPublicVendorResponse(vendor, { activeOffers }));
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
 const updateShopProfile = async (req, res) => {
   try {
-    const { workingHours, shopName, address } = req.body;
+    const { workingHours, shopName, address, location } = req.body;
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
     if (workingHours) vendor.workingHours = workingHours;
     if (shopName) vendor.shopName = shopName;
     if (address) vendor.address = address;
+    if (location) vendor.location = location;
 
     await vendor.save();
     res.status(200).json(vendor);
@@ -476,9 +541,42 @@ const createWalkIn = async (req, res) => {
       totalDuration: totalDuration || 30,
       startTime: startTime || new Date(),
       endTime: moment(startTime || new Date()).add(totalDuration || 30, 'minutes').toDate(),
-      status: 'completed', // Walk-ins are usually marked as completed immediately
+      status: 'completed',
       type: 'shop'
     });
+
+    // 💰 WALLET INTEGRATION: Credit vendor for direct walk-in
+    if (totalPrice > 0) {
+      vendor.walletBalance = (vendor.walletBalance || 0) + totalPrice;
+      await vendor.save();
+
+      const WalletTransaction = require('../models/WalletTransaction');
+      await WalletTransaction.create({
+        vendorId: vendor._id,
+        initiatedByUserId: req.user._id,
+        amount: totalPrice,
+        type: 'credit',
+        category: 'booking_revenue',
+        reason: 'Walk-in service completed',
+        status: 'completed',
+        referenceId: `${booking._id}_WALK_REV`,
+        description: `Direct revenue from Walk-in #${booking._id.toString().slice(-6).toUpperCase()}`
+      });
+    }
+
+    // 👨‍🔧 STAFF NOTIFICATION: Alert the professional about their immediate Walk-in
+    const staff = await Staff.findById(booking.staffId);
+    if (staff && getStaffNotificationTarget(staff)) {
+      await NotificationService.sendNotification({
+        userIds: getStaffNotificationTarget(staff),
+        role: 'staff',
+        type: 'STAFF_ASSIGNED',
+        title: 'New Assignment (Walk-in)',
+        message: `New Walk-in client: ${name}. Services: ${booking.services.map(s => s.name).join(', ')}.`,
+        data: { bookingId: booking._id },
+        referenceId: `${booking._id}_WALK_ASSIGN`
+      });
+    }
 
     res.status(201).json(booking);
   } catch (error) {
@@ -493,7 +591,7 @@ const createManualBooking = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
     const vendorId = vendor._id;
 
-    if (!name || !serviceIds || !staffId || !startTime) {
+    if (!name || !sIds || !staffId || !startTime) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -527,6 +625,20 @@ const createManualBooking = async (req, res) => {
       type: type || 'shop',
       status: 'confirmed'
     });
+
+    // 👨‍🔧 STAFF NOTIFICATION: Alert the professional about their new Manual Booking
+    const staff = await Staff.findById(staffId);
+    if (staff && getStaffNotificationTarget(staff)) {
+      await NotificationService.sendNotification({
+        userIds: getStaffNotificationTarget(staff),
+        role: 'staff',
+        type: 'STAFF_ASSIGNED',
+        title: 'New Dashboard Assignment',
+        message: `New manual booking for ${name}. Services: ${services.map(s => s.name).join(', ')}.`,
+        data: { bookingId: booking._id },
+        referenceId: `${booking._id}_MANUAL_ASSIGN`
+      });
+    }
 
     res.status(201).json(booking);
   } catch (error) {

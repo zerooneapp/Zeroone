@@ -35,13 +35,6 @@ const StaffBookings = () => {
     fetchBookings();
   }, []);
 
-  const isContactVisible = (startTime) => {
-    const now = new Date();
-    const start = new Date(startTime);
-    const diffInMinutes = (start - now) / (1000 * 60);
-    return diffInMinutes <= 30; // ⚡ CONTACT LOGIC: Unlocks 30m before
-  };
-
   const filteredBookings = bookings.filter(b => {
     const isCorrectStatus = activeTab === 'upcoming' 
       ? (b.status === 'confirmed' || b.status === 'assigned') 
@@ -138,48 +131,78 @@ const StaffBookings = () => {
                              {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={20} />}
                            </div>
                            <div>
-                              <h3 className="text-sm font-black text-gray-900 dark:text-white leading-none">{booking.userId?.name || 'Client'}</h3>
+                              <h3 className="text-sm font-black text-gray-900 dark:text-white leading-none">
+                                 {booking.walkInCustomerName || booking.userId?.name || 'Client'}
+                              </h3>
                               <p className="text-[9px] font-black text-primary uppercase tracking-widest mt-1.5 flex items-center gap-1">
                                  <Clock size={10} /> {formatTime(booking.startTime)}
                               </p>
                            </div>
                         </div>
                         
-                        {/* 🔒 LOGIC RE-CONFIRMED: 30m Lock */}
-                        {isContactVisible(booking.startTime) ? (
-                           <a href={`tel:${booking.userId?.phone}`} className="p-3 bg-primary text-white rounded-xl shadow-lg shadow-primary/20">
+                        {/* 📞 SYNCED CONTACT: Uses Backend Permission */}
+                        {booking.canContact ? (
+                           <a href={`tel:${booking.userId?.phone}`} className="p-3 bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform">
                               <Phone size={18} />
                            </a>
                         ) : (
-                           <div className="p-3 bg-gray-50 dark:bg-gray-800 text-gray-300 rounded-xl border border-gray-100 dark:border-gray-800">
+                           <div className="p-3 bg-gray-50 dark:bg-gray-800 text-gray-300 rounded-xl border border-gray-100 dark:border-gray-800 opacity-40">
                               <Lock size={18} />
                            </div>
                         )}
                       </div>
 
-                      <div className="space-y-1.5 mb-5 px-1">
+                      <div className="space-y-3 mb-5 px-1">
                         <div className="space-y-1.5">
                           {booking.services?.map((s, idx) => (
-                            <div key={idx} className="text-[11px] font-bold text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                               <div className="w-1 h-1 bg-primary rounded-full shadow-[0_0_5px_var(--primary)]" />
+                            <div key={idx} className="text-[11px] font-bold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                               <div className="w-1 h-1 bg-primary/40 rounded-full" />
                                {s.name || s.serviceId?.name || 'Service Task'}
                             </div>
                           ))}
                         </div>
                         
-                        {/* 📍 NEW: LOCATION AWARENESS */}
-                        <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800 flex items-center gap-2">
-                           <MapPin size={12} className="text-gray-400" />
-                           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[200px]">
-                              {booking.serviceAddress || 'Vendor Shop'}
-                           </p>
+                        {/* 📊 ASSIGNMENT METRICS: Price & Duration */}
+                        <div className="flex items-center gap-4 py-2 border-y border-gray-50 dark:border-gray-800/30">
+                           <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-md bg-emerald-50 dark:bg-emerald-900/10 flex items-center justify-center text-emerald-600">
+                                 <span className="text-[10px] font-black italic select-none">₹</span>
+                              </div>
+                              <span className="text-[11px] font-black text-gray-700 dark:text-gray-300">₹{booking.totalPrice}</span>
+                           </div>
+                           <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600">
+                                 <Clock size={10} />
+                              </div>
+                              <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight">{booking.totalDuration} Mins</span>
+                           </div>
+                        </div>
+
+                        {/* 📍 LOCATION AWARENESS */}
+                        <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-2">
+                              <MapPin size={12} className="text-gray-400" />
+                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[170px]">
+                                 {booking.serviceAddress || 'Shop Service'}
+                              </p>
+                           </div>
+                           {booking.serviceAddress && (
+                              <a 
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.serviceAddress)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[9px] font-black text-primary uppercase tracking-widest underline decoration-dotted"
+                              >
+                                Navigate
+                              </a>
+                           )}
                         </div>
                       </div>
 
                       {activeTab === 'upcoming' && (
                         <button 
                           onClick={() => handleStatusUpdate(booking._id, 'complete')}
-                          className="w-full h-13 bg-gray-900 dark:bg-white text-white dark:text-black rounded-[1.25rem] flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-transform"
+                          className="w-full h-13 bg-gray-900 dark:bg-primary text-white rounded-[1.25rem] flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-transform"
                         >
                            <CheckCircle size={18} />
                            Finalize Assignment

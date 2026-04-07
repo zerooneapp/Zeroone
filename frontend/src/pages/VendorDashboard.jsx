@@ -35,6 +35,7 @@ import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import NotificationDrawer from '../components/NotificationDrawer';
 import CreateSlotModal from '../components/CreateSlotModal';
+import EmergencyClosureModal from '../components/EmergencyClosureModal';
 import { cn } from '../utils/cn';
 
 const prettifyTransactionLabel = (value = '') =>
@@ -51,6 +52,7 @@ const VendorDashboard = () => {
   const [showRetentionModal, setShowRetentionModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isCreateSlotOpen, setIsCreateSlotOpen] = useState(false);
+  const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
   const [showWalletValue, setShowWalletValue] = useState(false);
 
   const fetchDashboard = async () => {
@@ -99,6 +101,28 @@ const VendorDashboard = () => {
 
     const previousStatus = data.isShopOpen;
     const newStatus = !previousStatus;
+
+    // Check if we are toggling OFF during business hours => Trigger Emergency Closure
+    if (previousStatus === true) {
+      const now = dayjs();
+      const parseWorkingTime = (timeStr = '') => {
+        const [time, mod] = timeStr.split(' ');
+        let [h, m] = time.split(':').map(Number);
+        if (mod === 'PM' && h < 12) h += 12;
+        if (mod === 'AM' && h === 12) h = 0;
+        return h * 60 + m;
+      };
+
+      const startMin = parseWorkingTime(data.workingHours?.start);
+      const endMin = parseWorkingTime(data.workingHours?.end);
+      const nowMin = now.hour() * 60 + now.minute();
+
+      if (nowMin >= startMin && nowMin <= endMin) {
+        setIsClosureModalOpen(true);
+        return;
+      }
+    }
+
     setData((prev) => ({ ...prev, isShopOpen: newStatus }));
 
     try {
@@ -276,10 +300,12 @@ const VendorDashboard = () => {
                       <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
                         {item.customerName}
                       </h4>
-                      <div className="flex items-center gap-2 text-[8px] font-bold text-slate-400 tracking-widest">
-                        <span className="text-primary">{item.time}</span>
-                        <span className="opacity-20">•</span>
-                        <span className="truncate max-w-[80px]">{item.service}</span>
+                      <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
+                        <div className="flex items-center gap-1.5">
+                           <span className="text-primary uppercase">{item.time}</span>
+                           <span className="opacity-20">•</span>
+                           <span className="truncate max-w-[150px]">{item.service}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -354,6 +380,7 @@ const VendorDashboard = () => {
 
       <NotificationDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
       <CreateSlotModal isOpen={isCreateSlotOpen} onClose={() => setIsCreateSlotOpen(false)} onRefresh={fetchDashboard} />
+      <EmergencyClosureModal isOpen={isClosureModalOpen} onClose={() => setIsClosureModalOpen(false)} onCreated={fetchDashboard} />
     </div>
   );
 };

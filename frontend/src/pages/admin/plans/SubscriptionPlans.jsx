@@ -30,8 +30,12 @@ const SubscriptionPlans = () => {
     fetchPlans();
   }, []);
 
-  const handlePriceChange = (id, newPrice) => {
-    setPlans(prev => prev.map(p => p._id === id ? { ...p, price: Number(newPrice) } : p));
+  const handleFieldChange = (id, field, value) => {
+    setPlans(prev => prev.map(p => p._id === id ? { ...p, [field]: Number(value) } : p));
+  };
+
+  const handleGstChange = (level, value) => {
+    setPlans(prev => prev.map(p => p.level === level ? { ...p, gstPercent: Number(value) } : p));
   };
 
   const handleSave = async (level) => {
@@ -45,9 +49,9 @@ const SubscriptionPlans = () => {
     setSavingId(level);
     try {
       await Promise.all(levelPlans.map(p =>
-        api.patch(`/admin/plans/${p._id}`, { price: p.price })
+        api.patch(`/admin/plans/${p._id}`, { price: p.price, gstPercent: p.gstPercent || 0 })
       ));
-      toast.success(`${level.toUpperCase()} Pricing Updated 💰`);
+      toast.success(`${level.toUpperCase()} Pricing & Tax Updated 💰`);
     } catch (err) {
       toast.error(`Failed to update ${level} plans`);
       fetchPlans();
@@ -93,7 +97,8 @@ const SubscriptionPlans = () => {
             icon={ShieldCheck}
             color="emerald"
             planData={getPlanByLevelInfo('standard')}
-            onPriceChange={handlePriceChange}
+            onFieldChange={handleFieldChange}
+            onGstChange={(val) => handleGstChange('standard', val)}
             onSave={() => handleSave('standard')}
             isSaving={savingId === 'standard'}
           />
@@ -102,7 +107,8 @@ const SubscriptionPlans = () => {
             icon={Zap}
             color="blue"
             planData={getPlanByLevelInfo('premium')}
-            onPriceChange={handlePriceChange}
+            onFieldChange={handleFieldChange}
+            onGstChange={(val) => handleGstChange('premium', val)}
             onSave={() => handleSave('premium')}
             isSaving={savingId === 'premium'}
           />
@@ -111,7 +117,8 @@ const SubscriptionPlans = () => {
             icon={Crown}
             color="amber"
             planData={getPlanByLevelInfo('luxury')}
-            onPriceChange={handlePriceChange}
+            onFieldChange={handleFieldChange}
+            onGstChange={(val) => handleGstChange('luxury', val)}
             onSave={() => handleSave('luxury')}
             isSaving={savingId === 'luxury'}
           />
@@ -148,12 +155,15 @@ const SubscriptionPlans = () => {
   );
 };
 
-const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, isSaving }) => {
+const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChange, onSave, isSaving }) => {
   const colors = {
     emerald: "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20",
     blue: "text-blue-600 bg-blue-50 border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/20",
     amber: "text-amber-600 bg-amber-50 border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20"
   };
+
+  // We take gstPercent from monthly plan as the source of truth for the shared input
+  const gstPercent = planData.monthly?.gstPercent || planData.daily?.gstPercent || 0;
 
   return (
     <motion.div
@@ -187,7 +197,7 @@ const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, i
               type="number"
               className="w-full h-11 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[13px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none italic"
               value={planData.daily?.price || 0}
-              onChange={(e) => onPriceChange(planData.daily?._id, e.target.value)}
+              onChange={(e) => onFieldChange(planData.daily?._id, 'price', e.target.value)}
             />
           </div>
         </div>
@@ -204,7 +214,25 @@ const PlanCard = ({ level, icon: Icon, color, planData, onPriceChange, onSave, i
               type="number"
               className="w-full h-11 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[13px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none italic"
               value={planData.monthly?.price || 0}
-              onChange={(e) => onPriceChange(planData.monthly?._id, e.target.value)}
+              onChange={(e) => onFieldChange(planData.monthly?._id, 'price', e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* GST SETTING */}
+        <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-gray-800 border-dashed">
+          <div className="flex justify-between items-center px-1">
+            <span className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest opacity-80">GST Percentage (%)</span>
+            {gstPercent > 0 && <span className="text-[7.5px] font-black text-amber-500 uppercase italic leading-none">+Tax Applied</span>}
+          </div>
+          <div className="relative group/input">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[10px] group-focus-within/input:text-primary transition-colors italic">%</div>
+            <input
+              type="number"
+              className="w-full h-10 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[13px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none italic"
+              value={gstPercent}
+              onChange={(e) => onGstChange(e.target.value)}
+              placeholder="e.g. 18"
             />
           </div>
         </div>

@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
 import { useAdminStore } from '../store/useAdminStore';
+import useNotificationStore from '../store/notificationStore';
+import useSocket from '../hooks/useSocket';
 import { cn } from '../utils/cn';
 
 const adminRoutes = [
@@ -26,7 +28,15 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useThemeStore();
   const { admin, isSidebarOpen, toggleSidebar, closeSidebar } = useAdminStore();
+  const { unreadCount, fetchNotifications } = useNotificationStore();
+  useSocket(admin?._id);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (admin) {
+      fetchNotifications();
+    }
+  }, [admin, fetchNotifications]);
 
   return (
     <div className="h-screen bg-background-light dark:bg-background-dark flex overflow-hidden">
@@ -169,13 +179,15 @@ const AdminLayout = () => {
                 >
                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
-                <button 
-                  onClick={() => navigate('/admin/notifications')}
-                  className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary transition-colors relative"
-                >
-                   <Bell size={20} />
-                   <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
-                </button>
+                 <button 
+                   onClick={() => navigate('/admin/notifications')}
+                   className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary transition-colors relative"
+                 >
+                    <Bell size={20} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></span>
+                    )}
+                 </button>
              </div>
           </div>
         </header>

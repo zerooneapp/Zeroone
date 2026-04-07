@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Star, MapPin, Clock, Plus, Minus,
   Heart, Play, Verified, ShieldCheck,
-  Calendar, CheckCircle2, ChevronRight, Info, AlertCircle, Share2
+  Calendar, CheckCircle2, ChevronRight, Info, AlertCircle, Share2, Loader2
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -14,7 +15,12 @@ import api from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
+import dayjs from 'dayjs';
 
+/**
+ * ServiceDetail Component
+ * Optimized for elite user experience and intelligent booking flow.
+ */
 const ServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,8 +36,11 @@ const ServiceDetail = () => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [servicePricing, setServicePricing] = useState({});
   const [cartPricing, setCartPricing] = useState(null);
+  const [showChoiceModal, setShowChoiceModal] = useState(false);
+  const [existingBooking, setExistingBooking] = useState(null);
   const { role, isAuthenticated } = useAuthStore();
 
+  // 1. Fetch Main Data (Vendor + Services)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,25 +50,26 @@ const ServiceDetail = () => {
           api.get(`/services`, { params: { vendorId: id } })
         ]);
 
-        const fetchedVendor = vendorRes.data;
-        const fetchedServices = servicesRes.data;
+        if (vendorRes.data) {
+          setVendor(vendorRes.data);
+          setServices(servicesRes.data || []);
+          setActiveImage(vendorRes.data.shopImage || vendorRes.data.gallery?.[0]);
 
-        setVendor(fetchedVendor);
-        setServices(fetchedServices);
-        // Set initial active image from vendor shop image or gallery
-        setActiveImage(fetchedVendor.shopImage || fetchedVendor.gallery?.[0]);
-
-        if (fetchedServices.length > 0) {
-          const isSameVendor = cartVendor?._id === id;
-          if (!isSameVendor || cartItems.length === 0) {
-            const lowestPriceService = [...fetchedServices].sort((a, b) => a.price - b.price)[0];
-            const alreadyInCart = cartItems.find(item => item._id === lowestPriceService._id);
-            if (!alreadyInCart) {
-              addItem(fetchedVendor, lowestPriceService);
+          if (servicesRes.data?.length > 0) {
+            const isSameVendor = cartVendor?._id === id;
+            if (!isSameVendor || cartItems.length === 0) {
+              const lowestPriceService = [...servicesRes.data].sort((a, b) => a.price - b.price)[0];
+              const alreadyInCart = cartItems.find(item => item._id === lowestPriceService._id);
+              if (!alreadyInCart) {
+                addItem(vendorRes.data, lowestPriceService);
+              }
+              if (lowestPriceService.category) {
+                setSelectedCat(lowestPriceService.category);
+              }
             }
-            if (lowestPriceService.category) {
-              setSelectedCat(lowestPriceService.category);
-            }
+            
+            const uniqueCats = ['All', ...new Set(servicesRes.data.map(s => s.category).filter(Boolean))];
+            setCategories(uniqueCats);
           }
         }
       } catch (err) {
@@ -71,6 +81,7 @@ const ServiceDetail = () => {
     fetchData();
   }, [id, addItem, cartVendor?._id, cartItems.length]);
 
+  // 2. Favorite Sync
   useEffect(() => {
     const checkFavorite = async () => {
       if (!isAuthenticated || !id) return;
@@ -79,12 +90,13 @@ const ServiceDetail = () => {
         const favorites = res.data || [];
         setIsFavorited(favorites.some(v => v._id === id));
       } catch (err) {
-        console.error('Favorite check sync lost');
+        console.error('Favorite status sync lost');
       }
     };
     checkFavorite();
   }, [id, isAuthenticated]);
 
+  // 3. Service Pricing Previews
   useEffect(() => {
     if (!vendor?._id || services.length === 0) {
       setServicePricing({});
@@ -114,6 +126,7 @@ const ServiceDetail = () => {
     fetchServicePricing();
   }, [vendor?._id, services]);
 
+  // 4. Cart Pricing Preview (Discounts/Offers)
   useEffect(() => {
     if (!vendor?._id || cartVendor?._id !== vendor._id || cartItems.length === 0) {
       setCartPricing(null);
@@ -177,6 +190,39 @@ const ServiceDetail = () => {
     }
   };
 
+  /**
+   * Smart Interceptor: Checks for existing bookings before allowing a new one.
+   * Prompts user with choice modal if an active appt is found.
+   */
+  const handleProceedToBooking = async () => {
+    if (!isAuthenticated) return navigate('/login');
+    
+    setLoading(true);
+    try {
+      const res = await api.get('/bookings/my');
+      const bookingsArray = Array.isArray(res.data) ? res.data : [];
+      
+      const active = bookingsArray.find(b => 
+        (b.vendorId?._id === id || b.vendorId === id) && 
+        b.status === 'confirmed' &&
+        dayjs(b.startTime).isAfter(dayjs())
+      );
+      
+      if (active) {
+        setExistingBooking(active);
+        setShowChoiceModal(true);
+      } else {
+        useCartStore.getState().setRescheduleBookingId(null);
+        navigate('/cart');
+      }
+    } catch (err) {
+      useCartStore.getState().setRescheduleBookingId(null);
+      navigate('/cart');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const gallery = vendor ? (services.some(s => s.images?.length > 0)
     ? services.flatMap(s => s.images).filter(Boolean).slice(0, 10)
     : [vendor.shopImage, ...(vendor.gallery || [])].filter(Boolean).slice(0, 5)) : [];
@@ -187,7 +233,7 @@ const ServiceDetail = () => {
     setActiveImage((prev) => (gallery.includes(prev) ? prev : gallery[0]));
   }, [gallery]);
 
-  if (loading) return (
+  if (loading && !vendor) return (
     <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen">
       <div className="h-64 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
       <div className="grid grid-cols-2 gap-4">
@@ -219,7 +265,7 @@ const ServiceDetail = () => {
 
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-40">
-      {/* Redesigned Secondary Navbar (Screenshot Sync) */}
+      {/* Redesigned Secondary Navbar */}
       <div className="bg-white text-[#1C2C4E] px-4 py-2 sticky top-0 z-[60] flex items-center justify-between border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 shrink-0 h-[50px]">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
@@ -246,7 +292,7 @@ const ServiceDetail = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent " />
 
-            {/* Redesigned Like/Heart Overlay - Fixed Dimensions & New Color */}
+            {/* Favorite Overlay */}
             <button
               onClick={handleToggleFavorite}
               className={cn(
@@ -316,7 +362,7 @@ const ServiceDetail = () => {
         </div>
       </div>
 
-      {/* Info Grid - Updated Typography Spacing */}
+      {/* Info Grid */}
       <div className="px-5 mt-4 grid grid-cols-2 gap-y-3 gap-x-6">
         <button
           type="button"
@@ -367,6 +413,7 @@ const ServiceDetail = () => {
         </div>
       </div>
 
+      {/* Category Tabs */}
       <div className="flex gap-2 px-3 mt-6 overflow-x-auto no-scrollbar">
             {categories.map(cat => (
               <button
@@ -382,6 +429,7 @@ const ServiceDetail = () => {
             ))}
       </div>
 
+      {/* Selected Services Section */}
       <div className="px-3 mt-4 space-y-2">
             <SectionTitle title="Selected Services" className="mb-1" />
             {cartItems.length > 0 && hasItemsFromThisVendor ? (
@@ -421,7 +469,7 @@ const ServiceDetail = () => {
                         </div>
                         <button
                           onClick={() => removeItem(item._id)}
-                          className="w-8 h-8 bg-black dark:bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center shadow-lg"
+                          className="w-8 h-8 bg-black dark:bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
                         >
                           <Minus size={14} strokeWidth={3} />
                         </button>
@@ -437,10 +485,11 @@ const ServiceDetail = () => {
             )}
       </div>
 
+      {/* Available Services Section */}
       <div className="px-3 mt-4 space-y-2">
             <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
             <div className="space-y-2">
-              {filteredServices.map((service, index) => {
+              {filteredServices.map((service) => {
                 const isSelected = cartItems.find(item => item._id === service._id);
                 if (isSelected) return null;
                 const priceMeta = servicePricing[service._id] || {
@@ -481,6 +530,7 @@ const ServiceDetail = () => {
             </div>
       </div>
 
+      {/* Trust Badges */}
       <div className="px-3 mt-4">
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#1C2C4E]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
               <div className="flex items-center gap-2.5">
@@ -499,6 +549,7 @@ const ServiceDetail = () => {
             </div>
       </div>
 
+      {/* Fixed Sticky Action Bar */}
       <div
         className="fixed bottom-[52px] left-0 right-0 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-1.5 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] mx-2 rounded-[24px]"
       >
@@ -514,14 +565,72 @@ const ServiceDetail = () => {
             )}
           </div>
           <button
-            onClick={() => navigate('/cart')}
-            disabled={cartItems.length === 0}
-            className="px-8 py-2 bg-white text-[#0B1222] rounded-2xl font-black text-[14px] uppercase tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[2px] border-gray-100 flex items-center justify-center"
+            onClick={handleProceedToBooking}
+            disabled={cartItems.length === 0 || loading}
+            className="px-8 py-2 bg-white text-[#0B1222] rounded-2xl font-black text-[14px] uppercase tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[2px] border-gray-100 flex items-center justify-center min-w-[120px]"
           >
-            Book Now
+            {loading ? <Loader2 size={16} className="animate-spin" /> : 'Book Now'}
           </button>
         </div>
       </div>
+
+      {/* Intelligent Choice Modal */}
+      <AnimatePresence>
+        {showChoiceModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowChoiceModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-sm bg-white dark:bg-gray-950 rounded-3xl overflow-hidden shadow-2xl relative z-10 p-6"
+            >
+              <div className="w-14 h-14 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-5 mx-auto">
+                <Calendar size={28} />
+              </div>
+              
+              <h3 className="text-xl font-black text-[#0B1222] dark:text-white text-center leading-tight">
+                Active Booking Found
+              </h3>
+              <p className="text-[11px] font-bold text-[#0B1222]/40 dark:text-gray-400 text-center mt-3 px-2">
+                You already have a confirmed appointment at <span className="text-[#0B1222] dark:text-white font-black">{vendor.shopName}</span> on {existingBooking ? dayjs(existingBooking.startTime).format('LLL') : ''}.
+              </p>
+
+              <div className="space-y-3 mt-8">
+                <button
+                  onClick={() => navigate('/cart', { state: { rescheduleBookingId: existingBooking._id } })}
+                  className="w-full py-4 bg-[#0B1222] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <Clock size={16} />
+                  Reschedule Existing
+                </button>
+                <button
+                  onClick={() => { 
+                    setShowChoiceModal(false); 
+                    useCartStore.getState().setRescheduleBookingId(null);
+                    navigate('/cart'); 
+                  }}
+                  className="w-full py-4 bg-white dark:bg-gray-900 text-[#0B1222] dark:text-white border border-[#0B1222]/10 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-[0.98] transition-all"
+                >
+                  Create New Booking
+                </button>
+                <button
+                  onClick={() => setShowChoiceModal(false)}
+                  className="w-full py-2 text-[10px] font-black text-[#0B1222]/30 dark:text-gray-500 uppercase tracking-widest"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

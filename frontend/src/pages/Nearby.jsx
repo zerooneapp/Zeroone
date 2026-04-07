@@ -6,10 +6,12 @@ import { VendorSkeleton } from '../components/Skeleton';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useDebounce } from '../hooks/useDebounce';
+import { useAuthStore } from '../store/authStore';
 
 const Nearby = () => {
   const navigate = useNavigate();
   const observer = useRef();
+  const { user } = useAuthStore();
   
   const [categories, setCategories] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -22,17 +24,29 @@ const Nearby = () => {
   
   const [search, setSearch] = useState('');
   const [selectedCats, setSelectedCats] = useState([]);
-  const [location, setLocation] = useState({ lng: 77.4126, lat: 23.2599 });
+  // Default to User's saved location or Bhopal [lng, lat]
+  const [location, setLocation] = useState({ 
+    lng: user?.location?.coordinates?.[0] || 77.4126, 
+    lat: user?.location?.coordinates?.[1] || 23.2599 
+  });
 
-  // 📍 FIX: Get User Location in Nearby Page
+  // 📍 SMART LOCATION FALLBACK: Browser GPS -> Saved Address -> Default
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setLocation({ lng: pos.coords.longitude, lat: pos.coords.latitude }),
-        (err) => console.log('Location access denied, using default.')
+        (err) => {
+          console.log('Location access denied, falling back to profile address.');
+          if (user?.location?.coordinates?.[0] && user?.location?.coordinates?.[0] !== 0) {
+            setLocation({ 
+              lng: user.location.coordinates[0], 
+              lat: user.location.coordinates[1] 
+            });
+          }
+        }
       );
     }
-  }, []);
+  }, [user]);
 
   const debouncedSearch = useDebounce(search, 300);
 

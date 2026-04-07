@@ -56,8 +56,16 @@ const lockSlot = async (req, res) => {
     const services = Array.isArray(serviceIds) 
       ? serviceIds 
       : (typeof serviceIds === 'string' ? serviceIds.split(',').map(id => id.trim()) : [serviceIds]);
+
+    const Service = require('../models/Service');
+    const serviceDetails = await Service.find({ _id: { $in: services }, vendorId });
+    if (serviceDetails.length === 0) {
+       return res.status(400).json({ message: 'Selected services are invalid' });
+    }
+    const realDuration = serviceDetails.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
+
     const normalizedStart = normalizeToGrid(startTime);
-    const end = normalizedStart.clone().add(duration, 'minutes');
+    const end = normalizedStart.clone().add(realDuration, 'minutes');
 
     // 1. Identify a free staff member for this specific slot
     const staff = await findFirstAvailableStaff(
@@ -76,16 +84,23 @@ const lockSlot = async (req, res) => {
     await SlotLock.deleteMany({ userId: req.user._id, vendorId });
 
     // 3. Create Lock
-    const lock = await SlotLock.create({
-      userId: req.user._id,
-      vendorId,
-      staffId: staff._id,
-      startTime: normalizedStart.toDate(),
-      endTime: end.toDate(),
-      expiresAt: moment().add(5, 'minutes').toDate(),
-    });
+    try {
+      const lock = await SlotLock.create({
+        userId: req.user._id,
+        vendorId,
+        staffId: staff._id,
+        startTime: normalizedStart.toDate(),
+        endTime: end.toDate(),
+        expiresAt: moment().add(5, 'minutes').toDate(),
+      });
 
-    res.status(200).json({ message: 'Slot locked for 5 minutes', lock });
+      res.status(200).json({ message: 'Slot locked for 5 minutes', lock });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({ message: 'Slot was just taken by another user. Please choose a different time.' });
+      }
+      throw err;
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

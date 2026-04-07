@@ -30,8 +30,16 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
       >
          <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-3">
-               <div className="w-11 h-11 bg-slate-50 dark:bg-gray-800/80 rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50 shadow-sm relative">
-                  <User size={20} className="text-slate-400 dark:text-gray-500" />
+               <div className="w-11 h-11 bg-slate-50 dark:bg-gray-800/80 rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50 shadow-sm relative overflow-hidden">
+                  {(booking.userId?.image || booking.customerImage) ? (
+                     <img 
+                        src={booking.userId?.image || booking.customerImage} 
+                        className="w-full h-full object-cover" 
+                        alt={booking.walkInCustomerName || booking.userId?.name || 'Customer'}
+                     />
+                  ) : (
+                     <User size={20} className="text-slate-400 dark:text-gray-500" />
+                  )}
                   {booking.isWalkIn && (
                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm">
                         <ShoppingBag size={8} />
@@ -45,9 +53,14 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
                      )}
                   </div>
-                  <p className="text-[9px] font-black text-primary uppercase tracking-widest mt-1 line-clamp-1 opacity-80 leading-none">
-                     {booking.services.map(s => s.name).join(' • ')}
-                  </p>
+                  <div className="mt-2.5 space-y-1">
+                     {booking.services.map((s, idx) => (
+                        <div key={idx} className="flex items-center gap-1.5 text-[8.5px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest leading-none">
+                           <div className="w-1 h-1 bg-primary/40 rounded-full shrink-0" />
+                           <span className="truncate max-w-[200px]">{s.name}</span>
+                        </div>
+                     ))}
+                  </div>
                </div>
             </div>
             <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase border tracking-widest leading-none ${getStatusStyles(booking.status)} shadow-sm`}>
@@ -56,21 +69,41 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
          </div>
 
          <div className="grid grid-cols-2 gap-4 py-3 border-y border-dashed border-slate-100 dark:border-gray-800/50 my-3 relative z-10">
-            <div className="space-y-1">
-               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 leading-none">
-                  <Calendar size={10} strokeWidth={3} /> Schedule
-               </p>
-               <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none">
-                  {dayjs(booking.startTime).format('DD MMM, YYYY')}
-               </p>
+            <div className="space-y-2">
+               <div className="space-y-1">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 leading-none">
+                     <Calendar size={10} strokeWidth={3} /> Schedule
+                  </p>
+                  <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none">
+                     {dayjs(booking.startTime).format('DD MMM, YYYY')}
+                  </p>
+               </div>
+               <div className="space-y-1">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 leading-none">
+                     <User size={10} strokeWidth={3} className="text-emerald-500" /> Assigned Staff
+                  </p>
+                  <p className="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight leading-none">
+                     {booking.staffId?.isOwner ? <span className="text-emerald-600 dark:text-emerald-400">You (Owner)</span> : (booking.staffId?.name || 'Self')}
+                  </p>
+               </div>
             </div>
-            <div className="space-y-1 text-right flex flex-col items-end">
-               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 leading-none">
-                  <Clock size={10} strokeWidth={3} className="text-primary" /> Arrival
-               </p>
-               <p className="text-[11px] font-black text-primary uppercase tracking-tighter leading-none">
-                  {dayjs(booking.startTime).format('hh:mm A')}
-               </p>
+            <div className="space-y-2 text-right flex flex-col items-end">
+               <div className="space-y-1 text-right flex flex-col items-end">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 leading-none">
+                     <Clock size={10} strokeWidth={3} className="text-primary" /> Arrival
+                  </p>
+                  <p className="text-[11px] font-black text-primary uppercase tracking-tighter leading-none">
+                     {dayjs(booking.startTime).format('hh:mm A')}
+                  </p>
+               </div>
+               <div className="space-y-1 text-right flex flex-col items-end">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 leading-none">
+                     <Clock size={10} strokeWidth={3} className="text-slate-400" /> Duration
+                  </p>
+                  <p className="text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase tracking-tight leading-none">
+                     {booking.totalDuration} Mins
+                  </p>
+               </div>
             </div>
          </div>
 

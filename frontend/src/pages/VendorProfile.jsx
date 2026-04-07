@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-   ArrowLeft, Store, Camera, Video,
+   ArrowLeft, Store, Camera, Video, MapPin, Loader2,
    Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,11 +21,41 @@ const VendorProfile = () => {
    const [data, setData] = useState({
       shopName: '',
       address: '',
-      workingHours: { start: '09:00 AM', end: '09:00 PM' }
+      workingHours: { start: '09:00 AM', end: '09:00 PM' },
+      location: null
    });
+   const [locationLoading, setLocationLoading] = useState(false);
    const [currentMedia, setCurrentMedia] = useState(null);
    const [galleryFiles, setGalleryFiles] = useState([]);
    const [videoFile, setVideoFile] = useState(null);
+
+   const handleFetchLocation = () => {
+      if (!navigator.geolocation) return toast.error('GPS not supported');
+      
+      setLocationLoading(true);
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+         const { latitude, longitude } = pos.coords;
+         try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+            const result = await response.json();
+            const addr = result.display_name || `${latitude}, ${longitude}`;
+            
+            setData(prev => ({
+               ...prev,
+               address: addr,
+               location: { type: 'Point', coordinates: [longitude, latitude] }
+            }));
+            toast.success('Location fetched!');
+         } catch (err) {
+            toast.error('Failed to resolve address');
+         } finally {
+            setLocationLoading(false);
+         }
+      }, () => {
+         setLocationLoading(false);
+         toast.error('Location permission denied');
+      });
+   };
 
    useEffect(() => {
       const fetchProfile = async () => {
@@ -34,7 +64,8 @@ const VendorProfile = () => {
             setData({
                shopName: res.data.shopName,
                address: res.data.address,
-               workingHours: res.data.workingHours || { start: '09:00 AM', end: '09:00 PM' }
+               workingHours: res.data.workingHours || { start: '09:00 AM', end: '09:00 PM' },
+               location: res.data.location
             });
             setCurrentMedia(res.data);
          } catch (err) {
@@ -215,7 +246,18 @@ const VendorProfile = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                           <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Business Address</label>
+                           <div className="flex items-center justify-between px-1">
+                              <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Business Address</label>
+                              <button 
+                                 type="button"
+                                 onClick={handleFetchLocation}
+                                 disabled={locationLoading}
+                                 className="flex items-center gap-1 text-primary text-[8px] font-black uppercase tracking-widest hover:opacity-70 transition-all disabled:opacity-50"
+                              >
+                                 {locationLoading ? <Loader2 size={10} className="animate-spin" /> : <MapPin size={10} />}
+                                 Auto Fetch
+                              </button>
+                           </div>
                            <textarea
                               value={data.address}
                               onChange={(e) => setData({ ...data, address: e.target.value })}
@@ -330,18 +372,14 @@ const VendorProfile = () => {
                                  <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight">Promo Video</p>
                                  <p className="text-[8px] text-gray-400 font-bold tracking-tighter uppercase mt-0.5">MP4 (Max 30s / 50MB)</p>
                               </div>
-                              <input type="file" id="video-input" className="hidden" onChange={(e) => setVideoFile(e.target.files[0])} />
-                              <label htmlFor="video-input" className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-pointer shadow-md border border-slate-200/60 dark:border-gray-800">
-                                 <Video size={16} className={videoFile ? 'text-blue-500' : 'text-gray-400'} />
-                              </label>
+                              <button 
+                                 type="button"
+                                 onClick={() => toast('Video feature coming soon!', { icon: '🚧' })}
+                                 className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-not-allowed shadow-md border border-slate-200/60 dark:border-gray-800"
+                              >
+                                 <Video size={16} className="text-gray-400 opacity-50" />
+                              </button>
                            </div>
-
-                           {videoFile && (
-                              <div className="px-3 py-1.5 bg-purple-500/10 text-purple-500 rounded-lg text-[8px] font-black uppercase flex items-center justify-between border border-purple-500/20">
-                                 <span>{videoFile.name}</span>
-                                 <X size={10} className="cursor-pointer" onClick={() => setVideoFile(null)} />
-                              </div>
-                           )}
                         </div>
                      </div>
 
@@ -389,7 +427,7 @@ const VendorProfile = () => {
                         <button
                            onClick={() => {
                               logout();
-                              navigate('/login');
+                              navigate('/vendor-login');
                            }}
                            className="flex-1 py-2.5 bg-rose-500 text-white rounded-xl font-black text-xs shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
                         >

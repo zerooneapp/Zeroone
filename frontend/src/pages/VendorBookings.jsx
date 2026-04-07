@@ -172,13 +172,6 @@ const VendorBookings = () => {
           </button>
         </div>
 
-        <button
-          onClick={() => setIsClosureModalOpen(true)}
-          className="w-full mb-3 h-11 rounded-2xl bg-amber-500 text-white text-[10px] font-black uppercase tracking-[0.22em] shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all"
-        >
-          Emergency Close Window
-        </button>
-
         <StatusTabs activeTab={status} onTabChange={setStatus} />
 
         {/* 📅 PREMIUM COMPACT DATE FILTER */}

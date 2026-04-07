@@ -14,20 +14,32 @@ const MyBookings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchBookings = async () => {
+  const fetchBookings = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const res = await api.get('/bookings/my');
       setBookings(res.data);
     } catch (err) {
       setError('Failed to load bookings');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBookings();
+    fetchBookings(true);
+
+    // 🚀 LIVE SYNC: Listen for real-time status updates from vendor
+    const handleListUpdateEvent = (e) => {
+      const notification = e.detail;
+      // Refresh list if status changes or a new booking related event occurs
+      if (['BOOKING_CONFIRMED', 'BOOKING_CANCELLED', 'BOOKING_COMPLETED', 'ASSIGNMENT_RECEIVED'].includes(notification?.type)) {
+        fetchBookings(false);
+      }
+    };
+
+    window.addEventListener('new-socket-notification', handleListUpdateEvent);
+    return () => window.removeEventListener('new-socket-notification', handleListUpdateEvent);
   }, []);
 
   const filteredBookings = bookings.filter(b => {

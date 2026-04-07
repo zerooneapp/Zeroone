@@ -203,6 +203,8 @@ const formatInr = (amount = 0) => `Rs ${Number(amount || 0).toLocaleString('en-I
 const processDailyDeduction = async (vendor) => {
   normalizeVendorPlanState(vendor);
   const today = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+  const yesterday = moment().tz('Asia/Kolkata').subtract(1, 'day').format('YYYY-MM-DD');
+
   if (
     vendor.lastDeductionDate &&
     moment(vendor.lastDeductionDate).tz('Asia/Kolkata').format('YYYY-MM-DD') === today
@@ -212,72 +214,53 @@ const processDailyDeduction = async (vendor) => {
   }
 
   const state = await getVendorSubscriptionState(vendor);
+  
+  // 1. Trial/Monthly are exempt from daily deductions
   if (state.isTrialActive || state.isMonthlyActive) {
     vendor.status = 'active';
+    vendor.lastDeductionDate = new Date();
     return vendor.save();
   }
 
+  // 2. Post-Paid Deduction: Take money for the day that just passed
+  // We only deduct if the vendor was "Discoverable" (Active) during that period
   const dailyPlan = await getSubscriptionPlanForVendor('daily', vendor.serviceLevel);
-  const dailyPrice = dailyPlan.price;
-  const minimumRequiredBalance = state.minimumWalletThreshold + dailyPrice;
-  const shortfall = Math.max(minimumRequiredBalance - vendor.walletBalance, 0);
+  const basePrice = dailyPlan.price || 0;
+  const gstAmount = dailyPlan.gstPercent ? (basePrice * dailyPlan.gstPercent) / 100 : 0;
+  const dailyPrice = basePrice + gstAmount;
 
-  if (vendor.walletBalance < minimumRequiredBalance) {
-    vendor.status = 'inactive';
+  const wasActiveYesterday = vendor.status === 'active';
+
+  if (wasActiveYesterday) {
+    vendor.walletBalance -= dailyPrice;
+    await createWalletTransaction({
+      vendorId: vendor._id,
+      initiatedByUserId: vendor.ownerId,
+      amount: dailyPrice,
+      type: 'debit',
+      reason: 'daily_subscription',
+      category: 'daily_subscription',
+      paymentGateway: 'system',
+      paymentMethod: 'wallet',
+      referenceId: `POST_DAILY_${vendor._id}_${today}`,
+      description: `${getNormalizedServiceLevel(vendor.serviceLevel)} Service Day: ${yesterday}. (Base: ₹${basePrice} + GST: ₹${gstAmount})`
+    });
+  }
+
+  // 3. Status Update: Set status for the UPCOMING day based on new balance
+  const isBalanceSufficient = vendor.walletBalance >= state.minimumWalletThreshold;
+  vendor.status = isBalanceSufficient ? 'active' : 'inactive';
+  vendor.lastDeductionDate = new Date();
+
+  if (!isBalanceSufficient) {
+    const shortfall = Math.max(state.minimumWalletThreshold - vendor.walletBalance, 0);
     await NotificationService.sendNotification({
       userIds: vendor.ownerId,
       role: 'vendor',
       type: 'LOW_BALANCE',
       title: 'Wallet Balance Low',
-      message: `Keep at least ${formatInr(minimumRequiredBalance)} in your wallet. Current balance: ${formatInr(vendor.walletBalance)}. Add ${formatInr(shortfall)} to stay live on daily mode.`,
+      message: `Keep at least ${formatInr(state.minimumWalletThreshold)} in your wallet to stay live. Current balance: ${formatInr(vendor.walletBalance)}. Add ${formatInr(shortfall)} to resume.`,
       referenceId: `LOW_BAL_${vendor._id}_${today}`
-    });
-    await NotificationService.sendNotification({
-      userIds: vendor.ownerId,
-      role: 'vendor',
-      type: 'SERVICE_PAUSED',
-      title: 'Bookings Paused',
-      message: `New bookings are paused because your wallet is short by ${formatInr(shortfall)}. Top up your wallet or buy the monthly plan to go live again.`,
-      referenceId: `SERVICE_PAUSED_${vendor._id}_${today}`
-    });
-    return vendor.save();
-  }
-
-  vendor.walletBalance -= dailyPrice;
-  vendor.lastDeductionDate = new Date();
-  vendor.status = vendor.walletBalance >= state.minimumWalletThreshold ? 'active' : 'inactive';
-
-  await createWalletTransaction({
-    vendorId: vendor._id,
-    initiatedByUserId: vendor.ownerId,
-    amount: dailyPrice,
-    type: 'debit',
-    reason: 'daily_subscription',
-    category: 'daily_subscription',
-    paymentGateway: 'system',
-    paymentMethod: 'wallet',
-    referenceId: `DAILY_${vendor._id}_${today}`,
-    description: `${getNormalizedServiceLevel(vendor.serviceLevel)} daily subscription deduction`
-  });
-
-  await NotificationService.sendNotification({
-    userIds: vendor.ownerId,
-    role: 'vendor',
-    type: 'WALLET_DEDUCTION',
-    title: 'Daily Deduction',
-    message: `${formatInr(dailyPrice)} deducted for your ${getNormalizedServiceLevel(vendor.serviceLevel)} plan. Remaining balance: ${formatInr(vendor.walletBalance)}.`,
-    referenceId: `DEDUCT_${vendor._id}_${today}`
-  });
-
-  if (vendor.walletBalance < minimumRequiredBalance) {
-    const nextCycleShortfall = Math.max(minimumRequiredBalance - vendor.walletBalance, 0);
-    await NotificationService.sendNotification({
-      userIds: vendor.ownerId,
-      role: 'vendor',
-      type: 'LOW_BALANCE_WARNING',
-      title: 'Recharge Before Next Cycle',
-      message: `Your wallet needs ${formatInr(nextCycleShortfall)} more before the next daily deduction. Top up soon or switch to the monthly plan.`,
-      referenceId: `LOW_BAL_WARN_${vendor._id}_${today}`
     });
   }
 
@@ -338,6 +321,10 @@ const addFunds = async (vendor, amount, reason = 'admin_topup', options = {}) =>
 const activateMonthlySubscription = async (vendor, options = {}) => {
   normalizeVendorPlanState(vendor);
   const monthlyPlan = await getSubscriptionPlanForVendor('monthly', vendor.serviceLevel);
+  const basePrice = monthlyPlan.price || 0;
+  const gstAmount = monthlyPlan.gstPercent ? (basePrice * monthlyPlan.gstPercent) / 100 : 0;
+  const totalPrice = basePrice + gstAmount;
+
   const baseDate =
     vendor.planType === 'monthly' && vendor.expiryDate && new Date(vendor.expiryDate) > new Date()
       ? moment(vendor.expiryDate)
@@ -355,7 +342,7 @@ const activateMonthlySubscription = async (vendor, options = {}) => {
   await upsertWalletTransactionRecord(options.existingTransaction, {
     vendorId: vendor._id,
     initiatedByUserId: options.initiatedByUserId || vendor.ownerId,
-    amount: monthlyPlan.price,
+    amount: totalPrice,
     type: 'debit',
     reason: 'monthly_subscription',
     category: 'monthly_subscription',

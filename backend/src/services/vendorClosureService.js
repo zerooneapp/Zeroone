@@ -21,8 +21,8 @@ const getOverlappingClosures = async (vendorId, start, end, excludeClosureId = n
   const query = {
     vendorId,
     status: 'active',
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
+    startTime: { $lt: moment(end).toDate() },
+    endTime: { $gt: moment(start).toDate() }
   };
 
   if (excludeClosureId) {
@@ -36,8 +36,8 @@ const getImpactedBookings = async (vendorId, start, end) => (
   Booking.find({
     vendorId,
     status: 'confirmed',
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
+    startTime: { $lt: moment(end).toDate() },
+    endTime: { $gt: moment(start).toDate() }
   })
     .populate('userId', 'name phone image')
     .populate('staffId', 'name image phone')

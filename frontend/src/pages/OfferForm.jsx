@@ -17,6 +17,8 @@ const OfferForm = () => {
     value: '',
     serviceIds: [],
     expiryDate: dayjs().add(7, 'day').format('YYYY-MM-DD'),
+    minPurchaseAmount: 0,
+    maxDiscountLimit: 0,
   });
   const [availableServices, setAvailableServices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,7 +26,7 @@ const OfferForm = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const servicesRes = await api.get('/services', { params: { includeInactive: false } });
+        const servicesRes = await api.get('/services/manage/all', { params: { includeInactive: false } });
         setAvailableServices(servicesRes.data);
 
         if (isEdit) {
@@ -36,6 +38,8 @@ const OfferForm = () => {
             value: offer.value,
             serviceIds: offer.serviceIds.map(s => typeof s === 'object' ? s._id : s),
             expiryDate: dayjs(offer.expiryDate).format('YYYY-MM-DD'),
+            minPurchaseAmount: offer.minPurchaseAmount || 0,
+            maxDiscountLimit: offer.maxDiscountLimit || 0,
           });
         }
       } catch (err) {
@@ -146,34 +150,65 @@ const OfferForm = () => {
                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                   {/* Value */}
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Value</label>
-                      <input 
-                        required
-                        type="number" 
-                        placeholder={formData.discountType === 'percentage' ? '20' : '100'}
-                        value={formData.value}
-                        onChange={(e) => {
-                           const val = Number(e.target.value);
-                           setFormData({...formData, value: isNaN(val) ? '' : val});
-                        }}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
-                      />
-                   </div>
-                   {/* Expiry */}
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Expiry Date</label>
-                      <input 
-                        required
-                        type="date" 
-                        value={formData.expiryDate}
-                        onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
-                      />
-                   </div>
-                </div>
+                 <div className="grid grid-cols-2 gap-3">
+                    {/* Value */}
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Value</label>
+                       <input 
+                         required
+                         type="number" 
+                         placeholder={formData.discountType === 'percentage' ? '20' : '100'}
+                         value={formData.value}
+                         onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setFormData({...formData, value: isNaN(val) ? '' : val});
+                         }}
+                         className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
+                       />
+                    </div>
+                    {/* Expiry */}
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Expiry Date</label>
+                       <input 
+                         required
+                         type="date" 
+                         value={formData.expiryDate}
+                         onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
+                         className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
+                       />
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-3">
+                    {/* Min Order Value */}
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Min Order Value</label>
+                       <div className="relative">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">₹</span>
+                          <input 
+                            type="number" 
+                            placeholder="0"
+                            value={formData.minPurchaseAmount}
+                            onChange={(e) => setFormData({...formData, minPurchaseAmount: Number(e.target.value)})}
+                            className="w-full pl-7 p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
+                          />
+                       </div>
+                    </div>
+                    {/* Max Discount Cap */}
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Max Discount Cap</label>
+                       <div className="relative">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">₹</span>
+                          <input 
+                            type="number" 
+                            placeholder="0"
+                            value={formData.maxDiscountLimit}
+                            onChange={(e) => setFormData({...formData, maxDiscountLimit: Number(e.target.value)})}
+                            className="w-full pl-7 p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
+                          />
+                       </div>
+                    </div>
+                 </div>
 
                 {/* Scope Selection */}
                 <div className="space-y-3">

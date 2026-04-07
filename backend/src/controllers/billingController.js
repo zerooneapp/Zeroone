@@ -45,9 +45,18 @@ const getVendorWalletOverview = async (req, res) => {
       getSubscriptionPlanForVendor('monthly', serviceLevel)
     ]);
     const razorpay = getRazorpayConfig();
-    const requiredBalanceToday = (settings.minWalletThreshold || 100) + dailyPlan.price;
+    const dailyBase = dailyPlan.price || 0;
+    const dailyGstAmount = dailyPlan.gstPercent ? (dailyBase * dailyPlan.gstPercent) / 100 : 0;
+    const dailyTotal = dailyBase + dailyGstAmount;
+
+    const monthlyBase = monthlyPlan.price || 0;
+    const monthlyGstAmount = monthlyPlan.gstPercent ? (monthlyBase * monthlyPlan.gstPercent) / 100 : 0;
+    const monthlyTotal = monthlyBase + monthlyGstAmount;
+
+    const requiredBalanceToday = (settings.minWalletThreshold || 100) + dailyTotal;
     const shortfallToResume = Math.max(requiredBalanceToday - (vendor.walletBalance || 0), 0);
-    const recommendedTopup = shortfallToResume > 0 ? shortfallToResume : dailyPlan.price;
+    const recommendedTopup = shortfallToResume > 0 ? shortfallToResume : dailyTotal;
+    const isLowBalanceWarning = vendor.walletBalance < requiredBalanceToday && subscriptionState.currentPlan === 'daily';
 
     res.status(200).json({
       walletBalance: vendor.walletBalance || 0,
@@ -55,6 +64,7 @@ const getVendorWalletOverview = async (req, res) => {
       requiredBalanceToday,
       shortfallToResume,
       recommendedTopup,
+      isLowBalanceWarning,
       freeTrialDays: settings.freeTrialDays || 7,
       currency: 'INR',
       razorpay: {
@@ -77,13 +87,19 @@ const getVendorWalletOverview = async (req, res) => {
           _id: dailyPlan._id,
           type: dailyPlan.type,
           level: dailyPlan.level,
-          price: dailyPlan.price
+          price: dailyTotal,
+          basePrice: dailyBase,
+          gstPercent: dailyPlan.gstPercent || 0,
+          gstAmount: dailyGstAmount
         },
         monthly: {
           _id: monthlyPlan._id,
           type: monthlyPlan.type,
           level: monthlyPlan.level,
-          price: monthlyPlan.price
+          price: monthlyTotal,
+          basePrice: monthlyBase,
+          gstPercent: monthlyPlan.gstPercent || 0,
+          gstAmount: monthlyGstAmount
         }
       }
     });

@@ -108,8 +108,12 @@ const Cart = () => {
 
   // 3. Filter Staff based on selected slot and services
   const availableStaff = (allStaff || []).filter((staff) => {
+    // Check if staff supports all items in the current cart
     const supportsAllSelectedServices = (items || []).every((item) =>
-      staff.services?.some((serviceId) => String(serviceId) === String(item._id))
+      staff.services?.some((s) => {
+        const id = s?._id || s;
+        return String(id) === String(item._id);
+      })
     );
 
     if (!supportsAllSelectedServices) {

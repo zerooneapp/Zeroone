@@ -19,7 +19,17 @@ const resolveActorStaffId = async (req) => {
   }
 
   if (req.user?.role === 'staff') {
-    const staff = await Staff.findOne({ userId: req.user._id }).select('_id');
+    let staff = await Staff.findOne({ userId: req.user._id });
+    
+    // Auto-Heal: If seeded or detached, find by verified phone and link
+    if (!staff && req.user.phone) {
+      staff = await Staff.findOne({ phone: req.user.phone });
+      if (staff) {
+        staff.userId = req.user._id;
+        await staff.save();
+      }
+    }
+    
     return staff?._id || null;
   }
 
@@ -37,11 +47,12 @@ const formatBookingResponse = (booking, role) => {
 
   // Logic: 30-minute window
   const isWithin30Mins = now.isSameOrAfter(bufferTime);
-  const isPastStart = now.isAfter(startTime);
+  const endTime = moment(b.endTime).tz('Asia/Kolkata');
+  const isPastEnd = now.isAfter(endTime);
 
   b.canCancel = !isWithin30Mins && b.status === 'confirmed';
   b.canReschedule = !isWithin30Mins && b.status === 'confirmed';
-  b.canContact = isWithin30Mins && b.status === 'confirmed' && !isPastStart;
+  b.canContact = isWithin30Mins && b.status === 'confirmed' && !isPastEnd;
 
   // Sanitize Staff Phone based on contact rule
   if (role === 'customer' && !b.canContact) {
@@ -97,14 +108,17 @@ const getMyBookings = async (req, res) => {
       filter.vendorId = vendor._id;
     } else if (actorRole === 'staff') {
       const actorStaffId = await resolveActorStaffId(req);
-      if (!actorStaffId) return res.status(404).json({ message: 'Staff not found' });
+      if (!actorStaffId) {
+        console.warn(`[Staff Warning] Could not resolve Staff document for user ${req.user?._id || 'unknown'}`);
+        return res.status(200).json([]);
+      }
       filter.staffId = actorStaffId;
     }
 
     const bookings = await Booking.find(filter)
       .populate('userId', 'name phone image')
       .populate('vendorId', 'shopName address')
-      .populate('staffId', 'name phone')
+      .populate('staffId', 'name phone isOwner')
       .sort({ startTime: -1 });
 
     const formatted = bookings.map(b => formatBookingResponse(b, actorRole));

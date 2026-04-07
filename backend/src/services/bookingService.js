@@ -3,6 +3,8 @@ const SlotLock = require('../models/SlotLock');
 const Service = require('../models/Service');
 const Staff = require('../models/Staff');
 const Vendor = require('../models/Vendor');
+const User = require('../models/User');
+const WalletTransaction = require('../models/WalletTransaction');
 const moment = require('moment-timezone');
 const { calculateAvailableSlots } = require('./slotService');
 const NotificationService = require('./notificationService');
@@ -146,7 +148,7 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
       role: 'staff',
       type: 'STAFF_ASSIGNED',
       title: 'New Assignment',
-      message: `You have been assigned a new booking for ${start.format('LLL')}.`,
+      message: `You have been assigned a new booking for ${booking.isWalkIn ? 'Walk-in' : 'Customer'}: ${booking.walkInCustomerName || 'Client'}. Services: ${booking.services.map(s => s.name).join(', ')} at ${start.format('LT')}.`,
       data: { bookingId: booking._id },
       referenceId: `${booking._id}_ASSIGN`
     } : null
@@ -168,9 +170,37 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
 
   if (!isOwner && !isStaff) throw new Error('Unauthorized');
 
+  if (booking.status !== 'confirmed') {
+    throw new Error(`Only confirmed bookings can be completed (Current: ${booking.status})`);
+  }
+
+  // 1. Atomic Status Update
   booking.status = 'completed';
   booking.completedAt = new Date();
   await booking.save();
+
+  // 2. Revenue Collection: Credit Vendor's Wallet
+  const amount = booking.totalPrice || 0;
+  if (amount > 0) {
+    const vendor = await Vendor.findById(booking.vendorId?._id || booking.vendorId);
+    if (vendor) {
+      vendor.walletBalance = (vendor.walletBalance || 0) + amount;
+      await vendor.save();
+
+      // Log Transaction
+      await WalletTransaction.create({
+        vendorId: vendor._id,
+        initiatedByUserId: userId,
+        amount: amount,
+        type: 'credit',
+        category: 'booking_revenue',
+        reason: `Service completed: ${booking.services.map(s => s.name).join(', ')}`,
+        status: 'completed',
+        referenceId: `${booking._id}_REV`,
+        description: `Revenue from booking #${booking._id.toString().slice(-6).toUpperCase()}`
+      });
+    }
+  }
 
   await sendRoleNotifications([
     {
@@ -190,7 +220,16 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
       message: `Staff ${booking.staffId?.name || 'Professional'} has completed the service for ${booking.userId?.name || 'Customer'}.`,
       data: { bookingId: booking._id },
       referenceId: `${booking._id}_COMPLETE_V`
-    }
+    },
+    getStaffNotificationTarget(booking.staffId) ? {
+      userIds: getStaffNotificationTarget(booking.staffId),
+      role: 'staff',
+      type: 'BOOKING_COMPLETED',
+      title: 'Job Completed!',
+      message: `Great job! You have completed the service for ${booking.walkInCustomerName || booking.userId?.name || 'Customer'}.`,
+      data: { bookingId: booking._id },
+      referenceId: `${booking._id}_COMPLETE_S`
+    } : null
   ]);
 
   return booking;
@@ -202,6 +241,10 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
 
   const booking = await Booking.findOne(query).populate('vendorId staffId');
   if (!booking) throw new Error('Booking not found');
+
+  if (booking.status !== 'confirmed') {
+    throw new Error(`Only confirmed bookings can be cancelled (Current: ${booking.status})`);
+  }
 
   if (role === 'vendor' && booking.vendorId?.ownerId?.toString() !== userId.toString()) {
     throw new Error('Unauthorized');
@@ -267,8 +310,8 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
       userIds: getStaffNotificationTarget(staff),
       role: 'staff',
       type: 'BOOKING_CANCELLED',
-      title: 'Booking Cancelled',
-      message: internalMessage,
+      title: 'Assignment Cancelled',
+      message: `Your assignment for ${booking.walkInCustomerName || booking.userId?.name || 'Client'} at ${moment(booking.startTime).format('LT')} was cancelled.${reasonSuffix}`,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_CANCEL_STAFF`
     } : null
@@ -354,6 +397,10 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
   const isStaff = actorRole === 'staff' && Boolean(actorStaffId) && booking.staffId?.toString() === actorStaffId.toString();
   if (!isCustomer && !isVendor && !isStaff) throw new Error('Unauthorized');
 
+  if (booking.status !== 'confirmed') {
+    throw new Error(`Only confirmed bookings can be rescheduled (Current: ${booking.status})`);
+  }
+
   if (actorRole === 'customer' && moment().isAfter(moment(booking.startTime).subtract(30, 'minutes'))) {
     throw new Error('Too late to reschedule (30m window)');
   }
@@ -427,7 +474,7 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
         role: 'staff',
         type: 'BOOKING_RESCHEDULED',
         title: 'Assignment Rescheduled',
-        message: `Your assignment has been moved from ${oldTime} to ${start.format('LLL')}.`,
+        message: `Your assignment for ${booking.walkInCustomerName || 'Client'} moved from ${oldTime} to ${start.format('LLL')}.`,
         data: { bookingId: booking._id },
         referenceId: `${booking._id}_STAFF_RESCHED`
       });
@@ -453,7 +500,7 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
         role: 'staff',
         type: 'STAFF_ASSIGNED',
         title: 'New Assignment (Rescheduled)',
-        message: `You have a new assignment for ${start.format('LLL')}.`,
+        message: `You have been assigned a rescheduled booking for ${booking.walkInCustomerName || 'Client'} at ${start.format('LLL')}.`,
         data: { bookingId: booking._id },
         referenceId: `${booking._id}_NEW_ASSIGN`
       });

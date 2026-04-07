@@ -15,11 +15,20 @@ const buildServiceKey = (service) => String(service._id || service.serviceId);
 
 const calculateOfferDiscount = (offer, eligibleSubtotal) => {
   if (eligibleSubtotal <= 0) return 0;
+  
+  let discount = 0;
   if (offer.discountType === 'percentage') {
-    return roundCurrency((eligibleSubtotal * offer.value) / 100);
+    discount = roundCurrency((eligibleSubtotal * offer.value) / 100);
+  } else {
+    discount = roundCurrency(Math.min(offer.value, eligibleSubtotal));
   }
 
-  return roundCurrency(Math.min(offer.value, eligibleSubtotal));
+  // 🛡️ Apply Max Discount Cap
+  if (offer.maxDiscountLimit > 0 && discount > offer.maxDiscountLimit) {
+    discount = offer.maxDiscountLimit;
+  }
+
+  return discount;
 };
 
 const allocateDiscountAcrossServices = (services, totalDiscount) => {
@@ -61,6 +70,10 @@ const getBestOfferForServices = (services, offers) => {
     if (eligibleServices.length === 0) continue;
 
     const eligibleSubtotal = eligibleServices.reduce((sum, service) => sum + Number(service.price || 0), 0);
+    
+    // 🛡️ ENFORCE MIN PURCHASE
+    if (eligibleSubtotal < (offer.minPurchaseAmount || 0)) continue;
+
     const discount = calculateOfferDiscount(offer, eligibleSubtotal);
 
     if (!bestOffer || discount > bestOffer.discount) {
@@ -114,7 +127,11 @@ const calculatePricingPreview = async (vendorId, services) => {
           _id: bestOffer.offer._id,
           title: bestOffer.offer.title,
           discountType: bestOffer.offer.discountType,
-          value: bestOffer.offer.value
+          value: bestOffer.offer.value,
+          serviceIds: bestOffer.offer.serviceIds,
+          expiryDate: bestOffer.offer.expiryDate,
+          minPurchaseAmount: bestOffer.offer.minPurchaseAmount,
+          maxDiscountLimit: bestOffer.offer.maxDiscountLimit
         }
       : null,
     originalTotal,

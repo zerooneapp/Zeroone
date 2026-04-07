@@ -58,4 +58,21 @@ const getUnreadCount = async (req, res) => {
   }
 };
 
-module.exports = { getNotifications, markAsRead, getUnreadCount };
+// @desc    Delete a notification
+// @route   DELETE /api/notifications/:id
+const deleteNotification = async (req, res) => {
+  try {
+    const ownerIds = getNotificationOwnerIds(req);
+    const notification = await Notification.findOneAndDelete({ 
+      _id: req.params.id, 
+      userId: { $in: ownerIds } 
+    });
+    
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    res.status(200).json({ message: 'Notification removed' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getNotifications, markAsRead, getUnreadCount, deleteNotification };

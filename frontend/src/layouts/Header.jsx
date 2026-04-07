@@ -2,33 +2,20 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
-import { Moon, Sun, Bell, MapPin, User, Heart, ChevronDown } from 'lucide-react';
-import api from '../services/api';
+import useNotificationStore from '../store/notificationStore';
+import { Moon, Sun, Bell, MapPin, Heart, ChevronDown } from 'lucide-react';
 
 const Header = ({ onOpenNotifications }) => {
   const { isDarkMode, toggleTheme } = useThemeStore();
   const { user } = useAuthStore();
-  const [unreadCount, setUnreadCount] = React.useState(0);
+  const { unreadCount, fetchNotifications } = useNotificationStore();
   const navigate = useNavigate();
 
   React.useEffect(() => {
     if (user) {
-      const fetchUnread = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        try {
-          const res = await api.get('/notifications/unread-count');
-          setUnreadCount(res.data.count);
-        } catch (err) {
-          console.debug('Unread sync pending...');
-        }
-      };
-      fetchUnread();
-      const interval = setInterval(fetchUnread, 30000);
-      return () => clearInterval(interval);
+      fetchNotifications();
     }
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl px-4 py-2 border-b border-slate-100 dark:border-gray-800 shadow-sm">
@@ -76,8 +63,6 @@ const Header = ({ onOpenNotifications }) => {
           </button>
         </div>
       </div>
-
-
     </header>
   );
 };

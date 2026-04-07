@@ -14,7 +14,7 @@ const moment = require('moment-timezone');
 
 const addStaff = async (req, res) => {
   try {
-    const { name, phone, services } = req.body;
+    const { name, phone, services, designation } = req.body;
 
     // Validate services is not empty (already in model but good for early 400)
     const serviceArray = typeof services === 'string' ? JSON.parse(services) : services;
@@ -41,7 +41,8 @@ const addStaff = async (req, res) => {
       name,
       phone,
       services: serviceArray,
-      image: imageUrl
+      image: imageUrl,
+      designation: designation || 'Staff'
     });
 
     res.status(201).json(staff);
@@ -78,7 +79,20 @@ const listStaff = async (req, res) => {
       }
     }
 
-    res.status(200).json(staff);
+    // 💰 ENRICHMENT: Calculate Total Earnings for each staff
+    const Booking = require('../models/Booking');
+    const enrichedStaff = await Promise.all(staff.map(async (s) => {
+      const stats = await Booking.aggregate([
+        { $match: { staffId: s._id, status: { $in: ['confirmed', 'completed'] } } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+      ]);
+      return {
+        ...s.toObject(),
+        totalEarnings: stats[0]?.total || 0
+      };
+    }));
+
+    res.status(200).json(enrichedStaff);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -149,13 +163,37 @@ const getStaffProfile = async (req, res) => {
     }
 
     const staffQuery = authStaffId ? { _id: authStaffId } : { userId: authUserId };
-    const staff = await Staff.findOne(staffQuery)
+    let staff = await Staff.findOne(staffQuery)
+      .populate('userId', 'image name')
       .populate('services')
       .populate({
         path: 'vendorId',
         select: 'shopName ownerId address',
         populate: { path: 'ownerId', select: 'name phone' }
       });
+
+    // 📸 IMAGE FALLBACK: Ensure the best image (Staff or User) is returned
+    if (staff && !staff.image && staff.userId?.image) {
+      staff.image = staff.userId.image;
+    }
+
+    // 🩹 Auto-Heal: If not found by userId, try phone (Handles seeded/detached staff test cases)
+    if (!staff && req.user && req.user.phone) {
+      const detachedStaff = await Staff.findOne({ phone: req.user.phone });
+      if (detachedStaff) {
+        detachedStaff.userId = req.user._id;
+        await detachedStaff.save();
+        
+        // Re-fetch populated after healing
+        staff = await Staff.findOne({ _id: detachedStaff._id })
+          .populate('services')
+          .populate({
+            path: 'vendorId',
+            select: 'shopName ownerId address',
+            populate: { path: 'ownerId', select: 'name phone' }
+          });
+      }
+    }
 
     console.log('[DEBUG] Staff record found:', staff ? 'Yes' : 'No');
 

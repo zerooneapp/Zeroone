@@ -13,6 +13,7 @@ const StaffForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    designation: '',
     services: [], // Array of IDs
   });
   const [availableServices, setAvailableServices] = useState([]);
@@ -44,6 +45,7 @@ const StaffForm = () => {
           setFormData({
             name: staff.name,
             phone: staff.phone,
+            designation: staff.designation || '',
             services: staff.services.map(s => s._id),
           });
           setPreview(staff.image);
@@ -113,6 +115,7 @@ const StaffForm = () => {
     const data = new FormData();
     data.append('name', formData.name);
     data.append('phone', formData.phone);
+    data.append('designation', formData.designation);
     data.append('services', JSON.stringify(formData.services));
     if (image) data.append('image', image);
 
@@ -241,7 +244,21 @@ const StaffForm = () => {
                   <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 </div>
               </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Designation</label>
+                <div className="relative">
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g. Senior Stylist"
+                    value={formData.designation}
+                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                    className="w-full py-3 pl-11 pr-4 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white placeholder:text-gray-300"
+                  />
+                  <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                </div>
             </div>
+          </div>
 
             {/* Skills/Services Multi-Select */}
             <div className="space-y-2.5">

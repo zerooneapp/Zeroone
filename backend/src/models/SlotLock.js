@@ -11,6 +11,6 @@ const slotLockSchema = new mongoose.Schema({
 
 // TTL index to automatically release slot lock
 slotLockSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-slotLockSchema.index({ staffId: 1 });
+slotLockSchema.index({ staffId: 1, startTime: 1 }, { unique: true });
 
 module.exports = mongoose.model('SlotLock', slotLockSchema);

@@ -89,6 +89,10 @@ const createClosure = async (req, res) => {
       endTime: { $gt: start.toDate() }
     });
 
+    // Sync shop status to OFFLINE
+    vendor.isShopOpen = false;
+    await vendor.save();
+
     res.status(201).json(await mapClosureResponse(closure, vendor));
   } catch (error) {
     const status = error.message === 'Vendor not found' ? 404 : 400;
