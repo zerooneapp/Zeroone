@@ -8,6 +8,7 @@ import {
   Power,
   Calendar,
   ChevronRight,
+  ChevronDown,
   MapPin,
   X,
   ShieldCheck,
@@ -135,7 +136,7 @@ const VendorDashboard = () => {
   }
 
   const actionTiles = [
-    { label: 'Create', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
+    { label: 'Create Booking', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
     { label: 'Create Offers', icon: Percent, path: '/vendor/offers' },
     { label: 'Staff', icon: Briefcase, path: '/vendor/staff' },
     { label: 'Services', icon: LayoutGrid, path: '/vendor/services' },
@@ -150,16 +151,13 @@ const VendorDashboard = () => {
             <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
               {data.shopName?.split(' ')[0] || 'Shop'}
             </h1>
-            <div className="flex items-center gap-1 bg-emerald-500 px-1.5 py-0.5 rounded-full">
-              <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              <span className="text-[6px] font-black text-white tracking-widest">Live</span>
-            </div>
           </div>
           <div className="flex items-center gap-1.5 text-slate-400 dark:text-gray-500">
             <MapPin size={8} strokeWidth={3} />
             <span className="text-[8px] font-black tracking-widest">
               {data.address?.split(',').slice(-1)[0]?.trim().split(' ')[0] || 'Indore'}
             </span>
+            <ChevronDown size={10} className="ml-0.5" />
           </div>
         </div>
 
