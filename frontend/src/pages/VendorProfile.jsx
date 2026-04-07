@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-   ArrowLeft, Store, MapPin, Clock, Camera, Image as ImageIcon,
-   Video, Save, Plus, X, UploadCloud, Info, CheckCircle2
+   ArrowLeft, Store, Camera, Video,
+   Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import Button from '../components/Button';
-import SectionTitle from '../components/SectionTitle';
 import toast from 'react-hot-toast';
+import { useThemeStore } from '../store/themeStore';
 
 const VendorProfile = () => {
    const navigate = useNavigate();
+   const { isDarkMode, toggleTheme } = useThemeStore();
    const [loading, setLoading] = useState(false);
+   const [activeSection, setActiveSection] = useState(null); // null | 'basic' | 'media'
    const [data, setData] = useState({
       shopName: '',
       address: '',
       workingHours: { start: '09:00 AM', end: '09:00 PM' }
    });
    const [currentMedia, setCurrentMedia] = useState(null);
-
-   // Form states for uploads
    const [galleryFiles, setGalleryFiles] = useState([]);
    const [videoFile, setVideoFile] = useState(null);
 
@@ -58,13 +58,8 @@ const VendorProfile = () => {
       try {
          setLoading(true);
          const formData = new FormData();
-
-         galleryFiles.forEach(file => {
-            formData.append('gallery', file);
-         });
-         if (videoFile) {
-            formData.append('video', videoFile);
-         }
+         galleryFiles.forEach(file => formData.append('gallery', file));
+         if (videoFile) formData.append('video', videoFile);
 
          const res = await api.post('/vendor/upload-docs', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
@@ -81,183 +76,271 @@ const VendorProfile = () => {
       }
    };
 
+   const menuItems = [
+      {
+         key: 'basic',
+         label: 'Basic Info',
+         subtitle: 'Shop name, address & hours',
+         icon: Store,
+         iconBg: 'bg-blue-500/10',
+         iconColor: 'text-blue-500',
+      },
+      {
+         key: 'media',
+         label: 'Shop Media',
+         subtitle: 'Gallery images & promo video',
+         icon: Camera,
+         iconBg: 'bg-purple-500/10',
+         iconColor: 'text-purple-500',
+      },
+      {
+         key: 'services',
+         label: 'Services',
+         subtitle: 'Manage your service listings',
+         icon: LayoutGrid,
+         iconBg: 'bg-emerald-500/10',
+         iconColor: 'text-emerald-500',
+         path: '/vendor/services',
+      },
+      {
+         key: 'theme',
+         label: isDarkMode ? 'Light Mode' : 'Dark Mode',
+         subtitle: isDarkMode ? 'Switch to light theme' : 'Switch to dark theme',
+         icon: isDarkMode ? Sun : Moon,
+         iconBg: isDarkMode ? 'bg-amber-500/10' : 'bg-slate-500/10',
+         iconColor: isDarkMode ? 'text-amber-500' : 'text-slate-500',
+         isToggle: true,
+      },
+   ];
+
    return (
-      <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-         <header className="px-4 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center gap-3 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-4">
+         {/* Header */}
+         <header className="px-4 pt-5 pb-3 sticky top-0 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 flex items-center gap-3 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
             <button
-               onClick={() => navigate(-1)}
-               className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
+               onClick={() => {
+                  if (activeSection) setActiveSection(null);
+                  else navigate(-1);
+               }}
+               className="p-2 rounded-xl active:scale-90 transition-all"
             >
-               <ArrowLeft size={18} />
+               <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
             </button>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Shop Profile Settings</h1>
+            <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
+               {activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Shop Media' : 'Account Settings'}
+            </h1>
          </header>
 
-         <main className="px-4 mt-3.5 space-y-4 max-w-2xl mx-auto">
-            {/* 📋 BASIC INFO SECTION */}
-            <section className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-sm border border-slate-200/60 dark:border-gray-800 space-y-3">
-               <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
-                     <Store size={18} />
-                  </div>
-                  <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Basic Info</h2>
-               </div>
-
-               <form onSubmit={handleUpdateInfo} className="space-y-4">
-                  <div className="space-y-1.5">
-                     <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Shop Name</label>
-                     <input
-                        type="text"
-                        value={data.shopName}
-                        onChange={(e) => setData({ ...data, shopName: e.target.value })}
-                        className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
-                        placeholder="Enter shop name"
-                     />
-                  </div>
-
-                  <div className="space-y-1.5">
-                     <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Business Address</label>
-                     <textarea
-                        value={data.address}
-                        onChange={(e) => setData({ ...data, address: e.target.value })}
-                        className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10 min-h-[60px]"
-                        placeholder="Street, City, ZIP"
-                     />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                     <div className="space-y-1.5">
-                        <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Open Time</label>
-                        <input
-                           type="text"
-                           value={data.workingHours.start}
-                           onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, start: e.target.value } })}
-                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
-                           placeholder="09:00 AM"
-                        />
-                     </div>
-                     <div className="space-y-1.5">
-                        <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Close Time</label>
-                        <input
-                           type="text"
-                           value={data.workingHours.end}
-                           onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, end: e.target.value } })}
-                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all focus:ring-2 focus:ring-primary/10"
-                           placeholder="09:00 PM"
-                        />
-                     </div>
-                  </div>
-
-                  <Button type="submit" loading={loading} className="w-full rounded-lg py-3 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all active:scale-95">
-                     Save Changes
-                  </Button>
-               </form>
-            </section>
-
-            {/* 🎬 MEDIA & GALLERY SECTION */}
-            <section className="bg-white dark:bg-gray-900 rounded-[2rem] p-5 shadow-sm border border-slate-200/60 dark:border-gray-800 space-y-5">
-               <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-purple-500/10 text-purple-500 rounded-lg">
-                     <Camera size={18} />
-                  </div>
-                  <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Shop Media (Mockup Style)</h2>
-               </div>
-
-               {/* Current Gallery Preview */}
-               <div className="space-y-2">
-                  <p className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Current Gallery</p>
-                  <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
-                     {currentMedia?.galleryImages?.map((img, i) => (
-                        <div key={i} className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-800 shadow-sm relative group">
-                           <img src={img} className="w-full h-full object-cover" />
-                        </div>
+         <main className="px-4 mt-3 max-w-2xl mx-auto">
+            <AnimatePresence mode="wait">
+               {/* ── MENU LIST ── */}
+               {!activeSection && (
+                  <motion.div
+                     key="menu"
+                     initial={{ opacity: 0, x: -16 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: -16 }}
+                     transition={{ duration: 0.18 }}
+                     className="space-y-2"
+                  >
+                     {menuItems.map((item) => (
+                        <button
+                           key={item.key}
+                           onClick={() => {
+                              if (item.isToggle) { toggleTheme(); return; }
+                              if (item.path) { navigate(item.path); return; }
+                              setActiveSection(item.key);
+                           }}
+                           className="w-full flex items-center gap-3.5 bg-white dark:bg-gray-900 rounded-xl px-4 py-3.5 border border-slate-100 dark:border-gray-800 shadow-sm active:scale-[0.98] transition-all group"
+                        >
+                           <div className={`w-10 h-10 ${item.iconBg} ${item.iconColor} rounded-xl flex items-center justify-center shrink-0`}>
+                              <item.icon size={18} />
+                           </div>
+                           <div className="flex-1 text-left">
+                              <p className="text-sm font-black text-slate-800 dark:text-white leading-tight">{item.label}</p>
+                              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-0.5">{item.subtitle}</p>
+                           </div>
+                           {item.isToggle ? (
+                               <div className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}>
+                                  <div className={`absolute top-1 w-4 h-4 rounded-full shadow-sm transition-all duration-300 ${isDarkMode ? 'bg-amber-400 left-6' : 'bg-white left-1'}`} />
+                               </div>
+                            ) : (
+                               <ChevronRight size={16} className="text-slate-300 dark:text-gray-600 group-active:translate-x-0.5 transition-transform" />
+                            )}
+                        </button>
                      ))}
-                     {!currentMedia?.galleryImages?.length && (
-                        <p className="text-[9px] italic text-gray-300 px-1 font-bold">No gallery images yet</p>
-                     )}
-                  </div>
-               </div>
+                  </motion.div>
+               )}
 
-               {/* Video Preview */}
-               <div className="space-y-2">
-                  <p className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Promotional Video</p>
-                  {currentMedia?.shopVideo ? (
-                     <div className="relative w-full h-28 bg-slate-50 dark:bg-gray-800/50 rounded-xl overflow-hidden flex items-center justify-center border border-slate-100 dark:border-gray-800">
-                        <Video className="text-gray-300" size={28} />
-                        <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-sm"><CheckCircle2 size={10} /></div>
-                        <p className="absolute bottom-2 left-3 text-[8px] font-black uppercase text-gray-400 opacity-60">Status: Active</p>
-                     </div>
-                  ) : (
-                     <p className="text-[9px] italic text-gray-300 px-1 font-bold">No promotional video uploaded</p>
-                  )}
-               </div>
-
-               {/* Upload Zone */}
-               <div className="p-5 border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-2xl space-y-4 bg-slate-50/30 dark:bg-transparent">
-                  <div className="space-y-4">
-                     <div className="flex items-center justify-between">
-                        <div>
-                           <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight">Add Images/Gallery</p>
-                           <p className="text-[8px] text-gray-400 font-bold tracking-tighter uppercase mt-0.5">Recommended: 1:1 or 4:3 ratio</p>
+               {/* ── BASIC INFO SECTION ── */}
+               {activeSection === 'basic' && (
+                  <motion.section
+                     key="basic"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-3"
+                  >
+                     <div className="flex items-center gap-2.5 mb-1">
+                        <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+                           <Store size={16} />
                         </div>
-                        <input
-                           type="file"
-                           id="gallery-input"
-                           multiple
-                           className="hidden"
-                           onChange={(e) => setGalleryFiles([...galleryFiles, ...Array.from(e.target.files)])}
-                        />
-                        <label htmlFor="gallery-input" className="p-2.5 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-white transition-all shadow-md border border-slate-200/60 dark:border-gray-800">
-                           <Plus size={18} className="text-gray-400" />
-                        </label>
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Basic Info</h2>
                      </div>
 
-                     {galleryFiles.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                           {galleryFiles.map((f, i) => (
-                              <div key={i} className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-[8px] font-black uppercase flex items-center gap-1.5 border border-blue-500/20">
-                                 {f.name.slice(0, 12)}
-                                 <X size={10} className="cursor-pointer" onClick={() => setGalleryFiles(galleryFiles.filter((_, idx) => idx !== i))} />
+                     <form onSubmit={handleUpdateInfo} className="space-y-4">
+                        <div className="space-y-1.5">
+                           <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Shop Name</label>
+                           <input
+                              type="text"
+                              value={data.shopName}
+                              onChange={(e) => setData({ ...data, shopName: e.target.value })}
+                              className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              placeholder="Enter shop name"
+                           />
+                        </div>
+
+                        <div className="space-y-1.5">
+                           <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Business Address</label>
+                           <textarea
+                              value={data.address}
+                              onChange={(e) => setData({ ...data, address: e.target.value })}
+                              className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10 min-h-[60px]"
+                              placeholder="Street, City, ZIP"
+                           />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                           <div className="space-y-1.5">
+                              <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Open Time</label>
+                              <input
+                                 type="text"
+                                 value={data.workingHours.start}
+                                 onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, start: e.target.value } })}
+                                 className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                                 placeholder="09:00 AM"
+                              />
+                           </div>
+                           <div className="space-y-1.5">
+                              <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Close Time</label>
+                              <input
+                                 type="text"
+                                 value={data.workingHours.end}
+                                 onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, end: e.target.value } })}
+                                 className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                                 placeholder="09:00 PM"
+                              />
+                           </div>
+                        </div>
+
+                        <Button type="submit" loading={loading} className="w-full rounded-lg py-3 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all active:scale-95">
+                           Save Changes
+                        </Button>
+                     </form>
+                  </motion.section>
+               )}
+
+               {/* ── MEDIA SECTION ── */}
+               {activeSection === 'media' && (
+                  <motion.section
+                     key="media"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-5"
+                  >
+                     <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-purple-500/10 text-purple-500 rounded-lg">
+                           <Camera size={16} />
+                        </div>
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Shop Media</h2>
+                     </div>
+
+                     {/* Current Gallery */}
+                     <div className="space-y-2">
+                        <p className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Current Gallery</p>
+                        <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
+                           {currentMedia?.galleryImages?.map((img, i) => (
+                              <div key={i} className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-800 shadow-sm">
+                                 <img src={img} className="w-full h-full object-cover" alt="" />
                               </div>
                            ))}
+                           {!currentMedia?.galleryImages?.length && (
+                              <p className="text-[9px] italic text-gray-300 px-1 font-bold">No gallery images yet</p>
+                           )}
                         </div>
-                     )}
-
-                     <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-gray-800">
-                        <div>
-                           <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight">Upload Promo Video</p>
-                           <p className="text-[8px] text-gray-400 font-bold tracking-tighter uppercase mt-0.5">Format: MP4 (Max 30s / 50MB)</p>
-                        </div>
-                        <input
-                           type="file"
-                           id="video-input"
-                           className="hidden"
-                           onChange={(e) => setVideoFile(e.target.files[0])}
-                        />
-                        <label htmlFor="video-input" className="p-2.5 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-white transition-all shadow-md border border-slate-200/60 dark:border-gray-800">
-                           <Video size={18} className={videoFile ? "text-blue-500" : "text-gray-400"} />
-                        </label>
                      </div>
-                     {videoFile && (
-                        <div className="px-3 py-1.5 bg-purple-500/10 text-purple-500 rounded-lg text-[8px] font-black uppercase flex items-center justify-between border border-purple-500/20">
-                           <span>{videoFile.name}</span>
-                           <X size={10} className="cursor-pointer" onClick={() => setVideoFile(null)} />
-                        </div>
-                     )}
-                  </div>
-               </div>
 
-               <Button
-                  onClick={handleMediaUpload}
-                  loading={loading}
-                  className="w-full rounded-xl py-4 font-black uppercase tracking-widest text-[10px] bg-slate-900 dark:bg-primary shadow-xl shadow-black/10 active:scale-95 transition-all"
-               >
-                  Upload & Sync Gallery
-               </Button>
-               <p className="text-[8px] text-center text-gray-400 font-black uppercase tracking-widest opacity-60">
-                  Changes will reflect instantly on customer side discovery
-               </p>
-            </section>
+                     {/* Video */}
+                     <div className="space-y-2">
+                        <p className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Promotional Video</p>
+                        {currentMedia?.shopVideo ? (
+                           <div className="relative w-full h-24 bg-slate-50 dark:bg-gray-800/50 rounded-xl overflow-hidden flex items-center justify-center border border-slate-100 dark:border-gray-800">
+                              <Video className="text-gray-300" size={24} />
+                              <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-sm"><CheckCircle2 size={10} /></div>
+                              <p className="absolute bottom-2 left-3 text-[8px] font-black uppercase text-gray-400 opacity-60">Status: Active</p>
+                           </div>
+                        ) : (
+                           <p className="text-[9px] italic text-gray-300 px-1 font-bold">No promotional video uploaded</p>
+                        )}
+                     </div>
+
+                     {/* Upload Zone */}
+                     <div className="p-4 border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-xl space-y-4 bg-slate-50/30 dark:bg-transparent">
+                        <div className="space-y-4">
+                           <div className="flex items-center justify-between">
+                              <div>
+                                 <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight">Add Images</p>
+                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter uppercase mt-0.5">1:1 or 4:3 ratio</p>
+                              </div>
+                              <input type="file" id="gallery-input" multiple className="hidden" onChange={(e) => setGalleryFiles([...galleryFiles, ...Array.from(e.target.files)])} />
+                              <label htmlFor="gallery-input" className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-pointer shadow-md border border-slate-200/60 dark:border-gray-800">
+                                 <Plus size={16} className="text-gray-400" />
+                              </label>
+                           </div>
+
+                           {galleryFiles.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5">
+                                 {galleryFiles.map((f, i) => (
+                                    <div key={i} className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-[8px] font-black uppercase flex items-center gap-1.5 border border-blue-500/20">
+                                       {f.name.slice(0, 12)}
+                                       <X size={10} className="cursor-pointer" onClick={() => setGalleryFiles(galleryFiles.filter((_, idx) => idx !== i))} />
+                                    </div>
+                                 ))}
+                              </div>
+                           )}
+
+                           <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-gray-800">
+                              <div>
+                                 <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight">Promo Video</p>
+                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter uppercase mt-0.5">MP4 (Max 30s / 50MB)</p>
+                              </div>
+                              <input type="file" id="video-input" className="hidden" onChange={(e) => setVideoFile(e.target.files[0])} />
+                              <label htmlFor="video-input" className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-pointer shadow-md border border-slate-200/60 dark:border-gray-800">
+                                 <Video size={16} className={videoFile ? 'text-blue-500' : 'text-gray-400'} />
+                              </label>
+                           </div>
+
+                           {videoFile && (
+                              <div className="px-3 py-1.5 bg-purple-500/10 text-purple-500 rounded-lg text-[8px] font-black uppercase flex items-center justify-between border border-purple-500/20">
+                                 <span>{videoFile.name}</span>
+                                 <X size={10} className="cursor-pointer" onClick={() => setVideoFile(null)} />
+                              </div>
+                           )}
+                        </div>
+                     </div>
+
+                     <Button onClick={handleMediaUpload} loading={loading} className="w-full rounded-xl py-3 font-black uppercase tracking-widest text-[10px] bg-slate-900 dark:bg-primary shadow-xl shadow-black/10 active:scale-95 transition-all">
+                        Upload & Sync Gallery
+                     </Button>
+                     <p className="text-[8px] text-center text-gray-400 font-black uppercase tracking-widest opacity-60">
+                        Changes reflect instantly on customer side
+                     </p>
+                  </motion.section>
+               )}
+            </AnimatePresence>
          </main>
       </div>
    );

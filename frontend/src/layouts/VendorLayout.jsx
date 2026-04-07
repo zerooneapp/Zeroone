@@ -21,8 +21,8 @@ const VendorLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 font-sans flex flex-col pb-[58px] sm:pb-0">
-      <div className="flex-1 overflow-y-auto w-full max-w-lg mx-auto bg-white dark:bg-gray-900 shadow-[0_0_100px_rgba(0,0,0,0.03)] dark:shadow-none min-h-screen relative border-x border-slate-100 dark:border-gray-800/50">
+    <div className="bg-slate-50 dark:bg-gray-950 font-sans flex flex-col pb-[58px] sm:pb-0">
+      <div className="flex-1 overflow-y-auto w-full max-w-lg mx-auto bg-white dark:bg-gray-900 shadow-[0_0_100px_rgba(0,0,0,0.03)] dark:shadow-none relative border-x border-slate-100 dark:border-gray-800/50">
         <Outlet />
       </div>
 

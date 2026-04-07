@@ -139,12 +139,11 @@ const VendorDashboard = () => {
     { label: 'Create Booking', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
     { label: 'Create Offers', icon: Percent, path: '/vendor/offers' },
     { label: 'Staff', icon: Briefcase, path: '/vendor/staff' },
-    { label: 'Services', icon: LayoutGrid, path: '/vendor/services' },
     { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-12 transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden pb-4">
       <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
@@ -163,18 +162,12 @@ const VendorDashboard = () => {
 
         <div className="flex items-center gap-1.5 shrink-0">
           <button
-            onClick={toggleTheme}
-            className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90 shadow-sm"
-          >
-            {isDarkMode ? <Sun size={15} className="text-amber-500" /> : <Moon size={15} className="text-slate-600" />}
-          </button>
-          <button
             onClick={() => setIsNotificationsOpen(true)}
-            className="relative w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-slate-100 dark:border-gray-700 transition-transform active:scale-90"
+            className="relative w-8 h-8 flex items-center justify-center transition-transform active:scale-90"
           >
-            <Bell size={15} className="text-slate-600 dark:text-gray-400" />
+            <Bell size={18} className="text-slate-700 dark:text-gray-400" />
             {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 border-2 border-white dark:border-gray-950 rounded-full" />
+              <span className="absolute top-1 right-1.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-gray-950 rounded-full" />
             )}
           </button>
           <button
@@ -199,44 +192,18 @@ const VendorDashboard = () => {
       </header>
 
       <main className="px-2.5 space-y-1 pt-[65px]">
-        <section className="grid grid-cols-5 gap-1.5 px-0.5">
+        <section className="grid grid-cols-4 gap-1.5 px-0.5">
           {actionTiles.map((action) => (
             <button
               key={action.label}
               onClick={action.onClick || (() => navigate(action.path))}
-              className="flex flex-col items-center justify-center gap-1.5 py-2.5 bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
+              className="flex flex-col items-center justify-center gap-1 py-1.5 bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
             >
-              <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-8">
-                {action.label === 'Wallet' ? (
-                  <AnimatePresence mode="wait">
-                    {showWalletValue ? (
-                      <motion.span
-                        key="wallet-value"
-                        initial={{ y: 12, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -12, opacity: 0 }}
-                        className="text-[10px] font-black text-slate-900 dark:text-white absolute"
-                      >
-                        ₹{data.walletBalance.toLocaleString()}
-                      </motion.span>
-                    ) : (
-                      <motion.div
-                        key="wallet-icon"
-                        initial={{ y: 12, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -12, opacity: 0 }}
-                        className="absolute"
-                      >
-                        <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                ) : (
-                  <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
-                )}
+              <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-6">
+                <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
               </div>
               <div className="px-1 text-center">
-                <span className="text-[7.5px] font-black text-slate-500 dark:text-gray-400 tracking-tighter leading-none block">
+                <span className="text-[9px] font-black text-slate-700 dark:text-gray-300 tracking-tight leading-none block">
                   {action.label}
                 </span>
               </div>
@@ -245,26 +212,24 @@ const VendorDashboard = () => {
         </section>
 
         <section className="px-0.5">
-          <div className="flex overflow-x-auto gap-2 no-scrollbar pb-0">
-            <div className="bg-slate-900 dark:bg-gray-900 py-3 px-2.5 rounded-lg shadow-lg border border-[#1C2C4E]/10 flex flex-col min-w-[130px] shrink-0">
-              <p className="text-[9px] font-black text-white/50 tracking-widest leading-none mb-1.5">Today revenue</p>
-              <p className="text-sm font-black text-white leading-none">₹{data.stats.todayEarnings.toLocaleString()}</p>
+          <div className="grid grid-cols-4 gap-1.5 pb-0">
+            <div className="bg-slate-900 dark:bg-gray-900 py-2.5 px-1.5 rounded-lg shadow-lg border border-[#1C2C4E]/10 flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-white/50 tracking-widest leading-none mb-1.5 truncate">Today revenue</p>
+              <p className="text-[17px] font-black text-white leading-none truncate">₹{data.stats.todayEarnings.toLocaleString()}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[130px] shrink-0">
-              <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Today clients</p>
-              <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">{data.stats.todayBookings}</p>
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Today clients</p>
+              <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">{data.stats.todayBookings}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[130px] shrink-0">
-              <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5">Services done</p>
-              <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Services done</p>
+              <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'completed').length || 0}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col min-w-[130px] shrink-0">
-              <p className="text-[9px] font-black text-slate-400 tracking-widest leading-none mb-1.5 text-ellipsis overflow-hidden whitespace-nowrap">
-                Pending bookings
-              </p>
-              <p className="text-xl font-bold text-slate-900 dark:text-white leading-none">
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Pending</p>
+              <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'confirmed').length || 0}
               </p>
             </div>
@@ -273,7 +238,7 @@ const VendorDashboard = () => {
 
         <section className="space-y-2 pt-0">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-sm font-black text-slate-800 dark:text-white tracking-widest capitalize">Today's clients</h2>
+            <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-widest opacity-80 uppercase">Today's clients</h2>
             <button
               onClick={() => navigate('/vendor/bookings')}
               className="text-[8px] font-black text-primary dark:text-white tracking-widest px-3 py-1.5 bg-primary/5 dark:bg-white/10 rounded-full border border-primary/10 dark:border-white/20 transition-all active:scale-95"
@@ -284,11 +249,11 @@ const VendorDashboard = () => {
 
           <div className="space-y-1">
             {data.schedule.length === 0 ? (
-              <div className="py-10 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center gap-2 group">
-                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-200 group-hover:text-primary transition-colors">
+              <div className="py-20 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm">
+                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-primary transition-colors">
                   <Calendar size={18} />
                 </div>
-                <p className="text-[8px] font-black text-slate-400 tracking-widest">No appointments for today</p>
+                <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">No appointments for today</p>
               </div>
             ) : (
               data.schedule.map((item, idx) => (
@@ -338,99 +303,7 @@ const VendorDashboard = () => {
           </div>
         </section>
 
-        <section className="space-y-1 px-0.5">
-          <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80 uppercase">Revenue Analytics</h2>
-          <div className="bg-white dark:bg-gray-900 p-4 pt-8 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm h-40 w-full relative overflow-hidden group">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={(data.revenueHistory || []).slice(0, 5)} margin={{ left: 10, right: 35, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={isDarkMode ? '#1e293b' : '#f1f5f9'} />
-                <XAxis
-                  dataKey="day"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 9, fill: isDarkMode ? '#CBD5E1' : '#1E293B', fontWeight: 800, dx: -10 }}
-                  dy={10}
-                />
-                <YAxis hide domain={[0, 'auto']} />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '0.5rem',
-                    background: isDarkMode ? '#0f172a' : '#ffffff',
-                    border: isDarkMode ? '1px solid #1e293b' : '1px solid #f1f5f9',
-                    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
-                    fontSize: '9px',
-                    fontWeight: 900,
-                    padding: '8px 12px'
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#3b82f6"
-                  strokeWidth={4}
-                  fillOpacity={1}
-                  fill="url(#colorRev)"
-                  animationDuration={2000}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
-          </div>
-        </section>
 
-        <section className="space-y-1 pb-0 px-0.5">
-          <h2 className="text-[10px] font-black text-slate-800 dark:text-white px-1 tracking-widest opacity-80 uppercase">Recent Payments</h2>
-          <div className="bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm overflow-hidden">
-            {recentTransactions.length === 0 ? (
-              <div className="p-4 text-center text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                No recent payments
-              </div>
-            ) : (
-              recentTransactions.map((transaction, i, arr) => (
-                <div
-                  key={transaction._id || i}
-                  className={cn(
-                    'p-3 flex items-center justify-between group active:bg-slate-50 dark:active:bg-gray-800 transition-colors',
-                    i !== arr.length - 1 && 'border-b border-slate-50 dark:border-gray-800'
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="space-y-0.5">
-                      <h4 className="text-[11px] font-black text-slate-800 dark:text-white items-center flex gap-2">
-                        {prettifyTransactionLabel(transaction.category || transaction.reason || 'Payment')}
-                        <span className="text-[8px] font-bold text-slate-400 opacity-60 tracking-wider font-sans">
-                          {dayjs(transaction.timestamp).format('DD MMM')}
-                        </span>
-                      </h4>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-                        {transaction.description || prettifyTransactionLabel(transaction.paymentGateway || transaction.paymentMethod || 'System')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="text-[11px] font-black text-slate-800 dark:text-white">
-                        {transaction.type === 'credit' ? '+' : '-'}₹ {Math.round(transaction.amount || 0)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter opacity-60">
-                        {transaction.paymentMethod || transaction.paymentGateway || 'system'}
-                      </span>
-                      <ChevronRight size={10} className="text-blue-500/30" />
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
       </main>
 
       <AnimatePresence>
