@@ -14,6 +14,8 @@ const CheckoutReview = () => {
   const navigate = useNavigate();
   const bookingData = location.state;
   const { clearCart } = useCartStore();
+  const [loading, setLoading] = React.useState(false);
+  const [pricingPreview, setPricingPreview] = React.useState(null);
 
   if (!bookingData) {
     return (
@@ -28,8 +30,6 @@ const CheckoutReview = () => {
   const totalDuration =
     bookingData.totalDurationOverride ||
     items.reduce((sum, item) => sum + (item.duration || 0) + (item.bufferTime || 0), 0);
-  const [loading, setLoading] = React.useState(false);
-  const [pricingPreview, setPricingPreview] = React.useState(null);
   const formatPrice = (amount) => `Rs. ${Number(amount || 0).toFixed(2).replace(/\.00$/, '')}`;
 
   React.useEffect(() => {
@@ -238,7 +238,7 @@ const CheckoutReview = () => {
           <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 leading-none capitalize">Assigned professional</p>
           <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center gap-3 active:scale-95 transition-all">
             <div className="w-12 h-12 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shadow-inner shrink-0">
-              <img src={selectedStaff?.image || `https://i.pravatar.cc/150?u=${vendor._id}`} className="w-full h-full object-cover" />
+              <img src={selectedStaff?.image || `https://i.pravatar.cc/150?u=${vendor._id}`} className="w-full h-full object-cover" alt={selectedStaff?.name || 'Auto assigned'} />
             </div>
             <div className="leading-none overflow-hidden pr-2">
               <p className="font-black text-[14px] text-gray-900 dark:text-white tracking-tight truncate leading-none capitalize">{selectedStaff?.name || 'Auto assigned'}</p>

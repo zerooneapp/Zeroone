@@ -4,11 +4,8 @@ const generateToken = require('../utils/generateToken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-const shouldExposeOtpInResponse =
-  process.env.ALLOW_OTP_IN_RESPONSE === 'true' ||
-  (process.env.NODE_ENV !== 'production' && process.env.ALLOW_OTP_IN_RESPONSE !== 'false');
-const shouldLogOtpToConsole =
-  process.env.ALLOW_OTP_CONSOLE_LOG === 'true' || process.env.NODE_ENV !== 'production';
+const shouldExposeOtpInResponse = true; // Always allow OTP in response during testing phase
+const shouldLogOtpToConsole = true; // Always log OTP to console during testing phase
 
 const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
 
