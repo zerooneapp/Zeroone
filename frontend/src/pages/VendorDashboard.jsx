@@ -15,7 +15,9 @@ import {
   CalendarPlus,
   LayoutGrid,
   Briefcase,
-  Percent
+  Percent,
+  Users,
+  Ticket
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -136,9 +138,9 @@ const VendorDashboard = () => {
   }
 
   const actionTiles = [
-    { label: 'Create Booking', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
-    { label: 'Create Offers', icon: Percent, path: '/vendor/offers' },
-    { label: 'Staff', icon: Briefcase, path: '/vendor/staff' },
+    { label: 'New Booking', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
+    { label: 'Offers', icon: Ticket, path: '/vendor/offers' },
+    { label: 'Staff', icon: Users, path: '/vendor/staff' },
     { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' }
   ];
 
@@ -191,19 +193,19 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      <main className="px-2.5 space-y-1 pt-[65px]">
-        <section className="grid grid-cols-4 gap-1.5 px-0.5">
+      <main className="px-1.5 space-y-1 pt-[65px]">
+        <section className="grid grid-cols-4 gap-1 px-0.5">
           {actionTiles.map((action) => (
             <button
               key={action.label}
               onClick={action.onClick || (() => navigate(action.path))}
-              className="flex flex-col items-center justify-center gap-1 py-1.5 bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] active:scale-95 transition-all group"
+              className="flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-[15px] border border-[#1C2C4E]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(28,44,78,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(28,44,78,0.2)]"
             >
-              <div className="w-full flex items-center justify-center relative overflow-hidden shrink-0 h-6">
-                <action.icon size={22} strokeWidth={2.4} className="text-slate-700 dark:text-gray-300 group-hover:text-primary transition-colors" />
+              <div className="w-9 h-9 bg-[#1C2C4E] dark:bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-[#1C2C4E]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <action.icon size={18} strokeWidth={2.5} className="text-white" />
               </div>
-              <div className="px-1 text-center">
-                <span className="text-[9px] font-black text-slate-700 dark:text-gray-300 tracking-tight leading-none block">
+              <div className="px-1 text-center font-black">
+                <span className="text-[10px] text-[#1C2C4E] dark:text-gray-300 tracking-tight leading-none block uppercase">
                   {action.label}
                 </span>
               </div>

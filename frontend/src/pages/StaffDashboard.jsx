@@ -82,21 +82,21 @@ const StaffDashboard = () => {
          {/* 🏙️ CLEAN MINIMAL HEADER (NO ITALIC) */}
          <div className="px-5 pt-6 pb-2 bg-white/80 dark:bg-gray-900/80 sticky top-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
             <div className="flex items-center justify-between">
-               <div className="flex items-center gap-1.5">
-                  <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-widest uppercase">ZeroOne</h1>
+               <div className="flex items-center gap-1">
+                  <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+                     <span className="text-[#1C2C4E] dark:text-white uppercase">Zero</span>
+                     <span className="text-[#1C2C4E]/30 dark:text-gray-600 uppercase">One</span>
+                  </h1>
                   <div className="w-1 h-1 bg-primary rounded-full mt-0.5" />
                </div>
 
                <div className="flex items-center gap-1.5">
-                  <button onClick={toggleTheme} className="p-2 text-slate-400 bg-slate-100 dark:bg-gray-800 rounded-lg transition-all active:scale-90 border border-slate-200/50 dark:border-gray-700">
-                     {isDarkMode ? <Sun size={16} strokeWidth={3} /> : <Moon size={16} strokeWidth={3} />}
+                  <button onClick={toggleTheme} className="p-2 text-slate-700 dark:text-gray-400 transition-all active:scale-90">
+                     {isDarkMode ? <Sun size={17} strokeWidth={3} /> : <Moon size={17} strokeWidth={3} />}
                   </button>
-                  <button onClick={() => setShowNotifications(true)} className="relative p-2 text-slate-400 bg-slate-100 dark:bg-gray-800 rounded-lg transition-all active:scale-90 border border-slate-200/50 dark:border-gray-700">
-                     <Bell size={16} strokeWidth={3} />
+                  <button onClick={() => setShowNotifications(true)} className="relative p-2 text-slate-700 dark:text-gray-400 transition-all active:scale-90">
+                     <Bell size={17} strokeWidth={3} />
                      {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-gray-950" />}
-                  </button>
-                  <button onClick={logout} className="p-2 bg-red-500/10 text-red-500 rounded-lg active:scale-90 transition-all border border-red-500/20">
-                     <LogOut size={16} strokeWidth={3} />
                   </button>
                </div>
             </div>
@@ -139,7 +139,7 @@ const StaffDashboard = () => {
                               </div>
                               <div className="leading-none">
                                  <h4 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[140px]">{currentTask.userId?.name || 'Client'}</h4>
-                                 <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-2 italic shadow-sm">{formatTime(currentTask.startTime)} DEPLOYMENT</p>
+                                 <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-2 italic shadow-sm">{formatTime(currentTask.startTime)}</p>
                               </div>
                            </div>
                            <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-95 transition-all">
@@ -156,13 +156,11 @@ const StaffDashboard = () => {
                            ))}
                         </div>
 
-                        {/* 📍 LOCATION AWARENESS */}
-                        <div className="flex items-start gap-2.5 mb-5 bg-slate-50/50 dark:bg-gray-800/50 p-2.5 rounded-xl border border-slate-50 dark:border-gray-800/50">
-                           <div className="p-1 px-1.5 bg-white dark:bg-gray-800 rounded-lg text-slate-400 shadow-sm border border-slate-100 dark:border-gray-700 mt-0.5">
-                              <MapPin size={12} strokeWidth={3} />
-                           </div>
-                           <p className="text-[9px] font-black text-slate-500 dark:text-gray-400 leading-normal uppercase tracking-tight line-clamp-2">
-                              {currentTask.serviceAddress || 'Elite Venue Address'}
+                        {/* 💰 SERVICE PRICE DISPLAY */}
+                        <div className="flex items-center justify-between mb-5 bg-slate-50/50 dark:bg-gray-800/50 p-3 rounded-xl border border-slate-50 dark:border-gray-800/50">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Service Price</p>
+                           <p className="text-[14px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                              ₹{currentTask.services?.reduce((acc, s) => acc + (s.price || 0), 0) || 0}
                            </p>
                         </div>
 

@@ -87,7 +87,7 @@ const OfferForm = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-       <header className="px-6 pt-8 pb-6 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/50">
+        <header className="px-5 pt-5 pb-4 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/50">
           <div className="flex items-center gap-4">
              <button 
                onClick={() => navigate(-1)}
@@ -108,9 +108,9 @@ const OfferForm = () => {
           </button>
        </header>
 
-       <main className="px-6 mt-8">
-          <form id="offer-form" onSubmit={handleSubmit} className="space-y-8 pb-12">
-             <div className="space-y-6">
+       <main className="px-5 mt-4">
+          <form id="offer-form" onSubmit={handleSubmit} className="space-y-4 pb-8">
+             <div className="space-y-4">
                 {/* Title */}
                 <div className="space-y-2">
                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Offer Title</label>
@@ -120,7 +120,7 @@ const OfferForm = () => {
                      placeholder="e.g. Summer Special"
                      value={formData.title}
                      onChange={(e) => setFormData({...formData, title: e.target.value})}
-                     className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                     className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                    />
                 </div>
 
@@ -133,7 +133,7 @@ const OfferForm = () => {
                            key={t}
                            type="button"
                            onClick={() => setFormData({...formData, discountType: t})}
-                           className={`p-4 rounded-2xl border font-black uppercase text-xs flex items-center justify-center gap-2 transition-all ${
+                           className={`p-3.5 rounded-2xl border font-black uppercase text-xs flex items-center justify-center gap-2 transition-all ${
                              formData.discountType === t 
                              ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105'
                              : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
@@ -146,7 +146,7 @@ const OfferForm = () => {
                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                    {/* Value */}
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Value</label>
@@ -159,7 +159,7 @@ const OfferForm = () => {
                            const val = Number(e.target.value);
                            setFormData({...formData, value: isNaN(val) ? '' : val});
                         }}
-                        className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
                       />
                    </div>
                    {/* Expiry */}
@@ -170,26 +170,26 @@ const OfferForm = () => {
                         type="date" 
                         value={formData.expiryDate}
                         onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
-                        className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 font-bold"
                       />
                    </div>
                 </div>
 
                 {/* Scope Selection */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                    <div className="flex items-center justify-between px-1">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Applicable Services</label>
                       <span className="text-[10px] text-gray-400 font-bold italic flex items-center gap-1">
                          <Info size={10} /> select none for all services
                       </span>
                    </div>
-                   <div className="flex flex-wrap gap-2">
+                   <div className="flex flex-wrap gap-1.5">
                       {availableServices.map((service) => (
                          <button 
                            key={service._id} 
                            type="button"
                            onClick={() => toggleService(service._id)}
-                           className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all border ${
+                           className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${
                              formData.serviceIds.includes(service._id) 
                              ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/20' 
                              : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
@@ -202,9 +202,9 @@ const OfferForm = () => {
                 </div>
              </div>
 
-             <div className="flex flex-col gap-4">
+             <div className="flex flex-col gap-3">
                 {/* 🚀 SAVINGS PREVIEW */}
-                <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-2xl border border-purple-100 dark:border-purple-900/30 flex items-center justify-between">
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/10 rounded-2xl border border-purple-100 dark:border-purple-900/30 flex items-center justify-between">
                    <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest">Customer Savings:</span>
                    <span className="text-sm font-black text-purple-600">
                       {formData.discountType === 'percentage'
@@ -213,7 +213,7 @@ const OfferForm = () => {
                    </span>
                 </div>
 
-                <div className="p-4 bg-green-50 dark:bg-green-900/10 rounded-2xl border border-green-100 dark:border-green-900/30 flex items-start gap-3">
+                <div className="p-3 bg-green-50 dark:bg-green-900/10 rounded-2xl border border-green-100 dark:border-green-900/30 flex items-start gap-3">
                    <Tag className="text-green-500 mt-0.5" size={18} />
                    <p className="text-[10px] font-bold text-green-600/70 leading-relaxed uppercase">
                       This offer will be automatically applied to eligible services during checkout. Expired offers are automatically disabled.

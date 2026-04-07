@@ -2,19 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video,
-   Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon
+   Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
 import { useThemeStore } from '../store/themeStore';
+import { useAuthStore } from '../store/authStore';
 
 const VendorProfile = () => {
    const navigate = useNavigate();
    const { isDarkMode, toggleTheme } = useThemeStore();
+   const { logout } = useAuthStore();
    const [loading, setLoading] = useState(false);
    const [activeSection, setActiveSection] = useState(null); // null | 'basic' | 'media'
+   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
    const [data, setData] = useState({
       shopName: '',
       address: '',
@@ -111,6 +114,15 @@ const VendorProfile = () => {
          iconColor: isDarkMode ? 'text-amber-500' : 'text-slate-500',
          isToggle: true,
       },
+      {
+         key: 'logout',
+         label: 'Logout',
+         subtitle: 'Sign out of your account',
+         icon: LogOut,
+         iconBg: 'bg-rose-500/10',
+         iconColor: 'text-rose-500',
+         isLogout: true,
+      },
    ];
 
    return (
@@ -148,6 +160,7 @@ const VendorProfile = () => {
                            key={item.key}
                            onClick={() => {
                               if (item.isToggle) { toggleTheme(); return; }
+                              if (item.isLogout) { setShowLogoutConfirm(true); return; }
                               if (item.path) { navigate(item.path); return; }
                               setActiveSection(item.key);
                            }}
@@ -342,6 +355,51 @@ const VendorProfile = () => {
                )}
             </AnimatePresence>
          </main>
+
+         <AnimatePresence>
+            {showLogoutConfirm && (
+               <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+                  <motion.div
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     exit={{ opacity: 0 }}
+                     onClick={() => setShowLogoutConfirm(false)}
+                     className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                  />
+                  <motion.div
+                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                     animate={{ scale: 1, opacity: 1, y: 0 }}
+                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                     className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl relative z-10 p-5 text-center"
+                  >
+                     <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <LogOut size={24} />
+                     </div>
+                     <h3 className="text-base font-black text-slate-800 dark:text-white leading-tight">Confirm Logout</h3>
+                     <p className="text-[11px] font-medium text-slate-400 dark:text-gray-500 mt-2">
+                        Are you sure you want to sign out? You will need to login again.
+                     </p>
+                     <div className="flex gap-2 mt-6">
+                        <button
+                           onClick={() => setShowLogoutConfirm(false)}
+                           className="flex-1 py-2.5 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-bold text-xs"
+                        >
+                           Cancel
+                        </button>
+                        <button
+                           onClick={() => {
+                              logout();
+                              navigate('/login');
+                           }}
+                           className="flex-1 py-2.5 bg-rose-500 text-white rounded-xl font-black text-xs shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+                        >
+                           OK
+                        </button>
+                     </div>
+                  </motion.div>
+               </div>
+            )}
+         </AnimatePresence>
       </div>
    );
 };
