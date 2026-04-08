@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
    Search, Filter, RefreshCw, MoreVertical,
-   ChevronRight, User, Phone, Calendar,
+   ChevronRight, ChevronDown, User, Phone, Calendar,
    Shield, CheckCircle, XCircle, Ban,
    LayoutDashboard, History, Eye, ArrowLeft
 } from 'lucide-react';
@@ -110,18 +110,20 @@ const UserManagement = () => {
                      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                   />
                </div>
-               {['status'].map((f) => (
-                  <select
-                     key={f}
-                     className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer"
-                     value={filters[f]}
-                     onChange={(e) => setFilters({ ...filters, [f]: e.target.value })}
-                  >
-                     <option value="">{f.toUpperCase()} : ALL</option>
-                     <option value="active">ACTIVE</option>
-                     <option value="blocked">BLOCKED</option>
-                  </select>
-               ))}
+                {['status'].map((f) => (
+                   <div key={f} className="relative group min-w-[120px]">
+                      <select
+                         className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
+                         value={filters[f]}
+                         onChange={(e) => setFilters({ ...filters, [f]: e.target.value })}
+                      >
+                         <option value="">{f.toUpperCase()} : ALL</option>
+                         <option value="active">ACTIVE</option>
+                         <option value="blocked">BLOCKED</option>
+                      </select>
+                      <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
+                   </div>
+                ))}
             </div>
          </div>
 

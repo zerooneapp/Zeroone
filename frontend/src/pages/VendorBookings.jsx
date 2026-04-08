@@ -150,8 +150,8 @@ const VendorBookings = () => {
 
   return (
     <div className="bg-background-light dark:bg-gray-950 pb-10">
-      <header className="px-4 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+      <header className="px-4 pt-3 pb-2 sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/vendor/dashboard')}
@@ -161,9 +161,9 @@ const VendorBookings = () => {
             </button>
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-1">
-                <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
-                  <span className="text-primary dark:text-white ">Zero</span>
-                  <span className="text-primary/30 dark:text-gray-600">One</span>
+                <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
+                  <span className="text-[#344474] dark:text-white ">Zero</span>
+                  <span className="text-[#344474]/30 dark:text-gray-600">One</span>
                 </h1>
 
               </div>
@@ -172,9 +172,9 @@ const VendorBookings = () => {
           </div>
           <button
             onClick={refreshAll}
-            className={`p-2.5 bg-slate-50 dark:bg-gray-800/80 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-800 active:rotate-180 transition-all duration-500 shadow-sm ${loading ? 'animate-spin' : ''}`}
+            className={`p-2 text-slate-400 active:rotate-180 transition-all duration-500 ${loading ? 'animate-spin' : ''}`}
           >
-            <RefreshCcw size={16} />
+            <RefreshCcw size={18} />
           </button>
         </div>
 
@@ -272,7 +272,7 @@ const VendorBookings = () => {
                             <button
                               onClick={() => handleEmergencyReschedule(booking, vendor)}
                               disabled={closureActionId === booking._id}
-                              className="h-10 px-3 bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
+                              className="h-10 px-3 bg-[#344474] text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
                             >
                               Reschedule
                             </button>
@@ -309,7 +309,7 @@ const VendorBookings = () => {
               className="py-8 text-center space-y-4"
             >
               <div className="relative w-20 h-20 mx-auto">
-                <div className="absolute inset-0 bg-primary/5 rounded-[2.5rem] animate-pulse" />
+                <div className="absolute inset-0 bg-[#344474]/5 rounded-[2.5rem] animate-pulse" />
                 <div className="relative w-full h-full bg-white dark:bg-gray-900 rounded-[2.5rem] border border-slate-100 dark:border-gray-800 shadow-xl dark:shadow-none flex items-center justify-center text-slate-300 dark:text-gray-700">
                   <CalendarIcon size={28} strokeWidth={1.5} />
                 </div>

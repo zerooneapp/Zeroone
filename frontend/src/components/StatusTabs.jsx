@@ -26,7 +26,7 @@ const StatusTabs = ({ activeTab, onTabChange }) => {
               />
             )}
             <span className={`relative z-10 text-[9px] font-black uppercase tracking-widest transition-colors duration-300 ${isActive
-                ? 'text-primary dark:text-white'
+                ? 'text-[#344474] dark:text-white'
                 : 'text-slate-400 hover:text-slate-600 dark:text-gray-500 dark:hover:text-gray-300'
               }`}>
               {tab.label}

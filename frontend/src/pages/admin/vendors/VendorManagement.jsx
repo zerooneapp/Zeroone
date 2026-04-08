@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
    Search, Filter, RefreshCw, MoreVertical,
-   ChevronRight, Store, User, Phone, MapPin,
+   ChevronRight, ChevronDown, Store, User, Phone, MapPin,
    CreditCard, Wallet, Zap, Star, Shield,
    CheckCircle, XCircle, Ban, Plus, History,
    LayoutDashboard, TrendingUp, Eye, MousePointer2,
@@ -148,20 +148,22 @@ const VendorManagement = () => {
                      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                   />
                </div>
-               {['status', 'serviceLevel', 'planType', 'isActive'].map((f) => (
-                  <select
-                     key={f}
-                     className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer"
-                     value={filters[f]}
-                     onChange={(e) => setFilters({ ...filters, [f]: e.target.value })}
-                  >
-                     <option value="">{f.toUpperCase()}</option>
-                     {f === 'status' && ['pending', 'active', 'inactive', 'blocked', 'rejected'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
-                     {f === 'serviceLevel' && ['standard', 'premium', 'luxury'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
-                     {f === 'planType' && ['daily', 'monthly', 'trial'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
-                     {f === 'isActive' && [<option key="t" value="true">VISIBLE</option>, <option key="f" value="false">HIDDEN</option>]}
-                  </select>
-               ))}
+                {['status', 'serviceLevel', 'planType', 'isActive'].map((f) => (
+                   <div key={f} className="relative group">
+                      <select
+                         className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
+                         value={filters[f]}
+                         onChange={(e) => setFilters({ ...filters, [f]: e.target.value })}
+                      >
+                         <option value="">{f.toUpperCase()}</option>
+                         {f === 'status' && ['pending', 'active', 'inactive', 'blocked', 'rejected'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
+                         {f === 'serviceLevel' && ['standard', 'premium', 'luxury'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
+                         {f === 'planType' && ['daily', 'monthly', 'trial'].map(o => <option key={o} value={o}>{o.toUpperCase()}</option>)}
+                         {f === 'isActive' && [<option key="t" value="true">VISIBLE</option>, <option key="f" value="false">HIDDEN</option>]}
+                      </select>
+                      <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
+                   </div>
+                ))}
             </div>
          </div>
 

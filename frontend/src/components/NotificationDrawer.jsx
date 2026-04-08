@@ -20,10 +20,10 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
     switch (type) {
       case 'BOOKING_CONFIRMED': return <CheckCircle2 size={16} className="text-emerald-500" />;
       case 'BOOKING_CANCELLED': return <AlertCircle size={16} className="text-red-500" />;
-      case 'BOOKING_RESCHEDULED': return <Clock3 size={16} className="text-blue-500" />;
-      case 'ASSIGNMENT_RECEIVED': return <ShoppingBag size={16} className="text-blue-600" />;
+      case 'BOOKING_RESCHEDULED': return <Clock3 size={16} className="text-[#344474]" />;
+      case 'ASSIGNMENT_RECEIVED': return <ShoppingBag size={16} className="text-[#344474]" />;
       case 'LOW_BALANCE': return <CreditCard size={16} className="text-orange-500" />;
-      default: return <Bell size={16} className="text-blue-600" />;
+      default: return <Bell size={16} className="text-[#344474]" />;
     }
   };
 

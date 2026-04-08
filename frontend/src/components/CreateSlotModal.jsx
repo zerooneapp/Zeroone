@@ -152,7 +152,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
         {/* Header */}
         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-950 sticky top-0 z-10">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+            <div className="w-9 h-9 bg-[#344474]/10 rounded-xl flex items-center justify-center text-[#344474]">
               <Calendar className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
@@ -201,7 +201,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                         : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
                         }`}
                     >
-                      <span className={`text-[10px] font-black uppercase ${formData.serviceIds.includes(s._id) ? 'text-primary' : 'text-gray-900 dark:text-white'}`}>
+                      <span className={`text-[10px] font-black uppercase ${formData.serviceIds.includes(s._id) ? 'text-[#344474]' : 'text-gray-900 dark:text-white'}`}>
                         {s.name}
                       </span>
                       <span className="text-[9px] font-bold text-gray-400 tracking-tight">₹{s.price} • {s.duration}m</span>
@@ -213,7 +213,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
               <button
                 disabled={!formData.name || formData.serviceIds.length === 0}
                 onClick={() => setStep(2)}
-                className="w-full py-4 bg-primary text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
+                className="w-full py-4 bg-[#344474] text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-[#344474]/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 Next: Select Slot <ChevronRight size={14} />
               </button>
@@ -254,7 +254,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                         key={slot.time}
                         onClick={() => setFormData({ ...formData, time: slot.time })}
                         className={`py-2.5 rounded-lg text-[10px] font-black border transition-all ${formData.time === slot.time
-                          ? 'bg-primary border-primary text-white shadow-md'
+                          ? 'bg-[#344474] border-[#344474] text-white shadow-md'
                           : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm'
                           }`}
                       >
@@ -281,7 +281,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                           <div className="w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden">
                             {s.image ? <img src={s.image} alt="" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400" />}
                           </div>
-                          <span className={`text-[9px] font-black uppercase truncate ${formData.staffId === s._id ? 'text-primary' : 'text-gray-900 dark:text-white'}`}>{s.name}</span>
+                          <span className={`text-[9px] font-black uppercase truncate ${formData.staffId === s._id ? 'text-[#344474]' : 'text-gray-900 dark:text-white'}`}>{s.name}</span>
                         </button>
                       ))
                     }
@@ -294,7 +294,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                 <button
                   onClick={handleSubmit}
                   disabled={loading || !formData.staffId}
-                  className="flex-1 py-4 bg-primary text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                  className="flex-1 py-4 bg-[#344474] text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-[#344474]/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
                 >
                   {loading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                   Finalize Slot 📅
@@ -309,7 +309,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
           <div className="space-y-0.5">
             <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Pricing Summary</p>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-black text-primary">₹{totalPrice}</span>
+              <span className="text-lg font-black text-[#344474]">₹{totalPrice}</span>
               <span className="text-[9px] font-bold text-slate-400">({totalDuration}m)</span>
             </div>
           </div>

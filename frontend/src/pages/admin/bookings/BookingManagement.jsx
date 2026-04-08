@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Search, Filter, RefreshCw, ChevronRight,
+  Search, Filter, RefreshCw, ChevronRight, ChevronDown,
   Calendar, Clock, CreditCard, Package,
   User, Store, AlertCircle, XCircle,
   CheckCircle, Ban, History, ShieldAlert,
@@ -117,16 +117,19 @@ const BookingManagement = () => {
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
-          <select
-            className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer"
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          >
-            <option value="">ALL STATUS</option>
-            <option value="confirmed">CONFIRMED</option>
-            <option value="completed">COMPLETED</option>
-            <option value="cancelled">CANCELLED</option>
-          </select>
+          <div className="relative group min-w-[140px]">
+            <select
+              className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            >
+              <option value="">ALL STATUS</option>
+              <option value="confirmed">CONFIRMED</option>
+              <option value="completed">COMPLETED</option>
+              <option value="cancelled">CANCELLED</option>
+            </select>
+            <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
+          </div>
           <input
             type="date"
             className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize text-slate-500 focus:ring-2 ring-primary/20 outline-none cursor-pointer"

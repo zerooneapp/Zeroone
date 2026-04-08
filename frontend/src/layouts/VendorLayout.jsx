@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { RiHomeHeartFill, RiTeamFill } from 'react-icons/ri';
+import { RiTeamFill } from 'react-icons/ri';
+import { BiSolidHome } from 'react-icons/bi';
 import { IoPersonCircleSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
 
@@ -18,7 +19,7 @@ const VendorLayout = () => {
   }
 
   const menuItems = [
-    { label: 'Home', icon: RiHomeHeartFill, path: '/vendor/dashboard' },
+    { label: 'Home', icon: BiSolidHome, path: '/vendor/dashboard' },
     { label: 'Clients', icon: RiTeamFill, path: '/vendor/bookings' },
     { label: 'Account', icon: IoPersonCircleSharp, path: '/vendor/profile' },
   ];
@@ -43,16 +44,16 @@ const VendorLayout = () => {
                   {isActive && (
                     <motion.div
                       layoutId="active-nav-line-vendor"
-                      className="absolute top-0 w-8 h-[3px] bg-[#1C2C4E] dark:bg-white rounded-b-full"
+                      className="absolute top-0 w-8 h-[3px] bg-[#344474] dark:bg-white rounded-b-full"
                     />
                   )}
 
                   <item.icon
                     size={22}
-                    className="text-[#1C2C4E] dark:text-white"
+                    className="text-[#344474] dark:text-white"
                   />
 
-                  <span className="text-[10px] font-black uppercase tracking-tight text-[#1C2C4E] dark:text-white">
+                  <span className="text-[10px] font-black uppercase tracking-tight text-[#344474] dark:text-white">
                     {item.label}
                   </span>
                 </button>

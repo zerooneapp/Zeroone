@@ -232,7 +232,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
               <button
                 onClick={handleCreate}
                 disabled={!preview || previewing || creating || preview.conflicts?.length > 0}
-                className="h-11 px-5 bg-slate-900 dark:bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all disabled:opacity-40"
+                className="h-11 px-5 bg-slate-900 dark:bg-[#344474] text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all disabled:opacity-40"
               >
                 {creating ? 'Activating...' : 'Activate Closure'}
               </button>

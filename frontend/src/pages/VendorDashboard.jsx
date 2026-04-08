@@ -173,14 +173,14 @@ const VendorDashboard = () => {
       <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
-            <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
-              <span className="text-primary dark:text-white">Zero</span>
-              <span className="text-primary/30 dark:text-gray-600">One</span>
+            <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
+              <span className="text-[#344474] dark:text-white">Zero</span>
+              <span className="text-[#344474]/30 dark:text-gray-600">One</span>
             </h1>
           </div>
           <div className="flex items-center gap-1.5 text-slate-400 dark:text-gray-500">
             <MapPin size={8} strokeWidth={3} />
-            <span className="text-[8px] font-black tracking-widest">
+            <span className="text-[9.5px] font-black tracking-tight text-slate-500 dark:text-gray-400">
               {data.address?.split(',').slice(-1)[0]?.trim().split(' ')[0] || 'Indore'}
             </span>
             <ChevronDown size={10} className="ml-0.5" />
@@ -197,24 +197,34 @@ const VendorDashboard = () => {
               <span className="absolute top-1 right-1.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-gray-950 rounded-full" />
             )}
           </button>
-          <button
-            onClick={handleToggleStatus}
-            disabled={!data.subscription?.isActive || statusLoading}
-            className={cn(
-              'h-9 px-3 rounded-lg flex items-center justify-center gap-2 transition-all border shrink-0',
-              data.isShopOpen && !data.isClosedToday
-                ? 'bg-[#3E4D7E] text-white border-white/10 active:scale-95 shadow-lg shadow-[#3E4D7E]/20'
-                : 'bg-slate-50 dark:bg-gray-900 text-slate-400 dark:text-gray-500 border-slate-100 dark:border-gray-700'
-            )}
-          >
-            <Power
-              size={11}
-              className={cn(data.isShopOpen && !data.isClosedToday ? 'text-white' : 'text-slate-400 dark:text-gray-600')}
-            />
-            <span className="text-[7.5px] font-black uppercase tracking-[0.05em] hidden sm:inline">
+          <div className="flex items-center gap-2 pr-1">
+            <span className={cn("text-[8px] font-black uppercase tracking-widest transition-colors duration-300", 
+              data.isShopOpen && !data.isClosedToday ? "text-[#344474] dark:text-blue-400" : "text-slate-400 dark:text-gray-600")}>
               {data.isShopOpen ? 'Online' : 'Offline'}
             </span>
-          </button>
+            <button
+              onClick={handleToggleStatus}
+              disabled={!data.subscription?.isActive || statusLoading}
+              className={cn(
+                "relative h-6 w-11 rounded-full p-1 transition-all duration-500 active:scale-90 shrink-0 border border-transparent shadow-sm",
+                data.isShopOpen && !data.isClosedToday
+                  ? "bg-[#344474] shadow-[0_4px_12px_rgba(52,68,116,0.3)]"
+                  : "bg-slate-200 dark:bg-gray-800 border-slate-300/10"
+              )}
+            >
+              <motion.div
+                animate={{ x: (data.isShopOpen && !data.isClosedToday) ? 20 : 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="h-4 w-4 rounded-full bg-white shadow-md flex items-center justify-center pointer-events-none"
+              >
+                <Power 
+                  size={8} 
+                  strokeWidth={4} 
+                  className={cn(data.isShopOpen && !data.isClosedToday ? "text-[#344474]" : "text-slate-400")} 
+                />
+              </motion.div>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -224,13 +234,13 @@ const VendorDashboard = () => {
             <button
               key={action.label}
               onClick={action.onClick || (() => navigate(action.path))}
-              className="flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-[15px] border border-primary/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(52,68,116,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(52,68,116,0.2)]"
+              className="flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-[15px] border border-[#344474]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(52,68,116,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(52,68,116,0.2)]"
             >
-              <div className="w-9 h-9 bg-[#344474] dark:bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-[#344474]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-9 h-9 bg-[#344474] dark:bg-[#344474] rounded-2xl flex items-center justify-center shadow-lg shadow-[#344474]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
                 <action.icon size={18} strokeWidth={2.5} className="text-white" />
               </div>
               <div className="px-1 text-center font-black">
-                <span className="text-[10px] text-primary dark:text-gray-300 tracking-tight leading-none block uppercase">
+                <span className="text-[10px] text-[#344474] dark:text-gray-300 tracking-tight leading-none block uppercase">
                   {action.label}
                 </span>
               </div>
@@ -241,21 +251,21 @@ const VendorDashboard = () => {
         <section className="px-0.5">
           <div className="grid gap-1.5 pb-0" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 0.85fr' }}>
             <div className="bg-[#344474] dark:bg-gray-900 py-2.5 px-1.5 rounded-lg shadow-lg border border-white/20 flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-white/50 tracking-widest leading-none mb-1.5 truncate">Today revenue</p>
+              <p className="text-[8px] font-black text-white/90 tracking-tight leading-none mb-1.5 truncate">Today revenue</p>
               <p className="text-[17px] font-black text-white leading-none truncate">₹{data.stats.todayEarnings.toLocaleString()}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-primary/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Today clients</p>
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#344474]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1.5 truncate">Today clients</p>
               <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">{data.stats.todayBookings}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-primary/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Services done</p>
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#344474]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1.5 truncate">Services done</p>
               <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'completed').length || 0}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-primary/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Pending</p>
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#344474]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1.5 truncate">Pending</p>
               <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'confirmed').length || 0}
               </p>
@@ -265,19 +275,13 @@ const VendorDashboard = () => {
 
         <section className="space-y-2 pt-0">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-widest opacity-80 uppercase">Today's clients</h2>
-            <button
-              onClick={() => navigate('/vendor/bookings')}
-              className="text-[8px] font-black text-primary dark:text-white tracking-widest px-3 py-1.5 bg-primary/5 dark:bg-white/10 rounded-full border border-primary/10 dark:border-white/20 transition-all active:scale-95"
-            >
-              View all <ChevronRight size={8} className="inline ml-1" />
-            </button>
+            <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">Today's clients</h2>
           </div>
 
           <div className="space-y-1">
             {data.schedule.length === 0 ? (
               <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
-                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-primary transition-colors">
+                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#344474] transition-colors">
                   <Calendar size={18} />
                 </div>
                 <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">No appointments for today</p>
@@ -287,7 +291,7 @@ const VendorDashboard = () => {
                 <motion.div
                   key={idx}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-primary/10 dark:border-gray-800 flex items-center justify-between group"
+                  className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-[#344474]/10 dark:border-gray-800 flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
@@ -303,7 +307,7 @@ const VendorDashboard = () => {
                       </h4>
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
                         <div className="flex items-center gap-1.5">
-                           <span className="text-primary uppercase">{item.time}</span>
+                           <span className="text-[#344474] uppercase">{item.time}</span>
                            <span className="opacity-20">•</span>
                            <span className="truncate max-w-[150px]">{item.service}</span>
                         </div>
@@ -313,7 +317,7 @@ const VendorDashboard = () => {
                   {item.status === 'confirmed' ? (
                     <button
                       onClick={() => handleCompleteBooking(item.id)}
-                      className="px-4 py-2 bg-[#344474] dark:bg-primary text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#344474]/10 transition-all font-bold"
+                      className="px-4 py-2 bg-[#344474] dark:bg-[#344474] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#344474]/10 transition-all font-bold"
                     >
                       Done
                     </button>
@@ -323,7 +327,7 @@ const VendorDashboard = () => {
                       className="bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[10px] font-bold flex items-center gap-1"
                     >
                       View Details
-                      <ChevronRight size={10} className="text-primary" />
+                      <ChevronRight size={10} className="text-[#344474]" />
                     </button>
                   )}
                 </motion.div>
@@ -369,7 +373,7 @@ const VendorDashboard = () => {
                     setShowRetentionModal(false);
                     navigate('/vendor/wallet');
                   }}
-                  className="w-full py-5 bg-slate-900 dark:bg-primary text-white font-black uppercase text-xs tracking-[0.2em] rounded-lg active:scale-95 shadow-2xl shadow-slate-900/20 dark:shadow-primary/20 transition-all italic"
+                  className="w-full py-5 bg-[#344474] dark:bg-[#344474] text-white font-black uppercase text-xs tracking-[0.2em] rounded-lg active:scale-95 shadow-2xl shadow-slate-900/20 dark:shadow-[#344474]/20 transition-all italic"
                 >
                   Boost Visibility Now
                 </button>
