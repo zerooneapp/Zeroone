@@ -81,7 +81,16 @@ const VendorOffers = () => {
           >
             <ArrowLeft size={18} />
           </button>
-          <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Promotions</h1>
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-1">
+              <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+                <span className="text-primary dark:text-white">Zero</span>
+                <span className="text-primary/30 dark:text-gray-600">One</span>
+              </h1>
+
+            </div>
+            <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none">Promotions</p>
+          </div>
         </div>
         <button
           onClick={() => {

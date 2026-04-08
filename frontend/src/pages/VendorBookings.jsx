@@ -159,9 +159,15 @@ const VendorBookings = () => {
             >
               <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
             </button>
-            <div>
-              <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-none">Management</h1>
-              <p className="text-[9px] font-black text-primary dark:text-white/60 uppercase tracking-[0.2em] mt-1 opacity-80">Bookings Roster</p>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+                  <span className="text-primary dark:text-white ">Zero</span>
+                  <span className="text-primary/30 dark:text-gray-600">One</span>
+                </h1>
+
+              </div>
+              <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80">Bookings Roster</p>
             </div>
           </div>
           <button
@@ -266,7 +272,7 @@ const VendorBookings = () => {
                             <button
                               onClick={() => handleEmergencyReschedule(booking, vendor)}
                               disabled={closureActionId === booking._id}
-                              className="h-10 px-3 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
+                              className="h-10 px-3 bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
                             >
                               Reschedule
                             </button>

@@ -6,8 +6,8 @@ const StaffCard = ({ staff, onToggle, onEdit }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1 - (!staff.isActive ? 0.4 : 0), y: 0 }}
-      className={`p-5 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 transition-all ${!staff.isActive ? 'grayscale-[0.5]' : ''}`}
+      animate={{ opacity: 1, y: 0 }}
+      className={`p-5 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 transition-all`}
     >
       <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
          {staff.image ? (
@@ -52,7 +52,7 @@ const StaffCard = ({ staff, onToggle, onEdit }) => {
          </button>
          <button 
            onClick={() => onToggle(staff._id, !staff.isActive)}
-           className={`w-12 h-6 rounded-full relative transition-all duration-300 ${staff.isActive ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-800'}`}
+           className={`w-12 h-6 rounded-full relative transition-all duration-300 ${staff.isActive ? 'bg-green-500' : 'bg-red-600'}`}
          >
             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${staff.isActive ? 'left-7' : 'left-1'}`} />
          </button>

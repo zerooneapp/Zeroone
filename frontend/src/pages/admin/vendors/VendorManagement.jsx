@@ -344,7 +344,7 @@ const VendorManagement = () => {
                                           "w-full py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all border shadow-sm active:scale-95",
                                           selectedVendor.isActive
                                              ? "bg-emerald-500 text-white border-emerald-600 shadow-emerald-500/20"
-                                             : "bg-slate-50 text-slate-400 border-slate-200"
+                                             : "bg-red-500 text-white border-red-600 shadow-red-500/10"
                                        )}
                                     >
                                        {selectedVendor.isActive ? "Marketplace Visible" : "Force Hidden"}
