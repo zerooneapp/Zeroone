@@ -363,7 +363,7 @@ const ServiceDetail = () => {
       </div>
 
       {/* Info Grid */}
-      <div className="px-5 mt-4 grid grid-cols-2 gap-y-3 gap-x-6">
+      <div className="px-5 mt-4 grid grid-cols-2 gap-y-3 gap-x-2">
         <button
           type="button"
           onClick={handleOpenLocation}

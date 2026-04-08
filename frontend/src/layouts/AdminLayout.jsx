@@ -3,8 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Store, Users, CalendarRange, 
   Tag, CreditCard, Wallet, Star, Bell, 
-  Menu, X, Sun, Moon, LogOut, ChevronRight, Settings,
-  ShieldCheck
+  Menu, X, Sun, Moon, LogOut, ChevronRight, Settings
 } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
 import { useAdminStore } from '../store/useAdminStore';
@@ -163,7 +162,7 @@ const AdminLayout = () => {
              </button>
              <div className="hidden sm:block">
                 <h1 className="text-base font-black dark:text-white capitalize tracking-widest flex items-center gap-2">
-                   Overview <ChevronRight size={16} className="text-gray-300" /> <span className="text-primary">Dashboard</span>
+                   Overview <ChevronRight size={16} className="text-gray-300 dark:text-slate-600" /> <span className="text-primary dark:text-white">Dashboard</span>
                 </h1>
              </div>
           </div>
@@ -173,11 +172,11 @@ const AdminLayout = () => {
              <div className="hidden lg:flex items-center gap-3 pr-4 border-r border-gray-100 dark:border-gray-800">
                 <div className="text-right">
                    <p className="text-sm font-black dark:text-white capitalize">{admin.name}</p>
-                   <span className="text-[11px] font-black text-primary capitalize bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-                      <ShieldCheck size={12} className="mr-1" />Super Admin
+                   <span className="text-[11px] font-black text-primary dark:text-white capitalize bg-primary/10 dark:bg-primary/25 px-2 py-0.5 rounded-full border border-primary/20 shadow-sm">
+                      Super Admin
                    </span>
                 </div>
-                <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-primary dark:text-white font-black border border-primary/10 dark:border-white/10 text-base">
+                <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center text-primary dark:text-white font-black border border-primary/10 text-base shadow-sm">
                    {admin.name.charAt(0)}
                 </div>
              </div>
