@@ -9,8 +9,8 @@ const OfferCard = ({ offer, onToggle, onEdit }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1 - (!offer.isActive || isExpired ? 0.3 : 0), scale: 1 }}
-      className={`p-5 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col gap-4 transition-all relative overflow-hidden ${!offer.isActive || isExpired ? 'grayscale-[0.5]' : ''}`}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`p-5 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col gap-4 transition-all relative overflow-hidden`}
     >
       {/* Discount Badge */}
       <div className="flex items-center justify-between">
@@ -34,7 +34,7 @@ const OfferCard = ({ offer, onToggle, onEdit }) => {
             </button>
             <button 
               onClick={() => onToggle(offer._id, !offer.isActive)}
-              className={`w-12 h-6 rounded-full relative transition-all duration-300 ${offer.isActive && !isExpired ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-800'}`}
+              className={`w-12 h-6 rounded-full relative transition-all duration-300 ${offer.isActive && !isExpired ? 'bg-green-500' : 'bg-red-600'}`}
             >
                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${offer.isActive && !isExpired ? 'left-7' : 'left-1'}`} />
             </button>

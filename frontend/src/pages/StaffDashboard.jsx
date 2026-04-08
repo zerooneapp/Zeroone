@@ -86,10 +86,10 @@ const StaffDashboard = () => {
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-1">
                   <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
-                     <span className="text-[#1C2C4E] dark:text-white uppercase">Zero</span>
-                     <span className="text-[#1C2C4E]/30 dark:text-gray-600 uppercase">One</span>
+                     <span className="text-primary dark:text-white">Zero</span>
+                     <span className="text-primary/30 dark:text-gray-600">One</span>
                   </h1>
-                  <div className="w-1 h-1 bg-primary rounded-full mt-0.5" />
+
                </div>
 
                <div className="flex items-center gap-1.5">
@@ -188,7 +188,7 @@ const StaffDashboard = () => {
 
                         <div className="grid grid-cols-5 gap-2.5">
                            {currentTask.canContact ? (
-                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
+                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
                                  <Phone size={18} strokeWidth={3} />
                               </a>
                            ) : (

@@ -84,9 +84,6 @@ const StaffBookings = () => {
                      className="w-full h-12 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 text-xs font-black text-gray-900 dark:text-white focus:ring-0"
                    />
                 </div>
-                <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-                   <Filter size={18} />
-                </div>
              </div>
 
              {/* Row 2: Status Tabs (Moved Below for Mobile Reach) */}
@@ -130,73 +127,49 @@ const StaffBookings = () => {
                            <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-300 overflow-hidden">
                              {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={20} />}
                            </div>
-                           <div>
-                              <h3 className="text-sm font-black text-gray-900 dark:text-white leading-none">
-                                 {booking.walkInCustomerName || booking.userId?.name || 'Client'}
-                              </h3>
-                              <p className="text-[9px] font-black text-primary uppercase tracking-widest mt-1.5 flex items-center gap-1">
-                                 <Clock size={10} /> {formatTime(booking.startTime)}
-                              </p>
-                           </div>
-                        </div>
-                        
-                        {/* 📞 SYNCED CONTACT: Uses Backend Permission */}
-                        {booking.canContact ? (
-                           <a href={`tel:${booking.userId?.phone}`} className="p-3 bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform">
-                              <Phone size={18} />
-                           </a>
-                        ) : (
-                           <div className="p-3 bg-gray-50 dark:bg-gray-800 text-gray-300 rounded-xl border border-gray-100 dark:border-gray-800 opacity-40">
-                              <Lock size={18} />
-                           </div>
-                        )}
+                            <div>
+                               <h3 className="text-sm font-black text-slate-900 dark:text-white leading-none">
+                                  {booking.walkInCustomerName || booking.userId?.name || 'Client'}
+                               </h3>
+                               <p className="text-[10px] font-black text-primary uppercase tracking-[0.1em] mt-2 flex items-center gap-1.5">
+                                  <Clock size={11} strokeWidth={3} /> {formatTime(booking.startTime)}
+                               </p>
+                            </div>
+                         </div>
+                         
+                         {booking.canContact ? (
+                            <a href={`tel:${booking.userId?.phone}`} className="p-2.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                               <Phone size={16} strokeWidth={2.5} />
+                            </a>
+                         ) : (
+                            <div className="p-2.5 bg-slate-50 dark:bg-gray-800 text-slate-300 dark:text-gray-600 rounded-xl border border-slate-100 dark:border-gray-800 opacity-40">
+                               <Lock size={16} />
+                            </div>
+                         )}
                       </div>
 
                       <div className="space-y-3 mb-5 px-1">
                         <div className="space-y-1.5">
                           {booking.services?.map((s, idx) => (
-                            <div key={idx} className="text-[11px] font-bold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                               <div className="w-1 h-1 bg-primary/40 rounded-full" />
+                            <div key={idx} className="text-[10px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-2 tracking-tight">
+                               <div className="w-1.5 h-1.5 bg-primary/30 rounded-full" />
                                {s.name || s.serviceId?.name || 'Service Task'}
                             </div>
                           ))}
                         </div>
                         
-                        {/* 📊 ASSIGNMENT METRICS: Price & Duration */}
-                        <div className="flex items-center gap-4 py-2 border-y border-gray-50 dark:border-gray-800/30">
-                           <div className="flex items-center gap-1.5">
-                              <div className="w-5 h-5 rounded-md bg-emerald-50 dark:bg-emerald-900/10 flex items-center justify-center text-emerald-600">
-                                 <span className="text-[10px] font-black italic select-none">₹</span>
-                              </div>
-                              <span className="text-[11px] font-black text-gray-700 dark:text-gray-300">₹{booking.totalPrice}</span>
+                        <div className="flex items-center gap-5 py-3 border-y border-slate-50 dark:border-gray-800/40 my-1">
+                           <div className="flex flex-col gap-1">
+                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Price</span>
+                              <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-none">₹{booking.totalPrice}</span>
                            </div>
-                           <div className="flex items-center gap-1.5">
-                              <div className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center text-blue-600">
-                                 <Clock size={10} />
-                              </div>
-                              <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight">{booking.totalDuration} Mins</span>
+                           <div className="w-px h-6 bg-slate-100 dark:bg-gray-800" />
+                           <div className="flex flex-col gap-1">
+                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Estimate</span>
+                              <span className="text-xs font-black text-slate-600 dark:text-gray-400 uppercase tracking-tight leading-none">{booking.totalDuration} Mins</span>
                            </div>
                         </div>
 
-                        {/* 📍 LOCATION AWARENESS */}
-                        <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-2">
-                              <MapPin size={12} className="text-gray-400" />
-                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[170px]">
-                                 {booking.serviceAddress || 'Shop Service'}
-                              </p>
-                           </div>
-                           {booking.serviceAddress && (
-                              <a 
-                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.serviceAddress)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[9px] font-black text-primary uppercase tracking-widest underline decoration-dotted"
-                              >
-                                Navigate
-                              </a>
-                           )}
-                        </div>
                       </div>
 
                       {activeTab === 'upcoming' && (

@@ -169,12 +169,13 @@ const VendorDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden pb-4">
+    <div className="bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden">
       <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
-              {data.shopName?.split(' ')[0] || 'Shop'}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1">
+            <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+              <span className="text-primary dark:text-white">Zero</span>
+              <span className="text-primary/30 dark:text-gray-600">One</span>
             </h1>
           </div>
           <div className="flex items-center gap-1.5 text-slate-400 dark:text-gray-500">
@@ -202,8 +203,8 @@ const VendorDashboard = () => {
             className={cn(
               'h-9 px-3 rounded-lg flex items-center justify-center gap-2 transition-all border shrink-0',
               data.isShopOpen && !data.isClosedToday
-                ? 'bg-emerald-500 text-white border-emerald-400 active:scale-95 shadow-lg shadow-emerald-500/20'
-                : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 border-slate-100 dark:border-gray-700'
+                ? 'bg-[#3E4D7E] text-white border-white/10 active:scale-95 shadow-lg shadow-[#3E4D7E]/20'
+                : 'bg-slate-50 dark:bg-gray-900 text-slate-400 dark:text-gray-500 border-slate-100 dark:border-gray-700'
             )}
           >
             <Power
@@ -223,13 +224,13 @@ const VendorDashboard = () => {
             <button
               key={action.label}
               onClick={action.onClick || (() => navigate(action.path))}
-              className="flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-[15px] border border-[#1C2C4E]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(28,44,78,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(28,44,78,0.2)]"
+              className="flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-[15px] border border-primary/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(52,68,116,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(52,68,116,0.2)]"
             >
-              <div className="w-9 h-9 bg-[#1C2C4E] dark:bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-[#1C2C4E]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-9 h-9 bg-[#344474] dark:bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-[#344474]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
                 <action.icon size={18} strokeWidth={2.5} className="text-white" />
               </div>
               <div className="px-1 text-center font-black">
-                <span className="text-[10px] text-[#1C2C4E] dark:text-gray-300 tracking-tight leading-none block uppercase">
+                <span className="text-[10px] text-primary dark:text-gray-300 tracking-tight leading-none block uppercase">
                   {action.label}
                 </span>
               </div>
@@ -239,21 +240,21 @@ const VendorDashboard = () => {
 
         <section className="px-0.5">
           <div className="grid gap-1.5 pb-0" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 0.85fr' }}>
-            <div className="bg-slate-900 dark:bg-gray-900 py-2.5 px-1.5 rounded-lg shadow-lg border border-[#1C2C4E]/10 flex flex-col justify-center overflow-hidden">
+            <div className="bg-[#344474] dark:bg-gray-900 py-2.5 px-1.5 rounded-lg shadow-lg border border-white/20 flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-white/50 tracking-widest leading-none mb-1.5 truncate">Today revenue</p>
               <p className="text-[17px] font-black text-white leading-none truncate">₹{data.stats.todayEarnings.toLocaleString()}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-primary/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Today clients</p>
               <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">{data.stats.todayBookings}</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-primary/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Services done</p>
               <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'completed').length || 0}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-primary/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 tracking-widest leading-none mb-1.5 truncate">Pending</p>
               <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'confirmed').length || 0}
@@ -275,7 +276,7 @@ const VendorDashboard = () => {
 
           <div className="space-y-1">
             {data.schedule.length === 0 ? (
-              <div className="py-20 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm">
+              <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
                 <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-primary transition-colors">
                   <Calendar size={18} />
                 </div>
@@ -286,7 +287,7 @@ const VendorDashboard = () => {
                 <motion.div
                   key={idx}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group"
+                  className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-primary/10 dark:border-gray-800 flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
@@ -312,7 +313,7 @@ const VendorDashboard = () => {
                   {item.status === 'confirmed' ? (
                     <button
                       onClick={() => handleCompleteBooking(item.id)}
-                      className="px-4 py-2 bg-slate-900 dark:bg-primary text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-slate-900/10 transition-all"
+                      className="px-4 py-2 bg-[#344474] dark:bg-primary text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#344474]/10 transition-all font-bold"
                     >
                       Done
                     </button>

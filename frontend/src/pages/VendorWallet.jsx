@@ -235,7 +235,16 @@ const VendorWallet = () => {
             >
               <ArrowLeft size={16} />
             </button>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Wallet</h1>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+                  <span className="text-primary dark:text-white">Zero</span>
+                  <span className="text-primary/30 dark:text-gray-600">One</span>
+                </h1>
+
+              </div>
+              <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none">Wallet & Finance</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -253,7 +262,7 @@ const VendorWallet = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-gradient-to-br from-slate-900 to-black dark:from-primary/20 dark:to-primary/10 rounded-[2rem] text-white shadow-2xl shadow-black/10 relative overflow-hidden">
+        <div className="p-4 bg-gradient-to-br from-[#344474] to-[#1E293B] dark:from-primary/20 dark:to-primary/10 rounded-[2rem] text-white shadow-2xl shadow-black/10 relative overflow-hidden">
           <div className="relative z-10 space-y-2.5">
             <div className="flex items-center justify-between">
               <p className="text-[8px] font-black uppercase tracking-[0.2em] opacity-60">Available Balance</p>
@@ -367,7 +376,7 @@ const VendorWallet = () => {
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={openRecommendedTopup}
-                className="h-11 rounded-xl bg-slate-900 dark:bg-primary text-white font-black text-[8px] uppercase tracking-[0.18em] shadow-lg shadow-slate-900/10 active:scale-[0.98] transition-all"
+                className="h-11 rounded-xl bg-[#344474] dark:bg-primary text-white font-black text-[8px] uppercase tracking-[0.18em] shadow-lg shadow-[#344474]/10 active:scale-[0.98] transition-all"
               >
                 Top Up {moneyFormatter.format(recommendedTopup)}
               </button>
@@ -481,7 +490,7 @@ const VendorWallet = () => {
               <button
                 onClick={handleMonthlyPurchase}
                 disabled={submitting || !canUseRazorpay}
-                className={`w-full h-10 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all ${submitting || !canUseRazorpay ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-900 dark:bg-primary text-white shadow-lg shadow-slate-900/10 active:scale-[0.98]'}`}
+                className={`w-full h-10 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all ${submitting || !canUseRazorpay ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-[#344474] dark:bg-primary text-white shadow-lg shadow-[#344474]/10 active:scale-[0.98]'}`}
               >
                 {wallet?.subscription?.currentPlan === 'monthly' ? 'Renew Monthly' : 'Buy Monthly'}
               </button>
@@ -620,7 +629,7 @@ const VendorWallet = () => {
               <button
                 onClick={handleTopup}
                 disabled={submitting || !canUseRazorpay}
-                className={`w-full h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all ${submitting || !canUseRazorpay ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-900 dark:bg-primary text-white shadow-lg shadow-slate-900/10 active:scale-[0.98]'}`}
+                className={`w-full h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all ${submitting || !canUseRazorpay ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-[#344474] dark:bg-primary text-white shadow-lg shadow-[#344474]/10 active:scale-[0.98]'}`}
               >
                 {canUseRazorpay ? (submitting ? 'Processing...' : 'Continue with Razorpay') : 'Awaiting Razorpay Setup'}
               </button>

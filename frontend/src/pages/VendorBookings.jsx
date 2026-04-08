@@ -149,7 +149,7 @@ const VendorBookings = () => {
   const filteredBookings = bookings.filter(b => b.status === status);
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
+    <div className="bg-background-light dark:bg-gray-950 pb-10">
       <header className="px-4 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -159,9 +159,15 @@ const VendorBookings = () => {
             >
               <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
             </button>
-            <div>
-              <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-none">Management</h1>
-              <p className="text-[9px] font-black text-primary dark:text-white/60 uppercase tracking-[0.2em] mt-1 opacity-80">Bookings Roster</p>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+                  <span className="text-primary dark:text-white ">Zero</span>
+                  <span className="text-primary/30 dark:text-gray-600">One</span>
+                </h1>
+
+              </div>
+              <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80">Bookings Roster</p>
             </div>
           </div>
           <button
@@ -200,7 +206,7 @@ const VendorBookings = () => {
         </div>
       </header>
 
-      <main className="px-4 mt-4 max-w-2xl mx-auto space-y-3">
+      <main className="px-4 mt-2 max-w-2xl mx-auto space-y-3">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (
@@ -266,7 +272,7 @@ const VendorBookings = () => {
                             <button
                               onClick={() => handleEmergencyReschedule(booking, vendor)}
                               disabled={closureActionId === booking._id}
-                              className="h-10 px-3 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
+                              className="h-10 px-3 bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
                             >
                               Reschedule
                             </button>
@@ -300,7 +306,7 @@ const VendorBookings = () => {
               key="empty"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="py-12 text-center space-y-4"
+              className="py-8 text-center space-y-4"
             >
               <div className="relative w-20 h-20 mx-auto">
                 <div className="absolute inset-0 bg-primary/5 rounded-[2.5rem] animate-pulse" />

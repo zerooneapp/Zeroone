@@ -28,6 +28,7 @@ const Navbar = () => {
             <NavLink
               key={item.path}
               to={item.path}
+              end
               className={({ isActive }) => cn(
                 'flex flex-col items-center justify-center gap-1.5 min-w-[90px] h-full transition-all relative',
                 'opacity-100'
