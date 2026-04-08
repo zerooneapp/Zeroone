@@ -1,6 +1,7 @@
 const Vendor = require('../models/Vendor');
 const VendorClosure = require('../models/VendorClosure');
 const SlotLock = require('../models/SlotLock');
+const moment = require('moment-timezone');
 const {
   normalizeClosureWindow,
   getOverlappingClosures,
@@ -13,6 +14,21 @@ const getVendorContext = async (userId) => {
     throw new Error('Vendor not found');
   }
   return vendor;
+};
+
+const hasLiveClosureAtTime = async (vendorId, referenceTime, excludeClosureId = null) => {
+  const query = {
+    vendorId,
+    status: 'active',
+    startTime: { $lte: referenceTime },
+    endTime: { $gt: referenceTime }
+  };
+
+  if (excludeClosureId) {
+    query._id = { $ne: excludeClosureId };
+  }
+
+  return VendorClosure.exists(query);
 };
 
 const mapClosureResponse = async (closure, vendor) => {
@@ -80,7 +96,8 @@ const createClosure = async (req, res) => {
       createdBy: req.user._id,
       startTime: start.toDate(),
       endTime: end.toDate(),
-      reason: reason?.trim() || ''
+      reason: reason?.trim() || '',
+      previousIsShopOpen: vendor.isShopOpen
     });
 
     await SlotLock.deleteMany({
@@ -89,9 +106,12 @@ const createClosure = async (req, res) => {
       endTime: { $gt: start.toDate() }
     });
 
-    // Sync shop status to OFFLINE
-    vendor.isShopOpen = false;
-    await vendor.save();
+    const now = new Date();
+    const isLiveNow = start.toDate() <= now && end.toDate() > now;
+    if (isLiveNow) {
+      vendor.isShopOpen = false;
+      await vendor.save();
+    }
 
     res.status(201).json(await mapClosureResponse(closure, vendor));
   } catch (error) {
@@ -142,9 +162,31 @@ const endClosure = async (req, res) => {
     }
     await closure.save();
 
+    const hasAnotherLiveClosure = await hasLiveClosureAtTime(vendor._id, now, closure._id);
+    const nowInIndia = moment(now).tz('Asia/Kolkata');
+    const isClosedDateToday = vendor.closedDates?.some((date) =>
+      moment(date).tz('Asia/Kolkata').isSame(nowInIndia, 'day')
+    );
+    const shouldRestoreShopOpen =
+      !hasAnotherLiveClosure &&
+      !vendor.isClosedToday &&
+      !isClosedDateToday &&
+      (
+        closure.previousIsShopOpen === true ||
+        (closure.previousIsShopOpen === undefined && vendor.isShopOpen === false)
+      );
+
+    if (shouldRestoreShopOpen) {
+      vendor.isShopOpen = true;
+      await vendor.save();
+    }
+
     res.status(200).json({
       message: 'Emergency closure ended successfully',
-      closure
+      closure,
+      shopStatus: {
+        isShopOpen: vendor.isShopOpen
+      }
     });
   } catch (error) {
     const status = error.message === 'Vendor not found' ? 404 : 500;
