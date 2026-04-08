@@ -84,14 +84,14 @@ const PlatformSettings = () => {
       {/* ⚙️ HEADER */}
       <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-primary/20">
         <div className="space-y-1">
-          <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tighter uppercase italic">Platform Core</h1>
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">Manage master governance parameters</p>
+          <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize">Platform Core</h1>
+          <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Manage master governance parameters</p>
         </div>
         <div className="bg-slate-50 dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center gap-4 transition-all hover:border-primary/20">
-          <ShieldAlert size={20} strokeWidth={3} className="text-primary hidden sm:block opacity-60" />
+          <ShieldAlert size={24} strokeWidth={3} className="text-primary hidden sm:block opacity-60" />
           <div className="leading-tight">
-            <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Global State Control</p>
-            <p className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest leading-relaxed opacity-60">
+            <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-widest">Global State Control</p>
+            <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest leading-relaxed opacity-60">
               Critical changes affect all vendor accounts instantly.
             </p>
           </div>
@@ -158,11 +158,11 @@ const PlatformSettings = () => {
       </div>
 
       {/* 📊 FOOTER NOTE */}
-      <div className="p-3.5 bg-slate-900 dark:bg-black rounded-xl flex items-center gap-4 group border border-slate-800 shadow-xl">
-        <div className="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center border border-primary/20 shrink-0 rotate-[-4deg] group-hover:rotate-0 transition-all duration-500">
-          <AlertCircle size={18} strokeWidth={3} />
+      <div className="p-4 bg-slate-900 dark:bg-black rounded-xl flex items-center gap-5 group border border-slate-800 shadow-xl">
+        <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center border border-primary/20 shrink-0 rotate-[-4deg] group-hover:rotate-0 transition-all duration-500">
+          <AlertCircle size={24} strokeWidth={3} />
         </div>
-        <p className="text-[9.5px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed italic opacity-80">
+        <p className="text-[11px] font-black text-slate-500 capitalize tracking-[0.2em] leading-relaxed opacity-80">
           Administrative parameters are audited by the platform security layer. Unauthorized changes are flagged to the root controller for immediate audit review.
         </p>
       </div>
@@ -172,10 +172,10 @@ const PlatformSettings = () => {
 };
 
 const SettingsCard = ({ title, icon: Icon, children }) => (
-  <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-5 h-full transition-all hover:shadow-md">
+  <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-5 h-full transition-all hover:shadow-md">
     <div className="flex items-center gap-3 border-b border-slate-50 dark:border-gray-800 pb-3.5 mb-2">
-      <Icon size={16} strokeWidth={3} className="text-primary opacity-80" />
-      <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.1em]">{title}</h3>
+      <Icon size={20} strokeWidth={3} className="text-primary opacity-80" />
+      <h3 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-[0.1em]">{title}</h3>
     </div>
     <div className="space-y-4">
       {children}
@@ -184,25 +184,25 @@ const SettingsCard = ({ title, icon: Icon, children }) => (
 );
 
 const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisabled }) => (
-  <div className="space-y-2.5 group">
+  <div className="space-y-3 group">
     <div className="flex justify-between items-start px-1">
-      <div className="space-y-1">
-        <h4 className="text-[8.5px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-[0.2em] opacity-60">{label}</h4>
-        <p className="text-[9px] font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">{sub}</p>
+      <div className="space-y-1.5">
+        <h4 className="text-[11px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-60">{label}</h4>
+        <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">{sub}</p>
       </div>
       <div className="text-primary opacity-20 group-hover:opacity-100 transition-opacity">
-        <Icon size={14} strokeWidth={3} />
+        <Icon size={18} strokeWidth={3} />
       </div>
     </div>
     <div className="relative">
       <input
         type="number"
-        className="w-full pl-4 pr-12 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[16px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all italic tracking-tighter shadow-inner"
+        className="w-full pl-5 pr-12 h-12 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[18px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all tracking-tighter shadow-inner"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={isDisabled}
       />
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-300 dark:text-gray-600 uppercase tracking-widest italic">
+      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[11px] font-black text-slate-300 dark:text-gray-600 capitalize tracking-widest">
         {unit}
       </div>
     </div>
@@ -210,10 +210,10 @@ const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisable
 );
 
 const ToggleItem = ({ label, sub, isActive, onToggle, isDisabled }) => (
-  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-transparent group hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-300">
-    <div className="space-y-1 leading-none">
-      <h4 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">{label}</h4>
-      <p className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest opacity-60 italic">{sub}</p>
+  <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-transparent group hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-300">
+    <div className="space-y-1.5 leading-none">
+      <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">{label}</h4>
+      <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest opacity-60">{sub}</p>
     </div>
     <button
       onClick={onToggle}
@@ -223,7 +223,7 @@ const ToggleItem = ({ label, sub, isActive, onToggle, isDisabled }) => (
         isActive ? "text-primary scale-110" : "text-slate-200 dark:text-gray-700 scale-95 opacity-50"
       )}
     >
-      {isActive ? <ToggleRight size={32} strokeWidth={1} /> : <ToggleLeft size={32} strokeWidth={1} />}
+      {isActive ? <ToggleRight size={36} strokeWidth={1} /> : <ToggleLeft size={36} strokeWidth={1} />}
     </button>
   </div>
 );

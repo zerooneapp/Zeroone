@@ -67,10 +67,10 @@ const UserDetail = () => {
 
    if (!user) return (
       <div className="p-20 text-center space-y-6">
-         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-primary font-black uppercase text-xs mx-auto">
+         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-primary font-black capitalize text-xs mx-auto">
             <ArrowLeft size={16} /> Go Back
          </button>
-         <h1 className="text-2xl font-black dark:text-white uppercase tracking-tighter">User not found</h1>
+         <h1 className="text-2xl font-black dark:text-white capitalize tracking-tighter">User not found</h1>
       </div>
    );
 
@@ -81,7 +81,7 @@ const UserDetail = () => {
          <div className="flex items-center justify-between">
             <button
                onClick={() => navigate(-1)}
-               className="flex items-center gap-2 px-4 h-9 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-500 hover:text-primary transition-all font-black text-[9px] uppercase tracking-widest shadow-sm"
+               className="flex items-center gap-2 px-4 h-9 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-500 hover:text-primary transition-all font-black text-[9px] capitalize tracking-widest shadow-sm"
             >
                <ArrowLeft size={14} strokeWidth={3} /> Profile Audit
             </button>
@@ -89,7 +89,7 @@ const UserDetail = () => {
             <button
                onClick={handleToggleBlock}
                className={cn(
-                  "px-5 h-9 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all border shadow-sm",
+                  "px-5 h-9 rounded-xl font-black text-[9px] capitalize tracking-widest transition-all border shadow-sm",
                   user.isBlocked
                      ? "bg-emerald-500 text-white border-emerald-600 shadow-emerald-500/20"
                      : "bg-red-50 text-red-500 border-red-100 hover:bg-red-500 hover:text-white"
@@ -104,11 +104,11 @@ const UserDetail = () => {
             {/* LEFT: USER DETAILS */}
             <div className="lg:col-span-1 space-y-5">
                <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm text-center">
-                  <div className="w-20 h-20 bg-slate-900 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-3xl font-black italic shadow-xl border border-white/10">
+                  <div className="w-20 h-20 bg-slate-900 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-3xl font-black shadow-xl border border-white/10">
                      {user.name?.charAt(0)}
                   </div>
-                  <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1 leading-none">{user.name}</h2>
-                  <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-[0.2em] mb-5 opacity-60 italic">Customer Since {new Date(user.createdAt).getFullYear()}</p>
+                  <h2 className="text-[18px] font-black text-slate-900 dark:text-white capitalize tracking-tighter mb-1 leading-none">{user.name}</h2>
+                  <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-[0.2em] mb-5 opacity-60">Customer Since {new Date(user.createdAt).getFullYear()}</p>
 
                   <div className="space-y-3.5 text-left">
                      <InfoItem icon={Phone} label="Contact" value={user.phone} />
@@ -120,7 +120,7 @@ const UserDetail = () => {
                <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-4">
                   <div className="flex items-center gap-2 px-1">
                      <TrendingUp size={14} strokeWidth={3} className="text-primary" />
-                     <h3 className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest opacity-80">Booking Insights</h3>
+                     <h3 className="text-[9px] font-black text-slate-900 dark:text-white capitalize tracking-widest opacity-80">Booking Insights</h3>
                   </div>
                   <div className="grid grid-cols-1 gap-2">
                      <InsightCard label="Total Requests" value={bookingStats.total} color="primary" />
@@ -133,10 +133,10 @@ const UserDetail = () => {
             {/* RIGHT: BOOKING HISTORY */}
             <div className="lg:col-span-2 space-y-4">
                <div className="flex items-center justify-between px-2">
-                  <h3 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                  <h3 className="text-[10px] font-black text-slate-900 dark:text-white capitalize tracking-widest flex items-center gap-2">
                      <History size={14} strokeWidth={3} className="text-primary" /> Transaction History
                   </h3>
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60">{bookings.length} Bookings Total</span>
+                  <span className="text-[8px] font-black text-slate-400 capitalize tracking-widest opacity-60">{bookings.length} Bookings Total</span>
                </div>
 
                <div className="space-y-2.5">
@@ -154,8 +154,8 @@ const UserDetail = () => {
                               <Package size={20} strokeWidth={3} />
                            </div>
                            <div className="leading-tight">
-                              <h4 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight group-hover:text-primary transition-colors">{booking.vendorId?.shopName || 'Unknown Vendor'}</h4>
-                              <p className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1 mt-0.5 opacity-60">
+                              <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary transition-colors">{booking.vendorId?.shopName || 'Unknown Vendor'}</h4>
+                              <p className="text-[9px] font-black text-slate-400 capitalize flex items-center gap-1 mt-0.5 opacity-60">
                                  <Clock size={10} strokeWidth={3} /> {new Date(booking.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                               </p>
                            </div>
@@ -163,11 +163,11 @@ const UserDetail = () => {
 
                         <div className="hidden md:flex items-center gap-8 px-8 border-x border-slate-100 dark:border-gray-800">
                            <div className="text-center">
-                              <p className="text-[7.5px] font-black text-slate-400 uppercase mb-1 tracking-widest opacity-60">Price</p>
-                              <p className="text-[12px] font-black text-slate-900 dark:text-white italic">₹{booking.totalPrice}</p>
+                              <p className="text-[7.5px] font-black text-slate-400 capitalize mb-1 tracking-widest opacity-60">Price</p>
+                              <p className="text-[12px] font-black text-slate-900 dark:text-white">₹{booking.totalPrice}</p>
                            </div>
                            <div className="text-center">
-                              <p className="text-[7.5px] font-black text-slate-400 uppercase mb-1 tracking-widest opacity-60">Status</p>
+                              <p className="text-[7.5px] font-black text-slate-400 capitalize mb-1 tracking-widest opacity-60">Status</p>
                               <BookingStatusBadge status={booking.status} />
                            </div>
                         </div>
@@ -185,7 +185,7 @@ const UserDetail = () => {
                         <div className="w-14 h-14 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto shadow-sm border border-slate-100 dark:border-gray-700">
                            <History size={28} className="text-slate-200" strokeWidth={3} />
                         </div>
-                        <p className="font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest text-[9px] opacity-80 italic">No bookings found in audit logs</p>
+                        <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[9px] opacity-80">No bookings found in audit logs</p>
                      </div>
                   )}
                </div>
@@ -205,8 +205,8 @@ const InfoItem = ({ icon: Icon, label, value, highlight }) => (
          <Icon size={12} strokeWidth={3} />
       </div>
       <div className="leading-tight pt-0.5">
-         <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1 opacity-60">{label}</p>
-         <p className={cn("text-[11px] font-black uppercase text-slate-900 dark:text-white tracking-tight", highlight && "text-red-500")}>
+         <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-[0.15em] mb-1 opacity-60">{label}</p>
+         <p className={cn("text-[11px] font-black capitalize text-slate-900 dark:text-white tracking-tight", highlight && "text-red-500")}>
             {value || '---'}
          </p>
       </div>
@@ -221,8 +221,8 @@ const InsightCard = ({ label, value, color }) => {
    };
    return (
       <div className={cn("p-3.5 rounded-xl border flex items-center justify-between transition-all active:scale-95 shadow-sm", colors[color])}>
-         <span className="text-[8.5px] font-black uppercase tracking-widest opacity-90">{label}</span>
-         <span className="text-[16px] font-black italic">{value}</span>
+         <span className="text-[8.5px] font-black capitalize tracking-widest opacity-90">{label}</span>
+         <span className="text-[16px] font-black">{value}</span>
       </div>
    );
 };
@@ -236,7 +236,7 @@ const BookingStatusBadge = ({ status }) => {
       ongoing: "bg-indigo-50 text-indigo-500 border-indigo-100/50"
    };
    return (
-      <span className={cn("text-[8.5px] font-black uppercase px-2 py-0.5 rounded-md border tracking-tighter", styles[status] || styles.pending)}>
+      <span className={cn("text-[8.5px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter", styles[status] || styles.pending)}>
          {status}
       </span>
    );

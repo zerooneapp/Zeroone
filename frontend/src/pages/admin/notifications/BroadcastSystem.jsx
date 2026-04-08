@@ -58,12 +58,12 @@ const BroadcastSystem = () => {
          {/* 📡 HEADER */}
          <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-primary/20">
             <div className="space-y-1">
-               <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tighter uppercase italic">Broadcast Center</h1>
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">Mass scale cognitive dissemination</p>
+               <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tighter capitalize">Broadcast Center</h1>
+               <p className="text-[9px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Mass scale cognitive dissemination</p>
             </div>
             <div className="p-3.5 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center gap-4 group hover:border-primary/20 transition-all">
                <ShieldAlert size={18} strokeWidth={3} className="text-primary hidden sm:block opacity-60 group-hover:scale-110 transition-transform" />
-               <p className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest leading-relaxed opacity-60">
+               <p className="text-[8.5px] font-black text-slate-400 capitalize tracking-widest leading-relaxed opacity-60">
                   Broadcasts are absolute. High-frequency usage may diminish impact and user engagement.
                </p>
             </div>
@@ -74,7 +74,7 @@ const BroadcastSystem = () => {
             {/* 🎯 TARGET SELECTION */}
             <div className="lg:col-span-1 space-y-4">
                <div className="px-2 py-1">
-                  <h3 className="text-[9px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest opacity-60 italic">1. Select Target Demographic</h3>
+                  <h3 className="text-[9px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-widest opacity-60">1. Select Target Demographic</h3>
                </div>
                <div className="space-y-2.5">
                   {targets.map((t) => (
@@ -95,8 +95,8 @@ const BroadcastSystem = () => {
                            <t.icon size={18} strokeWidth={3} />
                         </div>
                         <div className="leading-tight">
-                           <h4 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tighter italic">{t.name}</h4>
-                           <p className="text-[8.5px] font-black text-slate-400 uppercase mt-0.5 tracking-widest opacity-60">{t.desc}</p>
+                           <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">{t.name}</h4>
+                           <p className="text-[8.5px] font-black text-slate-400 capitalize mt-0.5 tracking-widest opacity-60">{t.desc}</p>
                         </div>
                      </button>
                   ))}
@@ -106,24 +106,24 @@ const BroadcastSystem = () => {
             {/* ✍️ MESSAGE CRAFTING */}
             <div className="lg:col-span-2 space-y-4">
                <div className="px-2 py-1">
-                  <h3 className="text-[9px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest opacity-60 italic">2. Craft Intelligence Payload</h3>
+                  <h3 className="text-[9px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-widest opacity-60">2. Craft Intelligence Payload</h3>
                </div>
 
                <form onSubmit={handlePreSubmit} className="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-5 relative overflow-hidden group">
 
                   {/* SELECTED BADGE */}
-                  <div className="absolute top-4 right-6 p-2.5 px-4 bg-primary text-white rounded-lg font-black text-[9px] uppercase tracking-widest shadow-lg shadow-primary/20 transition-all duration-500 border border-primary/20 italic">
+                  <div className="absolute top-4 right-6 p-2.5 px-4 bg-primary text-white rounded-lg font-black text-[9px] capitalize tracking-widest shadow-lg shadow-primary/20 transition-all duration-500 border border-primary/20">
                      Target: {selectedTarget.name}
                   </div>
 
                   <div className="space-y-2">
-                     <label className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-2 opacity-60">
+                     <label className="text-[8.5px] font-black text-slate-400 capitalize tracking-widest px-1 flex items-center gap-2 opacity-60">
                         <Zap size={14} strokeWidth={3} className="text-primary" /> Transmission Title
                      </label>
                      <input
                         type="text"
                         required
-                        className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800/40 border border-slate-100 dark:border-gray-700 rounded-xl text-[12px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all placeholder:text-slate-300 uppercase italic shadow-inner"
+                        className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800/40 border border-slate-100 dark:border-gray-700 rounded-xl text-[12px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all placeholder:text-slate-300 capitalize shadow-inner"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         placeholder="e.g. SYSTEM UPGRADE COMPLETE"
@@ -132,12 +132,12 @@ const BroadcastSystem = () => {
                   </div>
 
                   <div className="space-y-2">
-                     <label className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-2 opacity-60">
+                     <label className="text-[8.5px] font-black text-slate-400 capitalize tracking-widest px-1 flex items-center gap-2 opacity-60">
                         <MessageSquare size={14} strokeWidth={3} className="text-primary" /> Cognitive Message Payload
                      </label>
                      <textarea
                         required
-                        className="w-full p-4 bg-slate-50 dark:bg-gray-800/40 border border-slate-100 dark:border-gray-700 rounded-xl text-[12px] font-bold text-slate-600 dark:text-gray-300 focus:ring-2 ring-primary/20 outline-none transition-all h-32 resize-none placeholder:text-slate-300 leading-relaxed italic shadow-inner no-scrollbar"
+                        className="w-full p-4 bg-slate-50 dark:bg-gray-800/40 border border-slate-100 dark:border-gray-700 rounded-xl text-[12px] font-bold text-slate-600 dark:text-gray-300 focus:ring-2 ring-primary/20 outline-none transition-all h-32 resize-none placeholder:text-slate-300 leading-relaxed shadow-inner no-scrollbar"
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         placeholder="Type your message here..."
@@ -146,10 +146,10 @@ const BroadcastSystem = () => {
                   </div>
 
                   <div className="bg-slate-50 dark:bg-gray-800/40 p-3.5 rounded-xl border border-dashed border-slate-200 dark:border-gray-700 shadow-inner">
-                     <p className="text-[8.5px] font-black text-slate-400 px-1 uppercase tracking-widest mb-1 opacity-60">Pre-flight Intelligence Check</p>
+                     <p className="text-[8.5px] font-black text-slate-400 px-1 capitalize tracking-widest mb-1 opacity-60">Pre-flight Intelligence Check</p>
                      <div className="flex items-center gap-3 text-emerald-500">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-sm" />
-                        <p className="text-[8.5px] font-black uppercase tracking-widest italic leading-none">All systems ready for mass dissipation.</p>
+                        <p className="text-[8.5px] font-black capitalize tracking-widest leading-none">All systems ready for mass dissipation.</p>
                      </div>
                   </div>
 
@@ -157,7 +157,7 @@ const BroadcastSystem = () => {
                      type="submit"
                      disabled={loading}
                      className={cn(
-                        "w-full h-12 rounded-xl font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-900/10 italic",
+                        "w-full h-12 rounded-xl font-black text-[10px] capitalize tracking-[0.3em] transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-900/10",
                         loading
                            ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                            : "bg-slate-900 dark:bg-primary text-white hover:scale-[1.01] active:scale-[0.98] shadow-primary/20 group/btn border border-slate-800"
@@ -193,21 +193,21 @@ const BroadcastSystem = () => {
                         <BellRing size={24} strokeWidth={3} className="animate-bounce" />
                      </div>
                      <div>
-                        <h3 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tighter italic">Dissemination Alert</h3>
-                        <p className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest mt-2 px-4 leading-relaxed opacity-60 italic">
+                        <h3 className="text-[18px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">Dissemination Alert</h3>
+                        <p className="text-[8.5px] font-black text-slate-400 capitalize tracking-widest mt-2 px-4 leading-relaxed opacity-60">
                            Are you sure? This broadcast will instantly reach all {formData.targetAudience} entities. This action is absolute and irreversible.
                         </p>
                      </div>
                      <div className="flex gap-2 pt-2">
                         <button
                            onClick={() => setIsConfirmOpen(false)}
-                           className="flex-1 h-10 bg-slate-50 dark:bg-gray-800 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+                           className="flex-1 h-10 bg-slate-50 dark:bg-gray-800 rounded-xl text-[9px] font-black capitalize tracking-widest text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
                         >
                            Abort
                         </button>
                         <button
                            onClick={executeBroadcast}
-                           className="flex-1 h-10 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all border border-slate-800 italic"
+                           className="flex-1 h-10 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black capitalize tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all border border-slate-800"
                         >
                            Transmit
                         </button>

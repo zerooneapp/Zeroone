@@ -5,14 +5,16 @@ import {
    ChevronRight, Filter, MoreVertical, Star
 } from 'lucide-react';
 import {
-   AreaChart, Area, XAxis, YAxis, CartesianGrid,
+   BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid,
    Tooltip, ResponsiveContainer
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useThemeStore } from '../store/themeStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
+   const { isDarkMode } = useThemeStore();
    const [data, setData] = useState(null);
    const [loading, setLoading] = useState(true);
    const [chartRange, setChartRange] = useState('7d');
@@ -79,14 +81,14 @@ const AdminDashboard = () => {
          {/* 👑 HEADER */}
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="leading-none">
-               <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">System Status</h1>
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Platform Command Center</p>
+               <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight capitalize">System Status</h1>
+               <p className="text-[13px] font-black text-slate-400 capitalize tracking-[0.2em] mt-2">Platform Command Center</p>
             </div>
             <div className="flex items-center gap-2.5">
                <button onClick={fetchDashboard} className="p-2.5 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl shadow-sm active:scale-95 transition-all text-slate-400">
-                  <Filter size={16} strokeWidth={3} />
+                  <Filter size={18} strokeWidth={3} />
                </button>
-               <button className="px-5 py-2.5 bg-slate-900 dark:bg-primary text-white font-black text-[9px] uppercase tracking-widest rounded-xl shadow-xl active:scale-95 transition-all border-b-2 border-white/10 italic">
+               <button className="px-5 py-2.5 bg-slate-900 dark:bg-primary text-white font-black text-[11px] capitalize tracking-widest rounded-xl shadow-xl active:scale-95 transition-all border-b-2 border-white/10">
                   Live Feed
                </button>
             </div>
@@ -100,13 +102,13 @@ const AdminDashboard = () => {
                className="p-3.5 px-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-between"
             >
                <div className="flex items-center gap-3.5 text-red-500 leading-none">
-                  <AlertTriangle size={18} strokeWidth={3} className="animate-pulse" />
+                  <AlertTriangle size={20} strokeWidth={3} className="animate-pulse" />
                   <div>
-                     <p className="text-[11px] font-black uppercase tracking-tight italic">Critical Alert: Low Wallet Balance</p>
-                     <p className="text-[9px] font-black opacity-60 uppercase tracking-widest mt-1">{data.alerts.lowBalanceVendors} Vendors Inactive</p>
+                     <p className="text-[13px] font-black capitalize tracking-tight">Critical Alert: Low Wallet Balance</p>
+                     <p className="text-[11px] font-black opacity-60 capitalize tracking-widest mt-1">{data.alerts.lowBalanceVendors} Vendors Inactive</p>
                   </div>
                </div>
-               <button className="text-[8px] font-black uppercase text-red-500 border-b border-red-500/30">Notify All</button>
+               <button className="text-[10px] font-black capitalize text-red-500 border-b border-red-500/30">Notify All</button>
             </motion.div>
          )}
 
@@ -121,12 +123,12 @@ const AdminDashboard = () => {
                   className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden group active:scale-[0.98] transition-all"
                >
                   <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-3.5 transition-transform group-hover:scale-110", kpi.bg, kpi.color)}>
-                     <kpi.icon size={18} strokeWidth={3} />
+                     <kpi.icon size={20} strokeWidth={3} />
                   </div>
                   <div className="leading-none pt-1">
-                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">{kpi.label}</p>
-                     <p className="text-[18px] font-black text-slate-900 dark:text-white mt-2 italic tracking-tighter">{kpi.value}</p>
-                     <p className="text-[8.5px] font-black text-slate-400 mt-2 uppercase tracking-tight opacity-60">{kpi.sub}</p>
+                     <p className="text-[11px] font-black text-slate-400 dark:text-slate-400 capitalize tracking-[0.2em]">{kpi.label}</p>
+                     <p className="text-[24px] font-black text-slate-900 dark:text-white mt-2 tracking-tighter">{kpi.value}</p>
+                     <p className="text-[11px] font-black text-slate-400 dark:text-slate-400 mt-2 capitalize tracking-tight opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity">{kpi.sub}</p>
                   </div>
                   <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
                      <kpi.icon size={60} />
@@ -139,8 +141,8 @@ const AdminDashboard = () => {
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-6">
                <div className="flex items-center justify-between">
-                  <h2 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase">Platform Revenue</h2>
-                  <div className="flex gap-1.5 bg-slate-50 dark:bg-gray-800 p-1 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-400">
+                  <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Platform Revenue</h2>
+                  <div className="flex gap-1.5 bg-slate-50 dark:bg-gray-800 p-1 rounded-lg text-[11px] font-black capitalize tracking-widest text-slate-400">
                      {['7d', '15d', '30d'].map(r => (
                         <button
                            key={r}
@@ -153,47 +155,55 @@ const AdminDashboard = () => {
                   </div>
                </div>
 
-               <div className="h-64 w-full">
+               <div className="h-64 w-full pt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                     <AreaChart data={data.revenueGraph}>
-                        <defs>
-                           <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#000" stopOpacity={0.05} />
-                              <stop offset="95%" stopColor="#000" stopOpacity={0} />
-                           </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                     <BarChart data={data.revenueGraph} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="4 4" vertical={false} strokeOpacity={0.08} />
                         <XAxis
                            dataKey="date"
                            axisLine={false}
                            tickLine={false}
-                           tick={{ fontSize: 8, fontWeight: 900, fill: '#64748b' }}
+                           tick={{ fontSize: 11, fontWeight: 900, fill: isDarkMode ? '#64748b' : '#94a3b8' }}
                            dy={10}
+                           interval={0}
                         />
                         <YAxis
                            axisLine={false}
                            tickLine={false}
-                           tick={{ fontSize: 8, fontWeight: 900, fill: '#64748b' }}
+                           tick={{ fontSize: 11, fontWeight: 900, fill: isDarkMode ? '#64748b' : '#94a3b8' }}
                         />
                         <Tooltip
-                           contentStyle={{ borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: '#fff' }}
-                           itemStyle={{ fontWeight: 900, fontSize: '10px', color: '#0f172a' }}
+                           cursor={{ fill: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}
+                           contentStyle={{ 
+                              borderRadius: '16px', 
+                              border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)', 
+                              boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', 
+                              background: isDarkMode ? '#0f172a' : '#fff',
+                              padding: '12px 16px'
+                           }}
+                           itemStyle={{ fontWeight: 900, fontSize: '14px', color: isDarkMode ? '#f8fafc' : '#0f172a' }}
+                           labelStyle={{ fontSize: '11px', fontWeight: 900, color: '#94a3b8', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
                         />
-                        <Area
-                           type="monotone"
+                        <Bar
                            dataKey="amount"
-                           stroke="#0f172a"
-                           strokeWidth={3}
-                           fillOpacity={1}
-                           fill="url(#colorRevenue)"
-                        />
-                     </AreaChart>
+                           radius={[8, 8, 8, 8]}
+                           barSize={32}
+                        >
+                           {data.revenueGraph.map((entry, index) => (
+                              <Cell 
+                                 key={`cell-${index}`} 
+                                 fill={index === data.revenueGraph.length - 1 ? (isDarkMode ? '#38bdf8' : '#0f172a') : (isDarkMode ? '#334155' : '#cbd5e1')}
+                                 className="transition-all duration-500 hover:fill-primary cursor-pointer"
+                              />
+                           ))}
+                        </Bar>
+                     </BarChart>
                   </ResponsiveContainer>
                </div>
             </div>
 
             <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-4">
-               <h2 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase">Live Status</h2>
+               <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Live Status</h2>
                <div className="space-y-2.5">
                   {[
                      { label: 'Active Bookings', value: data.bookingStats.active, color: 'amber' },
@@ -201,16 +211,16 @@ const AdminDashboard = () => {
                      { label: 'Cancelled', value: data.bookingStats.cancelled, color: 'red' }
                   ].map((stat, i) => {
                      const colorMap = {
-                        amber: "bg-amber-50 dark:bg-amber-500/5 border-amber-100 dark:border-amber-500/10 text-amber-500",
-                        emerald: "bg-emerald-50 dark:bg-emerald-500/5 border-emerald-100 dark:border-emerald-500/10 text-emerald-500",
-                        red: "bg-red-50 dark:bg-red-500/5 border-red-100 dark:border-red-500/10 text-red-500"
+                        amber: "bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20 text-amber-500",
+                        emerald: "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20 text-emerald-500",
+                        red: "bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20 text-red-500"
                      };
 
                      return (
                         <div key={i} className={cn("p-3 px-4 rounded-xl border transition-all active:scale-[0.98]", colorMap[stat.color])}>
                            <div className="flex items-center justify-between leading-none">
-                              <span className="text-[9px] font-black uppercase tracking-widest italic">{stat.label}</span>
-                              <span className="text-[15px] font-black">{stat.value}</span>
+                              <span className="text-[11px] font-black capitalize tracking-widest">{stat.label}</span>
+                              <span className="text-[18px] font-black">{stat.value}</span>
                            </div>
                         </div>
                      );
@@ -218,7 +228,7 @@ const AdminDashboard = () => {
                </div>
 
                <div className="pt-4 border-t border-slate-50 dark:border-gray-800/60">
-                  <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest text-center">System Healthy</p>
+                  <p className="text-[10px] font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-center">System Healthy</p>
                </div>
             </div>
          </div>
@@ -229,19 +239,19 @@ const AdminDashboard = () => {
             {/* RECENT VENDORS */}
             <div className="space-y-3">
                <div className="flex items-center justify-between px-1">
-                  <h2 className="text-[14px] font-black text-slate-900 dark:text-white uppercase tracking-tight">New Requests</h2>
-                  <button className="text-[8px] font-black text-primary uppercase tracking-widest border-b border-primary/30">See All</button>
+                  <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">New Requests</h2>
+                  <button className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">See All</button>
                </div>
                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
                   {data.recentVendors.map((vendor) => (
                      <div key={vendor._id} className="p-3.5 px-4.5 border-b border-slate-50 dark:border-gray-800 last:border-0 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-all group">
                         <div className="flex items-center gap-3.5 leading-none">
-                           <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-[13px] font-black italic">
+                           <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-[15px] font-black">
                               {vendor.shopName.charAt(0)}
                            </div>
                            <div>
-                              <h4 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{vendor.shopName}</h4>
-                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">{vendor.ownerId?.name} • {vendor.serviceLevel}</p>
+                              <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{vendor.shopName}</h4>
+                              <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{vendor.ownerId?.name} • {vendor.serviceLevel}</p>
                            </div>
                         </div>
 
@@ -251,46 +261,46 @@ const AdminDashboard = () => {
                                  onClick={() => handleVendorAction(vendor._id, 'approve')}
                                  className="p-1.5 bg-emerald-50 text-emerald-500 rounded-lg active:scale-90 transition-all border border-emerald-100"
                               >
-                                 <CheckCircle size={14} strokeWidth={3} />
+                                 <CheckCircle size={16} strokeWidth={3} />
                               </button>
                               <button
                                  onClick={() => handleVendorAction(vendor._id, 'reject')}
                                  className="p-1.5 bg-red-50 text-red-500 rounded-lg active:scale-90 transition-all border border-red-100"
                               >
-                                 <XCircle size={14} strokeWidth={3} />
+                                 <XCircle size={16} strokeWidth={3} />
                               </button>
                            </div>
                         ) : (
-                           <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded-md ${vendor.status === 'active' || vendor.status === 'approved' ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-400'}`}>
+                           <span className={`text-[9px] font-black capitalize px-2 py-0.5 rounded-md ${vendor.status === 'active' || vendor.status === 'approved' ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-400'}`}>
                               {vendor.status}
                            </span>
                         )}
                      </div>
                   ))}
-                  {data.recentVendors.length === 0 && <div className="p-10 text-center text-slate-300 font-black uppercase tracking-[0.2em] text-[8px]">No pending requests</div>}
+                  {data.recentVendors.length === 0 && <div className="p-10 text-center text-slate-300 font-black capitalize tracking-[0.2em] text-[10px]">No pending requests</div>}
                </div>
             </div>
 
             {/* RECENT USERS */}
             <div className="space-y-3">
                <div className="flex items-center justify-between px-1">
-                  <h2 className="text-[14px] font-black text-slate-900 dark:text-white uppercase tracking-tight">Platform Users</h2>
-                  <button className="text-[8px] font-black text-primary uppercase tracking-widest border-b border-primary/30">Manage All</button>
+                  <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">Platform Users</h2>
+                  <button className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Manage All</button>
                </div>
                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
                   {data.recentUsers.map((user) => (
                      <div key={user._id} className="p-3.5 px-4.5 border-b border-slate-50 dark:border-gray-800 last:border-0 flex items-center justify-between group active:bg-slate-50 transition-all">
                         <div className="flex items-center gap-3.5 leading-none">
                            <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-slate-100 dark:border-gray-700">
-                              <Users size={16} strokeWidth={3} />
+                              <Users size={18} strokeWidth={3} />
                            </div>
                            <div>
-                              <p className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{user.name}</p>
-                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">{user.phone}</p>
+                              <p className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{user.name}</p>
+                              <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{user.phone}</p>
                            </div>
                         </div>
                         <button className="p-1.5 text-slate-200 group-hover:text-primary transition-all active:scale-95">
-                           <ChevronRight size={14} strokeWidth={3} />
+                           <ChevronRight size={16} strokeWidth={3} />
                         </button>
                      </div>
                   ))}
@@ -301,26 +311,26 @@ const AdminDashboard = () => {
          {/* ⭐ REVIEWS MODERATION */}
          <section className="space-y-3">
             <div className="flex items-center justify-between px-1">
-               <h2 className="text-[14px] font-black text-slate-900 dark:text-white uppercase tracking-tight">Quality Control</h2>
-               <button className="text-[8px] font-black text-primary uppercase tracking-widest border-b border-primary/30">Full Audit</button>
+               <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">Quality Control</h2>
+               <button className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Full Audit</button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                {data.recentReviews.map((review) => (
                   <div key={review._id} className="p-4 px-5 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-3 active:scale-[0.98] transition-all">
                      <div className="flex items-center justify-between leading-none">
                         <div className="flex gap-0.5 text-amber-500">
-                           {[...Array(5)].map((_, i) => <Star key={i} size={10} fill={i < review.rating ? "currentColor" : "none"} strokeWidth={3} />)}
+                           {[...Array(5)].map((_, i) => <Star key={i} size={11} fill={i < review.rating ? "currentColor" : "none"} strokeWidth={3} />)}
                         </div>
-                        <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[80px]">{review.vendorId?.shopName}</span>
+                        <span className="text-[11px] font-black text-slate-400 capitalize tracking-widest truncate max-w-[80px]">{review.vendorId?.shopName}</span>
                      </div>
-                     <p className="text-[11px] font-black text-slate-600 dark:text-gray-400 line-clamp-2 leading-snug italic opacity-80">"{review.comment}"</p>
+                     <p className="text-[13px] font-black text-slate-600 dark:text-gray-400 line-clamp-2 leading-snug opacity-80">"{review.comment}"</p>
                      <div className="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-gray-800">
-                        <span className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{review.userId?.name}</span>
-                        <button className="text-[7.5px] font-black text-red-500 uppercase italic opacity-60 hover:opacity-100 transition-opacity">Block User</button>
+                        <span className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{review.userId?.name}</span>
+                        <button className="text-[11px] font-black text-red-500 capitalize opacity-60 hover:opacity-100 transition-opacity">Block User</button>
                      </div>
                   </div>
                ))}
-               {data.recentReviews.length === 0 && <div className="lg:col-span-3 py-16 text-center text-slate-300 font-black uppercase tracking-[0.2em] text-[8px] border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-2xl">Clean sheet! No reviews yet.</div>}
+               {data.recentReviews.length === 0 && <div className="lg:col-span-3 py-16 text-center text-slate-300 font-black capitalize tracking-[0.2em] text-[11px] border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-2xl">Clean sheet! No reviews yet.</div>}
             </div>
          </section>
 

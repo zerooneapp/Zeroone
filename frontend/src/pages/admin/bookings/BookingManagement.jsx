@@ -3,7 +3,8 @@ import {
   Search, Filter, RefreshCw, ChevronRight,
   Calendar, Clock, CreditCard, Package,
   User, Store, AlertCircle, XCircle,
-  CheckCircle, Ban, History, ShieldAlert
+  CheckCircle, Ban, History, ShieldAlert,
+  Eye
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -82,7 +83,7 @@ const BookingManagement = () => {
       cancelled: "bg-red-50 text-red-500 border-red-100/50"
     };
     return (
-      <span className={cn("text-[8px] font-black uppercase px-2 py-0.5 rounded-md border tracking-tighter", styles[status] || "bg-slate-50 text-slate-400 border-slate-100")}>
+      <span className={cn("text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter", styles[status] || "bg-slate-50 text-slate-400 border-slate-100")}>
         {status}
       </span>
     );
@@ -95,29 +96,29 @@ const BookingManagement = () => {
       <div className="p-4 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-[20px] font-black text-slate-900 dark:text-white tracking-tight uppercase">Global Ledger</h1>
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 opacity-60">Audit real-time transaction activity</p>
+            <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Global Ledger</h1>
+            <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Audit real-time transaction activity</p>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={fetchBookings} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all shadow-sm">
-              <RefreshCw size={16} strokeWidth={3} className={loading ? "animate-spin" : ""} />
+              <RefreshCw size={18} strokeWidth={3} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           <div className="relative lg:col-span-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} strokeWidth={3} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} strokeWidth={3} />
             <input
               type="text"
               placeholder="Search user, vendor..."
-              className="w-full pl-10 pr-4 h-10 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[12px] font-black uppercase tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-300"
+              className="w-full pl-10 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-300"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
           <select
-            className="px-3.5 h-10 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer"
+            className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer"
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           >
@@ -128,7 +129,7 @@ const BookingManagement = () => {
           </select>
           <input
             type="date"
-            className="px-3.5 h-10 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[9px] font-black uppercase text-slate-500 focus:ring-2 ring-primary/20 outline-none cursor-pointer"
+            className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize text-slate-500 focus:ring-2 ring-primary/20 outline-none cursor-pointer"
             value={filters.date}
             onChange={(e) => setFilters({ ...filters, date: e.target.value })}
           />
@@ -140,12 +141,12 @@ const BookingManagement = () => {
         <table className="w-full text-left border-collapse min-w-[900px]">
           <thead>
             <tr className="bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
-              <th className="px-6 py-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 opacity-60">Transaction ID</th>
-              <th className="px-4 py-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 opacity-60">Participants</th>
-              <th className="px-4 py-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 opacity-60 text-center">Price</th>
-              <th className="px-4 py-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 opacity-60">Date & Time</th>
-              <th className="px-4 py-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 opacity-60">Status</th>
-              <th className="px-6 py-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 opacity-60 text-right">Actions</th>
+              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Transaction ID</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Participants</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-center">Price</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Date & Time</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Status</th>
+              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-gray-800">
@@ -159,28 +160,28 @@ const BookingManagement = () => {
                   className="group hover:bg-slate-50/80 dark:hover:bg-gray-800/80 transition-all cursor-pointer"
                 >
                   <td className="px-6 py-3.5">
-                    <code className="text-[10px] font-black text-slate-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 uppercase tracking-tighter italic">
+                    <code className="text-[12px] font-black text-slate-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 capitalize tracking-tighter">
                       #{booking.bookingId || booking._id.slice(-6)}
                     </code>
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="space-y-1 leading-none">
-                      <div className="flex items-center gap-1.5 text-[11px] font-black uppercase text-slate-900 dark:text-white tracking-tight">
-                        <User size={10} strokeWidth={3} className="text-primary opacity-60" /> {booking.user?.name}
+                      <div className="flex items-center gap-1.5 text-[14px] font-black capitalize text-slate-900 dark:text-white tracking-tight">
+                        <User size={12} strokeWidth={3} className="text-primary opacity-60" /> {booking.user?.name}
                       </div>
-                      <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest opacity-60 italic">
-                        <Store size={10} strokeWidth={3} className="text-slate-300" /> {booking.vendor?.shopName}
+                      <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-400 capitalize tracking-widest opacity-60">
+                        <Store size={12} strokeWidth={3} className="text-slate-300" /> {booking.vendor?.shopName}
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3.5 text-center">
-                    <span className="text-[12px] font-black text-slate-900 dark:text-white italic">
+                    <span className="text-[15px] font-black text-slate-900 dark:text-white">
                       ₹{booking.totalPrice}
                     </span>
                   </td>
-                  <td className="px-4 py-3.5 space-y-1 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter leading-none opacity-80">
-                    <div className="flex items-center gap-1.5"><Calendar size={9} strokeWidth={3} className="text-slate-300" /> {new Date(booking.createdAt).toLocaleDateString()}</div>
-                    <div className="flex items-center gap-1.5"><Clock size={9} strokeWidth={3} className="text-slate-300" /> {new Date(booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  <td className="px-4 py-3.5 space-y-1 text-[12px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tighter leading-none opacity-80">
+                    <div className="flex items-center gap-1.5"><Calendar size={11} strokeWidth={3} className="text-slate-300" /> {new Date(booking.createdAt).toLocaleDateString()}</div>
+                    <div className="flex items-center gap-1.5"><Clock size={11} strokeWidth={3} className="text-slate-300" /> {new Date(booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                   </td>
                   <td className="px-4 py-3.5 leading-none">
                     {getStatusBadge(booking.status)}
@@ -189,22 +190,22 @@ const BookingManagement = () => {
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => navigate(`/admin/bookings/${booking._id}`)}
-                        className="w-8 h-8 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
+                        className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
                         title="View Order"
                       >
-                        <Eye size={16} strokeWidth={3} />
+                        <Eye size={18} strokeWidth={3} />
                       </button>
                       {booking.status === 'confirmed' && (
                         <button
                           onClick={() => handleForceCancel(booking._id)}
                           disabled={actionLoadingId === booking._id}
                           className={cn(
-                            "w-8 h-8 flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 rounded-xl transition-all active:scale-90 border border-red-100/50 shadow-sm",
+                            "w-9 h-9 flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 rounded-xl transition-all active:scale-90 border border-red-100/50 shadow-sm",
                             actionLoadingId === booking._id && "opacity-50 animate-pulse"
                           )}
                           title="Force Cancel"
                         >
-                          <XCircle size={16} strokeWidth={3} />
+                          <XCircle size={18} strokeWidth={3} />
                         </button>
                       )}
                     </div>
@@ -220,7 +221,7 @@ const BookingManagement = () => {
             <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 dark:text-slate-700 border border-slate-100 dark:border-gray-700">
               <Package size={32} strokeWidth={3} />
             </div>
-            <p className="font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest text-[9px] italic">
+            <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[12px] ">
               {filters.search || filters.status || filters.date ? "No matching records in ledger" : "No bookings recorded yet"}
             </p>
           </div>
@@ -230,10 +231,5 @@ const BookingManagement = () => {
     </div>
   );
 };
-
-// Internal sub-components for reuse logic
-const Eye = ({ size, strokeWidth = 2 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-);
 
 export default BookingManagement;

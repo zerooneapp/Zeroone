@@ -61,10 +61,10 @@ const AdminBookingDetail = () => {
 
    if (!booking) return (
       <div className="p-20 text-center space-y-6">
-         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-primary font-black uppercase text-xs mx-auto">
+         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-primary font-black capitalize text-xs mx-auto">
             <ArrowLeft size={16} /> Portfolio Back
          </button>
-         <h1 className="text-2xl font-black dark:text-white uppercase tracking-tighter">Transaction Expired or Not Found</h1>
+         <h1 className="text-2xl font-black dark:text-white capitalize tracking-tighter">Transaction Expired or Not Found</h1>
       </div>
    );
 
@@ -75,7 +75,7 @@ const AdminBookingDetail = () => {
          <div className="flex items-center justify-between">
             <button
                onClick={() => navigate(-1)}
-               className="flex items-center gap-2 px-4 h-9 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-500 hover:text-primary transition-all font-black text-[9px] uppercase tracking-widest shadow-sm"
+               className="flex items-center gap-2 px-4 h-9 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-500 hover:text-primary transition-all font-black text-[9px] capitalize tracking-widest shadow-sm"
             >
                <ArrowLeft size={14} strokeWidth={3} /> Transaction Audit
             </button>
@@ -84,7 +84,7 @@ const AdminBookingDetail = () => {
                <button
                   onClick={handleForceCancel}
                   disabled={actionLoading}
-                  className="px-4 h-9 bg-red-50 text-red-500 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all border border-red-100/50 hover:bg-red-500 hover:text-white shadow-sm"
+                  className="px-4 h-9 bg-red-50 text-red-500 rounded-xl font-black text-[9px] capitalize tracking-widest transition-all border border-red-100/50 hover:bg-red-500 hover:text-white shadow-sm"
                >
                   {actionLoading ? "Processing Override..." : "Force Cancel Platform-wide"}
                </button>
@@ -97,12 +97,12 @@ const AdminBookingDetail = () => {
             <div className="lg:col-span-1 space-y-5">
                <Section title="Customer Intelligence" icon={User}>
                   <div className="flex items-center gap-3.5">
-                     <div className="w-11 h-11 bg-slate-900 text-white rounded-lg flex items-center justify-center font-black text-lg shadow-lg border border-white/10 italic">
+                     <div className="w-11 h-11 bg-slate-900 text-white rounded-lg flex items-center justify-center font-black text-lg shadow-lg border border-white/10">
                         {booking.userId?.name?.charAt(0)}
                      </div>
                      <div className="leading-tight">
-                        <h4 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{booking.userId?.name}</h4>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest opacity-60 italic">{booking.userId?.phone}</p>
+                        <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{booking.userId?.name}</h4>
+                        <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest opacity-60">{booking.userId?.phone}</p>
                      </div>
                   </div>
                   <div className="pt-2">
@@ -112,12 +112,12 @@ const AdminBookingDetail = () => {
 
                <Section title="Vendor Compliance" icon={Store}>
                   <div className="flex items-center gap-3.5">
-                     <div className="w-11 h-11 bg-amber-500 text-white rounded-lg flex items-center justify-center font-black text-lg shadow-lg border border-white/10 italic">
+                     <div className="w-11 h-11 bg-amber-500 text-white rounded-lg flex items-center justify-center font-black text-lg shadow-lg border border-white/10">
                         {booking.vendorId?.shopName?.charAt(0)}
                      </div>
                      <div className="leading-tight">
-                        <h4 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{booking.vendorId?.shopName}</h4>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5 opacity-60 italic">{booking.vendorId?.location?.address?.split(',')[0]}</p>
+                        <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{booking.vendorId?.shopName}</h4>
+                        <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest mt-0.5 opacity-60">{booking.vendorId?.location?.address?.split(',')[0]}</p>
                      </div>
                   </div>
                   <div className="pt-2 space-y-3.5">
@@ -133,8 +133,8 @@ const AdminBookingDetail = () => {
                      <InfoItem label="Creation Timestamp" value={new Date(booking.createdAt).toLocaleString()} />
                   </div>
                   <div className="mt-2 p-3.5 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800">
-                     <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mb-1 opacity-60">Administrative Note</p>
-                     <p className="text-[10px] font-black text-slate-500 dark:text-gray-400 leading-relaxed italic opacity-80">This transaction is subject to platform-wide governance. Overrides are logged in the secure audit path.</p>
+                     <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-widest mb-1 opacity-60">Administrative Note</p>
+                     <p className="text-[10px] font-black text-slate-500 dark:text-gray-400 leading-relaxed opacity-80">This transaction is subject to platform-wide governance. Overrides are logged in the secure audit path.</p>
                   </div>
                </Section>
             </div>
@@ -145,15 +145,15 @@ const AdminBookingDetail = () => {
                {/* STATUS CAROUSEL-STYLE HEADER */}
                <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex items-center justify-between no-scrollbar overflow-x-auto">
                   <div>
-                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 opacity-60">Transaction State</p>
+                     <p className="text-[8px] font-black text-slate-400 capitalize tracking-[0.2em] mb-2 opacity-60">Transaction State</p>
                      <div className="flex items-center gap-3">
                         <BookingStatusLarge status={booking.status} />
-                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest italic">Global Node</span>
+                        <span className="text-[9px] font-black text-slate-300 capitalize tracking-widest">Global Node</span>
                      </div>
                   </div>
                   <div className="text-right">
-                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 opacity-60 font-black">Settlement</p>
-                     <h3 className="text-[24px] font-black text-slate-900 dark:text-white italic tracking-tighter leading-none">₹{booking.totalPrice}</h3>
+                     <p className="text-[8px] font-black text-slate-400 capitalize tracking-[0.2em] mb-1 opacity-60 font-black">Settlement</p>
+                     <h3 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">₹{booking.totalPrice}</h3>
                   </div>
                </div>
 
@@ -164,15 +164,15 @@ const AdminBookingDetail = () => {
                         <div key={i} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-transparent group hover:bg-slate-900 hover:text-white transition-all">
                            <div className="flex items-center gap-2.5">
                               <Bookmark size={14} strokeWidth={3} className="text-primary opacity-60 group-hover:text-white" />
-                              <span className="text-[11px] font-black uppercase tracking-widest">{s.name}</span>
+                              <span className="text-[11px] font-black capitalize tracking-widest">{s.name}</span>
                            </div>
-                           <span className="text-[12px] font-black italic">₹{s.price}</span>
+                           <span className="text-[12px] font-black">₹{s.price}</span>
                         </div>
                      ))}
                   </div>
                   <div className="pt-4 mt-4 border-t border-slate-100 dark:border-gray-800 flex justify-between items-center px-2">
-                     <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60">Total Aggregate Price</span>
-                     <span className="text-[18px] font-black text-slate-900 dark:text-white tracking-tighter italic">₹{booking.totalPrice}</span>
+                     <span className="text-[8px] font-black text-slate-400 capitalize tracking-widest opacity-60">Total Aggregate Price</span>
+                     <span className="text-[18px] font-black text-slate-900 dark:text-white tracking-tighter">₹{booking.totalPrice}</span>
                   </div>
                </Section>
 
@@ -225,7 +225,7 @@ const Section = ({ title, icon: Icon, children }) => (
    <div className="space-y-3">
       <div className="flex items-center gap-2 px-1">
          <Icon size={14} strokeWidth={3} className="text-primary opacity-80" />
-         <h3 className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest opacity-80">{title}</h3>
+         <h3 className="text-[9px] font-black text-slate-900 dark:text-white capitalize tracking-widest opacity-80">{title}</h3>
       </div>
       <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 space-y-4 shadow-sm">
          {children}
@@ -235,8 +235,8 @@ const Section = ({ title, icon: Icon, children }) => (
 
 const InfoItem = ({ label, value, highlight }) => (
    <div className="leading-tight">
-      <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none opacity-60">{label}</p>
-      <p className={cn("text-[11px] font-black uppercase text-slate-900 dark:text-white tracking-tighter truncate italic", highlight && "text-red-500")}>
+      <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-[0.2em] mb-1 leading-none opacity-60">{label}</p>
+      <p className={cn("text-[11px] font-black capitalize text-slate-900 dark:text-white tracking-tighter truncate", highlight && "text-red-500")}>
          {value || '---'}
       </p>
    </div>
@@ -251,7 +251,7 @@ const BookingStatusLarge = ({ status }) => {
       ongoing: "bg-indigo-50 text-indigo-500 border-indigo-100/50"
    };
    return (
-      <span className={cn("text-[11px] font-black uppercase px-3 py-1 rounded-md border tracking-tighter shadow-sm", styles[status] || styles.pending)}>
+      <span className={cn("text-[11px] font-black capitalize px-3 py-1 rounded-md border tracking-tighter shadow-sm", styles[status] || styles.pending)}>
          {status}
       </span>
    );
@@ -271,8 +271,8 @@ const TimelineItem = ({ title, time, active, color = "primary" }) => {
             active ? dots[color] : "bg-slate-200"
          )} />
          <div className="leading-none">
-            <h5 className={cn("text-[10px] font-black uppercase tracking-widest leading-none", active ? "text-slate-900 dark:text-white" : "text-slate-400")}>{title}</h5>
-            <p className="text-[8.5px] font-black text-slate-400 uppercase mt-1.5 tracking-wider opacity-60 italic leading-none">{time}</p>
+            <h5 className={cn("text-[10px] font-black capitalize tracking-widest leading-none", active ? "text-slate-900 dark:text-white" : "text-slate-400")}>{title}</h5>
+            <p className="text-[8.5px] font-black text-slate-400 capitalize mt-1.5 tracking-wider opacity-60 leading-none">{time}</p>
          </div>
       </div>
    );

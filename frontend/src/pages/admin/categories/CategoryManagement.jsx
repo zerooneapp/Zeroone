@@ -102,14 +102,14 @@ const CategoryManagement = () => {
       {/* 🏷️ HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm">
         <div>
-          <h1 className="text-[20px] font-black text-slate-900 dark:text-white tracking-tight uppercase">Catalog Mastery</h1>
-          <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 opacity-60">Manage global service classifications</p>
+          <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Catalog Mastery</h1>
+          <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Manage global service classifications</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center justify-center gap-2 px-4 h-9 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[9px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-sm border border-slate-800"
+          className="flex items-center justify-center gap-2 px-6 h-11 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[11px] capitalize tracking-widest hover:scale-105 active:scale-95 transition-all shadow-sm border border-slate-800"
         >
-          <Plus size={14} strokeWidth={3} /> Add Class
+          <Plus size={18} strokeWidth={3} /> Add Class
         </button>
       </div>
 
@@ -131,35 +131,35 @@ const CategoryManagement = () => {
               >
                 {/* STATUS DOT */}
                 <div className={cn(
-                  "absolute top-5 right-5 w-2 h-2 rounded-full",
+                  "absolute top-5 right-5 w-2.5 h-2.5 rounded-full",
                   cat.isActive ? "bg-emerald-500 shadow-lg shadow-emerald-500/20" : "bg-slate-200"
                 )} />
 
-                <div className="w-14 h-14 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4 text-slate-400 group-hover:text-primary group-hover:bg-slate-900 transition-all border border-slate-100 dark:border-gray-800 shadow-inner">
+                <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4 text-slate-400 group-hover:text-primary group-hover:bg-slate-900 transition-all border border-slate-100 dark:border-gray-800 shadow-inner">
                   {cat.image ? (
                     <img src={cat.image} alt={cat.name} className="w-full h-full object-cover rounded-xl" />
                   ) : (
-                    <Tag size={24} strokeWidth={3} />
+                    <Tag size={28} strokeWidth={3} />
                   )}
                 </div>
 
-                <h3 className="text-[14px] font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1 truncate group-hover:text-primary transition-colors">{cat.name}</h3>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest line-clamp-2 leading-[1.4] h-7 opacity-60 italic">
+                <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight mb-1 truncate group-hover:text-primary transition-colors">{cat.name}</h3>
+                <p className="text-[11px] font-bold text-slate-400 capitalize tracking-widest line-clamp-2 leading-[1.4] h-8 opacity-60">
                   {cat.description || "No description provided"}
                 </p>
 
                 <div className="mt-4 flex items-center gap-2 pt-4 border-t border-slate-50 dark:border-gray-800">
                   <button
                     onClick={() => handleOpenModal(cat)}
-                    className="flex-1 h-8 bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-400 hover:text-primary transition-all flex items-center justify-center border border-slate-100 dark:border-gray-700 active:scale-90"
+                    className="flex-1 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-400 hover:text-primary transition-all flex items-center justify-center border border-slate-100 dark:border-gray-700 active:scale-90"
                   >
-                    <Edit2 size={12} strokeWidth={3} />
+                    <Edit2 size={16} strokeWidth={3} />
                   </button>
                   <button
                     onClick={() => openDeleteConfirm(cat._id)}
-                    className="flex-1 h-8 bg-red-50 dark:bg-red-500/10 rounded-lg text-red-300 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center border border-red-100/50 active:scale-90"
+                    className="flex-1 h-9 bg-red-50 dark:bg-red-500/10 rounded-lg text-red-300 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center border border-red-100/50 active:scale-90"
                   >
-                    <Trash2 size={12} strokeWidth={3} />
+                    <Trash2 size={16} strokeWidth={3} />
                   </button>
                 </div>
               </motion.div>
@@ -170,10 +170,10 @@ const CategoryManagement = () => {
 
       {!loading && categories.length === 0 && (
         <div className="p-20 text-center space-y-4 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-slate-200 dark:border-gray-800 animate-in zoom-in duration-500 shadow-sm">
-          <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto text-slate-200 dark:text-gray-700 border border-slate-100 dark:border-gray-800 italic">
-            <Tag size={32} strokeWidth={3} />
+          <div className="w-20 h-20 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto text-slate-200 dark:text-gray-700 border border-slate-100 dark:border-gray-800">
+            <Tag size={40} strokeWidth={3} />
           </div>
-          <p className="font-black text-slate-400 dark:text-gray-600 uppercase tracking-widest text-[9px] italic opacity-60">
+          <p className="font-black text-slate-400 dark:text-gray-600 capitalize tracking-widest text-[12px] opacity-60">
             No classifications defined — create one to start mapping
           </p>
         </div>
@@ -197,64 +197,64 @@ const CategoryManagement = () => {
               className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 p-6 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tighter italic">
+                <h2 className="text-[20px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
                   {editingCategory ? "Update Master Class" : "Define New Class"}
                 </h2>
-                <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-400 hover:text-red-500 transition-all border border-slate-100 shadow-sm">
-                  <X size={16} strokeWidth={3} />
+                <button onClick={() => setIsModalOpen(false)} className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-400 hover:text-red-500 transition-all border border-slate-100 shadow-sm">
+                  <X size={20} strokeWidth={3} />
                 </button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5 leading-none">
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-1 opacity-60">Classification Name</label>
+                  <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Classification Name</label>
                   <input
                     type="text"
                     required
-                    className="w-full px-4 h-10 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[12px] font-black uppercase focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300 italic"
+                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. LUXURY SPA"
                   />
                 </div>
                 <div className="space-y-1.5 leading-none">
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-1 opacity-60">Metadata Details</label>
+                  <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Metadata Details</label>
                   <textarea
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[12px] font-black uppercase focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all h-20 resize-none no-scrollbar placeholder:text-slate-300 italic"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all h-24 resize-none no-scrollbar placeholder:text-slate-300"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Classification details..."
                   />
                 </div>
                 <div className="space-y-1.5 leading-none">
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-1 opacity-60">Visual Icon Link</label>
+                  <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Visual Icon Link</label>
                   <input
                     type="text"
-                    className="w-full px-4 h-10 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black uppercase focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300"
+                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[13px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300"
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                     placeholder="https://..."
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-gray-800/40 rounded-xl mt-2 border border-slate-100 dark:border-gray-700 shadow-inner">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60">Global Linkage</span>
+                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-gray-800/40 rounded-xl mt-2 border border-slate-100 dark:border-gray-700 shadow-inner">
+                  <span className="text-[10px] font-black text-slate-400 capitalize tracking-widest opacity-60">Global Linkage</span>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
                     className={cn(
-                      "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all shadow-sm border",
+                      "flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black capitalize transition-all shadow-sm border",
                       formData.isActive ? "bg-emerald-500 text-white border-emerald-600 shadow-emerald-500/20" : "bg-slate-200 text-slate-500 border-slate-300"
                     )}
                   >
-                    {formData.isActive ? <Check size={12} strokeWidth={3} /> : <X size={12} strokeWidth={3} />}
+                    {formData.isActive ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
                     {formData.isActive ? "Active State" : "Suspended"}
                   </button>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full h-11 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-slate-900/10 hover:scale-[1.01] active:scale-95 transition-all mt-4 border border-slate-800 italic"
+                  className="w-full h-12 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[12px] capitalize tracking-widest shadow-lg shadow-slate-900/10 hover:scale-[1.01] active:scale-95 transition-all mt-4 border border-slate-800"
                 >
                   {editingCategory ? "Update Classification" : "Establish New Class"}
                 </button>
@@ -281,25 +281,25 @@ const CategoryManagement = () => {
               exit={{ opacity: 0, scale: 0.98 }}
               className="relative w-full max-w-xs bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 p-8 shadow-2xl text-center space-y-5"
             >
-              <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto text-red-500 border border-red-100 dark:border-red-500/20 shadow-sm">
-                <AlertCircle size={32} strokeWidth={3} />
+              <div className="w-20 h-20 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto text-red-500 border border-red-100 dark:border-red-500/20 shadow-sm">
+                <AlertCircle size={40} strokeWidth={3} />
               </div>
               <div>
-                <h3 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none italic">Security Override</h3>
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-2 px-2 leading-relaxed opacity-60">
+                <h3 className="text-[20px] font-black text-slate-900 dark:text-white capitalize tracking-tighter leading-none">Security Override</h3>
+                <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-2 px-2 leading-relaxed opacity-60">
                   Deleting this classification may disrupt active platform services. Execute with caution.
                 </p>
               </div>
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setConfirmData({ open: false, id: null })}
-                  className="flex-1 h-10 bg-slate-50 dark:bg-gray-800 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+                  className="flex-1 h-11 bg-slate-50 dark:bg-gray-800 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
                 >
                   Abort
                 </button>
                 <button
                   onClick={executeDelete}
-                  className="flex-1 h-10 bg-red-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-red-500/20 active:scale-95 transition-all border border-red-600"
+                  className="flex-1 h-11 bg-red-500 text-white rounded-xl text-[11px] font-black capitalize tracking-widest shadow-lg shadow-red-500/20 active:scale-95 transition-all border border-red-600"
                 >
                   Delete
                 </button>
@@ -315,11 +315,11 @@ const CategoryManagement = () => {
 
 const CategorySkeleton = () => (
   <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 animate-pulse space-y-4 shadow-sm">
-    <div className="w-14 h-14 bg-slate-50 dark:bg-gray-800 rounded-xl" />
-    <div className="h-3.5 w-2/3 bg-slate-50 dark:bg-gray-800 rounded-md" />
-    <div className="h-2 w-full bg-slate-50/50 dark:bg-gray-800/50 rounded-md" />
-    <div className="h-2 w-5/6 bg-slate-50/50 dark:bg-gray-800/50 rounded-md" />
-    <div className="h-8 w-full bg-slate-50/50 dark:bg-gray-800/50 rounded-lg mt-4" />
+    <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl" />
+    <div className="h-4 w-2/3 bg-slate-50 dark:bg-gray-800 rounded-md" />
+    <div className="h-3 w-full bg-slate-50/50 dark:bg-gray-800/50 rounded-md" />
+    <div className="h-3 w-5/6 bg-slate-50/50 dark:bg-gray-800/50 rounded-md" />
+    <div className="h-9 w-full bg-slate-50/50 dark:bg-gray-800/50 rounded-lg mt-4" />
   </div>
 );
 

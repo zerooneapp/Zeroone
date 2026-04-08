@@ -124,22 +124,22 @@ const TransactionManagement = () => {
     <div className="space-y-5 pb-20 animate-in fade-in duration-500">
       <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-emerald-500/20">
         <div className="space-y-1">
-          <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tighter uppercase italic">Capital Ledger</h1>
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">Global Financial Movement & Settlement Hub</p>
+          <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize">Capital Ledger</h1>
+          <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Global Financial Movement & Settlement Hub</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportCsv}
-            className="h-10 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2 group"
+            className="h-11 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2 group"
           >
-            <Download size={14} strokeWidth={3} className="group-hover:translate-y-0.5 transition-transform" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Live Report</span>
+            <Download size={18} strokeWidth={3} className="group-hover:translate-y-0.5 transition-transform" />
+            <span className="text-[11px] font-black capitalize tracking-widest">Live Report</span>
           </button>
           <button
             onClick={handlePrint}
-            className="h-10 px-4 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg shadow-slate-900/10 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 italic"
+            className="h-11 px-4 bg-slate-900 text-white rounded-xl font-black text-[11px] capitalize tracking-widest shadow-lg shadow-slate-900/10 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
           >
-            <Printer size={14} strokeWidth={3} />
+            <Printer size={18} strokeWidth={3} />
             Export Ledger
           </button>
         </div>
@@ -171,11 +171,11 @@ const TransactionManagement = () => {
 
       <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-gray-600" size={16} strokeWidth={3} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-gray-600" size={18} strokeWidth={3} />
           <input
             type="text"
             placeholder="SEARCH ORDER ID, PAYMENT ID OR VENDOR..."
-            className="w-full pl-11 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[10px] font-black uppercase tracking-widest focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300 italic"
+            className="w-full pl-11 pr-4 h-12 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[14px] font-black capitalize tracking-widest focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300"
             value={filters.search}
             onChange={(event) => {
               const value = event.target.value;
@@ -193,9 +193,9 @@ const TransactionManagement = () => {
                 setFilters((previous) => ({ ...previous, type }));
               }}
               className={cn(
-                'flex-1 h-11 px-6 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border shadow-sm',
+                'flex-1 h-12 px-6 rounded-xl text-[11px] font-black capitalize tracking-widest transition-all border shadow-sm',
                 filters.type === type
-                  ? 'bg-slate-900 text-white border-slate-900 italic scale-[1.02]'
+                  ? 'bg-slate-900 text-white border-slate-900 scale-[1.02]'
                   : 'bg-white dark:bg-gray-800 text-slate-400 border-slate-100 dark:border-gray-700 hover:bg-slate-50'
               )}
             >
@@ -212,7 +212,7 @@ const TransactionManagement = () => {
                 setFilters((previous) => ({ ...previous, status }));
               }}
               className={cn(
-                'flex-1 h-11 px-4 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all border shadow-sm',
+                'flex-1 h-12 px-4 rounded-xl text-[10px] font-black capitalize tracking-widest transition-all border shadow-sm',
                 filters.status === status
                   ? 'bg-white dark:bg-gray-800 text-slate-900 dark:text-white border-slate-900/10 dark:border-gray-700'
                   : 'bg-slate-50 dark:bg-gray-800 text-slate-400 border-slate-100 dark:border-gray-700'
@@ -226,15 +226,15 @@ const TransactionManagement = () => {
 
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-slate-50/80 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
-                <th className="px-5 py-4 text-left text-[8.5px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-[0.2em] opacity-80">Reference ID</th>
-                <th className="px-5 py-4 text-left text-[8.5px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-[0.2em] opacity-80">Vendor / Initiator</th>
-                <th className="px-5 py-4 text-left text-[8.5px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-[0.2em] opacity-80">Classification</th>
-                <th className="px-5 py-4 text-left text-[8.5px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-[0.2em] opacity-80 text-right">Capital Amount</th>
-                <th className="px-5 py-4 text-left text-[8.5px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-[0.2em] opacity-80 text-center">Settlement</th>
-                <th className="px-5 py-4 text-left text-[8.5px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-[0.2em] opacity-80 text-right">Synchronization</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Reference ID</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Vendor / Initiator</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Classification</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-right">Capital Amount</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-center">Settlement</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-right">Synchronization</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-gray-800/40">
@@ -248,19 +248,19 @@ const TransactionManagement = () => {
                     className="group hover:bg-slate-50/50 dark:hover:bg-gray-800/30 transition-all cursor-default"
                   >
                     <td className="px-5 py-4 leading-none">
-                      <span className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tighter italic">
+                      <span className="text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
                         #{transaction.referenceId || transaction.gatewayPaymentId || transaction._id.slice(-6)}
                       </span>
                       <div className="flex items-center gap-1 mt-1 opacity-40">
-                        <Layers size={8} />
-                        <span className="text-[7.5px] font-bold text-slate-400 uppercase">
+                        <Layers size={10} />
+                        <span className="text-[10px] font-bold text-slate-400 capitalize">
                           {transaction.gatewayOrderId || transaction.paymentGateway || 'manual'}
                         </span>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-gray-800 flex items-center justify-center text-[12px] font-black text-slate-400 capitalize tracking-tighter">
                           {(transaction.vendor?.shopName || transaction.initiatedBy?.name || 'NA')
                             .split(' ')
                             .map((part) => part[0])
@@ -268,10 +268,10 @@ const TransactionManagement = () => {
                             .slice(0, 2)}
                         </div>
                         <div className="leading-tight">
-                          <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                          <p className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
                             {transaction.vendor?.shopName || transaction.initiatedBy?.name || 'Unknown'}
                           </p>
-                          <p className="text-[8px] font-black text-slate-400 uppercase opacity-60">
+                          <p className="text-[11px] font-black text-slate-400 capitalize opacity-60">
                             {transaction.vendor?.owner?.name || transaction.initiatedBy?.phone || 'Verified Identity'}
                           </p>
                         </div>
@@ -280,10 +280,10 @@ const TransactionManagement = () => {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <div className={cn(
-                          'w-2 h-2 rounded-full',
+                          'w-2.5 h-2.5 rounded-full',
                           transaction.type === 'credit' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]'
                         )} />
-                        <span className="text-[9px] font-black text-slate-600 dark:text-gray-400 uppercase tracking-widest italic">
+                        <span className="text-[12px] font-black text-slate-600 dark:text-gray-400 capitalize tracking-widest">
                           {prettifyLabel(transaction.category)}
                         </span>
                       </div>
@@ -291,12 +291,12 @@ const TransactionManagement = () => {
                     <td className="px-5 py-4 text-right">
                       <div className="leading-none">
                         <span className={cn(
-                          'text-[14px] font-black italic tracking-tighter',
+                          'text-[16px] font-black tracking-tighter',
                           transaction.type === 'credit' ? 'text-emerald-600' : 'text-rose-600'
                         )}>
                           {transaction.type === 'credit' ? '+' : '-'} {moneyFormatter.format(transaction.amount || 0)}
                         </span>
-                        <p className="text-[8px] font-black text-slate-300 uppercase mt-0.5">
+                        <p className="text-[11px] font-black text-slate-300 capitalize mt-0.5">
                           {prettifyLabel(transaction.paymentMethod || transaction.paymentGateway || 'manual')}
                         </p>
                       </div>
@@ -308,10 +308,10 @@ const TransactionManagement = () => {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <div className="leading-none">
-                        <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                        <p className="text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
                           {format(new Date(transaction.timestamp), 'dd MMM yyyy')}
                         </p>
-                        <p className="text-[8.5px] font-black text-slate-400 uppercase opacity-60 mt-0.5">
+                        <p className="text-[11px] font-black text-slate-400 capitalize opacity-60 mt-0.5">
                           {format(new Date(transaction.timestamp), 'HH:mm:ss')}
                         </p>
                       </div>
@@ -325,39 +325,39 @@ const TransactionManagement = () => {
 
         {loading && (
           <div className="p-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 border border-slate-100 italic animate-pulse">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 border border-slate-100 animate-pulse">
               <TrendingUp size={32} strokeWidth={3} />
             </div>
-            <p className="font-black text-slate-400 uppercase tracking-widest text-[9px] italic opacity-60">Synchronizing ledger</p>
+            <p className="font-black text-slate-400 capitalize tracking-widest text-[12px] opacity-60">Synchronizing ledger</p>
           </div>
         )}
 
         {!loading && data.transactions.length === 0 && (
           <div className="p-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 border border-slate-100 italic">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 border border-slate-100">
               <TrendingUp size={32} strokeWidth={3} />
             </div>
-            <p className="font-black text-slate-400 uppercase tracking-widest text-[9px] italic opacity-60">No financial velocity detected in this range</p>
+            <p className="font-black text-slate-400 capitalize tracking-widest text-[12px] opacity-60">No financial velocity detected in this range</p>
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-between px-2">
-        <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">
+        <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em]">
           Page {data.currentPage} of {data.totalPages}
         </p>
         <div className="flex gap-2">
           <button
             onClick={() => setPage(Math.max(1, data.currentPage - 1))}
             disabled={data.currentPage === 1}
-            className="h-10 px-4 rounded-xl border border-slate-200 dark:border-gray-800 text-[9px] font-black uppercase tracking-widest disabled:opacity-40"
+            className="h-11 px-4 rounded-xl border border-slate-200 dark:border-gray-800 text-[11px] font-black capitalize tracking-widest disabled:opacity-40"
           >
             Prev
           </button>
           <button
             onClick={() => setPage(Math.min(data.totalPages, data.currentPage + 1))}
             disabled={data.currentPage >= data.totalPages}
-            className="h-10 px-4 rounded-xl border border-slate-200 dark:border-gray-800 text-[9px] font-black uppercase tracking-widest disabled:opacity-40"
+            className="h-11 px-4 rounded-xl border border-slate-200 dark:border-gray-800 text-[11px] font-black capitalize tracking-widest disabled:opacity-40"
           >
             Next
           </button>
@@ -371,23 +371,23 @@ const SummaryCard = ({ label, value, icon: Icon, color, sub }) => (
   <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-4 transition-all hover:shadow-md border-b-2" style={{ borderBottomColor: color === 'emerald' ? '#10b981' : color === 'rose' ? '#f43f5e' : '#f59e0b' }}>
     <div className="flex items-center justify-between">
       <div className={cn(
-        'w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border',
+        'w-12 h-12 rounded-xl flex items-center justify-center shadow-sm border',
         color === 'emerald' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
           color === 'rose' ? 'bg-rose-50 text-rose-600 border-rose-100' :
             'bg-amber-50 text-amber-600 border-amber-100'
       )}>
-        <Icon size={18} strokeWidth={3} />
+        <Icon size={24} strokeWidth={3} />
       </div>
       <div className="text-right">
-        <p className="text-[8.5px] font-black text-slate-400 uppercase tracking-widest opacity-60 leading-none">{label}</p>
-        <p className="text-[18px] font-black text-slate-900 dark:text-white tracking-tighter italic mt-1">
+        <p className="text-[12px] font-black text-slate-400 capitalize tracking-widest opacity-60 leading-none">{label}</p>
+        <p className="text-[22px] font-black text-slate-900 dark:text-white tracking-tighter mt-1">
           {moneyFormatter.format(value || 0)}
         </p>
       </div>
     </div>
     <div className="pt-3 border-t border-slate-50 dark:border-gray-800 flex items-center gap-2">
-      <div className={cn('w-1 h-1 rounded-full', color === 'emerald' ? 'bg-emerald-500' : color === 'rose' ? 'bg-rose-500' : 'bg-amber-500')} />
-      <p className="text-[8.5px] font-black text-slate-400 uppercase tracking-tighter opacity-70 italic">{sub}</p>
+      <div className={cn('w-1.5 h-1.5 rounded-full', color === 'emerald' ? 'bg-emerald-500' : color === 'rose' ? 'bg-rose-500' : 'bg-amber-500')} />
+      <p className="text-[11px] font-black text-slate-400 capitalize tracking-tighter opacity-70">{sub}</p>
     </div>
   </div>
 );
@@ -400,14 +400,14 @@ const StatusBadge = ({ status }) => {
   };
 
   const icons = {
-    completed: <CheckCircle2 size={10} strokeWidth={3} />,
-    pending: <Clock size={10} strokeWidth={3} />,
-    failed: <AlertCircle size={10} strokeWidth={3} />
+    completed: <CheckCircle2 size={12} strokeWidth={3} />,
+    pending: <Clock size={12} strokeWidth={3} />,
+    failed: <AlertCircle size={12} strokeWidth={3} />
   };
 
   return (
     <div className={cn(
-      'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border shadow-sm italic',
+      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black capitalize tracking-widest border shadow-sm',
       styles[status] || styles.pending
     )}>
       {icons[status] || icons.pending}
