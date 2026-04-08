@@ -149,7 +149,7 @@ const VendorBookings = () => {
   const filteredBookings = bookings.filter(b => b.status === status);
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
+    <div className="bg-background-light dark:bg-gray-950 pb-10">
       <header className="px-4 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -206,7 +206,7 @@ const VendorBookings = () => {
         </div>
       </header>
 
-      <main className="px-4 mt-4 max-w-2xl mx-auto space-y-3">
+      <main className="px-4 mt-2 max-w-2xl mx-auto space-y-3">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (
@@ -306,7 +306,7 @@ const VendorBookings = () => {
               key="empty"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="py-12 text-center space-y-4"
+              className="py-8 text-center space-y-4"
             >
               <div className="relative w-20 h-20 mx-auto">
                 <div className="absolute inset-0 bg-primary/5 rounded-[2.5rem] animate-pulse" />

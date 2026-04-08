@@ -169,7 +169,7 @@ const VendorDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden pb-4">
+    <div className="bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden">
       <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
@@ -276,7 +276,7 @@ const VendorDashboard = () => {
 
           <div className="space-y-1">
             {data.schedule.length === 0 ? (
-              <div className="py-20 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm">
+              <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
                 <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-primary transition-colors">
                   <Calendar size={18} />
                 </div>

@@ -133,13 +133,8 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                </div>
             )}
 
-            {(booking.status === 'completed' || booking.status === 'cancelled') && (
-               <button className="h-8 px-3 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-slate-100 dark:border-gray-700/30 active:scale-95 transition-all shadow-sm">
-                  Audit Receipt <ChevronRight size={12} />
-               </button>
-            )}
-         </div>
-      </motion.div>
+          </div>
+       </motion.div>
    );
 };
 
