@@ -62,7 +62,7 @@ const StaffBookings = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
        {/* 📱 OPTIMIZED MOBILE HEADER */}
-       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-5 px-5 pb-3">
+       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-3 px-5 pb-2">
           <div className="flex items-center gap-4 mb-5">
              <button 
                onClick={() => navigate('/staff')}

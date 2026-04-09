@@ -60,10 +60,10 @@ const StaffAccount = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
         {/* 🏛️ ELITE IDENTITY CARD (PREMIUM BLUR) */}
-        <div className="relative px-6 pt-6 pb-8 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-[3.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none">
+        <div className="relative px-6 pt-6 pb-8 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-2xl shadow-2xl shadow-slate-200/50 dark:shadow-none">
            <div className="flex flex-col items-center text-center space-y-4 pt-0">
               <div className="relative">
-                 <div className="w-24 h-24 bg-slate-50 dark:bg-gray-900 rounded-[2.5rem] border-4 border-white dark:border-gray-950 shadow-2xl overflow-hidden">
+                 <div className="w-24 h-24 bg-slate-50 dark:bg-gray-900 rounded-2xl border-4 border-white dark:border-gray-950 shadow-2xl overflow-hidden">
                     {profile?.image ? <img src={profile.image} className="w-full h-full object-cover" /> : <User size={40} className="text-slate-300 m-7" />}
                  </div>
                  <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-2xl flex items-center justify-center border-4 border-white dark:border-gray-950 shadow-lg text-white">
@@ -104,7 +104,7 @@ const StaffAccount = () => {
                  <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
               </div>
               
-              <div className="bg-white dark:bg-gray-900 p-5 rounded-[2.2rem] border border-slate-100 dark:border-gray-800 space-y-5 shadow-sm relative overflow-hidden group">
+              <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 space-y-5 shadow-sm relative overflow-hidden group">
                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-blue-500/10 transition-all duration-500" />
                  
                  <div className="flex items-start gap-4 relative z-10">
@@ -141,7 +141,7 @@ const StaffAccount = () => {
                  <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
               </div>
               
-              <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-[2rem] border border-slate-100 dark:border-gray-800 shadow-sm">
+              <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50">
@@ -163,7 +163,7 @@ const StaffAccount = () => {
 
            <button 
               onClick={logout}
-              className="w-full h-11 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-[2.2rem] flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-[0.2em] border border-slate-200/50 dark:border-gray-700 active:scale-95 transition-all shadow-sm group"
+              className="w-full h-11 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-2xl flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-[0.2em] border border-slate-200/50 dark:border-gray-700 active:scale-95 transition-all shadow-sm group"
            >
               <LogOut size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
               Sign Out
