@@ -51,6 +51,49 @@ const normalizeReviewForAdmin = (review) => ({
   status: review.status || 'approved'
 });
 
+const getVendorReviews = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+
+    const reviews = await Review.find({
+      vendorId,
+      ...getApprovedReviewQuery()
+    })
+      .populate('userId', 'name image')
+      .populate('bookingId', 'services createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const normalizedReviews = reviews.map((review) => ({
+      _id: review._id,
+      rating: review.rating,
+      comment: review.comment || '',
+      date: review.createdAt,
+      user: {
+        name: review.userId?.name || 'Verified User',
+        image: review.userId?.image || ''
+      },
+      services: (review.bookingId?.services || [])
+        .map((service) => service?.name)
+        .filter(Boolean)
+    }));
+
+    const avgRating = normalizedReviews.length
+      ? Number((normalizedReviews.reduce((sum, review) => sum + review.rating, 0) / normalizedReviews.length).toFixed(1))
+      : 0;
+
+    res.status(200).json({
+      summary: {
+        totalReviews: normalizedReviews.length,
+        avgRating
+      },
+      reviews: normalizedReviews
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const getUnreviewedBooking = async (req, res) => {
   try {
     const booking = await Booking.findOne({
@@ -213,6 +256,7 @@ const deleteReview = async (req, res) => {
 };
 
 module.exports = {
+  getVendorReviews,
   getUnreviewedBooking,
   submitReview,
   getAdminReviews,

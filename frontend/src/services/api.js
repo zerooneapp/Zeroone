@@ -15,12 +15,14 @@ const getStoredRole = () => {
 const buildLoginRedirect = () => {
   const currentPath = `${window.location.pathname}${window.location.search}`;
   const storedRole = getStoredRole();
-  const isBusinessArea = ['/vendor', '/staff', '/admin'].some((prefix) =>
-    window.location.pathname.startsWith(prefix)
-  );
-  const loginPath = isBusinessArea || ['vendor', 'staff', 'admin'].includes(storedRole)
-    ? '/vendor-login'
-    : '/login';
+  const loginPath = window.location.pathname.startsWith('/admin') || ['admin', 'super_admin'].includes(storedRole)
+    ? '/admin-login'
+    : (
+        ['/vendor', '/staff'].some((prefix) => window.location.pathname.startsWith(prefix)) ||
+        ['vendor', 'staff'].includes(storedRole)
+      )
+      ? '/vendor-login'
+      : '/login';
 
   return `${loginPath}?redirect=${encodeURIComponent(currentPath)}`;
 };

@@ -154,7 +154,7 @@ const UserDetail = () => {
                               <Package size={20} strokeWidth={3} />
                            </div>
                            <div className="leading-tight">
-                              <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary transition-colors">{booking.vendorId?.shopName || 'Unknown Vendor'}</h4>
+                              <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary transition-colors">{booking.vendorId?.shopName || 'Unknown Partner'}</h4>
                               <p className="text-[9px] font-black text-slate-400 capitalize flex items-center gap-1 mt-0.5 opacity-60">
                                  <Clock size={10} strokeWidth={3} /> {new Date(booking.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                               </p>

@@ -9,6 +9,6 @@ const router = express.Router();
 router.get('/vendor', protect, isApprovedVendor, getVendorDashboard);
 
 // Admin Dashboard Route
-router.get('/admin', protect, authorize('admin'), getAdminDashboard);
+router.get('/admin', protect, authorize('admin', 'super_admin'), getAdminDashboard);
 
 module.exports = router;

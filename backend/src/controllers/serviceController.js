@@ -6,9 +6,25 @@ const {
 } = require('../services/serviceService');
 const cloudinary = require('../config/cloudinary');
 
+const normalizeRetainedImages = (value) => {
+  if (!value) return [];
+
+  let parsed = value;
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter((item) => typeof item === 'string' && item.trim()).slice(0, 4);
+};
+
 const addService = async (req, res) => {
   try {
-    const { name, description, price, duration, bufferTime, type, category } = req.body;
+    const { name, description, price, duration, bufferTime, type, category, showOnHome } = req.body;
     
     let imageUrls = [];
     if (req.files && req.files.length > 0) {
@@ -35,6 +51,7 @@ const addService = async (req, res) => {
       bufferTime,
       type,
       category,
+      showOnHome,
       image: imageUrls[0] || '', // Primary image for legacy support
       images: imageUrls // Multi-image gallery for elite swapper
     });
@@ -63,9 +80,13 @@ const listServices = async (req, res) => {
 const patchService = async (req, res) => {
   try {
     const updateData = { ...req.body };
+    const retainedImages = normalizeRetainedImages(updateData.retainedImages);
+    const hasRetainedImagesPayload = Object.prototype.hasOwnProperty.call(updateData, 'retainedImages');
+    delete updateData.retainedImages;
     
+    let uploadedImageUrls = [];
     if (req.files && req.files.length > 0) {
-      const imageUrls = await Promise.all(req.files.map(file => {
+      uploadedImageUrls = await Promise.all(req.files.map(file => {
         return new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             { folder: 'services' },
@@ -77,8 +98,13 @@ const patchService = async (req, res) => {
           stream.end(file.buffer);
         });
       }));
-      updateData.images = imageUrls;
-      updateData.image = imageUrls[0]; // Sync primary image
+    }
+
+    const shouldUpdateImages = hasRetainedImagesPayload || (req.files && req.files.length > 0);
+    if (shouldUpdateImages) {
+      const finalImages = [...retainedImages, ...uploadedImageUrls].slice(0, 4);
+      updateData.images = finalImages;
+      updateData.image = finalImages[0] || '';
     }
 
     const service = await updateService(req.vendor._id, req.params.id, updateData);

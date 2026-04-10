@@ -76,7 +76,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
       const res = await api.get('/slots', {
         params: {
           vendorId: services[0].vendorId,
-          serviceIds: formData.serviceIds,
+          serviceIds: formData.serviceIds.join(','),
           date: formData.date
         }
       });
@@ -131,6 +131,10 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
   const totalPrice = services
     .filter(s => formData.serviceIds.includes(s._id))
     .reduce((acc, s) => acc + (s.price || 0), 0);
+  const selectedSlot = availableSlots.find((slot) => slot.time === formData.time);
+  const availableStaffForSelectedSlot = staff.filter((member) =>
+    selectedSlot?.availableStaff?.some((availableStaffId) => String(availableStaffId) === String(member._id))
+  );
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0">
@@ -269,9 +273,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest px-1">Assign Staff Member</label>
                   <div className="grid grid-cols-2 gap-2">
-                    {staff
-                      .filter(s => availableSlots.find(slot => slot.time === formData.time)?.availableStaff?.includes(s._id))
-                      .map(s => (
+                    {availableStaffForSelectedSlot.map(s => (
                         <button
                           key={s._id}
                           onClick={() => setFormData({ ...formData, staffId: s._id })}
@@ -283,9 +285,13 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                           </div>
                           <span className={`text-[9px] font-black uppercase truncate ${formData.staffId === s._id ? 'text-[#344474]' : 'text-gray-900 dark:text-white'}`}>{s.name}</span>
                         </button>
-                      ))
-                    }
+                      ))}
                   </div>
+                  {availableStaffForSelectedSlot.length === 0 && (
+                    <div className="p-3 text-center text-gray-400 uppercase text-[8px] font-black bg-slate-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-slate-200 dark:border-gray-800">
+                      No free staff for this slot
+                    </div>
+                  )}
                 </div>
               )}
 

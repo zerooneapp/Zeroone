@@ -67,6 +67,7 @@ const StaffDashboard = () => {
 
    // 🎯 CORE LOGIC: Find the single most immediate CONFIRMED task
    const currentTask = bookings.find(b => b.status === 'confirmed' || b.status === 'assigned');
+   const canNavigateToCustomer = currentTask?.type === 'home' && Boolean(currentTask?.serviceAddress);
 
    const todayCompleted = bookings.filter(b =>
       b.status === 'completed' &&
@@ -163,10 +164,10 @@ const StaffDashboard = () => {
                            <div className="flex items-center gap-2">
                               <MapPin size={12} className="text-gray-400" />
                               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[170px]">
-                                 {currentTask.serviceAddress || 'Shop Service'}
+                                 {canNavigateToCustomer ? currentTask.serviceAddress : 'Shop Service'}
                               </p>
                            </div>
-                           {currentTask.serviceAddress && (
+                           {canNavigateToCustomer && (
                               <a 
                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
                                 target="_blank"
@@ -197,7 +198,7 @@ const StaffDashboard = () => {
                               </div>
                            )}
 
-                           {currentTask.serviceAddress && (
+                           {canNavigateToCustomer && (
                               <a 
                                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
                                  target="_blank"
@@ -214,7 +215,7 @@ const StaffDashboard = () => {
                                     handleStatusUpdate(currentTask._id, 'complete');
                                  }
                               }}
-                              className={`${currentTask.serviceAddress ? 'col-span-3' : 'col-span-4'} h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10`}
+                              className={`${canNavigateToCustomer ? 'col-span-3' : 'col-span-4'} h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10`}
                            >
                               <CheckCircle size={16} strokeWidth={3} />
                               Complete Job

@@ -5,6 +5,15 @@ import { motion } from 'framer-motion';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
+const normalizeServiceCategory = (value = '') =>
+   value
+      .trim()
+      .replace(/\s+/g, ' ')
+      .split(' ')
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+
 const ServiceForm = () => {
    const navigate = useNavigate();
    const { id } = useParams();
@@ -17,8 +26,10 @@ const ServiceForm = () => {
       duration: 30,
       bufferTime: 0,
       description: '',
+      type: 'shop'
    });
    const [images, setImages] = useState([null, null, null, null]);
+   const [existingImages, setExistingImages] = useState([null, null, null, null]);
    const [previews, setPreviews] = useState([null, null, null, null]);
    const [loading, setLoading] = useState(false);
 
@@ -36,14 +47,18 @@ const ServiceForm = () => {
                      duration: service.duration,
                      bufferTime: service.bufferTime || 0,
                      description: service.description || '',
+                     type: service.type || 'shop'
                   });
                   // Handling multi-images if they exist in legacy or new format
                   const existingImages = service.images || (service.image ? [service.image] : []);
                   const newPreviews = [null, null, null, null];
+                  const newExistingImages = [null, null, null, null];
                   existingImages.slice(0, 4).forEach((img, idx) => {
                      newPreviews[idx] = img;
+                     newExistingImages[idx] = img;
                   });
                   setPreviews(newPreviews);
+                  setExistingImages(newExistingImages);
                }
             } catch (err) {
                toast.error('Failed to load service data');
@@ -60,6 +75,10 @@ const ServiceForm = () => {
          newImages[index] = file;
          setImages(newImages);
 
+         const newExistingImages = [...existingImages];
+         newExistingImages[index] = null;
+         setExistingImages(newExistingImages);
+
          const newPreviews = [...previews];
          newPreviews[index] = URL.createObjectURL(file);
          setPreviews(newPreviews);
@@ -70,6 +89,10 @@ const ServiceForm = () => {
       const newImages = [...images];
       newImages[index] = null;
       setImages(newImages);
+
+      const newExistingImages = [...existingImages];
+      newExistingImages[index] = null;
+      setExistingImages(newExistingImages);
 
       const newPreviews = [...previews];
       newPreviews[index] = null;
@@ -90,6 +113,7 @@ const ServiceForm = () => {
       images.forEach((img, idx) => {
          if (img) data.append('images', img);
       });
+      data.append('retainedImages', JSON.stringify(existingImages.filter(Boolean)));
 
       try {
          setLoading(true);
@@ -191,8 +215,37 @@ const ServiceForm = () => {
                         placeholder="e.g. Haircut, Hair Color, Facial"
                         value={formData.category}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        onBlur={(e) => setFormData({ ...formData, category: normalizeServiceCategory(e.target.value) })}
                         className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-slate-300"
                      />
+                  </div>
+                  <div className="space-y-2">
+                     <div className="flex items-center justify-between px-1">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Service Availability</label>
+                        <span className="text-[8px] text-gray-400 font-black uppercase italic tracking-tighter opacity-70">
+                           shop / home
+                        </span>
+                     </div>
+                     <div className="grid grid-cols-3 gap-2">
+                        {[
+                           { value: 'shop', label: 'Shop Only' },
+                           { value: 'home', label: 'Home Only' },
+                           { value: 'both', label: 'Shop + Home' }
+                        ].map((option) => (
+                           <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => setFormData({ ...formData, type: option.value })}
+                              className={`px-3 py-2.5 rounded-xl text-[8px] font-black uppercase tracking-widest border transition-all ${
+                                 formData.type === option.value
+                                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                    : 'bg-white dark:bg-gray-900 text-gray-400 border-slate-100 dark:border-gray-800 shadow-sm'
+                              }`}
+                           >
+                              {option.label}
+                           </button>
+                        ))}
+                     </div>
                   </div>
                   {/* Name */}
                   <div className="space-y-1.5">

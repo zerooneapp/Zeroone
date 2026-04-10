@@ -46,6 +46,28 @@ export const useAuthStore = create(
         }
       },
 
+      adminLogin: async (credentials) => {
+        set({ loading: true });
+        try {
+          const res = await api.post('/auth/admin-login', credentials);
+          const { token, role } = res.data;
+
+          set({
+            user: res.data,
+            token,
+            role,
+            isAuthenticated: true
+          });
+
+          localStorage.setItem('token', token);
+          return { success: true, role };
+        } catch (err) {
+          return { success: false, message: err.response?.data?.message || 'Admin login failed' };
+        } finally {
+          set({ loading: false });
+        }
+      },
+
       requestOTP: async (phone) => {
         set({ loading: true });
         try {

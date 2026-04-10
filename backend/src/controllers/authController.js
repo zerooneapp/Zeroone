@@ -9,6 +9,9 @@ const shouldLogOtpToConsole = true; // Always log OTP to console during testing 
 
 const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
 
+const sanitizePublicRole = (role) => (role === 'vendor' ? 'vendor' : 'customer');
+const isAdminRole = (role) => ['admin', 'super_admin'].includes(role);
+
 // @desc    Login user / vendor / staff / admin
 // @route   POST /api/auth/login
 // @access  Public
@@ -29,6 +32,9 @@ const login = async (req, res) => {
     let finalUser = user;
 
     if (user) {
+      if (isAdminRole(user.role)) {
+        return res.status(403).json({ message: 'Admins must use the secure admin login' });
+      }
       const isMatch = await user.comparePassword(password);
       if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
       if (user.isBlocked) return res.status(403).json({ message: 'Account is blocked' });
@@ -67,13 +73,44 @@ const login = async (req, res) => {
   }
 };
 
+// @desc    Dedicated Admin Login
+// @route   POST /api/auth/admin-login
+// @access  Public
+const adminLogin = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+
+    if (!phone || !password) {
+      return res.status(400).json({ message: 'Phone number and password are required' });
+    }
+
+    const admin = await User.findOne({ phone, role: { $in: ['admin', 'super_admin'] } });
+    if (!admin) return res.status(401).json({ message: 'Invalid admin credentials' });
+
+    const isMatch = await admin.comparePassword(password);
+    if (!isMatch) return res.status(401).json({ message: 'Invalid admin credentials' });
+    if (admin.isBlocked) return res.status(403).json({ message: 'Admin account is blocked' });
+
+    res.status(200).json({
+      _id: admin._id,
+      name: admin.name,
+      phone: admin.phone,
+      image: admin.image,
+      role: admin.role,
+      token: generateToken(admin._id)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Register Customer
 // @route   POST /api/auth/register
 // @access  Public
 const register = async (req, res) => {
   try {
     const { phone, name, password, role, email, gender, dob, referralCode, image } = req.body;
-    const requestedRole = role || 'customer';
+    const requestedRole = sanitizePublicRole(role);
     const effectivePassword = password || (requestedRole === 'vendor' ? generateTemporaryPassword() : undefined);
 
     let user = await User.findOne({ phone });
@@ -164,6 +201,10 @@ const sendOTP = async (req, res) => {
     let user = await User.findOne({ phone });
     let staff = !user ? await Staff.findOne({ phone }) : null;
 
+    if (isAdminRole(user?.role)) {
+      return res.status(403).json({ message: 'Admins must use the secure admin login' });
+    }
+
     if (user) {
       user.otp = otp;
       user.otpExpires = otpExpires;
@@ -209,6 +250,9 @@ const verifyOTP = async (req, res) => {
     let finalAccount = user || staff;
 
     if (!finalAccount) return res.status(404).json({ message: 'Account not found' });
+    if (isAdminRole(user?.role)) {
+      return res.status(403).json({ message: 'Admins must use the secure admin login' });
+    }
 
     // Check OTP
     if (finalAccount.otp !== otp || new Date() > finalAccount.otpExpires) {
@@ -239,6 +283,7 @@ const verifyOTP = async (req, res) => {
 };
 
 module.exports = {
+  adminLogin,
   login,
   register,
   me,

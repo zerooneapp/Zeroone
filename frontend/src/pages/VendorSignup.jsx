@@ -26,12 +26,15 @@ const VendorSignup = () => {
     shopName: '',
     category: '',
     serviceLevel: 'standard', // standard, premium, luxury
+    serviceMode: 'shop',
     address: '',
     location: { coordinates: [75.8577, 22.7196] }, // Default Indore
   });
 
   // Media State
   const [panCardFile, setPanCardFile] = useState(null);
+  const [gstCertificateFile, setGstCertificateFile] = useState(null);
+  const [shopRegistrationFile, setShopRegistrationFile] = useState(null);
   const [aadhaarFrontFile, setAadhaarFrontFile] = useState(null);
   const [aadhaarBackFile, setAadhaarBackFile] = useState(null);
   const [shopImage, setShopImage] = useState(null);
@@ -54,7 +57,7 @@ const VendorSignup = () => {
   }, [phone, navigate]);
 
   const handleNext = () => {
-    if (step === 1 && (!formData.shopName || !formData.category)) {
+    if (step === 1 && (!formData.shopName || !formData.category || !formData.serviceMode)) {
       return toast.error('Please fill business details');
     }
     if (step === 2 && (!panCardFile || !aadhaarFrontFile || !aadhaarBackFile)) {
@@ -90,9 +93,11 @@ const VendorSignup = () => {
 
       // 3. Upload Media
       const mediaData = new FormData();
-      if (shopImage) mediaData.append('shopImage', shopImage);
+      if (shopImage && formData.serviceMode === 'shop') mediaData.append('shopImage', shopImage);
       if (vendorPhoto) mediaData.append('vendorPhoto', vendorPhoto);
       if (panCardFile) mediaData.append('panCard', panCardFile);
+      if (gstCertificateFile) mediaData.append('gstCertificate', gstCertificateFile);
+      if (shopRegistrationFile) mediaData.append('shopRegistration', shopRegistrationFile);
       if (aadhaarFrontFile) mediaData.append('aadhaarFront', aadhaarFrontFile);
       if (aadhaarBackFile) mediaData.append('aadhaarBack', aadhaarBackFile);
 
@@ -167,6 +172,35 @@ const VendorSignup = () => {
               </div>
             </div>
 
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Service Mode</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'shop', title: 'Shop Service', desc: 'Physical shop based bookings' },
+                  { id: 'home', title: 'Home Service', desc: 'Doorstep or home visit bookings' }
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, serviceMode: mode.id })}
+                    className={`px-4 py-3 rounded-xl border-2 transition-all text-left relative overflow-hidden ${
+                      formData.serviceMode === mode.id
+                        ? 'bg-primary/5 dark:bg-primary/10 border-primary shadow-sm'
+                        : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 opacity-80'
+                    }`}
+                  >
+                    <h4 className="font-black text-[11px] uppercase tracking-tight leading-none">{mode.title}</h4>
+                    <p className="text-[8px] font-bold text-gray-400 leading-tight mt-2">{mode.desc}</p>
+                    {formData.serviceMode === mode.id && (
+                      <CheckCircle2 className="text-primary absolute right-3 top-3" size={16} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Service Level Section */}
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
@@ -233,6 +267,52 @@ const VendorSignup = () => {
                     <ArrowRight size={14} className="text-gray-300" />
                   </div>
                   <input type="file" className="hidden" onChange={(e) => setPanCardFile(e.target.files[0])} accept="image/*" />
+                </label>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">GST Certificate</p>
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {gstCertificateFile ? (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
+                        <img src={URL.createObjectURL(gstCertificateFile)} alt="GST" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                        <FileText className="text-gray-300" size={18} />
+                      </div>
+                    )}
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{gstCertificateFile ? gstCertificateFile.name : 'ADD GST CERTIFICATE'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {gstCertificateFile && <CheckCircle2 className="text-green-500" size={16} />}
+                    <ArrowRight size={14} className="text-gray-300" />
+                  </div>
+                  <input type="file" className="hidden" onChange={(e) => setGstCertificateFile(e.target.files[0])} accept="image/*" />
+                </label>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Registration</p>
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {shopRegistrationFile ? (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
+                        <img src={URL.createObjectURL(shopRegistrationFile)} alt="Registration" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                        <FileText className="text-gray-300" size={18} />
+                      </div>
+                    )}
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopRegistrationFile ? shopRegistrationFile.name : 'ADD SHOP REGISTRY'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {shopRegistrationFile && <CheckCircle2 className="text-green-500" size={16} />}
+                    <ArrowRight size={14} className="text-gray-300" />
+                  </div>
+                  <input type="file" className="hidden" onChange={(e) => setShopRegistrationFile(e.target.files[0])} accept="image/*" />
                 </label>
               </div>
 
@@ -353,6 +433,7 @@ const VendorSignup = () => {
               </div>
 
               <div className="space-y-3">
+                {formData.serviceMode === 'shop' && (
                 <div className="space-y-1.5">
                   <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Façade Image</p>
                   <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
@@ -372,6 +453,7 @@ const VendorSignup = () => {
                     <input type="file" className="hidden" onChange={(e) => setShopImage(e.target.files[0])} accept="image/*" />
                   </label>
                 </div>
+                )}
 
                 <div className="space-y-1.5">
                   <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Vendor Profile Photo</p>

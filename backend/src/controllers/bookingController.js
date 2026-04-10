@@ -63,6 +63,10 @@ const formatBookingResponse = (booking, role) => {
     if (b.userId) b.userId.phone = '**********';
   }
 
+  if ((role === 'staff' || role === 'vendor') && b.type !== 'home') {
+    b.serviceAddress = undefined;
+  }
+
   return b;
 };
 

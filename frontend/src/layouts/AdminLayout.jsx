@@ -3,41 +3,46 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Store, Users, CalendarRange, 
   Tag, CreditCard, Wallet, Star, Bell, 
-  Menu, X, Sun, Moon, LogOut, ChevronRight, Settings
+  Menu, X, Sun, Moon, LogOut, ChevronRight, Settings, Shield
 } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
 import { useAdminStore } from '../store/useAdminStore';
+import { useAuthStore } from '../store/authStore';
 import useNotificationStore from '../store/notificationStore';
 import useSocket from '../hooks/useSocket';
 import { cn } from '../utils/cn';
 import logo from '../assests/logo.jpeg';
 
-const adminRoutes = [
-  { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Vendors", path: "/admin/vendors", icon: Store },
-  { name: "Users", path: "/admin/users", icon: Users },
-  { name: "Bookings", path: "/admin/bookings", icon: CalendarRange },
-  { name: "Categories", path: "/admin/categories", icon: Tag },
-  { name: "Plans", path: "/admin/plans", icon: CreditCard },
-  { name: "Settings", path: "/admin/settings", icon: Settings },
-  { name: "Transactions", path: "/admin/transactions", icon: Wallet },
-  { name: "Reviews", path: "/admin/reviews", icon: Star },
-  { name: "Notifications", path: "/admin/notifications", icon: Bell },
-];
-
 const AdminLayout = () => {
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useThemeStore();
-  const { admin, isSidebarOpen, toggleSidebar, closeSidebar } = useAdminStore();
+  const { admin, isSidebarOpen, toggleSidebar } = useAdminStore();
+  const { user, logout } = useAuthStore();
   const { unreadCount, fetchNotifications } = useNotificationStore();
-  useSocket(admin?._id);
+  const currentAdmin = user || admin;
+  const isSuperAdmin = currentAdmin?.role === 'super_admin';
+  const adminRoutes = [
+    { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
+    { name: "Partners", path: "/admin/vendors", icon: Store },
+    { name: "Users", path: "/admin/users", icon: Users },
+    { name: "Bookings", path: "/admin/bookings", icon: CalendarRange },
+    { name: "Categories", path: "/admin/categories", icon: Tag },
+    { name: "Plans", path: "/admin/plans", icon: CreditCard },
+    { name: "Settings", path: "/admin/settings", icon: Settings },
+    { name: "Transactions", path: "/admin/transactions", icon: Wallet },
+    { name: "Reviews", path: "/admin/reviews", icon: Star },
+    { name: "Notifications", path: "/admin/notifications", icon: Bell },
+    ...(isSuperAdmin ? [{ name: "Admin Access", path: "/admin/access", icon: Shield }] : []),
+  ];
+
+  useSocket(currentAdmin?._id);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   React.useEffect(() => {
-    if (admin) {
+    if (currentAdmin) {
       fetchNotifications();
     }
-  }, [admin, fetchNotifications]);
+  }, [currentAdmin, fetchNotifications]);
 
   return (
     <div className="h-screen bg-background-light dark:bg-background-dark flex overflow-hidden">
@@ -85,7 +90,10 @@ const AdminLayout = () => {
 
         <div className="p-4 border-t border-gray-100 dark:border-gray-800">
            <button 
-             onClick={() => navigate('/')}
+             onClick={() => {
+               logout();
+               navigate('/admin-login');
+             }}
              className="w-full flex items-center gap-4 px-4 py-3.5 text-red-500 font-black text-sm capitalize tracking-wide hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all"
            >
               <LogOut size={22} />
@@ -171,13 +179,13 @@ const AdminLayout = () => {
              {/* Admin Identity */}
              <div className="hidden lg:flex items-center gap-3 pr-4 border-r border-gray-100 dark:border-gray-800">
                 <div className="text-right">
-                   <p className="text-sm font-black dark:text-white capitalize">{admin.name}</p>
+                   <p className="text-sm font-black dark:text-white capitalize">{currentAdmin?.name || 'Admin'}</p>
                    <span className="text-[11px] font-black text-primary dark:text-white capitalize bg-primary/10 dark:bg-primary/25 px-2 py-0.5 rounded-full border border-primary/20 shadow-sm">
-                      Super Admin
+                      {isSuperAdmin ? 'Super Admin' : 'Admin'}
                    </span>
                 </div>
                 <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center text-primary dark:text-white font-black border border-primary/10 text-base shadow-sm">
-                   {admin.name.charAt(0)}
+                   {(currentAdmin?.name || 'A').charAt(0)}
                 </div>
              </div>
 

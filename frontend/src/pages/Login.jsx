@@ -77,7 +77,7 @@ const CustomerAuth = () => {
       } else {
         toast.success(`Welcome back!`);
         const { role } = res.data;
-        if (role === 'admin') navigate('/admin');
+        if (role === 'admin' || role === 'super_admin') navigate('/admin');
         else if (role === 'vendor') navigate('/vendor');
         else if (role === 'staff') navigate('/staff');
         else {

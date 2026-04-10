@@ -12,7 +12,12 @@ const {
   getUserBookings,
   getFilteredBookings,
   createCategory,
-  getCategories
+  getCategories,
+  getAdminAccounts,
+  createAdminAccount,
+  toggleAdminAccountBlock,
+  deleteAdminAccount,
+  extendVendorFreeTrial
 } = require('../controllers/adminController');
 const { getAdminTransactions } = require('../controllers/transactionController');
 const {
@@ -25,8 +30,8 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// All routes require Admin role
-router.use(protect, authorize('admin'));
+// All routes require admin or super admin role
+router.use(protect, authorize('admin', 'super_admin'));
 
 // 👑 Dashboard
 router.get('/dashboard', require('../controllers/adminController').getAdminDashboard);
@@ -40,6 +45,8 @@ router.patch('/vendors/:id/reject', rejectVendor);
 router.patch('/vendors/:id/block', require('../controllers/adminController').toggleBlockVendor);
 router.patch('/vendors/:id/toggle-active', require('../controllers/adminController').toggleVendorActive);
 router.patch('/vendors/:id/add-balance', addBalance);
+router.patch('/vendors/:id/extend-trial', extendVendorFreeTrial);
+router.get('/vendors/:id/insights', require('../controllers/adminController').getVendorInsights);
 
 // Subscription Plans
 router.post('/plans', createPlan);
@@ -79,5 +86,11 @@ router.patch('/settings', require('../controllers/adminController').updateGlobal
 
 // Broadcast
 router.post('/broadcast', require('../controllers/adminController').broadcastNotification);
+
+// Super Admin Access Management
+router.get('/admins', authorize('super_admin'), getAdminAccounts);
+router.post('/admins', authorize('super_admin'), createAdminAccount);
+router.patch('/admins/:id/block', authorize('super_admin'), toggleAdminAccountBlock);
+router.delete('/admins/:id', authorize('super_admin'), deleteAdminAccount);
 
 module.exports = router;

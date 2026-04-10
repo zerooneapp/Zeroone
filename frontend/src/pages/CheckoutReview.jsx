@@ -27,6 +27,7 @@ const CheckoutReview = () => {
   }
 
   const { selectedDate, selectedSlot, selectedStaff, items, vendor } = bookingData;
+  const isHomeBooking = items.some((item) => item.type === 'home' || item.type === 'both');
   const totalDuration =
     bookingData.totalDurationOverride ||
     items.reduce((sum, item) => sum + (item.duration || 0) + (item.bufferTime || 0), 0);
@@ -80,7 +81,7 @@ const CheckoutReview = () => {
       });
 
       const { user } = useAuthStore.getState();
-      const serviceAddress = user?.address || vendor?.address;
+      const serviceAddress = isHomeBooking ? (user?.address || '') : '';
 
       const res = bookingData.rescheduleBookingId
         ? await api.patch(`/bookings/${bookingData.rescheduleBookingId}/reschedule`, {

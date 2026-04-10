@@ -1,4 +1,6 @@
+const moment = require('moment-timezone');
 const WalletTransaction = require('../models/WalletTransaction');
+const Staff = require('../models/Staff');
 
 const buildTransactionQuery = (query = {}) => {
   const filter = {};
@@ -23,16 +25,78 @@ const buildTransactionQuery = (query = {}) => {
 // @access  Private (Vendor)
 const getTransactions = async (req, res) => {
   try {
+    const { from, to, source = 'all', staffId = '' } = req.query;
     const filter = {
       vendorId: req.vendor._id,
       ...buildTransactionQuery(req.query)
     };
 
-    const transactions = await WalletTransaction.find(filter)
-      .sort({ timestamp: -1 })
-      .limit(100);
+    if (from || to) {
+      const startDate = from
+        ? moment(from).startOf('day').toDate()
+        : moment(to).startOf('day').toDate();
+      const endDate = to
+        ? moment(to).endOf('day').toDate()
+        : moment(from).endOf('day').toDate();
 
-    res.status(200).json(transactions);
+      filter.timestamp = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
+
+    const staffMembers = await Staff.find({ vendorId: req.vendor._id }).select('name userId').lean();
+    const staffByUserId = new Map(
+      staffMembers
+        .filter((staff) => staff.userId)
+        .map((staff) => [String(staff.userId), staff])
+    );
+
+    const transactions = await WalletTransaction.find(filter)
+      .populate('initiatedByUserId', 'name phone role')
+      .sort({ timestamp: -1 })
+      .limit(200)
+      .lean();
+
+    const normalizedSource = String(source || 'all').toLowerCase();
+    const normalizedStaffId = String(staffId || '').trim();
+    const filteredTransactions = transactions
+      .map((transaction) => {
+        const initiatorId = transaction.initiatedByUserId?._id
+          ? String(transaction.initiatedByUserId._id)
+          : transaction.initiatedByUserId
+            ? String(transaction.initiatedByUserId)
+            : '';
+
+        const matchingStaff = initiatorId ? staffByUserId.get(initiatorId) : null;
+        const sourceType = matchingStaff
+          ? 'staff'
+          : initiatorId && initiatorId === String(req.vendor.ownerId)
+            ? 'partner'
+            : 'total';
+
+        return {
+          ...transaction,
+          sourceType,
+          sourceLabel: matchingStaff?.name || transaction.initiatedByUserId?.name || (sourceType === 'partner' ? 'Partner' : 'Total'),
+          sourceStaffId: matchingStaff?._id ? String(matchingStaff._id) : null
+        };
+      })
+      .filter((transaction) => {
+        if (normalizedSource === 'partner') {
+          return transaction.sourceType === 'partner';
+        }
+
+        if (normalizedSource === 'staff') {
+          if (transaction.sourceType !== 'staff') return false;
+          if (!normalizedStaffId) return true;
+          return String(transaction.sourceStaffId || '') === normalizedStaffId;
+        }
+
+        return true;
+      });
+
+    res.status(200).json(filteredTransactions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

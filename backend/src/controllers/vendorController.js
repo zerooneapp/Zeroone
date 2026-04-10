@@ -27,6 +27,7 @@ const buildPublicVendorResponse = (vendor, extra = {}) => ({
   rating: vendor.rating,
   totalReviews: vendor.totalReviews,
   serviceLevel: vendor.serviceLevel,
+  serviceMode: vendor.serviceMode || 'shop',
   isShopOpen: vendor.isShopOpen,
   isClosedToday: vendor.isClosedToday,
   offers: vendor.offers || [],
@@ -54,7 +55,7 @@ const calculateDistanceInMeters = (fromLat, fromLng, toLat, toLng) => {
 
 const registerVendor = async (req, res) => {
   try {
-    const { shopName, category, address, location, serviceLevel } = req.body;
+    const { shopName, category, address, location, serviceLevel, serviceMode } = req.body;
     const existingVendor = await Vendor.findOne({ ownerId: req.user._id });
     if (existingVendor) return res.status(400).json({ message: 'Vendor already exists' });
 
@@ -66,7 +67,8 @@ const registerVendor = async (req, res) => {
       location,
       ownerId: req.user._id,
       status: 'pending',
-      serviceLevel: serviceLevel || 'standard'
+      serviceLevel: serviceLevel || 'standard',
+      serviceMode: serviceMode === 'home' ? 'home' : 'shop'
     });
     console.log('[DEBUG] Vendor Record Created:', vendor._id, 'with ownerId:', vendor.ownerId);
     await User.findByIdAndUpdate(req.user._id, { role: 'vendor' });
@@ -107,6 +109,8 @@ const uploadDocs = async (req, res) => {
     if (files.aadhaarFront) vendor.aadhaarFront = await uploadToCloudinary(files.aadhaarFront[0].buffer);
     if (files.aadhaarBack) vendor.aadhaarBack = await uploadToCloudinary(files.aadhaarBack[0].buffer);
     if (files.panCard) vendor.panCard = await uploadToCloudinary(files.panCard[0].buffer);
+    if (files.gstCertificate) vendor.gstCertificate = await uploadToCloudinary(files.gstCertificate[0].buffer);
+    if (files.shopRegistration) vendor.shopRegistration = await uploadToCloudinary(files.shopRegistration[0].buffer);
     if (files.shopImage) vendor.shopImage = await uploadToCloudinary(files.shopImage[0].buffer);
     if (files.vendorPhoto) vendor.vendorPhoto = await uploadToCloudinary(files.vendorPhoto[0].buffer);
 
@@ -121,7 +125,9 @@ const uploadDocs = async (req, res) => {
       vendor.shopVideo = await uploadToCloudinary(files.video[0].buffer, true);
     }
 
-    if (vendor.aadhaarFront && vendor.aadhaarBack && vendor.panCard && vendor.shopImage && vendor.vendorPhoto) {
+    const requiresShopImage = (vendor.serviceMode || 'shop') === 'shop';
+    const hasRequiredMedia = vendor.aadhaarFront && vendor.aadhaarBack && vendor.panCard && vendor.vendorPhoto && (!requiresShopImage || vendor.shopImage);
+    if (hasRequiredMedia) {
       vendor.isProfileComplete = true;
     }
     await vendor.save();
@@ -144,13 +150,17 @@ const getVendorProfile = async (req, res) => {
 // 📍 UPDATED: Search + Multi-Category Support
 const getNearbyVendors = async (req, res) => {
   try {
-    const { lng, lat, category, search, page = 1, limit = 10 } = req.query;
+    const { lng, lat, category, search, serviceType = 'all', page = 1, limit = 10 } = req.query;
     if (!lng || !lat) return res.status(400).json({ message: 'Lng/Lat required' });
 
     const parsedLng = parseFloat(lng);
     const parsedLat = parseFloat(lat);
     const discoveryRadius = parseInt(process.env.VENDOR_DISCOVERY_RADIUS, 10) || 10000;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const normalizedLimit = parseInt(limit);
+    const skip = (parseInt(page) - 1) * normalizedLimit;
+    const normalizedServiceType = ['all', 'shop', 'home'].includes(String(serviceType).toLowerCase())
+      ? String(serviceType).toLowerCase()
+      : 'all';
 
     // 🚀 AGGREGATION PIPELINE: High-Performance Geospatial Search
     const pipeline = [
@@ -189,10 +199,6 @@ const getNearbyVendors = async (req, res) => {
       });
     }
 
-    // Pagination
-    pipeline.push({ $skip: skip });
-    pipeline.push({ $limit: parseInt(limit) });
-
     // Lookup Category and Services
     pipeline.push(
       { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
@@ -204,12 +210,12 @@ const getNearbyVendors = async (req, res) => {
     // Enrich with Intelligent Service Selection & Offers
     const enrichedVendors = await Promise.all(vendors.map(async (v) => {
       const allServices = await Service.find({ vendorId: v._id, isActive: true })
-        .select('_id name price image images duration')
-        .sort({ price: 1 })
+        .select('_id name price image images duration showOnHome type')
+        .sort({ showOnHome: -1, price: 1, createdAt: 1 })
         .lean();
 
       // 🧠 SEARCH INTELLIGENCE: Find the service that matches the search query best
-      let primaryService = allServices[0];
+      let primaryService = allServices.find((service) => service.showOnHome) || allServices[0];
       if (search) {
         const matched = allServices.find(s => s.name.toLowerCase().includes(search.toLowerCase()));
         if (matched) primaryService = matched;
@@ -253,19 +259,30 @@ const getNearbyVendors = async (req, res) => {
         discountedPrice: discountedPrice < mainPrice ? Math.round(discountedPrice) : null,
         offerLabel,
         serviceImage: primaryService?.image || primaryService?.images?.[0] || '',
+        serviceType: primaryService?.type || 'shop',
         serviceCount: allServices.length,
         services: allServices
       });
     }));
 
-    res.json(enrichedVendors);
+    const modeFilteredVendors = normalizedServiceType === 'all'
+      ? enrichedVendors
+      : enrichedVendors.filter((vendor) => {
+          const currentServiceType = vendor.serviceType || 'shop';
+          if (normalizedServiceType === 'shop') {
+            return currentServiceType === 'shop' || currentServiceType === 'both';
+          }
+          return currentServiceType === 'home' || currentServiceType === 'both';
+        });
+
+    const paginatedVendors = modeFilteredVendors.slice(skip, skip + normalizedLimit);
 
     // 🚀 ENGAGEMENT TRACKING: Increment profileViews (Throttled)
     const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress;
     const cacheKey = `view:${ip}`;
 
     // Bulk update views for vendors not recently viewed by this IP
-    for (const v of enrichedVendors) {
+    for (const v of paginatedVendors) {
       const vendorId = v._id.toString();
       const uniqueKey = `${cacheKey}:${vendorId}`;
 
@@ -279,7 +296,7 @@ const getNearbyVendors = async (req, res) => {
       }
     }
 
-    res.status(200).json(enrichedVendors);
+    res.status(200).json(paginatedVendors);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
@@ -328,8 +345,18 @@ const getVendorBookings = async (req, res) => {
     const { from, to, status } = req.query;
     const filter = { vendorId: vendor._id };
 
-    if (from && to) {
-      filter.startTime = { $gte: moment(from).startOf('day').toDate(), $lt: moment(to).endOf('day').toDate() };
+    if (from || to) {
+      const startDate = from
+        ? moment(from).startOf('day').toDate()
+        : moment(to).startOf('day').toDate();
+      const endDate = to
+        ? moment(to).endOf('day').toDate()
+        : moment(from).endOf('day').toDate();
+
+      filter.startTime = {
+        $gte: startDate,
+        $lte: endDate
+      };
     }
     const allowedStatus = ['confirmed', 'completed', 'cancelled'];
     if (status && allowedStatus.includes(status)) {
@@ -352,6 +379,9 @@ const getVendorBookings = async (req, res) => {
       // SOP Level Flags
       doc.canCancel = !now.isSameOrAfter(bufferTime) && doc.status === 'confirmed';
       doc.canContact = now.isSameOrAfter(bufferTime) && doc.status === 'confirmed' && now.isBefore(endTime);
+      if (doc.type !== 'home') {
+        doc.serviceAddress = undefined;
+      }
 
       return doc;
     });
@@ -373,7 +403,10 @@ const getVendorDashboard = async (req, res) => {
     const todayBookings = await Booking.find({
       vendorId: vendor._id,
       startTime: { $gte: todayStart, $lt: todayEnd }
-    }).populate('userId', 'name image').sort({ startTime: 1 });
+    })
+      .populate('userId', 'name image')
+      .populate('staffId', 'name isOwner')
+      .sort({ startTime: 1 });
 
     // 💰 Today's Earnings
     const todayEarnings = todayBookings
@@ -416,8 +449,9 @@ const getVendorDashboard = async (req, res) => {
       minimumWalletThreshold: billingSettings.minWalletThreshold || 100,
       subscription: {
         currentPlan: subscriptionState.currentPlan,
-        serviceLevel: vendor.serviceLevel,
-        planExpiry: subscriptionState.isTrialActive
+      serviceLevel: vendor.serviceLevel,
+      serviceMode: vendor.serviceMode || 'shop',
+      planExpiry: subscriptionState.isTrialActive
           ? vendor.freeTrial?.expiryDate || null
           : (subscriptionState.isMonthlyActive ? vendor.expiryDate || null : null),
         nextDeduction: vendor.planType === 'daily' ? moment().add(1, 'day').startOf('day').toDate() : null,
@@ -458,7 +492,9 @@ const getVendorDashboard = async (req, res) => {
         customerName: b.userId?.name || 'Customer',
         customerImage: b.userId?.image || '',
         service: b.services.map(s => s.name).join(', '),
-        status: b.status
+        status: b.status,
+        staffName: b.staffId?.name || 'Owner',
+        staffType: b.staffId?.isOwner ? 'owner' : 'staff'
       }))
     });
   } catch (error) { res.status(500).json({ message: error.message }); }
@@ -591,7 +627,7 @@ const createManualBooking = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
     const vendorId = vendor._id;
 
-    if (!name || !sIds || !staffId || !startTime) {
+    if (!name || !serviceIds || !staffId || !startTime) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -651,3 +687,4 @@ module.exports = {
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings, getVendorDashboard,
   updateShopProfile, createWalkIn, createManualBooking
 };
+

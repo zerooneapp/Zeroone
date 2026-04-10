@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String },
   image: { type: String },
   password: { type: String },
-  role: { type: String, enum: ['admin', 'vendor', 'staff', 'customer'], default: 'customer' },
+  role: { type: String, enum: ['super_admin', 'admin', 'vendor', 'staff', 'customer'], default: 'customer' },
   isBlocked: { type: Boolean, default: false },
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },

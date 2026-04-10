@@ -80,7 +80,7 @@ const VendorAuth = () => {
       const intendedPath = location.state?.from?.pathname;
       if (intendedPath) {
         navigate(intendedPath, { replace: true });
-      } else if (role === 'admin') {
+      } else if (role === 'admin' || role === 'super_admin') {
         navigate('/admin');
       } else if (role === 'vendor') {
         navigate('/vendor');

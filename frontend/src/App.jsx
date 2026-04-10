@@ -8,6 +8,7 @@ import AdminLayout from './layouts/AdminLayout';
 import Home from './pages/Home';
 import Nearby from './pages/Nearby';
 import ServiceDetail from './pages/ServiceDetail';
+import VendorReviews from './pages/VendorReviews';
 import Cart from './pages/Cart';
 import CheckoutReview from './pages/CheckoutReview';
 import BookingSuccess from './pages/BookingSuccess';
@@ -26,6 +27,7 @@ import Notifications from './pages/Notifications';
 // Auth
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import AdminLogin from './pages/AdminLogin';
 import VendorLogin from './pages/VendorLogin';
 import VendorSignup from './pages/VendorSignup';
 import VendorVerification from './pages/VendorVerification';
@@ -56,6 +58,7 @@ import PlatformSettings from './pages/admin/settings/PlatformSettings';
 import BroadcastSystem from './pages/admin/notifications/BroadcastSystem';
 import TransactionManagement from './pages/admin/transactions/TransactionManagement';
 import ReviewManagement from './pages/admin/reviews/ReviewManagement';
+import AdminManagement from './pages/admin/admins/AdminManagement';
 import {
   AdminNotifications
 } from './pages/AdminModulePlaceholders';
@@ -101,6 +104,7 @@ function App() {
       <Routes>
         {/* PUBLIC GUEST ROUTES */}
         <Route path="/login" element={<Login />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/vendor-login" element={<VendorLogin />} />
         <Route path="/vendor-signup" element={<VendorSignup />} />
@@ -112,6 +116,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="nearby" element={<Nearby />} />
           <Route path="service/:id" element={<ServiceDetail />} />
+          <Route path="service/:id/reviews" element={<VendorReviews />} />
           <Route path="services/:id" element={<ServiceDetail />} />
           <Route path="favorites" element={<Favorites />} />
           <Route path="cart" element={<Cart />} />
@@ -175,7 +180,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -197,6 +202,7 @@ function App() {
           <Route path="notifications" element={<BroadcastSystem />} />
           <Route path="transactions" element={<TransactionManagement />} />
           <Route path="reviews" element={<ReviewManagement />} />
+          <Route path="access" element={<AdminManagement />} />
         </Route>
       </Routes>
 

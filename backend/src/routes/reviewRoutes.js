@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getUnreviewedBooking, submitReview } = require('../controllers/reviewController');
+const { getVendorReviews, getUnreviewedBooking, submitReview } = require('../controllers/reviewController');
 const { protect } = require('../middleware/authMiddleware');
 
-// All review routes are protected
+router.get('/vendor/:vendorId', getVendorReviews);
+
+// Remaining review routes are protected
 router.use(protect);
 
 router.get('/unreviewed', getUnreviewedBooking);

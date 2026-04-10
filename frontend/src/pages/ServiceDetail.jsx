@@ -17,6 +17,18 @@ import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 
+const normalizeCategoryValue = (value = '') =>
+  value
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+
+const getServiceModeLabel = (type = 'shop') => {
+  if (type === 'both') return 'Shop + Home';
+  if (type === 'home') return 'Home Service';
+  return 'Shop Service';
+};
+
 /**
  * ServiceDetail Component
  * Optimized for elite user experience and intelligent booking flow.
@@ -56,20 +68,20 @@ const ServiceDetail = () => {
           setActiveImage(vendorRes.data.shopImage || vendorRes.data.gallery?.[0]);
 
           if (servicesRes.data?.length > 0) {
-            const isSameVendor = cartVendor?._id === id;
-            if (!isSameVendor || cartItems.length === 0) {
-              const lowestPriceService = [...servicesRes.data].sort((a, b) => a.price - b.price)[0];
-              const alreadyInCart = cartItems.find(item => item._id === lowestPriceService._id);
-              if (!alreadyInCart) {
-                addItem(vendorRes.data, lowestPriceService);
-              }
-              if (lowestPriceService.category) {
-                setSelectedCat(lowestPriceService.category);
-              }
-            }
-            
-            const uniqueCats = ['All', ...new Set(servicesRes.data.map(s => s.category).filter(Boolean))];
-            setCategories(uniqueCats);
+            const dedupedCategories = [];
+            const seenCategoryKeys = new Set();
+
+            servicesRes.data
+              .map((service) => service.category)
+              .filter(Boolean)
+              .forEach((category) => {
+                const key = normalizeCategoryValue(category);
+                if (!key || seenCategoryKeys.has(key)) return;
+                seenCategoryKeys.add(key);
+                dedupedCategories.push(category);
+              });
+
+            setCategories(['All', ...dedupedCategories]);
           }
         }
       } catch (err) {
@@ -79,7 +91,7 @@ const ServiceDetail = () => {
       }
     };
     fetchData();
-  }, [id, addItem, cartVendor?._id, cartItems.length]);
+  }, [id]);
 
   // 2. Favorite Sync
   useEffect(() => {
@@ -261,7 +273,10 @@ const ServiceDetail = () => {
   const originalTotal = cartPricing?.originalTotal ?? totalPrice;
   const totalSavings = cartPricing?.totalDiscount ?? 0;
   const hasItemsFromThisVendor = cartVendor?._id === vendor._id;
-  const filteredServices = selectedCat === 'All' ? services : services.filter(s => s.category === selectedCat);
+  const hasHomeService = services.some((service) => service.type === 'home' || service.type === 'both');
+  const filteredServices = selectedCat === 'All'
+    ? services
+    : services.filter((service) => normalizeCategoryValue(service.category) === normalizeCategoryValue(selectedCat));
 
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-40">
@@ -394,10 +409,14 @@ const ServiceDetail = () => {
           <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
             <Star size={14} fill="#FACC15" className="text-yellow-400 border-none" />
           </div>
-          <div>
+          <button
+            type="button"
+            onClick={() => navigate(`/service/${vendor._id}/reviews`)}
+            className="text-left active:scale-[0.98] transition-all"
+          >
             <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight">{vendor.totalReviews || '320'} Reviews</p>
             <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Elite rating</p>
-          </div>
+          </button>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -411,6 +430,19 @@ const ServiceDetail = () => {
             <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Trust secured</p>
           </div>
         </div>
+        {hasHomeService && (
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl">
+              <MapPin size={14} className="text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter">
+                Home Service Available
+              </p>
+              <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Some services support doorstep booking</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Category Tabs */}
@@ -451,11 +483,14 @@ const ServiceDetail = () => {
                       </div>
                       <div className="flex-1">
                         <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
                             <Clock size={8} /> {item.duration}m
                           </span>
                           <span className="text-xs font-black text-[#0B1222] dark:text-white leading-none">₹{item.price}</span>
+                          <span className="text-[7px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-500/20 uppercase tracking-widest">
+                            {getServiceModeLabel(item.type)}
+                          </span>
                         </div>
                         {priceMeta.discount > 0 && (
                           <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
@@ -508,7 +543,12 @@ const ServiceDetail = () => {
                     </div>
                     <div className="flex-1">
                       <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
-                      <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
+                        <span className="text-[7px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-500/20 uppercase tracking-widest">
+                          {getServiceModeLabel(service.type)}
+                        </span>
+                      </div>
                       {priceMeta.discount > 0 && (
                         <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
                           Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
@@ -604,7 +644,30 @@ const ServiceDetail = () => {
 
               <div className="space-y-3 mt-8">
                 <button
-                  onClick={() => navigate('/cart', { state: { rescheduleBookingId: existingBooking._id } })}
+                  onClick={() => navigate('/cart', {
+                    state: {
+                      rescheduleBookingId: existingBooking._id,
+                      vendor: {
+                        ...vendor,
+                        ...(existingBooking.vendorId || {})
+                      },
+                      rescheduleItems: (existingBooking.services || []).map((service) => ({
+                        _id: service.serviceId,
+                        name: service.name,
+                        price: service.price,
+                        duration: service.duration,
+                        bufferTime: service.bufferTime || 0
+                      })),
+                      rescheduleTotalDuration: existingBooking.totalDuration,
+                      rescheduleSelection: {
+                        date: dayjs(existingBooking.startTime).format('YYYY-MM-DD'),
+                        time: dayjs(existingBooking.startTime).format('HH:mm'),
+                        staffId: existingBooking.staffId?._id || existingBooking.staffId || '',
+                        staffName: existingBooking.staffId?.name || '',
+                        staffImage: existingBooking.staffId?.image || ''
+                      }
+                    }
+                  })}
                   className="w-full py-4 bg-[#0B1222] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <Clock size={16} />

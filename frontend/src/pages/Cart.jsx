@@ -7,6 +7,8 @@ import Button from '../components/Button';
 import SectionTitle from '../components/SectionTitle';
 import api from '../services/api';
 import { cn } from '../utils/cn';
+import toast from 'react-hot-toast';
+import dayjs from 'dayjs';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -24,20 +26,70 @@ const Cart = () => {
   const [loadingStaff, setLoadingStaff] = useState(false);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [pricingPreview, setPricingPreview] = useState(null);
+  const [rescheduleHydrating, setRescheduleHydrating] = useState(false);
+  const [reschedulePrefill, setReschedulePrefill] = useState(null);
+  const [prefillApplied, setPrefillApplied] = useState(false);
+  const [skipNextStaffReset, setSkipNextStaffReset] = useState(false);
 
   // 🔄 INITIALIZE RESCHEDULE MODE (If navigated from Status Details)
   useEffect(() => {
-    if (location.state?.rescheduleBookingId) {
-      clearCart();
-      setRescheduleBookingId(location.state.rescheduleBookingId);
+    const hydrateRescheduleState = async () => {
+      if (!location.state?.rescheduleBookingId) return;
 
-      if (location.state.rescheduleItems && location.state.vendor) {
-        location.state.rescheduleItems.forEach(item => {
-          addItem(location.state.vendor, item);
-        });
+      setRescheduleHydrating(true);
+
+      try {
+        clearCart();
+        setRescheduleBookingId(location.state.rescheduleBookingId);
+
+        let vendorData = location.state.vendor || null;
+        let rescheduleItems = location.state.rescheduleItems || [];
+        let rescheduleSelection = location.state.rescheduleSelection || null;
+
+        if (!vendorData || rescheduleItems.length === 0) {
+          const res = await api.get('/bookings/my');
+          const bookings = Array.isArray(res.data) ? res.data : [];
+          const booking = bookings.find((item) => String(item._id) === String(location.state.rescheduleBookingId));
+
+          if (booking) {
+            vendorData = booking.vendorId || vendorData;
+            rescheduleItems = (booking.services || []).map((service) => ({
+              _id: service.serviceId,
+              name: service.name,
+              price: service.price,
+              duration: service.duration,
+              bufferTime: service.bufferTime || 0
+            }));
+            rescheduleSelection = {
+              date: booking.startTime ? new Date(booking.startTime).toISOString().split('T')[0] : null,
+              time: booking.startTime ? dayjs(booking.startTime).format('HH:mm') : '',
+              staffId: booking.staffId?._id || booking.staffId || '',
+              staffName: booking.staffId?.name || '',
+              staffImage: booking.staffId?.image || ''
+            };
+          }
+        }
+
+        if (vendorData && rescheduleItems.length > 0) {
+          rescheduleItems.forEach((item) => {
+            addItem(vendorData, item);
+          });
+        }
+
+        if (rescheduleSelection?.date) {
+          setSelectedDate(rescheduleSelection.date);
+          setReschedulePrefill(rescheduleSelection);
+          setPrefillApplied(false);
+        }
+      } catch (error) {
+        toast.error('Failed to load booking for reschedule');
+      } finally {
+        setRescheduleHydrating(false);
       }
-    }
-  }, [location.state]);
+    };
+
+    hydrateRescheduleState();
+  }, [location.state, clearCart, setRescheduleBookingId, addItem]);
 
   // 1. Generate Next 30 Days
   const dates = Array.from({ length: 30 }, (_, i) => {
@@ -107,7 +159,72 @@ const Cart = () => {
   }, [vendor?._id, items]);
 
   // 3. Filter Staff based on selected slot and services
-  const availableStaff = (allStaff || []).filter((staff) => {
+  useEffect(() => {
+    if (
+      prefillApplied ||
+      !reschedulePrefill?.date ||
+      !selectedDate ||
+      selectedDate !== reschedulePrefill.date ||
+      loadingSlots ||
+      loadingStaff
+    ) {
+      return;
+    }
+
+    const fallbackSlot = {
+      time: reschedulePrefill.time,
+      availableStaff: reschedulePrefill.staffId ? [String(reschedulePrefill.staffId)] : [],
+      isCurrentBookingSlot: true
+    };
+
+    const nextSelectedSlot = slots.find((slot) => slot.time === reschedulePrefill.time) || fallbackSlot;
+    setSkipNextStaffReset(true);
+    setSelectedSlot(nextSelectedSlot);
+
+    const matchedStaff = allStaff.find((member) => String(member._id) === String(reschedulePrefill.staffId));
+    if (matchedStaff) {
+      setSelectedStaff(matchedStaff);
+    } else if (reschedulePrefill.staffId) {
+      setSelectedStaff({
+        _id: reschedulePrefill.staffId,
+        name: reschedulePrefill.staffName || 'Selected Staff',
+        image: reschedulePrefill.staffImage || '',
+        services: items.map((item) => item._id)
+      });
+    }
+
+    setPrefillApplied(true);
+  }, [
+    prefillApplied,
+    reschedulePrefill,
+    selectedDate,
+    slots,
+    allStaff,
+    loadingSlots,
+    loadingStaff,
+    items
+  ]);
+
+  const displaySlots = (
+    reschedulePrefill?.date === selectedDate &&
+    reschedulePrefill?.time &&
+    !slots.some((slot) => slot.time === reschedulePrefill.time)
+  )
+    ? [
+        {
+          time: reschedulePrefill.time,
+          availableStaff: reschedulePrefill.staffId ? [String(reschedulePrefill.staffId)] : [],
+          isCurrentBookingSlot: true
+        },
+        ...slots
+      ]
+    : slots;
+
+  const staffPool = selectedSlot?.isCurrentBookingSlot && selectedStaff && !allStaff.some((member) => String(member._id) === String(selectedStaff._id))
+    ? [selectedStaff, ...allStaff]
+    : allStaff;
+
+  const availableStaff = (staffPool || []).filter((staff) => {
     // Check if staff supports all items in the current cart
     const supportsAllSelectedServices = (items || []).every((item) =>
       staff.services?.some((s) => {
@@ -134,11 +251,24 @@ const Cart = () => {
   }, [selectedDate]);
 
   useEffect(() => {
+    if (skipNextStaffReset) {
+      setSkipNextStaffReset(false);
+      return;
+    }
     setSelectedStaff(null);
-  }, [selectedSlot]);
+  }, [selectedSlot, skipNextStaffReset]);
 
   const handleContinue = () => {
     if (!selectedSlot) return alert("Please select a time slot");
+    if (
+      rescheduleBookingId &&
+      reschedulePrefill &&
+      selectedDate === reschedulePrefill.date &&
+      selectedSlot.time === reschedulePrefill.time &&
+      String(selectedStaff?._id || '') === String(reschedulePrefill.staffId || '')
+    ) {
+      return toast.error('Please choose a new slot or professional to reschedule');
+    }
 
     navigate('/checkout-review', {
       state: {
@@ -161,6 +291,15 @@ const Cart = () => {
     const h12 = hour % 12 || 12;
     return `${h12}:${m} ${suffix}`;
   };
+
+  if (rescheduleHydrating) {
+    return (
+      <div className="p-10 text-center flex flex-col items-center justify-center min-h-[60vh]">
+        <ShoppingBag size={64} className="text-gray-200 mb-4 animate-pulse" />
+        <p className="text-gray-500 font-medium">Loading your booking...</p>
+      </div>
+    );
+  }
 
   if (!vendor || items.length === 0) {
     return (
@@ -341,7 +480,7 @@ const Cart = () => {
                 <div className="grid grid-cols-3 gap-1.5 mt-2">
                   {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-9 bg-slate-50 dark:bg-gray-800 rounded-lg animate-pulse border border-slate-100 dark:border-gray-800" />)}
                 </div>
-              ) : slots.length === 0 ? (
+              ) : displaySlots.length === 0 ? (
                 <div className="p-4 text-center bg-red-500/5 rounded-xl border border-red-500/10 mt-2">
                   <AlertCircle className="mx-auto text-red-500 mb-1" size={16} strokeWidth={3} />
                   <p className="text-[8px] text-red-600 dark:text-red-400 font-black uppercase tracking-widest">
@@ -350,7 +489,7 @@ const Cart = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-1.5">
-                  {slots.map((slot) => (
+                  {displaySlots.map((slot) => (
                     <button
                       key={slot.time}
                       onClick={() => setSelectedSlot(slot)}
@@ -362,6 +501,11 @@ const Cart = () => {
                       )}
                     >
                       {formatTo12H(slot.time)}
+                      {slot.isCurrentBookingSlot && (
+                        <span className="block text-[7px] font-black opacity-70 mt-1 tracking-widest">
+                          Current
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>

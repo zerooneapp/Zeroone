@@ -82,6 +82,22 @@ const StaffForm = () => {
     fetchAvailability();
   }, [availabilityDate, id, isEdit]);
 
+  useEffect(() => {
+    const guardHomeServicePartner = async () => {
+      try {
+        const vendorRes = await api.get('/vendor/profile');
+        if ((vendorRes.data?.serviceMode || 'shop') === 'home') {
+          toast('Only for shop partners', { icon: '🔒' });
+          navigate('/vendor/dashboard', { replace: true });
+        }
+      } catch (err) {
+        // Keep existing page flow unchanged if profile lookup fails.
+      }
+    };
+
+    guardHomeServicePartner();
+  }, [navigate]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {

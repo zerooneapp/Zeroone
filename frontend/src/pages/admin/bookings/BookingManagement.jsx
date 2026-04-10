@@ -24,7 +24,8 @@ const BookingManagement = () => {
   const [filters, setFilters] = useState({
     search: '',
     status: '',
-    date: ''
+    startDate: '',
+    endDate: ''
   });
 
   const fetchBookings = useCallback(async () => {
@@ -106,12 +107,12 @@ const BookingManagement = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(140px,0.7fr)_minmax(0,0.8fr)_24px_minmax(0,0.8fr)] gap-2.5 items-center">
           <div className="relative lg:col-span-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} strokeWidth={3} />
             <input
               type="text"
-              placeholder="Search user, vendor..."
+              placeholder="Search user, partner..."
               className="w-full pl-10 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-300"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
@@ -133,8 +134,17 @@ const BookingManagement = () => {
           <input
             type="date"
             className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize text-slate-500 focus:ring-2 ring-primary/20 outline-none cursor-pointer"
-            value={filters.date}
-            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+            value={filters.startDate}
+            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+          />
+          <div className="hidden lg:flex items-center justify-center text-slate-300 dark:text-slate-600 font-black text-lg">
+            &gt;
+          </div>
+          <input
+            type="date"
+            className="px-3.5 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize text-slate-500 focus:ring-2 ring-primary/20 outline-none cursor-pointer"
+            value={filters.endDate}
+            onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
           />
         </div>
       </div>
@@ -183,8 +193,8 @@ const BookingManagement = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3.5 space-y-1 text-[12px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tighter leading-none opacity-80">
-                    <div className="flex items-center gap-1.5"><Calendar size={11} strokeWidth={3} className="text-slate-300" /> {new Date(booking.createdAt).toLocaleDateString()}</div>
-                    <div className="flex items-center gap-1.5"><Clock size={11} strokeWidth={3} className="text-slate-300" /> {new Date(booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div className="flex items-center gap-1.5"><Calendar size={11} strokeWidth={3} className="text-slate-300" /> {new Date(booking.startTime || booking.createdAt).toLocaleDateString()}</div>
+                    <div className="flex items-center gap-1.5"><Clock size={11} strokeWidth={3} className="text-slate-300" /> {new Date(booking.startTime || booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                   </td>
                   <td className="px-4 py-3.5 leading-none">
                     {getStatusBadge(booking.status)}
@@ -225,7 +235,7 @@ const BookingManagement = () => {
               <Package size={32} strokeWidth={3} />
             </div>
             <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[12px] ">
-              {filters.search || filters.status || filters.date ? "No matching records in ledger" : "No bookings recorded yet"}
+              {filters.search || filters.status || filters.startDate || filters.endDate ? "No matching records in ledger" : "No bookings recorded yet"}
             </p>
           </div>
         )}

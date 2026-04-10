@@ -13,17 +13,31 @@ const VendorStaff = () => {
   const [toggleLoadingId, setToggleLoadingId] = useState(null);
   const [search, setSearch] = useState('');
   const [vendorData, setVendorData] = useState(null);
+  const [hasRedirectedHomeVendor, setHasRedirectedHomeVendor] = useState(false);
+
+  const handleHomeServiceGuard = () => {
+    if (hasRedirectedHomeVendor) return;
+    setHasRedirectedHomeVendor(true);
+    toast('Only for shop partners', { icon: '🔒' });
+    navigate('/vendor/dashboard', { replace: true });
+  };
 
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const [staffRes, dashRes] = await Promise.all([
-        api.get('/staff/manage/all', { params: { includeInactive: true } }),
-        api.get('/vendor/dashboard')
-      ]);
+      const dashRes = await api.get('/vendor/dashboard');
+      if ((dashRes.data?.serviceMode || 'shop') === 'home') {
+        handleHomeServiceGuard();
+        return;
+      }
+      const staffRes = await api.get('/staff/manage/all', { params: { includeInactive: true } });
       setStaff(staffRes.data);
       setVendorData(dashRes.data);
     } catch (err) {
+      if (err.response?.status === 403 && err.response?.data?.message === 'Only shop partners can manage staff') {
+        handleHomeServiceGuard();
+        return;
+      }
       toast.error('Failed to load roster');
     } finally {
       setLoading(false);

@@ -10,10 +10,21 @@ const Vendor = require('../models/Vendor');
 const User = require('../models/User');
 const cloudinary = require('../config/cloudinary');
 const StaffAvailability = require('../models/StaffAvailability');
+const Booking = require('../models/Booking');
+const WalletTransaction = require('../models/WalletTransaction');
 const moment = require('moment-timezone');
+
+const rejectHomeServicePartnerStaffAccess = (req, res) => {
+  if (req.vendor && (req.vendor.serviceMode || 'shop') === 'home') {
+    res.status(403).json({ message: 'Only shop partners can manage staff' });
+    return true;
+  }
+  return false;
+};
 
 const addStaff = async (req, res) => {
   try {
+    if (rejectHomeServicePartnerStaffAccess(req, res)) return;
     const { name, phone, services, designation } = req.body;
 
     // Validate services is not empty (already in model but good for early 400)
@@ -53,6 +64,7 @@ const addStaff = async (req, res) => {
 
 const listStaff = async (req, res) => {
   try {
+    if (rejectHomeServicePartnerStaffAccess(req, res)) return;
     const vendorId = req.vendor?._id || req.query.vendorId;
     if (!vendorId) return res.status(400).json({ message: 'VendorId required' });
 
@@ -100,6 +112,7 @@ const listStaff = async (req, res) => {
 
 const patchStaff = async (req, res) => {
   try {
+    if (rejectHomeServicePartnerStaffAccess(req, res)) return;
     const updateData = { ...req.body };
 
     if (req.body.services) {
@@ -145,6 +158,7 @@ const getStaffById = async (req, res) => {
 
 const deleteStaff = async (req, res) => {
   try {
+    if (rejectHomeServicePartnerStaffAccess(req, res)) return;
     const staff = await softDeleteStaff(req.vendor._id, req.params.id);
     if (!staff) return res.status(404).json({ message: 'Staff not found' });
     res.status(200).json({ message: 'Staff deactivated successfully', staff });
@@ -212,6 +226,108 @@ const getStaffProfile = async (req, res) => {
   }
 };
 
+const resolveAuthenticatedStaff = async (req) => {
+  const authUserId = req.user?._id || req.staff?.userId || null;
+  const authStaffId = req.staff?._id || null;
+
+  if (!authUserId && !authStaffId) return null;
+
+  const staffQuery = authStaffId ? { _id: authStaffId } : { userId: authUserId };
+  let staff = await Staff.findOne(staffQuery).populate('vendorId', 'shopName ownerId');
+
+  if (!staff && req.user?.phone) {
+    const detachedStaff = await Staff.findOne({ phone: req.user.phone });
+    if (detachedStaff) {
+      detachedStaff.userId = req.user._id;
+      await detachedStaff.save();
+      staff = await Staff.findById(detachedStaff._id).populate('vendorId', 'shopName ownerId');
+    }
+  }
+
+  return staff;
+};
+
+const getStaffHistory = async (req, res) => {
+  try {
+    const staff = await resolveAuthenticatedStaff(req);
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff profile not linked to this user account' });
+    }
+
+    const period = String(req.query.period || 'week').toLowerCase();
+    const dateValue = req.query.date || moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+
+    let start = moment.tz('Asia/Kolkata');
+    let end = moment.tz('Asia/Kolkata');
+
+    if (period === 'month') {
+      start = start.startOf('month');
+      end = end.endOf('month');
+    } else if (period === 'date') {
+      start = moment.tz(dateValue, 'YYYY-MM-DD', 'Asia/Kolkata').startOf('day');
+      end = start.clone().endOf('day');
+    } else {
+      start = start.startOf('week');
+      end = end.endOf('week');
+    }
+
+    const [bookings, earnings] = await Promise.all([
+      Booking.find({
+        staffId: staff._id,
+        startTime: { $gte: start.toDate(), $lte: end.toDate() }
+      })
+        .populate('vendorId', 'shopName')
+        .sort({ startTime: -1 })
+        .lean(),
+      WalletTransaction.find({
+        vendorId: staff.vendorId?._id || staff.vendorId,
+        initiatedByUserId: staff.userId,
+        category: 'booking_revenue',
+        status: 'completed',
+        timestamp: { $gte: start.toDate(), $lte: end.toDate() }
+      })
+        .sort({ timestamp: -1 })
+        .lean()
+    ]);
+
+    const completedBookings = bookings.filter((booking) => booking.status === 'completed');
+    const totalEarnings = earnings.reduce((sum, transaction) => sum + (transaction.amount || 0), 0);
+
+    res.status(200).json({
+      period,
+      date: dateValue,
+      range: {
+        from: start.toDate(),
+        to: end.toDate()
+      },
+      summary: {
+        totalBookings: bookings.length,
+        completedBookings: completedBookings.length,
+        totalEarnings
+      },
+      bookings: bookings.map((booking) => ({
+        _id: booking._id,
+        status: booking.status,
+        startTime: booking.startTime,
+        completedAt: booking.completedAt,
+        totalPrice: booking.totalPrice,
+        totalDuration: booking.totalDuration,
+        serviceType: booking.type || 'shop',
+        services: booking.services || [],
+        shopName: booking.vendorId?.shopName || staff.vendorId?.shopName || 'Partner Shop'
+      })),
+      earnings: earnings.map((transaction) => ({
+        _id: transaction._id,
+        amount: transaction.amount || 0,
+        description: transaction.description || transaction.reason || 'Booking revenue',
+        timestamp: transaction.timestamp
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const buildDayRange = (dateValue) => {
   const day = moment.tz(dateValue, 'Asia/Kolkata').startOf('day');
   return {
@@ -254,6 +370,7 @@ const normalizeAvailabilityPayload = (body = {}) => {
 
 const getStaffAvailabilityForDate = async (req, res) => {
   try {
+    if (rejectHomeServicePartnerStaffAccess(req, res)) return;
     const { date } = req.query;
     if (!date) return res.status(400).json({ message: 'Date is required' });
 
@@ -299,6 +416,7 @@ const getStaffAvailabilityForDate = async (req, res) => {
 
 const upsertStaffAvailabilityForDate = async (req, res) => {
   try {
+    if (rejectHomeServicePartnerStaffAccess(req, res)) return;
     const { date } = req.body;
     if (!date) return res.status(400).json({ message: 'Date is required' });
 
@@ -357,6 +475,7 @@ module.exports = {
   deleteStaff,
   getStaffById,
   getStaffProfile,
+  getStaffHistory,
   getStaffAvailabilityForDate,
   upsertStaffAvailabilityForDate,
 };

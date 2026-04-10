@@ -110,7 +110,7 @@ const AdminBookingDetail = () => {
                   </div>
                </Section>
 
-               <Section title="Vendor Compliance" icon={Store}>
+               <Section title="Partner Compliance" icon={Store}>
                   <div className="flex items-center gap-3.5">
                      <div className="w-11 h-11 bg-amber-500 text-white rounded-lg flex items-center justify-center font-black text-lg shadow-lg border border-white/10">
                         {booking.vendorId?.shopName?.charAt(0)}
@@ -202,7 +202,7 @@ const AdminBookingDetail = () => {
                      )}
                      {booking.status === 'confirmed' && (
                         <TimelineItem
-                           title="Vendor Confirmed"
+                           title="Partner Confirmed"
                            time={new Date(booking.updatedAt).toLocaleString()}
                            color="blue"
                            active

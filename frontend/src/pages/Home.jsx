@@ -8,9 +8,11 @@ import { VendorSkeleton } from '../components/Skeleton';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useDebounce } from '../hooks/useDebounce';
+import { useAuthStore } from '../store/authStore';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [categories, setCategories] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,39 +20,50 @@ const Home = () => {
 
   const [search, setSearch] = useState('');
   const [selectedCats, setSelectedCats] = useState([]);
+  const [selectedServiceMode, setSelectedServiceMode] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [location, setLocation] = useState({ lng: 77.4126, lat: 23.2599 }); // Default: Bhopal
-  const debouncedSearch = useDebounce(search, 300);
-  const serviceCards = vendors.flatMap((vendor) => {
-    const vendorServices = vendor.services?.length
-      ? vendor.services
-      : [{
-          _id: `fallback-${vendor._id}`,
-          name: vendor.service || 'Beauty Service',
-          price: vendor.price || 0,
-          image: vendor.serviceImage || ''
-        }];
+  const serviceModeOptions = [
+    { id: 'all', label: 'All' },
+    { id: 'shop', label: 'Shop' },
+    { id: 'home', label: 'Home' }
+  ];
 
-    return vendorServices.map((service) => ({
-      ...vendor,
-      cardKey: `${vendor._id}-${service._id}`,
-      service: service.name,
-      price: service.price,
-      serviceImage: service.image || vendor.serviceImage || vendor.shopImage || '',
-      serviceCount: 1
-    }));
+  // 📍 SMART INITIALIZATION: Use Saved Profile Location or Bhopal [lng, lat]
+  const [location, setLocation] = useState({ 
+    lng: user?.location?.coordinates?.[0] || 77.4126, 
+    lat: user?.location?.coordinates?.[1] || 23.2599 
   });
 
-  // 1. Get Location
+  const debouncedSearch = useDebounce(search, 300);
+  
+  const homeCards = vendors.map((vendor) => ({
+    ...vendor,
+    cardKey: vendor._id,
+    service: vendor.service || 'Beauty Service',
+    price: vendor.price || 0,
+    serviceImage: vendor.serviceImage || vendor.shopImage || ''
+  }));
+
+  const filteredHomeCards = homeCards;
+
+  // 📍 SMART LOCATION SYNC: Browser GPS -> Saved Address -> Default
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setLocation({ lng: pos.coords.longitude, lat: pos.coords.latitude }),
-        () => console.log('Using default location')
+        (err) => {
+          console.log('Location access denied, falling back to profile address.');
+          if (user?.location?.coordinates?.[0] && user?.location?.coordinates?.[0] !== 0) {
+             setLocation({ 
+               lng: user.location.coordinates[0], 
+               lat: user.location.coordinates[1] 
+             });
+          }
+        }
       );
     }
-  }, []);
+  }, [user]);
 
   // 2. Fetch Categories
   useEffect(() => {
@@ -66,7 +79,8 @@ const Home = () => {
       lng: location.lng,
       lat: location.lat,
       search: debouncedSearch,
-      category: selectedCats.join(',')
+      category: selectedCats.join(','),
+      serviceType: selectedServiceMode
     };
 
     api.get('/vendors/nearby', { params })
@@ -77,7 +91,7 @@ const Home = () => {
       })
       .catch(err => setError('Failed to load professionals nearby'))
       .finally(() => setLoading(false));
-  }, [location, debouncedSearch, selectedCats]);
+  }, [location, debouncedSearch, selectedCats, selectedServiceMode]);
 
   const toggleCategory = (id) => {
     setSelectedCats(prev =>
@@ -88,8 +102,8 @@ const Home = () => {
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentVendors = serviceCards.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(serviceCards.length / itemsPerPage);
+  const currentVendors = filteredHomeCards.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredHomeCards.length / itemsPerPage);
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -123,6 +137,32 @@ const Home = () => {
       </div>
 
       {/* Modern Category Pill Filters */}
+      <div className="px-4 mb-2">
+        <div className="overflow-x-auto no-scrollbar scroll-smooth">
+          <div className="flex gap-2 items-center min-w-max pb-1">
+            {serviceModeOptions.map((option) => {
+              const isActive = selectedServiceMode === option.id;
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => {
+                    setSelectedServiceMode(option.id);
+                    setCurrentPage(1);
+                  }}
+                  className={`relative px-3.5 py-1.5 rounded-xl whitespace-nowrap text-[11px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 ${
+                    isActive
+                      ? 'bg-[#1C2C4E] text-white shadow-[0_8px_22px_-4px_rgba(28,44,78,0.28)]'
+                      : 'bg-white dark:bg-gray-900/50 text-[#1C2C4E]/60 dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       <div className="px-4 mb-1">
         <div className="overflow-x-auto no-scrollbar scroll-smooth">
           <div className="flex gap-2.5 items-center min-w-max pb-1">

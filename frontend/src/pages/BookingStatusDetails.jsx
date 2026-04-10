@@ -188,8 +188,15 @@ const BookingStatusDetails = () => {
                 state: {
                   rescheduleBookingId: id,
                   vendor: booking.vendorId,
-                  rescheduleItems: booking.services.map(s => ({ _id: s.serviceId, name: s.name, price: s.price, duration: s.duration })),
-                  rescheduleTotalDuration: booking.totalDuration
+                  rescheduleItems: booking.services.map(s => ({ _id: s.serviceId, name: s.name, price: s.price, duration: s.duration, bufferTime: s.bufferTime || 0 })),
+                  rescheduleTotalDuration: booking.totalDuration,
+                  rescheduleSelection: {
+                    date: dayjs(booking.startTime).format('YYYY-MM-DD'),
+                    time: dayjs(booking.startTime).format('HH:mm'),
+                    staffId: booking.staffId?._id || booking.staffId || '',
+                    staffName: booking.staffId?.name || '',
+                    staffImage: booking.staffId?.image || ''
+                  }
                 }
               })}
               disabled={!booking.canReschedule}

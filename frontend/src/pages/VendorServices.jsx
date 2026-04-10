@@ -11,6 +11,7 @@ const VendorServices = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toggleLoadingId, setToggleLoadingId] = useState(null);
+  const [homeLoadingId, setHomeLoadingId] = useState(null);
   const [vendorData, setVendorData] = useState(null);
 
   const fetchServices = async () => {
@@ -64,6 +65,35 @@ const VendorServices = () => {
       return toast.error('Account inactive. Recharge to edit services.');
     }
     navigate(`/vendor/services/edit/${service._id}`);
+  };
+
+  const handleSetHomeService = async (service) => {
+    if (!vendorData?.subscription?.isActive) {
+      return toast.error('Account inactive. Recharge to update home service.');
+    }
+    if (!service.isActive) {
+      return toast.error('Activate the service before showing it on home.');
+    }
+    if (homeLoadingId === service._id || service.showOnHome) return;
+
+    const original = [...services];
+    setServices((prev) =>
+      prev.map((item) => ({
+        ...item,
+        showOnHome: item._id === service._id
+      }))
+    );
+
+    try {
+      setHomeLoadingId(service._id);
+      await api.patch(`/services/${service._id}`, { showOnHome: true });
+      toast.success(`${service.name} will now appear on home`);
+    } catch (err) {
+      setServices(original);
+      toast.error('Failed to update home service');
+    } finally {
+      setHomeLoadingId(null);
+    }
   };
 
   if (loading) return (
@@ -149,6 +179,8 @@ const VendorServices = () => {
                   service={service}
                   onToggle={handleToggle}
                   onEdit={handleEdit}
+                  onSetHome={handleSetHomeService}
+                  homeLoadingId={homeLoadingId}
                 />
               ))}
             </div>

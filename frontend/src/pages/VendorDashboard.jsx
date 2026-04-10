@@ -17,7 +17,8 @@ import {
   Briefcase,
   Percent,
   Users,
-  Ticket
+  Ticket,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -54,6 +55,7 @@ const VendorDashboard = () => {
   const [isCreateSlotOpen, setIsCreateSlotOpen] = useState(false);
   const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
   const [showWalletValue, setShowWalletValue] = useState(false);
+  const [scheduleFilter, setScheduleFilter] = useState('all');
 
   const fetchDashboard = async () => {
     try {
@@ -164,9 +166,16 @@ const VendorDashboard = () => {
   const actionTiles = [
     { label: 'New Booking', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
     { label: 'Offers', icon: Ticket, path: '/vendor/offers' },
-    { label: 'Staff', icon: Users, path: '/vendor/staff' },
+    data.serviceMode === 'home'
+      ? { label: 'Staff', icon: Lock, locked: true }
+      : { label: 'Staff', icon: Users, path: '/vendor/staff' },
     { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' }
   ];
+  const filteredSchedule = (data.schedule || []).filter((item) => {
+    if (scheduleFilter === 'owner') return item.staffType === 'owner';
+    if (scheduleFilter === 'staff') return item.staffType === 'staff';
+    return true;
+  });
 
   return (
     <div className="bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden">
@@ -233,7 +242,17 @@ const VendorDashboard = () => {
           {actionTiles.map((action) => (
             <button
               key={action.label}
-              onClick={action.onClick || (() => navigate(action.path))}
+              onClick={() => {
+                if (action.locked) {
+                  toast('Only for shop partners', { icon: '🔒' });
+                  return;
+                }
+                if (action.onClick) {
+                  action.onClick();
+                  return;
+                }
+                navigate(action.path);
+              }}
               className="flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-[15px] border border-[#344474]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(52,68,116,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(52,68,116,0.2)]"
             >
               <div className="w-9 h-9 bg-[#344474] dark:bg-[#344474] rounded-2xl flex items-center justify-center shadow-lg shadow-[#344474]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
@@ -276,18 +295,38 @@ const VendorDashboard = () => {
         <section className="space-y-2 pt-0">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">Today's clients</h2>
+            <div className="flex items-center gap-1">
+              {[
+                { key: 'all', label: 'All' },
+                { key: 'owner', label: 'Owner' },
+                { key: 'staff', label: 'Staff' }
+              ].map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setScheduleFilter(filter.key)}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest transition-all',
+                    scheduleFilter === filter.key
+                      ? 'bg-[#344474] text-white border-[#344474]'
+                      : 'bg-white dark:bg-gray-900 text-slate-400 dark:text-gray-500 border-slate-200 dark:border-gray-800'
+                  )}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-1">
-            {data.schedule.length === 0 ? (
+            {filteredSchedule.length === 0 ? (
               <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
                 <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#344474] transition-colors">
                   <Calendar size={18} />
                 </div>
-                <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">No appointments for today</p>
+                <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">No appointments found</p>
               </div>
             ) : (
-              data.schedule.map((item, idx) => (
+              filteredSchedule.map((item, idx) => (
                 <motion.div
                   key={idx}
                   whileTap={{ scale: 0.98 }}
@@ -310,6 +349,11 @@ const VendorDashboard = () => {
                            <span className="text-[#344474] uppercase">{item.time}</span>
                            <span className="opacity-20">•</span>
                            <span className="truncate max-w-[150px]">{item.service}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="uppercase">{item.staffType === 'owner' ? 'Owner' : 'Staff'}</span>
+                          <span className="opacity-20">â€¢</span>
+                          <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
                         </div>
                       </div>
                     </div>

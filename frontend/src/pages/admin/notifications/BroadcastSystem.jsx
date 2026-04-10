@@ -22,7 +22,7 @@ const BroadcastSystem = () => {
    const targets = [
       { id: 'all', name: 'Global Audience', icon: Globe, color: 'primary', desc: 'Notify every registered entity' },
       { id: 'customer', name: 'Users Only', icon: Users, color: 'blue', desc: 'Dispatch to all app customers' },
-      { id: 'vendor', name: 'Vendors Only', icon: Store, color: 'emerald', desc: 'Broadcast to service providers' },
+      { id: 'vendor', name: 'Partners Only', icon: Store, color: 'emerald', desc: 'Broadcast to service providers' },
       { id: 'staff', name: 'Staff Only', icon: Briefcase, color: 'amber', desc: 'Alert platform professionals' }
    ];
 

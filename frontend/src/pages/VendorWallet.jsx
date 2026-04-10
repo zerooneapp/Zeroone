@@ -54,6 +54,13 @@ const prettifyLabel = (value = '') => value
   .replace(/_/g, ' ')
   .replace(/\b\w/g, (char) => char.toUpperCase());
 
+const WALLET_HISTORY_CATEGORIES = new Set([
+  'wallet_topup',
+  'admin_topup',
+  'daily_subscription',
+  'monthly_subscription'
+]);
+
 const VendorWallet = () => {
   const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(null);
@@ -89,18 +96,22 @@ const VendorWallet = () => {
   }, []);
 
   const filteredTransactions = useMemo(() => {
+    const walletOnlyTransactions = transactions.filter((transaction) => (
+      WALLET_HISTORY_CATEGORIES.has(transaction.category || '')
+    ));
+
     const now = dayjs();
     const scopedTransactions = (() => {
       switch (filter) {
         case 'today':
-          return transactions.filter((transaction) => dayjs(transaction.timestamp).isSame(now, 'day'));
+          return walletOnlyTransactions.filter((transaction) => dayjs(transaction.timestamp).isSame(now, 'day'));
         case 'week':
-          return transactions.filter((transaction) => {
+          return walletOnlyTransactions.filter((transaction) => {
             const timestamp = dayjs(transaction.timestamp);
             return timestamp.isAfter(now.subtract(7, 'day')) && timestamp.isBefore(now.add(1, 'minute'));
           });
         default:
-          return transactions;
+          return walletOnlyTransactions;
       }
     })();
 

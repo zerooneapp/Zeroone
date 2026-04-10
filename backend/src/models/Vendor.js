@@ -10,12 +10,15 @@ const vendorSchema = new mongoose.Schema({
   },
   address: { type: String },
   panCard: { type: String },
+  gstCertificate: { type: String },
+  shopRegistration: { type: String },
   aadhaarFront: { type: String },
   aadhaarBack: { type: String },
   shopImage: { type: String },
   galleryImages: [{ type: String }], // Array of URLs
   shopVideo: { type: String }, // Video URL
   vendorPhoto: { type: String },
+  serviceMode: { type: String, enum: ['shop', 'home'], default: 'shop' },
   workingHours: {
     start: { type: String, default: '09:00 AM' },
     end: { type: String, default: '09:00 PM' }

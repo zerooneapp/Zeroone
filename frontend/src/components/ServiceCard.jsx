@@ -1,8 +1,9 @@
 import React from 'react';
-import { Edit3, Clock, IndianRupee, Trash2 } from 'lucide-react';
+import { Edit3, Clock, IndianRupee, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const ServiceCard = ({ service, onToggle, onEdit }) => {
+const ServiceCard = ({ service, onToggle, onEdit, onSetHome, homeLoadingId }) => {
+   const typeLabel = service.type === 'both' ? 'Shop + Home' : service.type === 'home' ? 'Home Only' : 'Shop Only';
    return (
       <motion.div
          initial={{ opacity: 0, scale: 0.95 }}
@@ -38,6 +39,24 @@ const ServiceCard = ({ service, onToggle, onEdit }) => {
                   </span>
                </div>
             )}
+            <div className="mt-1.5 flex">
+               <span className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[7px] font-black uppercase tracking-[0.18em] border-slate-200 bg-slate-50 text-slate-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 mr-1.5">
+                  {typeLabel}
+               </span>
+               <button
+                  type="button"
+                  onClick={() => onSetHome?.(service)}
+                  disabled={!service.isActive || service.showOnHome || homeLoadingId === service._id}
+                  className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[7px] font-black uppercase tracking-[0.18em] transition-all ${
+                     service.showOnHome
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                        : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                  } ${!service.isActive || homeLoadingId === service._id ? 'opacity-60 cursor-not-allowed' : 'active:scale-95'}`}
+               >
+                  <Home size={10} strokeWidth={2.5} />
+                  {service.showOnHome ? 'Home Service' : 'Show on Home'}
+               </button>
+            </div>
          </div>
 
          <div className="flex flex-col gap-1.5 items-end">

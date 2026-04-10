@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
-   Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut
+   Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
+   History, Calendar, Clock, UserRound, IndianRupee, Wallet
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -18,9 +19,26 @@ const VendorProfile = () => {
    const [loading, setLoading] = useState(false);
    const [activeSection, setActiveSection] = useState(null); // null | 'basic' | 'media'
    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+   const [historyLoading, setHistoryLoading] = useState(false);
+   const [historyBookings, setHistoryBookings] = useState([]);
+   const [historyFilters, setHistoryFilters] = useState({
+      from: '',
+      to: '',
+      status: ''
+   });
+   const [transactionLoading, setTransactionLoading] = useState(false);
+   const [transactions, setTransactions] = useState([]);
+   const [staffOptions, setStaffOptions] = useState([]);
+   const [transactionFilters, setTransactionFilters] = useState({
+      from: '',
+      to: '',
+      source: 'total',
+      staffId: ''
+   });
    const [data, setData] = useState({
       shopName: '',
       address: '',
+      serviceMode: 'shop',
       workingHours: { start: '09:00 AM', end: '09:00 PM' },
       location: null
    });
@@ -64,6 +82,7 @@ const VendorProfile = () => {
             setData({
                shopName: res.data.shopName,
                address: res.data.address,
+               serviceMode: res.data.serviceMode || 'shop',
                workingHours: res.data.workingHours || { start: '09:00 AM', end: '09:00 PM' },
                location: res.data.location
             });
@@ -74,6 +93,82 @@ const VendorProfile = () => {
       };
       fetchProfile();
    }, []);
+
+   useEffect(() => {
+      if (data.serviceMode === 'home' && transactionFilters.source === 'staff') {
+         setTransactionFilters((prev) => ({ ...prev, source: 'total', staffId: '' }));
+      }
+   }, [data.serviceMode, transactionFilters.source]);
+
+   useEffect(() => {
+      if (activeSection !== 'history') return;
+
+      const fetchHistory = async () => {
+         try {
+            setHistoryLoading(true);
+            const params = {};
+            if (historyFilters.from) params.from = historyFilters.from;
+            if (historyFilters.to) params.to = historyFilters.to;
+            if (historyFilters.status) params.status = historyFilters.status;
+
+            const res = await api.get('/vendor/bookings', { params });
+            setHistoryBookings(res.data || []);
+         } catch (err) {
+            toast.error('Failed to load booking history');
+         } finally {
+            setHistoryLoading(false);
+         }
+      };
+
+      fetchHistory();
+   }, [activeSection, historyFilters]);
+
+   useEffect(() => {
+      if (activeSection !== 'transactions') return;
+
+      const fetchTransactions = async () => {
+         try {
+            setTransactionLoading(true);
+            const params = {
+               category: 'booking_revenue',
+               source: transactionFilters.source
+            };
+            if (transactionFilters.from) params.from = transactionFilters.from;
+            if (transactionFilters.to) params.to = transactionFilters.to;
+            if (transactionFilters.source === 'staff' && transactionFilters.staffId) {
+               params.staffId = transactionFilters.staffId;
+            }
+
+            const res = await api.get('/vendor/transactions', { params });
+            setTransactions(res.data || []);
+         } catch (err) {
+            toast.error('Failed to load earning history');
+         } finally {
+            setTransactionLoading(false);
+         }
+      };
+
+      fetchTransactions();
+   }, [activeSection, transactionFilters]);
+
+   useEffect(() => {
+      if (activeSection !== 'transactions') return;
+      if (data.serviceMode === 'home') {
+         setStaffOptions([]);
+         return;
+      }
+
+      const fetchStaffOptions = async () => {
+         try {
+            const res = await api.get('/staff/manage/all');
+            setStaffOptions(Array.isArray(res.data) ? res.data : []);
+         } catch (err) {
+            setStaffOptions([]);
+         }
+      };
+
+      fetchStaffOptions();
+   }, [activeSection, data.serviceMode]);
 
    const handleUpdateInfo = async (e) => {
       e.preventDefault();
@@ -137,6 +232,22 @@ const VendorProfile = () => {
          path: '/vendor/services',
       },
       {
+         key: 'history',
+         label: 'History',
+         subtitle: 'Shop booking history & date filter',
+         icon: History,
+         iconBg: 'bg-amber-500/10',
+         iconColor: 'text-amber-500',
+      },
+      {
+         key: 'transactions',
+         label: 'Transactions',
+         subtitle: 'Shop earning history & filters',
+         icon: Wallet,
+         iconBg: 'bg-emerald-500/10',
+         iconColor: 'text-emerald-500',
+      },
+      {
          key: 'theme',
          label: isDarkMode ? 'Light Mode' : 'Dark Mode',
          subtitle: isDarkMode ? 'Switch to light theme' : 'Switch to dark theme',
@@ -170,7 +281,7 @@ const VendorProfile = () => {
                <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
             </button>
             <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-               {activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Shop Media' : 'Account Settings'}
+               {activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Shop Media' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transactions' : 'Account Settings'}
             </h1>
          </header>
 
@@ -389,6 +500,246 @@ const VendorProfile = () => {
                      <p className="text-[8px] text-center text-gray-400 font-black uppercase tracking-widest opacity-60">
                         Changes reflect instantly on customer side
                      </p>
+                  </motion.section>
+               )}
+
+               {activeSection === 'history' && (
+                  <motion.section
+                     key="history"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
+                  >
+                     <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-amber-500/10 text-amber-500 rounded-lg">
+                           <History size={16} />
+                        </div>
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Booking History</h2>
+                     </div>
+
+                     <div className="grid grid-cols-[1fr_20px_1fr] gap-2 items-center">
+                        <input
+                           type="date"
+                           value={historyFilters.from}
+                           onChange={(e) => setHistoryFilters((prev) => ({ ...prev, from: e.target.value }))}
+                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                        />
+                        <div className="flex items-center justify-center text-slate-300 dark:text-gray-600 font-black text-base">
+                           &gt;
+                        </div>
+                        <input
+                           type="date"
+                           value={historyFilters.to}
+                           onChange={(e) => setHistoryFilters((prev) => ({ ...prev, to: e.target.value }))}
+                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                        />
+                     </div>
+
+                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 px-1">
+                           Same date in both boxes shows one specific day.
+                        </p>
+                        <div className="flex items-center gap-2">
+                           <select
+                              value={historyFilters.status}
+                              onChange={(e) => setHistoryFilters((prev) => ({ ...prev, status: e.target.value }))}
+                              className="h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                           >
+                              <option value="">All</option>
+                              <option value="completed">Completed</option>
+                              <option value="cancelled">Cancelled</option>
+                              <option value="confirmed">Confirmed</option>
+                           </select>
+                           <div className="px-3 h-9 inline-flex items-center rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-300">
+                              Total {historyBookings.length}
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="space-y-2">
+                        {historyLoading ? (
+                           Array.from({ length: 4 }).map((_, i) => (
+                              <div key={i} className="h-20 rounded-xl bg-slate-50 dark:bg-gray-800 animate-pulse border border-slate-100 dark:border-gray-800" />
+                           ))
+                        ) : historyBookings.length === 0 ? (
+                           <div className="py-10 text-center bg-slate-50/60 dark:bg-gray-800/40 rounded-xl border border-dashed border-slate-200 dark:border-gray-800">
+                              <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">No bookings found</p>
+                           </div>
+                        ) : (
+                           historyBookings.map((booking) => (
+                              <div
+                                 key={booking._id}
+                                 className="p-3 bg-slate-50/70 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800 space-y-2"
+                              >
+                                 <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                       <p className="text-[12px] font-black text-slate-800 dark:text-white leading-tight">
+                                          {booking.walkInCustomerName || booking.userId?.name || 'Customer'}
+                                       </p>
+                                       <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest mt-1">
+                                          {booking.services?.map((service) => service.name).join(', ') || 'Service'}
+                                       </p>
+                                    </div>
+                                    <span className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                                       booking.status === 'completed'
+                                          ? 'bg-emerald-50 text-emerald-500 border-emerald-100'
+                                          : booking.status === 'cancelled'
+                                             ? 'bg-red-50 text-red-500 border-red-100'
+                                             : 'bg-blue-50 text-blue-500 border-blue-100'
+                                    }`}>
+                                       {booking.status}
+                                    </span>
+                                 </div>
+
+                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <div className="flex items-center gap-1.5">
+                                       <Calendar size={11} />
+                                       {new Date(booking.startTime).toLocaleDateString()}
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                       <Clock size={11} />
+                                       {new Date(booking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                       <UserRound size={11} />
+                                       {booking.staffId?.name || 'Unassigned'}
+                                    </div>
+                                    <div className="text-right text-[11px] text-slate-800 dark:text-white">
+                                       Rs {booking.totalPrice || 0}
+                                    </div>
+                                 </div>
+                              </div>
+                           ))
+                        )}
+                     </div>
+                  </motion.section>
+               )}
+
+               {activeSection === 'transactions' && (
+                  <motion.section
+                     key="transactions"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
+                  >
+                     <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
+                           <Wallet size={16} />
+                        </div>
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Transactions</h2>
+                     </div>
+
+                     <div className="grid grid-cols-[1fr_20px_1fr] gap-2 items-center">
+                        <input
+                           type="date"
+                           value={transactionFilters.from}
+                           onChange={(e) => setTransactionFilters((prev) => ({ ...prev, from: e.target.value }))}
+                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                        />
+                        <div className="flex items-center justify-center text-slate-300 dark:text-gray-600 font-black text-base">
+                           &gt;
+                        </div>
+                        <input
+                           type="date"
+                           value={transactionFilters.to}
+                           onChange={(e) => setTransactionFilters((prev) => ({ ...prev, to: e.target.value }))}
+                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                        />
+                     </div>
+
+                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 px-1">
+                           Same date in both boxes shows one specific day.
+                        </p>
+                        <div className="flex items-center gap-2">
+                           <select
+                              value={transactionFilters.source}
+                              onChange={(e) => setTransactionFilters((prev) => ({
+                                 ...prev,
+                                 source: e.target.value,
+                                 staffId: e.target.value === 'staff' ? prev.staffId : ''
+                              }))}
+                              className="h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                           >
+                              <option value="total">Total</option>
+                              <option value="partner">Partner</option>
+                              {data.serviceMode !== 'home' && <option value="staff">Staff</option>}
+                           </select>
+                           {data.serviceMode !== 'home' && transactionFilters.source === 'staff' && (
+                              <select
+                                 value={transactionFilters.staffId}
+                                 onChange={(e) => setTransactionFilters((prev) => ({ ...prev, staffId: e.target.value }))}
+                                 className="h-9 px-3 max-w-[150px] bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                              >
+                                 <option value="">All Staff</option>
+                                 {staffOptions.map((staff) => (
+                                    <option key={staff._id} value={staff._id}>
+                                       {staff.name}
+                                    </option>
+                                 ))}
+                              </select>
+                           )}
+                           <div className="px-3 h-9 inline-flex items-center rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-300">
+                              Total {transactions.length}
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="space-y-2">
+                        {transactionLoading ? (
+                           Array.from({ length: 4 }).map((_, i) => (
+                              <div key={i} className="h-20 rounded-xl bg-slate-50 dark:bg-gray-800 animate-pulse border border-slate-100 dark:border-gray-800" />
+                           ))
+                        ) : transactions.length === 0 ? (
+                           <div className="py-10 text-center bg-slate-50/60 dark:bg-gray-800/40 rounded-xl border border-dashed border-slate-200 dark:border-gray-800">
+                              <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">No earnings found</p>
+                           </div>
+                        ) : (
+                           transactions.map((transaction) => (
+                              <div
+                                 key={transaction._id}
+                                 className="p-3 bg-slate-50/70 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800 space-y-2"
+                              >
+                                 <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                       <p className="text-[12px] font-black text-slate-800 dark:text-white leading-tight">
+                                          {transaction.sourceType === 'staff' ? transaction.sourceLabel : transaction.sourceType === 'partner' ? 'Partner Earning' : 'Shop Earning'}
+                                       </p>
+                                       <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest mt-1">
+                                          {transaction.description || transaction.reason || 'Booking Revenue'}
+                                       </p>
+                                    </div>
+                                    <span className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border bg-emerald-50 text-emerald-500 border-emerald-100">
+                                       {transaction.sourceType}
+                                    </span>
+                                 </div>
+
+                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <div className="flex items-center gap-1.5">
+                                       <Calendar size={11} />
+                                       {new Date(transaction.timestamp).toLocaleDateString()}
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                       <Clock size={11} />
+                                       {new Date(transaction.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                       <UserRound size={11} />
+                                       {transaction.sourceLabel || 'System'}
+                                    </div>
+                                    <div className="flex items-center justify-end gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">
+                                       <IndianRupee size={11} />
+                                       {Number(transaction.amount || 0).toLocaleString('en-IN')}
+                                    </div>
+                                 </div>
+                              </div>
+                           ))
+                        )}
+                     </div>
                   </motion.section>
                )}
             </AnimatePresence>

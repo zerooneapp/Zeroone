@@ -18,10 +18,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (!isAuthenticated) {
-    const isBusinessArea = ['/vendor', '/staff', '/admin'].some((prefix) =>
-      location.pathname.startsWith(prefix)
-    );
-    const loginPath = isBusinessArea ? '/vendor-login' : '/login';
+    const loginPath = location.pathname.startsWith('/admin')
+      ? '/admin-login'
+      : (['/vendor', '/staff'].some((prefix) => location.pathname.startsWith(prefix))
+        ? '/vendor-login'
+        : '/login');
     return <Navigate to={loginPath} state={{ from: location }} replace />;
   }
 
@@ -29,6 +30,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     // Redirect to their respective dashboards if they try to access unauthorized role areas
     const dashboardMap = {
       admin: '/admin/dashboard',
+      super_admin: '/admin/dashboard',
       vendor: '/vendor/dashboard',
       staff: '/staff/dashboard',
       customer: '/'

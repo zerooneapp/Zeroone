@@ -24,6 +24,16 @@ const sendRoleNotifications = async (notifications = []) => {
   );
 };
 
+const HOME_ENABLED_SERVICE_TYPES = new Set(['home', 'both']);
+
+const resolveBookingMode = (serviceDetails = [], serviceAddress = '') => {
+  const supportsHomeVisit = serviceDetails.some((service) => HOME_ENABLED_SERVICE_TYPES.has(service.type));
+  return {
+    bookingType: supportsHomeVisit ? 'home' : 'shop',
+    resolvedServiceAddress: supportsHomeVisit ? serviceAddress : undefined
+  };
+};
+
 const resolveLockedStaff = async ({ userId, vendorId, start, preferredStaffId = null }) => {
   const lockQuery = {
     userId,
@@ -84,6 +94,7 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
   if (serviceDetails.length !== serviceIds.length) throw new Error('Services unavailable');
 
   const pricingPreview = await calculatePricingPreview(vendorId, serviceDetails);
+  const { bookingType, resolvedServiceAddress } = resolveBookingMode(serviceDetails, serviceAddress);
   const totalPrice = pricingPreview.finalTotal;
   const totalDuration = serviceDetails.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
   const end = start.clone().add(totalDuration, 'minutes');
@@ -105,7 +116,8 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
     userId,
     vendorId,
     staffId,
-    serviceAddress,
+    type: bookingType,
+    serviceAddress: resolvedServiceAddress,
     services: serviceDetails.map((service) => ({
       serviceId: service._id,
       name: service.name,
@@ -175,8 +187,12 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
   }
 
   // 1. Atomic Status Update
+  const completionTime = new Date();
   booking.status = 'completed';
-  booking.completedAt = new Date();
+  booking.completedAt = completionTime;
+  if (booking.endTime && completionTime < booking.endTime) {
+    booking.endTime = completionTime;
+  }
   await booking.save();
 
   // 2. Revenue Collection: Credit Vendor's Wallet
@@ -434,11 +450,21 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
 
   const oldTime = moment(booking.startTime).format('LLL');
   const originalStaffId = booking.staffId;
+  const serviceIds = (booking.services || []).map((service) => service.serviceId).filter(Boolean);
+  const serviceDetails = await Service.find({
+    _id: { $in: serviceIds },
+    vendorId: booking.vendorId._id
+  }).select('type');
+  const { bookingType, resolvedServiceAddress } = resolveBookingMode(
+    serviceDetails,
+    newServiceAddress || booking.serviceAddress || ''
+  );
 
   booking.startTime = start.toDate();
   booking.endTime = end.toDate();
   booking.staffId = resolvedStaffId;
-  if (newServiceAddress) booking.serviceAddress = newServiceAddress;
+  booking.type = bookingType;
+  booking.serviceAddress = resolvedServiceAddress;
   booking.rescheduledAt = new Date();
   booking.rescheduledByRole = actorRole;
   await booking.save();

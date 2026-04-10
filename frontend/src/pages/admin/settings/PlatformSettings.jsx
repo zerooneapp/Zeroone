@@ -92,7 +92,7 @@ const PlatformSettings = () => {
           <div className="leading-tight">
             <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-widest">Global State Control</p>
             <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest leading-relaxed opacity-60">
-              Critical changes affect all vendor accounts instantly.
+              Critical changes affect all partner accounts instantly.
             </p>
           </div>
         </div>
@@ -145,7 +145,7 @@ const PlatformSettings = () => {
                 isDisabled={saving}
               />
               <ToggleItem
-                label="Vendor Retention"
+                label="Partner Retention"
                 sub="Reminders for profile & asset compliance"
                 isActive={settings.notifications?.reminderAlerts}
                 onToggle={() => handleToggle('reminderAlerts')}

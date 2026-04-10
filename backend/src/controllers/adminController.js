@@ -17,6 +17,21 @@ const {
 
 const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin']);
 const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
+const ADMIN_ROLES = new Set(['admin', 'super_admin']);
+
+const hasAdminAccess = (req) => ADMIN_ROLES.has(req.user?.role);
+const isSuperAdmin = (req) => req.user?.role === 'super_admin';
+const sanitizeAdminAccount = (admin) => ({
+  _id: admin._id,
+  name: admin.name,
+  phone: admin.phone,
+  email: admin.email,
+  image: admin.image,
+  role: admin.role,
+  isBlocked: admin.isBlocked,
+  createdAt: admin.createdAt,
+  updatedAt: admin.updatedAt
+});
 
 // ... (existing functions)
 
@@ -121,7 +136,7 @@ const getSubscriptionPlans = async (req, res) => {
 // @desc    Get all pending vendors for approval
 const getPendingVendors = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const vendors = await Vendor.find({ status: 'pending' }).populate('ownerId', 'name phone');
     res.status(200).json(vendors);
   } catch (error) {
@@ -132,7 +147,7 @@ const getPendingVendors = async (req, res) => {
 // @desc    Approve a vendor
 const approveVendor = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
     if (!vendor.isProfileComplete) {
@@ -140,7 +155,7 @@ const approveVendor = async (req, res) => {
       if (!vendor.aadhaarFront) missing.push('aadhaarFront');
       if (!vendor.aadhaarBack) missing.push('aadhaarBack');
       if (!vendor.panCard) missing.push('panCard');
-      if (!vendor.shopImage) missing.push('shopImage');
+      if ((vendor.serviceMode || 'shop') === 'shop' && !vendor.shopImage) missing.push('shopImage');
       if (!vendor.vendorPhoto) missing.push('vendorPhoto');
       console.log('[DEBUG] Approval FAILED. isProfileComplete is FALSE. Missing:', missing.join(', '));
       return res.status(400).json({
@@ -181,7 +196,7 @@ const approveVendor = async (req, res) => {
 // @desc    Block/Unblock user
 const toggleBlockUser = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (!hasAdminAccess(req)) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
     const user = await User.findById(req.params.id);
@@ -197,7 +212,7 @@ const toggleBlockUser = async (req, res) => {
 // @desc    Add funds to vendor wallet
 const addBalance = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const { amount, reason } = req.body || {};
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
@@ -232,7 +247,7 @@ const updatePlan = async (req, res) => {
 // 2. Advanced Revenue Dashboard
 const getRevenueReport = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const { date, from, to } = req.query;
     let start, end;
     if (date) {
@@ -315,7 +330,7 @@ const getAllUsers = async (req, res) => {
 
 const getUserDetail = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const user = await User.findById(req.params.id).select('-otp -otpExpires');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -332,7 +347,7 @@ const getUserDetail = async (req, res) => {
 
 const getUserBookings = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const bookings = await Booking.find({ userId: req.params.userId })
       .populate('vendorId', 'shopName')
       .sort({ createdAt: -1 });
@@ -344,8 +359,8 @@ const getUserBookings = async (req, res) => {
 
 const getFilteredBookings = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
-    const { status, date, vendorId, search, page = 1, limit = 10 } = req.query;
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const { status, date, startDate, endDate, vendorId, search, page = 1, limit = 10 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Base Match Stage
@@ -355,8 +370,20 @@ const getFilteredBookings = async (req, res) => {
       matchLine.status = status;
     }
     if (vendorId) matchLine.vendorId = require('mongoose').Types.ObjectId(vendorId);
-    if (date) {
-      matchLine.createdAt = {
+    if (startDate || endDate) {
+      const rangeStart = startDate
+        ? moment(startDate).startOf('day').toDate()
+        : moment(endDate).startOf('day').toDate();
+      const rangeEnd = endDate
+        ? moment(endDate).endOf('day').toDate()
+        : moment(startDate).endOf('day').toDate();
+
+      matchLine.startTime = {
+        $gte: rangeStart,
+        $lte: rangeEnd
+      };
+    } else if (date) {
+      matchLine.startTime = {
         $gte: moment(date).startOf('day').toDate(),
         $lt: moment(date).endOf('day').toDate()
       };
@@ -397,7 +424,7 @@ const getFilteredBookings = async (req, res) => {
     }
 
     pipeline.push(
-      { $sort: { createdAt: -1 } },
+      { $sort: { startTime: -1, createdAt: -1 } },
       {
         $facet: {
           metadata: [{ $count: "total" }],
@@ -423,7 +450,7 @@ const getFilteredBookings = async (req, res) => {
 
 const getBookingDetail = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const booking = await Booking.findById(req.params.id)
       .populate('userId', 'name phone email')
       .populate({
@@ -442,7 +469,7 @@ const getBookingDetail = async (req, res) => {
 
 const adminCancelBooking = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
 
@@ -494,7 +521,9 @@ const getAdminDashboard = async (req, res) => {
     const [
       todayRevenue,
       yesterdayRevenue,
+      totalRevenue,
       newVendors,
+      totalPartners,
       activeBookings,
       totalUsers,
       bookingStats,
@@ -529,8 +558,20 @@ const getAdminDashboard = async (req, res) => {
         },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]),
+      // 3. Total Revenue
+      require('../models/WalletTransaction').aggregate([
+        {
+          $match: {
+            category: 'booking_revenue',
+            status: 'completed'
+          }
+        },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
       // 3. New Vendors
       Vendor.countDocuments({ createdAt: { $gte: today.toDate() } }),
+      // 4. Total Partners
+      Vendor.countDocuments(),
       // 4. Active Bookings
       Booking.countDocuments({ status: { $in: ['confirmed', 'ongoing'] } }),
       // 5. Total Users
@@ -585,7 +626,9 @@ const getAdminDashboard = async (req, res) => {
     res.status(200).json({
       todayRevenue: todayRevenue[0]?.total || 0,
       yesterdayRevenue: yesterdayRevenue[0]?.total || 0,
+      totalRevenue: totalRevenue[0]?.total || 0,
       newVendors,
+      totalPartners,
       activeBookings,
       totalUsers,
       bookingStats: stats,
@@ -698,6 +741,260 @@ const toggleVendorActive = async (req, res) => {
   }
 };
 
+const extendVendorFreeTrial = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+
+    const vendor = await Vendor.findById(req.params.id).populate('ownerId', 'name');
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const extensionDays = Number(req.body?.days);
+    if (!Number.isFinite(extensionDays) || extensionDays <= 0) {
+      return res.status(400).json({ message: 'A valid trial extension in days is required' });
+    }
+
+    const subscriptionState = await getVendorSubscriptionState(vendor);
+    if (subscriptionState.isMonthlyActive) {
+      return res.status(400).json({ message: 'Monthly subscription is already active for this vendor' });
+    }
+
+    const now = new Date();
+    const currentExpiry =
+      vendor.freeTrial?.isActive && vendor.freeTrial?.expiryDate && new Date(vendor.freeTrial.expiryDate) > now
+        ? new Date(vendor.freeTrial.expiryDate)
+        : now;
+
+    const nextExpiry = new Date(currentExpiry);
+    nextExpiry.setDate(nextExpiry.getDate() + extensionDays);
+
+    vendor.freeTrial = {
+      ...(vendor.freeTrial || {}),
+      isActive: true,
+      expiryDate: nextExpiry
+    };
+
+    vendor.planType = 'trial';
+    if (!['pending', 'blocked', 'rejected'].includes(vendor.status)) {
+      vendor.status = 'active';
+      vendor.isActive = true;
+    }
+
+    await vendor.save();
+
+    await NotificationService.sendNotification({
+      userIds: vendor.ownerId?._id || vendor.ownerId,
+      role: 'vendor',
+      type: 'TRIAL_EXTENDED',
+      title: 'Free Trial Extended',
+      message: `Your free trial has been extended by ${extensionDays} day${extensionDays > 1 ? 's' : ''} and is now active until ${moment(nextExpiry).format('DD MMM YYYY')}.`,
+      referenceId: `TRIAL_EXTEND_${vendor._id}_${Date.now()}`
+    });
+
+    res.status(200).json({
+      message: `Free trial extended until ${moment(nextExpiry).format('DD MMM YYYY')}`,
+      vendor
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getVendorInsights = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.params.id).populate('ownerId', 'name phone');
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const { from, to } = req.query;
+    const now = moment().tz('Asia/Kolkata');
+    const startDate = from
+      ? moment.tz(from, 'YYYY-MM-DD', 'Asia/Kolkata').startOf('day')
+      : now.clone().startOf('month');
+    const endDate = to
+      ? moment.tz(to, 'YYYY-MM-DD', 'Asia/Kolkata').endOf('day')
+      : now.clone().endOf('day');
+
+    const [bookings, revenueTransactions] = await Promise.all([
+      Booking.find({
+        vendorId: vendor._id,
+        startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+      })
+        .populate('userId', 'name')
+        .populate('staffId', 'name')
+        .sort({ startTime: -1 })
+        .limit(20)
+        .lean(),
+      WalletTransaction.find({
+        vendorId: vendor._id,
+        category: 'booking_revenue',
+        status: 'completed',
+        timestamp: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+      })
+        .sort({ timestamp: -1 })
+        .limit(20)
+        .lean()
+    ]);
+
+    const totalRevenue = revenueTransactions.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const totalBookings = bookings.length;
+    const completedBookings = bookings.filter((booking) => booking.status === 'completed').length;
+    const cancelledBookings = bookings.filter((booking) => booking.status === 'cancelled').length;
+
+    res.status(200).json({
+      vendor: {
+        _id: vendor._id,
+        shopName: vendor.shopName,
+        ownerName: vendor.ownerId?.name || ''
+      },
+      range: {
+        from: startDate.format('YYYY-MM-DD'),
+        to: endDate.format('YYYY-MM-DD')
+      },
+      summary: {
+        totalBookings,
+        completedBookings,
+        cancelledBookings,
+        totalRevenue
+      },
+      bookings: bookings.map((booking) => ({
+        _id: booking._id,
+        customerName: booking.walkInCustomerName || booking.userId?.name || 'Customer',
+        staffName: booking.staffId?.name || 'Owner',
+        status: booking.status,
+        totalPrice: booking.totalPrice,
+        startTime: booking.startTime,
+        services: booking.services || []
+      })),
+      revenue: revenueTransactions.map((item) => ({
+        _id: item._id,
+        amount: item.amount || 0,
+        description: item.description || item.reason || 'Booking revenue',
+        timestamp: item.timestamp
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAdminAccounts = async (req, res) => {
+  try {
+    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can manage admin access' });
+
+    const { search = '', status = 'all' } = req.query;
+    const filter = { role: { $in: ['admin', 'super_admin'] } };
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (status === 'blocked') filter.isBlocked = true;
+    if (status === 'active') filter.isBlocked = false;
+
+    const admins = await User.find(filter)
+      .select('-password -otp -otpExpires')
+      .sort({ role: 1, createdAt: -1 });
+
+    res.status(200).json(admins.map(sanitizeAdminAccount));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const createAdminAccount = async (req, res) => {
+  try {
+    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can create admins' });
+
+    const { name, phone, password, email } = req.body || {};
+    if (!name?.trim() || !phone?.trim() || !password) {
+      return res.status(400).json({ message: 'Name, phone and password are required' });
+    }
+
+    if (!/^\d{10}$/.test(phone.trim())) {
+      return res.status(400).json({ message: 'Admin phone must be a valid 10-digit number' });
+    }
+
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    const existingUser = await User.findOne({ phone: phone.trim() });
+    if (existingUser) {
+      return res.status(400).json({ message: 'An account with this phone number already exists' });
+    }
+
+    const admin = await User.create({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email?.trim() || undefined,
+      password,
+      role: 'admin',
+      isBlocked: false
+    });
+
+    res.status(201).json(sanitizeAdminAccount(admin));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const toggleAdminAccountBlock = async (req, res) => {
+  try {
+    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can update admin access' });
+
+    const admin = await User.findById(req.params.id);
+    if (!admin || !ADMIN_ROLES.has(admin.role)) {
+      return res.status(404).json({ message: 'Admin account not found' });
+    }
+
+    if (String(admin._id) === String(req.user._id)) {
+      return res.status(400).json({ message: 'You cannot block your own account' });
+    }
+
+    if (admin.role === 'super_admin') {
+      return res.status(400).json({ message: 'Super admin accounts cannot be blocked here' });
+    }
+
+    admin.isBlocked = !admin.isBlocked;
+    await admin.save();
+
+    res.status(200).json({
+      message: `Admin ${admin.isBlocked ? 'blocked' : 'unblocked'} successfully`,
+      admin: sanitizeAdminAccount(admin)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteAdminAccount = async (req, res) => {
+  try {
+    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can delete admin accounts' });
+
+    const admin = await User.findById(req.params.id);
+    if (!admin || !ADMIN_ROLES.has(admin.role)) {
+      return res.status(404).json({ message: 'Admin account not found' });
+    }
+
+    if (String(admin._id) === String(req.user._id)) {
+      return res.status(400).json({ message: 'You cannot delete your own account' });
+    }
+
+    if (admin.role === 'super_admin') {
+      return res.status(400).json({ message: 'Super admin accounts cannot be deleted here' });
+    }
+
+    await admin.deleteOne();
+
+    res.status(200).json({ message: 'Admin account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPendingVendors, approveVendor, rejectVendor, toggleBlockUser, addBalance,
   createPlan, updatePlan, getRevenueReport, getAllUsers, getUserBookings,
@@ -705,5 +1002,7 @@ module.exports = {
   getVendors, toggleBlockVendor, toggleVendorActive, getUserDetail,
   getBookingDetail, adminCancelBooking,
   updateCategory, deleteCategory, getGlobalSettings, updateGlobalSettings,
-  broadcastNotification, getSubscriptionPlans
+  broadcastNotification, getSubscriptionPlans,
+  getAdminAccounts, createAdminAccount, toggleAdminAccountBlock, deleteAdminAccount,
+  extendVendorFreeTrial, getVendorInsights
 };

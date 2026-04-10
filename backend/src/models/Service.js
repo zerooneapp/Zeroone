@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const serviceSchema = new mongoose.Schema({
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
   name: { type: String, required: true },
+  category: { type: String, default: '' },
   description: { type: String },
   price: { type: Number, required: true, min: 0 },
   duration: { 
@@ -18,7 +19,8 @@ const serviceSchema = new mongoose.Schema({
   bufferTime: { type: Number, default: 0 },
   image: { type: String },
   images: { type: [String], default: [] },
-  type: { type: String, enum: ['shop', 'home'], default: 'shop' },
+  type: { type: String, enum: ['shop', 'home', 'both'], default: 'shop' },
+  showOnHome: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 

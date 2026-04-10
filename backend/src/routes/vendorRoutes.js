@@ -63,6 +63,8 @@ router.post(
     { name: 'aadhaarFront', maxCount: 1 },
     { name: 'aadhaarBack', maxCount: 1 },
     { name: 'panCard', maxCount: 1 },
+    { name: 'gstCertificate', maxCount: 1 },
+    { name: 'shopRegistration', maxCount: 1 },
     { name: 'shopImage', maxCount: 1 },
     { name: 'vendorPhoto', maxCount: 1 },
     { name: 'gallery', maxCount: 5 },

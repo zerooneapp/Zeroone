@@ -86,7 +86,7 @@ const TransactionManagement = () => {
 
   const handleExportCsv = () => {
     const rows = [
-      ['Reference ID', 'Vendor', 'Owner', 'Category', 'Type', 'Amount', 'Status', 'Gateway', 'Payment Id', 'Created At'],
+      ['Reference ID', 'Partner', 'Owner', 'Category', 'Type', 'Amount', 'Status', 'Gateway', 'Payment Id', 'Created At'],
       ...data.transactions.map((transaction) => ([
         transaction.referenceId || transaction.gatewayPaymentId || transaction._id,
         transaction.vendor?.shopName || transaction.initiatedBy?.name || '',
@@ -230,7 +230,7 @@ const TransactionManagement = () => {
             <thead>
               <tr className="bg-slate-50/80 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
                 <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Reference ID</th>
-                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Vendor / Initiator</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Partner / Initiator</th>
                 <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Classification</th>
                 <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-right">Capital Amount</th>
                 <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-center">Settlement</th>
