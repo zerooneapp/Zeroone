@@ -83,10 +83,10 @@ const StaffDashboard = () => {
    return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32 animate-in fade-in duration-500">
          {/* 🏙️ CLEAN MINIMAL HEADER (NO ITALIC) */}
-         <div className="px-5 pt-6 pb-2 bg-white/80 dark:bg-gray-900/80 sticky top-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
+         <div className="px-5 pt-3.5 pb-2 bg-white/80 dark:bg-gray-900/80 sticky top-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-1">
-                  <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+                  <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
                      <span className="text-primary dark:text-white">Zero</span>
                      <span className="text-primary/30 dark:text-gray-600">One</span>
                   </h1>
