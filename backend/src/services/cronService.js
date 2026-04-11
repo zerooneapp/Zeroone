@@ -36,8 +36,10 @@ const initCronJobs = () => {
         // Notify Customer
         NotificationService.sendNotification({
           userIds: booking.userId, role: 'customer', type: 'REMINDER_30M',
-          title: 'Upcoming Appointment', message: `Reminder: Your appointment at ${booking.vendorId.shopName} starts in 30 minutes.`,
-          data: { bookingId: booking._id }, referenceId: `REMIND_CUST_${booking._id}`
+          title: 'Upcoming Appointment',
+          message: `Your appointment at ${booking.vendorId.shopName} starts in 30 minutes. Contact details are now unlocked!`,
+          data: { bookingId: booking._id, type: 'REMINDER_30M' },
+          referenceId: `REMIND_CUST_${booking._id}`
         });
 
         // Notify Staff
@@ -45,8 +47,10 @@ const initCronJobs = () => {
         if (getStaffNotificationTarget(staff)) {
           NotificationService.sendNotification({
             userIds: getStaffNotificationTarget(staff), role: 'staff', type: 'REMINDER_30M',
-            title: 'Upcoming Assignment', message: `Reminder: Your assignment at ${booking.vendorId.shopName} starts in 30 minutes.`,
-            data: { bookingId: booking._id }, referenceId: `REMIND_STAFF_${booking._id}`
+            title: 'Upcoming Assignment',
+            message: `Next Booking: You have an appointment for ${booking.walkInCustomerName || 'Client'} in 30 minutes. Contact details are now unlocked!`,
+            data: { bookingId: booking._id, type: 'REMINDER_30M' },
+            referenceId: `REMIND_STAFF_${booking._id}`
           });
         }
       }
@@ -66,11 +70,11 @@ const initCronJobs = () => {
         isShopOpen: false,
         'workingHours.start': { $in: [timeStrPad, timeStrNoPad, timeStrMilitary] }
       });
-      
+
       for (const v of startMatchVendors) {
-         v.isShopOpen = true; 
-         v.isClosedToday = false; // Fresh start for the day
-         await v.save();
+        v.isShopOpen = true;
+        v.isClosedToday = false; // Fresh start for the day
+        await v.save();
       }
 
       // 🌃 AUTO-CLOSE at workingHours.end
@@ -80,8 +84,8 @@ const initCronJobs = () => {
       });
 
       for (const v of endMatchVendors) {
-         v.isShopOpen = false;
-         await v.save();
+        v.isShopOpen = false;
+        await v.save();
       }
 
     } catch (error) { console.error('Shop Status Cron Error:', error); }
@@ -92,10 +96,10 @@ const initCronJobs = () => {
     console.log('--- Expiry Reminder Cron ---');
     try {
       const now = moment().tz('Asia/Kolkata');
-      const monthlyVendors = await Vendor.find({ 
-        planType: 'monthly', 
+      const monthlyVendors = await Vendor.find({
+        planType: 'monthly',
         status: 'active',
-        expiryDate: { $exists: true } 
+        expiryDate: { $exists: true }
       });
 
       for (const vendor of monthlyVendors) {

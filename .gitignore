@@ -24,3 +24,8 @@
 # Project specific
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+src/config/zeroone.json
+backend/src/config/zeroone.json
+zeroone.json
+config/zeroone.json

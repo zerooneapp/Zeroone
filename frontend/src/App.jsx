@@ -71,15 +71,55 @@ import StaffBookings from './pages/StaffBookings';
 import StaffAccount from './pages/StaffAccount';
 import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
+import { requestForToken, onMessageListener } from './config/firebase';
+import { saveTokenToBackend } from './services/fcmService';
 
 function App() {
   const { isDarkMode } = useThemeStore();
-  const { restoreSession } = useAuthStore();
+  const { restoreSession, isAuthenticated, isInitialized } = useAuthStore();
+
+  // Foreground Notification Listener
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      onMessageListener()
+        .then((payload) => {
+          console.log('[App.jsx] Foreground notification:', payload);
+          toast.success(
+            <div>
+              <b>{payload.notification.title}</b>
+              <p className="text-sm">{payload.notification.body}</p>
+            </div>,
+            { duration: 5000 }
+          );
+        })
+        .catch((err) => console.log('failed: ', err));
+    }
+  }, []);
+
+  // Token Registration Logic
+  useEffect(() => {
+    const setupNotifications = async () => {
+      if (!isInitialized) return;
+
+      console.log('[App] setupNotifications called. isAuthenticated:', isAuthenticated);
+      if (isAuthenticated) {
+        const token = await requestForToken();
+        if (token) {
+          console.log('[App] Token retrieved, sending to backend...');
+          await saveTokenToBackend(token);
+        } else {
+          console.log('[App] Token retrieval failed or permission denied.');
+        }
+      }
+    };
+
+    setupNotifications();
+  }, [isAuthenticated, isInitialized]);
 
   useEffect(() => {
     restoreSession();
-    
+
     // Smooth Session Expiration Handler
     const handleUnauthorized = () => {
       useAuthStore.getState().logout();

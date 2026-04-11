@@ -703,6 +703,17 @@ const rejectVendor = async (req, res) => {
     vendor.isActive = false;
     vendor.rejectionReason = rejectionReason;
     await vendor.save();
+
+    NotificationService.sendNotification({
+      userIds: [vendor.ownerId],
+      role: 'vendor',
+      type: 'VENDOR_REJECTED',
+      title: 'Profile Verification Failed',
+      message: `Your shop profile could not be approved. Reason: ${rejectionReason}. Please update your documents and try again.`,
+      data: { vendorId: vendor._id, reason: rejectionReason },
+      referenceId: `REJECT_${vendor._id}`
+    });
+
     res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });

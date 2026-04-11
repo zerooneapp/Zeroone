@@ -19,12 +19,14 @@ const staffSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   isFirstLogin: { type: Boolean, default: true },
   isOwner: { type: Boolean, default: false },
+  fcmTokens: [String], // For Web
+  fcmTokenMobile: [String], // For Android/iOS
   otp: { type: String },
   otpExpires: { type: Date }
 }, { timestamps: true });
 
 // Hash password before saving
-staffSchema.pre('save', async function() {
+staffSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   const bcrypt = require('bcryptjs');
   const salt = await bcrypt.genSalt(10);
@@ -32,7 +34,7 @@ staffSchema.pre('save', async function() {
 });
 
 // Compare password
-staffSchema.methods.comparePassword = async function(enteredPassword) {
+staffSchema.methods.comparePassword = async function (enteredPassword) {
   const bcrypt = require('bcryptjs');
   return await bcrypt.compare(enteredPassword, this.password);
 };

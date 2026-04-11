@@ -13,11 +13,8 @@ const userSchema = new mongoose.Schema({
     coordinates: { type: [Number], default: [0, 0] }
   },
   address: { type: String },
-  fcmTokens: [{
-    token: { type: String },
-    deviceType: { type: String, enum: ['android', 'ios', 'web'] },
-    lastUsedAt: { type: Date, default: Date.now }
-  }],
+  fcmTokens: [String], // For Web
+  fcmTokenMobile: [String], // For Android/iOS
   gender: { type: String, enum: ['male', 'female', 'other'] },
   dob: { type: Date },
   referralCode: { type: String },
@@ -41,7 +38,7 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Hash password before saving
-userSchema.pre('save', async function() {
+userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   const bcrypt = require('bcryptjs');
   const salt = await bcrypt.genSalt(10);
@@ -49,7 +46,7 @@ userSchema.pre('save', async function() {
 });
 
 // Compare password
-userSchema.methods.comparePassword = async function(enteredPassword) {
+userSchema.methods.comparePassword = async function (enteredPassword) {
   const bcrypt = require('bcryptjs');
   return await bcrypt.compare(enteredPassword, this.password);
 };
