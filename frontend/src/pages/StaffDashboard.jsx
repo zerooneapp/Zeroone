@@ -24,6 +24,10 @@ const StaffDashboard = () => {
    const [bookings, setBookings] = useState([]);
    const [loading, setLoading] = useState(true);
    const [showNotifications, setShowNotifications] = useState(false);
+   const activeBookings = bookings.filter(
+      (booking) => booking.status === 'confirmed' || booking.status === 'assigned'
+   );
+   const upcomingBookings = activeBookings.slice(1, 4);
 
    const handleStatusUpdate = async (bookingId, action) => {
       if (action === 'complete' && !window.confirm('Mark this booking as completed?')) return;
@@ -66,7 +70,7 @@ const StaffDashboard = () => {
    }, []);
 
    // 🎯 CORE LOGIC: Find the single most immediate CONFIRMED task
-   const currentTask = bookings.find(b => b.status === 'confirmed' || b.status === 'assigned');
+   const currentTask = activeBookings[0];
    const canNavigateToCustomer = currentTask?.type === 'home' && Boolean(currentTask?.serviceAddress);
 
    const todayCompleted = bookings.filter(b =>
@@ -116,7 +120,7 @@ const StaffDashboard = () => {
                </div>
                <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
                   <p className="text-[16px] font-black text-slate-900 dark:text-white leading-none">
-                     {bookings.filter(b => b.status === 'confirmed' || b.status === 'assigned').length}
+                     {activeBookings.length}
                   </p>
                   <div className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
                      <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Remainder
@@ -221,6 +225,32 @@ const StaffDashboard = () => {
                               Complete Job
                            </button>
                         </div>
+
+                        {upcomingBookings.length > 0 && (
+                           <div className="mt-4 space-y-2">
+                              <h3 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
+                                 Upcoming clients
+                              </h3>
+                              {upcomingBookings.map((booking) => (
+                                 <div
+                                    key={booking._id}
+                                    className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/80 px-2.5 py-2 dark:border-gray-800 dark:bg-gray-800/60"
+                                 >
+                                    <div className="min-w-0">
+                                       <p className="truncate text-[10px] font-black uppercase tracking-tight text-slate-900 dark:text-white">
+                                          {booking.userId?.name || 'Client'}
+                                       </p>
+                                       <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">
+                                          {formatTime(booking.startTime)} • {booking.type === 'home' ? 'Home' : 'Shop'}
+                                       </p>
+                                    </div>
+                                    <p className="ml-3 max-w-[110px] truncate text-right text-[8px] font-black uppercase tracking-tight text-primary">
+                                       {booking.services?.map((service) => service.name || service.serviceId?.name).filter(Boolean).join(', ') || 'Service'}
+                                    </p>
+                                 </div>
+                              ))}
+                           </div>
+                        )}
                      </motion.div>
                   ) : (
                      <div className="py-20 text-center space-y-6 bg-white dark:bg-gray-900/50 rounded-2xl border border-dashed border-slate-200/60 dark:border-gray-800 shadow-sm">

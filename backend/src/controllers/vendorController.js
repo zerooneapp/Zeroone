@@ -88,7 +88,7 @@ const registerVendor = async (req, res) => {
 
 const uploadDocs = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('ownerId', 'name image');
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
     if (!req.files) return res.status(400).json({ message: 'No files' });
 
@@ -430,7 +430,29 @@ const getVendorDashboard = async (req, res) => {
 
     // 👨‍🔧 Active Staff
     const Staff = require('../models/Staff');
-    const activeStaffCount = await Staff.countDocuments({ vendorId: vendor._id, isActive: true });
+    const [activeStaffCount, activeStaffMembers] = await Promise.all([
+      Staff.countDocuments({ vendorId: vendor._id, isActive: true }),
+      Staff.find({ vendorId: vendor._id, isActive: true, isOwner: false })
+        .populate('userId', 'image')
+        .select('name image userId')
+        .lean()
+    ]);
+    const activeStaffCards = [
+      {
+        id: 'owner',
+        type: 'owner',
+        name: vendor.ownerId?.name || 'Owner',
+        image: vendor.ownerId?.image || '',
+        todayBookings: todayBookings.filter((booking) => booking.staffId?.isOwner).length
+      },
+      ...activeStaffMembers.map((staff) => ({
+        id: staff._id.toString(),
+        type: 'staff',
+        name: staff.name,
+        image: staff.image || staff.userId?.image || '',
+        todayBookings: todayBookings.filter((booking) => booking.staffId && booking.staffId._id.toString() === staff._id.toString()).length
+      }))
+    ];
     const [billingSettings, subscriptionState, dailyPlan, monthlyPlan] = await Promise.all([
       getBillingSettings(),
       getVendorSubscriptionState(vendor),
@@ -486,6 +508,8 @@ const getVendorDashboard = async (req, res) => {
           revenue: bookings.reduce((sum, b) => sum + b.totalPrice, 0)
         };
       })).then(res => res.reverse()),
+      activeStaffCards,
+      hasRegisteredStaff: activeStaffMembers.length > 0,
       schedule: todayBookings.map(b => ({
         id: b._id,
         time: moment(b.startTime).format('hh:mm A'),
@@ -493,6 +517,7 @@ const getVendorDashboard = async (req, res) => {
         customerImage: b.userId?.image || '',
         service: b.services.map(s => s.name).join(', '),
         status: b.status,
+        staffId: b.staffId?._id?.toString() || null,
         staffName: b.staffId?.name || 'Owner',
         staffType: b.staffId?.isOwner ? 'owner' : 'staff'
       }))

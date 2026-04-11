@@ -6,6 +6,7 @@ const Vendor = require('../models/Vendor');
 const VendorAvailability = require('../models/VendorAvailability');
 const StaffAvailability = require('../models/StaffAvailability');
 const moment = require('moment-timezone');
+const { ensureOwnerStaff } = require('./staffService');
 const {
   getActiveClosureWindows,
   hasClosureOverlap
@@ -184,28 +185,7 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date) => {
 
   const totalDuration = services.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
 
-  let ownerStaff = await Staff.findOne({ vendorId, isOwner: true });
-  if (!ownerStaff) {
-    const User = require('../models/User');
-    const ownerUser = await User.findById(vendor.ownerId);
-    if (ownerUser) {
-      try {
-        ownerStaff = await Staff.create({
-          vendorId,
-          userId: vendor.ownerId,
-          name: ownerUser.name,
-          phone: ownerUser.phone,
-          password: 'dummy_vendor_staff',
-          isOwner: true,
-          isActive: true,
-          services: serviceIds
-        });
-      } catch (err) {
-        // If another request created it first, just fetch it
-        ownerStaff = await Staff.findOne({ vendorId, isOwner: true });
-      }
-    }
-  }
+  await ensureOwnerStaff(vendorId);
 
   const staffMembers = await getEligibleStaffMembers(vendorId, serviceIds);
   if (staffMembers.length === 0) return [];

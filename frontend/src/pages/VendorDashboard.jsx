@@ -55,7 +55,7 @@ const VendorDashboard = () => {
   const [isCreateSlotOpen, setIsCreateSlotOpen] = useState(false);
   const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
   const [showWalletValue, setShowWalletValue] = useState(false);
-  const [scheduleFilter, setScheduleFilter] = useState('all');
+  const [selectedAssignee, setSelectedAssignee] = useState('all');
 
   const fetchDashboard = async () => {
     try {
@@ -94,6 +94,18 @@ const VendorDashboard = () => {
       }
     }
   }, [data]);
+
+  useEffect(() => {
+    if (!data?.hasRegisteredStaff) {
+      setSelectedAssignee('all');
+      return;
+    }
+
+    const nextCards = (data.activeStaffCards || []).filter((card) => card.type === 'owner' || data.hasRegisteredStaff);
+    if (!nextCards.some((card) => card.id === selectedAssignee) && selectedAssignee !== 'all') {
+      setSelectedAssignee('all');
+    }
+  }, [data, selectedAssignee]);
 
   const handleToggleStatus = async () => {
     if (!data.subscription?.isActive) {
@@ -140,6 +152,10 @@ const VendorDashboard = () => {
   };
 
   const handleCompleteBooking = async (id) => {
+    if (!window.confirm('Are you sure this booking is fully completed?')) {
+      return;
+    }
+
     try {
       await api.patch(`/bookings/${id}/status`, { action: 'complete' });
       toast.success('Booking marked as completed');
@@ -171,11 +187,70 @@ const VendorDashboard = () => {
       : { label: 'Staff', icon: Users, path: '/vendor/staff' },
     { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' }
   ];
-  const filteredSchedule = (data.schedule || []).filter((item) => {
-    if (scheduleFilter === 'owner') return item.staffType === 'owner';
-    if (scheduleFilter === 'staff') return item.staffType === 'staff';
-    return true;
+  const activeSchedule = (data.schedule || []).filter(
+    (item) => item.status === 'confirmed' || item.status === 'assigned'
+  );
+  const filteredSchedule = activeSchedule.filter((item) => {
+    if (!data.hasRegisteredStaff || selectedAssignee === 'all') return true;
+    if (selectedAssignee === 'owner') return item.staffType === 'owner';
+    return item.staffId === selectedAssignee;
   });
+  const activeStaffCards = (data.activeStaffCards || []).filter((card) => {
+    if (card.type === 'owner') return true;
+    return data.hasRegisteredStaff;
+  });
+  const displaySchedule = data.hasRegisteredStaff
+    ? filteredSchedule
+    : activeSchedule;
+
+  const getStaffCardClasses = (cardId) =>
+    cn(
+      'min-w-[132px] rounded-2xl border px-3 py-2.5 shadow-sm transition-all active:scale-95 flex items-center gap-2.5',
+      selectedAssignee === cardId
+        ? 'border-[#344474] bg-white shadow-[0_8px_18px_-12px_rgba(52,68,116,0.45)]'
+        : 'border-slate-200 bg-white/90 dark:bg-gray-900 dark:border-gray-800'
+    );
+
+  const renderScheduleCard = (item, idx) => (
+    <motion.div
+      key={item.id || idx}
+      whileTap={{ scale: 0.98 }}
+      className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-[#344474]/10 dark:border-gray-800 flex items-center justify-between group"
+    >
+      <div className="flex items-center gap-2.5">
+        <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
+          <img
+            src={item.customerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.customerName}${idx}`}
+            alt={item.customerName || 'Customer'}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="space-y-0">
+          <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
+            {item.customerName}
+          </h4>
+          <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[#344474] uppercase">{item.time}</span>
+              <span className="opacity-20">•</span>
+              <span className="truncate max-w-[150px]">{item.service}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="uppercase">{item.staffType === 'owner' ? 'Owner' : 'Staff'}</span>
+              <span className="opacity-20">•</span>
+              <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button
+        onClick={() => handleCompleteBooking(item.id)}
+        className="px-4 py-2 bg-[#344474] dark:bg-[#344474] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#344474]/10 transition-all font-bold"
+      >
+        Done
+      </button>
+    </motion.div>
+  );
 
   return (
     <div className="bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden">
@@ -293,31 +368,44 @@ const VendorDashboard = () => {
         </section>
 
         <section className="space-y-2 pt-0">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">Today's clients</h2>
-            <div className="flex items-center gap-1">
-              {[
-                { key: 'all', label: 'All' },
-                { key: 'owner', label: 'Owner' },
-                { key: 'staff', label: 'Staff' }
-              ].map((filter) => (
-                <button
-                  key={filter.key}
-                  onClick={() => setScheduleFilter(filter.key)}
-                  className={cn(
-                    'px-2.5 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest transition-all',
-                    scheduleFilter === filter.key
-                      ? 'bg-[#344474] text-white border-[#344474]'
-                      : 'bg-white dark:bg-gray-900 text-slate-400 dark:text-gray-500 border-slate-200 dark:border-gray-800'
-                  )}
-                >
-                  {filter.label}
-                </button>
-              ))}
+          {data.hasRegisteredStaff && (
+            <div className="space-y-2 px-1">
+              <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
+                Active Staff
+              </h2>
+              <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                {activeStaffCards.map((card) => (
+                  <button
+                    key={card.id}
+                    onClick={() => setSelectedAssignee(card.id)}
+                    className={getStaffCardClasses(card.id)}
+                  >
+                    <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100 dark:border-gray-700 dark:bg-gray-800 shrink-0">
+                      <img
+                        src={card.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(card.name)}`}
+                        alt={card.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0 text-left">
+                      <p className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 dark:text-white">
+                        {card.name}
+                      </p>
+                      <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">
+                        {card.type === 'owner' ? 'Owner' : `${card.todayBookings} Today`}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="space-y-1">
+          <div className="px-1">
+            <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
+              Today's clients
+            </h2>
+          </div>`r`n`r`n          <div className="space-y-1">
             {filteredSchedule.length === 0 ? (
               <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
                 <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#344474] transition-colors">
@@ -435,3 +523,7 @@ const VendorDashboard = () => {
 };
 
 export default VendorDashboard;
+
+
+
+

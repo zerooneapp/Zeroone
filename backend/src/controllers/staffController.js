@@ -1,5 +1,6 @@
 const { 
   onboardStaff, 
+  ensureOwnerStaff,
   getVendorStaff, 
   updateStaff, 
   softDeleteStaff 
@@ -68,10 +69,11 @@ const listStaff = async (req, res) => {
     const vendorId = req.vendor?._id || req.query.vendorId;
     if (!vendorId) return res.status(400).json({ message: 'VendorId required' });
 
+    await ensureOwnerStaff(vendorId);
     let staff = await getVendorStaff(vendorId, req.query.includeInactive === 'true');
     
     // 🛡️ FALLBACK: If vendor has 0 staff, auto-create a 'Self' record for the vendor
-    if (staff.length === 0) {
+    if (false && staff.length === 0) {
       console.log(`[DEBUG] No staff found for vendor ${vendorId}, checking services.`);
       const Vendor = require('../models/Vendor');
       const Service = require('../models/Service');
