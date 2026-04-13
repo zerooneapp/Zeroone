@@ -3,9 +3,10 @@ const Staff = require('../models/Staff');
 const generateToken = require('../utils/generateToken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { sendOtpSms } = require('../services/smsService');
 
-const shouldExposeOtpInResponse = true; // Always allow OTP in response during testing phase
-const shouldLogOtpToConsole = true; // Always log OTP to console during testing phase
+const shouldExposeOtpInResponse = false;
+const shouldLogOtpToConsole = false;
 
 const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
 
@@ -69,6 +70,7 @@ const login = async (req, res) => {
       isFirstLogin: role === 'staff' ? finalUser.isFirstLogin : undefined
     });
   } catch (error) {
+    console.error('[AUTH-OTP-ERROR]', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -218,6 +220,8 @@ const sendOTP = async (req, res) => {
       // Actually, User model only requires phone. So we can create a "pending" user.
       await User.create({ phone, otp, otpExpires, role: 'customer' });
     }
+
+    await sendOtpSms(phone, otp);
 
     if (shouldLogOtpToConsole) {
       console.log(`\n-----------------------------------`);

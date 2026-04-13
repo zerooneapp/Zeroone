@@ -19,6 +19,15 @@ const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin'
 const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
 const ADMIN_ROLES = new Set(['admin', 'super_admin']);
 
+const safeSendNotification = (payload) => {
+  try {
+    return NotificationService.sendNotification(payload);
+  } catch (error) {
+    console.error('[AdminNotificationError]', error.message);
+    return null;
+  }
+};
+
 const hasAdminAccess = (req) => ADMIN_ROLES.has(req.user?.role);
 const isSuperAdmin = (req) => req.user?.role === 'super_admin';
 const sanitizeAdminAccount = (admin) => ({
@@ -203,6 +212,18 @@ const toggleBlockUser = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
     user.isBlocked = !user.isBlocked;
     await user.save();
+
+    safeSendNotification({
+      userIds: user._id,
+      role: user.role,
+      type: user.isBlocked ? 'ACCOUNT_BLOCKED' : 'ACCOUNT_UNBLOCKED',
+      title: user.isBlocked ? 'Account Restricted' : 'Account Restored',
+      message: user.isBlocked
+        ? 'Your account has been restricted by the admin team. Please contact support for help.'
+        : 'Your account access has been restored. You can continue using ZerOne.',
+      referenceId: `ACCOUNT_${user.isBlocked ? 'BLOCK' : 'UNBLOCK'}_${user._id}_${Date.now()}`
+    });
+
     res.status(200).json({ message: `User ${user.isBlocked ? 'blocked' : 'unblocked'}` });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -480,6 +501,44 @@ const adminCancelBooking = async (req, res) => {
 
     await booking.save();
 
+    const hydratedBooking = await Booking.findById(booking._id)
+      .populate('vendorId', 'shopName ownerId')
+      .populate('staffId', 'name userId')
+      .populate('userId', 'name');
+
+    const cancellationReason = booking.cancellationReason || 'Cancelled by Admin';
+    const bookingTime = moment(booking.startTime).tz('Asia/Kolkata').format('LLL');
+
+    await Promise.all([
+      safeSendNotification({
+        userIds: hydratedBooking.userId?._id || booking.userId,
+        role: 'customer',
+        type: 'BOOKING_CANCELLED',
+        title: 'Booking Cancelled',
+        message: `Your booking for ${bookingTime} was cancelled by the admin team. Reason: ${cancellationReason}.`,
+        data: { bookingId: booking._id, reason: cancellationReason },
+        referenceId: `${booking._id}_ADMIN_CANCEL_CUSTOMER`
+      }),
+      safeSendNotification({
+        userIds: hydratedBooking.vendorId?.ownerId,
+        role: 'vendor',
+        type: 'BOOKING_CANCELLED',
+        title: 'Booking Cancelled by Admin',
+        message: `Booking scheduled for ${bookingTime} was cancelled by the admin team. Reason: ${cancellationReason}.`,
+        data: { bookingId: booking._id, reason: cancellationReason },
+        referenceId: `${booking._id}_ADMIN_CANCEL_VENDOR`
+      }),
+      hydratedBooking.staffId ? safeSendNotification({
+        userIds: getStaffNotificationTarget(hydratedBooking.staffId),
+        role: 'staff',
+        type: 'BOOKING_CANCELLED',
+        title: 'Assignment Cancelled',
+        message: `Your assigned booking for ${bookingTime} was cancelled by the admin team.`,
+        data: { bookingId: booking._id, reason: cancellationReason },
+        referenceId: `${booking._id}_ADMIN_CANCEL_STAFF`
+      }) : null
+    ].filter(Boolean));
+
     // Logic for refund/wallet could be added here if needed
 
     res.status(200).json({ message: 'Booking forced cancelled by Admin', booking });
@@ -703,6 +762,17 @@ const rejectVendor = async (req, res) => {
     vendor.isActive = false;
     vendor.rejectionReason = rejectionReason;
     await vendor.save();
+
+    NotificationService.sendNotification({
+      userIds: [vendor.ownerId],
+      role: 'vendor',
+      type: 'VENDOR_REJECTED',
+      title: 'Profile Verification Failed',
+      message: `Your shop profile could not be approved. Reason: ${rejectionReason}. Please update your documents and try again.`,
+      data: { vendorId: vendor._id, reason: rejectionReason },
+      referenceId: `REJECT_${vendor._id}`
+    });
+
     res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -722,6 +792,18 @@ const toggleBlockVendor = async (req, res) => {
     }
 
     await vendor.save();
+
+    safeSendNotification({
+      userIds: vendor.ownerId,
+      role: 'vendor',
+      type: vendor.status === 'blocked' ? 'ACCOUNT_BLOCKED' : 'ACCOUNT_UNBLOCKED',
+      title: vendor.status === 'blocked' ? 'Partner Account Restricted' : 'Partner Account Restored',
+      message: vendor.status === 'blocked'
+        ? 'Your partner account has been restricted by the admin team. Please contact support for details.'
+        : 'Your partner account has been restored and is available again.',
+      referenceId: `VENDOR_${vendor.status === 'blocked' ? 'BLOCK' : 'UNBLOCK'}_${vendor._id}_${Date.now()}`
+    });
+
     res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -735,6 +817,18 @@ const toggleVendorActive = async (req, res) => {
 
     vendor.isActive = !vendor.isActive;
     await vendor.save();
+
+    safeSendNotification({
+      userIds: vendor.ownerId,
+      role: 'vendor',
+      type: vendor.isActive ? 'PARTNER_ACTIVATED' : 'PARTNER_DEACTIVATED',
+      title: vendor.isActive ? 'Partner Profile Activated' : 'Partner Profile Deactivated',
+      message: vendor.isActive
+        ? 'Your partner profile is active again and visible on ZerOne.'
+        : 'Your partner profile has been deactivated by the admin team.',
+      referenceId: `VENDOR_ACTIVE_${vendor._id}_${Date.now()}`
+    });
+
     res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });

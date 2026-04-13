@@ -18,6 +18,7 @@ const offerRoutes = require('./routes/offerRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const userRoutes = require('./routes/userRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const fcmRoutes = require('./routes/fcmRoutes');
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/fcm-tokens', fcmRoutes);
 app.use('/api', publicRoutes);
 
 // Error Handling

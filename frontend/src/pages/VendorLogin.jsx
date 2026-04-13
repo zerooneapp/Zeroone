@@ -50,10 +50,7 @@ const VendorAuth = () => {
 
     const res = await requestOTP(phone);
     if (res.success) {
-      toast.success(
-        res.otp ? `Verification code sent! Your OTP is: ${res.otp}` : 'Verification code sent successfully',
-        { duration: res.otp ? 8000 : 4000 }
-      );
+      toast.success('Verification code sent successfully');
       setStep('otp');
       setTimer(30);
       setCanResend(false);

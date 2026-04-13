@@ -303,7 +303,7 @@ const VendorWallet = () => {
         </div>
 
         {wallet?.isLowBalanceWarning && wallet?.subscription?.isActive && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             className="mt-3 mx-1 p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-3 shadow-sm"

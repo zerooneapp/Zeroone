@@ -208,18 +208,18 @@ const ServiceDetail = () => {
    */
   const handleProceedToBooking = async () => {
     if (!isAuthenticated) return navigate('/login');
-    
+
     setLoading(true);
     try {
       const res = await api.get('/bookings/my');
       const bookingsArray = Array.isArray(res.data) ? res.data : [];
-      
-      const active = bookingsArray.find(b => 
-        (b.vendorId?._id === id || b.vendorId === id) && 
+
+      const active = bookingsArray.find(b =>
+        (b.vendorId?._id === id || b.vendorId === id) &&
         b.status === 'confirmed' &&
         dayjs(b.startTime).isAfter(dayjs())
       );
-      
+
       if (active) {
         setExistingBooking(active);
         setShowChoiceModal(true);
@@ -447,146 +447,140 @@ const ServiceDetail = () => {
 
       {/* Category Tabs */}
       <div className="flex gap-2 px-3 mt-6 overflow-x-auto no-scrollbar">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCat(cat)}
-                className={`px-3 py-1.5 rounded-[12px] whitespace-nowrap text-[10px] font-black tracking-widest transition-all ${selectedCat === cat
-                  ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-xl shadow-[#1C2C4E]/20 scale-105'
-                  : 'bg-white dark:bg-gray-900 text-[#0B1222] border border-[#1C2C4E]/10 shadow-sm'
-                  }`}
-              >
-                {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
-              </button>
-            ))}
+        {categories.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCat(cat)}
+            className={`px-3 py-1.5 rounded-[12px] whitespace-nowrap text-[10px] font-black tracking-widest transition-all ${selectedCat === cat
+              ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-xl shadow-[#1C2C4E]/20 scale-105'
+              : 'bg-white dark:bg-gray-900 text-[#0B1222] border border-[#1C2C4E]/10 shadow-sm'
+              }`}
+          >
+            {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
+          </button>
+        ))}
       </div>
 
       {/* Selected Services Section */}
       <div className="px-3 mt-4 space-y-2">
-            <SectionTitle title="Selected Services" className="mb-1" />
-            {cartItems.length > 0 && hasItemsFromThisVendor ? (
-              cartItems.map((item) => {
-                const priceMeta = servicePricing[item._id] || {
-                  originalPrice: item.price,
-                  finalPrice: item.price,
-                  discount: 0
-                };
+        <SectionTitle title="Selected Services" className="mb-1" />
+        {cartItems.length > 0 && hasItemsFromThisVendor ? (
+          cartItems.map((item) => {
+            const priceMeta = servicePricing[item._id] || {
+              originalPrice: item.price,
+              finalPrice: item.price,
+              discount: 0
+            };
 
-                return (
-                  <div
-                    key={item._id}
-                    className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
-                        <img src={item.image || vendor.shopImage} className="w-full h-full object-cover" alt={item.name} />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
-                            <Clock size={8} /> {item.duration}m
-                          </span>
-                          <span className="text-xs font-black text-[#0B1222] dark:text-white leading-none">₹{item.price}</span>
-                          <span className="text-[7px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-500/20 uppercase tracking-widest">
-                            {getServiceModeLabel(item.type)}
-                          </span>
-                        </div>
-                        {priceMeta.discount > 0 && (
-                          <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
-                            Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
-                          Pay At Shop
-                        </div>
-                        <button
-                          onClick={() => removeItem(item._id)}
-                          className="w-8 h-8 bg-black dark:bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
-                        >
-                          <Minus size={14} strokeWidth={3} />
-                        </button>
-                      </div>
-                    </div>
+            return (
+              <div
+                key={item._id}
+                className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+                    <img src={item.image || vendor.shopImage} className="w-full h-full object-cover" alt={item.name} />
                   </div>
-                );
-              })
-            ) : (
-              <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
-                <p className="text-[8px] font-black text-[#0B1222]/30 uppercase tracking-widest italic">Tap items below to add them</p>
-              </div>
-            )}
-      </div>
-
-      {/* Available Services Section */}
-      <div className="px-3 mt-4 space-y-2">
-            <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
-            <div className="space-y-2">
-              {filteredServices.map((service) => {
-                const isSelected = cartItems.find(item => item._id === service._id);
-                if (isSelected) return null;
-                const priceMeta = servicePricing[service._id] || {
-                  originalPrice: service.price,
-                  finalPrice: service.price,
-                  discount: 0
-                };
-
-                return (
-                  <div
-                    key={service._id}
-                    className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
-                      <img src={service.image || vendor.shopImage} className="w-full h-full object-cover" alt={service.name} />
+                  <div className="flex-1">
+                    <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
+                        <Clock size={8} /> {item.duration}m
+                      </span>
+                      <span className="text-xs font-black text-[#0B1222] dark:text-white leading-none">₹{item.price}</span>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
-                        <span className="text-[7px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-500/20 uppercase tracking-widest">
-                          {getServiceModeLabel(service.type)}
-                        </span>
-                      </div>
-                      {priceMeta.discount > 0 && (
-                        <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
-                          Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
-                        </p>
-                      )}
-                    </div>
+                    {priceMeta.discount > 0 && (
+                      <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
+                        Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
                     <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
                       Pay At Shop
                     </div>
                     <button
-                      onClick={() => toggleService(service)}
-                      className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1C2C4E] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
+                      onClick={() => removeItem(item._id)}
+                      className="w-8 h-8 bg-black dark:bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
                     >
-                      <Plus size={16} strokeWidth={3} />
+                      <Minus size={14} strokeWidth={3} />
                     </button>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
+            <p className="text-[8px] font-black text-[#0B1222]/30 uppercase tracking-widest italic">Tap items below to add them</p>
+          </div>
+        )}
+      </div>
+
+      {/* Available Services Section */}
+      <div className="px-3 mt-4 space-y-2">
+        <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
+        <div className="space-y-2">
+          {filteredServices.map((service) => {
+            const isSelected = cartItems.find(item => item._id === service._id);
+            if (isSelected) return null;
+            const priceMeta = servicePricing[service._id] || {
+              originalPrice: service.price,
+              finalPrice: service.price,
+              discount: 0
+            };
+
+            return (
+              <div
+                key={service._id}
+                className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
+                  <img src={service.image || vendor.shopImage} className="w-full h-full object-cover" alt={service.name} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
+                  </div>
+                  {priceMeta.discount > 0 && (
+                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
+                      Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                    </p>
+                  )}
+                </div>
+                <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                  Pay At Shop
+                </div>
+                <button
+                  onClick={() => toggleService(service)}
+                  className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1C2C4E] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
+                >
+                  <Plus size={16} strokeWidth={3} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Trust Badges */}
       <div className="px-3 mt-4">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#1C2C4E]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
-              <div className="flex items-center gap-2.5">
-                <div className="text-green-500 bg-white dark:bg-gray-800 p-1 rounded-full shadow-sm">
-                  <CheckCircle2 size={14} />
-                </div>
-                <p className="text-[10px] font-black text-[#0B1222] dark:text-white tracking-tight">Instant Booking Available</p>
-              </div>
-              <div className="flex -space-x-1.5">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden shadow-sm">
-                    <img src={`https://i.pravatar.cc/100?u=${i}`} alt="avatar" />
-                  </div>
-                ))}
-              </div>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#1C2C4E]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+          <div className="flex items-center gap-2.5">
+            <div className="text-green-500 bg-white dark:bg-gray-800 p-1 rounded-full shadow-sm">
+              <CheckCircle2 size={14} />
             </div>
+            <p className="text-[10px] font-black text-[#0B1222] dark:text-white tracking-tight">Instant Booking Available</p>
+          </div>
+          <div className="flex -space-x-1.5">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden shadow-sm">
+                <img src={`https://i.pravatar.cc/100?u=${i}`} alt="avatar" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Fixed Sticky Action Bar */}
@@ -634,7 +628,7 @@ const ServiceDetail = () => {
               <div className="w-14 h-14 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-5 mx-auto">
                 <Calendar size={28} />
               </div>
-              
+
               <h3 className="text-xl font-black text-[#0B1222] dark:text-white text-center leading-tight">
                 Active Booking Found
               </h3>
@@ -674,10 +668,10 @@ const ServiceDetail = () => {
                   Reschedule Existing
                 </button>
                 <button
-                  onClick={() => { 
-                    setShowChoiceModal(false); 
+                  onClick={() => {
+                    setShowChoiceModal(false);
                     useCartStore.getState().setRescheduleBookingId(null);
-                    navigate('/cart'); 
+                    navigate('/cart');
                   }}
                   className="w-full py-4 bg-white dark:bg-gray-900 text-[#0B1222] dark:text-white border border-[#0B1222]/10 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-[0.98] transition-all"
                 >

@@ -72,7 +72,7 @@ export const useAuthStore = create(
         set({ loading: true });
         try {
           const res = await api.post('/auth/send-otp', { phone });
-          return { success: true, message: res.data.message, otp: res.data.otp };
+          return { success: true, message: res.data.message };
         } catch (err) {
           return { success: false, message: err.response?.data?.message || 'Failed to send OTP' };
         } finally {
