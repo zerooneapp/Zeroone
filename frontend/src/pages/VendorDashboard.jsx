@@ -282,7 +282,7 @@ const VendorDashboard = () => {
             )}
           </button>
           <div className="flex items-center gap-2 pr-1">
-            <span className={cn("text-[8px] font-black uppercase tracking-widest transition-colors duration-300", 
+            <span className={cn("text-[8px] font-black uppercase tracking-widest transition-colors duration-300",
               data.isShopOpen && !data.isClosedToday ? "text-[#344474] dark:text-blue-400" : "text-slate-400 dark:text-gray-600")}>
               {data.isShopOpen ? 'Online' : 'Offline'}
             </span>
@@ -301,10 +301,10 @@ const VendorDashboard = () => {
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 className="h-4 w-4 rounded-full bg-white shadow-md flex items-center justify-center pointer-events-none"
               >
-                <Power 
-                  size={8} 
-                  strokeWidth={4} 
-                  className={cn(data.isShopOpen && !data.isClosedToday ? "text-[#344474]" : "text-slate-400")} 
+                <Power
+                  size={8}
+                  strokeWidth={4}
+                  className={cn(data.isShopOpen && !data.isClosedToday ? "text-[#344474]" : "text-slate-400")}
                 />
               </motion.div>
             </button>
@@ -434,9 +434,9 @@ const VendorDashboard = () => {
                       </h4>
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
                         <div className="flex items-center gap-1.5">
-                           <span className="text-[#344474] uppercase">{item.time}</span>
-                           <span className="opacity-20">•</span>
-                           <span className="truncate max-w-[150px]">{item.service}</span>
+                          <span className="text-[#344474] uppercase">{item.time}</span>
+                          <span className="opacity-20">•</span>
+                          <span className="truncate max-w-[150px]">{item.service}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className="uppercase">{item.staffType === 'owner' ? 'Owner' : 'Staff'}</span>
