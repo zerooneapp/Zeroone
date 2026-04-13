@@ -405,7 +405,9 @@ const VendorDashboard = () => {
             <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
               Today's clients
             </h2>
-          </div>`r`n`r`n          <div className="space-y-1">
+          </div>
+
+          <div className="space-y-1">
             {filteredSchedule.length === 0 ? (
               <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
                 <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#344474] transition-colors">

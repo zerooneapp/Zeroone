@@ -8,10 +8,12 @@ const { emitNotification } = require('./socketService');
 // Firebase Admin Initialization
 try {
   const serviceAccount = require('../config/zeroone.json');
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-  console.log('[NOTIFICATION-SERVICE] Firebase Admin Initialized');
+  if (admin.apps.length === 0) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('[NOTIFICATION-SERVICE] Firebase Admin Initialized');
+  }
 } catch (error) {
   console.error('[NOTIFICATION-SERVICE-FATAL] Firebase Admin initialization failed:', error.message);
   console.warn('[NOTIFICATION-SERVICE] Falling back to MOCK mode. Please check backend/src/config/firebase-service-account.json');
@@ -53,6 +55,8 @@ class NotificationService {
    */
   static async _dispatchPush(userId, payload) {
     try {
+      if (admin.apps.length === 0) return;
+
       const notificationId = `${userId}_${payload.data?.type || 'GEN'}_${payload.data?.id || Date.now()}`;
 
       // 🚫 1. Backend Duplicate Prevention (L1)
@@ -165,7 +169,6 @@ class NotificationService {
     const notifications = [];
     for (const recipient of resolvedRecipients) {
       try {
-        // Enforce notificationId for data payload if not provided
         const payloadData = {
           ...data,
           type: data.type || type,
@@ -190,7 +193,6 @@ class NotificationService {
 
         // 📲 3. Dispatch Push (Async/Non-blocking)
         if (!isSilent) {
-          // Fire and forget to keep API response fast
           this._dispatchPush(recipient.userId, {
             title,
             message,
@@ -209,4 +211,3 @@ class NotificationService {
 }
 
 module.exports = NotificationService;
-

@@ -138,10 +138,14 @@ const StaffForm = () => {
     try {
       setLoading(true);
       if (isEdit) {
-        await api.patch(`/staff/${id}`, data);
+        await api.patch(`/staff/${id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success('Staff profile updated');
       } else {
-        await api.post('/staff', data);
+        await api.post('/staff', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success('Staff onboarded successfully');
       }
       navigate('/vendor/staff');

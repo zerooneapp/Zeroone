@@ -278,12 +278,12 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
     }
   }
 
-  if (moment().isAfter(moment(booking.startTime).subtract(30, 'minutes'))) {
-    throw new Error('Too late to cancel');
+  if (role === 'customer' && moment().isAfter(moment(booking.startTime).subtract(30, 'minutes'))) {
+    throw new Error('Too late to cancel (30m window)');
   }
 
   const trimmedReason = reason?.trim();
-  if (role === 'vendor' && !trimmedReason) {
+  if ((role === 'vendor' || role === 'staff') && !trimmedReason) {
     throw new Error('Cancellation reason is required');
   }
 

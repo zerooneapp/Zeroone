@@ -133,8 +133,19 @@ const updateStaff = async (vendorId, staffId, updateData) => {
   const staff = await Staff.findOneAndUpdate(
     { _id: staffId, vendorId },
     updateData,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
+
+  // 🔄 Sync image to User account so staff app displays it
+  if (staff && updateData.image) {
+    const User = require('../models/User');
+    if (staff.userId) {
+      await User.findByIdAndUpdate(staff.userId, { image: updateData.image });
+    } else {
+      await User.findOneAndUpdate({ phone: staff.phone }, { image: updateData.image });
+    }
+  }
+
   if (staff) await invalidateSlotCache(vendorId);
   return staff;
 };
@@ -143,7 +154,7 @@ const softDeleteStaff = async (vendorId, staffId) => {
   const staff = await Staff.findOneAndUpdate(
     { _id: staffId, vendorId },
     { isActive: false },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (staff) await invalidateSlotCache(vendorId);
   return staff;

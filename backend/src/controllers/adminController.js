@@ -1089,6 +1089,33 @@ const deleteAdminAccount = async (req, res) => {
   }
 };
 
+const notifyLowBalance = async (req, res) => {
+  try {
+    const settings = await getBillingSettings();
+    const minThreshold = settings.minWalletThreshold || 100;
+    
+    const vendors = await Vendor.find({ walletBalance: { $lt: minThreshold } }).select('ownerId');
+    if (vendors.length === 0) return res.status(200).json({ message: 'No low balance vendors found' });
+
+    const ownerIds = vendors.map(v => v.ownerId).filter(Boolean);
+    
+    if (ownerIds.length > 0) {
+      await NotificationService.sendNotification({
+        userIds: ownerIds,
+        role: 'vendor',
+        type: 'LOW_BALANCE',
+        title: 'Critical Alert: Wallet Balance Low',
+        message: 'Your partner wallet balance is critically low. Please recharge your wallet immediately to remain active and continue receiving bookings on ZerOne.',
+        referenceId: `LOW_BALANCE_BLAST_${Date.now()}`
+      });
+    }
+
+    res.status(200).json({ message: `Notified ${ownerIds.length} partners successfully` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPendingVendors, approveVendor, rejectVendor, toggleBlockUser, addBalance,
   createPlan, updatePlan, getRevenueReport, getAllUsers, getUserBookings,
@@ -1098,5 +1125,5 @@ module.exports = {
   updateCategory, deleteCategory, getGlobalSettings, updateGlobalSettings,
   broadcastNotification, getSubscriptionPlans,
   getAdminAccounts, createAdminAccount, toggleAdminAccountBlock, deleteAdminAccount,
-  extendVendorFreeTrial, getVendorInsights
+  extendVendorFreeTrial, getVendorInsights, notifyLowBalance
 };

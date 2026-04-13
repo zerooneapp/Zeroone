@@ -120,17 +120,24 @@ const ServiceDetail = () => {
         const res = await api.get('/pricing/preview', {
           params: {
             vendorId: vendor._id,
-            serviceIds: services.map((service) => service._id).join(',')
+            serviceIds: services.map((service) => service._id).join(','),
+            _t: Date.now()
           }
         });
+
+        console.log('[PRICING DEBUG] API Response:', JSON.stringify(res.data, null, 2));
 
         const pricingMap = (res.data?.services || []).reduce((acc, service) => {
           acc[service.serviceId] = service;
           return acc;
         }, {});
 
+        console.log('[PRICING DEBUG] pricingMap keys:', Object.keys(pricingMap));
+        console.log('[PRICING DEBUG] services._id list:', services.map(s => String(s._id)));
+
         setServicePricing(pricingMap);
       } catch (err) {
+        console.error('[PRICING DEBUG] API Error:', err?.response?.data || err.message);
         setServicePricing({});
       }
     };
@@ -150,7 +157,8 @@ const ServiceDetail = () => {
         const res = await api.get('/pricing/preview', {
           params: {
             vendorId: vendor._id,
-            serviceIds: cartItems.map((item) => item._id).join(',')
+            serviceIds: cartItems.map((item) => item._id).join(','),
+            _t: Date.now()
           }
         });
         setCartPricing(res.data);
@@ -430,19 +438,6 @@ const ServiceDetail = () => {
             <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Trust secured</p>
           </div>
         </div>
-        {hasHomeService && (
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl">
-              <MapPin size={14} className="text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter">
-                Home Service Available
-              </p>
-              <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Some services support doorstep booking</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Category Tabs */}
@@ -466,11 +461,20 @@ const ServiceDetail = () => {
         <SectionTitle title="Selected Services" className="mb-1" />
         {cartItems.length > 0 && hasItemsFromThisVendor ? (
           cartItems.map((item) => {
-            const priceMeta = servicePricing[item._id] || {
-              originalPrice: item.price,
-              finalPrice: item.price,
-              discount: 0
-            };
+            const cartServiceEntry = (cartPricing?.services || []).find(
+              (s) => String(s.serviceId) === String(item._id)
+            );
+            const priceMeta = cartServiceEntry
+              ? {
+                  originalPrice: cartServiceEntry.originalPrice,
+                  finalPrice: cartServiceEntry.finalPrice,
+                  discount: cartServiceEntry.discount
+                }
+              : {
+                  originalPrice: item.price,
+                  finalPrice: item.price,
+                  discount: 0
+                };
 
             return (
               <div
@@ -483,17 +487,24 @@ const ServiceDetail = () => {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
-                        <Clock size={8} /> {item.duration}m
-                      </span>
-                      <span className="text-xs font-black text-[#0B1222] dark:text-white leading-none">₹{item.price}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
+                          <Clock size={8} /> {item.duration}m
+                        </span>
+                        <div className="flex items-center gap-1.5 leading-none">
+                          <span className="text-xs font-black text-[#0B1222] dark:text-white">₹{priceMeta.finalPrice}</span>
+                          {priceMeta.discount > 0 && (
+                            <span className="text-[10px] font-bold text-gray-400 line-through">₹{priceMeta.originalPrice}</span>
+                          )}
+                        </div>
+                      </div>
+                      {priceMeta.discount > 0 && (
+                        <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest leading-none">
+                          Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                        </p>
+                      )}
                     </div>
-                    {priceMeta.discount > 0 && (
-                      <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
-                        Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
-                      </p>
-                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
@@ -524,7 +535,7 @@ const ServiceDetail = () => {
           {filteredServices.map((service) => {
             const isSelected = cartItems.find(item => item._id === service._id);
             if (isSelected) return null;
-            const priceMeta = servicePricing[service._id] || {
+            const priceMeta = servicePricing[String(service._id)] || {
               originalPrice: service.price,
               finalPrice: service.price,
               discount: 0
@@ -540,8 +551,11 @@ const ServiceDetail = () => {
                 </div>
                 <div className="flex-1">
                   <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-[10px] font-black text-[#0B1222] dark:text-white leading-none">₹{service.price}</p>
+                  <div className="flex items-center gap-1.5 leading-none">
+                    <p className="text-[10px] font-black text-[#0B1222] dark:text-white">₹{priceMeta.finalPrice}</p>
+                    {priceMeta.discount > 0 && (
+                      <span className="text-[9px] font-bold text-gray-400 line-through">₹{priceMeta.originalPrice}</span>
+                    )}
                   </div>
                   {priceMeta.discount > 0 && (
                     <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">

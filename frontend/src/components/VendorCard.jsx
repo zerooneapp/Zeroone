@@ -53,12 +53,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
                 {distanceInKm !== null ? `${distanceInKm.toFixed(1)} km away` : 'Nearby'}
               </span>
             </div>
-            {supportsHomeService && (
-              <div className="mt-1 inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
-                <Home size={9} className="text-emerald-600 dark:text-emerald-400" />
-                <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Home Service</span>
-              </div>
-            )}
+
           </div>
           <div className="flex items-center gap-1 bg-[#1C2C4E]/5 dark:bg-white/10 px-1.5 py-0.5 rounded-lg shrink-0">
             <Star size={10} fill="#1C2C4E" className="text-[#1C2C4E] dark:text-blue-400" />

@@ -142,6 +142,7 @@ function App() {
   useEffect(() => {
     restoreSession();
 
+
     // Smooth Session Expiration Handler
     const handleUnauthorized = () => {
       useAuthStore.getState().logout();

@@ -137,6 +137,14 @@ const patchStaff = async (req, res) => {
         : req.body.services;
     }
 
+    if (updateData.image === '{}' || updateData.image === '[object Object]' || typeof updateData.image === 'object') {
+      delete updateData.image;
+    }
+    // ensure image is a string if it exists
+    if (updateData.image && typeof updateData.image !== 'string') {
+      delete updateData.image;
+    }
+
     if (req.file) {
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -167,6 +175,7 @@ const patchStaff = async (req, res) => {
 
     res.status(200).json(staff);
   } catch (error) {
+    console.error('[patchStaff Error]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -493,7 +502,7 @@ const upsertStaffAvailabilityForDate = async (req, res) => {
         }
       },
       {
-        new: true,
+        returnDocument: 'after',
         upsert: true,
         runValidators: true
       }

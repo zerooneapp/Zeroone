@@ -91,6 +91,7 @@ const previewPublicPricing = async (req, res) => {
     }
 
     const preview = await getPricingPreviewForServiceIds(vendorId, normalizedServiceIds);
+    res.setHeader('Cache-Control', 'no-store');
     res.status(200).json(preview);
   } catch (error) {
     res.status(400).json({ message: error.message });
