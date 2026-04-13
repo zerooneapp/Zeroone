@@ -30,13 +30,13 @@ const Home = () => {
   ];
 
   // 📍 SMART INITIALIZATION: Use Saved Profile Location or Bhopal [lng, lat]
-  const [location, setLocation] = useState({ 
-    lng: user?.location?.coordinates?.[0] || 77.4126, 
-    lat: user?.location?.coordinates?.[1] || 23.2599 
+  const [location, setLocation] = useState({
+    lng: user?.location?.coordinates?.[0] || 77.4126,
+    lat: user?.location?.coordinates?.[1] || 23.2599
   });
 
   const debouncedSearch = useDebounce(search, 300);
-  
+
   const homeCards = vendors.map((vendor) => ({
     ...vendor,
     cardKey: vendor._id,
@@ -55,10 +55,10 @@ const Home = () => {
         (err) => {
           console.log('Location access denied, falling back to profile address.');
           if (user?.location?.coordinates?.[0] && user?.location?.coordinates?.[0] !== 0) {
-             setLocation({ 
-               lng: user.location.coordinates[0], 
-               lat: user.location.coordinates[1] 
-             });
+            setLocation({
+              lng: user.location.coordinates[0],
+              lat: user.location.coordinates[1]
+            });
           }
         }
       );
@@ -137,31 +137,6 @@ const Home = () => {
       </div>
 
       {/* Modern Category Pill Filters */}
-      <div className="px-4 mb-2">
-        <div className="overflow-x-auto no-scrollbar scroll-smooth">
-          <div className="flex gap-2 items-center min-w-max pb-1">
-            {serviceModeOptions.map((option) => {
-              const isActive = selectedServiceMode === option.id;
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    setSelectedServiceMode(option.id);
-                    setCurrentPage(1);
-                  }}
-                  className={`relative px-3.5 py-1.5 rounded-xl whitespace-nowrap text-[11px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 ${
-                    isActive
-                      ? 'bg-[#1C2C4E] text-white shadow-[0_8px_22px_-4px_rgba(28,44,78,0.28)]'
-                      : 'bg-white dark:bg-gray-900/50 text-[#1C2C4E]/60 dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
 
       <div className="px-4 mb-1">
         <div className="overflow-x-auto no-scrollbar scroll-smooth">
