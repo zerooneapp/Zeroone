@@ -5,18 +5,24 @@ const User = require('../models/User');
 const Staff = require('../models/Staff');
 const { emitNotification } = require('./socketService');
 
-// Firebase Admin Initialization
+// Firebase Admin Initialization (Secure Environment Variable Method)
 try {
-  const serviceAccount = require('../config/zeroone.json');
-  if (admin.apps.length === 0) {
+  const firebaseConfig = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined
+  };
+
+  if (admin.apps.length === 0 && firebaseConfig.projectId && firebaseConfig.clientEmail && firebaseConfig.privateKey) {
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.credential.cert(firebaseConfig)
     });
-    console.log('[NOTIFICATION-SERVICE] Firebase Admin Initialized');
+    console.log('[NOTIFICATION-SERVICE] Firebase Admin Initialized Successfully');
+  } else if (admin.apps.length === 0) {
+    console.warn('[NOTIFICATION-SERVICE] Skipping Firebase initialization: Missing environment variables.');
   }
 } catch (error) {
   console.error('[NOTIFICATION-SERVICE-FATAL] Firebase Admin initialization failed:', error.message);
-  console.warn('[NOTIFICATION-SERVICE] Falling back to MOCK mode. Please check backend/src/config/firebase-service-account.json');
 }
 
 const VALID_ROLES = new Set(['customer', 'vendor', 'staff', 'admin']);
