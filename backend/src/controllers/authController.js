@@ -221,7 +221,15 @@ const sendOTP = async (req, res) => {
       await User.create({ phone, otp, otpExpires, role: 'customer' });
     }
 
-    await sendOtpSms(phone, otp);
+    try {
+      await sendOtpSms(phone, otp);
+    } catch (smsError) {
+      console.warn(`[SMS-OTP-WARNING] Real SMS failed:`, smsError.message);
+      // Only throw if we are strictly NOT exposing OTPs (i.e. strict production mode)
+      if (!shouldExposeOtpInResponse) {
+        throw smsError;
+      }
+    }
 
     if (shouldLogOtpToConsole) {
       console.log(`\n-----------------------------------`);
