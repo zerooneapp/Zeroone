@@ -5,9 +5,11 @@ const API_KEY_PATH = '/api/mt/SendSMS';
 const TRANSACTIONAL_PATH = '/vendorsms/pushsms.aspx';
 
 const buildOtpMessage = (otp) => {
-  const template =
-    process.env.SMSINDIAHUB_OTP_TEMPLATE ||
+  let template = process.env.SMSINDIAHUB_OTP_TEMPLATE ||
     'Welcome to the zeroone powered by SMSINDIAHUB. Your OTP for registration is ${otp}';
+
+  // Remove surrounding quotes if they exist in .env
+  template = template.replace(/^["']|["']$/g, "");
 
   return template
     .replace(/##var##/g, otp)
@@ -148,11 +150,14 @@ const sendViaApiKeyRoute = async ({ normalizedPhone, text }) => {
 };
 
 const sendOtpSms = async (phone, otp) => {
-  const normalizedPhone = String(phone).startsWith('91') ? String(phone) : `91${phone}`;
+  // Clean phone: Remove any non-numeric characters that might have leaked
+  const cleanPhone = String(phone).replace(/\D/g, '');
+  const normalizedPhone = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
+  
   const text = buildOtpMessage(otp);
 
-  console.log(`[SMS-OTP] Attempting to send OTP to ${normalizedPhone}`);
-  console.log(`[SMS-OTP] Message Content: "${text}"`);
+  console.log(`[SMS-OTP] Final Phone: ${normalizedPhone}`);
+  console.log(`[SMS-OTP] Final Message: "${text}"`);
 
   try {
     const transactionalResponse = await sendViaTransactionalRoute({ normalizedPhone, text });

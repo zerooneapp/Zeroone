@@ -5,8 +5,8 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { sendOtpSms } = require('../services/smsService');
 
-const shouldExposeOtpInResponse = false;
-const shouldLogOtpToConsole = false;
+const shouldExposeOtpInResponse = true;
+const shouldLogOtpToConsole = true;
 
 const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
 

@@ -50,7 +50,7 @@ const VendorAuth = () => {
 
     const res = await requestOTP(phone);
     if (res.success) {
-      toast.success('Verification code sent successfully');
+      toast.success(res.otp ? `Test Mode: OTP is ${res.otp}` : 'Verification code sent successfully');
       setStep('otp');
       setTimer(30);
       setCanResend(false);
