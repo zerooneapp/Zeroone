@@ -22,7 +22,7 @@ const saveFcmToken = async (req, res) => {
             return res.status(404).json({ message: 'User/Staff not found' });
         }
 
-        if (platform === 'mobile') {
+        if (platform === 'mobile' || platform === 'app') {
             if (!entity.fcmTokenMobile) entity.fcmTokenMobile = [];
             if (!entity.fcmTokenMobile.includes(token)) {
                 entity.fcmTokenMobile.push(token);
