@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Calendar, ShieldCheck, MapPin, Phone, MessageSquare, AlertTriangle, XCircle, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, ShieldCheck, MapPin, Phone, MessageSquare, AlertTriangle, XCircle, CheckCircle2, Sparkles } from 'lucide-react';
 import api from '../services/api';
 import Button from '../components/Button';
 import SectionTitle from '../components/SectionTitle';
@@ -13,6 +13,16 @@ const BookingStatusDetails = () => {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelPrompt, setShowCancelPrompt] = useState(false);
+  const [cancelReason, setCancelReason] = useState('Change of mind / Want to postpone');
+  
+  const cancelOptions = [
+    "Running late / Not enough time",
+    "Need a different time slot (preferred slot not available)",
+    "Location is too far",
+    "Traffic or travel issues",
+    "Change of mind / Want to postpone"
+  ];
 
   const fetchDetails = async (showLoading = true) => {
     try {
@@ -43,12 +53,12 @@ const BookingStatusDetails = () => {
     return () => window.removeEventListener('new-socket-notification', handleStatusUpdateEvent);
   }, [id]);
 
-  const handleCancel = async () => {
-    if (!window.confirm('Are you sure you want to cancel?')) return;
+  const processCancellation = async () => {
     try {
       setCancelling(true);
-      await api.patch(`/bookings/${id}/status`, { action: 'cancel' });
+      await api.patch(`/bookings/${id}/status`, { action: 'cancel', reason: cancelReason });
       toast.success('Booking cancelled successfully');
+      setShowCancelPrompt(false);
       fetchDetails(false);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Cancellation failed');
@@ -124,7 +134,11 @@ const BookingStatusDetails = () => {
           <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Service provider</p>
           <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 overflow-hidden shadow-inner shrink-0">
-              <img src={booking.staffId?.image || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
+              <img 
+                src={booking.staffId?.image || `https://i.pravatar.cc/150?u=${booking.staffId?._id || 'staff'}`} 
+                onError={(e) => { e.target.src = `https://i.pravatar.cc/150?u=${booking.staffId?._id || 'staff'}` }}
+                className="w-full h-full object-cover" 
+              />
             </div>
             <div className="flex-1 leading-none">
               <p className="font-extrabold text-[13px] text-gray-900 dark:text-white tracking-tight">{booking.staffId?.name || 'Assigning soon...'}</p>
@@ -142,14 +156,7 @@ const BookingStatusDetails = () => {
             )}
           </div>
 
-          {!booking.canContact && booking.status === 'confirmed' && (
-            <div className="p-2.5 bg-amber-500/5 dark:bg-amber-900/10 rounded-xl border border-amber-500/10 dark:border-amber-900/20 flex items-start gap-2 active:scale-95 transition-all">
-              <AlertTriangle size={12} className="text-amber-500 mt-0.5" />
-              <p className="text-[8px] font-black text-amber-600 dark:text-amber-400 leading-tight tracking-tight">
-                Contact details will be visible 30 mins before the appointment schedule.
-              </p>
-            </div>
-          )}
+
         </section>
 
         {/* Schedule Info */}
@@ -171,11 +178,19 @@ const BookingStatusDetails = () => {
             </div>
           </div>
 
-          <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 flex items-start gap-2">
-            <MapPin size={12} strokeWidth={3} className="text-slate-300 dark:text-gray-600 mt-0.5 shrink-0" />
-            <p className="text-[10px] font-black tracking-tight text-slate-400 dark:text-white/60 leading-tight">
-              {booking.serviceAddress || booking.vendorId?.address || 'Location information unavailable'}
-            </p>
+          <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 space-y-2">
+            <div className="flex items-start gap-2">
+              <Sparkles size={12} strokeWidth={3} className="text-primary mt-0.5 shrink-0" />
+              <p className="text-[10px] font-black tracking-tight text-[#1C2C4E] dark:text-white leading-tight">
+                {booking.services?.map(s => s.name).join(', ') || 'Service Details'}
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <MapPin size={12} strokeWidth={3} className="text-slate-300 dark:text-gray-600 mt-0.5 shrink-0" />
+              <p className="text-[10px] font-black tracking-tight text-slate-400 dark:text-white/60 leading-tight">
+                {booking.serviceAddress || booking.vendorId?.address || 'Location information unavailable'}
+              </p>
+            </div>
           </div>
         </section>
 
@@ -204,13 +219,30 @@ const BookingStatusDetails = () => {
               Reschedule Booking
             </button>
 
-            <button
-              className="w-full h-10 bg-slate-50 dark:bg-gray-800/80 text-red-500 rounded-xl border border-slate-100 dark:border-gray-700 font-black text-[9px] tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm disabled:opacity-50"
-              onClick={handleCancel}
-              disabled={!booking.canCancel || cancelling}
-            >
-              {cancelling ? 'Processing...' : 'Cancel Booking'}
-            </button>
+            {showCancelPrompt ? (
+              <div className="w-full bg-slate-50 dark:bg-gray-800 p-3 rounded-xl border border-red-500/20 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2 text-center">Select Cancellation Reason</p>
+                <select 
+                  className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-lg p-2 text-[10px] font-bold text-gray-700 dark:text-gray-300 outline-none mb-3"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                >
+                  {cancelOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+                <div className="flex gap-2">
+                  <button className="flex-1 h-9 bg-slate-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-black text-[9px] tracking-widest uppercase active:scale-95 transition-all" onClick={() => setShowCancelPrompt(false)} disabled={cancelling}>Keep Booking</button>
+                  <button className="flex-1 h-9 bg-red-500 text-white rounded-lg font-black text-[9px] tracking-widest uppercase active:scale-95 transition-all flex items-center justify-center disabled:opacity-50" onClick={processCancellation} disabled={cancelling}>{cancelling ? 'Wait...' : 'Confirm'}</button>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="w-full h-10 bg-slate-50 dark:bg-gray-800/80 text-red-500 rounded-xl border border-slate-100 dark:border-gray-700 font-black text-[9px] tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+                onClick={() => setShowCancelPrompt(true)}
+                disabled={!booking.canCancel || cancelling}
+              >
+                {cancelling ? 'Processing...' : 'Cancel Booking'}
+              </button>
+            )}
             {!booking.canCancel && (
               <p className="text-center text-[8px] font-black text-slate-400 tracking-widest opacity-60 leading-none pt-1">
                 You can only cancel 30 minutes before schedule.

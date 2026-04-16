@@ -161,7 +161,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
                     className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all ${formData.staffId === st._id ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-slate-400 dark:text-gray-500 shadow-sm'}`}
                   >
                     <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-gray-800 overflow-hidden">
-                      <img src={st.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${st.name}`} alt={st.name} className="w-full h-full object-cover" />
+                      <img src={st.image || `https://i.pravatar.cc/150?u=${st.name}`} alt={st.name} className="w-full h-full object-cover" />
                     </div>
                     <span className="text-[9px] font-black uppercase truncate">{st.name}</span>
                   </button>

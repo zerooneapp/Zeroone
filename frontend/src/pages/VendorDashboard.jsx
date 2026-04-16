@@ -236,7 +236,7 @@ const VendorDashboard = () => {
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
           <img
-            src={item.customerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.customerName}${idx}`}
+            src={item.customerImage || `https://i.pravatar.cc/150?u=${item.customerName}${idx}`}
             alt={item.customerName || 'Customer'}
             className="w-full h-full object-cover"
           />
@@ -394,7 +394,7 @@ const VendorDashboard = () => {
                   >
                     <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100 dark:border-gray-700 dark:bg-gray-800 shrink-0">
                       <img
-                        src={card.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(card.name)}`}
+                        src={card.image || `https://i.pravatar.cc/150?u=${encodeURIComponent(card.name)}`}
                         alt={card.name}
                         className="h-full w-full object-cover"
                       />
@@ -437,7 +437,7 @@ const VendorDashboard = () => {
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
                       <img
-                        src={item.customerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.customerName}${idx}`}
+                        src={item.customerImage || `https://i.pravatar.cc/150?u=${item.customerName}${idx}`}
                         alt={item.customerName || 'Customer'}
                         className="w-full h-full object-cover"
                       />
