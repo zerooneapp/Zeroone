@@ -302,7 +302,7 @@ const ServiceDetail = () => {
     : services.filter((service) => normalizeCategoryValue(service.category) === normalizeCategoryValue(selectedCat));
 
   return (
-    <div className="bg-white dark:bg-gray-950 min-h-screen pb-0">
+    <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">
       {/* Redesigned Secondary Navbar */}
       <div className="bg-white text-[#1C2C4E] dark:text-white px-4 py-2 sticky top-0 z-[60] flex items-center justify-between border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 shrink-0 h-[50px]">
         <div className="flex items-center gap-3">
@@ -620,7 +620,7 @@ const ServiceDetail = () => {
 
       {/* Fixed Sticky Action Bar */}
       <div
-        className="fixed bottom-[52px] left-0 right-0 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-1.5 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] mx-2 rounded-[24px]"
+        className="fixed bottom-[50px] left-0 right-0 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-1.5 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] mx-2 rounded-[24px]"
       >
         <div className="flex items-center justify-between max-w-lg mx-auto">
           <div className="flex flex-col">

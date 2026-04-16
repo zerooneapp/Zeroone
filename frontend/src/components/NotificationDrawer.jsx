@@ -46,9 +46,9 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            className="fixed right-0 top-0 h-full w-full max-w-sm bg-white/40 dark:bg-gray-950/40 backdrop-blur-3xl shadow-2xl z-[120] flex flex-col border-l border-white/20 dark:border-gray-800/20"
+            className="fixed right-0 top-0 h-full w-full max-w-sm bg-slate-50 dark:bg-gray-950 shadow-2xl z-[120] flex flex-col border-l border-slate-100 dark:border-gray-800"
           >
-            <div className="px-4 pt-5 pb-3 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl">
+            <div className="px-4 pt-5 pb-3 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 transition-colors">
               <div>
                 <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Notifications</h2>
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">
@@ -84,7 +84,7 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="p-3.5 rounded-2xl border transition-all bg-white/30 dark:bg-white/5 backdrop-blur-xl border-white/40 dark:border-white/10 shadow-lg hover:shadow-xl relative group cursor-pointer"
+                    className="p-3.5 rounded-2xl border transition-all bg-white/60 dark:bg-gray-800/40 backdrop-blur-xl border-white/60 dark:border-white/5 shadow-xl hover:shadow-2xl relative group cursor-pointer"
                     onClick={() => markAsRead(n._id)}
                   >
                     <div className="flex gap-3">
