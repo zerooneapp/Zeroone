@@ -21,9 +21,9 @@ const Navbar = () => {
     ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-white dark:bg-gray-950 pb-[env(safe-area-inset-bottom)]">
-      <nav className="w-full border-t border-slate-100 dark:border-gray-800 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] px-6">
-        <div className="flex items-center justify-between max-w-lg mx-auto h-[50px]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent pointer-events-none pb-[env(safe-area-inset-bottom)]">
+      <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-6 pointer-events-auto">
+        <div className="flex items-center justify-between max-w-lg mx-auto h-[60px]">
           {navItems.map((item) => (
             <NavLink
               key={item.path}

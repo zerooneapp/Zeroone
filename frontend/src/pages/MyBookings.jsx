@@ -69,7 +69,7 @@ const MyBookings = () => {
   );
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col bg-background-light dark:bg-gray-950 overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background-light dark:bg-gray-950 overflow-hidden">
       <header className="px-4 pt-4 pb-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm shrink-0">
         <div className="flex items-center gap-2">
           <button
@@ -122,7 +122,7 @@ const MyBookings = () => {
             {filteredBookings.map((booking) => (
               <div
                 key={booking._id}
-                className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] transition-all active:scale-[0.98]"
+                className="bg-white/70 dark:bg-gray-900/60 backdrop-blur-md p-4 rounded-2xl border border-white/40 dark:border-[#1C2C4E]/20 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.05)] transition-all active:scale-[0.98]"
                 onClick={() => navigate(`/booking-status/${booking._id}`)}
               >
                 <div className="flex justify-between items-start mb-2 leading-none">

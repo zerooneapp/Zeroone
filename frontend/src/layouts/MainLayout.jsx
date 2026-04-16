@@ -31,7 +31,7 @@ const MainLayout = () => {
   }, [location.pathname, isAuthenticated, role]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-white/80 to-blue-50/30 dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-950 dark:to-blue-950/10 text-text-light dark:text-text-dark pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 text-text-light dark:text-text-dark">
       {!shouldHideHeader && (
         <Header onOpenNotifications={() => setShowNotifications(true)} />
       )}

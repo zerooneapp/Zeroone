@@ -27,7 +27,7 @@ const Account = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500 pb-28">
       <header className="px-4 pt-4 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-2">
           <button

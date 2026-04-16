@@ -37,6 +37,7 @@ import toast from 'react-hot-toast';
 import NotificationDrawer from '../components/NotificationDrawer';
 import CreateSlotModal from '../components/CreateSlotModal';
 import EmergencyClosureModal from '../components/EmergencyClosureModal';
+import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import { cn } from '../utils/cn';
 
 const prettifyTransactionLabel = (value = '') =>
@@ -56,6 +57,7 @@ const VendorDashboard = () => {
   const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
   const [showWalletValue, setShowWalletValue] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState('all');
+  const [completeBookingModal, setCompleteBookingModal] = useState({ isOpen: false, bookingId: null });
 
   const fetchDashboard = async () => {
     try {
@@ -151,14 +153,28 @@ const VendorDashboard = () => {
     }
   };
 
-  const handleCompleteBooking = async (id) => {
-    if (!window.confirm('Are you sure this booking is fully completed?')) {
-      return;
-    }
+  const handleCompleteBooking = (id) => {
+    setCompleteBookingModal({ isOpen: true, bookingId: id });
+  };
+
+  const executeCompleteBooking = async () => {
+    const id = completeBookingModal.bookingId;
+    if (!id) return;
 
     try {
       await api.patch(`/bookings/${id}/status`, { action: 'complete' });
-      toast.success('Booking marked as completed');
+      toast.success('Booking marked as completed', {
+        icon: '✅',
+        style: {
+          borderRadius: '12px',
+          background: '#1C2C4E',
+          color: '#fff',
+          fontSize: '10px',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }
+      });
       fetchDashboard();
     } catch (err) {
       toast.error('Update failed');
@@ -167,7 +183,7 @@ const VendorDashboard = () => {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 p-6 space-y-6 pt-24 animate-pulse">
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 p-6 space-y-6 pt-24 animate-pulse no-scrollbar">
         <div className="flex justify-between items-start h-16 bg-white dark:bg-gray-900 rounded-lg" />
         <div className="h-32 bg-white dark:bg-gray-900 rounded-lg" />
         <div className="grid grid-cols-4 gap-3">
@@ -215,7 +231,7 @@ const VendorDashboard = () => {
     <motion.div
       key={item.id || idx}
       whileTap={{ scale: 0.98 }}
-      className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group"
+      className="bg-white/70 dark:bg-gray-900/60 backdrop-blur-md p-2.5 mx-1.5 rounded-xl border border-white/40 dark:border-gray-800/40 shadow-sm flex items-center justify-between group"
     >
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
@@ -253,7 +269,7 @@ const VendorDashboard = () => {
   );
 
   return (
-    <div className="bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden">
+    <div className="bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar">
       <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2.5 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
@@ -282,10 +298,6 @@ const VendorDashboard = () => {
             )}
           </button>
           <div className="flex items-center gap-2 pr-1">
-            <span className={cn("text-[8px] font-black uppercase tracking-widest transition-colors duration-300",
-              data.isShopOpen && !data.isClosedToday ? "text-[#1C2C4E] dark:text-blue-400" : "text-slate-400 dark:text-gray-600")}>
-              {data.isShopOpen ? 'Online' : 'Offline'}
-            </span>
             <button
               onClick={handleToggleStatus}
               disabled={!data.subscription?.isActive || statusLoading}
@@ -349,18 +361,18 @@ const VendorDashboard = () => {
               <p className="text-[17px] font-black text-white leading-none truncate">₹{data.stats.todayEarnings.toLocaleString()}</p>
             </div>
             <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1.5 truncate">Today clients</p>
-              <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">{data.stats.todayBookings}</p>
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none mb-1.5 truncate">Today clients</p>
+              <p className="text-[17px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">{data.stats.todayBookings}</p>
             </div>
             <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1.5 truncate">Services done</p>
-              <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none mb-1.5 truncate">Services done</p>
+              <p className="text-[17px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'completed').length || 0}
               </p>
             </div>
             <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1.5 truncate">Pending</p>
-              <p className="text-[17px] font-black text-slate-900 dark:text-white leading-none truncate">
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none mb-1.5 truncate">Pending</p>
+              <p className="text-[17px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'confirmed').length || 0}
               </p>
             </div>
@@ -370,7 +382,7 @@ const VendorDashboard = () => {
         <section className="space-y-2 pt-0">
           {data.hasRegisteredStaff && (
             <div className="space-y-2 px-1">
-              <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
+              <h2 className="text-[10px] font-black text-[#1C2C4E] dark:text-white tracking-tight opacity-80 uppercase">
                 Active Staff
               </h2>
               <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -388,7 +400,7 @@ const VendorDashboard = () => {
                       />
                     </div>
                     <div className="min-w-0 text-left">
-                      <p className="truncate text-[11px] font-black uppercase tracking-tight text-slate-900 dark:text-white">
+                      <p className="truncate text-[11px] font-black uppercase tracking-tight text-[#1C2C4E] dark:text-white">
                         {card.name}
                       </p>
                       <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">
@@ -402,7 +414,7 @@ const VendorDashboard = () => {
           )}
 
           <div className="px-1">
-            <h2 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
+            <h2 className="text-[10px] font-black text-[#1C2C4E] dark:text-white tracking-tight opacity-80 uppercase">
               Today's clients
             </h2>
           </div>
@@ -431,7 +443,7 @@ const VendorDashboard = () => {
                       />
                     </div>
                     <div className="space-y-0">
-                      <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
+                      <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-tight tracking-tight">
                         {item.customerName}
                       </h4>
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
@@ -520,6 +532,17 @@ const VendorDashboard = () => {
       <NotificationDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
       <CreateSlotModal isOpen={isCreateSlotOpen} onClose={() => setIsCreateSlotOpen(false)} onRefresh={fetchDashboard} />
       <EmergencyClosureModal isOpen={isClosureModalOpen} onClose={() => setIsClosureModalOpen(false)} onCreated={fetchDashboard} />
+      
+      {/* Enhanced Glass Confirmation Modal */}
+      <GlassConfirmationModal
+        isOpen={completeBookingModal.isOpen}
+        onClose={() => setCompleteBookingModal({ isOpen: false, bookingId: null })}
+        onConfirm={executeCompleteBooking}
+        title="Complete Booking"
+        message="Are you sure this booking is fully completed? This will finalize the revenue."
+        confirmText="Yes, Complete"
+        cancelText="Not Yet"
+      />
     </div>
   );
 };

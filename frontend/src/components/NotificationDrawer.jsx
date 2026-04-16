@@ -46,7 +46,7 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            className="fixed right-0 top-0 h-full w-full max-w-sm bg-slate-50 dark:bg-gray-950 shadow-2xl z-[120] flex flex-col border-l border-slate-100 dark:border-gray-800"
+            className="fixed right-0 top-0 h-full w-full max-w-sm bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl shadow-2xl z-[120] flex flex-col border-l border-white/20 dark:border-gray-800/20"
           >
             <div className="px-4 pt-5 pb-3 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl">
               <div>
@@ -66,11 +66,11 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
             <div className="flex-1 overflow-y-auto p-3 space-y-1.5 no-scrollbar">
               {loading && notifications.length === 0 ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-20 bg-slate-50 dark:bg-gray-900 rounded-2xl animate-pulse border border-slate-100 dark:border-gray-800" />
+                  <div key={i} className="h-20 bg-white/40 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl animate-pulse border border-white/20 dark:border-gray-800/20" />
                 ))
               ) : activeNotifications.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-40 select-none pb-20">
-                  <div className="p-5 bg-slate-50 dark:bg-gray-900 rounded-[2.5rem] mb-4 border border-slate-100 dark:border-gray-800">
+                  <div className="p-5 bg-white/40 dark:bg-gray-900/40 backdrop-blur-sm rounded-[2.5rem] mb-4 border border-white/20 dark:border-gray-800/20">
                     <Bell size={48} strokeWidth={1.5} className="text-gray-300" />
                   </div>
                   <p className="font-black text-xs uppercase tracking-widest text-gray-400">All caught up!</p>
@@ -84,7 +84,7 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="p-3.5 rounded-2xl border transition-all bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800 shadow-sm hover:shadow-md relative group cursor-pointer"
+                    className="p-3.5 rounded-2xl border transition-all bg-white/60 dark:bg-gray-900/40 backdrop-blur-md border-white/40 dark:border-gray-800/40 shadow-sm hover:shadow-md relative group cursor-pointer"
                     onClick={() => markAsRead(n._id)}
                   >
                     <div className="flex gap-3">

@@ -14,6 +14,7 @@ import useNotificationStore from '../store/notificationStore';
 import useSocket from '../hooks/useSocket';
 import Navbar from '../layouts/Navbar';
 import NotificationDrawer from '../components/NotificationDrawer';
+import GlassConfirmationModal from '../components/GlassConfirmationModal';
 
 const StaffDashboard = () => {
    const { user, logout } = useAuthStore();
@@ -24,16 +25,35 @@ const StaffDashboard = () => {
    const [bookings, setBookings] = useState([]);
    const [loading, setLoading] = useState(true);
    const [showNotifications, setShowNotifications] = useState(false);
+   const [confirmModal, setConfirmModal] = useState({ isOpen: false, bookingId: null });
    const activeBookings = bookings.filter(
       (booking) => booking.status === 'confirmed' || booking.status === 'assigned'
    );
    const upcomingBookings = activeBookings.slice(1, 4);
 
    const handleStatusUpdate = async (bookingId, action) => {
-      if (action === 'complete' && !window.confirm('Mark this booking as completed?')) return;
+      if (action === 'complete') {
+         setConfirmModal({ isOpen: true, bookingId });
+         return;
+      }
+      await executeStatusUpdate(bookingId, action);
+   };
+
+   const executeStatusUpdate = async (bookingId, action) => {
       try {
          await api.patch(`/bookings/${bookingId}/status`, { action });
-         toast.success(`Booking updated successfully!`);
+         toast.success(`Booking updated successfully!`, {
+            icon: action === 'complete' ? '✅' : '🚀',
+            style: {
+               borderRadius: '12px',
+               background: '#1C2C4E',
+               color: '#fff',
+               fontSize: '10px',
+               fontWeight: '900',
+               textTransform: 'uppercase',
+               letterSpacing: '0.1em'
+            }
+         });
          fetchBookings();
       } catch (err) {
          toast.error('Failed to update status');
@@ -214,11 +234,7 @@ const StaffDashboard = () => {
                            )}
 
                            <button
-                              onClick={() => {
-                                 if (window.confirm('Are you sure the service is fully completed? This will release revenue to the vendor.')) {
-                                    handleStatusUpdate(currentTask._id, 'complete');
-                                 }
-                              }}
+                              onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
                               className={`${canNavigateToCustomer ? 'col-span-3' : 'col-span-4'} h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10`}
                            >
                               <CheckCircle size={16} strokeWidth={3} />
@@ -271,6 +287,16 @@ const StaffDashboard = () => {
 
          <Navbar />
          <NotificationDrawer isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
+
+         <GlassConfirmationModal
+            isOpen={confirmModal.isOpen}
+            onClose={() => setConfirmModal({ isOpen: false, bookingId: null })}
+            onConfirm={() => executeStatusUpdate(confirmModal.bookingId, 'complete')}
+            title="Job Completed"
+            message="Are you sure the service is fully completed? This will release the revenue."
+            confirmText="Yes, Done"
+            cancelText="Not Yet"
+         />
       </div>
    );
 };

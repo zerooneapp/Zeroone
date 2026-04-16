@@ -8,6 +8,7 @@ import StatusTabs from '../components/StatusTabs';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import EmergencyClosureModal from '../components/EmergencyClosureModal';
+import GlassConfirmationModal from '../components/GlassConfirmationModal';
 
 const VendorBookings = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const VendorBookings = () => {
   const [closureActionId, setClosureActionId] = useState(null);
   const [endingClosureId, setEndingClosureId] = useState(null);
   const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
+  const [completeBookingModal, setCompleteBookingModal] = useState({ isOpen: false, bookingId: null });
 
   const fetchBookings = async () => {
     if (dayjs(fromDate).isAfter(toDate)) {
@@ -81,6 +83,15 @@ const VendorBookings = () => {
       }
     }
 
+    if (action === 'complete') {
+      setCompleteBookingModal({ isOpen: true, bookingId: id });
+      return;
+    }
+
+    await executeAction(id, action, reason);
+  };
+
+  const executeAction = async (id, action, reason = '') => {
     const originalBookings = [...bookings];
     setBookings(prev => prev.map(b =>
       b._id === id
@@ -91,7 +102,18 @@ const VendorBookings = () => {
     try {
       setActionLoadingId(id);
       await api.patch(`/bookings/${id}/status`, { action, reason });
-      toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
+      toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`, {
+        icon: action === 'complete' ? '✅' : '❌',
+        style: {
+          borderRadius: '12px',
+          background: '#1C2C4E',
+          color: '#fff',
+          fontSize: '10px',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }
+      });
     } catch (err) {
       setBookings(originalBookings);
       toast.error(err.response?.data?.message || 'Action failed');
@@ -149,7 +171,7 @@ const VendorBookings = () => {
   const filteredBookings = bookings.filter(b => b.status === status);
 
   return (
-    <div className="bg-background-light dark:bg-gray-950 pb-10">
+    <div className="bg-background-light dark:bg-gray-950 pb-24">
       <header className="px-4 pt-3 pb-2 sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
@@ -350,6 +372,16 @@ const VendorBookings = () => {
         isOpen={isClosureModalOpen}
         onClose={() => setIsClosureModalOpen(false)}
         onCreated={refreshAll}
+      />
+
+      <GlassConfirmationModal
+        isOpen={completeBookingModal.isOpen}
+        onClose={() => setCompleteBookingModal({ isOpen: false, bookingId: null })}
+        onConfirm={() => executeAction(completeBookingModal.bookingId, 'complete')}
+        title="Complete Booking"
+        message="Are you sure this booking is fully completed? This will finalize the revenue."
+        confirmText="Yes, Complete"
+        cancelText="Not Yet"
       />
     </div>
   );
