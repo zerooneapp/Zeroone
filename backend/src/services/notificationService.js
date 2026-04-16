@@ -5,19 +5,55 @@ const User = require('../models/User');
 const Staff = require('../models/Staff');
 const { emitNotification } = require('./socketService');
 
-// Firebase Admin Initialization
+// Firebase Admin Initialization (Secure Environment Variable Method)
 try {
-  const serviceAccount = require('../config/zeroone.json');
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-  console.log('[NOTIFICATION-SERVICE] Firebase Admin Initialized');
+  const firebaseConfig = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined
+  };
+
+  if (admin.apps.length === 0 && firebaseConfig.projectId && firebaseConfig.clientEmail && firebaseConfig.privateKey) {
+    admin.initializeApp({
+      credential: admin.credential.cert(firebaseConfig)
+    });
+    console.log('[NOTIFICATION-SERVICE] Firebase Admin Initialized Successfully');
+  } else if (admin.apps.length === 0) {
+    console.warn('[NOTIFICATION-SERVICE] Skipping Firebase initialization: Missing environment variables.');
+  }
 } catch (error) {
   console.error('[NOTIFICATION-SERVICE-FATAL] Firebase Admin initialization failed:', error.message);
-  console.warn('[NOTIFICATION-SERVICE] Falling back to MOCK mode. Please check backend/src/config/firebase-service-account.json');
 }
 
 const VALID_ROLES = new Set(['customer', 'vendor', 'staff', 'admin']);
+
+const toFcmSafeData = (data = {}) =>
+  Object.entries(data).reduce((acc, [key, value]) => {
+    if (value === undefined || value === null) return acc;
+
+    if (typeof value === 'string') {
+      acc[key] = value;
+      return acc;
+    }
+
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+      acc[key] = String(value);
+      return acc;
+    }
+
+    if (value instanceof Date) {
+      acc[key] = value.toISOString();
+      return acc;
+    }
+
+    if (typeof value?.toString === 'function' && value.toString() !== '[object Object]') {
+      acc[key] = value.toString();
+      return acc;
+    }
+
+    acc[key] = JSON.stringify(value);
+    return acc;
+  }, {});
 
 class NotificationService {
   /**
@@ -25,6 +61,8 @@ class NotificationService {
    */
   static async _dispatchPush(userId, payload) {
     try {
+      if (admin.apps.length === 0) return;
+
       const notificationId = `${userId}_${payload.data?.type || 'GEN'}_${payload.data?.id || Date.now()}`;
 
       // 🚫 1. Backend Duplicate Prevention (L1)
@@ -54,20 +92,47 @@ class NotificationService {
           title: payload.title,
           body: payload.message || payload.body
         },
-        data: {
+        data: toFcmSafeData({
           ...payload.data,
           notificationId // Sent for Frontend Dedupe (L3)
-        }
+        })
       });
 
       // 📝 4. Log Success (L1/L2 Lock)
+      const invalidTokens = [];
+      (response.responses || []).forEach((result, index) => {
+        if (result.success) return;
+
+        const token = tokens[index];
+        const code = result.error?.code || 'unknown';
+        const message = result.error?.message || 'Unknown push error';
+
+        console.warn(`[PUSH-FAIL] user=${userId} token=${token} code=${code} message=${message}`);
+
+        if (
+          code === 'messaging/invalid-registration-token' ||
+          code === 'messaging/registration-token-not-registered'
+        ) {
+          invalidTokens.push(token);
+        }
+      });
+
+      if (invalidTokens.length) {
+        entity.fcmTokens = (entity.fcmTokens || []).filter((token) => !invalidTokens.includes(token));
+        entity.fcmTokenMobile = (entity.fcmTokenMobile || []).filter((token) => !invalidTokens.includes(token));
+        await entity.save();
+        console.log(`[PUSH-CLEANUP] Removed ${invalidTokens.length} invalid token(s) for entity ${userId}`);
+      }
+
       await NotificationLog.create({
         notificationId,
         userId,
         tokens
       });
 
-      console.log(`[PUSH-SUCCESS] Delivered to ${response.successCount} devices for user ${userId}`);
+      console.log(
+        `[PUSH-SUCCESS] Delivered to ${response.successCount} devices for user ${userId} (failed: ${response.failureCount || 0})`
+      );
     } catch (error) {
       console.error('[PUSH-ERROR]', error.message);
     }
@@ -110,7 +175,6 @@ class NotificationService {
     const notifications = [];
     for (const recipient of resolvedRecipients) {
       try {
-        // Enforce notificationId for data payload if not provided
         const payloadData = {
           ...data,
           type: data.type || type,
@@ -135,7 +199,6 @@ class NotificationService {
 
         // 📲 3. Dispatch Push (Async/Non-blocking)
         if (!isSilent) {
-          // Fire and forget to keep API response fast
           this._dispatchPush(recipient.userId, {
             title,
             message,

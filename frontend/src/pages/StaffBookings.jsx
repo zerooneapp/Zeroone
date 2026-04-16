@@ -49,10 +49,16 @@ const StaffBookings = () => {
     });
   };
 
-  const handleStatusUpdate = async (bookingId, action) => {
+  const handleStatusUpdate = async (bookingId, action, reason = '') => {
+     if (action === 'cancel' && !reason) {
+       reason = window.prompt('Please enter the cancellation reason:');
+       if (!reason) {
+         return toast.error('Cancellation reason is required');
+       }
+     }
      try {
-       await api.patch(`/bookings/${bookingId}/status`, { action });
-       toast.success(`Booking completed!`);
+       await api.patch(`/bookings/${bookingId}/status`, { action, reason });
+       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
        fetchBookings();
      } catch (err) {
        toast.error(err.response?.data?.message || 'Update failed');
@@ -173,13 +179,23 @@ const StaffBookings = () => {
                       </div>
 
                       {activeTab === 'upcoming' && (
-                        <button 
-                          onClick={() => handleStatusUpdate(booking._id, 'complete')}
-                          className="w-full h-13 bg-gray-900 dark:bg-primary text-white rounded-[1.25rem] flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-transform"
-                        >
-                           <CheckCircle size={18} />
-                           Finalize Assignment
-                        </button>
+                        <div className="flex gap-2">
+                          {booking.canCancel && (
+                            <button 
+                              onClick={() => handleStatusUpdate(booking._id, 'cancel')}
+                              className="px-6 h-13 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-[1.25rem] flex items-center justify-center font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => handleStatusUpdate(booking._id, 'complete')}
+                            className="flex-1 h-13 bg-gray-900 dark:bg-primary text-white rounded-[1.25rem] flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-transform"
+                          >
+                             <CheckCircle size={18} />
+                             Finalize
+                          </button>
+                        </div>
                       )}
                     </motion.div>
                   ))}

@@ -17,7 +17,8 @@ const {
   createAdminAccount,
   toggleAdminAccountBlock,
   deleteAdminAccount,
-  extendVendorFreeTrial
+  extendVendorFreeTrial,
+  notifyLowBalance
 } = require('../controllers/adminController');
 const { getAdminTransactions } = require('../controllers/transactionController');
 const {
@@ -84,8 +85,9 @@ router.patch('/plans/:id', updatePlan);
 router.get('/settings', require('../controllers/adminController').getGlobalSettings);
 router.patch('/settings', require('../controllers/adminController').updateGlobalSettings);
 
-// Broadcast
+// Notifications
 router.post('/broadcast', require('../controllers/adminController').broadcastNotification);
+router.post('/notify-low-balance', notifyLowBalance);
 
 // Super Admin Access Management
 router.get('/admins', authorize('super_admin'), getAdminAccounts);

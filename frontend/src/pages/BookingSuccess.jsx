@@ -40,7 +40,7 @@ const BookingSuccess = () => {
             transition={{ delay: 0.15 }}
             className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] overflow-hidden mb-6"
          >
-            <div className="p-2.5 px-4 bg-[#1C2C4E] dark:bg-gray-800 text-white flex items-center justify-between">
+            <div className="p-2.5 px-4 bg-slate-900 dark:bg-gray-800 text-white flex items-center justify-between">
                <div>
                   <h2 className="text-sm font-black truncate tracking-tight leading-none">{vendor.shopName}</h2>
                   <p className="text-[7px] opacity-60 font-black tracking-widest mt-0.5">ID: #{booking._id.slice(-6).toUpperCase()}</p>

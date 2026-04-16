@@ -6,10 +6,12 @@ let io;
  * Initializes the Socket.io server with CORS and room-based messaging.
  */
 const initSocket = (server) => {
+  const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*';
   io = new Server(server, {
     cors: {
-      origin: "*", // Adjust for production
-      methods: ["GET", "POST"]
+      origin: allowedOrigins,
+      methods: ["GET", "POST"],
+      credentials: true
     }
   });
 

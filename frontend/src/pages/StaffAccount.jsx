@@ -293,9 +293,7 @@ const StaffAccount = () => {
                           }`}>
                             {booking.status}
                           </span>
-                          <span className="text-[7px] font-black uppercase tracking-widest text-slate-400">
-                            {booking.serviceType === 'home' ? 'Home Service' : 'Shop Service'}
-                          </span>
+
                         </div>
                       </div>
                       <div className="text-right shrink-0">

@@ -3,9 +3,10 @@ const Staff = require('../models/Staff');
 const generateToken = require('../utils/generateToken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { sendOtpSms } = require('../services/smsService');
 
-const shouldExposeOtpInResponse = true; // Always allow OTP in response during testing phase
-const shouldLogOtpToConsole = true; // Always log OTP to console during testing phase
+const shouldExposeOtpInResponse = true;
+const shouldLogOtpToConsole = true;
 
 const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
 
@@ -69,6 +70,7 @@ const login = async (req, res) => {
       isFirstLogin: role === 'staff' ? finalUser.isFirstLogin : undefined
     });
   } catch (error) {
+    console.error('[AUTH-OTP-ERROR]', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -217,6 +219,16 @@ const sendOTP = async (req, res) => {
       // For NEW USERS: We can't save to User model yet without other required fields?
       // Actually, User model only requires phone. So we can create a "pending" user.
       await User.create({ phone, otp, otpExpires, role: 'customer' });
+    }
+
+    try {
+      await sendOtpSms(phone, otp);
+    } catch (smsError) {
+      console.warn(`[SMS-OTP-WARNING] Real SMS failed:`, smsError.message);
+      // Only throw if we are strictly NOT exposing OTPs (i.e. strict production mode)
+      if (!shouldExposeOtpInResponse) {
+        throw smsError;
+      }
     }
 
     if (shouldLogOtpToConsole) {

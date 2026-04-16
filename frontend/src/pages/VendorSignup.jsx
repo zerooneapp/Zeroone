@@ -172,34 +172,7 @@ const VendorSignup = () => {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <h3 className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Service Mode</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: 'shop', title: 'Shop Service', desc: 'Physical shop based bookings' },
-                  { id: 'home', title: 'Home Service', desc: 'Doorstep or home visit bookings' }
-                ].map((mode) => (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, serviceMode: mode.id })}
-                    className={`px-4 py-3 rounded-xl border-2 transition-all text-left relative overflow-hidden ${
-                      formData.serviceMode === mode.id
-                        ? 'bg-primary/5 dark:bg-primary/10 border-primary shadow-sm'
-                        : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 opacity-80'
-                    }`}
-                  >
-                    <h4 className="font-black text-[11px] uppercase tracking-tight leading-none">{mode.title}</h4>
-                    <p className="text-[8px] font-bold text-gray-400 leading-tight mt-2">{mode.desc}</p>
-                    {formData.serviceMode === mode.id && (
-                      <CheckCircle2 className="text-primary absolute right-3 top-3" size={16} />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
+
 
             {/* Service Level Section */}
             <div className="space-y-3">

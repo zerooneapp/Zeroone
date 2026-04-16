@@ -8,7 +8,7 @@ export const saveTokenToBackend = async (token) => {
         });
         console.log('[FCM-SERVICE] Token saved to backend');
     } catch (error) {
-        console.error('[FCM-SERVICE] Failed to save token:', error.message);
+        console.error('[FCM-SERVICE] Failed to save token:', error.response?.data || error.message);
     }
 };
 

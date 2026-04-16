@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Review = require('../models/Review');
 const Vendor = require('../models/Vendor');
+const User = require('../models/User');
+const NotificationService = require('../services/notificationService');
 
 const getApprovedReviewQuery = () => ({
   $or: [
@@ -137,6 +139,31 @@ const submitReview = async (req, res) => {
     await booking.save({ session });
 
     await session.commitTransaction();
+
+    const vendor = await Vendor.findById(booking.vendorId).select('ownerId shopName');
+    const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id');
+
+    await Promise.all([
+      vendor?.ownerId ? NotificationService.sendNotification({
+        userIds: vendor.ownerId,
+        role: 'vendor',
+        type: 'NEW_REVIEW',
+        title: 'New Review Submitted',
+        message: `A new ${rating}-star review was submitted for ${vendor.shopName || 'your shop'} and is waiting for moderation.`,
+        data: { bookingId: booking._id, rating },
+        referenceId: `REVIEW_SUBMITTED_VENDOR_${booking._id}`
+      }) : null,
+      admins.length ? NotificationService.sendNotification({
+        userIds: admins.map((admin) => admin._id),
+        role: 'admin',
+        type: 'NEW_REVIEW',
+        title: 'Review Pending Moderation',
+        message: `A new ${rating}-star review is waiting for moderation.`,
+        data: { bookingId: booking._id, rating },
+        referenceId: `REVIEW_SUBMITTED_ADMIN_${booking._id}`
+      }) : null
+    ].filter(Boolean));
+
     res.status(201).json({ message: 'Review submitted and sent for moderation.', review: review[0] });
   } catch (error) {
     await session.abortTransaction();
@@ -198,7 +225,7 @@ const getAdminReviews = async (req, res) => {
 
 const approveReview = async (req, res) => {
   try {
-    const review = await Review.findById(req.params.id);
+    const review = await Review.findById(req.params.id).populate('userId', 'name');
     if (!review) return res.status(404).json({ message: 'Review not found' });
 
     review.status = 'approved';
@@ -206,6 +233,27 @@ const approveReview = async (req, res) => {
     review.moderatedAt = new Date();
     await review.save();
     await recalculateVendorRating(review.vendorId);
+
+    const vendor = await Vendor.findById(review.vendorId).select('ownerId shopName');
+
+    await Promise.all([
+      review.userId ? NotificationService.sendNotification({
+        userIds: review.userId._id || review.userId,
+        role: 'customer',
+        type: 'REVIEW_APPROVED',
+        title: 'Review Published',
+        message: `Your review for ${vendor?.shopName || 'the partner'} is now live.`,
+        referenceId: `REVIEW_APPROVED_USER_${review._id}`
+      }) : null,
+      vendor?.ownerId ? NotificationService.sendNotification({
+        userIds: vendor.ownerId,
+        role: 'vendor',
+        type: 'REVIEW_APPROVED',
+        title: 'New Review Published',
+        message: `A new customer review for ${vendor.shopName || 'your shop'} is now visible on your profile.`,
+        referenceId: `REVIEW_APPROVED_VENDOR_${review._id}`
+      }) : null
+    ].filter(Boolean));
 
     res.status(200).json({ message: 'Review approved successfully' });
   } catch (error) {

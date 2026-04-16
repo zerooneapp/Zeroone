@@ -14,6 +14,9 @@ const StaffAvailability = require('../models/StaffAvailability');
 const Booking = require('../models/Booking');
 const WalletTransaction = require('../models/WalletTransaction');
 const moment = require('moment-timezone');
+const NotificationService = require('../services/notificationService');
+
+const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
 
 const rejectHomeServicePartnerStaffAccess = (req, res) => {
   if (req.vendor && (req.vendor.serviceMode || 'shop') === 'home') {
@@ -56,6 +59,17 @@ const addStaff = async (req, res) => {
       image: imageUrl,
       designation: designation || 'Staff'
     });
+
+    if (getStaffNotificationTarget(staff)) {
+      await NotificationService.sendNotification({
+        userIds: getStaffNotificationTarget(staff),
+        role: 'staff',
+        type: 'STAFF_ACCOUNT_CREATED',
+        title: 'Staff Access Ready',
+        message: `Your staff account for ${req.vendor.shopName} is ready. You can now log in and manage your assignments.`,
+        referenceId: `STAFF_CREATED_${staff._id}_${Date.now()}`
+      });
+    }
 
     res.status(201).json(staff);
   } catch (error) {
@@ -123,6 +137,14 @@ const patchStaff = async (req, res) => {
         : req.body.services;
     }
 
+    if (updateData.image === '{}' || updateData.image === '[object Object]' || typeof updateData.image === 'object') {
+      delete updateData.image;
+    }
+    // ensure image is a string if it exists
+    if (updateData.image && typeof updateData.image !== 'string') {
+      delete updateData.image;
+    }
+
     if (req.file) {
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -139,8 +161,21 @@ const patchStaff = async (req, res) => {
 
     const staff = await updateStaff(req.vendor._id, req.params.id, updateData);
     if (!staff) return res.status(404).json({ message: 'Staff not found' });
+
+    if (getStaffNotificationTarget(staff)) {
+      await NotificationService.sendNotification({
+        userIds: getStaffNotificationTarget(staff),
+        role: 'staff',
+        type: 'STAFF_PROFILE_UPDATED',
+        title: 'Staff Profile Updated',
+        message: 'Your staff profile or assigned services were updated by the partner.',
+        referenceId: `STAFF_UPDATED_${staff._id}_${Date.now()}`
+      });
+    }
+
     res.status(200).json(staff);
   } catch (error) {
+    console.error('[patchStaff Error]', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -163,6 +198,18 @@ const deleteStaff = async (req, res) => {
     if (rejectHomeServicePartnerStaffAccess(req, res)) return;
     const staff = await softDeleteStaff(req.vendor._id, req.params.id);
     if (!staff) return res.status(404).json({ message: 'Staff not found' });
+
+    if (getStaffNotificationTarget(staff)) {
+      await NotificationService.sendNotification({
+        userIds: getStaffNotificationTarget(staff),
+        role: 'staff',
+        type: 'STAFF_ACCOUNT_DEACTIVATED',
+        title: 'Staff Access Disabled',
+        message: 'Your staff access has been disabled by the partner.',
+        referenceId: `STAFF_DEACTIVATED_${staff._id}_${Date.now()}`
+      });
+    }
+
     res.status(200).json({ message: 'Staff deactivated successfully', staff });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -455,7 +502,7 @@ const upsertStaffAvailabilityForDate = async (req, res) => {
         }
       },
       {
-        new: true,
+        returnDocument: 'after',
         upsert: true,
         runValidators: true
       }

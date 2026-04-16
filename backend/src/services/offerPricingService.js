@@ -7,7 +7,7 @@ const getActiveOffers = async (vendorId, now = new Date()) => (
   Offer.find({
     vendorId,
     isActive: true,
-    $or: [{ expiryDate: { $exists: false } }, { expiryDate: { $gt: now } }]
+    $or: [{ expiryDate: { $exists: false } }, { expiryDate: null }, { expiryDate: { $gt: now } }]
   }).lean()
 );
 
@@ -94,10 +94,16 @@ const calculatePricingPreview = async (vendorId, services) => {
     price: Number(service.price || 0)
   }));
   const offers = await getActiveOffers(vendorId);
+  console.log(`[OFFER DEBUG] vendorId=${vendorId} offers found=${offers.length}`);
+  offers.forEach(o => console.log(`  offer: ${o.title}, serviceIds=${JSON.stringify(o.serviceIds)}, isActive=${o.isActive}, expiry=${o.expiryDate}`));
+  console.log(`[OFFER DEBUG] services being priced:`, normalizedServices.map(s => ({ id: String(s._id), name: s.name, price: s.price })));
+
   const originalTotal = roundCurrency(
     normalizedServices.reduce((sum, service) => sum + Number(service.price || 0), 0)
   );
   const bestOffer = getBestOfferForServices(normalizedServices, offers);
+  console.log(`[OFFER DEBUG] bestOffer found:`, bestOffer ? { discount: bestOffer.discount, offer: bestOffer.offer?.title } : null);
+
   const serviceDiscountMap = bestOffer
     ? allocateDiscountAcrossServices(bestOffer.eligibleServices, bestOffer.discount)
     : {};
@@ -144,12 +150,17 @@ const calculatePricingPreview = async (vendorId, services) => {
 const getPricingPreviewForServiceIds = async (vendorId, serviceIds = []) => {
   const services = await Service.find({
     vendorId,
-    _id: { $in: serviceIds },
-    isActive: true
-  }).select('_id name price');
+    _id: { $in: serviceIds }
+  }).select('_id name price').lean();
 
-  if (services.length !== serviceIds.length) {
-    throw new Error('Some services are unavailable');
+  if (services.length === 0) {
+    return {
+      offer: null,
+      originalTotal: 0,
+      totalDiscount: 0,
+      finalTotal: 0,
+      services: []
+    };
   }
 
   return calculatePricingPreview(vendorId, services);

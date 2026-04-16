@@ -155,19 +155,6 @@ const VendorManagement = () => {
     );
   };
 
-  const getServiceModeBadge = (serviceMode) => {
-    const normalizedMode = serviceMode === 'home' ? 'home' : 'shop';
-    const styles = {
-      shop: 'bg-cyan-50 text-cyan-600 border-cyan-100',
-      home: 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100'
-    };
-
-    return (
-      <span className={cn('text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter', styles[normalizedMode])}>
-        {normalizedMode === 'home' ? 'Home Service' : 'Shop Service'}
-      </span>
-    );
-  };
 
   return (
     <div className="space-y-5 pb-20 animate-in fade-in duration-500">
@@ -278,7 +265,6 @@ const VendorManagement = () => {
                   <td className="px-3 py-3.5 leading-none">
                     <div className="flex flex-col gap-1.5">
                       {getLevelBadge(vendor.serviceLevel)}
-                      {getServiceModeBadge(vendor.serviceMode)}
                       <div className="text-[10px] font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest pl-0.5">
                         {vendor.subscription?.type || 'No Plan'}
                       </div>
@@ -362,7 +348,6 @@ const VendorManagement = () => {
                     <h2 className="text-[20px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{selectedVendor.shopName}</h2>
                     <div className="flex items-center gap-2 mt-1.5">
                       {getLevelBadge(selectedVendor.serviceLevel)}
-                      {getServiceModeBadge(selectedVendor.serviceMode)}
                       {getStatusBadge(selectedVendor.status)}
                     </div>
                   </div>
@@ -390,7 +375,7 @@ const VendorManagement = () => {
                     <Section title="Fleet Node Info" icon={User}>
                       <InfoItem label="Owner Entity" value={selectedVendor.ownerId?.name} />
                       <InfoItem label="Comms Node" value={selectedVendor.ownerId?.phone} />
-                      <InfoItem label="Service Mode" value={selectedVendor.serviceMode === 'home' ? 'Home Service' : 'Shop Service'} />
+                      <InfoItem label="Service Mode" value="Shop Service" />
                       <InfoItem label="Base Registry" value={selectedVendor.address} />
                       <InfoItem label="Market Node" value={selectedVendor.category?.name || 'Uncategorized'} />
                     </Section>

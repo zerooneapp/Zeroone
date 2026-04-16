@@ -12,6 +12,9 @@ const {
   getSubscriptionPlanForVendor,
   getVendorSubscriptionState
 } = require('../services/walletService');
+const Staff = require('../models/Staff');
+
+const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
 
 const buildPublicVendorResponse = (vendor, extra = {}) => ({
   _id: vendor._id,
@@ -392,7 +395,7 @@ const getVendorBookings = async (req, res) => {
 
 const getVendorDashboard = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('ownerId', 'name image phone');
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
     const todayStart = moment().startOf('day').toDate();

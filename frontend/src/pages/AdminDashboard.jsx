@@ -56,6 +56,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleNotifyLowBalance = async () => {
+    try {
+      await api.post('/admin/notify-low-balance');
+      toast.success('Alerts dispatched successfully');
+    } catch (err) {
+      toast.error('Failed to notify partners');
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8 space-y-8 animate-pulse">
@@ -107,7 +116,7 @@ const AdminDashboard = () => {
               <p className="text-[11px] font-black opacity-60 capitalize tracking-widest mt-1">{data.alerts.lowBalanceVendors} Partners Inactive</p>
             </div>
           </div>
-          <button className="text-[10px] font-black capitalize text-red-500 border-b border-red-500/30">Notify All</button>
+          <button onClick={handleNotifyLowBalance} className="text-[10px] font-black capitalize text-red-500 border-b border-red-500/30">Notify All</button>
         </motion.div>
       )}
 
