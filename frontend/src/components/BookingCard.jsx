@@ -26,7 +26,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
          whileHover={{ y: -2 }}
          transition={{ type: "spring", stiffness: 300, damping: 25 }}
          onClick={() => navigate(`/vendor/booking-status/${booking._id}`)}
-         className="bg-white/70 dark:bg-gray-900/60 backdrop-blur-md p-3.5 rounded-2xl border border-white/40 dark:border-[#1C2C4E]/20 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.05)] active:scale-[0.98] transition-all group cursor-pointer relative overflow-hidden"
+         className="bg-white/40 dark:bg-white/5 backdrop-blur-xl p-3.5 rounded-2xl border border-white/50 dark:border-white/10 shadow-xl active:scale-[0.98] transition-all group cursor-pointer relative overflow-hidden"
       >
          <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-3">
