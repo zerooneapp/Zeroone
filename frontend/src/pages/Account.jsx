@@ -71,7 +71,7 @@ const Account = () => {
             </div>
             <div className="flex-1 leading-none">
               <p className="text-[14px] font-black text-slate-900 dark:text-white tracking-tight">{item.label}</p>
-              <p className="text-[11px] font-black text-[#1C2C4E]/60 dark:text-slate-500 tracking-tight mt-0.5 truncate">{item.sub}</p>
+              <p className="text-[11px] font-black text-[#1C2C4E]/60 dark:text-slate-400 tracking-tight mt-0.5 truncate">{item.sub}</p>
             </div>
             <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
           </div>

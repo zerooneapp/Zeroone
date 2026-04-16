@@ -8,11 +8,11 @@ const ServiceCard = ({ service, onToggle, onEdit, onSetHome, homeLoadingId }) =>
       <motion.div
          initial={{ opacity: 0, scale: 0.95 }}
          animate={{ opacity: 1, scale: 1 }}
-         className={`p-3 bg-white dark:bg-gray-900/40 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center gap-3 transition-opacity active:scale-[0.98]`}
+         className={`p-2.5 bg-white dark:bg-gray-900/40 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center gap-2 transition-opacity active:scale-[0.98] w-full min-w-0 overflow-hidden`}
       >
-         <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-50 dark:bg-gray-800 flex-shrink-0 border border-slate-100 dark:border-gray-700 shadow-inner group-hover:scale-105 transition-transform">
-            {service.image ? (
-               <img src={service.image} alt={service.name} className="w-full h-full object-cover" />
+         <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-50 dark:bg-gray-800 flex-shrink-0 border border-slate-100 dark:border-gray-700 shadow-inner group-hover:scale-105 transition-transform">
+            {service.image || service.images?.[0] ? (
+               <img src={service.image || service.images?.[0]} alt={service.name} className="w-full h-full object-cover" />
             ) : (
                <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-gray-600 font-black text-[7px] uppercase tracking-tighter leading-none p-1 text-center">
                   <span>NO</span>
@@ -39,32 +39,14 @@ const ServiceCard = ({ service, onToggle, onEdit, onSetHome, homeLoadingId }) =>
                   </span>
                </div>
             )}
-            <div className="mt-1.5 flex">
-               <span className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[7px] font-black uppercase tracking-[0.18em] border-slate-200 bg-slate-50 text-slate-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 mr-1.5">
-                  {typeLabel}
-               </span>
-               <button
-                  type="button"
-                  onClick={() => onSetHome?.(service)}
-                  disabled={!service.isActive || service.showOnHome || homeLoadingId === service._id}
-                  className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[7px] font-black uppercase tracking-[0.18em] transition-all ${
-                     service.showOnHome
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
-                        : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                  } ${!service.isActive || homeLoadingId === service._id ? 'opacity-60 cursor-not-allowed' : 'active:scale-95'}`}
-               >
-                  <Home size={10} strokeWidth={2.5} />
-                  {service.showOnHome ? 'Home Service' : 'Show on Home'}
-               </button>
-            </div>
          </div>
 
-         <div className="flex flex-col gap-1.5 items-end">
+         <div className="flex flex-col gap-1.5 items-end flex-shrink-0">
             <button
                onClick={() => onEdit(service)}
-               className="w-10 h-8 flex items-center justify-center bg-slate-50 dark:bg-gray-800/80 text-slate-500 border border-slate-100 dark:border-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90 shadow-sm"
+               className="w-10 h-7 flex items-center justify-center bg-slate-50 dark:bg-gray-800/80 text-slate-500 border border-slate-100 dark:border-gray-700 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90 shadow-sm"
             >
-               <Edit3 size={14} />
+               <Edit3 size={13} />
             </button>
             <button
                onClick={() => onToggle(service._id, !service.isActive)}

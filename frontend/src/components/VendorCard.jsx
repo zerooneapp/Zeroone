@@ -35,7 +35,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
         />
         {!vendor.isShopOpen && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <span className="bg-white text-[#1C2C4E] px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest">Closed</span>
+            <span className="bg-white text-[#1C2C4E] px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg">Closed</span>
           </div>
         )}
       </div>
@@ -60,8 +60,8 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-1 bg-[#1C2C4E]/5 dark:bg-white/10 px-1.5 py-0.5 rounded-lg shrink-0">
-            <Star size={10} fill="#1C2C4E" className="text-[#1C2C4E] dark:text-blue-400" />
+          <div className="flex items-center gap-1 bg-[#1C2C4E]/5 dark:bg-white/10 px-1.5 py-0.5 rounded-lg shrink-0 border border-[#1C2C4E]/10 dark:border-white/10">
+            <Star size={10} fill="#FACC15" className="text-yellow-400 border-none" />
             <span className="text-[10px] font-black text-[#1C2C4E] dark:text-white">{vendor.rating || '4.6'}</span>
           </div>
         </div>

@@ -21,8 +21,8 @@ const Navbar = () => {
     ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
-      <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] px-6">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-white dark:bg-gray-950 pb-[env(safe-area-inset-bottom)]">
+      <nav className="w-full border-t border-slate-100 dark:border-gray-800 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] px-6">
         <div className="flex items-center justify-between max-w-lg mx-auto h-[50px]">
           {navItems.map((item) => (
             <NavLink
@@ -49,14 +49,14 @@ const Navbar = () => {
                     size={20}
                     className={cn(
                       "transition-all duration-300",
-                      isActive ? "text-[#1C2C4E] dark:text-white mt-1" : "text-[#1C2C4E] dark:text-blue-300"
+                      isActive ? "text-[#1C2C4E] dark:text-white mt-1" : "text-[#1C2C4E] dark:text-gray-400"
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
 
                   <span className={cn(
                     "text-[10px] font-black uppercase tracking-wider transition-all",
-                    isActive ? "text-[#1C2C4E] dark:text-white" : "text-[#1C2C4E] dark:text-blue-300"
+                    isActive ? "text-[#1C2C4E] dark:text-white" : "text-[#1C2C4E] dark:text-gray-400"
                   )}>
                     {item.label}
                   </span>

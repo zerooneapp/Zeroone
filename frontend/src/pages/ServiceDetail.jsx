@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Star, MapPin, Clock, Plus, Minus,
+  ArrowLeft, Star, MapPin, Clock, Tag, Plus, Minus,
   Heart, Play, Verified, ShieldCheck,
-  Calendar, CheckCircle2, ChevronRight, Info, AlertCircle, Share2, Loader2
+  Calendar, CheckCircle2, ChevronRight, ChevronLeft, Info, AlertCircle, Share2, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
@@ -42,7 +42,8 @@ const ServiceDetail = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeImage, setActiveImage] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = React.useRef(null);
   const [selectedCat, setSelectedCat] = useState('All');
   const [categories, setCategories] = useState(['All']);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -65,7 +66,6 @@ const ServiceDetail = () => {
         if (vendorRes.data) {
           setVendor(vendorRes.data);
           setServices(servicesRes.data || []);
-          setActiveImage(vendorRes.data.shopImage || vendorRes.data.gallery?.[0]);
 
           if (servicesRes.data?.length > 0) {
             const dedupedCategories = [];
@@ -235,15 +235,30 @@ const ServiceDetail = () => {
     }
   };
 
-  const gallery = vendor ? (services.some(s => s.images?.length > 0)
-    ? services.flatMap(s => s.images).filter(Boolean).slice(0, 10)
-    : [vendor.shopImage, ...(vendor.gallery || [])].filter(Boolean).slice(0, 5)) : [];
-  const galleryPreview = gallery.slice(0, 4);
+  const gallery = vendor ? [
+    vendor.shopImage,
+    ...(vendor.gallery || []),
+    ...(services.flatMap(s => s.images || []))
+  ].filter(Boolean).slice(0, 10) : [];
 
-  useEffect(() => {
-    if (gallery.length === 0) return;
-    setActiveImage((prev) => (gallery.includes(prev) ? prev : gallery[0]));
-  }, [gallery]);
+  const handleScrollTo = (index) => {
+    if (scrollRef.current) {
+      const width = scrollRef.current.offsetWidth;
+      scrollRef.current.scrollTo({
+        left: index * width,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleScroll = (e) => {
+    const scrollLeft = e.target.scrollLeft;
+    const width = e.target.offsetWidth;
+    if (width > 0) {
+      const index = Math.round(scrollLeft / width);
+      setActiveIndex(index);
+    }
+  };
 
   if (loading && !vendor) return (
     <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen">
@@ -279,9 +294,9 @@ const ServiceDetail = () => {
     : services.filter((service) => normalizeCategoryValue(service.category) === normalizeCategoryValue(selectedCat));
 
   return (
-    <div className="bg-white dark:bg-gray-950 min-h-screen pb-40">
+    <div className="bg-white dark:bg-gray-950 min-h-screen pb-0">
       {/* Redesigned Secondary Navbar */}
-      <div className="bg-white text-[#1C2C4E] px-4 py-2 sticky top-0 z-[60] flex items-center justify-between border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 shrink-0 h-[50px]">
+      <div className="bg-white text-[#1C2C4E] dark:text-white px-4 py-2 sticky top-0 z-[60] flex items-center justify-between border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 shrink-0 h-[50px]">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
             <ArrowLeft size={20} strokeWidth={3} />
@@ -294,84 +309,90 @@ const ServiceDetail = () => {
           <Share2 size={24} strokeWidth={2} />
         </button>
       </div>
-
-      {/* Header & Elite Gallery HUD */}
-      <div className="relative bg-white dark:bg-gray-950">
+      <div className="relative bg-white dark:bg-gray-950 overflow-hidden">
         <div className="relative group">
-          <div className="h-48 relative overflow-hidden bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50">
-            <img
-              src={activeImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'}
-              className="w-full h-full object-cover"
-              alt={vendor.shopName}
-              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent " />
+          {/* Elite Swipeable Carousel */}
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="h-64 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
+          >
+            {gallery.length > 0 ? (
+              gallery.map((img, idx) => (
+                <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative">
+                  <img
+                    src={img}
+                    className="w-full h-full object-cover"
+                    alt={`${vendor.shopName} gallery ${idx + 1}`}
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="w-full h-full snap-center">
+                <img
+                  src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200"
+                  className="w-full h-full object-cover"
+                  alt="placeholder"
+                />
+              </div>
+            )}
 
-            {/* Favorite Overlay */}
-            <button
-              onClick={handleToggleFavorite}
-              className={cn(
-                "absolute top-4 right-3 w-[32px] h-[32px] rounded-full shadow-2xl backdrop-blur-md transition-all active:scale-90 z-30 flex items-center justify-center",
-                isFavorited ? "bg-white text-[#1C2C4E]" : "bg-white text-[#1C2C4E]/40"
-              )}
-            >
-              <Heart
-                size={18}
-                fill={isFavorited ? "#1C2C4E" : "none"}
-                strokeWidth={isFavorited ? 0 : 2}
-              />
-            </button>
+            {/* Elite Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent pointer-events-none" />
           </div>
 
-          {galleryPreview.length > 1 && (
-            <div className="px-3 pt-3 space-y-2">
-              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                {galleryPreview.map((image, index) => {
-                  const isActive = activeImage === image;
+          {/* Navigation Arrows */}
+          {gallery.length > 1 && (
+            <>
+              {activeIndex > 0 && (
+                <button
+                  onClick={() => handleScrollTo(activeIndex - 1)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#1C2C4E] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
+                >
+                  <ChevronLeft size={20} strokeWidth={4} />
+                </button>
+              )}
+              {activeIndex < gallery.length - 1 && (
+                <button
+                  onClick={() => handleScrollTo(activeIndex + 1)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#1C2C4E] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
+                >
+                  <ChevronRight size={20} strokeWidth={4} />
+                </button>
+              )}
+            </>
+          )}
 
-                  return (
-                    <button
-                      key={`${image}-${index}`}
-                      type="button"
-                      onClick={() => setActiveImage(image)}
-                      className={cn(
-                        "relative shrink-0 w-[72px] h-[56px] rounded-2xl overflow-hidden border transition-all",
-                        isActive
-                          ? "border-[#1C2C4E] shadow-lg"
-                          : "border-[#1C2C4E]/10 opacity-70"
-                      )}
-                    >
-                      <img
-                        src={image}
-                        alt={`${vendor.shopName} preview ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      {index === galleryPreview.length - 1 && gallery.length > galleryPreview.length && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-[10px] font-black tracking-widest">
-                          +{gallery.length - galleryPreview.length}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+          {/* Favorite Overlay */}
+          <button
+            onClick={handleToggleFavorite}
+            className={cn(
+              "absolute top-4 right-3 w-[36px] h-[36px] rounded-full shadow-2xl backdrop-blur-md transition-all active:scale-90 z-30 flex items-center justify-center",
+              isFavorited ? "bg-white text-[#1C2C4E]" : "bg-white/20 text-white border border-white/30"
+            )}
+          >
+            <Heart
+              size={20}
+              fill={isFavorited ? "#1C2C4E" : "none"}
+              strokeWidth={isFavorited ? 0 : 2}
+            />
+          </button>
 
-              <div className="flex items-center justify-center gap-1.5">
-                {galleryPreview.map((image, index) => (
-                  <button
-                    key={`dot-${index}`}
-                    type="button"
-                    onClick={() => setActiveImage(image)}
-                    className={cn(
-                      "h-1.5 rounded-full transition-all",
-                      activeImage === image
-                        ? "w-5 bg-[#1C2C4E]"
-                        : "w-1.5 bg-[#1C2C4E]/20"
-                    )}
-                    aria-label={`Show image ${index + 1}`}
-                  />
-                ))}
-              </div>
+          {/* Pagination HUD */}
+          {gallery.length > 1 && (
+            <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-1.5 z-20">
+              {gallery.map((_, index) => (
+                <div
+                  key={`dot-${index}`}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-300 shadow-sm",
+                    activeIndex === index
+                      ? "w-6 bg-white"
+                      : "w-1.5 bg-white/40"
+                  )}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -385,7 +406,7 @@ const ServiceDetail = () => {
           className="flex items-center gap-2.5 text-left active:scale-[0.98] transition-all"
         >
           <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
-            <MapPin size={14} className="text-[#1C2C4E] dark:text-blue-400" />
+            <MapPin size={14} className="text-[#1C2C4E] dark:text-gray-400" />
           </div>
           <div className="min-w-0">
             <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter truncate">{vendor.address?.split(',')[0] || 'Local Address'}</p>
@@ -395,7 +416,7 @@ const ServiceDetail = () => {
 
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
-            <Clock size={14} className="text-[#1C2C4E] dark:text-blue-400" />
+            <Clock size={14} className="text-[#1C2C4E] dark:text-gray-400" />
           </div>
           <div className="min-w-0">
             <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight tracking-tighter whitespace-nowrap">
@@ -421,7 +442,7 @@ const ServiceDetail = () => {
 
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
-            <ShieldCheck size={14} className="text-[#1C2C4E] dark:text-blue-400" />
+            <ShieldCheck size={14} className="text-[#1C2C4E] dark:text-gray-400" />
           </div>
           <div>
             <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter">
@@ -452,8 +473,8 @@ const ServiceDetail = () => {
             key={cat}
             onClick={() => setSelectedCat(cat)}
             className={`px-3 py-1.5 rounded-[12px] whitespace-nowrap text-[10px] font-black tracking-widest transition-all ${selectedCat === cat
-              ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-xl shadow-[#1C2C4E]/20 scale-105'
-              : 'bg-white dark:bg-gray-900 text-[#0B1222] border border-[#1C2C4E]/10 shadow-sm'
+              ? 'bg-[#1C2C4E] text-white shadow-xl shadow-[#1C2C4E]/20 scale-105'
+              : 'bg-white dark:bg-gray-900 text-[#0B1222] dark:text-white/60 border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm'
               }`}
           >
             {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
@@ -511,8 +532,8 @@ const ServiceDetail = () => {
             );
           })
         ) : (
-          <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
-            <p className="text-[8px] font-black text-[#0B1222]/30 uppercase tracking-widest italic">Tap items below to add them</p>
+          <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl">
+            <p className="text-[8px] font-black text-[#0B1222]/30 dark:text-gray-400 uppercase tracking-widest">Tap items below to add them</p>
           </div>
         )}
       </div>
@@ -595,7 +616,10 @@ const ServiceDetail = () => {
             )}
             <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
             {totalSavings > 0 && (
-              <p className="text-[8px] font-black text-emerald-400 tracking-widest mt-1 leading-none">SAVE ₹{totalSavings}</p>
+              <div className="mt-1.5 flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-1 rounded-md self-start shadow-sm shadow-emerald-500/10">
+                <Tag size={8} className="text-emerald-400 fill-emerald-400" />
+                <p className="text-[8px] font-black text-emerald-400 tracking-widest leading-none uppercase">SAVE ₹{totalSavings}</p>
+              </div>
             )}
           </div>
           <button

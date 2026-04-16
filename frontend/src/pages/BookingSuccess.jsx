@@ -17,7 +17,7 @@ const BookingSuccess = () => {
    }
 
    return (
-      <div className="min-h-screen bg-background-light dark:bg-gray-950 flex flex-col items-center px-4 py-8 animate-in fade-in duration-700">
+      <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 animate-in fade-in duration-700 pb-10">
          {/* Animated Success Icon */}
          <motion.div
             initial={{ scale: 0 }}

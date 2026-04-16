@@ -162,8 +162,8 @@ const VendorBookings = () => {
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-1">
                 <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
-                  <span className="text-[#344474] dark:text-white ">Zero</span>
-                  <span className="text-[#344474]/30 dark:text-gray-600">One</span>
+                  <span className="text-[#1C2C4E] dark:text-white ">Zero</span>
+                  <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
                 </h1>
 
               </div>
@@ -272,7 +272,7 @@ const VendorBookings = () => {
                             <button
                               onClick={() => handleEmergencyReschedule(booking, vendor)}
                               disabled={closureActionId === booking._id}
-                              className="h-10 px-3 bg-[#344474] text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
+                              className="h-10 px-3 bg-[#1C2C4E] text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
                             >
                               Reschedule
                             </button>
@@ -309,7 +309,7 @@ const VendorBookings = () => {
               className="py-8 text-center space-y-4"
             >
               <div className="relative w-20 h-20 mx-auto">
-                <div className="absolute inset-0 bg-[#344474]/5 rounded-[2.5rem] animate-pulse" />
+                <div className="absolute inset-0 bg-[#1C2C4E]/5 rounded-[2.5rem] animate-pulse" />
                 <div className="relative w-full h-full bg-white dark:bg-gray-900 rounded-[2.5rem] border border-slate-100 dark:border-gray-800 shadow-xl dark:shadow-none flex items-center justify-center text-slate-300 dark:text-gray-700">
                   <CalendarIcon size={28} strokeWidth={1.5} />
                 </div>

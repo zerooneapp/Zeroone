@@ -10,7 +10,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
 
    const getStatusStyles = (status) => {
       switch (status) {
-         case 'confirmed': return 'bg-[#344474]/10 text-[#344474] border-[#344474]/20 dark:bg-gray-800/80 dark:text-blue-400 dark:border-blue-900/30';
+         case 'confirmed': return 'bg-[#1C2C4E]/10 text-[#1C2C4E] border-[#1C2C4E]/20 dark:bg-gray-800/80 dark:text-blue-400 dark:border-blue-900/30';
          case 'completed': return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/30';
          case 'cancelled': return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/10 dark:text-rose-400 dark:border-rose-900/30';
          default: return 'bg-gray-100 text-gray-500';
@@ -41,7 +41,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                      <User size={20} className="text-slate-400 dark:text-gray-500" />
                   )}
                   {booking.isWalkIn && (
-                     <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#344474] text-white rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm">
+                     <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#1C2C4E] text-white rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-sm">
                         <ShoppingBag size={8} />
                      </div>
                   )}
@@ -56,7 +56,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                   <div className="mt-2.5 space-y-1">
                      {booking.services.map((s, idx) => (
                         <div key={idx} className="flex items-center gap-1.5 text-[8.5px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest leading-none">
-                           <div className="w-1 h-1 bg-[#344474]/40 rounded-full shrink-0" />
+                           <div className="w-1 h-1 bg-[#1C2C4E]/40 rounded-full shrink-0" />
                            <span className="truncate max-w-[200px]">{s.name}</span>
                         </div>
                      ))}
@@ -90,9 +90,9 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
             <div className="space-y-2 text-right flex flex-col items-end">
                <div className="space-y-1 text-right flex flex-col items-end">
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 leading-none">
-                     <Clock size={10} strokeWidth={3} className="text-[#344474]" /> Arrival
+                     <Clock size={10} strokeWidth={3} className="text-[#1C2C4E]" /> Arrival
                   </p>
-                  <p className="text-[11px] font-black text-[#344474] uppercase tracking-tighter leading-none">
+                  <p className="text-[11px] font-black text-[#1C2C4E] uppercase tracking-tighter leading-none">
                      {dayjs(booking.startTime).format('hh:mm A')}
                   </p>
                </div>
@@ -118,7 +118,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                   <button
                      disabled={isActionLoading}
                      onClick={(e) => { e.stopPropagation(); onComplete(booking._id); }}
-                     className="h-9 px-4 bg-slate-900 dark:bg-[#344474] text-white rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-black/10 dark:shadow-[#344474]/20 disabled:opacity-50 border border-white/10"
+                     className="h-9 px-4 bg-slate-900 dark:bg-[#1C2C4E] text-white rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-black/10 dark:shadow-[#1C2C4E]/20 disabled:opacity-50 border border-white/10"
                   >
                      {isActionLoading ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle2 size={14} />}
                      Complete

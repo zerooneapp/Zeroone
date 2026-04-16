@@ -219,34 +219,6 @@ const ServiceForm = () => {
                         className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-slate-300"
                      />
                   </div>
-                  <div className="space-y-2">
-                     <div className="flex items-center justify-between px-1">
-                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Service Availability</label>
-                        <span className="text-[8px] text-gray-400 font-black uppercase italic tracking-tighter opacity-70">
-                           shop / home
-                        </span>
-                     </div>
-                     <div className="grid grid-cols-3 gap-2">
-                        {[
-                           { value: 'shop', label: 'Shop Only' },
-                           { value: 'home', label: 'Home Only' },
-                           { value: 'both', label: 'Shop + Home' }
-                        ].map((option) => (
-                           <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => setFormData({ ...formData, type: option.value })}
-                              className={`px-3 py-2.5 rounded-xl text-[8px] font-black uppercase tracking-widest border transition-all ${
-                                 formData.type === option.value
-                                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                    : 'bg-white dark:bg-gray-900 text-gray-400 border-slate-100 dark:border-gray-800 shadow-sm'
-                              }`}
-                           >
-                              {option.label}
-                           </button>
-                        ))}
-                     </div>
-                  </div>
                   {/* Name */}
                   <div className="space-y-1.5">
                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Service Name</label>

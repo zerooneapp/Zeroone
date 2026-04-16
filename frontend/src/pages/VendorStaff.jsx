@@ -91,7 +91,7 @@ const VendorStaff = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32 w-full max-w-full overflow-x-hidden">
       <header className="px-4 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center gap-3">
           <button
@@ -159,7 +159,7 @@ const VendorStaff = () => {
               </button>
             </motion.div>
           ) : (
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 w-full min-w-0 overflow-hidden px-0.5">
               {filteredStaff.map((member) => (
                 <StaffCard
                   key={member._id}

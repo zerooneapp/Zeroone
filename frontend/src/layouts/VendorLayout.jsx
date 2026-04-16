@@ -44,16 +44,16 @@ const VendorLayout = () => {
                   {isActive && (
                     <motion.div
                       layoutId="active-nav-line-vendor"
-                      className="absolute top-0 w-8 h-[3px] bg-[#344474] dark:bg-white rounded-b-full"
+                      className="absolute top-0 w-8 h-[3px] bg-[#1C2C4E] dark:bg-white rounded-b-full"
                     />
                   )}
 
                   <item.icon
                     size={22}
-                    className="text-[#344474] dark:text-white"
+                    className="text-[#1C2C4E] dark:text-white"
                   />
 
-                  <span className="text-[10px] font-black uppercase tracking-tight text-[#344474] dark:text-white">
+                  <span className="text-[10px] font-black uppercase tracking-tight text-[#1C2C4E] dark:text-white">
                     {item.label}
                   </span>
                 </button>

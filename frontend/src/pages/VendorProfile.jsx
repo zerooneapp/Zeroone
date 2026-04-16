@@ -510,7 +510,7 @@ const VendorProfile = () => {
                      animate={{ opacity: 1, x: 0 }}
                      exit={{ opacity: 0, x: 24 }}
                      transition={{ duration: 0.18 }}
-                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
+                     className="bg-white dark:bg-gray-900 rounded-xl p-3 sm:p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
                   >
                      <div className="flex items-center gap-2.5">
                         <div className="p-2 bg-amber-500/10 text-amber-500 rounded-lg">
@@ -519,22 +519,26 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Booking History</h2>
                      </div>
 
-                     <div className="grid grid-cols-[1fr_20px_1fr] gap-2 items-center">
-                        <input
-                           type="date"
-                           value={historyFilters.from}
-                           onChange={(e) => setHistoryFilters((prev) => ({ ...prev, from: e.target.value }))}
-                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
-                        />
-                        <div className="flex items-center justify-center text-slate-300 dark:text-gray-600 font-black text-base">
+                     <div className="flex items-center gap-1.5 w-full">
+                        <div className="flex-1 min-w-0">
+                           <input
+                              type="date"
+                              value={historyFilters.from}
+                              onChange={(e) => setHistoryFilters((prev) => ({ ...prev, from: e.target.value }))}
+                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                           />
+                        </div>
+                        <div className="text-slate-300 dark:text-gray-600 font-black text-xs shrink-0">
                            &gt;
                         </div>
-                        <input
-                           type="date"
-                           value={historyFilters.to}
-                           onChange={(e) => setHistoryFilters((prev) => ({ ...prev, to: e.target.value }))}
-                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
-                        />
+                        <div className="flex-1 min-w-0">
+                           <input
+                              type="date"
+                              value={historyFilters.to}
+                              onChange={(e) => setHistoryFilters((prev) => ({ ...prev, to: e.target.value }))}
+                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                           />
+                        </div>
                      </div>
 
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -624,7 +628,7 @@ const VendorProfile = () => {
                      animate={{ opacity: 1, x: 0 }}
                      exit={{ opacity: 0, x: 24 }}
                      transition={{ duration: 0.18 }}
-                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
+                     className="bg-white dark:bg-gray-900 rounded-xl p-3 sm:p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
                   >
                      <div className="flex items-center gap-2.5">
                         <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
@@ -633,22 +637,26 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Transactions</h2>
                      </div>
 
-                     <div className="grid grid-cols-[1fr_20px_1fr] gap-2 items-center">
-                        <input
-                           type="date"
-                           value={transactionFilters.from}
-                           onChange={(e) => setTransactionFilters((prev) => ({ ...prev, from: e.target.value }))}
-                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
-                        />
-                        <div className="flex items-center justify-center text-slate-300 dark:text-gray-600 font-black text-base">
+                     <div className="flex items-center gap-1.5 w-full">
+                        <div className="flex-1 min-w-0">
+                           <input
+                              type="date"
+                              value={transactionFilters.from}
+                              onChange={(e) => setTransactionFilters((prev) => ({ ...prev, from: e.target.value }))}
+                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                           />
+                        </div>
+                        <div className="text-slate-300 dark:text-gray-600 font-black text-xs shrink-0">
                            &gt;
                         </div>
-                        <input
-                           type="date"
-                           value={transactionFilters.to}
-                           onChange={(e) => setTransactionFilters((prev) => ({ ...prev, to: e.target.value }))}
-                           className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
-                        />
+                        <div className="flex-1 min-w-0">
+                           <input
+                              type="date"
+                              value={transactionFilters.to}
+                              onChange={(e) => setTransactionFilters((prev) => ({ ...prev, to: e.target.value }))}
+                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                           />
+                        </div>
                      </div>
 
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">

@@ -9,7 +9,7 @@ const SectionTitle = ({ title, subtitle, className, actionLabel, onAction }) => 
           {title}
         </h2>
         {subtitle && (
-          <p className="text-[10px] text-gray-400 font-medium">
+          <p className="text-[10px] text-gray-400 dark:text-gray-300 font-medium">
             {subtitle}
           </p>
         )}

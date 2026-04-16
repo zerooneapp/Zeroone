@@ -446,7 +446,7 @@ const Cart = () => {
             <div className="h-[1px] bg-slate-50 dark:bg-gray-800 my-1" />
             <div className="flex justify-between items-center font-black text-gray-900 dark:text-white tracking-widest capitalize text-[12px] px-1 leading-none">
               <span>Total Value</span>
-              <span className="text-[#1C2C4E] tracking-tighter">{formatPrice(originalTotal)}</span>
+              <span className="text-[#1C2C4E] dark:text-gray-400 tracking-tighter">{formatPrice(originalTotal)}</span>
             </div>
             {totalSavings > 0 && (
               <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1 text-emerald-500">

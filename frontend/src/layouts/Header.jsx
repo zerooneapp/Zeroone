@@ -22,7 +22,7 @@ const Header = ({ onOpenNotifications }) => {
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Brand & Location HUD */}
         <div className="flex flex-col gap-1 min-w-0">
-          <h1 className="text-[24px] font-extrabold tracking-tighter leading-none flex items-center">
+          <h1 className="text-[26px] font-black tracking-tighter leading-none flex items-center">
             <span className="text-[#1C2C4E] dark:text-white">Zero</span>
             <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
           </h1>

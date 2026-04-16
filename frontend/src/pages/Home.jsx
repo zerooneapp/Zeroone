@@ -127,7 +127,7 @@ const Home = () => {
               placeholder="Search salon, beauty parlour..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#1C2C4E]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#1C2C4E]/30 transition-all duration-500 outline-none placeholder:text-[#0B1222]/40 dark:placeholder:text-gray-500 placeholder:font-semibold"
+              className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#1C2C4E]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#1C2C4E]/30 transition-all duration-500 outline-none placeholder:text-[#0B1222]/40 dark:placeholder:text-gray-400 placeholder:font-semibold"
             />
             <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400/60 group-focus-within:text-[#1C2C4E] dark:group-focus-within:text-blue-400 z-10 transition-all duration-300">
               <Mic size={18} strokeWidth={2.5} />
@@ -138,17 +138,17 @@ const Home = () => {
 
       {/* Modern Category Pill Filters */}
 
-      <div className="px-4 mb-1">
+      <div className="px-0 mb-1">
         <div className="overflow-x-auto no-scrollbar scroll-smooth">
-          <div className="flex gap-2.5 items-center min-w-max pb-1">
+          <div className="flex gap-2.5 items-center min-w-max py-1.5 px-4">
             {categories.map((cat) => {
               const isActive = selectedCats.includes(cat._id);
               return (
                 <button
                   key={cat._id}
                   onClick={() => toggleCategory(cat._id)}
-                  className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 ${isActive
-                    ? 'bg-gradient-to-br from-[#1C2C4E] to-[#2D3F6E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
+                  className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 outline-none ${isActive
+                    ? 'bg-[#1C2C4E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
                     : 'bg-white dark:bg-gray-900/50 text-[#1C2C4E]/60 dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
                     }`}
                 >
@@ -197,7 +197,7 @@ const Home = () => {
                   ))
                 ) : (
                   <div className="py-20 text-center">
-                    <p className="text-[10px] font-black text-[#0B1222] uppercase tracking-widest opacity-25">No Professionals Found</p>
+                    <p className="text-[10px] font-black text-[#0B1222] dark:text-white/40 uppercase tracking-widest opacity-25">No Professionals Found</p>
                   </div>
                 )}
               </motion.div>
@@ -216,16 +216,16 @@ const Home = () => {
               <ChevronRight className="rotate-180" size={18} strokeWidth={3} />
             </button>
 
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 rounded-2xl border border-gray-100">
-              <span className="text-[11px] font-black text-[#0B1222]">{currentPage}</span>
-              <span className="text-[10px] font-bold text-[#0B1222] opacity-10">/</span>
-              <span className="text-[10px] font-bold text-[#0B1222] opacity-40">{totalPages}</span>
+            <div className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
+              <span className="text-[11px] font-black text-[#0B1222] dark:text-white">{currentPage}</span>
+              <span className="text-[10px] font-bold text-[#0B1222] dark:text-white/20 opacity-10">/</span>
+              <span className="text-[10px] font-bold text-[#0B1222] dark:text-white/40 opacity-40">{totalPages}</span>
             </div>
 
             <button
               onClick={() => paginate(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="p-3 rounded-xl border border-[#1C2C4E]/10 disabled:opacity-20 text-[#1C2C4E] font-black active:scale-90 transition-all bg-white shadow-sm"
+              className="p-3 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 disabled:opacity-20 text-[#1C2C4E] dark:text-white font-black active:scale-90 transition-all bg-white dark:bg-gray-900 shadow-sm"
             >
               <ChevronRight size={18} strokeWidth={3} />
             </button>

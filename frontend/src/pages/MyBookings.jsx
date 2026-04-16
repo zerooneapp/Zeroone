@@ -128,8 +128,8 @@ const MyBookings = () => {
                 <div className="flex justify-between items-start mb-2 leading-none">
                   <div>
                     <h3 className="font-black text-[15px] text-gray-900 dark:text-white truncate max-w-[200px] tracking-tight">{booking.vendorId.shopName}</h3>
-                    <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 tracking-tight mt-1.5">
-                      <MapPin size={11} strokeWidth={3} className="text-slate-300" />
+                    <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-gray-400 tracking-tight mt-1.5">
+                      <MapPin size={11} strokeWidth={3} className="text-slate-300 dark:text-gray-500" />
                       <span className="line-clamp-1">{booking.vendorId?.address || 'Vendor location'}</span>
                     </div>
                   </div>
@@ -140,16 +140,16 @@ const MyBookings = () => {
 
                 <div className="grid grid-cols-2 gap-4 py-3.5 border-y border-dashed border-slate-100 dark:border-gray-800/50 my-3.5">
                   <div className="space-y-1.5">
-                    <p className="text-[9px] font-black text-slate-400 dark:text-white/40 tracking-widest leading-none uppercase">Schedule</p>
+                    <p className="text-[9px] font-black text-slate-400 dark:text-gray-400 tracking-widest leading-none uppercase">Schedule</p>
                     <div className="flex items-center gap-1.5 text-[13px] font-black text-gray-900 dark:text-white leading-none mt-1">
-                      <Calendar size={13} strokeWidth={3} className="text-[#1C2C4E] dark:text-blue-400" />
+                      <Calendar size={13} strokeWidth={3} className="text-[#1C2C4E] dark:text-gray-400" />
                       {dayjs(booking.startTime).format('DD MMM, YYYY')}
                     </div>
                   </div>
                   <div className="space-y-1.5 text-right flex flex-col items-end">
                     <p className="text-[9px] font-black text-slate-400 dark:text-white/40 tracking-widest leading-none uppercase">Time</p>
-                    <div className="flex items-center gap-1.5 text-[13px] font-black text-[#1C2C4E] dark:text-blue-400 leading-none mt-1">
-                      <Clock size={13} strokeWidth={3} />
+                    <div className="flex items-center gap-1.5 text-[13px] font-black text-[#1C2C4E] dark:text-white leading-none mt-1">
+                      <Clock size={13} strokeWidth={3} className="dark:text-gray-400" />
                       {dayjs(booking.startTime).format('hh:mm A')}
                     </div>
                   </div>
@@ -162,9 +162,9 @@ const MyBookings = () => {
                     </div>
                     <span className="text-[10px] font-black text-slate-400 dark:text-white/60 tracking-widest uppercase">{booking.staffId?.name || 'Auto assigned'}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 font-black text-[#1C2C4E] dark:text-blue-400 active:scale-90 transition-all">
+                  <div className="flex items-center gap-1.5 font-black text-[#1C2C4E] dark:text-white active:scale-90 transition-all">
                     <span className="text-[12px] tracking-tight">Manage</span>
-                    <ChevronRight size={16} strokeWidth={3} />
+                    <ChevronRight size={16} strokeWidth={3} className="dark:text-gray-400" />
                   </div>
                 </div>
               </div>
