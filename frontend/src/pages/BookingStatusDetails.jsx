@@ -166,7 +166,7 @@ const BookingStatusDetails = () => {
               <p className="text-[8px] font-black tracking-widest text-slate-400 dark:text-white/40 leading-none uppercase">Scheduled date</p>
               <div className="flex items-center gap-1.5 text-[11px] font-black text-gray-900 dark:text-white tracking-tighter mt-1 leading-none">
                 <Calendar size={12} strokeWidth={3} className="text-primary" />
-                {dayjs(booking.startTime).format('dddd, DD MMMM')}
+                {dayjs(booking.startTime).format('DD-MM-YYYY')}
               </div>
             </div>
             <div className="space-y-1 text-right flex flex-col items-end">

@@ -143,7 +143,7 @@ const MyBookings = () => {
                     <p className="text-[9px] font-black text-slate-400 dark:text-gray-400 tracking-widest leading-none uppercase">Schedule</p>
                     <div className="flex items-center gap-1.5 text-[13px] font-black text-gray-900 dark:text-white leading-none mt-1">
                       <Calendar size={13} strokeWidth={3} className="text-[#1C2C4E] dark:text-gray-400" />
-                      {dayjs(booking.startTime).format('DD MMM, YYYY')}
+                      {dayjs(booking.startTime).format('DD-MM-YYYY')}
                     </div>
                   </div>
                   <div className="space-y-1.5 text-right flex flex-col items-end">

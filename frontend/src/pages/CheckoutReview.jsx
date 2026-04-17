@@ -151,7 +151,7 @@ const CheckoutReview = () => {
               <p className="text-[9px] font-black opacity-40 tracking-widest leading-none capitalize">Date</p>
               <div className="flex items-center justify-center gap-1.5 leading-none mt-1">
                 <Calendar size={13} className="opacity-60 text-blue-400" />
-                <span className="font-black text-[13px] tracking-tighter">{selectedDate}</span>
+                <span className="font-black text-[13px] tracking-tighter">{dayjs(selectedDate).format('DD-MM-YYYY')}</span>
               </div>
             </div>
             <div className="space-y-1.5 text-center">

@@ -28,7 +28,7 @@ const Account = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500 pb-28">
-      <header className="px-4 pt-4 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+      <header className="px-4 pt-2 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
@@ -42,36 +42,43 @@ const Account = () => {
         </div>
       </header>
 
-      <div className="px-4 mt-4">
-        <div
-          className="bg-[#1C2C4E] p-3.5 rounded-2xl text-white shadow-2xl relative overflow-hidden border border-white/5"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16" />
-          <div className="relative z-10 flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
-              <User size={20} strokeWidth={3} className="text-white" />
-            </div>
-            <div className="space-y-0.5 leading-none">
-              <h2 className="text-[15px] font-black tracking-tight truncate max-w-[180px]">{user?.name || 'Guest user'}</h2>
-              <p className="text-[10px] font-black text-white/40 tracking-widest mt-0.5">{user?.role || 'Customer'}</p>
-            </div>
+      <div className="flex flex-col items-center pt-2 pb-2">
+        <div className="relative group">
+          <div className="w-20 h-20 rounded-full bg-[#1C2C4E] dark:bg-primary shadow-xl flex items-center justify-center border-[3px] border-white dark:border-gray-900 overflow-hidden transition-transform active:scale-95 duration-300">
+            {user?.image ? (
+              <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[28px] font-black text-white uppercase tracking-tighter">
+                {user?.name ? user.name.charAt(0) : 'U'}
+              </span>
+            )}
           </div>
+          <div className="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900 shadow-md" />
+        </div>
+        
+        <div className="text-center mt-3 space-y-0.5">
+          <h2 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none uppercase">
+            {user?.name || 'Guest User'}
+          </h2>
+          <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 dark:text-gray-500 uppercase mt-1">
+            {user?.role || 'Customer'}
+          </p>
         </div>
       </div>
 
-      <div className="px-4 mt-1.5 space-y-1.5">
+      <div className="px-4 mt-2 space-y-1.5">
         {menuItems.map((item, i) => (
           <div
             key={item.label}
             onClick={() => item.path && navigate(item.path)}
-            className="group bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center gap-3.5 active:scale-[0.98] transition-all shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] cursor-pointer"
+            className="group bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center gap-3.5 active:scale-[0.98] transition-all shadow-sm cursor-pointer"
           >
             <div className="w-10 h-10 rounded-[10px] bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-400 group-hover:bg-primary/5 group-hover:text-primary transition-colors border border-slate-100 dark:border-gray-700">
               <item.icon size={18} strokeWidth={3} />
             </div>
             <div className="flex-1 leading-none">
-              <p className="text-[14px] font-black text-slate-900 dark:text-white tracking-tight">{item.label}</p>
-              <p className="text-[11px] font-black text-[#1C2C4E]/60 dark:text-slate-400 tracking-tight mt-0.5 truncate">{item.sub}</p>
+              <p className="text-[14px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">{item.label}</p>
+              <p className="text-[10px] font-black text-[#1C2C4E]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none uppercase">{item.sub}</p>
             </div>
             <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
           </div>
