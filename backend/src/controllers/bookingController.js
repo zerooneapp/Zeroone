@@ -50,23 +50,9 @@ const formatBookingResponse = (booking, role) => {
   const endTime = moment(b.endTime).tz('Asia/Kolkata');
   const isPastEnd = now.isAfter(endTime);
 
-  if (role === 'vendor' || role === 'staff') {
-    b.canCancel = b.status === 'confirmed';
-    b.canReschedule = b.status === 'confirmed';
-  } else {
-    b.canCancel = !isWithin30Mins && b.status === 'confirmed';
-    b.canReschedule = !isWithin30Mins && b.status === 'confirmed';
-  }
-  b.canContact = isWithin30Mins && b.status === 'confirmed' && !isPastEnd;
-
-  // Sanitize Staff Phone based on contact rule
-  if (role === 'customer' && !b.canContact) {
-    if (b.staffId) b.staffId.phone = '**********'; // Hide until 30m before
-  }
-
-  if (role === 'staff' && !b.canContact) {
-    if (b.userId) b.userId.phone = '**********';
-  }
+  b.canCancel = b.status === 'confirmed';
+  b.canReschedule = b.status === 'confirmed';
+  b.canContact = b.status === 'confirmed' && !isPastEnd;
 
   if ((role === 'staff' || role === 'vendor') && b.type !== 'home') {
     b.serviceAddress = undefined;

@@ -18,6 +18,7 @@ import {
   Percent,
   Users,
   Ticket,
+  Phone,
   Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -242,9 +243,16 @@ const VendorDashboard = () => {
           />
         </div>
         <div className="space-y-0">
-          <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
-            {item.customerName}
-          </h4>
+          <div className="flex items-center gap-2">
+            <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
+              {item.customerName}
+            </h4>
+            {item.customerPhone && (
+              <a href={`tel:${item.customerPhone}`} className="flex items-center gap-1 text-[9px] font-bold text-[#1C2C4E] bg-blue-50 px-1.5 py-0.5 rounded-md">
+                <Phone size={8} /> {item.customerPhone}
+              </a>
+            )}
+          </div>
           <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
             <div className="flex items-center gap-1.5">
               <span className="text-[#1C2C4E] uppercase">{item.time}</span>
@@ -428,9 +436,16 @@ const VendorDashboard = () => {
                       />
                     </div>
                     <div className="space-y-0">
-                      <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-tight tracking-tight">
-                        {item.customerName}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-tight tracking-tight">
+                          {item.customerName}
+                        </h4>
+                        {item.customerPhone && (
+                          <a href={`tel:${item.customerPhone}`} className="flex items-center gap-1 text-[9px] font-bold text-[#1C2C4E] bg-blue-50 px-1.5 py-0.5 rounded-md">
+                            <Phone size={8} /> {item.customerPhone}
+                          </a>
+                        )}
+                      </div>
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-[#1C2C4E] uppercase">{item.time}</span>
