@@ -398,9 +398,9 @@ const getVendorDashboard = async (req, res) => {
     const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('ownerId', 'name image phone');
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
-    const todayStart = moment().startOf('day').toDate();
-    const todayEnd = moment().endOf('day').toDate();
-    const weekStart = moment().startOf('week').toDate();
+    const todayStart = moment().tz('Asia/Kolkata').startOf('day').toDate();
+    const todayEnd = moment().tz('Asia/Kolkata').endOf('day').toDate();
+    const weekStart = moment().tz('Asia/Kolkata').startOf('week').toDate();
 
     // 📅 Today's Bookings
     const todayBookings = await Booking.find({
@@ -498,7 +498,7 @@ const getVendorDashboard = async (req, res) => {
         avgRating: vendor.rating
       },
       revenueHistory: await Promise.all([...Array(7)].map(async (_, i) => {
-        const d = moment().subtract(i, 'days');
+        const d = moment().tz('Asia/Kolkata').subtract(i, 'days');
         const start = d.clone().startOf('day').toDate();
         const end = d.clone().endOf('day').toDate();
         const bookings = await Booking.find({
@@ -515,7 +515,7 @@ const getVendorDashboard = async (req, res) => {
       hasRegisteredStaff: activeStaffMembers.length > 0,
       schedule: todayBookings.map(b => ({
         id: b._id,
-        time: moment(b.startTime).format('hh:mm A'),
+        time: moment(b.startTime).tz('Asia/Kolkata').format('hh:mm A'),
         customerName: b.userId?.name || 'Customer',
         customerImage: b.userId?.image || '',
         service: b.services.map(s => s.name).join(', '),
