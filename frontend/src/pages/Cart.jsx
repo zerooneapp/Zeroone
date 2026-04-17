@@ -425,14 +425,6 @@ const Cart = () => {
                   <div className="w-1.5 h-1.5 rounded-full bg-[#1C2C4E]" />
                   <div className="flex flex-col">
                     <span className="font-black text-[12px] text-gray-900 dark:text-white tracking-tight truncate max-w-[200px] leading-none capitalize">{item?.name || 'Service'}</span>
-                    {priceMeta.discount > 0 && (
-                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1">Offer applied</span>
-                    )}
-                    {priceMeta.discount > 0 && (
-                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1">
-                        Now {formatPrice(priceMeta.finalPrice)}
-                      </span>
-                    )}
                   </div>
                 </div>
                 <span className="font-black text-[13px] text-gray-900 dark:text-gray-300 tracking-tighter leading-none">₹{item?.price || 0}</span>
@@ -450,7 +442,7 @@ const Cart = () => {
             </div>
             {totalSavings > 0 && (
               <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1 text-emerald-500">
-                <span>Discounted Total</span>
+                <span>Discounted Value</span>
                 <span>{formatPrice(displayTotal)}</span>
               </div>
             )}
@@ -573,19 +565,19 @@ const Cart = () => {
         initial={{ y: 100, opacity: 0, scale: 0.9 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
-        className="fixed bottom-[52px] left-4 right-4 bg-slate-900 dark:bg-gray-900 p-3 px-5 rounded-2xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
+        className="fixed bottom-[52px] left-4 right-4 bg-slate-900 dark:bg-gray-900 py-2 px-5 rounded-2xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
       >
         <div className="flex items-center justify-between">
           <div className="leading-none">
-            <p className="text-[9px] font-black text-white/40 tracking-widest mb-2 leading-none capitalize">Net payable</p>
+            <p className="text-[9px] font-black text-white/40 tracking-widest mb-1 leading-none capitalize">Net payable</p>
             {totalSavings > 0 && (
-              <p className="text-[8px] font-black text-white/40 line-through tracking-widest mb-2 leading-none">
+              <p className="text-[8px] font-black text-white/40 line-through tracking-widest mb-1 leading-none">
                 {formatPrice(originalTotal)}
               </p>
             )}
             <p className="text-[20px] font-black text-white tracking-tighter leading-none">{formatPrice(displayTotal)}</p>
             {totalSavings > 0 && (
-              <p className="text-[8px] font-black text-emerald-400 tracking-widest mt-2 leading-none">
+              <p className="text-[8px] font-black text-emerald-400 tracking-widest mt-1 leading-none">
                 Save {formatPrice(totalSavings)}
               </p>
             )}

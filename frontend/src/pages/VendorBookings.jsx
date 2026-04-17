@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import EmergencyClosureModal from '../components/EmergencyClosureModal';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import CancellationModal from '../components/CancellationModal';
 
 const VendorBookings = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const VendorBookings = () => {
   const [endingClosureId, setEndingClosureId] = useState(null);
   const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
   const [completeBookingModal, setCompleteBookingModal] = useState({ isOpen: false, bookingId: null });
+  const [cancelBookingModal, setCancelBookingModal] = useState({ isOpen: false, bookingId: null });
 
   const fetchBookings = async () => {
     if (dayjs(fromDate).isAfter(toDate)) {
@@ -71,16 +73,8 @@ const VendorBookings = () => {
     let reason = '';
 
     if (action === 'cancel') {
-      const input = window.prompt('Please enter the cancellation reason for the customer:');
-      if (input === null) {
-        return;
-      }
-
-      reason = input.trim();
-      if (!reason) {
-        toast.error('Cancellation reason is required');
-        return;
-      }
+      setCancelBookingModal({ isOpen: true, bookingId: id });
+      return;
     }
 
     if (action === 'complete') {
@@ -382,6 +376,12 @@ const VendorBookings = () => {
         message="Are you sure this booking is fully completed? This will finalize the revenue."
         confirmText="Yes, Complete"
         cancelText="Not Yet"
+      />
+
+      <CancellationModal
+        isOpen={cancelBookingModal.isOpen}
+        onClose={() => setCancelBookingModal({ isOpen: false, bookingId: null })}
+        onConfirm={(reason) => executeAction(cancelBookingModal.bookingId, 'cancel', reason)}
       />
     </div>
   );
