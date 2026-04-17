@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { ChevronLeft, Bell, BellRing, Package, Tag, Volume2, ShieldCheck, ArrowRight, Zap, Info } from 'lucide-react';
+import { ArrowLeft, Bell, BellRing, Package, Tag, Volume2, ShieldCheck, ArrowRight, Zap, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -70,18 +70,20 @@ const NotificationSettings = () => {
   return (
     <div className="h-[100dvh] bg-slate-50 dark:bg-gray-950 flex flex-col overflow-hidden animate-in fade-in duration-500">
       {/* 🛡️ ELITE HEADER */}
-      <header className="px-4 pt-4 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
-        <div className="flex items-center gap-2">
+      <header className="p-2.5 py-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate('/account')}
-            className="p-2 -ml-2 text-[#1C2C4E] dark:text-blue-400 active:scale-95 transition-all font-black cursor-pointer z-50 flex items-center justify-center rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800"
+            className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all"
           >
-            <ChevronLeft size={22} strokeWidth={3.5} />
+            <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
-          <h1 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">
-            Notification settings
-          </h1>
+          <div className="leading-none">
+            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+              Notification settings
+            </h1>
+          </div>
         </div>
       </header>
 

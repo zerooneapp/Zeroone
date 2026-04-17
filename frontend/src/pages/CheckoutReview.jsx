@@ -122,18 +122,18 @@ const CheckoutReview = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in fade-in duration-500">
-      <div className="p-3.5 pt-4 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
-        <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
+      <div className="p-2.5 py-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
         <div className="text-center leading-none">
           <p className="text-[10px] font-black tracking-widest text-slate-400 capitalize">Step 2 of 3</p>
-          <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight mt-1">Review & Confirm</h1>
+          <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight mt-0.5">Review & Confirm</h1>
         </div>
         <div className="w-10"></div>
       </div>
 
-      <div className="px-4 mt-6 space-y-4 pb-20">
+      <div className="px-4 mt-4 space-y-4 pb-20">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

@@ -76,8 +76,11 @@ import { requestForToken, onMessageListener } from './config/firebase';
 import { saveTokenToBackend } from './services/fcmService';
 
 function App() {
-  const { isDarkMode } = useThemeStore();
-  const { restoreSession, isAuthenticated, isInitialized } = useAuthStore();
+  const isDarkMode = useThemeStore((state) => state.isDarkMode);
+  const restoreSession = useAuthStore((state) => state.restoreSession);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
+  const logout = useAuthStore((state) => state.logout);
 
   // Foreground Notification Listener
   useEffect(() => {
@@ -119,19 +122,20 @@ function App() {
     }
   }, []);
 
-  // Token Registration Logic
+  // Restore Session on Mount
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
+
+  // Handle Notifications Setup
   useEffect(() => {
     const setupNotifications = async () => {
       if (!isInitialized) return;
 
-      console.log('[App] setupNotifications called. isAuthenticated:', isAuthenticated);
       if (isAuthenticated) {
         const token = await requestForToken();
         if (token) {
-          console.log('[App] Token retrieved, sending to backend...');
           await saveTokenToBackend(token);
-        } else {
-          console.log('[App] Token retrieval failed or permission denied.');
         }
       }
     };
@@ -140,13 +144,8 @@ function App() {
   }, [isAuthenticated, isInitialized]);
 
   useEffect(() => {
-    restoreSession();
-
-
-    // Smooth Session Expiration Handler
     const handleUnauthorized = () => {
-      useAuthStore.getState().logout();
-      // Toast notification for user clarity
+      logout();
       toast.error('Session expired, please log in again.');
     };
     window.addEventListener('auth-unauthorized', handleUnauthorized);
@@ -160,7 +159,7 @@ function App() {
     return () => {
       window.removeEventListener('auth-unauthorized', handleUnauthorized);
     };
-  }, [isDarkMode, restoreSession]);
+  }, [isDarkMode, logout]);
 
   return (
     <Router>

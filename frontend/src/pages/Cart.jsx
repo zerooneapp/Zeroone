@@ -322,18 +322,18 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in slide-in-from-right-4 duration-500">
       {/* Header */}
-      <div className="p-3.5 pt-4 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
-        <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
+      <div className="p-2.5 py-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
         <div className="text-center leading-none">
           <p className="text-[10px] font-black tracking-widest text-slate-400">Step 1 of 3</p>
-          <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight mt-1">Select Date & Time</h1>
+          <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight mt-0.5">Select Date & Time</h1>
         </div>
         <div className="w-10"></div>
       </div>
 
-      <div className="px-5 mt-5 space-y-5 pb-24">
+      <div className="px-5 mt-4 space-y-5 pb-24">
         {/* Date Selection */}
         <section>
           <div className="flex items-center justify-between mb-2 px-1">

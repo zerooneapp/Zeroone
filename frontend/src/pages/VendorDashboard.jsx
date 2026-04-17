@@ -294,31 +294,16 @@ const VendorDashboard = () => {
           >
             <Bell size={18} className="text-slate-700 dark:text-gray-400" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-gray-950 rounded-full" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-950 shadow-sm animate-pulse" />
             )}
           </button>
           <div className="flex items-center gap-2 pr-1">
             <button
               onClick={handleToggleStatus}
               disabled={!data.subscription?.isActive || statusLoading}
-              className={cn(
-                "relative h-6 w-11 rounded-full p-1 transition-all duration-500 active:scale-90 shrink-0 border border-transparent shadow-sm",
-                data.isShopOpen && !data.isClosedToday
-                  ? "bg-[#1C2C4E] shadow-[0_4px_12px_rgba(28,44,78,0.3)]"
-                  : "bg-slate-200 dark:bg-gray-800 border-slate-300/10"
-              )}
+              className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${data.isShopOpen && !data.isClosedToday ? 'bg-[#1C2C4E]' : 'bg-slate-200 dark:bg-gray-800'}`}
             >
-              <motion.div
-                animate={{ x: (data.isShopOpen && !data.isClosedToday) ? 20 : 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="h-4 w-4 rounded-full bg-white shadow-md flex items-center justify-center pointer-events-none"
-              >
-                <Power
-                  size={8}
-                  strokeWidth={4}
-                  className={cn(data.isShopOpen && !data.isClosedToday ? "text-[#1C2C4E]" : "text-slate-400")}
-                />
-              </motion.div>
+               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${(data.isShopOpen && !data.isClosedToday) ? 'left-6' : 'left-1'}`} />
             </button>
           </div>
         </div>

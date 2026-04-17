@@ -50,12 +50,12 @@ const StaffCard = ({ staff, onToggle, onEdit }) => {
          >
             <Edit3 size={16} />
          </button>
-         <button 
-           onClick={() => onToggle(staff._id, !staff.isActive)}
-           className={`w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${staff.isActive ? 'bg-green-500' : 'bg-red-600'}`}
-         >
-            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${staff.isActive ? 'left-7' : 'left-1'}`} />
-         </button>
+          <button 
+            onClick={() => onToggle(staff._id, !staff.isActive)}
+            className={`w-11 h-6 rounded-full relative transition-colors duration-300 flex-shrink-0 ${staff.isActive ? 'bg-[#1C2C4E]' : 'bg-slate-200 dark:bg-gray-800'}`}
+          >
+             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${staff.isActive ? 'left-6' : 'left-1'}`} />
+          </button>
       </div>
     </motion.div>
   );

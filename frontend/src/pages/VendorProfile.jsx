@@ -316,8 +316,8 @@ const VendorProfile = () => {
                               <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-0.5">{item.subtitle}</p>
                            </div>
                            {item.isToggle ? (
-                               <div className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                                  <div className={`absolute top-1 w-4 h-4 rounded-full shadow-sm transition-all duration-300 ${isDarkMode ? 'bg-amber-400 left-6' : 'bg-white left-1'}`} />
+                               <div className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${isDarkMode ? 'bg-[#1C2C4E]' : 'bg-slate-200'}`}>
+                                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${isDarkMode ? 'left-6' : 'left-1'}`} />
                                </div>
                             ) : (
                                <ChevronRight size={16} className="text-slate-300 dark:text-gray-600 group-active:translate-x-0.5 transition-transform" />

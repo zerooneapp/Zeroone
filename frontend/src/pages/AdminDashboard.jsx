@@ -94,9 +94,6 @@ const AdminDashboard = () => {
           <p className="text-[13px] font-black text-slate-400 capitalize tracking-[0.2em] mt-2">Platform Command Center</p>
         </div>
         <div className="flex items-center gap-2.5">
-          <button onClick={fetchDashboard} className="p-2.5 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl shadow-sm active:scale-95 transition-all text-slate-400">
-            <Filter size={18} strokeWidth={3} />
-          </button>
           <button className="px-5 py-2.5 bg-slate-900 dark:bg-primary text-white font-black text-[11px] capitalize tracking-widest rounded-xl shadow-xl active:scale-95 transition-all border-b-2 border-white/10">
             Live Feed
           </button>

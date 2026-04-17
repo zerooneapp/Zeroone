@@ -28,17 +28,19 @@ const Account = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500 pb-28">
-      <header className="px-4 pt-2 pb-2 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-40 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
-        <div className="flex items-center gap-2">
+      <header className="p-2.5 py-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-1 px-2 -ml-2 text-[#1C2C4E] dark:text-blue-400 active:scale-90 transition-all"
+            className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all"
           >
-            <ChevronRight className="rotate-180" size={18} strokeWidth={3} />
+            <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
-          <h1 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">
-            Profile
-          </h1>
+          <div className="leading-none">
+            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+              Profile
+            </h1>
+          </div>
         </div>
       </header>
 
