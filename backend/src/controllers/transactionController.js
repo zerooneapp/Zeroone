@@ -114,6 +114,13 @@ const getAdminTransactions = async (req, res) => {
     } = req.query;
 
     const filter = buildTransactionQuery(req.query);
+    // 🛡️ Admin Filter: Exclude booking revenue from the general transaction list
+    if (!req.query.category || req.query.category === 'all') {
+      filter.category = { $ne: 'booking_revenue' };
+    } else if (req.query.category === 'booking_revenue') {
+      // If admin somehow explicitly requests booking_revenue, we still filter it out per request
+      filter.category = '__BLOCKED__'; 
+    }
     const normalizedLimit = Math.max(1, Number(limit) || 20);
     const normalizedPage = Math.max(1, Number(page) || 1);
 

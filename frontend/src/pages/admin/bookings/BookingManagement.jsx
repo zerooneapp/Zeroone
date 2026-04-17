@@ -18,6 +18,7 @@ const BookingManagement = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalBookings, setTotalBookings] = useState(0);
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
   // Filters State
@@ -107,7 +108,7 @@ const BookingManagement = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(140px,0.7fr)_minmax(0,0.8fr)_24px_minmax(0,0.8fr)] gap-2.5 items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(140px,0.7fr)_minmax(0,0.8fr)_24px_minmax(0,0.8fr)_minmax(120px,auto)] gap-2.5 items-center">
           <div className="relative lg:col-span-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} strokeWidth={3} />
             <input
@@ -146,6 +147,12 @@ const BookingManagement = () => {
             value={filters.endDate}
             onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
           />
+          <div className="flex items-center gap-2 px-4 h-11 bg-primary/5 border border-primary/10 rounded-xl">
+             <div className="flex flex-col leading-none">
+                <span className="text-[9px] font-black text-primary/50 uppercase tracking-widest mb-0.5">Total Booking</span>
+                <span className="text-[15px] font-black text-primary tracking-tight">{totalBookings}</span>
+             </div>
+          </div>
         </div>
       </div>
 
