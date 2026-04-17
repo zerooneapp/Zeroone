@@ -50,7 +50,7 @@ const VendorStaff = () => {
 
   const handleToggle = async (id, isActive) => {
     if (!vendorData?.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to update staff.');
+      return toast.error('Account inactive. Recharge to update staff.', { id: 'account-inactive', duration: 2000 });
     }
     if (toggleLoadingId === id) return;
 
@@ -72,7 +72,7 @@ const VendorStaff = () => {
 
   const handleEdit = (member) => {
     if (!vendorData?.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to edit staff.');
+      return toast.error('Account inactive. Recharge to edit staff.', { id: 'account-inactive', duration: 2000 });
     }
     navigate(`/vendor/staff/edit/${member._id}`);
   };
@@ -113,7 +113,7 @@ const VendorStaff = () => {
         </div>
         <button
           onClick={() => {
-            if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to onboard staff.');
+            if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to onboard staff.', { id: 'account-inactive', duration: 2000 });
             navigate('/vendor/staff/add');
           }}
           className={`p-2.5 rounded-xl shadow-xl transition-all ${!vendorData?.subscription?.isActive

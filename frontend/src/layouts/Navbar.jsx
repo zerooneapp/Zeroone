@@ -68,16 +68,16 @@ const Navbar = () => {
     ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent pointer-events-none pb-[env(safe-area-inset-bottom)]">
-      <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-6 pointer-events-auto transition-all duration-300">
-        <div className="flex items-center justify-between max-w-lg mx-auto h-[50px]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent pointer-events-none">
+      <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-6 pointer-events-auto transition-all duration-300 pb-[env(safe-area-inset-bottom)]">
+        <div className="flex items-center justify-between max-w-lg mx-auto h-[44px]">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               end
               className={({ isActive }) => cn(
-                'flex flex-col items-center justify-center gap-1 min-w-[90px] h-full transition-all relative',
+                'flex flex-col items-center justify-center gap-0.5 min-w-[90px] h-full transition-all relative',
                 'opacity-100'
               )}
             >
@@ -87,22 +87,22 @@ const Navbar = () => {
                   {isActive && (
                     <motion.div
                       layoutId="active-nav-line"
-                      className="absolute top-0 w-8 h-[3.5px] bg-[#1C2C4E] dark:bg-white rounded-b-full"
+                      className="absolute top-0 w-8 h-[3px] bg-[#1C2C4E] dark:bg-white rounded-b-full"
                       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                     />
                   )}
 
                   <item.icon
-                    size={20}
+                    size={19}
                     className={cn(
                       "transition-all duration-300",
-                      isActive ? "text-[#1C2C4E] dark:text-white mt-1" : "text-[#1C2C4E] dark:text-gray-400"
+                      isActive ? "text-[#1C2C4E] dark:text-white mt-0.5" : "text-[#1C2C4E] dark:text-gray-400"
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
 
                   <span className={cn(
-                    "text-[10px] font-black uppercase tracking-wider transition-all",
+                    "text-[9px] font-black uppercase tracking-wider transition-all",
                     isActive ? "text-[#1C2C4E] dark:text-white" : "text-[#1C2C4E] dark:text-gray-400"
                     )}>
                     {item.label}

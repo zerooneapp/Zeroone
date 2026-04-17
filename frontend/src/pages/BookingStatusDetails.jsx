@@ -83,13 +83,22 @@ const BookingStatusDetails = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
-      <div className="p-3.5 pt-4 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
-        <button onClick={() => navigate(-1)} className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
-          <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
-        </button>
-        <span className="font-black text-[11px] tracking-widest text-slate-400">Booking status</span>
+      <header className="p-2.5 py-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all"
+          >
+            <ArrowLeft size={18} className="text-gray-900 dark:text-white" strokeWidth={2.5} />
+          </button>
+          <div className="leading-none">
+            <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight">
+              Booking status
+            </h1>
+          </div>
+        </div>
         <div className="w-10"></div>
-      </div>
+      </header>
 
       <div className="px-5 mt-4 space-y-4 pb-20">
         {/* Live Status Badge */}

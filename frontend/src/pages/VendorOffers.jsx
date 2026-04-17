@@ -35,7 +35,7 @@ const VendorOffers = () => {
 
   const handleToggle = async (id, isActive) => {
     if (!vendorData?.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to update offers.');
+      return toast.error('Account inactive. Recharge to update offers.', { id: 'account-inactive', duration: 2000 });
     }
     if (toggleLoadingId === id) return;
 
@@ -57,7 +57,7 @@ const VendorOffers = () => {
 
   const handleEdit = (offer) => {
     if (!vendorData?.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to edit offers.');
+      return toast.error('Account inactive. Recharge to edit offers.', { id: 'account-inactive', duration: 2000 });
     }
     navigate(`/vendor/offers/edit/${offer._id}`);
   };
@@ -94,7 +94,7 @@ const VendorOffers = () => {
         </div>
         <button
           onClick={() => {
-            if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to launch offers.');
+            if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to launch offers.', { id: 'account-inactive', duration: 2000 });
             navigate('/vendor/offers/add');
           }}
           className={`p-2.5 rounded-xl shadow-xl transition-all ${!vendorData?.subscription?.isActive

@@ -37,7 +37,7 @@ const VendorServices = () => {
   const handleToggle = async (id, isActive) => {
     // 🛡️ HARD BLOCK CHECK
     if (!vendorData?.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to update services.');
+      return toast.error('Account inactive. Recharge to update services.', { id: 'account-inactive', duration: 2000 });
     }
 
     // 🛡️ LOADING GUARD
@@ -62,14 +62,14 @@ const VendorServices = () => {
 
   const handleEdit = (service) => {
     if (!vendorData?.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to edit services.');
+      return toast.error('Account inactive. Recharge to edit services.', { id: 'account-inactive', duration: 2000 });
     }
     navigate(`/vendor/services/edit/${service._id}`);
   };
 
   const handleSetHomeService = async (service) => {
     if (!vendorData?.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to update home service.');
+      return toast.error('Account inactive. Recharge to update home service.', { id: 'account-inactive', duration: 2000 });
     }
     if (!service.isActive) {
       return toast.error('Activate the service before showing it on home.');
@@ -128,7 +128,7 @@ const VendorServices = () => {
         </div>
         <button
           onClick={() => {
-            if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to add services.');
+            if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to add services.', { id: 'account-inactive', duration: 2000 });
             navigate('/vendor/services/add');
           }}
           className={`p-2.5 rounded-xl shadow-xl transition-all ${!vendorData?.subscription?.isActive

@@ -123,7 +123,7 @@ const StaffDashboard = () => {
                   </button>
                   <button onClick={() => setShowNotifications(true)} className="relative p-2 text-slate-700 dark:text-gray-400 transition-all active:scale-90">
                      <Bell size={17} strokeWidth={3} />
-                     {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-gray-950" />}
+                     {unreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-950 shadow-sm animate-pulse" />}
                   </button>
                </div>
             </div>
@@ -143,7 +143,7 @@ const StaffDashboard = () => {
                      {activeBookings.length}
                   </p>
                   <div className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
-                     <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Remainder
+                     <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Reminder
                   </div>
                </div>
             </div>
@@ -213,7 +213,7 @@ const StaffDashboard = () => {
 
                         <div className="grid grid-cols-5 gap-2.5">
                            {currentTask.canContact ? (
-                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
+                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
                                  <Phone size={18} strokeWidth={3} />
                               </a>
                            ) : (
