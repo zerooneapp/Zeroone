@@ -7,6 +7,53 @@ import { useAuthStore } from '../store/authStore';
 
 const Navbar = () => {
   const { role } = useAuthStore();
+  const [isVisible, setIsVisible] = React.useState(true);
+
+  React.useEffect(() => {
+    let maxHeight = window.innerHeight;
+
+    const handleResize = () => {
+      const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      if (currentHeight > maxHeight) maxHeight = currentHeight;
+      
+      // If current height is less than 90% of max height, assume keyboard is open
+      setIsVisible(currentHeight > maxHeight * 0.9);
+    };
+
+    const handleFocusIn = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        setIsVisible(false);
+      }
+    };
+
+    const handleFocusOut = () => {
+      setTimeout(() => {
+        const isInputFieldFocused = document.activeElement.tagName === 'INPUT' || 
+                                   document.activeElement.tagName === 'TEXTAREA';
+        if (!isInputFieldFocused) {
+          setIsVisible(true);
+        }
+      }, 300);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+    }
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('focusin', handleFocusIn);
+    window.addEventListener('focusout', handleFocusOut);
+    
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+      }
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('focusin', handleFocusIn);
+      window.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
+  if (!isVisible) return null;
 
   const navItems = role === 'staff'
     ? [
@@ -22,7 +69,7 @@ const Navbar = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent pointer-events-none pb-[env(safe-area-inset-bottom)]">
-      <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-6 pointer-events-auto">
+      <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-6 pointer-events-auto transition-all duration-300">
         <div className="flex items-center justify-between max-w-lg mx-auto h-[50px]">
           {navItems.map((item) => (
             <NavLink
@@ -57,7 +104,7 @@ const Navbar = () => {
                   <span className={cn(
                     "text-[10px] font-black uppercase tracking-wider transition-all",
                     isActive ? "text-[#1C2C4E] dark:text-white" : "text-[#1C2C4E] dark:text-gray-400"
-                  )}>
+                    )}>
                     {item.label}
                   </span>
                 </>

@@ -19,6 +19,16 @@
     -webkit-tap-highlight-color: transparent;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    caret-color: #1C2C4E;
+  }
+
+  ::selection {
+    background-color: rgba(28, 44, 78, 0.2);
+    color: inherit;
+  }
+
+  input, textarea {
+    caret-color: #1C2C4E;
   }
 }
 

@@ -270,7 +270,7 @@ const ServiceDetail = () => {
 
   if (loading && !vendor) return (
     <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen">
-      <div className="h-64 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
+      <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
       <div className="grid grid-cols-2 gap-4">
         <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
         <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
@@ -323,7 +323,7 @@ const ServiceDetail = () => {
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="h-64 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
+            className="h-48 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
           >
             {gallery.length > 0 ? (
               gallery.map((img, idx) => (

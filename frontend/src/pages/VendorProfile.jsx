@@ -691,10 +691,13 @@ const VendorProfile = () => {
                                  ))}
                               </select>
                            )}
-                           <div className="px-3 h-9 inline-flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-300">
-                              <span>Qty: {transactions.length}</span>
+                           <div className="px-2 h-9 flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black uppercase text-slate-500 dark:text-gray-300 shrink-0 shadow-sm">
+                              <div className="flex flex-col items-center leading-none px-0.5">
+                                  <span className="text-[6.5px] opacity-40">Qty</span>
+                                  <span>{transactions.length}</span>
+                               </div>
                               <span className="w-px h-3 bg-slate-200 dark:bg-gray-700" />
-                              <span className="text-emerald-500">₹ {transactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0).toLocaleString('en-IN')}</span>
+                              <span className="text-emerald-500 text-[10px] tracking-tight whitespace-nowrap">₹ {transactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0).toLocaleString('en-IN')}</span>
                            </div>
                         </div>
                      </div>
