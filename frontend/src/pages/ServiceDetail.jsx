@@ -406,57 +406,61 @@ const ServiceDetail = () => {
         </div>
       </div>
 
-      {/* Info Grid */}
-      <div className="px-5 mt-4 grid grid-cols-2 gap-y-3 gap-x-2">
+      {/* Redesigned Info Cards Grid */}
+      <div className="px-3 mt-3 grid grid-cols-2 gap-1.5">
         <button
           type="button"
           onClick={handleOpenLocation}
-          className="flex items-center gap-2.5 text-left active:scale-[0.98] transition-all"
+          className="flex items-center gap-2 py-1.5 px-2 bg-slate-50 dark:bg-gray-950 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm active:scale-[0.98] transition-all text-left group"
         >
-          <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
+          <div className="w-8 h-8 bg-white dark:bg-gray-300/5 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50 group-hover:bg-[#1C2C4E]/10 transition-colors">
             <MapPin size={14} className="text-[#1C2C4E] dark:text-gray-400" />
           </div>
-          <div className="min-w-0">
-            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter truncate">{vendor.address?.split(',')[0] || 'Local Address'}</p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Location</p>
+          <div className="min-w-0 pr-0.5">
+            <p className="text-[11px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tight truncate">
+              {vendor.address?.split(',')[0]}
+            </p>
+            <p className="text-[7px] font-black text-[#1C2C4E]/30 dark:text-gray-500 uppercase tracking-widest mt-0.5">Location</p>
           </div>
         </button>
 
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
+        <div className="flex items-center gap-2 py-1.5 px-2 bg-slate-50 dark:bg-gray-950 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm">
+          <div className="w-8 h-8 bg-white dark:bg-gray-300/5 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50">
             <Clock size={14} className="text-[#1C2C4E] dark:text-gray-400" />
           </div>
-          <div className="min-w-0">
-            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight tracking-tighter whitespace-nowrap">
-              {vendor.workingHours?.start || '09:00 AM'} - {vendor.workingHours?.end || '09:00 PM'}
+          <div className="min-w-0 pr-0.5">
+            <p className="text-[10px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tighter whitespace-nowrap">
+              {vendor.workingHours?.start} - {vendor.workingHours?.end}
             </p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Open today</p>
+            <p className="text-[7px] font-black text-emerald-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Open Now</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
-            <Star size={14} fill="#FACC15" className="text-yellow-400 border-none" />
+        <button
+          type="button"
+          onClick={() => navigate(`/service/${vendor._id}/reviews`)}
+          className="flex items-center gap-2 py-1.5 px-2 bg-slate-50 dark:bg-gray-950 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm active:scale-[0.98] transition-all text-left group"
+        >
+          <div className="w-8 h-8 bg-white dark:bg-amber-900/10 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50 group-hover:bg-amber-100 transition-colors">
+            <Star size={14} fill="#FACC15" className="text-amber-500" strokeWidth={1.5} />
           </div>
-          <button
-            type="button"
-            onClick={() => navigate(`/service/${vendor._id}/reviews`)}
-            className="text-left active:scale-[0.98] transition-all"
-          >
-            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight">{vendor.totalReviews || '320'} Reviews</p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Elite rating</p>
-          </button>
-        </div>
+          <div className="min-w-0 pr-0.5">
+            <p className="text-[11px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tight">
+              {vendor.totalReviews || '320'} Reviews
+            </p>
+            <p className="text-[7px] font-black text-[#1C2C4E]/30 dark:text-gray-500 uppercase tracking-widest mt-0.5">Elite Rating</p>
+          </div>
+        </button>
 
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-[#1C2C4E]/5 dark:bg-white/5 rounded-xl">
-            <ShieldCheck size={14} className="text-[#1C2C4E] dark:text-gray-400" />
+        <div className="flex items-center gap-2 py-1.5 px-2 bg-slate-50 dark:bg-gray-950 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm">
+          <div className="w-8 h-8 bg-white dark:bg-emerald-900/10 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50">
+            <ShieldCheck size={14} className="text-emerald-500" />
           </div>
-          <div>
-            <p className="text-[14px] font-black text-[#0B1222] dark:text-white leading-tight capitalize tracking-tighter">
+          <div className="min-w-0 pr-0.5">
+            <p className="text-[11px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tight">
               Premium Shop
             </p>
-            <p className="text-[10px] font-black text-[#0B1222]/30 dark:text-gray-400 capitalize tracking-tight">Trust secured</p>
+            <p className="text-[7px] font-black text-[#1C2C4E]/30 dark:text-gray-500 uppercase tracking-widest mt-0.5">Trust Secured</p>
           </div>
         </div>
       </div>
