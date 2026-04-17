@@ -530,8 +530,8 @@ const Cart = () => {
                   >
                     <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden mb-1.5 border border-slate-100 dark:border-gray-700 shadow-inner">
                       <img 
-                        src={s.image || `https://i.pravatar.cc/150?u=${s._id || 'staff'}`} 
-                        onError={(e) => { e.target.src = `https://i.pravatar.cc/150?u=${s._id || 'staff'}` }}
+                        src={s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} 
+                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true` }}
                         className="w-full h-full object-cover" 
                       />
                     </div>

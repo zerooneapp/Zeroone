@@ -518,6 +518,7 @@ const getVendorDashboard = async (req, res) => {
         time: moment(b.startTime).tz('Asia/Kolkata').format('hh:mm A'),
         customerName: b.userId?.name || 'Customer',
         customerImage: b.userId?.image || '',
+        customerPhone: b.userId?.phone || '',
         service: b.services.map(s => s.name).join(', '),
         status: b.status,
         staffId: b.staffId?._id?.toString() || null,

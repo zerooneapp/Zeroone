@@ -236,7 +236,7 @@ const VendorDashboard = () => {
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
           <img
-            src={item.customerImage || `https://i.pravatar.cc/150?u=${item.customerName}${idx}`}
+            src={item.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.customerName || 'Customer')}&background=E2E8F0&color=1C2C4E&bold=true`}
             alt={item.customerName || 'Customer'}
             className="w-full h-full object-cover"
           />
@@ -394,7 +394,7 @@ const VendorDashboard = () => {
                   >
                     <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100 dark:border-gray-700 dark:bg-gray-800 shrink-0">
                       <img
-                        src={card.image || `https://i.pravatar.cc/150?u=${encodeURIComponent(card.name)}`}
+                        src={card.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(card.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`}
                         alt={card.name}
                         className="h-full w-full object-cover"
                       />
@@ -437,7 +437,7 @@ const VendorDashboard = () => {
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
                       <img
-                        src={item.customerImage || `https://i.pravatar.cc/150?u=${item.customerName}${idx}`}
+                        src={item.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.customerName || 'Customer')}&background=E2E8F0&color=1C2C4E&bold=true`}
                         alt={item.customerName || 'Customer'}
                         className="w-full h-full object-cover"
                       />

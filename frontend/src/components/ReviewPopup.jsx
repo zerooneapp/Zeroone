@@ -69,7 +69,7 @@ const ReviewPopup = ({ booking, onClose }) => {
           {/* Expert Card Snapshot */}
           <div className="bg-gray-50 dark:bg-gray-900/50 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center gap-3.5 relative z-10 transition-all">
              <div className="w-12 h-12 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
-                <img src={booking.staffId?.image || `https://i.pravatar.cc/150?u=${booking._id}`} className="w-full h-full object-cover" />
+                <img src={booking.staffId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.staffId?.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} className="w-full h-full object-cover" />
              </div>
              <div>
                 <p className="font-black text-gray-900 dark:text-white tracking-tight">{booking.staffId?.name || 'Professional'}</p>

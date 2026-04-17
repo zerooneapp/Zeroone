@@ -615,7 +615,7 @@ const ServiceDetail = () => {
           <div className="flex -space-x-1.5">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden shadow-sm">
-                <img src={`https://i.pravatar.cc/100?u=${i}`} alt="avatar" />
+                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent('User')}&background=E2E8F0&color=1C2C4E&bold=true`} alt="avatar" />
               </div>
             ))}
           </div>

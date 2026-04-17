@@ -278,9 +278,6 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
     }
   }
 
-  if (role === 'customer' && moment().isAfter(moment(booking.startTime).subtract(30, 'minutes'))) {
-    throw new Error('Too late to cancel (30m window)');
-  }
 
   const trimmedReason = reason?.trim();
   if ((role === 'vendor' || role === 'staff') && !trimmedReason) {

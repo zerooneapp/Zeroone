@@ -135,8 +135,8 @@ const BookingStatusDetails = () => {
           <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 overflow-hidden shadow-inner shrink-0">
               <img 
-                src={booking.staffId?.image || `https://i.pravatar.cc/150?u=${booking.staffId?._id || 'staff'}`} 
-                onError={(e) => { e.target.src = `https://i.pravatar.cc/150?u=${booking.staffId?._id || 'staff'}` }}
+                src={booking.staffId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.staffId?.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} 
+                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.staffId?.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true` }}
                 className="w-full h-full object-cover" 
               />
             </div>
