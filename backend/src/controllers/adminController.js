@@ -14,6 +14,9 @@ const {
   getBillingSettings,
   getVendorSubscriptionState
 } = require('../services/walletService');
+const Review = require('../models/Review');
+const WalletTransaction = require('../models/WalletTransaction');
+const mongoose = require('mongoose');
 
 const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin']);
 const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
@@ -585,6 +588,38 @@ const getAdminDashboard = async (req, res) => {
       totalPartners,
       activeBookings,
       totalUsers,
+      bookingStats,
+      recentVendors,
+      recentUsers,
+      recentReviews,
+      revenueGraph,
+      totalBookingsInRange,
+      lowBalanceCount,
+      inactiveVendorsCount
+    ] = await Promise.all([
+      Booking.aggregate([{ $match: { status: 'completed', createdAt: { $gte: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Booking.aggregate([{ $match: { status: 'completed', createdAt: { $gte: yesterday.toDate(), $lt: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Booking.aggregate([{ $match: { status: 'completed' } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Vendor.countDocuments({ createdAt: { $gte: rangeStart } }),
+      Vendor.countDocuments({ status: 'active' }),
+      Booking.countDocuments({ status: { $in: ['confirmed', 'ongoing'] } }),
+      User.countDocuments({ role: 'customer' }),
+      Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Vendor.find().sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name'),
+      User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5),
+      Review.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName'),
+      Booking.aggregate([
+        { $match: { status: 'completed', createdAt: { $gte: rangeStart } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, total: { $sum: '$totalPrice' } } },
+        { $sort: { _id: 1 } }
+      ]),
+      Booking.countDocuments({ createdAt: { $gte: rangeStart } }),
+      Vendor.countDocuments({ walletBalance: { $lt: minimumWalletThreshold } }),
+      Vendor.countDocuments({ status: 'inactive' })
+    ]);
+
+    const stats = { active: 0, completed: 0, cancelled: 0 };
+    bookingStats.forEach(s => {
       if (['confirmed', 'ongoing'].includes(s._id)) stats.active += s.count;
       if (s._id === 'completed') stats.completed = s.count;
       if (s._id === 'cancelled') stats.cancelled = s.count;
