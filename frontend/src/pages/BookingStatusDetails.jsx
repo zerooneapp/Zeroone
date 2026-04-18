@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Calendar, ShieldCheck, MapPin, Phone, MessageSquare, 
 import api from '../services/api';
 import Button from '../components/Button';
 import SectionTitle from '../components/SectionTitle';
+import Loader from '../components/Loader';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 
@@ -67,12 +68,7 @@ const BookingStatusDetails = () => {
     }
   };
 
-  if (loading) return (
-    <div className="p-10 text-center">
-      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mx-auto" />
-      <p className="mt-4 text-gray-400">Loading details...</p>
-    </div>
-  );
+  if (loading) return <Loader text="Retrieving booking details..." />;
 
   if (!booking) return (
     <div className="p-10 text-center">

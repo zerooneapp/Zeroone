@@ -16,6 +16,7 @@ import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
+import Loader from '../components/Loader';
 
 const normalizeCategoryValue = (value = '') =>
   value
@@ -267,19 +268,7 @@ const ServiceDetail = () => {
       setActiveIndex(index);
     }
   };
-
-  if (loading && !vendor) return (
-    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen">
-      <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
-      <div className="grid grid-cols-2 gap-4">
-        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
-        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
-      </div>
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-50 dark:bg-gray-900 rounded-3xl animate-pulse" />)}
-      </div>
-    </div>
-  );
+  if (loading && !vendor) return <Loader text="Assembling elite services..." />;
 
   if (error || !vendor) return (
     <div className="p-20 text-center bg-white dark:bg-gray-950 min-h-screen">
