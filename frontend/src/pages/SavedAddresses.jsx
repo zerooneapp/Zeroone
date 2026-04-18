@@ -118,7 +118,7 @@ const SavedAddresses = () => {
       const isAddressChanged = normalizedAddress !== (user?.address || '').trim();
 
       if (!locationPayload && isAddressChanged) {
-        locationPayload = await resolveAddressToLocation(normalizedAddress);
+          locationPayload = await resolveAddressToLocation(normalizedAddress);
       }
 
       if (!locationPayload && Array.isArray(currentCoordinates) && currentCoordinates.length === 2) {

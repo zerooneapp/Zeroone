@@ -379,9 +379,9 @@ const getVendorBookings = async (req, res) => {
 
       const endTime = moment(doc.endTime).tz('Asia/Kolkata');
 
-      // SOP Level Flags
-      doc.canCancel = !now.isSameOrAfter(bufferTime) && doc.status === 'confirmed';
-      doc.canContact = now.isSameOrAfter(bufferTime) && doc.status === 'confirmed' && now.isBefore(endTime);
+      // SOP Level Flags - Instant Unlock & Any-time actions per client request
+      doc.canCancel = doc.status === 'confirmed';
+      doc.canContact = doc.status === 'confirmed' && now.isBefore(endTime);
       if (doc.type !== 'home') {
         doc.serviceAddress = undefined;
       }
@@ -407,13 +407,13 @@ const getVendorDashboard = async (req, res) => {
       vendorId: vendor._id,
       startTime: { $gte: todayStart, $lt: todayEnd }
     })
-      .populate('userId', 'name image')
+      .populate('userId', 'name image phone')
       .populate('staffId', 'name isOwner')
       .sort({ startTime: 1 });
 
     // 💰 Today's Earnings
     const todayEarnings = todayBookings
-      .filter(b => b.status === 'confirmed' || b.status === 'completed')
+      .filter(b => b.status === 'completed')
       .reduce((sum, b) => sum + b.totalPrice, 0);
 
     // 💰 Weekly Earnings
@@ -490,7 +490,7 @@ const getVendorDashboard = async (req, res) => {
         customerLoss: !subscriptionState.isActive ? (vendor.profileViews || 0) : 0
       },
       stats: {
-        todayBookings: todayBookings.length,
+        todayBookings: todayBookings.filter(b => b.status !== 'cancelled').length,
         todayEarnings,
         weekEarnings,
         totalEarnings,

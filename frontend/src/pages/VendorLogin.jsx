@@ -73,6 +73,17 @@ const VendorAuth = () => {
         return;
       }
 
+      // 🔒 ROLE SECURITY: Prevent cross-portal entry
+      if (role === 'customer') {
+        toast.error(`Customer accounts cannot use the Partner/Staff portal.`, {
+          duration: 5000,
+          icon: '⛔'
+        });
+        useAuthStore.getState().logout();
+        navigate('/login'); // Redirect to their actual home
+        return;
+      }
+
       toast.success('Welcome back!');
       const intendedPath = location.state?.from?.pathname;
       if (intendedPath) {

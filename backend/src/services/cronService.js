@@ -37,7 +37,7 @@ const initCronJobs = () => {
         NotificationService.sendNotification({
           userIds: booking.userId, role: 'customer', type: 'REMINDER_30M',
           title: 'Upcoming Appointment',
-          message: `Your appointment at ${booking.vendorId.shopName} starts in 30 minutes. Contact details are now unlocked!`,
+          message: `Your appointment at ${booking.vendorId.shopName} starts in 30 minutes. Check booking details for directions!`,
           data: { bookingId: booking._id, type: 'REMINDER_30M' },
           referenceId: `REMIND_CUST_${booking._id}`
         });
@@ -48,7 +48,7 @@ const initCronJobs = () => {
           NotificationService.sendNotification({
             userIds: getStaffNotificationTarget(staff), role: 'staff', type: 'REMINDER_30M',
             title: 'Upcoming Assignment',
-            message: `Next Booking: You have an appointment for ${booking.walkInCustomerName || 'Client'} in 30 minutes. Contact details are now unlocked!`,
+            message: `Next Booking: You have an appointment for ${booking.walkInCustomerName || 'Client'} in 30 minutes. Be ready!`,
             data: { bookingId: booking._id, type: 'REMINDER_30M' },
             referenceId: `REMIND_STAFF_${booking._id}`
           });
@@ -127,6 +127,32 @@ const initCronJobs = () => {
         }
       }
     } catch (error) { console.error('Expiry Cron Error:', error); }
+  }, { timezone: "Asia/Kolkata" });
+
+  // 5. Auto-Cancel "No-Show" or "Incomplete" Bookings (Raat 12:00 baje)
+  cron.schedule('0 0 * * *', async () => {
+    console.log('--- Midnight Auto-Cancel Cron ---');
+    try {
+      const yesterdayEnd = moment().tz('Asia/Kolkata').subtract(1, 'day').endOf('day').toDate();
+      
+      // Find all confirmed bookings that should have started/ended by now
+      const pendingBookings = await Booking.find({
+        status: 'confirmed',
+        startTime: { $lt: yesterdayEnd }
+      });
+
+      console.log(`[Cron] Found ${pendingBookings.length} stale bookings to auto-cancel.`);
+
+      for (const booking of pendingBookings) {
+        booking.status = 'cancelled';
+        booking.cancelReason = 'Auto-cancelled: Service not marked as completed by end of day.';
+        booking.cancelledByRole = 'system';
+        booking.cancelledAt = new Date();
+        await booking.save();
+        
+        console.log(`[Cron] Auto-cancelled booking ${booking._id}`);
+      }
+    } catch (error) { console.error('Auto-Cancel Cron Error:', error); }
   }, { timezone: "Asia/Kolkata" });
 };
 

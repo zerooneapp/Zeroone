@@ -249,8 +249,8 @@ const BookingStatusDetails = () => {
               </button>
             )}
             {!booking.canCancel && (
-              <p className="text-center text-[8px] font-black text-slate-400 tracking-widest opacity-60 leading-none pt-1">
-                You can only cancel 30 minutes before schedule.
+              <p className="text-center text-[8px] font-black text-rose-400 tracking-widest opacity-60 leading-none pt-1">
+                This booking can no longer be modified.
               </p>
             )}
           </div>

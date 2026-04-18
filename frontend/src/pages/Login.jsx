@@ -72,14 +72,20 @@ const CustomerAuth = () => {
       if (res.needsRegistration) {
         navigate('/signup', { state: { phone, role: 'customer' } });
       } else {
-        toast.success(`Welcome back!`);
         const { role } = res.data;
-        if (role === 'admin' || role === 'super_admin') navigate('/admin');
-        else if (role === 'vendor') navigate('/vendor');
-        else if (role === 'staff') navigate('/staff');
-        else {
-          navigate(redirectPath, { replace: true });
+        // 🔒 ROLE SECURITY: Prevent cross-portal entry
+        if (role !== 'customer') {
+          toast.error(`This account ( ${role} ) must use the Partner Login portal.`, {
+            duration: 5000,
+            icon: '⛔'
+          });
+          useAuthStore.getState().logout();
+          navigate('/vendor-login'); // Redirect to their actual home
+          return;
         }
+
+        toast.success(`Welcome back!`);
+        navigate(redirectPath, { replace: true });
       }
     } else {
       toast.error(res.message);
