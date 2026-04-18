@@ -585,98 +585,6 @@ const getAdminDashboard = async (req, res) => {
       totalPartners,
       activeBookings,
       totalUsers,
-      bookingStats,
-      recentVendors,
-      recentUsers,
-      recentReviews,
-      lowBalanceCount,
-      inactiveVendorsCount,
-      revenueGraph
-    ] = await Promise.all([
-      // 1. Today Revenue
-      require('../models/WalletTransaction').aggregate([
-        {
-          $match: {
-            type: 'debit',
-            status: 'completed',
-            reason: { $in: ['daily_subscription', 'monthly_subscription'] },
-            timestamp: { $gte: today.toDate() }
-          }
-        },
-        { $group: { _id: null, total: { $sum: '$amount' } } }
-      ]),
-      // 2. Yesterday Revenue
-      require('../models/WalletTransaction').aggregate([
-        {
-          $match: {
-            type: 'debit',
-            status: 'completed',
-            reason: { $in: ['daily_subscription', 'monthly_subscription'] },
-            timestamp: { $gte: yesterday.toDate(), $lt: today.toDate() }
-          }
-        },
-        { $group: { _id: null, total: { $sum: '$amount' } } }
-      ]),
-      // 3. Total Revenue
-      require('../models/WalletTransaction').aggregate([
-        {
-          $match: {
-            category: 'booking_revenue',
-            status: 'completed'
-          }
-        },
-        { $group: { _id: null, total: { $sum: '$amount' } } }
-      ]),
-      // 3. New Vendors
-      Vendor.countDocuments({ createdAt: { $gte: today.toDate() } }),
-      // 4. Total Partners
-      Vendor.countDocuments(),
-      // 4. Active Bookings
-      Booking.countDocuments({ status: { $in: ['confirmed', 'ongoing'] } }),
-      // 5. Total Users
-      User.countDocuments({ role: 'customer' }),
-      // 6. Booking Stats
-      Booking.aggregate([
-        { $group: { _id: '$status', count: { $sum: 1 } } }
-      ]),
-      // 7. Recent Vendors
-      Vendor.find().sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name'),
-      // 8. Recent Users
-      User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5),
-      // 9. Recent Reviews
-      require('../models/Review').find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName'),
-      // 10. Low Balance Alert
-      Vendor.countDocuments({ walletBalance: { $lt: minimumWalletThreshold } }),
-      // 11. Inactive Vendors (Real Check)
-      Vendor.countDocuments({
-        $or: [
-          { isActive: false },
-          { status: { $in: ['inactive', 'blocked', 'rejected'] } }
-        ]
-      }),
-      // 12. Revenue Graph (Dynamic Range)
-      require('../models/WalletTransaction').aggregate([
-        {
-          $match: {
-            type: 'debit',
-            status: 'completed',
-            reason: { $in: ['daily_subscription', 'monthly_subscription'] },
-            timestamp: { $gte: rangeStart }
-          }
-        },
-        {
-          $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
-            total: { $sum: "$amount" }
-          }
-        },
-        { $sort: { _id: 1 } }
-      ])
-    ]);
-
-    // Format Booking Stats
-    const stats = { active: 0, completed: 0, cancelled: 0 };
-    bookingStats.forEach(s => {
       if (['confirmed', 'ongoing'].includes(s._id)) stats.active += s.count;
       if (s._id === 'completed') stats.completed = s.count;
       if (s._id === 'cancelled') stats.cancelled = s.count;
@@ -698,7 +606,8 @@ const getAdminDashboard = async (req, res) => {
         lowBalanceVendors: lowBalanceCount,
         inactiveVendors: inactiveVendorsCount
       },
-      revenueGraph: revenueGraph.map(g => ({ date: moment(g._id).format('DD MMM'), amount: g.total }))
+      revenueGraph: revenueGraph.map(g => ({ date: moment(g._id).format('DD MMM'), amount: g.total })),
+      totalBookingsInRange: totalBookingsInRange || 0
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
