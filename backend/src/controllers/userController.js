@@ -46,8 +46,31 @@ const updateProfile = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.user._id);
+    const userId = req.user._id;
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // 🧹 CLEANUP: If user is a vendor, remove associated entities
+    if (user.role === 'vendor') {
+      const Vendor = require('../models/Vendor');
+      const Staff = require('../models/Staff');
+      const SlotLock = require('../models/SlotLock');
+
+      const vendor = await Vendor.findOne({ ownerId: userId });
+      if (vendor) {
+        // Remove Vendor, Staff, and SlotLocks
+        await Promise.all([
+          Vendor.deleteOne({ _id: vendor._id }),
+          Staff.deleteMany({ vendorId: vendor._id }),
+          SlotLock.deleteMany({ vendorId: vendor._id })
+        ]);
+        console.log(`[Cleanup] Removed vendor data for user ${userId}`);
+      }
+    }
+
+    // Finally delete the user
+    await User.findByIdAndDelete(userId);
+    
     res.status(200).json({ message: 'Account deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
