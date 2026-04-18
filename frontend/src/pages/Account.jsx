@@ -14,11 +14,12 @@ const Account = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setShowLogoutConfirm(false);
   };
 
 
@@ -96,7 +97,7 @@ const Account = () => {
       {/* Logout Action */}
       <div className="px-4 mt-4 space-y-2">
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogoutConfirm(true)}
           className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-[#1C2C4E]/10 dark:border-gray-800 text-slate-600 dark:text-gray-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
         >
           <LogOut size={16} strokeWidth={3} />
@@ -107,6 +108,47 @@ const Account = () => {
       </div>
 
 
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLogoutConfirm(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl relative z-10 p-5 text-center"
+            >
+              <div className="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-rose-100/50">
+                <LogOut size={20} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Confirm Logout</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-1.5 uppercase tracking-widest leading-relaxed">
+                Are you sure you want to sign out? You will need to login again.
+              </p>
+              <div className="flex gap-2.5 mt-6">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-black text-[11px] uppercase tracking-widest active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+                >
+                  OK
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

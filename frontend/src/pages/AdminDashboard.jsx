@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useThemeStore } from '../store/themeStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import Loader from '../components/Loader';
+
 
 // 3D Icons
 import revenueIcon from '../assets/3d-icons/revenue.png';
@@ -74,7 +74,17 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) return <Loader text="Analyzing system metrics..." />;
+  if (loading || !data) {
+    return (
+      <div className="p-8 space-y-8 animate-pulse bg-slate-50 dark:bg-gray-950 min-h-screen">
+        <div className="h-10 w-64 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="h-28 bg-gray-100 dark:bg-gray-800 rounded-[1.8rem]" />)}
+        </div>
+        <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-[3rem]" />
+      </div>
+    );
+  }
 
   const kpis = [
     { 

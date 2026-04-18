@@ -40,7 +40,6 @@ import CreateSlotModal from '../components/CreateSlotModal';
 import EmergencyClosureModal from '../components/EmergencyClosureModal';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import { cn } from '../utils/cn';
-import Loader from '../components/Loader';
 
 const prettifyTransactionLabel = (value = '') =>
   value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
@@ -184,7 +183,17 @@ const VendorDashboard = () => {
   };
 
   if (loading || !data) {
-    return <Loader text="Initializing your shop command center..." />;
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 p-6 space-y-6 pt-24 animate-pulse no-scrollbar">
+        <div className="flex justify-between items-start h-16 bg-white dark:bg-gray-900 rounded-lg" />
+        <div className="h-32 bg-white dark:bg-gray-900 rounded-lg" />
+        <div className="grid grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="aspect-square bg-white dark:bg-gray-900 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const actionTiles = [
