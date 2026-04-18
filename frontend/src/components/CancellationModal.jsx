@@ -4,6 +4,7 @@ import { AlertCircle, X } from 'lucide-react';
 
 const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking", message = "Please provide a reason for cancellation" }) => {
   const [reason, setReason] = useState('');
+  const [isManual, setIsManual] = useState(false);
 
   const handleConfirm = () => {
     if (!reason.trim()) return;
@@ -49,14 +50,47 @@ const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking
                 {message}
               </p>
 
-              <div className="mt-2.5">
-                <textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Enter reason here..."
-                  className="w-full h-16 p-3 bg-white/50 dark:bg-gray-900/50 border border-slate-200/50 dark:border-gray-800 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#1C2C4E]/30 resize-none placeholder:text-slate-300"
-                  autoFocus
-                />
+              <div className="mt-4 space-y-3">
+                <div className="relative group">
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value === 'manual') {
+                        setIsManual(true);
+                        setReason('');
+                      } else {
+                        setIsManual(false);
+                        setReason(e.target.value);
+                      }
+                    }}
+                    value={isManual ? 'manual' : reason}
+                    className="w-full p-3 bg-white/50 dark:bg-gray-900/50 border border-slate-200/50 dark:border-gray-800 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#1C2C4E]/30 appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="text-slate-400">Choose a reason...</option>
+                    <option value="Customer not reachable">1. Customer not reachable</option>
+                    <option value="Customer Running late">2. Customer Running late</option>
+                    <option value="Wrong Booking">3. Wrong Booking</option>
+                    <option value="Emergency">4. Emergency</option>
+                    <option value="manual">Other (Self)</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                    <AlertCircle size={12} className="rotate-180" />
+                  </div>
+                </div>
+
+                {isManual && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                  >
+                    <textarea
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      placeholder="Enter your reason here..."
+                      className="w-full h-20 p-3 bg-white/50 dark:bg-gray-900/50 border border-slate-200/50 dark:border-gray-800 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#1C2C4E]/30 resize-none placeholder:text-slate-300"
+                      autoFocus
+                    />
+                  </motion.div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3 mt-4">

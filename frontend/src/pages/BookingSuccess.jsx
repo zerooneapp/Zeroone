@@ -64,7 +64,7 @@ const BookingSuccess = () => {
                      <p className="text-[8px] font-black text-slate-400 tracking-widest leading-none uppercase">Time</p>
                      <div className="flex items-center gap-1.5 text-[11px] font-black text-primary leading-none mt-1.5 justify-end">
                         <Clock size={11} className="text-primary" />
-                        {selectedSlot}
+                        {dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')}
                      </div>
                   </div>
                </div>

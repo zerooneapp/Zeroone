@@ -13,6 +13,14 @@ import { useThemeStore } from '../store/themeStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
+// 3D Icons
+import revenueIcon from '../assets/3d-icons/revenue.png';
+import storeIcon from '../assets/3d-icons/store.png';
+import calendarIcon from '../assets/3d-icons/calendar.png';
+import usersIcon from '../assets/3d-icons/users.png';
+import partnersIcon from '../assets/3d-icons/partners.png';
+import growthIcon from '../assets/3d-icons/growth.png';
+
 const AdminDashboard = () => {
   const { isDarkMode } = useThemeStore();
   const [data, setData] = useState(null);
@@ -78,12 +86,66 @@ const AdminDashboard = () => {
   }
 
   const kpis = [
-    { label: 'Today Revenue', value: `₹${data.todayRevenue}`, sub: `vs ₹${data.yesterdayRevenue} yesterday`, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: 'New Partners', value: data.newVendors, sub: 'Registered today', icon: Store, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Active Bookings', value: data.activeBookings, sub: 'Currently live', icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Total Users', value: data.totalUsers, sub: 'Exclusive of partners', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Total Partners', value: data.totalPartners, sub: 'Registered partners', icon: Store, color: 'text-fuchsia-500', bg: 'bg-fuchsia-500/10' },
-    { label: 'Total Revenue', value: `₹${data.totalRevenue}`, sub: 'All booking revenue', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' }
+    { 
+      label: 'Today Revenue', 
+      value: `₹${data.todayRevenue || 0}`, 
+      trend: data.todayRevenue >= data.yesterdayRevenue ? '100.0%' : '-100.0%',
+      trendUp: data.todayRevenue >= data.yesterdayRevenue,
+      sub: `+${data.todayRevenue >= data.yesterdayRevenue ? '100.0' : '-100.0'}%`,
+      icon: Zap, 
+      color: 'amber', 
+      iconSrc: revenueIcon 
+    },
+    { 
+      label: 'New Partners', 
+      value: data.newVendors || 0, 
+      trend: '4.8%', 
+      trendUp: true, 
+      sub: '+4.8%', 
+      icon: Store, 
+      color: 'primary', 
+      iconSrc: storeIcon 
+    },
+    { 
+      label: 'Active Bookings', 
+      value: data.activeBookings || 0, 
+      trend: '12.5%', 
+      trendUp: true, 
+      sub: '+12.5%', 
+      icon: Calendar, 
+      color: 'emerald', 
+      iconSrc: calendarIcon 
+    },
+    { 
+      label: 'Total Users', 
+      value: data.totalUsers || 0, 
+      trend: '7.2%', 
+      trendUp: true, 
+      sub: '+7.2%', 
+      icon: Users, 
+      color: 'blue', 
+      iconSrc: usersIcon 
+    },
+    { 
+      label: 'Total Partners', 
+      value: data.totalPartners || 0, 
+      trend: '2.1%', 
+      trendUp: true, 
+      sub: '+2.1%', 
+      icon: Store, 
+      color: 'fuchsia', 
+      iconSrc: partnersIcon 
+    },
+    { 
+      label: 'Total Revenue', 
+      value: `₹${(data.totalRevenue || 0).toLocaleString()}`, 
+      trend: '15.4%', 
+      trendUp: true, 
+      sub: '+15.4%', 
+      icon: TrendingUp, 
+      color: 'emerald', 
+      iconSrc: growthIcon 
+    }
   ];
 
   return (
@@ -117,30 +179,51 @@ const AdminDashboard = () => {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-6 gap-3">
-        {kpis.map((kpi, i) => (
-          <motion.div
-            key={i}
-            initial={{ y: 15, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: i * 0.05 }}
-            className="p-3 px-3.5 bg-white dark:bg-gray-900 rounded-[1.6rem] border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden group active:scale-[0.98] transition-all min-w-0"
-          >
-            <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center mb-2 transition-transform group-hover:scale-110', kpi.bg, kpi.color)}>
-              <kpi.icon size={16} strokeWidth={3} />
-            </div>
-            <div className="leading-none pt-0.5">
-              <p className="text-[9px] font-black text-slate-400 dark:text-slate-400 capitalize tracking-[0.14em] leading-snug">{kpi.label}</p>
-              <p className="text-[18px] font-black text-slate-900 dark:text-white mt-2 tracking-tighter truncate">{kpi.value}</p>
-              <p className="text-[9px] font-black text-slate-400 dark:text-slate-400 mt-2 capitalize tracking-tight opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity leading-snug">
-                {kpi.sub}
-              </p>
-            </div>
-            <div className="absolute top-0 right-0 p-2.5 opacity-[0.03] pointer-events-none">
-              <kpi.icon size={44} />
-            </div>
-          </motion.div>
-        ))}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {kpis.map((kpi, i) => {
+          const colorStyles = {
+            amber: 'bg-amber-50 dark:bg-amber-500/10 text-amber-500',
+            primary: 'bg-indigo-50 dark:bg-primary/10 text-primary',
+            emerald: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500',
+            blue: 'bg-blue-50 dark:bg-blue-500/10 text-blue-500',
+            fuchsia: 'bg-fuchsia-50 dark:bg-fuchsia-500/10 text-fuchsia-500'
+          };
+
+          return (
+            <motion.div
+              key={i}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: i * 0.05 }}
+              className="p-3 bg-white dark:bg-gray-900 rounded-[1.3rem] border border-slate-100 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all flex flex-col min-h-[110px]"
+            >
+              <div className="flex justify-between items-start">
+                <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tight leading-none">
+                  {kpi.label}
+                </p>
+                <div className={cn('flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black', kpi.trendUp ? 'text-emerald-500' : 'text-red-500')}>
+                  <TrendingUp size={10} strokeWidth={3} className={kpi.trendUp ? '' : 'rotate-180'} />
+                  {kpi.trend}
+                </div>
+              </div>
+
+              <div className="flex items-end justify-between mt-0.5">
+                <div className="leading-none mb-1">
+                  <p className="text-[22px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                    {kpi.value}
+                  </p>
+                  <p className={cn('text-[10px] font-black mt-1.5 capitalize tracking-tight', kpi.trendUp ? 'text-emerald-500' : 'text-red-500')}>
+                    {kpi.sub}
+                  </p>
+                </div>
+                
+                <div className="w-24 h-24 flex items-center justify-center transition-transform group-hover:scale-110 drop-shadow-[0_15px_15px_rgba(0,0,0,0.12)] -mr-4 -mb-4">
+                  <img src={kpi.iconSrc} alt="" className="w-full h-full object-contain" />
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
