@@ -15,26 +15,13 @@ const Account = () => {
   const navigate = useNavigate();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
-  const [deleting, setDeleting] = React.useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      setDeleting(true);
-      await api.delete('/users/profile');
-      toast.success('Account deleted successfully');
-      logout();
-      navigate('/login');
-    } catch (err) {
-      toast.error('Deletion failed');
-    } finally {
-      setDeleting(false);
-    }
-  };
+
 
   const menuItems = [
     { icon: User, label: 'Personal Information', sub: 'Name, email, and phone', path: '/account/info' },
@@ -116,59 +103,10 @@ const Account = () => {
           Sign out of account
         </button>
 
-        <button
-          onClick={() => setShowDeleteConfirm(true)}
-          className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/10 border border-red-100 dark:border-red-950/20 text-red-500 font-black tracking-widest text-[11px] active:scale-95 transition-all"
-        >
-          <Trash2 size={16} strokeWidth={3} />
-          Delete my account
-        </button>
+
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !deleting && setShowDeleteConfirm(false)}
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl relative z-10 p-5 text-center"
-            >
-              <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle size={24} />
-              </div>
-              <h3 className="text-base font-black text-slate-800 dark:text-white leading-tight">Delete Account?</h3>
-              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-2 uppercase tracking-widest">
-                This action is permanent and cannot be undone. All your data will be lost.
-              </p>
-              <div className="flex gap-2 mt-6">
-                <button
-                  disabled={deleting}
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-2.5 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-bold text-xs disabled:opacity-50"
-                >
-                  Keep Account
-                </button>
-                <button
-                  disabled={deleting}
-                  onClick={handleDeleteAccount}
-                  className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-black text-xs shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-1.5"
-                >
-                  {deleting ? 'Wait...' : 'Delete'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 
 const Loader = ({ text = 'Loading details...' }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] w-full bg-white dark:bg-gray-950 animate-in fade-in duration-500">
+    <div className="relative flex flex-col items-center justify-center h-[100dvh] w-full bg-white dark:bg-gray-950 animate-in fade-in duration-500">
       <div className="relative flex items-center justify-center mb-6">
         {/* Outer Ring */}
         <div className="w-16 h-16 border-4 border-slate-100 dark:border-gray-800 rounded-full" />
