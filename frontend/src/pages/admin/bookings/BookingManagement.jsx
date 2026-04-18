@@ -43,6 +43,7 @@ const BookingManagement = () => {
       const res = await api.get('/admin/bookings', { params });
       setBookings(res.data.bookings);
       setTotalPages(res.data.totalPages);
+      setTotalBookings(res.data.totalBookings);
     } catch (err) {
       toast.error('Failed to fetch bookings');
     } finally {

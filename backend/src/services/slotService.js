@@ -62,7 +62,7 @@ const fitsWithinAnyWindow = (start, end, windows = []) => (
 
 const getVendorDayAvailability = async (vendorId, targetDate, existingVendor = null) => {
   const vendor = existingVendor || await Vendor.findById(vendorId);
-  if (!vendor || vendor.status !== 'active') return null;
+  if (!vendor || vendor.status !== 'active' || vendor.isActive === false) return null;
 
   const now = moment().tz('Asia/Kolkata');
   if (targetDate.isBefore(now, 'day')) return null;

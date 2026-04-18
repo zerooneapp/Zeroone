@@ -112,7 +112,7 @@ const VendorDashboard = () => {
 
   const handleToggleStatus = async () => {
     if (!data.subscription?.isActive) {
-      return toast.error('Account Inactive. Recharge to resume', { icon: '🚨' });
+      return toast.error('Account Inactive. Recharge to resume', { icon: '\uD83D\uDEA8' });
     }
     if (statusLoading) return;
 
@@ -165,7 +165,7 @@ const VendorDashboard = () => {
     try {
       await api.patch(`/bookings/${id}/status`, { action: 'complete' });
       toast.success('Booking marked as completed', {
-        icon: '✅',
+        icon: '\u2705',
         style: {
           borderRadius: '12px',
           background: '#1C2C4E',
@@ -256,12 +256,12 @@ const VendorDashboard = () => {
           <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
             <div className="flex items-center gap-1.5">
               <span className="text-[#1C2C4E] uppercase">{item.time}</span>
-              <span className="opacity-20">•</span>
+              <span className="opacity-20">&bull;</span>
               <span className="truncate max-w-[150px]">{item.service}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="uppercase">{item.staffType === 'owner' ? 'Owner' : 'Staff'}</span>
-              <span className="opacity-20">•</span>
+              <span className="opacity-20">&bull;</span>
               <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
             </div>
           </div>
@@ -324,7 +324,7 @@ const VendorDashboard = () => {
               key={action.label}
               onClick={() => {
                 if (action.locked) {
-                  toast('Only for shop partners', { icon: '🔒' });
+                  toast('Only for shop partners', { icon: '\uD83D\uDD12' });
                   return;
                 }
                 if (action.onClick) {
@@ -351,7 +351,7 @@ const VendorDashboard = () => {
           <div className="grid gap-1.5 pb-0" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 0.85fr' }}>
             <div className="bg-[#1C2C4E] dark:bg-gray-900 py-2.5 px-1.5 rounded-lg shadow-lg border border-white/20 flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-white/90 tracking-tight leading-none mb-1.5 truncate">Today revenue</p>
-              <p className="text-[17px] font-black text-white leading-none truncate">₹{data.stats.todayEarnings.toLocaleString()}</p>
+              <p className="text-[17px] font-black text-white leading-none truncate">&#8377;{data.stats.todayEarnings.toLocaleString()}</p>
             </div>
             <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none mb-1.5 truncate">Today clients</p>
@@ -449,12 +449,12 @@ const VendorDashboard = () => {
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-[#1C2C4E] uppercase">{item.time}</span>
-                          <span className="opacity-20">•</span>
+                          <span className="opacity-20">&bull;</span>
                           <span className="truncate max-w-[150px]">{item.service}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className="uppercase">{item.staffType === 'owner' ? 'Owner' : 'Staff'}</span>
-                          <span className="opacity-20">â€¢</span>
+                          <span className="opacity-20">&bull;</span>
                           <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
                         </div>
                       </div>
@@ -506,7 +506,7 @@ const VendorDashboard = () => {
               </button>
               <div className="p-10 space-y-8">
                 <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-lg flex items-center justify-center mx-auto text-4xl shadow-inner shadow-rose-500/5">
-                  🚨
+                  &#x1F6A8;
                 </div>
                 <div className="text-center space-y-3">
                   <h2 className="text-2xl font-black tracking-tight dark:text-white leading-tight uppercase">Profile Restricted</h2>

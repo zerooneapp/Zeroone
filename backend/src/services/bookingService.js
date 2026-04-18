@@ -89,6 +89,13 @@ const buildSlotConflictError = async (message, vendorId, serviceIds, start) => {
 const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress) => {
   const { normalizeToGrid } = require('./slotService');
   const start = normalizeToGrid(startTime);
+
+  // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
+  const vendor = await Vendor.findById(vendorId);
+  if (!vendor || vendor.status !== 'active' || vendor.isActive === false) {
+    throw new Error('Vendor is currently not accepting new bookings (Account Inactive)');
+  }
+
   const serviceDetails = await Service.find({ _id: { $in: serviceIds }, vendorId });
 
   if (serviceDetails.length !== serviceIds.length) throw new Error('Services unavailable');
@@ -133,7 +140,6 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
 
   await SlotLock.deleteOne({ _id: lock._id });
 
-  const vendor = await Vendor.findById(vendorId);
   const staff = await Staff.findById(staffId);
 
   await sendRoleNotifications([
@@ -414,8 +420,12 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
     throw new Error(`Only confirmed bookings can be rescheduled (Current: ${booking.status})`);
   }
 
-  if (actorRole === 'customer' && moment().isAfter(moment(booking.startTime).subtract(30, 'minutes'))) {
-    throw new Error('Too late to reschedule (30m window)');
+  // 🛡️ SECURITY GUARD: Block customer-initiated reschedule if vendor is not active
+  if (actorRole === 'customer') {
+    const vendor = await Vendor.findById(booking.vendorId);
+    if (!vendor || vendor.status !== 'active' || vendor.isActive === false) {
+      throw new Error('This partner is currently not accepting reschedule requests (Account Inactive)');
+    }
   }
 
   const end = start.clone().add(booking.totalDuration, 'minutes');
