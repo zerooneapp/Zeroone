@@ -42,14 +42,10 @@ const resolveActorStaffId = async (req) => {
 const formatBookingResponse = (booking, role) => {
   const b = booking.toObject();
   const now = moment().tz('Asia/Kolkata');
-  const startTime = moment(b.startTime).tz('Asia/Kolkata');
-  const bufferTime = startTime.clone().subtract(30, 'minutes');
-
-  // Logic: 30-minute window
-  const isWithin30Mins = now.isSameOrAfter(bufferTime);
   const endTime = moment(b.endTime).tz('Asia/Kolkata');
   const isPastEnd = now.isAfter(endTime);
 
+  // Instant visibility & Any-time actions per client request
   b.canCancel = b.status === 'confirmed';
   b.canReschedule = b.status === 'confirmed';
   b.canContact = b.status === 'confirmed' && !isPastEnd;

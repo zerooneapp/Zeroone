@@ -379,9 +379,9 @@ const getVendorBookings = async (req, res) => {
 
       const endTime = moment(doc.endTime).tz('Asia/Kolkata');
 
-      // SOP Level Flags
-      doc.canCancel = !now.isSameOrAfter(bufferTime) && doc.status === 'confirmed';
-      doc.canContact = now.isSameOrAfter(bufferTime) && doc.status === 'confirmed' && now.isBefore(endTime);
+      // SOP Level Flags - Instant Unlock & Any-time actions per client request
+      doc.canCancel = doc.status === 'confirmed';
+      doc.canContact = doc.status === 'confirmed' && now.isBefore(endTime);
       if (doc.type !== 'home') {
         doc.serviceAddress = undefined;
       }
