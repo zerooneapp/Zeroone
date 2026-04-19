@@ -259,10 +259,10 @@ const VendorWallet = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={fetchData}
-              className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-95 transition-all"
+               onClick={fetchData}
+               className={`p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 active:rotate-180 transition-all duration-500 ${loading ? 'animate-spin' : ''}`}
             >
-              <RefreshCw size={16} />
+               <RefreshCw size={16} />
             </button>
             <button
               onClick={() => setIsTopupOpen(true)}

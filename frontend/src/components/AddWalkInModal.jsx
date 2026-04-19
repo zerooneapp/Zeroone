@@ -96,7 +96,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <h2 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">Add Walk-in</h2>
-              <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest">Manual entry for shop customers</p>
+              <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 capitalize tracking-widest">Manual entry for shop customers</p>
             </div>
             <button onClick={onClose} className="p-2.5 bg-slate-50 dark:bg-gray-900 rounded-xl text-slate-400 hover:text-red-500 transition-colors border border-slate-100 dark:border-gray-800">
               <X size={18} />
@@ -131,7 +131,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
 
             {/* Service Selection */}
             <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Select Services</label>
+              <label className="text-[9px] font-black text-slate-400 capitalize tracking-widest px-1">Select Services</label>
               <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1 custom-scrollbar">
                 {services.map(s => {
                   const isSelected = formData.selectedServices.find(ss => ss.serviceId === s._id);
@@ -140,7 +140,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
                       key={s._id}
                       type="button"
                       onClick={() => toggleService(s)}
-                      className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all ${isSelected ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-slate-400 dark:text-gray-500 shadow-sm'}`}
+                      className={`px-3 py-2 rounded-lg text-[9px] font-black capitalize tracking-wider border transition-all ${isSelected ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-slate-400 dark:text-gray-500 shadow-sm'}`}
                     >
                       {s.name} - ₹{s.price}
                     </button>
@@ -151,7 +151,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
 
             {/* Staff Selection */}
             <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Assign Staff</label>
+              <label className="text-[9px] font-black text-slate-400 capitalize tracking-widest px-1">Assign Staff</label>
               <div className="grid grid-cols-2 gap-1.5">
                 {staff.map(st => (
                   <button
@@ -163,7 +163,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
                     <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-gray-800 overflow-hidden">
                       <img src={st.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(st.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} alt={st.name} className="w-full h-full object-cover" />
                     </div>
-                    <span className="text-[9px] font-black uppercase truncate">{st.name}</span>
+                    <span className="text-[9px] font-black capitalize truncate">{st.name}</span>
                   </button>
                 ))}
               </div>
@@ -173,11 +173,11 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
             <div className="pt-2 space-y-2.5">
               <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-2xl shadow-md">
                 <div className="space-y-0.5">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total Amount</span>
+                  <span className="text-[8px] font-black text-slate-400 capitalize tracking-widest">Total Amount</span>
                   <p className="text-lg font-black text-slate-800 dark:text-white leading-none">₹{formData.selectedServices.reduce((sum, s) => sum + s.price, 0)}</p>
                 </div>
                 <div className="text-right space-y-0.5">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Estimated Time</span>
+                  <span className="text-[8px] font-black text-slate-400 capitalize tracking-widest">Estimated Time</span>
                   <p className="text-[9px] font-bold text-primary uppercase">{formData.selectedServices.reduce((sum, s) => sum + s.duration, 0)} mins</p>
                 </div>
               </div>
@@ -185,7 +185,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-primary/20 active:scale-95 transition-all disabled:opacity-50"
+                className="w-full py-4 bg-primary text-white text-[10px] font-black capitalize tracking-[0.2em] rounded-xl shadow-xl shadow-primary/20 active:scale-95 transition-all disabled:opacity-50"
               >
                 {loading ? 'Adding...' : 'Complete Entry'}
               </button>

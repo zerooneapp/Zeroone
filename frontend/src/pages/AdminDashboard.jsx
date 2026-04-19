@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   TrendingUp, Users, Store, Calendar,
   Zap, AlertTriangle, CheckCircle, XCircle,
-  ChevronRight, Filter, Star
+  ChevronRight, Filter, Star, IndianRupee,
+  BarChart3, Handshake, LayoutDashboard
 } from 'lucide-react';
 import {
   BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid,
@@ -14,13 +15,13 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 
 
-// 3D Icons
+// 3D Icons based on assets folder
+import calendarIcon from '../assets/3d-icons/calendar.png';
+import growthIcon from '../assets/3d-icons/growth.png';
+import partnersIcon from '../assets/3d-icons/partners.png';
 import revenueIcon from '../assets/3d-icons/revenue.png';
 import storeIcon from '../assets/3d-icons/store.png';
-import calendarIcon from '../assets/3d-icons/calendar.png';
 import usersIcon from '../assets/3d-icons/users.png';
-import partnersIcon from '../assets/3d-icons/partners.png';
-import growthIcon from '../assets/3d-icons/growth.png';
 
 const AdminDashboard = () => {
   const { isDarkMode } = useThemeStore();
@@ -93,9 +94,8 @@ const AdminDashboard = () => {
       trend: data.todayRevenue >= data.yesterdayRevenue ? '100.0%' : '-100.0%',
       trendUp: data.todayRevenue >= data.yesterdayRevenue,
       sub: `+${data.todayRevenue >= data.yesterdayRevenue ? '100.0' : '-100.0'}%`,
-      icon: Zap, 
-      color: 'amber', 
-      iconSrc: revenueIcon 
+      iconSrc: revenueIcon, 
+      color: 'amber'
     },
     { 
       label: 'New Partners', 
@@ -103,9 +103,8 @@ const AdminDashboard = () => {
       trend: '4.8%', 
       trendUp: true, 
       sub: '+4.8%', 
-      icon: Store, 
-      color: 'primary', 
-      iconSrc: storeIcon 
+      iconSrc: partnersIcon, 
+      color: 'primary'
     },
     { 
       label: 'Active Bookings', 
@@ -113,9 +112,8 @@ const AdminDashboard = () => {
       trend: '12.5%', 
       trendUp: true, 
       sub: '+12.5%', 
-      icon: Calendar, 
-      color: 'emerald', 
-      iconSrc: calendarIcon 
+      iconSrc: calendarIcon, 
+      color: 'emerald'
     },
     { 
       label: 'Total Users', 
@@ -123,9 +121,8 @@ const AdminDashboard = () => {
       trend: '7.2%', 
       trendUp: true, 
       sub: '+7.2%', 
-      icon: Users, 
-      color: 'blue', 
-      iconSrc: usersIcon 
+      iconSrc: usersIcon, 
+      color: 'blue'
     },
     { 
       label: 'Total Partners', 
@@ -133,9 +130,8 @@ const AdminDashboard = () => {
       trend: '2.1%', 
       trendUp: true, 
       sub: '+2.1%', 
-      icon: Store, 
-      color: 'fuchsia', 
-      iconSrc: partnersIcon 
+      iconSrc: storeIcon, 
+      color: 'fuchsia'
     },
     { 
       label: 'Total Revenue', 
@@ -143,9 +139,8 @@ const AdminDashboard = () => {
       trend: '15.4%', 
       trendUp: true, 
       sub: '+15.4%', 
-      icon: TrendingUp, 
-      color: 'emerald', 
-      iconSrc: growthIcon 
+      iconSrc: growthIcon, 
+      color: 'emerald'
     }
   ];
 
@@ -218,7 +213,7 @@ const AdminDashboard = () => {
                   </p>
                 </div>
                 
-                <div className="w-24 h-24 flex items-center justify-center transition-transform group-hover:scale-110 drop-shadow-[0_15px_15px_rgba(0,0,0,0.12)] -mr-4 -mb-4">
+                <div className="w-16 h-16 flex items-center justify-center transition-transform group-hover:scale-110 drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)] -mr-1 -mb-1">
                   <img src={kpi.iconSrc} alt="" className="w-full h-full object-contain" />
                 </div>
               </div>

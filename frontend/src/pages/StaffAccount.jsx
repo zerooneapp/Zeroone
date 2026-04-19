@@ -112,9 +112,9 @@ const StaffAccount = () => {
           <div className="space-y-1">
             <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{profile?.name}</h1>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Professional Partner</span>
+              <span className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Professional Partner</span>
               <div className="w-1 h-1 bg-primary rounded-full" />
-              <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{profile?.vendorId?.shopName || 'Market'}</span>
+              <span className="text-[10px] font-black text-primary capitalize tracking-[0.2em]">{profile?.vendorId?.shopName || 'Market'}</span>
             </div>
           </div>
         </div>
@@ -122,15 +122,15 @@ const StaffAccount = () => {
         <div className="grid grid-cols-3 gap-2 mt-6">
           <div className="p-3 bg-slate-50/80 dark:bg-gray-900/50 rounded-2xl text-center border border-white dark:border-gray-800/50">
             <Award size={16} strokeWidth={2.5} className="text-primary mx-auto mb-1 opacity-80" />
-            <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{stats.skills} Skills</p>
+            <p className="text-[10px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{stats.skills} Skills</p>
           </div>
           <div className="p-3 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl text-center border border-emerald-100/50 dark:border-emerald-900/30">
             <CheckCircle size={16} strokeWidth={2.5} className="text-emerald-500 mx-auto mb-1" />
-            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">Verified</p>
+            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 capitalize tracking-tight">Verified</p>
           </div>
           <div className="p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl text-center border border-blue-100/50 dark:border-blue-900/30">
             <TrendingUp size={16} strokeWidth={2.5} className="text-blue-500 mx-auto mb-1" />
-            <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tight">{stats.completed}+ Done</p>
+            <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 capitalize tracking-tight">{stats.completed}+ Done</p>
           </div>
         </div>
       </div>
@@ -138,7 +138,7 @@ const StaffAccount = () => {
       <div className="px-6 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
         <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Work Identity</h2>
+            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Work Identity</h2>
             <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
           </div>
 
@@ -150,8 +150,8 @@ const StaffAccount = () => {
                 <Calendar size={18} strokeWidth={2.5} />
               </div>
               <div>
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Onboarding Date</p>
-                <p className="text-xs font-black text-slate-900 dark:text-white mt-1 uppercase tracking-tight">{formatDate(profile?.createdAt)}</p>
+                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Onboarding Date</p>
+                <p className="text-xs font-black text-slate-900 dark:text-white mt-1 capitalize tracking-tight">{formatDate(profile?.createdAt)}</p>
               </div>
             </div>
 
@@ -160,10 +160,10 @@ const StaffAccount = () => {
                 <ShieldCheck size={18} strokeWidth={2.5} />
               </div>
               <div className="flex-1">
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Service Authorization</p>
+                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Service Authorization</p>
                 <div className="flex flex-wrap gap-1 mt-1.5">
                   {profile?.services?.map((service) => (
-                    <span key={service._id} className="text-[7.5px] font-black bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-lg text-slate-500 dark:text-gray-400 border border-slate-100 dark:border-gray-700/50 uppercase tracking-widest leading-none">
+                    <span key={service._id} className="text-[7.5px] font-black bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-lg text-slate-500 dark:text-gray-400 border border-slate-100 dark:border-gray-700/50 capitalize tracking-widest leading-none">
                       {service.name}
                     </span>
                   ))}
@@ -175,7 +175,7 @@ const StaffAccount = () => {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Employment & Support</h2>
+            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Employment & Support</h2>
             <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
           </div>
 
@@ -186,7 +186,7 @@ const StaffAccount = () => {
                   <Briefcase size={20} strokeWidth={2.5} className="opacity-80" />
                 </div>
                 <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Primary Branch</p>
+                  <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none mb-1">Primary Branch</p>
                   <h3 className="text-xs font-black text-slate-900 dark:text-white tracking-tight">{profile?.vendorId?.shopName || 'Partner Hub'}</h3>
                 </div>
               </div>
@@ -201,7 +201,7 @@ const StaffAccount = () => {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">History</h2>
+            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">History</h2>
             <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
           </div>
 
@@ -215,7 +215,7 @@ const StaffAccount = () => {
                 <button
                   key={item.id}
                   onClick={() => setHistoryPeriod(item.id)}
-                  className={`px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
+                  className={`px-3 py-2 rounded-xl text-[9px] font-black capitalize tracking-widest border transition-all ${
                     historyPeriod === item.id
                       ? 'bg-slate-900 dark:bg-primary text-white border-slate-900 dark:border-primary'
                       : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 border-slate-100 dark:border-gray-700'
@@ -236,11 +236,11 @@ const StaffAccount = () => {
 
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 bg-slate-50/80 dark:bg-gray-800/60 rounded-2xl border border-slate-100 dark:border-gray-700/50">
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Bookings</p>
+                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest">Bookings</p>
                 <p className="text-lg font-black text-slate-900 dark:text-white mt-1">{history.summary?.totalBookings || 0}</p>
               </div>
               <div className="p-3 bg-emerald-50/60 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100/60 dark:border-emerald-900/30">
-                <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Earnings</p>
+                <p className="text-[8px] font-black text-emerald-500 capitalize tracking-widest">Earnings</p>
                 <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1">{formatMoney(history.summary?.totalEarnings || 0)}</p>
               </div>
             </div>
@@ -253,7 +253,7 @@ const StaffAccount = () => {
                 <button
                   key={item.id}
                   onClick={() => setHistoryView(item.id)}
-                  className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                  className={`flex-1 py-2 rounded-xl text-[9px] font-black capitalize tracking-widest transition-all ${
                     historyView === item.id
                       ? 'bg-white dark:bg-gray-900 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-400 dark:text-gray-400'
@@ -268,7 +268,7 @@ const StaffAccount = () => {
               {historyView === 'bookings' ? (
                 (history.bookings || []).length === 0 ? (
                   <div className="p-4 rounded-2xl bg-slate-50 dark:bg-gray-800/60 border border-dashed border-slate-100 dark:border-gray-700 text-center">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">No booking history found</p>
+                    <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest">No booking history found</p>
                   </div>
                 ) : (
                   history.bookings.slice(0, 8).map((booking) => (
@@ -280,11 +280,11 @@ const StaffAccount = () => {
                         <p className="text-[11px] font-black text-slate-900 dark:text-white tracking-tight truncate">
                           {booking.services?.map((service) => service.name).join(', ') || 'Service Booking'}
                         </p>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                        <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest">
                           {formatDate(booking.startTime)} • {formatTime(booking.startTime)}
                         </p>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-[7px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border ${
+                          <span className={`text-[7px] font-black capitalize tracking-widest px-2 py-1 rounded-lg border ${
                             booking.status === 'completed'
                               ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/30'
                               : booking.status === 'cancelled'
@@ -307,7 +307,7 @@ const StaffAccount = () => {
                 )
               ) : (history.earnings || []).length === 0 ? (
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-gray-800/60 border border-dashed border-slate-100 dark:border-gray-700 text-center">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">No earning history found</p>
+                  <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest">No earning history found</p>
                 </div>
               ) : (
                 history.earnings.slice(0, 8).map((entry) => (
@@ -319,7 +319,7 @@ const StaffAccount = () => {
                       <p className="text-[11px] font-black text-slate-900 dark:text-white tracking-tight truncate">
                         {entry.description || 'Booking Revenue'}
                       </p>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                      <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest">
                         {formatDate(entry.timestamp)} • {formatTime(entry.timestamp)}
                       </p>
                     </div>
@@ -338,7 +338,7 @@ const StaffAccount = () => {
 
         <button
           onClick={logout}
-          className="w-full h-11 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-[2.2rem] flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-[0.2em] border border-slate-200/50 dark:border-gray-700 active:scale-95 transition-all shadow-sm group"
+          className="w-full h-11 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-[2.2rem] flex items-center justify-center gap-3 font-black text-[10px] capitalize tracking-[0.2em] border border-slate-200/50 dark:border-gray-700 active:scale-95 transition-all shadow-sm group"
         >
           <LogOut size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
           Sign Out

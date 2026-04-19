@@ -87,7 +87,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
           >
             <div className="p-4 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-500">Emergency Window</p>
+                <p className="text-[9px] font-black capitalize tracking-[0.25em] text-amber-500">Emergency Window</p>
                 <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-1">Temporary Shop Closure</h2>
               </div>
               <button
@@ -101,7 +101,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
             <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 <label className="space-y-1.5">
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Start Date</span>
+                  <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Start Date</span>
                   <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
                     <CalendarDays size={14} className="text-slate-400" />
                     <input
@@ -114,7 +114,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                 </label>
 
                 <label className="space-y-1.5">
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Start Time</span>
+                  <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Start Time</span>
                   <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
                     <Clock3 size={14} className="text-slate-400" />
                     <input
@@ -127,7 +127,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                 </label>
 
                 <label className="space-y-1.5">
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">End Date</span>
+                  <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">End Date</span>
                   <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
                     <CalendarDays size={14} className="text-slate-400" />
                     <input
@@ -140,7 +140,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                 </label>
 
                 <label className="space-y-1.5">
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">End Time</span>
+                  <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">End Time</span>
                   <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
                     <Clock3 size={14} className="text-slate-400" />
                     <input
@@ -154,7 +154,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
               </div>
 
               <label className="space-y-1.5 block">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Reason</span>
+                <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Reason</span>
                 <textarea
                   value={form.reason}
                   onChange={(e) => setForm((prev) => ({ ...prev, reason: e.target.value }))}
@@ -172,7 +172,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                         <AlertTriangle size={18} />
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">
+                        <p className="text-[10px] font-black capitalize tracking-[0.2em] text-amber-600 dark:text-amber-400">
                           Impact Preview
                         </p>
                         <p className="text-[12px] font-black text-slate-900 dark:text-white">
@@ -190,7 +190,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                   <div className="space-y-2">
                     {preview.impactedBookings.length === 0 ? (
                       <div className="p-4 rounded-xl border border-dashed border-slate-200 dark:border-gray-700 text-center">
-                        <p className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-[0.2em]">
+                        <p className="text-[10px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-[0.2em]">
                           No existing bookings will be affected
                         </p>
                       </div>
@@ -205,7 +205,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                               <p className="text-[12px] font-black text-slate-900 dark:text-white">
                                 {booking.userId?.name || booking.walkInCustomerName || 'Customer'}
                               </p>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.18em] mt-1">
+                              <p className="text-[9px] font-black text-slate-400 capitalize tracking-[0.18em] mt-1">
                                 {dayjs(booking.startTime).format('DD MMM, hh:mm A')}
                               </p>
                             </div>
@@ -225,14 +225,14 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
               <button
                 onClick={handlePreview}
                 disabled={previewing || creating}
-                className="h-11 px-4 bg-white dark:bg-gray-900 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-gray-700 text-[10px] font-black uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50"
+                className="h-11 px-4 bg-white dark:bg-gray-900 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-gray-700 text-[10px] font-black capitalize tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50"
               >
                 {previewing ? 'Checking...' : 'Preview Impact'}
               </button>
               <button
                 onClick={handleCreate}
                 disabled={!preview || previewing || creating || preview.conflicts?.length > 0}
-                className="h-11 px-5 bg-slate-900 dark:bg-[#1C2C4E] text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all disabled:opacity-40"
+                className="h-11 px-5 bg-slate-900 dark:bg-[#1C2C4E] text-white rounded-xl text-[10px] font-black capitalize tracking-[0.2em] shadow-lg active:scale-95 transition-all disabled:opacity-40"
               >
                 {creating ? 'Activating...' : 'Activate Closure'}
               </button>
