@@ -571,23 +571,23 @@ const VendorProfile = () => {
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <p className="text-[8px] font-black capitalize tracking-widest text-gray-400 px-1">
                            Same date in both boxes shows one specific day.
-                        </p>
-                        <div className="flex items-center gap-2">
+                         </p>
+                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                            <select
                               value={historyFilters.status}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, status: e.target.value }))}
-                              className="h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                              className="flex-1 sm:flex-none h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
                            >
                               <option value="">All</option>
                               <option value="completed">Completed</option>
                               <option value="cancelled">Cancelled</option>
                               <option value="confirmed">Confirmed</option>
                            </select>
-                           <div className="px-3 h-9 inline-flex items-center rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize tracking-widest text-slate-500 dark:text-gray-300">
+                           <div className="flex-1 sm:flex-none px-3 h-9 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize tracking-widest text-slate-500 dark:text-gray-300">
                               Total {historyBookings.length}
                            </div>
                         </div>
-                     </div>
+                        </div>
 
                      <div className="space-y-2">
                         {historyLoading ? (
@@ -627,7 +627,7 @@ const VendorProfile = () => {
                                  <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider">
                                     <div className="flex items-center gap-1.5">
                                        <Calendar size={11} />
-                                       {new Date(booking.startTime).toLocaleDateString()}
+                                       {new Date(booking.startTime).toLocaleDateString('en-GB')}
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                        <Clock size={11} />
@@ -691,8 +691,8 @@ const VendorProfile = () => {
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <p className="text-[8px] font-black capitalize tracking-widest text-gray-400 px-1">
                            Same date in both boxes shows one specific day.
-                        </p>
-                        <div className="flex items-center gap-2">
+                         </p>
+                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                            <select
                               value={transactionFilters.source}
                               onChange={(e) => setTransactionFilters((prev) => ({
@@ -700,7 +700,7 @@ const VendorProfile = () => {
                                  source: e.target.value,
                                  staffId: e.target.value === 'staff' ? prev.staffId : ''
                               }))}
-                              className="h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                              className="flex-1 sm:flex-none h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
                            >
                               <option value="total">Total</option>
                               <option value="partner">Partner</option>
@@ -710,7 +710,7 @@ const VendorProfile = () => {
                               <select
                                  value={transactionFilters.staffId}
                                  onChange={(e) => setTransactionFilters((prev) => ({ ...prev, staffId: e.target.value }))}
-                                 className="h-9 px-3 max-w-[150px] bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                                 className="flex-1 sm:flex-none h-9 px-3 max-w-[150px] bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
                               >
                                  <option value="">All Staff</option>
                                  {staffOptions.map((staff) => (
@@ -720,7 +720,7 @@ const VendorProfile = () => {
                                  ))}
                               </select>
                            )}
-                           <div className="px-2 h-9 flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize text-slate-500 dark:text-gray-300 shrink-0 shadow-sm">
+                           <div className="flex-1 sm:flex-none px-2 h-9 flex items-center justify-center gap-1.5 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize text-slate-500 dark:text-gray-300 shadow-sm">
                               <div className="flex flex-col items-center leading-none px-0.5">
                                   <span className="text-[6.5px] opacity-40">Qty</span>
                                   <span>{transactions.length}</span>
@@ -763,7 +763,7 @@ const VendorProfile = () => {
                                  <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider">
                                     <div className="flex items-center gap-1.5">
                                        <Calendar size={11} />
-                                       {new Date(transaction.timestamp).toLocaleDateString()}
+                                       {new Date(transaction.timestamp).toLocaleDateString('en-GB')}
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                        <Clock size={11} />

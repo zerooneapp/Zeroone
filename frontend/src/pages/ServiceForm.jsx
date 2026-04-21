@@ -28,9 +28,9 @@ const ServiceForm = () => {
       description: '',
       type: 'shop'
    });
-   const [images, setImages] = useState([null, null, null, null]);
-   const [existingImages, setExistingImages] = useState([null, null, null, null]);
-   const [previews, setPreviews] = useState([null, null, null, null]);
+   const [images, setImages] = useState([null]);
+   const [existingImages, setExistingImages] = useState([null]);
+   const [previews, setPreviews] = useState([null]);
    const [loading, setLoading] = useState(false);
 
    useEffect(() => {
@@ -51,9 +51,9 @@ const ServiceForm = () => {
                   });
                   // Handling multi-images if they exist in legacy or new format
                   const existingImages = service.images || (service.image ? [service.image] : []);
-                  const newPreviews = [null, null, null, null];
-                  const newExistingImages = [null, null, null, null];
-                  existingImages.slice(0, 4).forEach((img, idx) => {
+                  const newPreviews = [null];
+                  const newExistingImages = [null];
+                  existingImages.slice(0, 1).forEach((img, idx) => {
                      newPreviews[idx] = img;
                      newExistingImages[idx] = img;
                   });
@@ -157,18 +157,17 @@ const ServiceForm = () => {
 
          <main className="px-4 mt-6">
             <form id="service-form" onSubmit={handleSubmit} className="space-y-6 pb-12 max-w-2xl mx-auto">
-               {/* Elite 4-Image Grid Upload */}
+               {/* Image Upload */}
                <section className="space-y-4">
                   <div className="flex items-center justify-between px-1">
-                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Service Gallery (Max 4)</label>
-                     <span className="text-[8px] font-black text-primary uppercase italic tracking-tighter opacity-70">Main Image First</span>
+                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Service Image</label>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                      {previews.map((prev, idx) => (
                         <div
                            key={idx}
-                           className={`relative aspect-square rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${prev ? 'border-primary/20 bg-primary/5' : 'border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900/50'
+                           className={`relative aspect-video rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${prev ? 'border-primary/20 bg-primary/5' : 'border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900/50'
                               }`}
                         >
                            {prev ? (
