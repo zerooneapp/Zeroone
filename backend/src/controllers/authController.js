@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { sendOtpSms } = require('../services/smsService');
 
-const shouldExposeOtpInResponse = true;
+const shouldExposeOtpInResponse = false;
 const shouldLogOtpToConsole = true;
 
 const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
@@ -196,7 +196,7 @@ const sendOTP = async (req, res) => {
     if (!phone) return res.status(400).json({ message: 'Phone number is required' });
 
     // Generate 5-digit OTP
-    const otp = Math.floor(10000 + Math.random() * 90000).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     // Check User or Staff

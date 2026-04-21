@@ -15,7 +15,7 @@ const CustomerAuth = () => {
 
   const [step, setStep] = useState('phone'); // phone, otp
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const [isOTPFocused, setIsOTPFocused] = useState(false);
@@ -40,8 +40,8 @@ const CustomerAuth = () => {
   };
 
   const handleOTPChange = (e) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 5);
-    const newOtp = ['', '', '', '', ''];
+    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+    const newOtp = ['', '', '', '', '', ''];
     val.split('').forEach((char, i) => {
       newOtp[i] = char;
     });
@@ -65,7 +65,7 @@ const CustomerAuth = () => {
 
   const handleVerifyOTP = async () => {
     const otpValue = otp.join('');
-    if (otpValue.length < 5) return toast.error('Please enter the full code');
+    if (otpValue.length < 6) return toast.error('Please enter the full code');
 
     const res = await verifyOTP(phone, otpValue);
     if (res.success) {
@@ -163,7 +163,7 @@ const CustomerAuth = () => {
                 <div className="relative">
                   <input
                     type="tel"
-                    maxLength={5}
+                    maxLength={6}
                     value={otp.join('')}
                     onChange={handleOTPChange}
                     onFocus={() => setIsOTPFocused(true)}

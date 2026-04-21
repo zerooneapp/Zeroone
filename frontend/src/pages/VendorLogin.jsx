@@ -13,7 +13,7 @@ const VendorAuth = () => {
 
   const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const [isOTPFocused, setIsOTPFocused] = useState(false);
@@ -34,8 +34,8 @@ const VendorAuth = () => {
   };
 
   const handleOTPChange = (e) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 5);
-    const nextOtp = ['', '', '', '', ''];
+    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+    const nextOtp = ['', '', '', '', '', ''];
     val.split('').forEach((char, index) => {
       nextOtp[index] = char;
     });
@@ -61,7 +61,7 @@ const VendorAuth = () => {
 
   const handleVerifyOTP = async () => {
     const otpValue = otp.join('');
-    if (otpValue.length < 5) {
+    if (otpValue.length < 6) {
       return toast.error('Please enter the full code');
     }
 
@@ -171,7 +171,7 @@ const VendorAuth = () => {
                 <div className="relative">
                   <input
                     type="tel"
-                    maxLength={5}
+                    maxLength={6}
                     value={otp.join('')}
                     onChange={handleOTPChange}
                     onFocus={() => setIsOTPFocused(true)}
@@ -213,9 +213,8 @@ const VendorAuth = () => {
                       <button
                         disabled={!canResend}
                         onClick={handleSendOTP}
-                        className={`text-[10px] font-black uppercase tracking-[0.2em] border-b border-current pb-0.5 transition-all ${
-                          canResend ? 'text-[#1C2C4E]' : 'text-gray-300'
-                        }`}
+                        className={`text-[10px] font-black uppercase tracking-[0.2em] border-b border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E]' : 'text-gray-300'
+                          }`}
                       >
                         Resend OTP
                       </button>
