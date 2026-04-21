@@ -36,14 +36,14 @@ const GlassConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, co
                 {title}
               </h3>
 
-              <p className="text-[11px] font-bold text-slate-500/80 dark:text-gray-400 mt-1.5 leading-relaxed tracking-widest px-2">
+              <p className="text-[11px] font-bold text-slate-500/80 dark:text-gray-400 mt-1.5 leading-relaxed tracking-tight px-2">
                 {message}
               </p>
 
               <div className="grid grid-cols-2 gap-3 mt-5">
                 <button
                   onClick={onClose}
-                  className="py-3 bg-slate-100/50 dark:bg-gray-800/50 text-slate-400 dark:text-gray-500 rounded-2xl font-black text-[10px] capitalize tracking-widest active:scale-95 transition-all border border-slate-200/5 dark:border-gray-700/50"
+                  className="py-3 bg-slate-100/50 dark:bg-gray-800/50 text-slate-400 dark:text-gray-500 rounded-2xl font-black text-[10px] capitalize tracking-tight active:scale-95 transition-all border border-slate-200/5 dark:border-gray-700/50"
                 >
                   {cancelText}
                 </button>
@@ -52,7 +52,7 @@ const GlassConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, co
                     onConfirm();
                     onClose();
                   }}
-                  className="py-3 bg-[#1C2C4E] text-white rounded-2xl font-black text-[10px] capitalize tracking-widest shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all"
+                  className="py-3 bg-[#1C2C4E] text-white rounded-2xl font-black text-[10px] capitalize tracking-tight shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all"
                 >
                   {confirmText}
                 </button>

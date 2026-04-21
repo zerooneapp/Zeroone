@@ -82,7 +82,7 @@ const VendorVerification = () => {
             <div className="space-y-4">
               <h1 className="text-3xl font-black tracking-tighter leading-tight">Verification in Progress</h1>
               <p className="text-gray-500 dark:text-gray-400 font-bold leading-relaxed">
-                Thank you for choosing <span className="text-primary">ZerOne</span>. Your documents have been received and are currently under review by our compliance team.
+                Thank you for choosing <span className="text-primary">ZeroOne</span>. Your documents have been received and are currently under review by our compliance team.
               </p>
             </div>
 

@@ -544,24 +544,26 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Booking History</h2>
                      </div>
 
-                     <div className="flex items-center gap-1.5 w-full">
-                        <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={historyFilters.from}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
-                        <div className="text-slate-300 dark:text-gray-600 font-black text-xs shrink-0">
+                        <div className="text-slate-300 dark:text-gray-700 font-black text-xs shrink-0">
                            &gt;
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={historyFilters.to}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
                      </div>
@@ -662,24 +664,26 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Transactions</h2>
                      </div>
 
-                     <div className="flex items-center gap-1.5 w-full">
-                        <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={transactionFilters.from}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
-                        <div className="text-slate-300 dark:text-gray-600 font-black text-xs shrink-0">
+                        <div className="text-slate-300 dark:text-gray-700 font-black text-xs shrink-0">
                            &gt;
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={transactionFilters.to}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
                      </div>

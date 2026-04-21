@@ -195,17 +195,17 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                     <Scissors size={12} /> Select Services
                   </label>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 p-1.5">
                   {services.map(s => (
                     <button
                       key={s._id}
                       onClick={() => toggleService(s._id)}
                       className={`p-3 rounded-xl border transition-all flex flex-col gap-1 text-left ${formData.serviceIds.includes(s._id)
-                        ? 'bg-primary/10 border-primary shadow-sm'
+                        ? 'bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] shadow-sm transform scale-105'
                         : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
                         }`}
                     >
-                      <span className={`text-[10px] font-black capitalize ${formData.serviceIds.includes(s._id) ? 'text-[#1C2C4E]' : 'text-gray-900 dark:text-white'}`}>
+                      <span className={`text-[10px] font-black capitalize ${formData.serviceIds.includes(s._id) ? 'text-[#1C2C4E] dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
                         {s.name}
                       </span>
                       <p className="text-[9px] font-black text-slate-400 capitalize tracking-[0.18em] mt-1">₹{s.price} • {s.duration}m</p>
@@ -252,13 +252,13 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                 ) : availableSlots.length === 0 ? (
                   <div className="p-8 text-center text-gray-400 capitalize text-[9px] font-black bg-slate-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-slate-200 dark:border-gray-800">No slots found</div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-4 gap-2 p-1.5">
                     {availableSlots.map(slot => (
                       <button
                         key={slot.time}
                         onClick={() => setFormData({ ...formData, time: slot.time })}
                         className={`py-2.5 rounded-lg text-[10px] font-black border transition-all ${formData.time === slot.time
-                          ? 'bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-md'
+                          ? 'bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-md transform scale-105'
                           : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm'
                           }`}
                       >
@@ -272,18 +272,18 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
               {formData.time && (
                 <div className="space-y-2">
                   <label className="text-[9px] font-black capitalize text-gray-400 tracking-widest px-1">Assign Staff Member</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 p-1.5">
                     {availableStaffForSelectedSlot.map(s => (
                         <button
                           key={s._id}
                           onClick={() => setFormData({ ...formData, staffId: s._id })}
-                          className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${formData.staffId === s._id ? 'border-primary bg-primary/10 shadow-sm' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
+                          className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${formData.staffId === s._id ? 'bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 shadow-xl transform scale-105' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
                             }`}
                         >
                           <div className="w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden">
                             {s.image ? <img src={s.image} alt="" className="w-full h-full object-cover" /> : <User size={12} className="text-gray-400" />}
                           </div>
-                          <span className={`text-[9px] font-black capitalize truncate ${formData.staffId === s._id ? 'text-[#1C2C4E]' : 'text-gray-900 dark:text-white'}`}>{s.name}</span>
+                          <span className={`text-[9px] font-black capitalize truncate ${formData.staffId === s._id ? 'text-[#1C2C4E] dark:text-white' : 'text-gray-900 dark:text-white'}`}>{s.name}</span>
                         </button>
                       ))}
                   </div>

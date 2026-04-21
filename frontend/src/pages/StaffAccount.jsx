@@ -5,12 +5,16 @@ import {
   CheckCircle, TrendingUp, IndianRupee
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import Navbar from '../layouts/Navbar';
 
 const StaffAccount = () => {
   const { logout } = useAuthStore();
+  const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({
     skills: 0,
@@ -337,13 +341,59 @@ const StaffAccount = () => {
         </div>
 
         <button
-          onClick={logout}
+          onClick={() => setShowLogoutConfirm(true)}
           className="w-full h-11 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-[2.2rem] flex items-center justify-center gap-3 font-black text-[10px] capitalize tracking-[0.2em] border border-slate-200/50 dark:border-gray-700 active:scale-95 transition-all shadow-sm group"
         >
           <LogOut size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
           Sign Out
         </button>
       </div>
+
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[250] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLogoutConfirm(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-[2.5rem] overflow-hidden shadow-2xl relative z-10 p-5 text-center border border-white/20 dark:border-gray-800"
+            >
+              <div className="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-rose-100/50">
+                <LogOut size={20} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Confirm Logout</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-1.5 tracking-widest leading-relaxed">
+                Are you sure you want to sign out? You will need to login again.
+              </p>
+              <div className="flex gap-2.5 mt-6">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-black text-[11px] capitalize tracking-widest active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate('/login');
+                    setShowLogoutConfirm(false);
+                  }}
+                  className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black text-[11px] capitalize tracking-widest shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+                >
+                  OK
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <Navbar />
     </div>

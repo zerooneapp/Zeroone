@@ -161,6 +161,21 @@ function App() {
     };
   }, [isDarkMode, logout]);
 
+  const toastStyle = {
+    background: isDarkMode ? 'rgba(15, 23, 42, 0.7)' : 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.4)',
+    color: isDarkMode ? '#fff' : '#1C2C4E',
+    borderRadius: '20px',
+    padding: '10px 18px',
+    fontSize: '11px',
+    fontWeight: '900',
+    letterSpacing: '0.02em',
+    boxShadow: isDarkMode ? '0 8px 32px 0 rgba(0, 0, 0, 0.3)' : '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+    maxWidth: '90%',
+  };
+
   return (
     <Router>
       <Routes>
@@ -269,7 +284,25 @@ function App() {
       </Routes>
 
       <AddressPopup />
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster 
+        position="top-center" 
+        reverseOrder={false}
+        toastOptions={{
+          style: toastStyle,
+          success: {
+            iconTheme: {
+              primary: isDarkMode ? '#10B981' : '#1C2C4E',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
     </Router>
   );
 }

@@ -221,75 +221,6 @@ const VendorSignup = () => {
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">PAN Card</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {panCardFile ? (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
-                        <img src={URL.createObjectURL(panCardFile)} alt="PAN" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                        <FileText className="text-gray-300" size={18} />
-                      </div>
-                    )}
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{panCardFile ? panCardFile.name : 'ADD PAN CARD'}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {panCardFile && <CheckCircle2 className="text-green-500" size={16} />}
-                    <ArrowRight size={14} className="text-gray-300" />
-                  </div>
-                  <input type="file" className="hidden" onChange={(e) => setPanCardFile(e.target.files[0])} accept="image/*" />
-                </label>
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">GST Certificate</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {gstCertificateFile ? (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
-                        <img src={URL.createObjectURL(gstCertificateFile)} alt="GST" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                        <FileText className="text-gray-300" size={18} />
-                      </div>
-                    )}
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{gstCertificateFile ? gstCertificateFile.name : 'ADD GST CERTIFICATE'}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {gstCertificateFile && <CheckCircle2 className="text-green-500" size={16} />}
-                    <ArrowRight size={14} className="text-gray-300" />
-                  </div>
-                  <input type="file" className="hidden" onChange={(e) => setGstCertificateFile(e.target.files[0])} accept="image/*" />
-                </label>
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Registration</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {shopRegistrationFile ? (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
-                        <img src={URL.createObjectURL(shopRegistrationFile)} alt="Registration" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                        <FileText className="text-gray-300" size={18} />
-                      </div>
-                    )}
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopRegistrationFile ? shopRegistrationFile.name : 'ADD SHOP REGISTRY'}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {shopRegistrationFile && <CheckCircle2 className="text-green-500" size={16} />}
-                    <ArrowRight size={14} className="text-gray-300" />
-                  </div>
-                  <input type="file" className="hidden" onChange={(e) => setShopRegistrationFile(e.target.files[0])} accept="image/*" />
-                </label>
-              </div>
-
-              <div className="space-y-1.5">
                 <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Aadhaar Card (Front Side)</p>
                 <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                   <div className="flex items-center gap-3 overflow-hidden">
@@ -332,6 +263,75 @@ const VendorSignup = () => {
                     <ArrowRight size={14} className="text-gray-300" />
                   </div>
                   <input type="file" className="hidden" onChange={(e) => setAadhaarBackFile(e.target.files[0])} accept="image/*" />
+                </label>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">PAN Card</p>
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {panCardFile ? (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
+                        <img src={URL.createObjectURL(panCardFile)} alt="PAN" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                        <FileText className="text-gray-300" size={18} />
+                      </div>
+                    )}
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{panCardFile ? panCardFile.name : 'ADD PAN CARD'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {panCardFile && <CheckCircle2 className="text-green-500" size={16} />}
+                    <ArrowRight size={14} className="text-gray-300" />
+                  </div>
+                  <input type="file" className="hidden" onChange={(e) => setPanCardFile(e.target.files[0])} accept="image/*" />
+                </label>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Registration (Optional)</p>
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {shopRegistrationFile ? (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
+                        <img src={URL.createObjectURL(shopRegistrationFile)} alt="Registration" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                        <FileText className="text-gray-300" size={18} />
+                      </div>
+                    )}
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopRegistrationFile ? shopRegistrationFile.name : 'ADD SHOP REGISTRY (OPTIONAL)'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {shopRegistrationFile && <CheckCircle2 className="text-green-500" size={16} />}
+                    <ArrowRight size={14} className="text-gray-300" />
+                  </div>
+                  <input type="file" className="hidden" onChange={(e) => setShopRegistrationFile(e.target.files[0])} accept="image/*" />
+                </label>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">GST Certificate (Optional)</p>
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {gstCertificateFile ? (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
+                        <img src={URL.createObjectURL(gstCertificateFile)} alt="GST" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                        <FileText className="text-gray-300" size={18} />
+                      </div>
+                    )}
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{gstCertificateFile ? gstCertificateFile.name : 'ADD GST CERTIFICATE (OPTIONAL)'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {gstCertificateFile && <CheckCircle2 className="text-green-500" size={16} />}
+                    <ArrowRight size={14} className="text-gray-300" />
+                  </div>
+                  <input type="file" className="hidden" onChange={(e) => setGstCertificateFile(e.target.files[0])} accept="image/*" />
                 </label>
               </div>
             </div>
@@ -408,7 +408,7 @@ const VendorSignup = () => {
               <div className="space-y-3">
                 {formData.serviceMode === 'shop' && (
                 <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Façade Image</p>
+                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Façade Image (Optional)</p>
                   <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {shopImage ? (
@@ -420,7 +420,7 @@ const VendorSignup = () => {
                           <Camera className="text-gray-300" size={18} />
                         </div>
                       )}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopImage ? 'SHOP IMAGE READY' : 'ADD FRONT PHOTO'}</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopImage ? 'SHOP IMAGE READY' : 'ADD FRONT PHOTO (OPTIONAL)'}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300" />
                     <input type="file" className="hidden" onChange={(e) => setShopImage(e.target.files[0])} accept="image/*" />
@@ -429,7 +429,7 @@ const VendorSignup = () => {
                 )}
 
                 <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Vendor Profile Photo</p>
+                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Vendor Profile Photo (Optional)</p>
                   <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {vendorPhoto ? (
@@ -441,7 +441,7 @@ const VendorSignup = () => {
                           <Upload className="text-gray-300" size={18} />
                         </div>
                       )}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{vendorPhoto ? 'PHOTO READY' : 'ADD OWNER PHOTO'}</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{vendorPhoto ? 'PHOTO READY' : 'ADD OWNER PHOTO (OPTIONAL)'}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300" />
                     <input type="file" className="hidden" onChange={(e) => setVendorPhoto(e.target.files[0])} accept="image/*" />

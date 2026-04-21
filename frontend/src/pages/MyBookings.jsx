@@ -127,7 +127,7 @@ const MyBookings = () => {
               >
                 <div className="flex justify-between items-start mb-2 leading-none">
                   <div>
-                    <h3 className="font-black text-[15px] text-gray-900 dark:text-white truncate max-w-[200px] tracking-tight">{booking.vendorId.shopName}</h3>
+                    <h3 className="font-black text-[15px] text-gray-900 dark:text-white truncate max-w-[200px] tracking-tight">{booking.vendorId?.shopName || 'Vendor'}</h3>
                     <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-gray-400 tracking-tight mt-1.5">
                       <MapPin size={11} strokeWidth={3} className="text-slate-300 dark:text-gray-500" />
                       <span className="line-clamp-1">{booking.vendorId?.address || 'Vendor location'}</span>

@@ -100,7 +100,7 @@ const VendorLayout = () => {
                       className="text-[#1C2C4E] dark:text-white"
                     />
 
-                    <span className="text-[10px] font-black capitalize tracking-tight text-[#1C2C4E] dark:text-white">
+                    <span className="text-[10px] font-black uppercase tracking-tight text-[#1C2C4E] dark:text-white">
                       {item.label}
                     </span>
                   </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, Clock, User, Phone, CheckCircle, 
+import {
+  Calendar, Clock, User, Phone, CheckCircle,
   ChevronLeft, Filter, Search, ClipboardList,
   Lock, ArrowLeft, MapPin
 } from 'lucide-react';
@@ -9,7 +9,9 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import dayjs from 'dayjs';
 import Navbar from '../layouts/Navbar';
+import CancellationModal from '../components/CancellationModal';
 
 const StaffBookings = () => {
   const { user } = useAuthStore();
@@ -17,7 +19,10 @@ const StaffBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   const fetchBookings = async () => {
     try {
@@ -34,13 +39,13 @@ const StaffBookings = () => {
   useEffect(() => {
     fetchBookings();
   }, []);
-
   const filteredBookings = bookings.filter(b => {
-    const isCorrectStatus = activeTab === 'upcoming' 
-      ? (b.status === 'confirmed' || b.status === 'assigned') 
+    const isCorrectStatus = activeTab === 'upcoming'
+      ? (b.status === 'confirmed' || b.status === 'assigned')
       : b.status === 'completed';
-    const isCorrectDate = new Date(b.startTime).toISOString().split('T')[0] === selectedDate;
-    return isCorrectStatus && isCorrectDate;
+    const bookingDate = new Date(b.startTime).toISOString().split('T')[0];
+    const isWithinRange = bookingDate >= startDate && bookingDate <= endDate;
+    return isCorrectStatus && isWithinRange;
   });
 
   const formatTime = (isoString) => {
@@ -50,171 +55,202 @@ const StaffBookings = () => {
   };
 
   const handleStatusUpdate = async (bookingId, action, reason = '') => {
-     if (action === 'cancel' && !reason) {
-       reason = window.prompt('Please enter the cancellation reason:');
-       if (!reason) {
-         return toast.error('Cancellation reason is required');
-       }
-     }
-     try {
-       await api.patch(`/bookings/${bookingId}/status`, { action, reason });
-       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
-       fetchBookings();
-     } catch (err) {
-       toast.error(err.response?.data?.message || 'Update failed');
-     }
+    if (action === 'cancel' && !reason) {
+      setSelectedBookingId(bookingId);
+      setIsCancelModalOpen(true);
+      return;
+    }
+    try {
+      await api.patch(`/bookings/${bookingId}/status`, { action, reason });
+      toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
+      fetchBookings();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Update failed');
+    }
   };
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-       {/* 📱 OPTIMIZED MOBILE HEADER */}
-       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-3 px-5 pb-2">
-          <div className="flex items-center gap-4 mb-5">
-             <button 
-               onClick={() => navigate('/staff')}
-               className="p-2.5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl active:scale-90 transition-transform"
-             >
-                <ArrowLeft size={20} />
-             </button>
-             <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Schedule</h1>
+      {/* 📱 OPTIMIZED MOBILE HEADER */}
+      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-3 px-5 pb-2">
+        <div className="flex items-center gap-4 mb-5">
+          <button
+            onClick={() => navigate('/staff')}
+            className="p-2.5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl active:scale-90 transition-transform"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Schedule</h1>
+        </div>
+
+        <div className="space-y-3">
+          {/* Row 1: Range Filter */}
+          <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-2xl border border-gray-100 dark:border-gray-800/50">
+            <div className="flex-1 space-y-1">
+              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 appearance-none"
+                />
+              </div>
+            </div>
+
+            <div className="pt-3 text-gray-300">
+              <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
+            </div>
+
+            <div className="flex-1 space-y-1">
+              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 appearance-none"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-3">
-             {/* Row 1: Filter & Date */}
-             <div className="flex items-center gap-2">
-                <div className="flex-1 relative">
-                   <input 
-                     type="date" 
-                     value={selectedDate}
-                     onChange={(e) => setSelectedDate(e.target.value)}
-                     className="w-full h-12 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-5 text-xs font-black text-gray-900 dark:text-white focus:ring-0"
-                   />
-                </div>
-             </div>
-
-             {/* Row 2: Status Tabs (Moved Below for Mobile Reach) */}
-             <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-100 dark:border-gray-800/50">
-                {['upcoming', 'completed'].map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
-                      activeTab === tab 
-                        ? 'bg-white dark:bg-gray-800 text-primary dark:text-white shadow-xl shadow-black/5' 
-                        : 'text-gray-400'
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-             </div>
+          {/* Row 2: Status Tabs */}
+          <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-100 dark:border-gray-800/50">
+            {['upcoming', 'completed'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${activeTab === tab
+                  ? 'bg-white dark:bg-gray-800 text-primary dark:text-white shadow-xl shadow-black/5'
+                  : 'text-gray-400'
+                  }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
-       </div>
+        </div>
+      </div>
 
-       {/* Assignments List Area */}
-       <div className="p-4 space-y-3">
-          <AnimatePresence mode="wait">
-            {loading ? (
-               <div className="space-y-3 px-1">
-                  {[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-50 dark:bg-gray-900 rounded-[2rem] animate-pulse" />)}
-               </div>
-            ) : filteredBookings.length > 0 ? (
-               <div className="space-y-3">
-                  {filteredBookings.map((booking) => (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      key={booking._id}
-                      className="bg-white dark:bg-gray-900 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden active:bg-gray-50 dark:active:bg-gray-800 transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-300 overflow-hidden">
-                             {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={20} />}
-                           </div>
-                            <div>
-                               <h3 className="text-sm font-black text-slate-900 dark:text-white leading-none">
-                                  {booking.walkInCustomerName || booking.userId?.name || 'Client'}
-                               </h3>
-                               <p className="text-[10px] font-black text-primary uppercase tracking-[0.1em] mt-2 flex items-center gap-1.5">
-                                  <Clock size={11} strokeWidth={3} /> {formatTime(booking.startTime)}
-                               </p>
-                            </div>
-                         </div>
-                         
-                         {booking.canContact ? (
-                            <a href={`tel:${booking.userId?.phone}`} className="p-2.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all">
-                               <Phone size={16} strokeWidth={2.5} />
-                            </a>
-                         ) : (
-                            <div className="p-2.5 bg-slate-50 dark:bg-gray-800 text-slate-300 dark:text-gray-600 rounded-xl border border-slate-100 dark:border-gray-800 opacity-40">
-                               <Lock size={16} />
-                            </div>
-                         )}
+      {/* Assignments List Area */}
+      <div className="p-4 space-y-3">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <div className="space-y-3 px-1">
+              {[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-50 dark:bg-gray-900 rounded-[2rem] animate-pulse" />)}
+            </div>
+          ) : filteredBookings.length > 0 ? (
+            <div className="space-y-3">
+              {filteredBookings.map((booking) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  key={booking._id}
+                  className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden active:bg-gray-50 dark:active:bg-gray-800 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-300 overflow-hidden">
+                        {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={20} />}
                       </div>
-
-                      <div className="space-y-3 mb-5 px-1">
-                        <div className="space-y-1.5">
-                          {booking.services?.map((s, idx) => (
-                            <div key={idx} className="text-[10px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-2 tracking-tight">
-                               <div className="w-1.5 h-1.5 bg-primary/30 rounded-full" />
-                               {s.name || s.serviceId?.name || 'Service Task'}
-                            </div>
-                          ))}
+                      <div>
+                        <h3 className="text-sm font-black text-slate-900 dark:text-white leading-none">
+                          {booking.walkInCustomerName || booking.userId?.name || 'Client'}
+                        </h3>
+                        <div className="text-[10px] font-black text-primary uppercase tracking-tighter mt-2 flex items-center gap-3">
+                          <div className="flex items-center gap-1">
+                            <Clock size={11} strokeWidth={3} /> {formatTime(booking.startTime)}
+                          </div>
+                          <div className="flex items-center gap-2 opacity-70">
+                            <Calendar size={11} strokeWidth={3} /> {dayjs(booking.startTime).format('DD-MM-YYYY')}
+                          </div>
                         </div>
-                        
-                        <div className="flex items-center gap-5 py-3 border-y border-slate-50 dark:border-gray-800/40 my-1">
-                           <div className="flex flex-col gap-1">
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Price</span>
-                              <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-none">₹{booking.totalPrice}</span>
-                           </div>
-                           <div className="w-px h-6 bg-slate-100 dark:bg-gray-800" />
-                           <div className="flex flex-col gap-1">
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Estimate</span>
-                              <span className="text-xs font-black text-slate-600 dark:text-gray-400 uppercase tracking-tight leading-none">{booking.totalDuration} Mins</span>
-                           </div>
-                        </div>
-
                       </div>
+                    </div>
 
-                      {activeTab === 'upcoming' && (
-                        <div className="flex gap-2">
-                          {booking.canCancel && (
-                            <button 
-                              onClick={() => handleStatusUpdate(booking._id, 'cancel')}
-                              className="px-6 h-13 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-[1.25rem] flex items-center justify-center font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform"
-                            >
-                              Cancel
-                            </button>
-                          )}
-                          <button 
-                            onClick={() => handleStatusUpdate(booking._id, 'complete')}
-                            className="flex-1 h-13 bg-gray-900 dark:bg-primary text-white rounded-[1.25rem] flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-transform"
-                          >
-                             <CheckCircle size={18} />
-                             Finalize
-                          </button>
+                    {booking.canContact ? (
+                      <a href={`tel:${booking.userId?.phone}`} className="p-2.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                        <Phone size={16} strokeWidth={2.5} />
+                      </a>
+                    ) : (
+                      <div className="p-2.5 bg-slate-50 dark:bg-gray-800 text-slate-300 dark:text-gray-600 rounded-xl border border-slate-100 dark:border-gray-800 opacity-40">
+                        <Lock size={16} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3 mb-2.5 px-1">
+                    <div className="space-y-1.5">
+                      {booking.services?.map((s, idx) => (
+                        <div key={idx} className="text-[10px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-2 tracking-tight">
+                          <div className="w-1.5 h-1.5 bg-primary/30 rounded-full" />
+                          {s.name || s.serviceId?.name || 'Service Task'}
                         </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-5 py-1.5 border-y border-slate-50 dark:border-gray-800/40 my-1">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight leading-none">Price</span>
+                        <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-none">₹{booking.totalPrice}</span>
+                      </div>
+                      <div className="w-px h-6 bg-slate-100 dark:bg-gray-800" />
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight leading-none">Estimate</span>
+                        <span className="text-xs font-black text-slate-600 dark:text-gray-400 uppercase tracking-tight leading-none">{booking.totalDuration} Mins</span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {activeTab === 'upcoming' && (
+                    <div className="flex gap-2">
+                      {booking.canCancel && (
+                        <button
+                          onClick={() => handleStatusUpdate(booking._id, 'cancel')}
+                          className="px-6 h-8 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform"
+                        >
+                          Cancel
+                        </button>
                       )}
-                    </motion.div>
-                  ))}
-               </div>
-            ) : (
-               <div className="py-24 text-center space-y-6">
-                  <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mx-auto text-gray-200">
-                     <ClipboardList size={40} />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-widest">No assignments found</p>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase">{activeTab} List is Empty</p>
-                  </div>
-               </div>
-            )}
-          </AnimatePresence>
-       </div>
+                      <button
+                        onClick={() => handleStatusUpdate(booking._id, 'complete')}
+                        className="flex-1 h-8 bg-gray-900 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-tight shadow-xl active:scale-95 transition-transform"
+                      >
+                        <CheckCircle size={18} />
+                        Finalize
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-24 text-center space-y-6">
+              <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mx-auto text-gray-200">
+                <ClipboardList size={40} />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-widest">No assignments found</p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase">{activeTab} List is Empty</p>
+              </div>
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
 
-       <Navbar />
+      <Navbar />
+
+      <CancellationModal 
+        isOpen={isCancelModalOpen}
+        onClose={() => {
+          setIsCancelModalOpen(false);
+          setSelectedBookingId(null);
+        }}
+        onConfirm={(reason) => handleStatusUpdate(selectedBookingId, 'cancel', reason)}
+      />
     </div>
   );
 };
