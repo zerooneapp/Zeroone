@@ -73,19 +73,20 @@ const StaffBookings = () => {
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       {/* 📱 OPTIMIZED MOBILE HEADER */}
       <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-3 px-5 pb-2">
-        <div className="flex items-center gap-4 mb-5">
+        <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/staff')}
-            className="p-2.5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl active:scale-90 transition-transform"
+            className="p-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
-          <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Schedule</h1>
+          <h1 className="text-[15px] font-black text-gray-900 dark:text-white tracking-tight uppercase">Schedule</h1>
+          <div className="w-8"></div>
         </div>
 
         <div className="space-y-3">
           {/* Row 1: Range Filter */}
-          <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-2xl border border-gray-100 dark:border-gray-800/50">
+          <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-gray-100 dark:border-gray-800/50">
             <div className="flex-1 space-y-1">
               <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
               <div className="relative group">
@@ -121,7 +122,7 @@ const StaffBookings = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${activeTab === tab
+                className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${activeTab === tab
                   ? 'bg-white dark:bg-gray-800 text-primary dark:text-white shadow-xl shadow-black/5'
                   : 'text-gray-400'
                   }`}
@@ -217,10 +218,10 @@ const StaffBookings = () => {
                       )}
                       <button
                         onClick={() => handleStatusUpdate(booking._id, 'complete')}
-                        className="flex-1 h-8 bg-gray-900 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-tight shadow-xl active:scale-95 transition-transform"
+                        className="flex-1 h-8 bg-primary text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-tight shadow-xl active:scale-95 transition-transform"
                       >
                         <CheckCircle size={18} />
-                        Finalize
+                        Complete
                       </button>
                     </div>
                   )}
