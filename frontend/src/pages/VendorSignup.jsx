@@ -106,7 +106,7 @@ const VendorSignup = () => {
       });
 
       toast.success('Your application is under verification! 🛡️', { duration: 5000 });
-      navigate('/vendor-verification');
+      navigate('/vendor-verification', { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Submission failed');
     } finally {

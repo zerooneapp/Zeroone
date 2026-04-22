@@ -284,7 +284,7 @@ const VendorProfile = () => {
          await api.delete('/users/profile');
          toast.success('Shop deleted successfully');
          logout();
-         navigate('/vendor-login');
+         navigate('/vendor-login', { replace: true });
       } catch (err) {
          toast.error('Deletion failed');
       } finally {
@@ -817,7 +817,7 @@ const VendorProfile = () => {
                         <button
                            onClick={() => {
                               logout();
-                              navigate('/vendor-login');
+                              navigate('/vendor-login', { replace: true });
                            }}
                            className="flex-1 py-2.5 bg-rose-500 text-white rounded-xl font-black text-xs shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
                         >

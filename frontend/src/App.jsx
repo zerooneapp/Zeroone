@@ -65,6 +65,7 @@ import {
 
 // Components & Utils
 import ProtectedRoute from './components/ProtectedRoute';
+import GuestRoute from './components/GuestRoute';
 import AddressPopup from './components/AddressPopup';
 import StaffDashboard from './pages/StaffDashboard';
 import StaffBookings from './pages/StaffBookings';
@@ -165,11 +166,13 @@ function App() {
     <Router>
       <Routes>
         {/* PUBLIC GUEST ROUTES */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/vendor-login" element={<VendorLogin />} />
-        <Route path="/vendor-signup" element={<VendorSignup />} />
+        <Route element={<GuestRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/vendor-login" element={<VendorLogin />} />
+          <Route path="/vendor-signup" element={<VendorSignup />} />
+        </Route>
         <Route path="/vendor-verification" element={<VendorVerification />} />
         <Route path="/vendor-pending" element={<PendingVerification />} />
 

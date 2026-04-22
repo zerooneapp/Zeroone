@@ -4,6 +4,7 @@ import {
   LogOut, Briefcase, Award,
   CheckCircle, TrendingUp, IndianRupee
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -11,6 +12,7 @@ import Navbar from '../layouts/Navbar';
 
 const StaffAccount = () => {
   const { logout } = useAuthStore();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({
     skills: 0,
@@ -337,8 +339,11 @@ const StaffAccount = () => {
         </div>
 
         <button
-          onClick={logout}
-          className="w-full h-11 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-[2.2rem] flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-[0.2em] border border-slate-200/50 dark:border-gray-700 active:scale-95 transition-all shadow-sm group"
+          onClick={() => {
+            logout();
+            navigate('/vendor-login', { replace: true });
+          }}
+          className="w-full h-11 bg-slate-50 dark:bg-gray-900 text-rose-500 rounded-[2.2rem] flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-[0.2em] border border-slate-200/50 dark:border-gray-800 active:scale-95 transition-all shadow-sm group"
         >
           <LogOut size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
           Sign Out

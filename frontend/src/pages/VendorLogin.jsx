@@ -89,13 +89,13 @@ const VendorAuth = () => {
       if (intendedPath) {
         navigate(intendedPath, { replace: true });
       } else if (role === 'admin' || role === 'super_admin') {
-        navigate('/admin');
+        navigate('/admin', { replace: true });
       } else if (role === 'vendor') {
-        navigate('/vendor');
+        navigate('/vendor', { replace: true });
       } else if (role === 'staff') {
-        navigate('/staff');
+        navigate('/staff', { replace: true });
       } else {
-        navigate('/');
+        navigate('/', { replace: true });
       }
     } else {
       toast.error(res.message);

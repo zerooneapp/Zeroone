@@ -119,7 +119,8 @@ export const useAuthStore = create(
             serviceLevel: 'standard'
           }
         });
-        localStorage.clear(); // Nuclear clear for all local states
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth-storage');
       },
 
       syncVendorStatus: async () => {

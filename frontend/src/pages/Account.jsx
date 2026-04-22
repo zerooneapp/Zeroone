@@ -19,7 +19,7 @@ const Account = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   const handleDeleteAccount = async () => {
@@ -28,7 +28,7 @@ const Account = () => {
       await api.delete('/users/profile');
       toast.success('Account deleted successfully');
       logout();
-      navigate('/login');
+      navigate('/login', { replace: true });
     } catch (err) {
       toast.error('Deletion failed');
     } finally {

@@ -54,7 +54,7 @@ const Signup = () => {
       const { useAuthStore } = await import('../store/authStore');
       await useAuthStore.getState().restoreSession();
       toast.success('Registration successful!');
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
