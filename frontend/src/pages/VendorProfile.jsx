@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-   ArrowLeft, Store, Camera, Video, MapPin, Loader2,
-   Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
-   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle
-} from 'lucide-react';
+    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
+    Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
+    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck
+ } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import Button from '../components/Button';
@@ -259,6 +259,14 @@ const VendorProfile = () => {
          isToggle: true,
       },
       {
+         key: 'security',
+         label: 'Security',
+         subtitle: 'Account protection & privacy',
+         icon: ShieldCheck,
+         iconBg: 'bg-indigo-500/10',
+         iconColor: 'text-indigo-500',
+      },
+      {
          key: 'logout',
          label: 'Logout',
          subtitle: 'Sign out of your account',
@@ -266,15 +274,6 @@ const VendorProfile = () => {
          iconBg: 'bg-rose-500/10',
          iconColor: 'text-rose-500',
          isLogout: true,
-      },
-      {
-         key: 'delete',
-         label: 'Delete Account',
-         subtitle: 'Permanently remove shop data',
-         icon: Trash2,
-         iconBg: 'bg-red-500/10',
-         iconColor: 'text-red-500',
-         isDelete: true,
       },
    ];
 
@@ -306,7 +305,7 @@ const VendorProfile = () => {
                <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
             </button>
             <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-               {activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Shop Media' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transactions' : 'Account Settings'}
+               {activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Shop Media' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transactions' : activeSection === 'security' ? 'Security' : 'Account Settings'}
             </h1>
          </header>
 
@@ -367,12 +366,12 @@ const VendorProfile = () => {
                         <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
                            <Store size={16} />
                         </div>
-                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Basic Info</h2>
+                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Basic Info</h2>
                      </div>
 
                      <form onSubmit={handleUpdateInfo} className="space-y-4">
                         <div className="space-y-1.5">
-                           <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Shop Name</label>
+                           <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Shop Name</label>
                            <input
                               type="text"
                               value={data.shopName}
@@ -384,12 +383,12 @@ const VendorProfile = () => {
 
                         <div className="space-y-1.5">
                            <div className="flex items-center justify-between px-1">
-                              <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Business Address</label>
+                              <label className="text-[9px] font-black capitalize text-gray-400 tracking-widest">Business Address</label>
                               <button 
                                  type="button"
                                  onClick={handleFetchLocation}
                                  disabled={locationLoading}
-                                 className="flex items-center gap-1 text-primary text-[8px] font-black uppercase tracking-widest hover:opacity-70 transition-all disabled:opacity-50"
+                                 className="flex items-center gap-1 text-primary text-[8px] font-black capitalize tracking-widest hover:opacity-70 transition-all disabled:opacity-50"
                               >
                                  {locationLoading ? <Loader2 size={10} className="animate-spin" /> : <MapPin size={10} />}
                                  Auto Fetch
@@ -405,7 +404,7 @@ const VendorProfile = () => {
 
                         <div className="grid grid-cols-2 gap-3">
                            <div className="space-y-1.5">
-                              <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Open Time</label>
+                              <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Open Time</label>
                               <input
                                  type="text"
                                  value={data.workingHours.start}
@@ -415,7 +414,7 @@ const VendorProfile = () => {
                               />
                            </div>
                            <div className="space-y-1.5">
-                              <label className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Close Time</label>
+                              <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Close Time</label>
                               <input
                                  type="text"
                                  value={data.workingHours.end}
@@ -426,7 +425,7 @@ const VendorProfile = () => {
                            </div>
                         </div>
 
-                        <Button type="submit" loading={loading} className="w-full rounded-lg py-3 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all active:scale-95">
+                        <Button type="submit" loading={loading} className="w-full rounded-lg py-3 font-black capitalize tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all active:scale-95">
                            Save Changes
                         </Button>
                      </form>
@@ -447,12 +446,12 @@ const VendorProfile = () => {
                         <div className="p-2 bg-purple-500/10 text-purple-500 rounded-lg">
                            <Camera size={16} />
                         </div>
-                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Shop Media</h2>
+                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Shop Media</h2>
                      </div>
 
                      {/* Current Gallery */}
                      <div className="space-y-2">
-                        <p className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Current Gallery</p>
+                        <p className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Current Gallery</p>
                         <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
                            {currentMedia?.galleryImages?.map((img, i) => (
                               <div key={i} className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-800 shadow-sm">
@@ -467,12 +466,12 @@ const VendorProfile = () => {
 
                      {/* Video */}
                      <div className="space-y-2">
-                        <p className="text-[9px] font-black uppercase text-gray-400 ml-1 tracking-widest">Promotional Video</p>
+                        <p className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Promotional Video</p>
                         {currentMedia?.shopVideo ? (
                            <div className="relative w-full h-24 bg-slate-50 dark:bg-gray-800/50 rounded-xl overflow-hidden flex items-center justify-center border border-slate-100 dark:border-gray-800">
                               <Video className="text-gray-300" size={24} />
                               <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-sm"><CheckCircle2 size={10} /></div>
-                              <p className="absolute bottom-2 left-3 text-[8px] font-black uppercase text-gray-400 opacity-60">Status: Active</p>
+                              <p className="absolute bottom-2 left-3 text-[8px] font-black capitalize text-gray-400 opacity-60">Status: Active</p>
                            </div>
                         ) : (
                            <p className="text-[9px] italic text-gray-300 px-1 font-bold">No promotional video uploaded</p>
@@ -484,8 +483,8 @@ const VendorProfile = () => {
                         <div className="space-y-4">
                            <div className="flex items-center justify-between">
                               <div>
-                                 <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight">Add Images</p>
-                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter uppercase mt-0.5">1:1 or 4:3 ratio</p>
+                                 <p className="text-[11px] font-black text-gray-900 dark:text-white capitalize tracking-tight">Add Images</p>
+                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter capitalize mt-0.5">1:1 or 4:3 ratio</p>
                               </div>
                               <input type="file" id="gallery-input" multiple className="hidden" onChange={(e) => setGalleryFiles([...galleryFiles, ...Array.from(e.target.files)])} />
                               <label htmlFor="gallery-input" className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-pointer shadow-md border border-slate-200/60 dark:border-gray-800">
@@ -496,7 +495,7 @@ const VendorProfile = () => {
                            {galleryFiles.length > 0 && (
                               <div className="flex flex-wrap gap-1.5">
                                  {galleryFiles.map((f, i) => (
-                                    <div key={i} className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-[8px] font-black uppercase flex items-center gap-1.5 border border-blue-500/20">
+                                    <div key={i} className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-[8px] font-black capitalize flex items-center gap-1.5 border border-blue-500/20">
                                        {f.name.slice(0, 12)}
                                        <X size={10} className="cursor-pointer" onClick={() => setGalleryFiles(galleryFiles.filter((_, idx) => idx !== i))} />
                                     </div>
@@ -506,8 +505,8 @@ const VendorProfile = () => {
 
                            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-gray-800">
                               <div>
-                                 <p className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight">Promo Video</p>
-                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter uppercase mt-0.5">MP4 (Max 30s / 50MB)</p>
+                                 <p className="text-[11px] font-black text-gray-900 dark:text-white capitalize tracking-tight">Promo Video</p>
+                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter capitalize mt-0.5">MP4 (Max 30s / 50MB)</p>
                               </div>
                               <button 
                                  type="button"
@@ -520,10 +519,10 @@ const VendorProfile = () => {
                         </div>
                      </div>
 
-                     <Button onClick={handleMediaUpload} loading={loading} className="w-full rounded-xl py-3 font-black uppercase tracking-widest text-[10px] bg-slate-900 dark:bg-primary shadow-xl shadow-black/10 active:scale-95 transition-all">
+                     <Button onClick={handleMediaUpload} loading={loading} className="w-full rounded-xl py-3 font-black capitalize tracking-widest text-[10px] bg-slate-900 dark:bg-primary shadow-xl shadow-black/10 active:scale-95 transition-all">
                         Upload & Sync Gallery
                      </Button>
-                     <p className="text-[8px] text-center text-gray-400 font-black uppercase tracking-widest opacity-60">
+                     <p className="text-[8px] text-center text-gray-400 font-black capitalize tracking-widest opacity-60">
                         Changes reflect instantly on customer side
                      </p>
                   </motion.section>
@@ -542,51 +541,53 @@ const VendorProfile = () => {
                         <div className="p-2 bg-amber-500/10 text-amber-500 rounded-lg">
                            <History size={16} />
                         </div>
-                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Booking History</h2>
+                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Booking History</h2>
                      </div>
 
-                     <div className="flex items-center gap-1.5 w-full">
-                        <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={historyFilters.from}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
-                        <div className="text-slate-300 dark:text-gray-600 font-black text-xs shrink-0">
+                        <div className="text-slate-300 dark:text-gray-700 font-black text-xs shrink-0">
                            &gt;
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={historyFilters.to}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
                      </div>
 
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 px-1">
+                        <p className="text-[8px] font-black capitalize tracking-widest text-gray-400 px-1">
                            Same date in both boxes shows one specific day.
-                        </p>
-                        <div className="flex items-center gap-2">
+                         </p>
+                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                            <select
                               value={historyFilters.status}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, status: e.target.value }))}
-                              className="h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                              className="flex-1 sm:flex-none h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
                            >
                               <option value="">All</option>
                               <option value="completed">Completed</option>
                               <option value="cancelled">Cancelled</option>
                               <option value="confirmed">Confirmed</option>
                            </select>
-                           <div className="px-3 h-9 inline-flex items-center rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-gray-300">
+                           <div className="flex-1 sm:flex-none px-3 h-9 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize tracking-widest text-slate-500 dark:text-gray-300">
                               Total {historyBookings.length}
                            </div>
                         </div>
-                     </div>
+                        </div>
 
                      <div className="space-y-2">
                         {historyLoading ? (
@@ -595,7 +596,7 @@ const VendorProfile = () => {
                            ))
                         ) : historyBookings.length === 0 ? (
                            <div className="py-10 text-center bg-slate-50/60 dark:bg-gray-800/40 rounded-xl border border-dashed border-slate-200 dark:border-gray-800">
-                              <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">No bookings found</p>
+                              <p className="text-[9px] font-black capitalize tracking-widest text-gray-400">No bookings found</p>
                            </div>
                         ) : (
                            historyBookings.map((booking) => (
@@ -608,11 +609,11 @@ const VendorProfile = () => {
                                        <p className="text-[12px] font-black text-slate-800 dark:text-white leading-tight">
                                           {booking.walkInCustomerName || booking.userId?.name || 'Customer'}
                                        </p>
-                                       <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest mt-1">
+                                       <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 capitalize tracking-widest mt-1">
                                           {booking.services?.map((service) => service.name).join(', ') || 'Service'}
                                        </p>
                                     </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                                    <span className={`px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border ${
                                        booking.status === 'completed'
                                           ? 'bg-emerald-50 text-emerald-500 border-emerald-100'
                                           : booking.status === 'cancelled'
@@ -623,10 +624,10 @@ const VendorProfile = () => {
                                     </span>
                                  </div>
 
-                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider">
                                     <div className="flex items-center gap-1.5">
                                        <Calendar size={11} />
-                                       {new Date(booking.startTime).toLocaleDateString()}
+                                       {new Date(booking.startTime).toLocaleDateString('en-GB')}
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                        <Clock size={11} />
@@ -660,36 +661,38 @@ const VendorProfile = () => {
                         <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
                            <Wallet size={16} />
                         </div>
-                        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Transactions</h2>
+                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Transactions</h2>
                      </div>
 
-                     <div className="flex items-center gap-1.5 w-full">
-                        <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={transactionFilters.from}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
-                        <div className="text-slate-300 dark:text-gray-600 font-black text-xs shrink-0">
+                        <div className="text-slate-300 dark:text-gray-700 font-black text-xs shrink-0">
                            &gt;
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
+                           <Calendar size={12} className="text-slate-400" />
                            <input
                               type="date"
                               value={transactionFilters.to}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full py-2 px-1.5 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
                            />
                         </div>
                      </div>
 
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 px-1">
+                        <p className="text-[8px] font-black capitalize tracking-widest text-gray-400 px-1">
                            Same date in both boxes shows one specific day.
-                        </p>
-                        <div className="flex items-center gap-2">
+                         </p>
+                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                            <select
                               value={transactionFilters.source}
                               onChange={(e) => setTransactionFilters((prev) => ({
@@ -697,7 +700,7 @@ const VendorProfile = () => {
                                  source: e.target.value,
                                  staffId: e.target.value === 'staff' ? prev.staffId : ''
                               }))}
-                              className="h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                              className="flex-1 sm:flex-none h-9 px-3 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
                            >
                               <option value="total">Total</option>
                               <option value="partner">Partner</option>
@@ -707,7 +710,7 @@ const VendorProfile = () => {
                               <select
                                  value={transactionFilters.staffId}
                                  onChange={(e) => setTransactionFilters((prev) => ({ ...prev, staffId: e.target.value }))}
-                                 className="h-9 px-3 max-w-[150px] bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-300 outline-none"
+                                 className="flex-1 sm:flex-none h-9 px-3 max-w-[150px] bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-[10px] font-black capitalize tracking-widest text-gray-500 dark:text-gray-300 outline-none"
                               >
                                  <option value="">All Staff</option>
                                  {staffOptions.map((staff) => (
@@ -717,7 +720,7 @@ const VendorProfile = () => {
                                  ))}
                               </select>
                            )}
-                           <div className="px-2 h-9 flex items-center gap-1.5 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black uppercase text-slate-500 dark:text-gray-300 shrink-0 shadow-sm">
+                           <div className="flex-1 sm:flex-none px-2 h-9 flex items-center justify-center gap-1.5 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize text-slate-500 dark:text-gray-300 shadow-sm">
                               <div className="flex flex-col items-center leading-none px-0.5">
                                   <span className="text-[6.5px] opacity-40">Qty</span>
                                   <span>{transactions.length}</span>
@@ -735,7 +738,7 @@ const VendorProfile = () => {
                            ))
                         ) : transactions.length === 0 ? (
                            <div className="py-10 text-center bg-slate-50/60 dark:bg-gray-800/40 rounded-xl border border-dashed border-slate-200 dark:border-gray-800">
-                              <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">No earnings found</p>
+                              <p className="text-[9px] font-black capitalize tracking-widest text-gray-400">No earnings found</p>
                            </div>
                         ) : (
                            transactions.map((transaction) => (
@@ -748,19 +751,19 @@ const VendorProfile = () => {
                                        <p className="text-[12px] font-black text-slate-800 dark:text-white leading-tight">
                                           {transaction.sourceType === 'staff' ? transaction.sourceLabel : transaction.sourceType === 'partner' ? 'Partner Earning' : 'Shop Earning'}
                                        </p>
-                                       <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest mt-1">
+                                       <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 capitalize tracking-widest mt-1">
                                           {transaction.description || transaction.reason || 'Booking Revenue'}
                                        </p>
                                     </div>
-                                    <span className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border bg-emerald-50 text-emerald-500 border-emerald-100">
+                                    <span className="px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border bg-emerald-50 text-emerald-500 border-emerald-100">
                                        {transaction.sourceType}
                                     </span>
                                  </div>
 
-                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-wider">
+                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider">
                                     <div className="flex items-center gap-1.5">
                                        <Calendar size={11} />
-                                       {new Date(transaction.timestamp).toLocaleDateString()}
+                                       {new Date(transaction.timestamp).toLocaleDateString('en-GB')}
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                        <Clock size={11} />
@@ -778,6 +781,45 @@ const VendorProfile = () => {
                               </div>
                            ))
                         )}
+                     </div>
+                  </motion.section>
+               )}
+               {activeSection === 'security' && (
+                  <motion.section
+                     key="security"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="space-y-4"
+                  >
+                     <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                           <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                              <ShieldCheck size={16} />
+                           </div>
+                           <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Security Settings</h2>
+                        </div>
+
+                        <div className="space-y-3">
+                           <p className="text-[11px] font-bold text-slate-500 dark:text-gray-400 px-1">
+                              Manage your account security and data privacy.
+                           </p>
+                           
+                           <button
+                              onClick={() => setShowDeleteConfirm(true)}
+                              className="w-full flex items-center gap-3.5 bg-rose-50 dark:bg-rose-900/10 rounded-xl px-4 py-3.5 border border-rose-100 dark:border-rose-900/20 active:scale-[0.98] transition-all group"
+                           >
+                              <div className="w-10 h-10 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center shrink-0">
+                                 <Trash2 size={18} />
+                              </div>
+                              <div className="flex-1 text-left">
+                                 <p className="text-sm font-black text-rose-600 dark:text-rose-400 leading-tight">Delete Account</p>
+                                 <p className="text-[10px] font-medium text-rose-400/70 mt-0.5">Permanently remove shop data</p>
+                              </div>
+                              <ChevronRight size={16} className="text-rose-300 group-active:translate-x-0.5 transition-transform" />
+                           </button>
+                        </div>
                      </div>
                   </motion.section>
                )}
@@ -847,7 +889,7 @@ const VendorProfile = () => {
                         <AlertTriangle size={24} />
                      </div>
                      <h3 className="text-base font-black text-slate-800 dark:text-white leading-tight">Delete Shop?</h3>
-                     <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-2 uppercase tracking-widest">
+                     <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-2 capitalize tracking-widest">
                         This will permanently remove your shop, staff, and earnings history. This cannot be undone.
                      </p>
                      <div className="flex gap-2 mt-6">
@@ -888,7 +930,7 @@ const VendorProfile = () => {
                         <AlertTriangle size={24} />
                      </div>
                      <h3 className="text-base font-black text-slate-800 dark:text-white leading-tight">Delete Shop?</h3>
-                     <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-2 uppercase tracking-widest leading-relaxed px-2">
+                     <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-2 capitalize tracking-widest leading-relaxed px-2">
                         This will permanently remove your shop, staff, and earnings history. This action cannot be undone.
                      </p>
                      <div className="flex gap-2 mt-6">

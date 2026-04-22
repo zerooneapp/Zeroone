@@ -62,7 +62,7 @@ const PendingVerification = () => {
                     Verification in Progress
                 </h1>
                 <p className="text-gray-400 text-sm font-medium leading-relaxed">
-                    Thank you for choosing <span className="text-white font-bold">ZerOne</span>. Your documents have been received and are currently under review by our compliance team.
+                    Thank you for choosing <span className="text-white font-bold">ZeroOne</span>. Your documents have been received and are currently under review by our compliance team.
                 </p>
             </div>
 

@@ -165,16 +165,7 @@ const VendorDashboard = () => {
     try {
       await api.patch(`/bookings/${id}/status`, { action: 'complete' });
       toast.success('Booking marked as completed', {
-        icon: '\u2705',
-        style: {
-          borderRadius: '12px',
-          background: '#1C2C4E',
-          color: '#fff',
-          fontSize: '10px',
-          fontWeight: '900',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em'
-        }
+        icon: '\u2705'
       });
       fetchDashboard();
     } catch (err) {
@@ -247,13 +238,8 @@ const VendorDashboard = () => {
             <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
               {item.customerName}
             </h4>
-            {item.customerPhone && (
-              <a href={`tel:${item.customerPhone}`} className="flex items-center gap-1 text-[9px] font-bold text-[#1C2C4E] bg-blue-50 px-1.5 py-0.5 rounded-md">
-                <Phone size={8} /> {item.customerPhone}
-              </a>
-            )}
           </div>
-          <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
+          <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
             <div className="flex items-center gap-1.5">
               <span className="text-[#1C2C4E] uppercase">{item.time}</span>
               <span className="opacity-20">&bull;</span>
@@ -267,12 +253,23 @@ const VendorDashboard = () => {
           </div>
         </div>
       </div>
-      <button
-        onClick={() => handleCompleteBooking(item.id)}
-        className="px-4 py-2 bg-[#1C2C4E] dark:bg-[#1C2C4E] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#1C2C4E]/10 transition-all font-bold"
-      >
-        Done
-      </button>
+      <div className="flex items-center gap-2">
+        {item.customerPhone && (
+          <a 
+            href={`tel:${item.customerPhone}`} 
+            className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#1C2C4E] dark:text-blue-400"
+            title="Call Customer"
+          >
+            <Phone size={12} strokeWidth={2.5} />
+          </a>
+        )}
+        <button
+          onClick={() => handleCompleteBooking(item.id)}
+          className="px-4 py-2 bg-[#1C2C4E] dark:bg-[#1C2C4E] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#1C2C4E]/10 transition-all font-bold"
+        >
+          Done
+        </button>
+      </div>
     </motion.div>
   );
 
@@ -350,21 +347,21 @@ const VendorDashboard = () => {
         <section className="px-0.5">
           <div className="grid gap-1.5 pb-0" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 0.85fr' }}>
             <div className="bg-[#1C2C4E] dark:bg-gray-900 py-2.5 px-1.5 rounded-lg shadow-lg border border-white/20 flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-white/90 tracking-tight leading-none mb-1.5 truncate">Today revenue</p>
+              <p className="text-[8px] font-black text-white/90 tracking-tighter leading-none mb-1.5 truncate">Today revenue</p>
               <p className="text-[17px] font-black text-white leading-none truncate">&#8377;{data.stats.todayEarnings.toLocaleString()}</p>
             </div>
             <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none mb-1.5 truncate">Today clients</p>
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-1.5 truncate">Today clients</p>
               <p className="text-[17px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">{data.stats.todayBookings}</p>
             </div>
             <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none mb-1.5 truncate">Services done</p>
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-1.5 truncate">Services done</p>
               <p className="text-[17px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'completed').length || 0}
               </p>
             </div>
             <div className="bg-white dark:bg-gray-900 py-2.5 px-1.5 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none mb-1.5 truncate">Pending</p>
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-1.5 truncate">Pending</p>
               <p className="text-[17px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
                 {data.schedule.filter((item) => item.status === 'confirmed').length || 0}
               </p>
@@ -396,7 +393,7 @@ const VendorDashboard = () => {
                       <p className="truncate text-[11px] font-black uppercase tracking-tight text-[#1C2C4E] dark:text-white">
                         {card.name}
                       </p>
-                      <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">
+                      <p className="mt-1 text-[8px] font-bold uppercase tracking-tight text-slate-400">
                         {card.type === 'owner' ? 'Owner' : `${card.todayBookings} Today`}
                       </p>
                     </div>
@@ -440,13 +437,8 @@ const VendorDashboard = () => {
                         <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-tight tracking-tight">
                           {item.customerName}
                         </h4>
-                        {item.customerPhone && (
-                          <a href={`tel:${item.customerPhone}`} className="flex items-center gap-1 text-[9px] font-bold text-[#1C2C4E] bg-blue-50 px-1.5 py-0.5 rounded-md">
-                            <Phone size={8} /> {item.customerPhone}
-                          </a>
-                        )}
                       </div>
-                      <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-widest mt-1">
+                      <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-[#1C2C4E] uppercase">{item.time}</span>
                           <span className="opacity-20">&bull;</span>
@@ -460,22 +452,33 @@ const VendorDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  {item.status === 'confirmed' ? (
-                    <button
-                      onClick={() => handleCompleteBooking(item.id)}
-                      className="px-4 py-2 bg-[#1C2C4E] dark:bg-[#1C2C4E] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#1C2C4E]/10 transition-all font-bold"
-                    >
-                      Done
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => navigate('/vendor/bookings')}
-                      className="bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[10px] font-bold flex items-center gap-1"
-                    >
-                      View Details
-                      <ChevronRight size={10} className="text-[#1C2C4E]" />
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {item.customerPhone && (
+                      <a 
+                        href={`tel:${item.customerPhone}`} 
+                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#1C2C4E] dark:text-blue-400"
+                        title="Call Customer"
+                      >
+                        <Phone size={12} strokeWidth={2.5} />
+                      </a>
+                    )}
+                    {item.status === 'confirmed' ? (
+                      <button
+                        onClick={() => handleCompleteBooking(item.id)}
+                        className="px-4 py-2 bg-[#1C2C4E] dark:bg-[#1C2C4E] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#1C2C4E]/10 transition-all font-bold"
+                      >
+                        Done
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => navigate('/vendor/bookings')}
+                        className="bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[10px] font-bold flex items-center gap-1"
+                      >
+                        Details
+                        <ChevronRight size={10} className="text-[#1C2C4E]" />
+                      </button>
+                    )}
+                  </div>
                 </motion.div>
               ))
             )}
@@ -509,8 +512,8 @@ const VendorDashboard = () => {
                   &#x1F6A8;
                 </div>
                 <div className="text-center space-y-3">
-                  <h2 className="text-2xl font-black tracking-tight dark:text-white leading-tight uppercase">Profile Restricted</h2>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-6 opacity-80">
+                  <h2 className="text-2xl font-black tracking-tight dark:text-white leading-tight">Profile Restricted</h2>
+                  <p className="text-[10px] text-slate-400 font-bold tracking-normal leading-relaxed px-6 opacity-80">
                     Reconnect with customers. Restores slot visibility instantly.
                   </p>
                 </div>
@@ -519,7 +522,7 @@ const VendorDashboard = () => {
                     setShowRetentionModal(false);
                     navigate('/vendor/wallet');
                   }}
-                  className="w-full py-5 bg-[#0B1222] dark:bg-gray-800 text-white font-black uppercase text-xs tracking-[0.2em] rounded-lg active:scale-95 shadow-2xl shadow-slate-900/20 dark:shadow-gray-950/20 transition-all"
+                  className="w-full py-5 bg-[#0B1222] dark:bg-gray-800 text-white font-black text-xs tracking-widest rounded-lg active:scale-95 shadow-2xl shadow-slate-900/20 dark:shadow-gray-950/20 transition-all"
                 >
                   Boost Visibility Now
                 </button>

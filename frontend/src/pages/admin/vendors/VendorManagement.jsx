@@ -150,7 +150,7 @@ const VendorManagement = () => {
 
     return (
       <span className={cn('text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter', styles[status] || styles.pending)}>
-        {status}
+        {status === 'active' ? 'approved' : status}
       </span>
     );
   };
@@ -186,9 +186,16 @@ const VendorManagement = () => {
             />
           </div>
 
-          {['status', 'serviceLevel', 'planType', 'isActive'].map((field) => (
-            <div key={field} className="relative group">
-              <select
+          {['status', 'serviceLevel', 'planType', 'isActive'].map((field) => {
+            const labels = {
+              status: 'STATUS',
+              serviceLevel: 'SERVICE LEVEL',
+              planType: 'PLAN TYPE',
+              isActive: 'IS ACTIVE'
+            };
+            return (
+              <div key={field} className="relative group">
+                <select
                 className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
                 value={filters[field]}
                 onChange={(e) => {
@@ -196,9 +203,9 @@ const VendorManagement = () => {
                   setFilters((prev) => ({ ...prev, [field]: e.target.value }));
                 }}
               >
-                <option value="">{field.toUpperCase()}</option>
+                <option value="">{labels[field]}</option>
                 {field === 'status' && ['pending', 'active', 'inactive', 'blocked', 'rejected'].map((option) => (
-                  <option key={option} value={option}>{option.toUpperCase()}</option>
+                  <option key={option} value={option}>{option === 'active' ? 'APPROVED' : option.toUpperCase()}</option>
                 ))}
                 {field === 'serviceLevel' && ['standard', 'premium', 'luxury'].map((option) => (
                   <option key={option} value={option}>{option.toUpperCase()}</option>
@@ -215,7 +222,7 @@ const VendorManagement = () => {
               </select>
               <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
             </div>
-          ))}
+          )})}
         </div>
       </div>
 

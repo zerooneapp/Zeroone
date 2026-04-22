@@ -10,18 +10,28 @@ const ReviewPopup = ({ booking, onClose }) => {
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [isManual, setIsManual] = useState(false);
 
   if (!booking) return null;
 
+  const options = [
+    "Excellent Service",
+    "Needs Improvement",
+    "Friendly Staff",
+    "Clean & Hygienic",
+    "Other (self)"
+  ];
+
   const handleSubmit = async () => {
     if (rating === 0) return toast.error('Please select a rating');
+    const finalComment = isManual ? comment : comment; // Logic will handle this below
     
     setSubmitting(true);
     try {
       await api.post('/reviews/submit', {
         bookingId: booking._id,
         rating,
-        comment
+        comment: isManual ? comment : comment
       });
       toast.success('Your feedback makes us better! ❤️');
       onClose();
@@ -115,17 +125,50 @@ const ReviewPopup = ({ booking, onClose }) => {
              </p>
           </div>
 
-          {/* Comment Box */}
-          <div className="relative group z-10">
-              <div className="absolute left-4 top-4 text-gray-400">
-                 <MessageSquare size={16} />
+          {/* Feedback Options */}
+          <div className="space-y-4 relative z-10">
+              <div className="relative group">
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value === 'Other (self)') {
+                        setIsManual(true);
+                        setComment('');
+                      } else {
+                        setIsManual(false);
+                        setComment(e.target.value);
+                      }
+                    }}
+                    value={isManual ? 'Other (self)' : comment}
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-transparent rounded-2xl text-[11px] font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-4 ring-primary/5 appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="text-slate-400">What did you like the most?</option>
+                    {options.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                    <MessageSquare size={14} className="rotate-180" />
+                  </div>
               </div>
-              <textarea 
-                placeholder="Anything else we should know? (Optional)"
-                className="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-[13px] font-bold dark:text-white focus:ring-4 ring-primary/10 transition-all min-h-[80px] resize-none"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
+
+              {isManual && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  className="relative group"
+                >
+                    <div className="absolute left-4 top-4 text-gray-400">
+                       <MessageSquare size={16} />
+                    </div>
+                    <textarea 
+                      placeholder="Share your specific experience..."
+                      className="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-[11px] font-bold dark:text-white focus:ring-4 ring-primary/10 transition-all min-h-[100px] resize-none"
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      autoFocus
+                    />
+                </motion.div>
+              )}
           </div>
 
           {/* Actions */}

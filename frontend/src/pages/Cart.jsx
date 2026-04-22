@@ -354,7 +354,7 @@ const Cart = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="flex gap-2 overflow-x-auto no-scrollbar pb-1"
+                className="flex gap-2 overflow-x-auto no-scrollbar pb-2 pt-2 px-1"
               >
                 {dates.map((d) => (
                   <button
@@ -363,7 +363,7 @@ const Cart = () => {
                     className={cn(
                       "flex flex-col items-center min-w-[50px] py-2 rounded-xl transition-all border shadow-sm",
                       selectedDate === d.full
-                        ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-105"
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-xl scale-105"
                         : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 text-slate-400 shadow-sm"
                     )}
                   >
@@ -393,7 +393,7 @@ const Cart = () => {
                     className={cn(
                       "aspect-square flex flex-col items-center justify-center rounded-xl transition-all text-[10px] font-black relative active:scale-90",
                       selectedDate === d.full
-                        ? "bg-slate-900 text-white shadow-md"
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-md"
                         : "bg-slate-50/50 dark:bg-gray-800/20 text-slate-400 hover:bg-slate-100 border border-slate-50 dark:border-transparent"
                     )}
                   >
@@ -480,7 +480,7 @@ const Cart = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-3 gap-2 p-1.5">
                   {displaySlots.map((slot) => (
                     <button
                       key={slot.time}
@@ -488,7 +488,7 @@ const Cart = () => {
                       className={cn(
                         "py-3 rounded-lg font-black text-[11px] transition-all border border-slate-100 dark:border-gray-800 text-center capitalize tracking-widest shadow-sm active:scale-95",
                         selectedSlot?.time === slot.time
-                          ? "bg-slate-900 border-slate-900 text-white shadow-lg"
+                          ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-lg"
                           : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#1C2C4E]/10"
                       )}
                     >
@@ -516,7 +516,7 @@ const Cart = () => {
               className="space-y-2"
             >
               <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 capitalize leading-none">Choose professional</p>
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-2.5 px-1.5">
                 {availableStaff.map((s) => (
                   <button
                     key={s._id}
@@ -524,7 +524,7 @@ const Cart = () => {
                     className={cn(
                       "relative flex flex-col items-center min-w-[80px] p-2 rounded-xl border transition-all active:scale-95 shadow-sm",
                       selectedStaff?._id === s._id
-                        ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-105"
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-xl scale-105"
                         : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm"
                     )}
                   >
@@ -537,7 +537,7 @@ const Cart = () => {
                     </div>
                     <span className={cn(
                       "text-[10px] font-black truncate w-full text-center tracking-widest leading-tight capitalize",
-                      selectedStaff?._id === s._id ? "text-white" : "text-slate-400"
+                      selectedStaff?._id === s._id ? "text-[#1C2C4E] dark:text-white" : "text-slate-400"
                     )}>
                       {s.name?.split(' ')[0] || 'Staff'}
                     </span>
@@ -561,12 +561,13 @@ const Cart = () => {
       </div>
 
       {/* Sticky Bottom Bar */}
-      <motion.div
-        initial={{ y: 100, opacity: 0, scale: 0.9 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
-        transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
-        className="fixed bottom-[52px] left-4 right-4 bg-slate-900 dark:bg-gray-900 py-2 px-5 rounded-2xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
-      >
+        <motion.div
+          initial={{ y: 100, opacity: 0, scale: 0.9 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
+          className="fixed left-4 right-4 bg-slate-900 dark:bg-gray-900 py-2 px-5 rounded-2xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 54px)' }}
+        >
         <div className="flex items-center justify-between">
           <div className="leading-none">
             <p className="text-[9px] font-black text-white/40 tracking-widest mb-1 leading-none capitalize">Net payable</p>

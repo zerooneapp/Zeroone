@@ -193,12 +193,12 @@ const StaffDashboard = () => {
                            </div>
                            {canNavigateToCustomer && (
                               <a 
-                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[9px] font-black text-primary uppercase tracking-widest underline decoration-dotted"
+                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="text-[9px] font-black text-primary uppercase tracking-widest underline decoration-dotted"
                               >
-                                Navigate
+                                 Navigate
                               </a>
                            )}
                         </div>
@@ -213,7 +213,7 @@ const StaffDashboard = () => {
 
                         <div className="grid grid-cols-5 gap-2.5">
                            {currentTask.canContact ? (
-                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
+                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
                                  <Phone size={18} strokeWidth={3} />
                               </a>
                            ) : (
@@ -235,7 +235,7 @@ const StaffDashboard = () => {
 
                            <button
                               onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
-                              className={`${canNavigateToCustomer ? 'col-span-3' : 'col-span-4'} h-11 bg-slate-950 dark:bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10`}
+                              className={`${canNavigateToCustomer ? 'col-span-3' : 'col-span-4'} h-11 bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10`}
                            >
                               <CheckCircle size={16} strokeWidth={3} />
                               Complete Job

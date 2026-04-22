@@ -142,7 +142,7 @@ const VendorWallet = () => {
         key: orderResponse.keyId || wallet?.razorpay?.keyId,
         amount: orderResponse.order.amount,
         currency: orderResponse.order.currency,
-        name: dashboard?.shopName || 'ZerOne',
+        name: dashboard?.shopName || 'ZeroOne',
         description,
         order_id: orderResponse.order.id,
         theme: { color: '#111827' },
@@ -259,10 +259,10 @@ const VendorWallet = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={fetchData}
-              className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-95 transition-all"
+               onClick={fetchData}
+               className={`p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 active:rotate-180 transition-all duration-500 ${loading ? 'animate-spin' : ''}`}
             >
-              <RefreshCw size={16} />
+               <RefreshCw size={16} />
             </button>
             <button
               onClick={() => setIsTopupOpen(true)}
@@ -327,9 +327,12 @@ const VendorWallet = () => {
                 <IndianRupee size={16} />
               </div>
               <div>
-                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Billing Mode</p>
+                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Plan Type</p>
                 <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase leading-none mt-1">
-                  {prettifyLabel(wallet?.subscription?.currentPlan || 'daily')} status
+                  {wallet?.subscription?.currentPlan === 'trial' ? 'Trial Period' : 
+                   wallet?.subscription?.currentPlan === 'daily' ? 'Daily Plan' : 
+                   wallet?.subscription?.currentPlan === 'monthly' ? 'Monthly Plan' : 
+                   prettifyLabel(wallet?.subscription?.currentPlan || 'no plan')}
                 </h3>
               </div>
             </div>

@@ -17,6 +17,7 @@ import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 
+
 const normalizeCategoryValue = (value = '') =>
   value
     .trim()
@@ -267,7 +268,6 @@ const ServiceDetail = () => {
       setActiveIndex(index);
     }
   };
-
   if (loading && !vendor) return (
     <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen">
       <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
@@ -624,7 +624,8 @@ const ServiceDetail = () => {
 
       {/* Fixed Sticky Action Bar */}
       <div
-        className="fixed bottom-[50px] left-0 right-0 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-1.5 px-4 z-50 border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] mx-2 rounded-[24px]"
+        className="fixed left-2 right-2 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-[24px]"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 54px)' }}
       >
         <div className="flex items-center justify-between max-w-lg mx-auto">
           <div className="flex flex-col">

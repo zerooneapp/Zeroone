@@ -269,7 +269,10 @@ const CheckoutReview = () => {
         </section>
       </div>
 
-      <div className="fixed bottom-[50px] left-0 right-0 p-4 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-gray-800 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+      <div 
+        className="fixed left-0 right-0 p-4 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-gray-800 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 54px)' }}
+      >
         <div className="max-w-md mx-auto">
           <button
             className="w-full h-12 bg-slate-900 dark:bg-primary text-white shadow-xl shadow-black/10 dark:shadow-primary/20 text-[15px] font-black tracking-tight flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50 capitalize"

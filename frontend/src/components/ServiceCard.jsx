@@ -50,7 +50,7 @@ const ServiceCard = ({ service, onToggle, onEdit, onSetHome, homeLoadingId }) =>
             </button>
             <button
                onClick={() => onToggle(service._id, !service.isActive)}
-               className={`w-10 h-5 rounded-full relative transition-all duration-300 border ${service.isActive ? 'bg-green-500 border-green-600' : 'bg-red-600 border-red-700'}`}
+               className={`w-10 h-5 rounded-full relative transition-all duration-300 border ${service.isActive ? 'bg-[#1C2C4E] border-[#1C2C4E]' : 'bg-red-600 border-red-700'}`}
             >
                <div className={`absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-all duration-300 ${service.isActive ? 'left-[22px]' : 'left-0.5'}`} />
             </button>

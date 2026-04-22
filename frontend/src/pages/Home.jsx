@@ -147,15 +147,12 @@ const Home = () => {
                 <button
                   key={cat._id}
                   onClick={() => toggleCategory(cat._id)}
-                  className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 outline-none ${isActive
-                    ? 'bg-[#1C2C4E] text-white shadow-[0_10px_25px_-4px_rgba(28,44,78,0.35)] scale-105'
-                    : 'bg-white dark:bg-gray-900/50 text-[#1C2C4E]/60 dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
+                  className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 outline-none border ${isActive
+                    ? 'bg-white dark:bg-gray-900 border-[#1C2C4E] text-[#1C2C4E] dark:text-blue-400 shadow-[0_10px_25px_-4px_rgba(28,44,78,0.15)] scale-105'
+                    : 'bg-white dark:bg-gray-900/50 text-[#1C2C4E]/60 dark:text-gray-400 border-[#1C2C4E]/10 dark:border-gray-700 shadow-sm'
                     }`}
                 >
                   <span className="relative z-10">{cat.name}</span>
-                  {isActive && (
-                    <div className="absolute inset-x-0 bottom-0 top-0 rounded-xl bg-white/10" />
-                  )}
                 </button>
               );
             })}

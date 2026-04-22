@@ -148,9 +148,9 @@ const Nearby = () => {
               onClick={() => toggleCategory(cat._id)}
               className={`px-4 py-1.5 rounded-xl whitespace-nowrap text-[11px] font-bold uppercase tracking-wider transition-all ${
                 selectedCats.includes(cat._id) 
-                  ? 'bg-primary text-white shadow-md' 
-                  : 'bg-white dark:bg-gray-800 text-gray-500'
-              }`}
+                  ? 'border-primary text-primary bg-white dark:bg-gray-900 shadow-sm' 
+                  : 'bg-white dark:bg-gray-800 text-gray-500 border-primary/10'
+              } border`}
             >
               {cat.name}
             </button>

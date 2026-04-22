@@ -57,15 +57,7 @@ const SavedAddresses = () => {
     });
 
     updateUser(res.data);
-    toast.success(successMessage, {
-      style: {
-        borderRadius: '1rem',
-        background: '#1C2C4E',
-        color: '#fff',
-        fontSize: '12px',
-        fontWeight: 'bold'
-      }
-    });
+    toast.success(successMessage);
   };
 
   const handleFetchCurrentLocation = () => {

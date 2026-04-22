@@ -14,8 +14,7 @@ const Account = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
-  const [deleting, setDeleting] = React.useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -35,6 +34,8 @@ const Account = () => {
       setDeleting(false);
     }
   };
+
+
 
   const menuItems = [
     { icon: User, label: 'Personal Information', sub: 'Name, email, and phone', path: '/account/info' },
@@ -69,7 +70,7 @@ const Account = () => {
             {user?.image ? (
               <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[28px] font-black text-white uppercase tracking-tighter">
+              <span className="text-[28px] font-black text-white capitalize tracking-tighter">
                 {user?.name ? user.name.charAt(0) : 'U'}
               </span>
             )}
@@ -78,10 +79,10 @@ const Account = () => {
         </div>
         
         <div className="text-center mt-3 space-y-0.5">
-          <h2 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none uppercase">
+          <h2 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none capitalize">
             {user?.name || 'Guest User'}
           </h2>
-          <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 dark:text-gray-500 uppercase mt-1">
+          <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 dark:text-gray-500 capitalize mt-1">
             {user?.role || 'Customer'}
           </p>
         </div>
@@ -99,7 +100,7 @@ const Account = () => {
             </div>
             <div className="flex-1 leading-none">
               <p className="text-[14px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">{item.label}</p>
-              <p className="text-[10px] font-black text-[#1C2C4E]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none uppercase">{item.sub}</p>
+              <p className="text-[10px] font-black text-[#1C2C4E]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none">{item.sub}</p>
             </div>
             <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
           </div>
@@ -109,60 +110,52 @@ const Account = () => {
       {/* Logout Action */}
       <div className="px-4 mt-4 space-y-2">
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogoutConfirm(true)}
           className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-[#1C2C4E]/10 dark:border-gray-800 text-slate-600 dark:text-gray-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
         >
           <LogOut size={16} strokeWidth={3} />
           Sign out of account
         </button>
 
-        <button
-          onClick={() => setShowDeleteConfirm(true)}
-          className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/10 border border-red-100 dark:border-red-950/20 text-red-500 font-black tracking-widest text-[11px] active:scale-95 transition-all"
-        >
-          <Trash2 size={16} strokeWidth={3} />
-          Delete my account
-        </button>
+
       </div>
 
-      {/* Delete Confirmation Modal */}
+
       <AnimatePresence>
-        {showDeleteConfirm && (
+        {showLogoutConfirm && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => !deleting && setShowDeleteConfirm(false)}
+              onClick={() => setShowLogoutConfirm(false)}
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl relative z-10 p-5 text-center"
+              className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl relative z-10 p-5 text-center"
             >
-              <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle size={24} />
+              <div className="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-rose-100/50">
+                <LogOut size={20} strokeWidth={2.5} />
               </div>
-              <h3 className="text-base font-black text-slate-800 dark:text-white leading-tight">Delete Account?</h3>
-              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-2 uppercase tracking-widest">
-                This action is permanent and cannot be undone. All your data will be lost.
+              <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Confirm Logout</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-1.5 tracking-widest leading-relaxed">
+                Are you sure you want to sign out? You will need to login again.
               </p>
-              <div className="flex gap-2 mt-6">
+              <div className="flex gap-2.5 mt-6">
                 <button
-                  disabled={deleting}
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-2.5 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-bold text-xs disabled:opacity-50"
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-black text-[11px] capitalize tracking-widest active:scale-95 transition-all"
                 >
-                  Keep Account
+                  Cancel
                 </button>
                 <button
-                  disabled={deleting}
-                  onClick={handleDeleteAccount}
-                  className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-black text-xs shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                  onClick={handleLogout}
+                  className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black text-[11px] capitalize tracking-widest shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
                 >
-                  {deleting ? 'Wait...' : 'Delete'}
+                  OK
                 </button>
               </div>
             </motion.div>

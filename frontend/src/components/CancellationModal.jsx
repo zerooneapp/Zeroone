@@ -42,11 +42,11 @@ const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking
                 <AlertCircle size={20} strokeWidth={1.5} />
               </div>
 
-              <h3 className="text-lg font-black text-slate-800 dark:text-white tracking-tight leading-tight uppercase">
+              <h3 className="text-lg font-black text-slate-800 dark:text-white tracking-tight leading-tight capitalize">
                 {title}
               </h3>
 
-              <p className="text-[10px] font-bold text-slate-500/80 dark:text-gray-400 mt-1.5 leading-relaxed uppercase tracking-widest px-2">
+              <p className="text-[10px] font-bold text-slate-500/80 dark:text-gray-400 mt-1.5 leading-relaxed tracking-tight px-2">
                 {message}
               </p>
 
@@ -96,14 +96,14 @@ const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <button
                   onClick={onClose}
-                  className="py-2.5 bg-slate-100/50 dark:bg-gray-800/50 text-slate-400 dark:text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all border border-slate-200/5 dark:border-gray-700/50"
+                  className="py-2.5 bg-slate-100/50 dark:bg-gray-800/50 text-slate-400 dark:text-gray-500 rounded-2xl font-black text-[10px] capitalize tracking-tight active:scale-95 transition-all border border-slate-200/5 dark:border-gray-700/50"
                 >
                   Go Back
                 </button>
                 <button
                   onClick={handleConfirm}
                   disabled={!reason.trim()}
-                  className="py-2.5 bg-[#1C2C4E] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="py-2.5 bg-[#1C2C4E] text-white rounded-2xl font-black text-[10px] capitalize tracking-tight shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>

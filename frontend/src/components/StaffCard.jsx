@@ -7,9 +7,9 @@ const StaffCard = ({ staff, onToggle, onEdit }) => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`p-3.5 bg-white dark:bg-gray-900 rounded-[1.75rem] border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-3 transition-all w-full min-w-0 overflow-hidden`}
+      className={`p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-3 transition-all w-full min-w-0 overflow-hidden`}
     >
-      <div className="w-14 h-14 rounded-[1.25rem] overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
          {staff.image ? (
             <img src={staff.image} alt={staff.name} className="w-full h-full object-cover" />
          ) : (
