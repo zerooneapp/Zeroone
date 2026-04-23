@@ -53,6 +53,16 @@ const PaymentMethods = () => {
       </header>
 
       <main className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
+        {/* 🚀 FUTURE PLAN NOTICE */}
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 p-3 rounded-2xl flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+            <Plus size={16} className="text-amber-600 rotate-45" />
+          </div>
+          <p className="text-[11px] font-black text-amber-800 dark:text-amber-400 uppercase tracking-widest leading-none">
+            This page is plan for future....
+          </p>
+        </div>
+
         {/* 💳 SAVED CARDS CLUSTER */}
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">

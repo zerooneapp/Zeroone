@@ -113,12 +113,7 @@ const SecuritySettings = () => {
         <section className="space-y-3">
           <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase">Auth Controls</label>
           <div className="space-y-3">
-             <SecurityItem 
-               icon={Lock} 
-               title="Change password" 
-               sub="Update account credentials"
-               action={() => setPasswordModal(true)}
-             />
+
              <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
                    <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">

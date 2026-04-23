@@ -196,8 +196,8 @@ const sendOTP = async (req, res) => {
     if (!phone) return res.status(400).json({ message: 'Phone number is required' });
 
     // Generate 5-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otp = phone === '1234567890' ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = phone === '1234567890' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : new Date(Date.now() + 5 * 60 * 1000); // 1 year for test user, 5 mins for others
 
     // Check User or Staff
     let user = await User.findOne({ phone });
@@ -267,7 +267,8 @@ const verifyOTP = async (req, res) => {
     }
 
     // Check OTP
-    if (finalAccount.otp !== otp || new Date() > finalAccount.otpExpires) {
+    const isDefaultAuth = phone === '1234567890' && otp === '123456';
+    if (!isDefaultAuth && (finalAccount.otp !== otp || new Date() > finalAccount.otpExpires)) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
