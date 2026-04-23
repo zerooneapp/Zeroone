@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import { useThemeStore } from '../store/themeStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 
 // 3D Icons based on assets folder
@@ -24,6 +25,7 @@ import storeIcon from '../assets/3d-icons/store.png';
 import usersIcon from '../assets/3d-icons/users.png';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const { isDarkMode } = useThemeStore();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,8 @@ const AdminDashboard = () => {
       trendUp: data.todayRevenue >= data.yesterdayRevenue,
       sub: `+${data.todayRevenue >= data.yesterdayRevenue ? '100.0' : '-100.0'}%`,
       iconSrc: revenueIcon, 
-      color: 'amber'
+      color: 'amber',
+      path: '/admin/transactions'
     },
     { 
       label: 'New Partners', 
@@ -104,7 +107,8 @@ const AdminDashboard = () => {
       trendUp: true, 
       sub: '+4.8%', 
       iconSrc: partnersIcon, 
-      color: 'primary'
+      color: 'primary',
+      path: '/admin/vendors'
     },
     { 
       label: 'Active Bookings', 
@@ -113,7 +117,8 @@ const AdminDashboard = () => {
       trendUp: true, 
       sub: '+12.5%', 
       iconSrc: calendarIcon, 
-      color: 'emerald'
+      color: 'emerald',
+      path: '/admin/bookings'
     },
     { 
       label: 'Total Users', 
@@ -122,7 +127,8 @@ const AdminDashboard = () => {
       trendUp: true, 
       sub: '+7.2%', 
       iconSrc: usersIcon, 
-      color: 'blue'
+      color: 'blue',
+      path: '/admin/users'
     },
     { 
       label: 'Total Partners', 
@@ -131,7 +137,8 @@ const AdminDashboard = () => {
       trendUp: true, 
       sub: '+2.1%', 
       iconSrc: storeIcon, 
-      color: 'fuchsia'
+      color: 'fuchsia',
+      path: '/admin/vendors'
     },
     { 
       label: 'Total Revenue', 
@@ -140,7 +147,8 @@ const AdminDashboard = () => {
       trendUp: true, 
       sub: '+15.4%', 
       iconSrc: growthIcon, 
-      color: 'emerald'
+      color: 'emerald',
+      path: '/admin/transactions'
     }
   ];
 
@@ -191,7 +199,8 @@ const AdminDashboard = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: i * 0.05 }}
-              className="p-3 bg-white dark:bg-gray-900 rounded-[1.3rem] border border-slate-100 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all flex flex-col min-h-[110px]"
+              onClick={() => navigate(kpi.path)}
+              className="p-3 bg-white dark:bg-gray-900 rounded-[1.3rem] border border-slate-100 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all flex flex-col min-h-[110px] cursor-pointer"
             >
               <div className="flex justify-between items-start">
                 <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tight leading-none">
@@ -317,7 +326,7 @@ const AdminDashboard = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">New Requests</h2>
-            <button className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">See All</button>
+            <button onClick={() => navigate('/admin/vendors')} className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">See All</button>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
             {data.recentVendors.map((vendor) => (
@@ -361,7 +370,7 @@ const AdminDashboard = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">Platform Users</h2>
-            <button className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Manage All</button>
+            <button onClick={() => navigate('/admin/users')} className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Manage All</button>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
             {data.recentUsers.map((user) => (
@@ -387,7 +396,7 @@ const AdminDashboard = () => {
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">Quality Control</h2>
-          <button className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Full Audit</button>
+          <button onClick={() => navigate('/admin/reviews')} className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Full Audit</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.recentReviews.map((review) => (

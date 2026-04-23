@@ -448,7 +448,7 @@ const getFilteredBookings = async (req, res) => {
     }
 
     pipeline.push(
-      { $sort: { startTime: -1, createdAt: -1 } },
+      { $sort: { createdAt: -1, startTime: -1 } },
       {
         $facet: {
           metadata: [{ $count: "total" }],

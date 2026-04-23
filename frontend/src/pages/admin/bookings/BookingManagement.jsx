@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Search, Filter, RefreshCw, ChevronRight, ChevronDown,
+  Search, Filter, RefreshCw, ChevronLeft, ChevronRight, ChevronDown,
   Calendar, Clock, CreditCard, Package,
   User, Store, AlertCircle, XCircle,
   CheckCircle, Ban, History, ShieldAlert,
@@ -50,6 +50,10 @@ const BookingManagement = () => {
       setLoading(false);
     }
   }, [filters, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
 
   useEffect(() => {
     const timer = setTimeout(fetchBookings, 300);
@@ -148,10 +152,10 @@ const BookingManagement = () => {
             value={filters.endDate}
             onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
           />
-          <div className="flex items-center gap-2 px-4 h-11 bg-primary/5 border border-primary/10 rounded-xl">
+          <div className="flex items-center gap-2 px-4 h-11 bg-primary/5 dark:bg-primary/20 border border-primary/10 dark:border-primary/30 rounded-xl">
              <div className="flex flex-col leading-none">
-                <span className="text-[9px] font-black text-primary/50 uppercase tracking-widest mb-0.5">Total Booking</span>
-                <span className="text-[15px] font-black text-primary tracking-tight">{totalBookings}</span>
+                <span className="text-[9px] font-black text-primary/50 dark:text-slate-500 uppercase tracking-widest mb-0.5">Total Booking</span>
+                <span className="text-[15px] font-black text-primary dark:text-white tracking-tight">{totalBookings}</span>
              </div>
           </div>
         </div>
@@ -209,13 +213,6 @@ const BookingManagement = () => {
                   </td>
                   <td className="px-6 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => navigate(`/admin/bookings/${booking._id}`)}
-                        className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
-                        title="View Order"
-                      >
-                        <Eye size={18} strokeWidth={3} />
-                      </button>
                       {booking.status === 'confirmed' && (
                         <button
                           onClick={() => handleForceCancel(booking._id)}
@@ -229,6 +226,13 @@ const BookingManagement = () => {
                           <XCircle size={18} strokeWidth={3} />
                         </button>
                       )}
+                      <button
+                        onClick={() => navigate(`/admin/bookings/${booking._id}`)}
+                        className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
+                        title="View Order"
+                      >
+                        <Eye size={18} strokeWidth={3} />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -248,6 +252,67 @@ const BookingManagement = () => {
           </div>
         )}
       </div>
+
+      {/* 🔢 PAGINATION */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4">
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            Showing Page <span className="text-slate-900 dark:text-white">{page}</span> of <span className="text-slate-900 dark:text-white">{totalPages}</span>
+          </div>
+          
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setPage(prev => Math.max(1, prev - 1))}
+              disabled={page === 1 || loading}
+              className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-400 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90 shadow-sm"
+            >
+              <ChevronLeft size={18} strokeWidth={3} />
+            </button>
+
+            <div className="flex items-center gap-1 mx-2">
+              {[...Array(totalPages)].map((_, i) => {
+                const pageNum = i + 1;
+                // Only show current page, first, last, and neighbors if many pages
+                if (
+                  totalPages <= 7 ||
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  Math.abs(pageNum - page) <= 1
+                ) {
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={cn(
+                        "w-10 h-10 rounded-xl text-[12px] font-black transition-all active:scale-90 border shadow-sm",
+                        page === pageNum
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white dark:bg-gray-900 text-slate-400 border-slate-200/60 dark:border-gray-800 hover:border-primary/30"
+                      )}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                } else if (
+                  (pageNum === 2 && page > 3) ||
+                  (pageNum === totalPages - 1 && page < totalPages - 2)
+                ) {
+                  return <span key={pageNum} className="text-slate-300 font-black px-1">...</span>;
+                }
+                return null;
+              })}
+            </div>
+
+            <button
+              onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={page === totalPages || loading}
+              className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-400 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90 shadow-sm"
+            >
+              <ChevronRight size={18} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

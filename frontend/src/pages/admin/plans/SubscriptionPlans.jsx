@@ -75,15 +75,6 @@ const SubscriptionPlans = () => {
           <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize leading-none">Pricing Hub</h1>
           <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Platform Subscription Yields</p>
         </div>
-        <div className="p-3 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center gap-4 group hover:border-primary/20 transition-all">
-          <div className="w-12 h-12 bg-white dark:bg-gray-900 rounded-lg flex items-center justify-center text-primary shadow-sm border border-slate-100 dark:border-gray-800 group-hover:scale-110 transition-transform">
-             <Info size={24} strokeWidth={2.5} />
-          </div>
-          <div>
-            <p className="text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tight leading-none">Dynamic Engine</p>
-            <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1">Real-time valuation active</p>
-          </div>
-        </div>
       </div>
 
       {loading ? (
@@ -195,9 +186,17 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
             <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[12px] group-focus-within/input:text-primary transition-colors ">₹</div>
             <input
               type="number"
+              min="0"
               className="w-full h-12 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[15px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none "
-              value={planData.daily?.price || 0}
-              onChange={(e) => onFieldChange(planData.daily?._id, 'price', e.target.value)}
+              value={planData.daily?.price || ''}
+              placeholder="0"
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val >= 0 || e.target.value === '') onFieldChange(planData.daily?._id, 'price', e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === '-' || e.key === 'e') e.preventDefault();
+              }}
             />
           </div>
         </div>
@@ -212,9 +211,17 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
             <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[12px] group-focus-within/input:text-primary transition-colors ">₹</div>
             <input
               type="number"
+              min="0"
               className="w-full h-12 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[15px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none "
-              value={planData.monthly?.price || 0}
-              onChange={(e) => onFieldChange(planData.monthly?._id, 'price', e.target.value)}
+              value={planData.monthly?.price || ''}
+              placeholder="0"
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val >= 0 || e.target.value === '') onFieldChange(planData.monthly?._id, 'price', e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === '-' || e.key === 'e') e.preventDefault();
+              }}
             />
           </div>
         </div>
@@ -229,10 +236,17 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
             <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[12px] group-focus-within/input:text-primary transition-colors ">%</div>
             <input
               type="number"
+              min="0"
               className="w-full h-11 pl-8 pr-4 bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 rounded-xl text-[15px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/10 focus:border-primary/30 outline-none transition-all appearance-none "
-              value={gstPercent}
-              onChange={(e) => onGstChange(e.target.value)}
-              placeholder="e.g. 18"
+              value={gstPercent === 0 ? '' : gstPercent}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val >= 0 || e.target.value === '') onGstChange(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === '-' || e.key === 'e') e.preventDefault();
+              }}
+              placeholder="0"
             />
           </div>
         </div>
