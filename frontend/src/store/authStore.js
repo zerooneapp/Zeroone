@@ -68,10 +68,10 @@ export const useAuthStore = create(
         }
       },
 
-      requestOTP: async (phone) => {
+      requestOTP: async (phone, portal) => {
         set({ loading: true });
         try {
-          const res = await api.post('/auth/send-otp', { phone });
+          const res = await api.post('/auth/send-otp', { phone, portal });
           return { success: true, message: res.data.message, otp: res.data.otp };
         } catch (err) {
           return { success: false, message: err.response?.data?.message || 'Failed to send OTP' };
@@ -80,14 +80,13 @@ export const useAuthStore = create(
         }
       },
 
-      verifyOTP: async (phone, otp) => {
+      verifyOTP: async (phone, otp, skipStateUpdate = false) => {
         set({ loading: true });
         try {
           const res = await api.post('/auth/verify-otp', { phone, otp });
           const { token, role, needsRegistration } = res.data;
 
-          // NEW: Always set token so subsequent profile completion (protected routes) work
-          if (token) {
+          if (token && !skipStateUpdate) {
             set({
               token,
               role,

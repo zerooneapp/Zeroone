@@ -91,26 +91,7 @@ function App() {
           if (!payload?.notification) return;
           console.log('[App.jsx] Foreground notification:', payload);
 
-          if (Notification.permission === 'granted') {
-            try {
-              const browserNotification = new Notification(
-                payload.notification.title || 'New Notification',
-                {
-                  body: payload.notification.body || '',
-                  icon: '/logo.png',
-                  tag: payload.data?.notificationId || payload.messageId
-                }
-              );
-
-              browserNotification.onclick = () => {
-                window.focus();
-                browserNotification.close();
-              };
-            } catch (error) {
-              console.log('[App.jsx] Browser notification display failed:', error);
-            }
-          }
-
+          // Only show Toast in foreground to avoid double notifications (system + toast)
           toast.success(
             <div>
               <b>{payload.notification.title}</b>

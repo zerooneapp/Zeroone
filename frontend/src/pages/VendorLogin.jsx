@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 const VendorAuth = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { requestOTP, verifyOTP, loading } = useAuthStore();
+  const { requestOTP, verifyOTP, loading, setCredentials } = useAuthStore();
 
   const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
@@ -48,7 +48,7 @@ const VendorAuth = () => {
       return toast.error('Please enter a valid phone number');
     }
 
-    const res = await requestOTP(phone);
+    const res = await requestOTP(phone, 'vendor');
     if (res.success) {
       toast.success(res.otp ? `Test Mode: OTP is ${res.otp}` : 'Verification code sent successfully');
       setStep('otp');
@@ -65,9 +65,9 @@ const VendorAuth = () => {
       return toast.error('Please enter the full code');
     }
 
-    const res = await verifyOTP(phone, otpValue);
+    const res = await verifyOTP(phone, otpValue, true);
     if (res.success) {
-      const { role, needsRegistration } = res.data;
+      const { role, needsRegistration, token } = res.data;
       if (needsRegistration) {
         navigate('/vendor-signup', { state: { phone, role: 'vendor' } });
         return;
@@ -75,14 +75,19 @@ const VendorAuth = () => {
 
       // 🔒 ROLE SECURITY: Prevent cross-portal entry
       if (role === 'customer') {
-        toast.error(`Customer accounts cannot use the Partner/Staff portal.`, {
-          duration: 5000,
+        toast.error(`You are already registered as a Customer. Please use another number for Partner account.`, {
+          duration: 6000,
           icon: '⛔'
         });
-        useAuthStore.getState().logout();
-        navigate('/login'); // Redirect to their actual home
         return;
       }
+
+      // ✅ Login is valid for this portal
+      setCredentials({
+        token,
+        role,
+        user: res.data
+      });
 
       toast.success('Welcome back!');
       const intendedPath = location.state?.from?.pathname;
