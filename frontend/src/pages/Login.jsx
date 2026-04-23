@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 const CustomerAuth = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { requestOTP, verifyOTP, loading } = useAuthStore();
+  const { requestOTP, verifyOTP, loading, setCredentials } = useAuthStore();
 
   const [step, setStep] = useState('phone'); // phone, otp
   const [phone, setPhone] = useState('');
@@ -52,7 +52,7 @@ const CustomerAuth = () => {
     e?.preventDefault();
     if (phone.length < 10) return toast.error('Please enter a valid phone number');
 
-    const res = await requestOTP(phone);
+    const res = await requestOTP(phone, 'customer');
     if (res.success) {
       toast.success(res.otp ? `Test Mode: OTP is ${res.otp}` : 'Verification code sent successfully');
       setStep('otp');
@@ -67,22 +67,28 @@ const CustomerAuth = () => {
     const otpValue = otp.join('');
     if (otpValue.length < 6) return toast.error('Please enter the full code');
 
-    const res = await verifyOTP(phone, otpValue);
+    const res = await verifyOTP(phone, otpValue, true);
     if (res.success) {
+      const { role, token } = res.data;
+
       if (res.needsRegistration) {
         navigate('/signup', { state: { phone, role: 'customer' } });
       } else {
-        const { role } = res.data;
         // 🔒 ROLE SECURITY: Prevent cross-portal entry
         if (role !== 'customer') {
-          toast.error(`This account ( ${role} ) must use the Partner Login portal.`, {
-            duration: 5000,
+          toast.error(`You are already registered as a Partner. Please use another number for Customer account.`, {
+            duration: 6000,
             icon: '⛔'
           });
-          useAuthStore.getState().logout();
-          navigate('/vendor-login'); // Redirect to their actual home
           return;
         }
+
+        // ✅ Login is valid for this portal
+        setCredentials({
+          token,
+          role,
+          user: res.data
+        });
 
         toast.success(`Welcome back!`);
         navigate(redirectPath, { replace: true });

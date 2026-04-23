@@ -192,16 +192,27 @@ const me = async (req, res) => {
 // @access  Public
 const sendOTP = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { phone, portal } = req.body;
     if (!phone) return res.status(400).json({ message: 'Phone number is required' });
-
-    // Generate 5-digit OTP
-    const otp = phone === '1234567890' ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = phone === '1234567890' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : new Date(Date.now() + 5 * 60 * 1000); // 1 year for test user, 5 mins for others
 
     // Check User or Staff
     let user = await User.findOne({ phone });
     let staff = !user ? await Staff.findOne({ phone }) : null;
+
+    // 🛡️ Pre-OTP Role Validation
+    if (portal === 'vendor') {
+      if (user && user.role === 'customer' && user.name) {
+        return res.status(403).json({ message: 'You are already registered as a Customer. Please use another number for Partner account.' });
+      }
+    } else if (portal === 'customer') {
+      if (staff || (user && (user.role === 'vendor' || user.role === 'admin' || user.role === 'super_admin'))) {
+        return res.status(403).json({ message: 'You are already registered as a Partner. Please use another number for Customer account.' });
+      }
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     if (isAdminRole(user?.role)) {
       return res.status(403).json({ message: 'Admins must use the secure admin login' });
