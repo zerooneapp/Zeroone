@@ -107,16 +107,37 @@ const listStaff = async (req, res) => {
       }
     }
 
-    // 💰 ENRICHMENT: Calculate Total Earnings for each staff
-    const Booking = require('../models/Booking');
+    // 📅 AVAILABILITY: If a date is provided, check if staff is off on that day
+    const { date } = req.query;
     const enrichedStaff = await Promise.all(staff.map(async (s) => {
+      // Get earnings stats
       const stats = await Booking.aggregate([
         { $match: { staffId: s._id, status: { $in: ['confirmed', 'completed'] } } },
         { $group: { _id: null, total: { $sum: '$totalPrice' } } }
       ]);
+
+      let isOffDay = false;
+      if (date) {
+        const moment = require('moment-timezone');
+        const day = moment.tz(date, 'Asia/Kolkata').startOf('day');
+        const start = day.toDate();
+        const end = day.clone().add(1, 'day').toDate();
+        
+        const availability = await StaffAvailability.findOne({
+          staffId: s._id,
+          date: { $gte: start, $lt: end }
+        });
+        
+        // If there's an entry and workingHours is empty, they are off
+        if (availability && (!availability.workingHours || availability.workingHours.length === 0)) {
+          isOffDay = true;
+        }
+      }
+
       return {
         ...s.toObject(),
-        totalEarnings: stats[0]?.total || 0
+        totalEarnings: stats[0]?.total || 0,
+        isOffDay
       };
     }));
 

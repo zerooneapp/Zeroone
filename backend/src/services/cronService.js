@@ -57,35 +57,33 @@ const initCronJobs = () => {
     } catch (error) { console.error('Reminder Cron Error:', error); }
   }, { timezone: "Asia/Kolkata" });
 
-  // 3. Auto-sync Shop Working Hours (Every minute precise check)
+  // 3. Auto-sync Shop Working Hours (Every minute range-based sync)
   cron.schedule('* * * * *', async () => {
     try {
-      const now = moment().tz('Asia/Kolkata');
-      const timeStrPad = now.format('hh:mm A'); // "09:00 AM"
-      const timeStrNoPad = now.format('h:mm A'); // "9:00 AM"
-      const timeStrMilitary = now.format('HH:mm'); // "21:00" or "09:00"
+      const { isShopCurrentlyOpen } = require('../utils/shopStatus');
+      const vendors = await Vendor.find({ status: 'active', isActive: true });
+      
+      let openedCount = 0;
+      let closedCount = 0;
 
-      // 🌅 AUTO-OPEN at workingHours.start
-      const startMatchVendors = await Vendor.find({
-        isShopOpen: false,
-        'workingHours.start': { $in: [timeStrPad, timeStrNoPad, timeStrMilitary] }
-      });
-
-      for (const v of startMatchVendors) {
-        v.isShopOpen = true;
-        v.isClosedToday = false; // Fresh start for the day
-        await v.save();
+      for (const v of vendors) {
+        const shouldBeOpen = isShopCurrentlyOpen(v.workingHours);
+        
+        // Only update if status has actually changed to minimize DB writes
+        if (v.isShopOpen !== shouldBeOpen) {
+          v.isShopOpen = shouldBeOpen;
+          if (shouldBeOpen) {
+            v.isClosedToday = false; // Reset daily closure if it's opening time
+            openedCount++;
+          } else {
+            closedCount++;
+          }
+          await v.save();
+        }
       }
 
-      // 🌃 AUTO-CLOSE at workingHours.end
-      const endMatchVendors = await Vendor.find({
-        isShopOpen: true,
-        'workingHours.end': { $in: [timeStrPad, timeStrNoPad, timeStrMilitary] }
-      });
-
-      for (const v of endMatchVendors) {
-        v.isShopOpen = false;
-        await v.save();
+      if (openedCount > 0 || closedCount > 0) {
+        console.log(`[Shop-Cron] Sync completed. Opened: ${openedCount}, Closed: ${closedCount}`);
       }
 
     } catch (error) { console.error('Shop Status Cron Error:', error); }

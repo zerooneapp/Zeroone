@@ -172,6 +172,15 @@ class NotificationService {
         .map((userId) => ({ userId, role }));
     }
 
+    // 🛡️ Deduplicate recipients to prevent double-sending in a single call
+    const seenUsers = new Set();
+    resolvedRecipients = resolvedRecipients.filter(r => {
+      const key = `${r.userId}_${r.role}`;
+      if (seenUsers.has(key)) return false;
+      seenUsers.add(key);
+      return true;
+    });
+
     const notifications = [];
     for (const recipient of resolvedRecipients) {
       try {
@@ -181,17 +190,46 @@ class NotificationService {
           id: data.id || referenceId || Date.now()
         };
 
-        // 🏠 1. Create In-App Notifications (MongoDB)
-        const notif = await Notification.create({
-          userId: recipient.userId,
-          role: recipient.role,
-          type,
-          title,
-          message,
-          data: payloadData,
-          referenceId,
-          isSilent
-        });
+        // 🏠 1. Create In-App Notifications (MongoDB) - Use upsert for idempotency
+        let notif;
+        if (referenceId) {
+          // If referenceId exists, try to find existing or create new (upsert)
+          // This prevents duplicates even if the create call is retried or concurrent
+          const result = await Notification.findOneAndUpdate(
+            { userId: recipient.userId, type, referenceId },
+            { 
+              $setOnInsert: { 
+                role: recipient.role,
+                title,
+                message,
+                data: payloadData,
+                isSilent,
+                createdAt: new Date()
+              } 
+            },
+            { upsert: true, new: true, rawResult: true }
+          );
+          
+          // Only proceed if it was newly inserted
+          if (result.lastErrorObject?.updatedExisting) {
+            console.log(`[Notification-Skip] Duplicate suppressed for user ${recipient.userId} (Ref: ${referenceId})`);
+            continue; 
+          }
+          notif = result.value || result;
+        } else {
+          // Fallback for notifications without referenceId (still subject to unique index {userId, type, undefined})
+          notif = await Notification.create({
+            userId: recipient.userId,
+            role: recipient.role,
+            type,
+            title,
+            message,
+            data: payloadData,
+            referenceId,
+            isSilent
+          });
+        }
+        
         notifications.push(notif);
 
         // ⚡ 2. Dispatch Real-time (Socket.io)
@@ -206,13 +244,38 @@ class NotificationService {
           });
         }
       } catch (error) {
-        if (error.code !== 11000) {
+        if (error.code === 11000) {
+          console.log(`[Notification-Skip] Unique constraint hit for user ${recipient.userId}`);
+        } else {
           console.error('[NotificationService-Error]', error.message);
         }
       }
     }
 
     return notifications;
+  }
+
+  /**
+   * Broadcasts a notification to all administrators (Admin Dashboard Sync)
+   */
+  static async notifyAdmins({ type, title, message, data = {}, isSilent = true }) {
+    try {
+      const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id');
+      if (!admins.length) return;
+
+      const adminIds = admins.map(a => a._id);
+      return this.sendNotification({
+        userIds: adminIds,
+        role: 'admin',
+        type,
+        title,
+        message,
+        data,
+        isSilent
+      });
+    } catch (error) {
+      console.error('[NotificationService-AdminNotify-Error]', error.message);
+    }
   }
 }
 

@@ -38,6 +38,25 @@ const StaffBookings = () => {
 
   useEffect(() => {
     fetchBookings();
+
+    const handleGlobalEvent = (e) => {
+      const type = e.detail?.type;
+      const refreshTypes = [
+        'STAFF_ASSIGNED', 
+        'BOOKING_CANCELLED', 
+        'BOOKING_COMPLETED', 
+        'BOOKING_RESCHEDULED',
+        'ASSIGNMENT_RECEIVED',
+        'NEW_BOOKING'
+      ];
+      
+      if (refreshTypes.includes(type)) {
+        fetchBookings();
+      }
+    };
+    
+    window.addEventListener('new-socket-notification', handleGlobalEvent);
+    return () => window.removeEventListener('new-socket-notification', handleGlobalEvent);
   }, []);
   const filteredBookings = bookings.filter(b => {
     const isCorrectStatus = activeTab === 'upcoming'

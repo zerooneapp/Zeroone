@@ -31,6 +31,15 @@ const getNotifications = async (req, res) => {
 const markAsRead = async (req, res) => {
   try {
     const ownerIds = getNotificationOwnerIds(req);
+    
+    if (req.params.id === 'all') {
+      await Notification.updateMany(
+        { userId: { $in: ownerIds }, isRead: false },
+        { isRead: true }
+      );
+      return res.status(200).json({ message: 'All notifications marked as read' });
+    }
+
     const notification = await Notification.findOneAndUpdate(
       { _id: req.params.id, userId: { $in: ownerIds } },
       { isRead: true },
@@ -63,6 +72,18 @@ const getUnreadCount = async (req, res) => {
 const deleteNotification = async (req, res) => {
   try {
     const ownerIds = getNotificationOwnerIds(req);
+
+    if (req.params.id === 'bulk') {
+      const { ids } = req.body;
+      if (!Array.isArray(ids)) return res.status(400).json({ message: 'IDs array required' });
+      
+      await Notification.deleteMany({
+        _id: { $in: ids },
+        userId: { $in: ownerIds }
+      });
+      return res.status(200).json({ message: 'Notifications deleted' });
+    }
+
     const notification = await Notification.findOneAndDelete({ 
       _id: req.params.id, 
       userId: { $in: ownerIds } 

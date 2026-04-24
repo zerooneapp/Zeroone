@@ -68,6 +68,22 @@ const useNotificationStore = create((set, get) => ({
     } catch (error) {
       console.error('Failed to delete notification:', error);
     }
+  },
+
+  deleteBulk: async (ids) => {
+    try {
+      await api.delete('/notifications/bulk', { data: { ids } });
+      set((state) => {
+        const deletedNotifications = state.notifications.filter(n => ids.includes(n._id));
+        const deletedUnreadCount = deletedNotifications.filter(n => !n.isRead).length;
+        return {
+          notifications: state.notifications.filter(n => !ids.includes(n._id)),
+          unreadCount: Math.max(0, state.unreadCount - deletedUnreadCount)
+        };
+      });
+    } catch (error) {
+      console.error('Failed to delete notifications in bulk:', error);
+    }
   }
 }));
 

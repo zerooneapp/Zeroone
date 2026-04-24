@@ -120,7 +120,7 @@ const Cart = () => {
               excludeBookingId: rescheduleBookingId
             }
           }),
-          api.get('/staff', { params: { vendorId: vendor?._id } })
+          api.get('/staff', { params: { vendorId: vendor?._id, date: selectedDate } })
         ]);
 
         setSlots(slotsRes.data?.availableSlots || []);
@@ -526,7 +526,13 @@ const Cart = () => {
                 {availableStaff.map((s) => (
                   <button
                     key={s._id}
-                    onClick={() => setSelectedStaff(selectedStaff?._id === s._id ? null : s)}
+                    onClick={() => {
+                      if (s.isOffDay) {
+                        toast.error(`${s.name} is not available on this date`);
+                        return;
+                      }
+                      setSelectedStaff(selectedStaff?._id === s._id ? null : s);
+                    }}
                     className={cn(
                       "relative flex flex-col items-center min-w-[80px] p-2 rounded-xl border transition-all active:scale-95 shadow-sm",
                       selectedStaff?._id === s._id
@@ -534,12 +540,20 @@ const Cart = () => {
                         : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm"
                     )}
                   >
-                    <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden mb-1.5 border border-slate-100 dark:border-gray-700 shadow-inner">
+                    <div className={cn(
+                      "w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden mb-1.5 border border-slate-100 dark:border-gray-700 shadow-inner relative",
+                      s.isOffDay && "opacity-40 grayscale"
+                    )}>
                       <img 
                         src={s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} 
                         onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true` }}
                         className="w-full h-full object-cover" 
                       />
+                      {s.isOffDay && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
+                           <span className="text-[6px] font-black text-white bg-red-600 px-1 py-0.5 rounded-full uppercase tracking-tighter">OFF</span>
+                        </div>
+                      )}
                     </div>
                     <span className={cn(
                       "text-[10px] font-black truncate w-full text-center tracking-widest leading-tight capitalize",

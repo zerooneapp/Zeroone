@@ -80,10 +80,27 @@ const VendorDashboard = () => {
 
   useEffect(() => {
     fetchDashboard();
+
+    // 📡 Real-time Refresh: Listen for socket notifications to update dashboard data
+    const handleRealtimeUpdate = (event) => {
+      const notification = event.detail;
+      // Refresh dashboard if it's a booking related notification
+      if (['NEW_BOOKING', 'BOOKING_CANCELLED', 'BOOKING_RESCHEDULED', 'STAFF_ASSIGNED'].includes(notification.type)) {
+        console.log('[DASHBOARD-REFRESH] Refreshing due to notification:', notification.type);
+        fetchDashboard();
+      }
+    };
+
+    window.addEventListener('new-socket-notification', handleRealtimeUpdate);
+
     const timer = setInterval(() => {
       setShowWalletValue((prev) => !prev);
     }, 3000);
-    return () => clearInterval(timer);
+
+    return () => {
+      window.removeEventListener('new-socket-notification', handleRealtimeUpdate);
+      clearInterval(timer);
+    };
   }, []);
 
   useEffect(() => {

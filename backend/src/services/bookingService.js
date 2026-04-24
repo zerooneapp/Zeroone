@@ -145,17 +145,23 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
 
   const staff = await Staff.findById(staffId);
 
-  await sendRoleNotifications([
-    {
-      userIds: userId,
-      role: 'customer',
-      type: 'BOOKING_CONFIRMED',
-      title: 'Booking Confirmed!',
-      message: `Your booking at ${vendor.shopName} is confirmed for ${start.format('LLL')}.`,
-      data: { bookingId: booking._id },
-      referenceId: `${booking._id}_CONFIRM`
-    },
-    {
+  const notificationTargets = new Map();
+
+  // 1. Customer Notification
+  notificationTargets.set(userId.toString(), {
+    userIds: userId,
+    role: 'customer',
+    type: 'BOOKING_CONFIRMED',
+    title: 'Booking Confirmed!',
+    message: `Your booking at ${vendor.shopName} is confirmed for ${start.format('LLL')}.`,
+    data: { bookingId: booking._id },
+    referenceId: `${booking._id}_CONFIRM`
+  });
+
+  // 2. Vendor Owner Notification
+  const ownerIdStr = vendor.ownerId.toString();
+  if (!notificationTargets.has(ownerIdStr)) {
+    notificationTargets.set(ownerIdStr, {
       userIds: vendor.ownerId,
       role: 'vendor',
       type: 'NEW_BOOKING',
@@ -163,17 +169,32 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
       message: `New booking received for ${start.format('LLL')}.`,
       data: { bookingId: booking._id },
       referenceId: `${booking._id}_NEW`
-    },
-    getStaffNotificationTarget(staff) ? {
-      userIds: getStaffNotificationTarget(staff),
-      role: 'staff',
-      type: 'STAFF_ASSIGNED',
-      title: 'New Assignment',
-      message: `You have been assigned a new booking for ${booking.isWalkIn ? 'Walk-in' : 'Customer'}: ${booking.walkInCustomerName || 'Client'}. Services: ${booking.services.map(s => s.name).join(', ')} at ${start.format('LT')}.`,
-      data: { bookingId: booking._id },
-      referenceId: `${booking._id}_ASSIGN`
-    } : null
-  ]);
+    });
+  }
+
+  // 3. Staff Notification
+  const staffTargetId = getStaffNotificationTarget(staff);
+  if (staffTargetId) {
+      const staffIdStr = staffTargetId.toString();
+      notificationTargets.set(`${staffIdStr}_staff`, {
+        userIds: staffTargetId,
+        role: 'staff',
+        type: 'STAFF_ASSIGNED',
+        title: 'Booking Accepted',
+        message: `You have been assigned a new booking for ${booking.isWalkIn ? 'Walk-in' : 'Customer'}: ${booking.walkInCustomerName || 'Client'}. Services: ${booking.services.map(s => s.name).join(', ')} at ${start.format('LT')}.`,
+        data: { bookingId: booking._id },
+      });
+  }
+
+  await sendRoleNotifications(Array.from(notificationTargets.values()));
+
+  // 4. Notify Admins for Dashboard Sync (Silent)
+  NotificationService.notifyAdmins({
+    type: 'NEW_BOOKING',
+    title: 'New Booking on Platform',
+    message: `A new booking has been confirmed at ${vendor.shopName}.`,
+    data: { bookingId: booking._id }
+  });
 
   return booking;
 };
@@ -257,6 +278,14 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
     } : null
   ]);
 
+  // Notify Admins for Dashboard Sync (Silent)
+  NotificationService.notifyAdmins({
+    type: 'BOOKING_COMPLETED',
+    title: 'Service Completed',
+    message: `A service has been completed at ${booking.vendorId.shopName}.`,
+    data: { bookingId: booking._id }
+  });
+
   return booking;
 };
 
@@ -309,17 +338,23 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
       : `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
   const internalMessage = `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
 
-  await sendRoleNotifications([
-    {
-      userIds: booking.userId,
-      role: 'customer',
-      type: 'BOOKING_CANCELLED',
-      title: 'Booking Cancelled',
-      message: customerMessage,
-      data: { bookingId: booking._id, reason: booking.cancelReason },
-      referenceId: `${booking._id}_CANCEL_CUSTOMER`
-    },
-    {
+  const notificationTargets = new Map();
+
+  // 1. Customer Notification
+  notificationTargets.set(booking.userId.toString(), {
+    userIds: booking.userId,
+    role: 'customer',
+    type: 'BOOKING_CANCELLED',
+    title: 'Booking Cancelled',
+    message: customerMessage,
+    data: { bookingId: booking._id, reason: booking.cancelReason },
+    referenceId: `${booking._id}_CANCEL_CUSTOMER`
+  });
+
+  // 2. Vendor Owner Notification
+  const ownerIdStr = booking.vendorId.ownerId.toString();
+  if (!notificationTargets.has(ownerIdStr)) {
+    notificationTargets.set(ownerIdStr, {
       userIds: booking.vendorId.ownerId,
       role: 'vendor',
       type: 'BOOKING_CANCELLED',
@@ -327,17 +362,33 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
       message: internalMessage,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_CANCEL_VENDOR`
-    },
-    getStaffNotificationTarget(staff) ? {
-      userIds: getStaffNotificationTarget(staff),
+    });
+  }
+
+  // 3. Staff Notification
+  const staffTargetId = getStaffNotificationTarget(staff);
+  if (staffTargetId) {
+    const staffIdStr = staffTargetId.toString();
+    notificationTargets.set(`${staffIdStr}_staff`, {
+      userIds: staffTargetId,
       role: 'staff',
       type: 'BOOKING_CANCELLED',
-      title: 'Assignment Cancelled',
+      title: 'Booking Rejected',
       message: `Your assignment for ${booking.walkInCustomerName || booking.userId?.name || 'Client'} at ${moment(booking.startTime).format('LT')} was cancelled.${reasonSuffix}`,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_CANCEL_STAFF`
-    } : null
-  ]);
+    });
+  }
+
+  await sendRoleNotifications(Array.from(notificationTargets.values()));
+
+  // Notify Admins for Dashboard Sync (Silent)
+  NotificationService.notifyAdmins({
+    type: 'BOOKING_CANCELLED',
+    title: 'Booking Cancelled',
+    message: `A booking at ${booking.vendorId.shopName} has been cancelled.`,
+    data: { bookingId: booking._id }
+  });
 
   return booking;
 };
@@ -397,7 +448,7 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
       userIds: getStaffNotificationTarget(staff),
       role: 'staff',
       type: 'BOOKING_CANCELLED',
-      title: 'Booking Cancelled',
+      title: 'Booking Rejected',
       message: `Assigned booking for ${bookingTime} was cancelled due to an emergency closure.`,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_EMERGENCY_CANCEL_STAFF`
@@ -525,7 +576,7 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
         userIds: getStaffNotificationTarget(staff),
         role: 'staff',
         type: 'BOOKING_RESCHEDULED',
-        title: 'Assignment Rescheduled',
+        title: 'Booking Accepted (Rescheduled)',
         message: `Your assignment for ${booking.walkInCustomerName || 'Client'} moved from ${oldTime} to ${start.format('LLL')}.`,
         data: { bookingId: booking._id },
         referenceId: `${booking._id}_STAFF_RESCHED`

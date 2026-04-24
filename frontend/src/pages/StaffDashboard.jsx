@@ -27,7 +27,7 @@ const StaffDashboard = () => {
    const [showNotifications, setShowNotifications] = useState(false);
    const [confirmModal, setConfirmModal] = useState({ isOpen: false, bookingId: null });
    const activeBookings = bookings.filter(
-      (booking) => booking.status === 'confirmed' || booking.status === 'assigned'
+      (booking) => booking.status === 'confirmed' || booking.status === 'assigned' || booking.status === 'pending'
    );
    const upcomingBookings = activeBookings.slice(1, 4);
 
@@ -76,15 +76,24 @@ const StaffDashboard = () => {
    };
 
    useEffect(() => {
-      fetchBookings(true);
-      
-      // Real-time Event Listener: Listen for NEW_NOTIFICATION from socket to auto-refresh queue
+      fetchBookings();
+
       const handleGlobalEvent = (e) => {
-         if (e.detail?.type === 'ASSIGNMENT_RECEIVED' || e.detail?.type === 'NEW_BOOKING') {
+         const type = e.detail?.type;
+         const refreshTypes = [
+            'STAFF_ASSIGNED',
+            'BOOKING_CANCELLED',
+            'BOOKING_COMPLETED',
+            'BOOKING_RESCHEDULED',
+            'ASSIGNMENT_RECEIVED',
+            'NEW_BOOKING'
+         ];
+
+         if (refreshTypes.includes(type)) {
             fetchBookings(false);
          }
       };
-      
+
       window.addEventListener('new-socket-notification', handleGlobalEvent);
       return () => window.removeEventListener('new-socket-notification', handleGlobalEvent);
    }, []);
@@ -165,8 +174,17 @@ const StaffDashboard = () => {
                                  {currentTask.userId?.image ? <img src={currentTask.userId.image} className="w-full h-full object-cover" alt={currentTask.userId?.name || 'Customer'} /> : <User size={20} strokeWidth={3} />}
                               </div>
                               <div className="leading-none">
-                                 <h4 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[140px]">{currentTask.userId?.name || 'Client'}</h4>
-                                 <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-2 shadow-sm">{formatTime(currentTask.startTime)}</p>
+                                 <div className="flex items-center gap-2 mb-1.5">
+                                    <h4 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[140px]">{currentTask.userId?.name || 'Client'}</h4>
+                                    <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-widest ${
+                                       currentTask.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                       currentTask.status === 'pending' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' :
+                                       'bg-slate-500/10 text-slate-500 border border-slate-500/20'
+                                    }`}>
+                                       {currentTask.status === 'confirmed' ? 'Accepted' : currentTask.status}
+                                    </span>
+                                 </div>
+                                 <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-0.5 shadow-sm">{formatTime(currentTask.startTime)}</p>
                               </div>
                            </div>
                            <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-95 transition-all">
@@ -211,39 +229,8 @@ const StaffDashboard = () => {
                            </p>
                         </div>
 
-                        <div className="grid grid-cols-5 gap-2.5">
-                           {currentTask.canContact ? (
-                              <a href={`tel:${currentTask.userId?.phone}`} className="h-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10">
-                                 <Phone size={18} strokeWidth={3} />
-                              </a>
-                           ) : (
-                              <div className="h-11 bg-slate-100 dark:bg-gray-800 text-slate-300 dark:text-gray-600 rounded-xl flex items-center justify-center border border-slate-200/50 dark:border-gray-700 opacity-60">
-                                 <Lock size={16} strokeWidth={3} />
-                              </div>
-                           )}
-
-                           {canNavigateToCustomer && (
-                              <a 
-                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="h-11 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-b-2 border-white/10"
-                              >
-                                 <MapPin size={18} strokeWidth={3} />
-                              </a>
-                           )}
-
-                           <button
-                              onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
-                              className={`${canNavigateToCustomer ? 'col-span-3' : 'col-span-4'} h-11 bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[8.5px] uppercase tracking-widest active:scale-95 transition-all shadow-xl border-b-2 border-white/10`}
-                           >
-                              <CheckCircle size={16} strokeWidth={3} />
-                              Complete Job
-                           </button>
-                        </div>
-
                         {upcomingBookings.length > 0 && (
-                           <div className="mt-4 space-y-2">
+                           <div className="mt-4 space-y-2 pb-4">
                               <h3 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
                                  Upcoming clients
                               </h3>
@@ -267,6 +254,32 @@ const StaffDashboard = () => {
                               ))}
                            </div>
                         )}
+                        
+                        {/* 🔘 FIXED ACTION BAR */}
+                        <div className="fixed bottom-20 left-4 right-4 bg-white dark:bg-gray-900 p-2 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-2xl flex gap-2 z-50">
+                           {currentTask.canContact && (
+                              <a href={`tel:${currentTask.userId?.phone}`} className="h-12 w-12 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-white rounded-xl flex items-center justify-center shadow-sm">
+                                 <Phone size={20} strokeWidth={3} />
+                              </a>
+                           )}
+                           {canNavigateToCustomer && (
+                              <a 
+                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="h-12 w-12 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg"
+                              >
+                                 <MapPin size={20} strokeWidth={3} />
+                              </a>
+                           )}
+                           <button
+                              onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
+                              className="flex-1 h-12 bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[10px] uppercase tracking-widest shadow-xl"
+                           >
+                              <CheckCircle size={18} strokeWidth={3} />
+                              Complete Job
+                           </button>
+                        </div>
                      </motion.div>
                   ) : (
                      <div className="py-20 text-center space-y-6 bg-white dark:bg-gray-900/50 rounded-2xl border border-dashed border-slate-200/60 dark:border-gray-800 shadow-sm">

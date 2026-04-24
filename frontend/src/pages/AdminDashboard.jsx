@@ -306,7 +306,11 @@ const AdminDashboard = () => {
               };
 
               return (
-                <div key={i} className={cn('p-3 px-4 rounded-xl border transition-all active:scale-[0.98]', colorMap[stat.color])}>
+                <div 
+                  key={i} 
+                  onClick={() => navigate('/admin/bookings')}
+                  className={cn('p-3 px-4 rounded-xl border transition-all active:scale-[0.98] cursor-pointer hover:shadow-md', colorMap[stat.color])}
+                >
                   <div className="flex items-center justify-between leading-none">
                     <span className="text-[11px] font-black capitalize tracking-widest">{stat.label}</span>
                     <span className="text-[18px] font-black">{stat.value}</span>
@@ -384,7 +388,10 @@ const AdminDashboard = () => {
                     <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{user.phone}</p>
                   </div>
                 </div>
-                <button className="p-1.5 text-slate-200 group-hover:text-primary transition-all active:scale-95">
+                <button 
+                  onClick={() => navigate(`/admin/users/${user._id}`)}
+                  className="p-1.5 text-slate-200 group-hover:text-primary transition-all active:scale-95"
+                >
                   <ChevronRight size={16} strokeWidth={3} />
                 </button>
               </div>

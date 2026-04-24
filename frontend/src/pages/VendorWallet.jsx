@@ -163,6 +163,7 @@ const VendorWallet = () => {
         modal: {
           ondismiss: () => {
             setSubmitting(false);
+            toast.error('Payment cancelled or failed');
           }
         }
       });

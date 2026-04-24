@@ -17,11 +17,15 @@ const getNormalizedServiceLevel = (serviceLevel = 'standard') => (
 
 const getEffectivePlanType = (vendor) => {
   const now = new Date();
+  
+  // 1. Explicit Trial Check (Even if expiry is missing, if it's a trial plan, treat it as such)
   const isTrialCurrentlyActive = Boolean(
+    vendor.planType === 'trial' &&
     vendor.freeTrial?.isActive &&
-    vendor.freeTrial?.expiryDate &&
-    new Date(vendor.freeTrial.expiryDate) > now
+    (!vendor.freeTrial?.expiryDate || new Date(vendor.freeTrial.expiryDate) > now)
   );
+
+  // 2. Monthly Check
   const isMonthlyCurrentlyActive = Boolean(
     vendor.planType === 'monthly' &&
     vendor.expiryDate &&
@@ -119,25 +123,14 @@ const getSubscriptionPlanForVendor = async (type, serviceLevel) => {
 
 const getVendorSubscriptionState = async (vendor) => {
   const settings = await getBillingSettings();
-  const minimumWalletThreshold = settings.minWalletThreshold || 100;
+  const minimumWalletThreshold = settings.minWalletThreshold ?? 100;
   const now = new Date();
+  
   const effectivePlanType = getEffectivePlanType(vendor);
-  const isTrialActive = Boolean(
-    vendor.freeTrial?.isActive &&
-    vendor.freeTrial?.expiryDate &&
-    new Date(vendor.freeTrial.expiryDate) > now
-  );
-  const isMonthlyActive = Boolean(
-    vendor.planType === 'monthly' &&
-    vendor.expiryDate &&
-    new Date(vendor.expiryDate) > now
-  );
-  const isDailyBalanceSufficient = vendor.walletBalance >= minimumWalletThreshold;
-  const didDeductToday = Boolean(
-    vendor.lastDeductionDate &&
-    moment(vendor.lastDeductionDate).tz('Asia/Kolkata').isSame(moment().tz('Asia/Kolkata'), 'day')
-  );
-  const isDailyActive = effectivePlanType === 'daily' && isDailyBalanceSufficient && didDeductToday;
+  
+  const isTrialActive = effectivePlanType === 'trial';
+  const isMonthlyActive = effectivePlanType === 'monthly';
+  const isDailyActive = effectivePlanType === 'daily' && Number(vendor.walletBalance || 0) >= Number(minimumWalletThreshold);
 
   return {
     settings,
@@ -145,23 +138,33 @@ const getVendorSubscriptionState = async (vendor) => {
     isTrialActive,
     isMonthlyActive,
     isDailyActive,
-    isDailyBalanceSufficient,
+    isDailyBalanceSufficient: Number(vendor.walletBalance || 0) >= Number(minimumWalletThreshold),
     currentPlan: effectivePlanType,
     isActive: isTrialActive || isMonthlyActive || isDailyActive
   };
 };
 
 const getUpdatedStatus = async (vendor) => {
+  // 1. Blocked/Rejected vendors stay blocked/rejected regardless of balance
   if (['pending', 'blocked', 'rejected'].includes(vendor.status)) {
     return vendor.status;
   }
 
+  // 2. Normalize Plan Type (e.g. daily to trial if trial was just added)
   const { didChange } = normalizeVendorPlanState(vendor);
-  if (didChange) {
+  
+  // 3. Evaluate Active Status based on Trial/Monthly/Wallet
+  const { isActive } = await getVendorSubscriptionState(vendor);
+  
+  const nextStatus = isActive ? 'active' : 'inactive';
+
+  // 4. Persistence
+  if (didChange || vendor.status !== nextStatus) {
+    vendor.status = nextStatus;
     await vendor.save();
   }
-  const { isActive } = await getVendorSubscriptionState(vendor);
-  return isActive ? 'active' : 'inactive';
+
+  return nextStatus;
 };
 
 const createWalletTransaction = async ({

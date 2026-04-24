@@ -179,11 +179,16 @@ const approveVendor = async (req, res) => {
     vendor.status = 'active';
     vendor.isActive = true;
     vendor.rejectionReason = undefined;
+    vendor.planType = 'trial';
 
     const { freeTrialDays = 7 } = req.body || {};
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + freeTrialDays);
-    vendor.freeTrial = { isActive: true, expiryDate };
+    
+    vendor.freeTrial = { 
+      isActive: true, 
+      expiryDate 
+    };
 
     await vendor.save();
 
@@ -286,7 +291,7 @@ const getRevenueReport = async (req, res) => {
     }
 
     const [revenue, newVendors, totalBookings] = await Promise.all([
-      Booking.aggregate([{ $match: { status: 'completed', createdAt: { $gte: start, $lt: end } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Booking.aggregate([{ $match: { status: 'completed', completedAt: { $gte: start, $lt: end } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
       Vendor.countDocuments({ createdAt: { $gte: start, $lt: end } }),
       Booking.countDocuments({ createdAt: { $gte: start, $lt: end } })
     ]);
@@ -562,7 +567,15 @@ const createCategory = async (req, res) => {
 
 const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const filter = {};
+    
+    // If not an admin/super_admin, only show active categories
+    const isAdmin = req.user && ['admin', 'super_admin'].includes(req.user.role);
+    if (!isAdmin) {
+      filter.isActive = true;
+    }
+
+    const categories = await Category.find(filter).sort({ name: 1 });
     res.status(200).json(categories);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -597,8 +610,8 @@ const getAdminDashboard = async (req, res) => {
       lowBalanceCount,
       inactiveVendorsCount
     ] = await Promise.all([
-      Booking.aggregate([{ $match: { status: 'completed', createdAt: { $gte: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
-      Booking.aggregate([{ $match: { status: 'completed', createdAt: { $gte: yesterday.toDate(), $lt: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Booking.aggregate([{ $match: { status: 'completed', completedAt: { $gte: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Booking.aggregate([{ $match: { status: 'completed', completedAt: { $gte: yesterday.toDate(), $lt: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
       Booking.aggregate([{ $match: { status: 'completed' } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
       Vendor.countDocuments({ createdAt: { $gte: rangeStart } }),
       Vendor.countDocuments({ status: 'active' }),
@@ -609,8 +622,8 @@ const getAdminDashboard = async (req, res) => {
       User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5),
       Review.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName'),
       Booking.aggregate([
-        { $match: { status: 'completed', createdAt: { $gte: rangeStart } } },
-        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, total: { $sum: '$totalPrice' } } },
+        { $match: { status: 'completed', completedAt: { $gte: rangeStart } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$completedAt' } }, total: { $sum: '$totalPrice' } } },
         { $sort: { _id: 1 } }
       ]),
       Booking.countDocuments({ createdAt: { $gte: rangeStart } }),

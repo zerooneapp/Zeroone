@@ -268,6 +268,9 @@ const getNearbyVendors = async (req, res) => {
         }
       }
 
+      const { isShopCurrentlyOpen } = require('../utils/shopStatus');
+      const dynamicIsShopOpen = isShopCurrentlyOpen(v.workingHours);
+
       return buildPublicVendorResponse(v, {
         dist: v.dist,
         service: primaryService?.name || 'Beauty Service',
@@ -277,7 +280,8 @@ const getNearbyVendors = async (req, res) => {
         serviceImage: primaryService?.image || primaryService?.images?.[0] || '',
         serviceType: primaryService?.type || 'shop',
         serviceCount: allServices.length,
-        services: allServices
+        services: allServices,
+        isShopOpen: dynamicIsShopOpen // Always return live status
       });
     }));
 
@@ -481,11 +485,14 @@ const getVendorDashboard = async (req, res) => {
       getSubscriptionPlanForVendor('monthly', vendor.serviceLevel)
     ]);
 
+    const { isShopCurrentlyOpen } = require('../utils/shopStatus');
+    const dynamicIsShopOpen = isShopCurrentlyOpen(vendor.workingHours);
+
     res.status(200).json({
       shopName: vendor.shopName,
       address: vendor.address,
       rating: vendor.rating,
-      isShopOpen: vendor.isShopOpen,
+      isShopOpen: dynamicIsShopOpen,
       isClosedToday: vendor.isClosedToday,
       workingHours: vendor.workingHours,
       walletBalance: vendor.walletBalance,
@@ -596,7 +603,13 @@ const updateShopProfile = async (req, res) => {
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
-    if (workingHours) vendor.workingHours = workingHours;
+    const { isShopCurrentlyOpen } = require('../utils/shopStatus');
+
+    if (workingHours) {
+      vendor.workingHours = workingHours;
+      vendor.isShopOpen = isShopCurrentlyOpen(workingHours);
+      if (vendor.isShopOpen) vendor.isClosedToday = false;
+    }
     if (shopName) vendor.shopName = shopName;
     if (address) vendor.address = address;
     if (location) vendor.location = location;

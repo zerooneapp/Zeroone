@@ -623,33 +623,40 @@ const ServiceDetail = () => {
       </div>
 
       {/* Fixed Sticky Action Bar */}
-      <div
-        className="fixed left-2 right-2 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-[24px]"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 54px)' }}
-      >
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          <div className="flex flex-col">
-            <p className="text-[8px] font-black text-white/40 capitalize tracking-widest mb-0.5 leading-none">Net total</p>
-            {totalSavings > 0 && (
-              <p className="text-[8px] font-black text-white/40 line-through leading-none mb-1">₹{originalTotal}</p>
-            )}
-            <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
-            {totalSavings > 0 && (
-              <div className="mt-1.5 flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-1 rounded-md self-start shadow-sm shadow-emerald-500/10">
-                <Tag size={8} className="text-emerald-400 fill-emerald-400" />
-                <p className="text-[8px] font-black text-emerald-400 tracking-widest leading-none uppercase">SAVE ₹{totalSavings}</p>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={handleProceedToBooking}
-            disabled={cartItems.length === 0 || loading}
-            className="px-8 py-2 bg-white text-[#0B1222] rounded-2xl font-black text-[14px] uppercase tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[2px] border-gray-100 flex items-center justify-center min-w-[120px]"
+      <AnimatePresence>
+        {hasItemsFromThisVendor && cartItems.length > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed left-2 right-2 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-[24px]"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 54px)' }}
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : 'Book Now'}
-          </button>
-        </div>
-      </div>
+            <div className="flex items-center justify-between max-w-lg mx-auto">
+              <div className="flex flex-col">
+                <p className="text-[8px] font-black text-white/40 capitalize tracking-widest mb-0.5 leading-none">Net total</p>
+                {totalSavings > 0 && (
+                  <p className="text-[8px] font-black text-white/40 line-through leading-none mb-1">₹{originalTotal}</p>
+                )}
+                <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
+                {totalSavings > 0 && (
+                  <div className="mt-1.5 flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-1 rounded-md self-start shadow-sm shadow-emerald-500/10">
+                    <Tag size={8} className="text-emerald-400 fill-emerald-400" />
+                    <p className="text-[8px] font-black text-emerald-400 tracking-widest leading-none uppercase">SAVE ₹{totalSavings}</p>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleProceedToBooking}
+                disabled={cartItems.length === 0 || loading}
+                className="px-8 py-2 bg-white text-[#0B1222] rounded-2xl font-black text-[14px] uppercase tracking-widest shadow-xl shadow-black/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95 border-b-[2px] border-gray-100 flex items-center justify-center min-w-[120px]"
+              >
+                {loading ? <Loader2 size={16} className="animate-spin" /> : 'Book Now'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Intelligent Choice Modal */}
       <AnimatePresence>
