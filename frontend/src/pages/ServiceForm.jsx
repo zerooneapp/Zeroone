@@ -118,10 +118,14 @@ const ServiceForm = () => {
       try {
          setLoading(true);
          if (isEdit) {
-            await api.patch(`/services/${id}`, data);
+            await api.patch(`/services/${id}`, data, {
+               headers: { 'Content-Type': 'multipart/form-data' }
+            });
             toast.success('Service updated successfully');
          } else {
-            await api.post('/services', data);
+            await api.post('/services', data, {
+               headers: { 'Content-Type': 'multipart/form-data' }
+            });
             toast.success('Service added successfully');
          }
          navigate('/vendor/services');

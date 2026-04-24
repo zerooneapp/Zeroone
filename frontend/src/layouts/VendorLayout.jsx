@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import useSocket from '../hooks/useSocket';
 
 const VendorLayout = () => {
-  const { role, user } = useAuthStore();
+  const { role, user, isInitialized } = useAuthStore();
   useSocket(user?._id);
   const location = useLocation();
   const navigate = useNavigate();
@@ -59,6 +59,8 @@ const VendorLayout = () => {
       window.removeEventListener('focusout', handleFocusOut);
     };
   }, []);
+
+  if (!isInitialized) return null;
 
   if (role !== 'vendor') {
     return <Navigate to="/" replace />;

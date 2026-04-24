@@ -15,6 +15,7 @@ const Home = () => {
   const { user } = useAuthStore();
   const [categories, setCategories] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -80,18 +81,20 @@ const Home = () => {
       lat: location.lat,
       search: debouncedSearch,
       category: selectedCats.join(','),
-      serviceType: selectedServiceMode
+      serviceType: selectedServiceMode,
+      page: currentPage,
+      limit: itemsPerPage
     };
 
     api.get('/vendors/nearby', { params })
       .then(res => {
-        setVendors(res.data);
-        setCurrentPage(1); // Reset to page 1 on new search/filter
+        setVendors(res.data.vendors || []);
+        setTotalPages(res.data.totalPages || 1);
         setError(null);
       })
       .catch(err => setError('Failed to load professionals nearby'))
       .finally(() => setLoading(false));
-  }, [location, debouncedSearch, selectedCats, selectedServiceMode]);
+  }, [location, debouncedSearch, selectedCats, selectedServiceMode, currentPage]);
 
   const toggleCategory = (id) => {
     setSelectedCats(prev =>
@@ -99,11 +102,13 @@ const Home = () => {
     );
   };
 
+  // 🔄 Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, selectedCats, selectedServiceMode]);
+
   // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentVendors = filteredHomeCards.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredHomeCards.length / itemsPerPage);
+  const currentVendors = filteredHomeCards;
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);

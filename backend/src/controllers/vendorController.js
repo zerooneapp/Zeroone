@@ -4,6 +4,7 @@ const Service = require('../models/Service');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
 const Offer = require('../models/Offer');
+const GlobalSettings = require('../models/GlobalSettings');
 const cloudinary = require('../config/cloudinary');
 const moment = require('moment-timezone');
 const NotificationService = require('../services/notificationService');
@@ -58,13 +59,14 @@ const calculateDistanceInMeters = (fromLat, fromLng, toLat, toLng) => {
 
 const registerVendor = async (req, res) => {
   try {
-    const { shopName, category, address, location, serviceLevel, serviceMode } = req.body;
+    const { shopName, ownerName, category, address, location, serviceLevel, serviceMode } = req.body;
     const existingVendor = await Vendor.findOne({ ownerId: req.user._id });
     if (existingVendor) return res.status(400).json({ message: 'Vendor already exists' });
 
     console.log('[DEBUG] Registering Vendor for user:', req.user._id);
     const vendor = await Vendor.create({
       shopName,
+      ownerName,
       category,
       address,
       location,
@@ -158,7 +160,18 @@ const getNearbyVendors = async (req, res) => {
 
     const parsedLng = parseFloat(lng);
     const parsedLat = parseFloat(lat);
-    const discoveryRadius = parseInt(process.env.VENDOR_DISCOVERY_RADIUS, 10) || 10000;
+
+    // 🛡️ Global Policy: Fetch discovery radius from system config
+    let discoveryRadiusInMeters = parseInt(process.env.VENDOR_DISCOVERY_RADIUS, 10) || 10000;
+    try {
+      const settings = await GlobalSettings.findOne();
+      if (settings && settings.discoveryRadius) {
+        discoveryRadiusInMeters = settings.discoveryRadius * 1000; // Convert KM to Meters
+      }
+    } catch (err) {
+      console.error('[SETTINGS-ERROR] Failed to fetch discovery radius, using fallback');
+    }
+
     const normalizedLimit = parseInt(limit);
     const skip = (parseInt(page) - 1) * normalizedLimit;
     const normalizedServiceType = ['all', 'shop', 'home'].includes(String(serviceType).toLowerCase())
@@ -171,7 +184,7 @@ const getNearbyVendors = async (req, res) => {
         $geoNear: {
           near: { type: 'Point', coordinates: [parsedLng, parsedLat] },
           distanceField: 'dist.calculated',
-          maxDistance: discoveryRadius,
+          maxDistance: discoveryRadiusInMeters,
           query: { status: 'active', isActive: true },
           spherical: true
         }
@@ -299,7 +312,12 @@ const getNearbyVendors = async (req, res) => {
       }
     }
 
-    res.status(200).json(paginatedVendors);
+    res.status(200).json({
+      vendors: paginatedVendors,
+      totalCount: modeFilteredVendors.length,
+      totalPages: Math.ceil(modeFilteredVendors.length / normalizedLimit),
+      currentPage: Number(page)
+    });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 

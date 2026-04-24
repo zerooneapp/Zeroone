@@ -508,7 +508,7 @@ const ServiceDetail = () => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
-                    <img src={item.image || vendor.shopImage} className="w-full h-full object-cover" alt={item.name} />
+                    <img src={item.image || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800'} className="w-full h-full object-cover" alt={item.name} />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
@@ -572,7 +572,7 @@ const ServiceDetail = () => {
                 className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
               >
                 <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
-                  <img src={service.image || vendor.shopImage} className="w-full h-full object-cover" alt={service.name} />
+                  <img src={service.image || (service.images && service.images[0]) || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800'} className="w-full h-full object-cover" alt={service.name} />
                 </div>
                 <div className="flex-1">
                   <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>

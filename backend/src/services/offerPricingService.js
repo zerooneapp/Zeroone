@@ -90,7 +90,7 @@ const getBestOfferForServices = (services, offers) => {
 
 const calculatePricingPreview = async (vendorId, services) => {
   const normalizedServices = services.map((service) => ({
-    ...service,
+    ...(service.toObject ? service.toObject() : service),
     price: Number(service.price || 0)
   }));
   const offers = await getActiveOffers(vendorId);

@@ -11,6 +11,12 @@ const {
   endClosure
 } = require('../controllers/vendorClosureController');
 const {
+  previewStaffClosure,
+  createStaffClosure,
+  listStaffClosures,
+  endStaffClosure
+} = require('../controllers/staffClosureController');
+const {
   getVendorWalletOverview,
   createWalletTopupOrder,
   verifyWalletTopup,
@@ -43,6 +49,12 @@ router.post('/closures/preview', protect, isApprovedVendor, previewClosure);
 router.post('/closures', protect, isApprovedVendor, createClosure);
 router.get('/closures', protect, isApprovedVendor, listActiveClosures);
 router.patch('/closures/:id/end', protect, isApprovedVendor, endClosure);
+
+// 4. Staff Closures
+router.post('/staff-closures/preview', protect, isApprovedVendor, previewStaffClosure);
+router.post('/staff-closures', protect, isApprovedVendor, createStaffClosure);
+router.get('/staff-closures', protect, isApprovedVendor, listStaffClosures);
+router.patch('/staff-closures/:id/end', protect, isApprovedVendor, endStaffClosure);
 
 // 2. Offer Management
 router.post('/offers', protect, isApprovedVendor, createOffer);

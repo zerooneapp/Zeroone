@@ -90,6 +90,14 @@ const onboardStaff = async (vendorId, staffData) => {
   const User = require('../models/User');
   const { name, phone, ...rest } = staffData;
 
+  // 🛡️ PREVENT DUPLICATE STAFF: Check if this phone is already a staff member for ANY vendor
+  const existingStaff = await Staff.findOne({ phone });
+  if (existingStaff) {
+    const Vendor = require('../models/Vendor');
+    const v = await Vendor.findById(existingStaff.vendorId);
+    throw new Error(`This phone number is already registered as staff for another vendor (${v?.shopName || 'Unknown Shop'}). One staff member can only work for one vendor.`);
+  }
+
   // 🛡️ AUTH LINKING: Ensure a User account exists for this staff member
   let user = await User.findOne({ phone });
   

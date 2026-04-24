@@ -267,7 +267,7 @@ const VendorManagement = () => {
                     </div>
                   </td>
                   <td className="px-3 py-3.5 text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tight opacity-80">
-                    {vendor.ownerId?.name || 'N/A'}
+                    {vendor.ownerName || vendor.ownerId?.name || 'N/A'}
                   </td>
                   <td className="px-3 py-3.5 leading-none">
                     <div className="flex flex-col gap-1.5">
@@ -380,7 +380,7 @@ const VendorManagement = () => {
                 <div className="grid grid-cols-2 gap-5">
                   <div className="space-y-6">
                     <Section title="Fleet Node Info" icon={User}>
-                      <InfoItem label="Owner Entity" value={selectedVendor.ownerId?.name} />
+                      <InfoItem label="Owner Entity" value={selectedVendor.ownerName || selectedVendor.ownerId?.name} />
                       <InfoItem label="Comms Node" value={selectedVendor.ownerId?.phone} />
                       <InfoItem label="Service Mode" value="Shop Service" />
                       <InfoItem label="Base Registry" value={selectedVendor.address} />

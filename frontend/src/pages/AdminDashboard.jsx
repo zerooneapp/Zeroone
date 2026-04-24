@@ -337,7 +337,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{vendor.shopName}</h4>
-                    <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{vendor.ownerId?.name} • {vendor.serviceLevel}</p>
+                    <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{vendor.ownerName || vendor.ownerId?.name} • {vendor.serviceLevel}</p>
                   </div>
                 </div>
 

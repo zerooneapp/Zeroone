@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import {
-  Store, FileText, MapPin, Camera, ArrowRight, ArrowLeft,
+  Store, FileText, MapPin, Camera, ArrowRight, ArrowLeft, User,
   CheckCircle2, Upload, Briefcase, ShieldCheck, Zap, Star, Crown, Info
 } from 'lucide-react';
 import api from '../services/api';
@@ -24,6 +24,7 @@ const VendorSignup = () => {
   // Form State
   const [formData, setFormData] = useState({
     shopName: '',
+    ownerName: '',
     category: '',
     serviceLevel: 'standard', // standard, premium, luxury
     serviceMode: 'shop',
@@ -57,8 +58,8 @@ const VendorSignup = () => {
   }, [phone, navigate]);
 
   const handleNext = () => {
-    if (step === 1 && (!formData.shopName || !formData.category || !formData.serviceMode)) {
-      return toast.error('Please fill business details');
+    if (step === 1 && (!formData.shopName || !formData.ownerName || !formData.category || !formData.serviceMode)) {
+      return toast.error('Please fill personal and business details');
     }
     if (step === 2 && (!panCardFile || !aadhaarFrontFile || !aadhaarBackFile)) {
       return toast.error('Please upload all identity documents');
@@ -73,7 +74,7 @@ const VendorSignup = () => {
     try {
       const authRes = await api.post('/auth/register', {
         phone,
-        name: formData.shopName,
+        name: formData.ownerName,
         role: 'vendor',
         forceUpdate: true
       });
@@ -155,6 +156,14 @@ const VendorSignup = () => {
                 className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 h-12 rounded-xl font-bold shadow-sm text-sm"
                 value={formData.shopName}
                 onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
+              />
+
+              <Input
+                icon={User}
+                placeholder="Owner Full Name"
+                className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 h-12 rounded-xl font-bold shadow-sm text-sm"
+                value={formData.ownerName}
+                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
               />
 
               <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-2 flex items-center gap-3 h-12 shadow-sm ring-inset ring-1 ring-black/5">

@@ -77,7 +77,8 @@ const CheckoutReview = () => {
         startTime: startDateTime,
         duration: totalDuration,
         serviceIds: items.map((item) => item._id),
-        staffId: selectedStaff?._id
+        staffId: selectedStaff?._id,
+        excludeBookingId: bookingData.rescheduleBookingId
       });
 
       const { user } = useAuthStore.getState();

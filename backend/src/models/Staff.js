@@ -39,8 +39,8 @@ staffSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+staffSchema.index({ phone: 1 }, { unique: true });
 staffSchema.index({ vendorId: 1 });
 staffSchema.index({ vendorId: 1, isOwner: 1 }, { unique: true, partialFilterExpression: { isOwner: true } });
-staffSchema.index({ vendorId: 1, phone: 1 }, { unique: true });
 
 module.exports = mongoose.model('Staff', staffSchema);

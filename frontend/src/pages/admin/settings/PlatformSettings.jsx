@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Settings, ShieldAlert, Wallet, BellRing,
   Save, RefreshCw, ToggleLeft, ToggleRight,
-  Info, ShieldCheck, Zap, AlertCircle
+  Info, ShieldCheck, Zap, AlertCircle, MapPin
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../services/api';
@@ -13,6 +13,7 @@ const PlatformSettings = () => {
   const [settings, setSettings] = useState({
     freeTrialDays: 7,
     minWalletThreshold: 100,
+    discoveryRadius: 10,
     notifications: {
       bookingAlerts: true,
       walletAlerts: true,
@@ -120,6 +121,15 @@ const PlatformSettings = () => {
                 value={settings.minWalletThreshold}
                 onChange={(val) => handleUpdate({ minWalletThreshold: Number(val) })}
                 unit="₹"
+                isDisabled={saving}
+              />
+              <SettingInput
+                label="Service Discovery Radius"
+                sub="Max distance for users to find partners"
+                icon={MapPin}
+                value={settings.discoveryRadius}
+                onChange={(val) => handleUpdate({ discoveryRadius: Number(val) })}
+                unit="KM"
                 isDisabled={saving}
               />
             </div>

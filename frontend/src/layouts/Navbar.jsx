@@ -6,7 +6,7 @@ import { cn } from '../utils/cn';
 import { useAuthStore } from '../store/authStore';
 
 const Navbar = () => {
-  const { role } = useAuthStore();
+  const { role, isInitialized } = useAuthStore();
   const [isVisible, setIsVisible] = React.useState(true);
 
   React.useEffect(() => {
@@ -53,7 +53,7 @@ const Navbar = () => {
     };
   }, []);
 
-  if (!isVisible) return null;
+  if (!isVisible || !isInitialized) return null;
 
   const navItems = role === 'staff'
     ? [

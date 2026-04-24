@@ -125,12 +125,15 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
     staffId,
     type: bookingType,
     serviceAddress: resolvedServiceAddress,
-    services: serviceDetails.map((service) => ({
-      serviceId: service._id,
-      name: service.name,
-      price: service.price,
-      duration: service.duration
-    })),
+    services: serviceDetails.map((service) => {
+      const preview = pricingPreview.services.find(ps => ps.serviceId.toString() === service._id.toString());
+      return {
+        serviceId: service._id,
+        name: service.name,
+        price: preview ? preview.finalPrice : service.price,
+        duration: service.duration
+      };
+    }),
     totalPrice,
     totalDuration,
     startTime: start.toDate(),
@@ -458,14 +461,30 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
   const oldTime = moment(booking.startTime).format('LLL');
   const originalStaffId = booking.staffId;
   const serviceIds = (booking.services || []).map((service) => service.serviceId).filter(Boolean);
+  
+  // 🔄 RECALCULATE PRICING: Ensure latest offers are applied during reschedule
+  const { getPricingPreviewForServiceIds } = require('./offerPricingService');
+  const pricingPreview = await getPricingPreviewForServiceIds(booking.vendorId._id, serviceIds);
+
   const serviceDetails = await Service.find({
     _id: { $in: serviceIds },
     vendorId: booking.vendorId._id
   }).select('type');
+
   const { bookingType, resolvedServiceAddress } = resolveBookingMode(
     serviceDetails,
     newServiceAddress || booking.serviceAddress || ''
   );
+
+  // Update Pricing & Services (Ensure offers persist)
+  booking.totalPrice = pricingPreview.finalTotal;
+  booking.services = booking.services.map(s => {
+    const preview = (pricingPreview.services || []).find(ps => ps.serviceId.toString() === s.serviceId.toString());
+    if (preview) {
+      s.price = preview.finalPrice;
+    }
+    return s;
+  });
 
   booking.startTime = start.toDate();
   booking.endTime = end.toDate();

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertTriangle, CalendarDays, Clock3, X } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Clock3, X, User } from 'lucide-react';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -19,7 +19,7 @@ const getInitialWindow = () => {
   };
 };
 
-const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
+const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
   const [form, setForm] = useState(getInitialWindow);
   const [preview, setPreview] = useState(null);
   const [previewing, setPreviewing] = useState(false);
@@ -35,18 +35,20 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
   }, [isOpen]);
 
   const payload = useMemo(() => ({
+    staffId: staff?._id,
     startTime: dayjs(`${form.startDate}T${form.startTime}`).toISOString(),
     endTime: dayjs(`${form.endDate}T${form.endTime}`).toISOString(),
-    reason: form.reason.trim()
-  }), [form]);
+    reason: form.reason.trim(),
+    autoCancel: true // Always auto-cancel per client request
+  }), [form, staff]);
 
   const handlePreview = async () => {
     try {
       setPreviewing(true);
-      const res = await api.post('/vendor/closures/preview', payload);
+      const res = await api.post('/vendor/staff-closures/preview', payload);
       setPreview(res.data);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to preview closure');
+      toast.error(err.response?.data?.message || 'Failed to preview absence');
     } finally {
       setPreviewing(false);
     }
@@ -55,12 +57,12 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
   const handleCreate = async () => {
     try {
       setCreating(true);
-      const res = await api.post('/vendor/closures', payload);
-      toast.success('Emergency closure activated');
+      const res = await api.post('/vendor/staff-closures', payload);
+      toast.success(`${staff?.name}'s absence recorded. ${res.data.cancelledCount || 0} bookings cancelled.`);
       onCreated?.(res.data);
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to activate closure');
+      toast.error(err.response?.data?.message || 'Failed to record absence');
     } finally {
       setCreating(false);
     }
@@ -86,9 +88,14 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
             className="relative z-10 w-full max-w-lg bg-white dark:bg-gray-900 rounded-[2rem] border border-slate-200/70 dark:border-gray-800 shadow-2xl overflow-hidden"
           >
             <div className="p-4 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[9px] font-black capitalize tracking-[0.25em] text-amber-500">Emergency Window</p>
-                <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-1">Temporary Shop Closure</h2>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20">
+                  <User size={24} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-black capitalize tracking-[0.25em] text-indigo-500">Staff Absence Window</p>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-1">Deactivate {staff?.name}</h2>
+                </div>
               </div>
               <button
                 onClick={onClose}
@@ -154,11 +161,11 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
               </div>
 
               <label className="space-y-1.5 block">
-                <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Reason</span>
+                <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Reason for Absence</span>
                 <textarea
                   value={form.reason}
                   onChange={(e) => setForm((prev) => ({ ...prev, reason: e.target.value }))}
-                  placeholder="Optional note for your team and customers"
+                  placeholder="Medical leave, family emergency, etc. Customers will see this reason if their booking is cancelled."
                   rows={3}
                   className="w-full px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-[11px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400 resize-none focus:outline-none"
                 />
@@ -176,7 +183,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                           Impact Preview
                         </p>
                         <p className="text-[12px] font-black text-slate-900 dark:text-white">
-                          {preview.impactedBookings.length} confirmed booking{preview.impactedBookings.length === 1 ? '' : 's'} affected.
+                          {preview.impactedBookings.length} confirmed assignment{preview.impactedBookings.length === 1 ? '' : 's'} affected.
                         </p>
                         <p className="text-[11px] font-black text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1.5">
                           <span className="opacity-60 uppercase tracking-widest text-[8px]">Estimated Loss:</span>
@@ -184,7 +191,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                         </p>
                         {preview.conflicts?.length > 0 && (
                           <p className="text-[10px] font-bold text-rose-500">
-                            Another active closure already overlaps this range. Adjust timing before activating.
+                            Another active absence already overlaps this range for {staff?.name}.
                           </p>
                         )}
                       </div>
@@ -195,7 +202,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                     {preview.impactedBookings.length === 0 ? (
                       <div className="p-4 rounded-xl border border-dashed border-slate-200 dark:border-gray-700 text-center">
                         <p className="text-[10px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-[0.2em]">
-                          No existing bookings will be affected
+                          No assignments will be affected
                         </p>
                       </div>
                     ) : (
@@ -236,9 +243,9 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
               <button
                 onClick={handleCreate}
                 disabled={!preview || previewing || creating || preview.conflicts?.length > 0}
-                className="h-11 px-5 bg-slate-900 dark:bg-[#1C2C4E] text-white rounded-xl text-[10px] font-black capitalize tracking-[0.2em] shadow-lg active:scale-95 transition-all disabled:opacity-40"
+                className="h-11 px-5 bg-indigo-600 text-white rounded-xl text-[10px] font-black capitalize tracking-[0.2em] shadow-lg active:scale-95 transition-all disabled:opacity-40"
               >
-                {creating ? 'Activating...' : 'Activate Closure'}
+                {creating ? 'Processing...' : 'Confirm Absence'}
               </button>
             </div>
           </motion.div>
@@ -248,4 +255,4 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
   );
 };
 
-export default EmergencyClosureModal;
+export default StaffClosureModal;

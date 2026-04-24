@@ -207,7 +207,7 @@ const StaffDashboard = () => {
                         <div className="flex items-center justify-between mb-5 bg-slate-50/50 dark:bg-gray-800/50 p-3 rounded-xl border border-slate-50 dark:border-gray-800/50">
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Service Price</p>
                            <p className="text-[14px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">
-                              ₹{currentTask.services?.reduce((acc, s) => acc + (s.price || 0), 0) || 0}
+                              ₹{currentTask.totalPrice || 0}
                            </p>
                         </div>
 

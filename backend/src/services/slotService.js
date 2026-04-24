@@ -8,9 +8,12 @@ const StaffAvailability = require('../models/StaffAvailability');
 const moment = require('moment-timezone');
 const { ensureOwnerStaff } = require('./staffService');
 const {
-  getActiveClosureWindows,
-  hasClosureOverlap
+  getActiveClosureWindows: getVendorClosureWindows,
+  hasClosureOverlap: hasVendorClosureOverlap
 } = require('./vendorClosureService');
+const {
+  getActiveClosureWindows: getStaffClosureWindows
+} = require('./staffClosureService');
 
 const TIME_FORMATS = ['HH:mm', 'H:mm', 'hh:mm A', 'h:mm A'];
 
@@ -165,7 +168,7 @@ const getEligibleStaffMembers = async (vendorId, serviceIds) => {
   return staffMembers;
 };
 
-const calculateAvailableSlots = async (vendorId, serviceIds, date) => {
+const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookingId = null) => {
   const now = moment().tz('Asia/Kolkata');
   const targetDate = moment(date).tz('Asia/Kolkata').startOf('day');
   const vendorAvailability = await getVendorDayAvailability(vendorId, targetDate);
@@ -192,11 +195,21 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date) => {
 
   const staffIds = staffMembers.map((staff) => staff._id);
   const staffAvailabilityMap = await getStaffAvailabilityMap(staffIds, targetDate);
-  const closureWindows = await getActiveClosureWindows(vendorId, shopOpen, shopClose);
+  const vendorClosureWindows = await getVendorClosureWindows(vendorId, shopOpen, shopClose);
+  
+  // 🛡️ Fetch all active staff closures for the day
+  const StaffClosure = require('../models/StaffClosure');
+  const staffClosureRecords = await StaffClosure.find({
+    staffId: { $in: staffIds },
+    status: 'active',
+    startTime: { $lt: targetDate.clone().add(1, 'day').toDate() },
+    endTime: { $gt: targetDate.toDate() }
+  }).lean();
 
   const bookings = await Booking.find({
     staffId: { $in: staffIds },
     status: { $ne: 'cancelled' },
+    _id: { $ne: excludeBookingId },
     startTime: { $gte: targetDate.toDate(), $lt: targetDate.clone().add(1, 'day').toDate() }
   });
 
@@ -227,7 +240,7 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date) => {
       continue;
     }
 
-    if (hasClosureOverlap(currentStart, currentEnd, closureWindows)) {
+    if (hasVendorClosureOverlap(currentStart, currentEnd, vendorClosureWindows)) {
       currentStart.add(30, 'minutes');
       continue;
     }
@@ -248,7 +261,13 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date) => {
         currentEnd.isAfter(block.start)
       ));
 
-      if (!isAvailableBySchedule || hasOverlap) continue;
+      const isStaffOnClosure = staffClosureRecords.some(c => 
+        c.staffId.toString() === staffIdStr &&
+        currentStart.isBefore(moment(c.endTime)) && 
+        currentEnd.isAfter(moment(c.startTime))
+      );
+
+      if (!isAvailableBySchedule || hasOverlap || isStaffOnClosure) continue;
 
       let slotObj = availableSlotsWithStaff.find((slot) => slot.time === currentStart.format('HH:mm'));
       if (!slotObj) {
@@ -265,7 +284,7 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date) => {
   return availableSlotsWithStaff.sort((a, b) => a.time.localeCompare(b.time));
 };
 
-const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime, targetStaffId = null) => {
+const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime, targetStaffId = null, excludeBookingId = null) => {
   const targetDate = moment(startTime).tz('Asia/Kolkata').startOf('day');
   const vendorAvailability = await getVendorDayAvailability(vendorId, targetDate);
 
@@ -278,8 +297,8 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
     return null;
   }
 
-  const closureWindows = await getActiveClosureWindows(vendorId, start, end);
-  if (hasClosureOverlap(start, end, closureWindows)) {
+  const vendorClosureWindows = await getVendorClosureWindows(vendorId, start, end);
+  if (hasVendorClosureOverlap(start, end, vendorClosureWindows)) {
     return null;
   }
 
@@ -287,11 +306,22 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
   if (staffMembers.length === 0) return null;
 
   const staffIds = staffMembers.map((staff) => staff._id);
+  
+  // 🛡️ Staff Closure Check
+  const StaffClosure = require('../models/StaffClosure');
+  const staffClosureRecords = await StaffClosure.find({
+    staffId: { $in: staffIds },
+    status: 'active',
+    startTime: { $lt: end.toDate() },
+    endTime: { $gt: start.toDate() }
+  }).lean();
+
   const staffAvailabilityMap = await getStaffAvailabilityMap(staffIds, targetDate);
 
   const bookings = await Booking.find({
     staffId: { $in: staffIds },
     status: { $ne: 'cancelled' },
+    _id: { $ne: excludeBookingId },
     startTime: { $lt: end.toDate() },
     endTime: { $gt: start.toDate() }
   });
@@ -309,23 +339,16 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
   ]);
 
   if (targetStaffId) {
-    const isTargetBusy = busyStaffIds.has(targetStaffId.toString());
-    const isTargetQualified = staffMembers.some((staff) => staff._id.toString() === targetStaffId.toString());
-    const isTargetAvailableBySchedule = isStaffAvailableForWindow(
-      targetStaffId,
-      start,
-      end,
-      staffAvailabilityMap,
-      vendorAvailability.windows
-    );
+    const isTargetOnClosure = staffClosureRecords.some(c => c.staffId.toString() === targetStaffId.toString());
 
-    return (!isTargetBusy && isTargetQualified && isTargetAvailableBySchedule)
+    return (!isTargetBusy && isTargetQualified && isTargetAvailableBySchedule && !isTargetOnClosure)
       ? staffMembers.find((staff) => staff._id.toString() === targetStaffId.toString())
       : null;
   }
 
   return staffMembers.find((staff) => (
     !busyStaffIds.has(staff._id.toString()) &&
+    !staffClosureRecords.some(c => c.staffId.toString() === staff._id.toString()) &&
     isStaffAvailableForWindow(
       staff._id,
       start,

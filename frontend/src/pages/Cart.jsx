@@ -116,7 +116,8 @@ const Cart = () => {
             params: {
               vendorId: vendor?._id,
               date: selectedDate,
-              serviceIds: items?.map(i => i?._id).filter(id => !!id).join(',')
+              serviceIds: items?.map(i => i?._id).filter(id => !!id).join(','),
+              excludeBookingId: rescheduleBookingId
             }
           }),
           api.get('/staff', { params: { vendorId: vendor?._id } })
@@ -205,20 +206,23 @@ const Cart = () => {
     items
   ]);
 
-  const displaySlots = (
+  const displaySlots = slots.map(slot => ({
+    ...slot,
+    isCurrentBookingSlot: reschedulePrefill?.date === selectedDate && slot.time === reschedulePrefill?.time
+  }));
+
+  // Fallback: If for some reason the backend doesn't return the current slot, inject it manually
+  if (
     reschedulePrefill?.date === selectedDate &&
     reschedulePrefill?.time &&
-    !slots.some((slot) => slot.time === reschedulePrefill.time)
-  )
-    ? [
-        {
-          time: reschedulePrefill.time,
-          availableStaff: reschedulePrefill.staffId ? [String(reschedulePrefill.staffId)] : [],
-          isCurrentBookingSlot: true
-        },
-        ...slots
-      ]
-    : slots;
+    !displaySlots.some((slot) => slot.time === reschedulePrefill.time)
+  ) {
+    displaySlots.unshift({
+      time: reschedulePrefill.time,
+      availableStaff: reschedulePrefill.staffId ? [String(reschedulePrefill.staffId)] : [],
+      isCurrentBookingSlot: true
+    });
+  }
 
   const staffPool = selectedSlot?.isCurrentBookingSlot && selectedStaff && !allStaff.some((member) => String(member._id) === String(selectedStaff._id))
     ? [selectedStaff, ...allStaff]
@@ -489,7 +493,9 @@ const Cart = () => {
                         "py-3 rounded-lg font-black text-[11px] transition-all border border-slate-100 dark:border-gray-800 text-center capitalize tracking-widest shadow-sm active:scale-95",
                         selectedSlot?.time === slot.time
                           ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-lg"
-                          : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#1C2C4E]/10"
+                          : slot.isCurrentBookingSlot
+                            ? "bg-amber-500/5 border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-sm"
+                            : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#1C2C4E]/10"
                       )}
                     >
                       {formatTo12H(slot.time)}

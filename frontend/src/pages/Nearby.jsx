@@ -101,8 +101,9 @@ const Nearby = () => {
 
     api.get('/vendors/nearby', { params })
       .then(res => {
-        setVendors(prev => isNewBatch ? res.data : [...prev, ...res.data]);
-        setHasMore(res.data.length === 10);
+        const fetchedVendors = res.data.vendors || [];
+        setVendors(prev => isNewBatch ? fetchedVendors : [...prev, ...fetchedVendors]);
+        setHasMore(fetchedVendors.length === 10);
         setError(null);
       })
       .catch(err => setError('Could not connect to service'))

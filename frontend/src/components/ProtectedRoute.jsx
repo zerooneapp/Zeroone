@@ -6,15 +6,13 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, role, vendorStatus, loading, isInitialized, user } = useAuthStore();
   const location = useLocation();
 
-  // Optimistic Rendering: Wait if not initialized, UNLESS we already have complete cached auth state
+  // Optimistic Rendering: Wait until session is fully restored to avoid incorrect redirects on refresh
   if (!isInitialized) {
-    if (!isAuthenticated || !user) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-alabaster dark:bg-onyx">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      );
-    }
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-alabaster dark:bg-onyx">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

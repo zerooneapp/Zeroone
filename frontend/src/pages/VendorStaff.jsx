@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Users, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import StaffCard from '../components/StaffCard';
+import StaffClosureModal from '../components/StaffClosureModal';
 import toast from 'react-hot-toast';
 
 const VendorStaff = () => {
@@ -14,6 +15,7 @@ const VendorStaff = () => {
   const [search, setSearch] = useState('');
   const [vendorData, setVendorData] = useState(null);
   const [hasRedirectedHomeVendor, setHasRedirectedHomeVendor] = useState(false);
+  const [closureModal, setClosureModal] = useState({ isOpen: false, staff: null });
 
   const handleHomeServiceGuard = () => {
     if (hasRedirectedHomeVendor) return;
@@ -52,16 +54,23 @@ const VendorStaff = () => {
     if (!vendorData?.subscription?.isActive) {
       return toast.error('Account inactive. Recharge to update staff.', { id: 'account-inactive', duration: 2000 });
     }
+
+    if (!isActive) {
+      const member = staff.find(s => s._id === id);
+      setClosureModal({ isOpen: true, staff: member });
+      return;
+    }
+
     if (toggleLoadingId === id) return;
 
-    // 🚀 OPTIMISTIC UI
+    // Activations proceed normally
     const original = [...staff];
     setStaff(prev => prev.map(s => s._id === id ? { ...s, isActive } : s));
 
     try {
       setToggleLoadingId(id);
       await api.patch(`/staff/${id}`, { isActive });
-      toast.success(isActive ? 'Staff is back online' : 'Staff marked inactive');
+      toast.success('Staff is back online');
     } catch (err) {
       setStaff(original);
       toast.error('Failed to update status');
@@ -172,6 +181,15 @@ const VendorStaff = () => {
           )}
         </AnimatePresence>
       </main>
+
+      <StaffClosureModal 
+        isOpen={closureModal.isOpen}
+        staff={closureModal.staff}
+        onClose={() => setClosureModal({ isOpen: false, staff: null })}
+        onCreated={() => {
+          fetchStaff();
+        }}
+      />
     </div>
   );
 };
