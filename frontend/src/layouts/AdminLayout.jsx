@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Store, Users, CalendarRange,
-  Tag, CreditCard, Wallet, Star, Bell,
+  Tag, CreditCard, Wallet, Star, Bell, Send,
   Menu, X, Sun, Moon, LogOut, ChevronRight, Settings, Shield
 } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
@@ -31,7 +31,8 @@ const AdminLayout = () => {
     { name: "Settings", path: "/admin/settings", icon: Settings },
     { name: "Transactions", path: "/admin/transactions", icon: Wallet },
     { name: "Reviews", path: "/admin/reviews", icon: Star },
-    { name: "Notifications", path: "/admin/notifications", icon: Bell },
+    { name: "Notifications", path: "/admin/notifications", icon: Bell, end: true },
+    { name: "Broadcast", path: "/admin/notifications/broadcast", icon: Send },
     ...(isSuperAdmin ? [{ name: "Admin Access", path: "/admin/access", icon: Shield }] : []),
   ];
 
@@ -72,6 +73,7 @@ const AdminLayout = () => {
             <NavLink
               key={route.path}
               to={route.path}
+              end={route.end}
               className={({ isActive }) => cn(
                 "group flex items-center gap-4 px-4 py-3.5 rounded-2xl font-black text-sm capitalize tracking-wide transition-all duration-300 relative overflow-hidden",
                 isActive
@@ -135,6 +137,7 @@ const AdminLayout = () => {
             <NavLink
               key={route.path}
               to={route.path}
+              end={route.end}
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) => cn(
                 "flex items-center gap-4 px-5 py-3.5 rounded-2xl font-black text-sm capitalize tracking-wide transition-all",

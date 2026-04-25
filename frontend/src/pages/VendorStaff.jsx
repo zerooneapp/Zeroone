@@ -55,22 +55,25 @@ const VendorStaff = () => {
       return toast.error('Account inactive. Recharge to update staff.', { id: 'account-inactive', duration: 2000 });
     }
 
-    if (!isActive) {
-      const member = staff.find(s => s._id === id);
-      setClosureModal({ isOpen: true, staff: member });
-      return;
-    }
-
     if (toggleLoadingId === id) return;
 
-    // Activations proceed normally
     const original = [...staff];
+    const member = staff.find(s => s._id === id);
+    
+    // Optimistic Update
     setStaff(prev => prev.map(s => s._id === id ? { ...s, isActive } : s));
 
     try {
       setToggleLoadingId(id);
       await api.patch(`/staff/${id}`, { isActive });
-      toast.success('Staff is back online');
+      
+      if (isActive) {
+        toast.success(`${member?.name} is back online`);
+      } else {
+        toast.success(`${member?.name} is now off-duty`);
+        // Open closure modal to handle existing bookings if deactivating
+        setClosureModal({ isOpen: true, staff: member });
+      }
     } catch (err) {
       setStaff(original);
       toast.error('Failed to update status');

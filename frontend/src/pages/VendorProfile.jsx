@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Store, Camera, Video, MapPin, Loader2,
     Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
-    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck
+    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle
  } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -24,6 +24,7 @@ const VendorProfile = () => {
    const [deleting, setDeleting] = useState(false);
    const [historyLoading, setHistoryLoading] = useState(false);
    const [historyBookings, setHistoryBookings] = useState([]);
+   const [supportNumber, setSupportNumber] = useState('');
    const [historyFilters, setHistoryFilters] = useState({
       from: '',
       to: '',
@@ -97,7 +98,16 @@ const VendorProfile = () => {
             toast.error('Failed to load profile');
          }
       };
+      const fetchSharedSettings = async () => {
+         try {
+            const res = await api.get('/settings/shared');
+            setSupportNumber(res.data.supportWhatsApp || '');
+         } catch (err) {
+            console.error('Failed to fetch support number');
+         }
+      };
       fetchProfile();
+      fetchSharedSettings();
    }, []);
 
    useEffect(() => {
@@ -301,6 +311,15 @@ const VendorProfile = () => {
          iconColor: 'text-indigo-500',
       },
       {
+         key: 'support',
+         label: 'Quick Support',
+         subtitle: 'Direct help via WhatsApp',
+         icon: MessageCircle,
+         iconBg: 'bg-emerald-500/10',
+         iconColor: 'text-emerald-500',
+         isSupport: true,
+      },
+      {
          key: 'logout',
          label: 'Logout',
          subtitle: 'Sign out of your account',
@@ -363,6 +382,11 @@ const VendorProfile = () => {
                               if (item.isLogout) { setShowLogoutConfirm(true); return; }
                               if (item.path) { navigate(item.path); return; }
                               if (item.isDelete) { setShowDeleteConfirm(true); return; }
+                              if (item.isSupport) {
+                                 if (!supportNumber) return toast.error('Support is temporarily unavailable');
+                                 window.open(`https://wa.me/${supportNumber.replace(/\D/g, '')}`, '_blank');
+                                 return;
+                              }
                               setActiveSection(item.key);
                            }}
                            className="w-full flex items-center gap-3.5 bg-white dark:bg-gray-900 rounded-xl px-4 py-3.5 border border-slate-100 dark:border-gray-800 shadow-sm active:scale-[0.98] transition-all group"

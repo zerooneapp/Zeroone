@@ -166,10 +166,10 @@ class NotificationService {
         throw new Error(`Invalid notification role: ${role}`);
       }
 
-      const ids = Array.isArray(userIds) ? userIds : [userIds];
-      resolvedRecipients = ids
-        .filter(Boolean)
-        .map((userId) => ({ userId, role }));
+      const rawIds = Array.isArray(userIds) ? userIds : [userIds];
+      const uniqueIds = [...new Set(rawIds.filter(Boolean).map(id => id.toString()))];
+      
+      resolvedRecipients = uniqueIds.map((userId) => ({ userId, role }));
     }
 
     // 🛡️ Deduplicate recipients to prevent double-sending in a single call

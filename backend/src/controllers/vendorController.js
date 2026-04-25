@@ -640,27 +640,9 @@ const createWalkIn = async (req, res) => {
       startTime: startTime || new Date(),
       endTime: moment(startTime || new Date()).add(totalDuration || 30, 'minutes').toDate(),
       status: 'completed',
+      completedAt: new Date(),
       type: 'shop'
     });
-
-    // 💰 WALLET INTEGRATION: Credit vendor for direct walk-in
-    if (totalPrice > 0) {
-      vendor.walletBalance = (vendor.walletBalance || 0) + totalPrice;
-      await vendor.save();
-
-      const WalletTransaction = require('../models/WalletTransaction');
-      await WalletTransaction.create({
-        vendorId: vendor._id,
-        initiatedByUserId: req.user._id,
-        amount: totalPrice,
-        type: 'credit',
-        category: 'booking_revenue',
-        reason: 'Walk-in service completed',
-        status: 'completed',
-        referenceId: `${booking._id}_WALK_REV`,
-        description: `Direct revenue from Walk-in #${booking._id.toString().slice(-6).toUpperCase()}`
-      });
-    }
 
     // 👨‍🔧 STAFF NOTIFICATION: Alert the professional about their immediate Walk-in
     const staff = await Staff.findById(booking.staffId);

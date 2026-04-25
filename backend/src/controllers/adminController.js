@@ -69,6 +69,13 @@ const getGlobalSettings = async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+const getSharedSettings = async (req, res) => {
+  try {
+    const settings = await GlobalSettings.findOne().select('supportWhatsApp discoveryRadius freeTrialDays');
+    res.status(200).json(settings || { supportWhatsApp: '', discoveryRadius: 10, freeTrialDays: 7 });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 const updateGlobalSettings = async (req, res) => {
   try {
     const settings = await GlobalSettings.findOneAndUpdate({}, req.body, { new: true, upsert: true });
@@ -149,7 +156,7 @@ const getSubscriptionPlans = async (req, res) => {
 const getPendingVendors = async (req, res) => {
   try {
     if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
-    const vendors = await Vendor.find({ status: 'pending' }).populate('ownerId', 'name phone').lean();
+    const vendors = await Vendor.find({ status: 'pending' }).populate('ownerId', 'name phone email').lean();
     res.status(200).json(vendors);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -428,7 +435,7 @@ const getFilteredBookings = async (req, res) => {
           as: 'user'
         }
       },
-      { $unwind: '$user' },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: 'vendors',
@@ -437,7 +444,7 @@ const getFilteredBookings = async (req, res) => {
           as: 'vendor'
         }
       },
-      { $unwind: '$vendor' }
+      { $unwind: { path: '$vendor', preserveNullAndEmptyArrays: true } }
     ];
 
     if (search) {
@@ -594,12 +601,20 @@ const getAdminDashboard = async (req, res) => {
     const yesterday = moment().tz('Asia/Kolkata').subtract(1, 'day').startOf('day');
     const rangeStart = moment().subtract(days, 'days').startOf('day').toDate();
 
+    const platformRevenueFilter = {
+      status: 'completed',
+      category: { $in: ['daily_subscription', 'monthly_subscription'] }
+    };
+
     const [
       todayRevenue,
       yesterdayRevenue,
       totalRevenue,
       newVendors,
       totalPartners,
+      activePartners,
+      pendingPartners,
+      blockedPartners,
       activeBookings,
       totalUsers,
       bookingStats,
@@ -611,20 +626,32 @@ const getAdminDashboard = async (req, res) => {
       lowBalanceCount,
       inactiveVendorsCount
     ] = await Promise.all([
-      Booking.aggregate([{ $match: { status: 'completed', completedAt: { $gte: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
-      Booking.aggregate([{ $match: { status: 'completed', completedAt: { $gte: yesterday.toDate(), $lt: today.toDate() } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
-      Booking.aggregate([{ $match: { status: 'completed' } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
-      Vendor.countDocuments({ createdAt: { $gte: rangeStart } }),
+      WalletTransaction.aggregate([
+        { $match: { ...platformRevenueFilter, timestamp: { $gte: today.toDate() } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      WalletTransaction.aggregate([
+        { $match: { ...platformRevenueFilter, timestamp: { $gte: yesterday.toDate(), $lt: today.toDate() } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      WalletTransaction.aggregate([
+        { $match: platformRevenueFilter },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      Vendor.countDocuments({ status: 'pending' }),
+      Vendor.countDocuments({}),
       Vendor.countDocuments({ status: 'active' }),
-      Booking.countDocuments({ status: { $in: ['confirmed', 'ongoing'] } }),
+      Vendor.countDocuments({ status: 'pending' }),
+      Vendor.countDocuments({ status: 'blocked' }),
+      Booking.countDocuments({ status: 'confirmed' }),
       User.countDocuments({ role: 'customer' }),
       Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
       Vendor.find().sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name').lean(),
       User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5).lean(),
       Review.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName').lean(),
-      Booking.aggregate([
-        { $match: { status: 'completed', completedAt: { $gte: rangeStart } } },
-        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$completedAt' } }, total: { $sum: '$totalPrice' } } },
+      WalletTransaction.aggregate([
+        { $match: { ...platformRevenueFilter, timestamp: { $gte: rangeStart } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } }, total: { $sum: '$amount' } } },
         { $sort: { _id: 1 } }
       ]),
       Booking.countDocuments({ createdAt: { $gte: rangeStart } }),
@@ -648,6 +675,9 @@ const getAdminDashboard = async (req, res) => {
       totalRevenue: totalRevenue[0]?.total || 0,
       newVendors,
       totalPartners,
+      activePartners,
+      pendingPartners,
+      blockedPartners,
       activeBookings,
       totalUsers,
       bookingStats: stats,
@@ -682,7 +712,7 @@ const getVendors = async (req, res) => {
     if (planType) filter.planType = planType;
 
     const vendors = await Vendor.find(filter)
-      .populate('ownerId', 'name phone')
+      .populate('ownerId', 'name phone email')
       .populate('category', 'name')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
@@ -868,7 +898,7 @@ const getVendorInsights = async (req, res) => {
       ? moment.tz(to, 'YYYY-MM-DD', 'Asia/Kolkata').endOf('day')
       : now.clone().endOf('day');
 
-    const [bookings, revenueTransactions] = await Promise.all([
+    const [bookings, completedBookingsData] = await Promise.all([
       Booking.find({
         vendorId: vendor._id,
         startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
@@ -878,18 +908,14 @@ const getVendorInsights = async (req, res) => {
         .sort({ startTime: -1 })
         .limit(20)
         .lean(),
-      WalletTransaction.find({
+      Booking.find({
         vendorId: vendor._id,
-        category: 'booking_revenue',
         status: 'completed',
-        timestamp: { $gte: startDate.toDate(), $lte: endDate.toDate() }
-      })
-        .sort({ timestamp: -1 })
-        .limit(20)
-        .lean()
+        startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+      }).select('totalPrice')
     ]);
 
-    const totalRevenue = revenueTransactions.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const totalRevenue = completedBookingsData.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
     const totalBookings = bookings.length;
     const completedBookings = bookings.filter((booking) => booking.status === 'completed').length;
     const cancelledBookings = bookings.filter((booking) => booking.status === 'cancelled').length;
@@ -919,11 +945,11 @@ const getVendorInsights = async (req, res) => {
         startTime: booking.startTime,
         services: booking.services || []
       })),
-      revenue: revenueTransactions.map((item) => ({
+      revenue: completedBookingsData.slice(0, 20).map((item) => ({
         _id: item._id,
-        amount: item.amount || 0,
-        description: item.description || item.reason || 'Booking revenue',
-        timestamp: item.timestamp
+        amount: item.totalPrice || 0,
+        description: 'Service completed',
+        timestamp: item.startTime
       }))
     });
   } catch (error) {
@@ -1086,7 +1112,7 @@ module.exports = {
   getFilteredBookings, createCategory, getCategories, getAdminDashboard,
   getVendors, toggleBlockVendor, toggleVendorActive, getUserDetail,
   getBookingDetail, adminCancelBooking,
-  updateCategory, deleteCategory, getGlobalSettings, updateGlobalSettings,
+  updateCategory, deleteCategory, getGlobalSettings, updateGlobalSettings, getSharedSettings,
   broadcastNotification, getSubscriptionPlans,
   getAdminAccounts, createAdminAccount, toggleAdminAccountBlock, deleteAdminAccount,
   extendVendorFreeTrial, getVendorInsights, notifyLowBalance

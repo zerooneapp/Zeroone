@@ -56,12 +56,10 @@ import CategoryManagement from './pages/admin/categories/CategoryManagement';
 import SubscriptionPlans from './pages/admin/plans/SubscriptionPlans';
 import PlatformSettings from './pages/admin/settings/PlatformSettings';
 import BroadcastSystem from './pages/admin/notifications/BroadcastSystem';
+import AdminNotificationList from './pages/admin/notifications/AdminNotificationList';
 import TransactionManagement from './pages/admin/transactions/TransactionManagement';
 import ReviewManagement from './pages/admin/reviews/ReviewManagement';
 import AdminManagement from './pages/admin/admins/AdminManagement';
-import {
-  AdminNotifications
-} from './pages/AdminModulePlaceholders';
 
 // Components & Utils
 import ProtectedRoute from './components/ProtectedRoute';
@@ -260,7 +258,10 @@ function App() {
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="plans" element={<SubscriptionPlans />} />
           <Route path="settings" element={<PlatformSettings />} />
-          <Route path="notifications" element={<BroadcastSystem />} />
+          <Route path="notifications">
+            <Route index element={<AdminNotificationList />} />
+            <Route path="broadcast" element={<BroadcastSystem />} />
+          </Route>
           <Route path="transactions" element={<TransactionManagement />} />
           <Route path="reviews" element={<ReviewManagement />} />
           <Route path="access" element={<AdminManagement />} />

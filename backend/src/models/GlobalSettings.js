@@ -8,7 +8,8 @@ const globalSettingsSchema = new mongoose.Schema({
     bookingAlerts: { type: Boolean, default: true },
     walletAlerts: { type: Boolean, default: true },
     reminderAlerts: { type: Boolean, default: true }
-  }
+  },
+  supportWhatsApp: { type: String, default: "" }
 }, { timestamps: true });
 
 module.exports = mongoose.model('GlobalSettings', globalSettingsSchema);

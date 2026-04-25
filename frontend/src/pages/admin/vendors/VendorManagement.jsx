@@ -385,6 +385,7 @@ const VendorManagement = () => {
                     <Section title="Fleet Node Info" icon={User}>
                       <InfoItem label="Owner Entity" value={selectedVendor.ownerName || selectedVendor.ownerId?.name} />
                       <InfoItem label="Comms Node" value={selectedVendor.ownerId?.phone} />
+                      <InfoItem label="Comms Email" value={selectedVendor.ownerId?.email || 'N/A'} />
                       <InfoItem label="Service Mode" value="Shop Service" />
                       <InfoItem label="Base Registry" value={selectedVendor.address} />
                       <InfoItem label="Market Node" value={selectedVendor.category?.name || 'Uncategorized'} />

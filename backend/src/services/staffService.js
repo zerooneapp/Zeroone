@@ -60,7 +60,7 @@ const ensureOwnerStaff = async (vendorId) => {
   canonicalOwner.userId = ownerUser._id;
   canonicalOwner.designation = canonicalOwner.designation || 'Owner';
   canonicalOwner.isOwner = true;
-  canonicalOwner.isActive = true;
+  // REMOVED: canonicalOwner.isActive = true; // Let the owner decide their own activity status manually
   if ((!canonicalOwner.services || canonicalOwner.services.length === 0) && currentServices.length > 0) {
     canonicalOwner.services = currentServices;
   }

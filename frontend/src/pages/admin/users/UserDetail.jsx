@@ -3,7 +3,7 @@ import {
    ArrowLeft, User, Phone, Calendar,
    Shield, Ban, History, CreditCard,
    MapPin, CheckCircle, XCircle, Clock,
-   Package, LayoutDashboard, TrendingUp
+   Package, LayoutDashboard, TrendingUp, ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';

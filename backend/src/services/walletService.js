@@ -245,19 +245,25 @@ const processDailyDeduction = async (vendor) => {
   const wasActiveYesterday = vendor.status === 'active';
 
   if (wasActiveYesterday) {
-    vendor.walletBalance -= dailyPrice;
-    await createWalletTransaction({
-      vendorId: vendor._id,
-      initiatedByUserId: vendor.ownerId,
-      amount: dailyPrice,
-      type: 'debit',
-      reason: 'daily_subscription',
-      category: 'daily_subscription',
-      paymentGateway: 'system',
-      paymentMethod: 'wallet',
-      referenceId: `POST_DAILY_${vendor._id}_${today}`,
-      description: `${getNormalizedServiceLevel(vendor.serviceLevel)} Service Day: ${yesterday}. (Base: ₹${basePrice} + GST: ₹${gstAmount})`
-    });
+    const referenceId = `POST_DAILY_${vendor._id}_${today}`;
+    
+    // 🛡️ IDEMPOTENCY CHECK: Ensure we haven't already deducted for this day
+    const existing = await WalletTransaction.findOne({ referenceId });
+    if (!existing) {
+      vendor.walletBalance -= dailyPrice;
+      await createWalletTransaction({
+        vendorId: vendor._id,
+        initiatedByUserId: vendor.ownerId,
+        amount: dailyPrice,
+        type: 'debit',
+        reason: 'daily_subscription',
+        category: 'daily_subscription',
+        paymentGateway: 'system',
+        paymentMethod: 'wallet',
+        referenceId,
+        description: `${getNormalizedServiceLevel(vendor.serviceLevel)} Service Day: ${yesterday}. (Base: ₹${basePrice} + GST: ₹${gstAmount})`
+      });
+    }
   }
 
   // 3. Status Update: Set status for the UPCOMING day based on new balance

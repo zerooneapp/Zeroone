@@ -175,15 +175,17 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
   // 3. Staff Notification
   const staffTargetId = getStaffNotificationTarget(staff);
   if (staffTargetId) {
-      const staffIdStr = staffTargetId.toString();
-      notificationTargets.set(`${staffIdStr}_staff`, {
-        userIds: staffTargetId,
-        role: 'staff',
-        type: 'STAFF_ASSIGNED',
-        title: 'Booking Accepted',
-        message: `You have been assigned a new booking for ${booking.isWalkIn ? 'Walk-in' : 'Customer'}: ${booking.walkInCustomerName || 'Client'}. Services: ${booking.services.map(s => s.name).join(', ')} at ${start.format('LT')}.`,
-        data: { bookingId: booking._id },
-      });
+    const staffIdStr = staffTargetId.toString();
+    // Prioritize Staff specific message over generic Vendor/Customer message if it's the same user
+    notificationTargets.set(staffIdStr, {
+      userIds: staffTargetId,
+      role: 'staff',
+      type: 'STAFF_ASSIGNED',
+      title: 'Booking Accepted',
+      message: `You have been assigned a new booking for ${booking.isWalkIn ? 'Walk-in' : 'Customer'}: ${booking.walkInCustomerName || 'Client'}. Services: ${booking.services.map(s => s.name).join(', ')} at ${start.format('LT')}.`,
+      data: { bookingId: booking._id },
+      referenceId: `${booking._id}_STAFF_ASSIGN`
+    });
   }
 
   await sendRoleNotifications(Array.from(notificationTargets.values()));
@@ -248,7 +250,7 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
     }
   }
 
-  await sendRoleNotifications([
+  const notificationPayloads = [
     {
       userIds: booking.userId,
       role: 'customer',
@@ -266,8 +268,11 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
       message: `Staff ${booking.staffId?.name || 'Professional'} has completed the service for ${booking.userId?.name || 'Customer'}.`,
       data: { bookingId: booking._id },
       referenceId: `${booking._id}_COMPLETE_V`
-    },
-    getStaffNotificationTarget(booking.staffId) ? {
+    }
+  ];
+
+  if (getStaffNotificationTarget(booking.staffId)) {
+    notificationPayloads.push({
       userIds: getStaffNotificationTarget(booking.staffId),
       role: 'staff',
       type: 'BOOKING_COMPLETED',
@@ -275,8 +280,21 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
       message: `Great job! You have completed the service for ${booking.walkInCustomerName || booking.userId?.name || 'Customer'}.`,
       data: { bookingId: booking._id },
       referenceId: `${booking._id}_COMPLETE_S`
-    } : null
-  ]);
+    });
+  }
+
+  // Deduplicate by userId before sending
+  const finalNotifications = new Map();
+  notificationPayloads.forEach(notif => {
+    if (!notif) return;
+    const uid = notif.userIds.toString();
+    // Prioritize Staff > Vendor > Customer message for completion
+    if (!finalNotifications.has(uid) || notif.role === 'staff') {
+      finalNotifications.set(uid, notif);
+    }
+  });
+
+  await sendRoleNotifications(Array.from(finalNotifications.values()));
 
   // Notify Admins for Dashboard Sync (Silent)
   NotificationService.notifyAdmins({
@@ -378,7 +396,8 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
   const staffTargetId = getStaffNotificationTarget(staff);
   if (staffTargetId) {
     const staffIdStr = staffTargetId.toString();
-    notificationTargets.set(`${staffIdStr}_staff`, {
+    // Prioritize staff cancellation info
+    notificationTargets.set(staffIdStr, {
       userIds: staffTargetId,
       role: 'staff',
       type: 'BOOKING_CANCELLED',
