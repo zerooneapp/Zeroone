@@ -79,7 +79,7 @@ const getVendorDayAvailability = async (vendorId, targetDate, existingVendor = n
     vendorId,
     day: targetDate.format('ddd'),
     isOpen: true
-  });
+  }).lean();
 
   if (!availability && !vendor.workingHours) return null;
 
@@ -150,19 +150,20 @@ const getEligibleStaffMembers = async (vendorId, serviceIds) => {
   const mongoose = require('mongoose');
   const objectServiceIds = serviceIds.map(id => new mongoose.Types.ObjectId(id.trim()));
 
+  // 1. Find ALL qualified professionals (Staff + Owner) who have these specific services
   let staffMembers = await Staff.find({
     vendorId,
     isActive: true,
-    isOwner: false,
     services: { $all: objectServiceIds }
   });
 
+  // 2. FALLBACK: If NO ONE is found with these specific skills, show the Owner (as they are the ultimate backup)
   if (staffMembers.length === 0) {
     staffMembers = await Staff.find({
       vendorId,
       isActive: true,
       isOwner: true
-    });
+    }).lean();
   }
 
   return staffMembers;
@@ -179,7 +180,7 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
   const mongoose = require('mongoose');
 
   const objectServiceIds = serviceIds.map((id) => new mongoose.Types.ObjectId(id.trim()));
-  const services = await Service.find({ _id: { $in: objectServiceIds }, vendorId });
+  const services = await Service.find({ _id: { $in: objectServiceIds }, vendorId }).lean();
 
   if (services.length !== serviceIds.length) {
     console.error('SlotService Error: Some services not found for vendor', vendorId);
@@ -339,11 +340,20 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
   ]);
 
   if (targetStaffId) {
-    const isTargetOnClosure = staffClosureRecords.some(c => c.staffId.toString() === targetStaffId.toString());
+    const staff = staffMembers.find((s) => s._id.toString() === targetStaffId.toString());
+    if (!staff) return null;
 
-    return (!isTargetBusy && isTargetQualified && isTargetAvailableBySchedule && !isTargetOnClosure)
-      ? staffMembers.find((staff) => staff._id.toString() === targetStaffId.toString())
-      : null;
+    const isBusy = busyStaffIds.has(staff._id.toString());
+    const isOnClosure = staffClosureRecords.some(c => c.staffId.toString() === staff._id.toString());
+    const isAvailable = isStaffAvailableForWindow(
+      staff._id,
+      start,
+      end,
+      staffAvailabilityMap,
+      vendorAvailability.windows
+    );
+
+    return (!isBusy && !isOnClosure && isAvailable) ? staff : null;
   }
 
   return staffMembers.find((staff) => (

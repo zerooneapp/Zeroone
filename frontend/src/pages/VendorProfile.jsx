@@ -11,6 +11,7 @@ import Button from '../components/Button';
 import toast from 'react-hot-toast';
 import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
+import { cn } from '../utils/cn';
 
 const VendorProfile = () => {
    const navigate = useNavigate();
@@ -42,8 +43,11 @@ const VendorProfile = () => {
       address: '',
       serviceMode: 'shop',
       workingHours: { start: '09:00 AM', end: '09:00 PM' },
-      location: null
+      location: null,
+      featuredImage: ''
    });
+   const [services, setServices] = useState([]);
+   const [servicesLoading, setServicesLoading] = useState(false);
    const [locationLoading, setLocationLoading] = useState(false);
    const [currentMedia, setCurrentMedia] = useState(null);
    const [galleryFiles, setGalleryFiles] = useState([]);
@@ -154,6 +158,23 @@ const VendorProfile = () => {
    }, [activeSection, transactionFilters]);
 
    useEffect(() => {
+      if (activeSection !== 'media') return;
+      
+      const fetchServices = async () => {
+         try {
+            setServicesLoading(true);
+            const res = await api.get('/services/manage/all');
+            setServices(res.data || []);
+         } catch (err) {
+            console.error('Failed to load services');
+         } finally {
+            setServicesLoading(false);
+         }
+      };
+      fetchServices();
+   }, [activeSection]);
+
+   useEffect(() => {
       if (activeSection !== 'transactions') return;
       if (data.serviceMode === 'home') {
          setStaffOptions([]);
@@ -202,6 +223,19 @@ const VendorProfile = () => {
          toast.success('Media gallery updated!');
       } catch (err) {
          toast.error('Upload failed. Check file sizes.');
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   const handleSetFeaturedImage = async (url) => {
+      try {
+         setLoading(true);
+         await api.patch('/vendor/update-profile', { featuredImage: url });
+         setData(prev => ({ ...prev, featuredImage: url }));
+         toast.success('Home page image updated!');
+      } catch (err) {
+         toast.error('Failed to set featured image');
       } finally {
          setLoading(false);
       }
@@ -449,9 +483,76 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Shop Media</h2>
                      </div>
 
+                      {/* 🏠 Home Page Featured Image (NEW) */}
+                     <div className="space-y-3 p-4 bg-blue-50/40 dark:bg-blue-900/5 rounded-2xl border border-blue-100 dark:border-blue-900/20">
+                        <div className="flex items-center justify-between">
+                           <div>
+                              <p className="text-[11px] font-black text-slate-900 dark:text-white capitalize tracking-tight">Home Page Featured Image</p>
+                              <p className="text-[8px] text-slate-400 font-bold tracking-tighter capitalize mt-0.5">This image will appear on the discovery list</p>
+                           </div>
+                           <div className="w-10 h-10 rounded-lg overflow-hidden border border-white dark:border-gray-800 shadow-sm bg-white">
+                              {data.featuredImage ? (
+                                 <img src={data.featuredImage} className="w-full h-full object-cover" alt="Featured" />
+                              ) : (
+                                 <div className="w-full h-full flex items-center justify-center text-slate-300"><LayoutGrid size={16} /></div>
+                              )}
+                           </div>
+                        </div>
+
+                        <div className="space-y-2">
+                           <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 opacity-70">Pick from your photos:</p>
+                           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                              {/* Shop Image Option */}
+                              {currentMedia?.shopImage && (
+                                 <button 
+                                    onClick={() => handleSetFeaturedImage(currentMedia.shopImage)}
+                                    className={cn(
+                                       "relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
+                                       data.featuredImage === currentMedia.shopImage ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
+                                    )}
+                                 >
+                                    <img src={currentMedia.shopImage} className="w-full h-full object-cover" alt="Shop" />
+                                    {data.featuredImage === currentMedia.shopImage && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
+                                 </button>
+                              )}
+                              {/* Gallery Options */}
+                              {currentMedia?.galleryImages?.map((img, i) => (
+                                 <button 
+                                    key={`gal-${i}`}
+                                    onClick={() => handleSetFeaturedImage(img)}
+                                    className={cn(
+                                       "relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
+                                       data.featuredImage === img ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
+                                    )}
+                                 >
+                                    <img src={img} className="w-full h-full object-cover" alt={`Gal ${i}`} />
+                                    {data.featuredImage === img && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
+                                 </button>
+                              ))}
+                              {/* Service Options */}
+                              {services.map((s, i) => (
+                                 (s.image || s.images?.[0]) && (
+                                    <button 
+                                       key={`serv-${i}`}
+                                       onClick={() => handleSetFeaturedImage(s.image || s.images?.[0])}
+                                       className={cn(
+                                          "relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
+                                          data.featuredImage === (s.image || s.images?.[0]) ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
+                                       )}
+                                    >
+                                       <img src={s.image || s.images?.[0]} className="w-full h-full object-cover" alt={s.name} />
+                                       <div className="absolute bottom-0 inset-x-0 bg-black/40 py-0.5 text-[5px] text-white font-black uppercase truncate px-1">{s.name}</div>
+                                       {data.featuredImage === (s.image || s.images?.[0]) && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
+                                    </button>
+                                 )
+                              ))}
+                           </div>
+                        </div>
+                     </div>
+
                      {/* Current Gallery */}
                      <div className="space-y-2">
-                        <p className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Current Gallery</p>
+                        <p className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Manage Gallery</p>
                         <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
                            {currentMedia?.galleryImages?.map((img, i) => (
                               <div key={i} className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-800 shadow-sm">

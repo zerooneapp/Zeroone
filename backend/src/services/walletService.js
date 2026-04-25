@@ -124,21 +124,31 @@ const getSubscriptionPlanForVendor = async (type, serviceLevel) => {
 const getVendorSubscriptionState = async (vendor) => {
   const settings = await getBillingSettings();
   const minimumWalletThreshold = settings.minWalletThreshold ?? 100;
-  const now = new Date();
   
   const effectivePlanType = getEffectivePlanType(vendor);
   
   const isTrialActive = effectivePlanType === 'trial';
   const isMonthlyActive = effectivePlanType === 'monthly';
-  const isDailyActive = effectivePlanType === 'daily' && Number(vendor.walletBalance || 0) >= Number(minimumWalletThreshold);
+
+  // 🛡️ ACCURATE THRESHOLD: Calculate daily price to ensure vendor has enough for the UPCOMING day
+  const dailyPlan = await getSubscriptionPlanForVendor('daily', vendor.serviceLevel);
+  const basePrice = dailyPlan.price || 0;
+  const gstAmount = dailyPlan.gstPercent ? (basePrice * dailyPlan.gstPercent) / 100 : 0;
+  const dailyPrice = basePrice + gstAmount;
+  
+  // Rule: Balance must be >= (Threshold + Daily Fees) to stay active
+  const totalRequired = Number(minimumWalletThreshold) + dailyPrice;
+  const isDailyActive = effectivePlanType === 'daily' && Number(vendor.walletBalance || 0) >= totalRequired;
 
   return {
     settings,
     minimumWalletThreshold,
+    dailyPrice,
+    totalRequired,
     isTrialActive,
     isMonthlyActive,
     isDailyActive,
-    isDailyBalanceSufficient: Number(vendor.walletBalance || 0) >= Number(minimumWalletThreshold),
+    isDailyBalanceSufficient: Number(vendor.walletBalance || 0) >= totalRequired,
     currentPlan: effectivePlanType,
     isActive: isTrialActive || isMonthlyActive || isDailyActive
   };
@@ -251,18 +261,19 @@ const processDailyDeduction = async (vendor) => {
   }
 
   // 3. Status Update: Set status for the UPCOMING day based on new balance
-  const isBalanceSufficient = vendor.walletBalance >= state.minimumWalletThreshold;
+  // Rule: Balance must be >= (Threshold + Daily Fees)
+  const isBalanceSufficient = vendor.walletBalance >= state.totalRequired;
   vendor.status = isBalanceSufficient ? 'active' : 'inactive';
   vendor.lastDeductionDate = new Date();
 
   if (!isBalanceSufficient) {
-    const shortfall = Math.max(state.minimumWalletThreshold - vendor.walletBalance, 0);
+    const shortfall = Math.max(state.totalRequired - vendor.walletBalance, 0);
     await NotificationService.sendNotification({
       userIds: vendor.ownerId,
       role: 'vendor',
       type: 'LOW_BALANCE',
       title: 'Wallet Balance Low',
-      message: `Keep at least ${formatInr(state.minimumWalletThreshold)} in your wallet to stay live. Current balance: ${formatInr(vendor.walletBalance)}. Add ${formatInr(shortfall)} to resume.`,
+      message: `Keep at least ${formatInr(state.totalRequired)} (Threshold + Daily Fees) in your wallet to stay live. Current balance: ${formatInr(vendor.walletBalance)}. Add ${formatInr(shortfall)} to resume.`,
       referenceId: `LOW_BAL_${vendor._id}_${today}`
     });
   }

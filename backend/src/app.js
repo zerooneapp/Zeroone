@@ -35,7 +35,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Base Route
 app.get('/', (req, res) => {
-  res.json({ message: 'ZerOne API is running...' });
+  res.json({ message: 'ZeroOne API is running...' });
 });
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');

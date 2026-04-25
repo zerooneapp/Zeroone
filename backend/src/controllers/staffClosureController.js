@@ -106,13 +106,9 @@ const createStaffClosure = async (req, res) => {
       endTime: { $gt: start.toDate() }
     });
 
-    // 🛑 Deactivate if live now
-    const now = new Date();
-    const isLiveNow = start.toDate() <= now && end.toDate() > now;
-    if (isLiveNow) {
-      staff.isActive = false;
-      await staff.save();
-    }
+    // 🛑 Deactivate immediately so the partner sees it as OFF and can manually re-enable
+    staff.isActive = false;
+    await staff.save();
 
     // ⚡ Auto-Cancel Impacted Bookings
     let cancelledCount = 0;

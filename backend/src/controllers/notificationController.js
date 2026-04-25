@@ -17,7 +17,15 @@ const getNotificationOwnerIds = (req) => {
 const getNotifications = async (req, res) => {
   try {
     const ownerIds = getNotificationOwnerIds(req);
-    const notifications = await Notification.find({ userId: { $in: ownerIds } })
+    const userRole = req.query.role || (req.user ? req.user.role : (req.staff ? 'staff' : null));
+    
+    const query = { userId: { $in: ownerIds } };
+    if (userRole && userRole !== 'super_admin') {
+      // super_admin sees all or specifically admin role notifications
+      query.role = userRole === 'super_admin' ? 'admin' : userRole;
+    }
+
+    const notifications = await Notification.find(query)
       .sort({ createdAt: -1 })
       .limit(50);
     res.status(200).json(notifications);
@@ -31,17 +39,23 @@ const getNotifications = async (req, res) => {
 const markAsRead = async (req, res) => {
   try {
     const ownerIds = getNotificationOwnerIds(req);
+    const userRole = req.query.role || (req.user ? req.user.role : (req.staff ? 'staff' : null));
     
+    const roleFilter = {};
+    if (userRole && userRole !== 'super_admin') {
+       roleFilter.role = userRole === 'super_admin' ? 'admin' : userRole;
+    }
+
     if (req.params.id === 'all') {
       await Notification.updateMany(
-        { userId: { $in: ownerIds }, isRead: false },
+        { userId: { $in: ownerIds }, isRead: false, ...roleFilter },
         { isRead: true }
       );
       return res.status(200).json({ message: 'All notifications marked as read' });
     }
 
     const notification = await Notification.findOneAndUpdate(
-      { _id: req.params.id, userId: { $in: ownerIds } },
+      { _id: req.params.id, userId: { $in: ownerIds }, ...roleFilter },
       { isRead: true },
       { new: true }
     );
@@ -57,10 +71,18 @@ const markAsRead = async (req, res) => {
 const getUnreadCount = async (req, res) => {
   try {
     const ownerIds = getNotificationOwnerIds(req);
-    const count = await Notification.countDocuments({ 
+    const userRole = req.query.role || (req.user ? req.user.role : (req.staff ? 'staff' : null));
+    
+    const query = { 
       userId: { $in: ownerIds },
       isRead: false 
-    });
+    };
+
+    if (userRole && userRole !== 'super_admin') {
+       query.role = userRole === 'super_admin' ? 'admin' : userRole;
+    }
+
+    const count = await Notification.countDocuments(query);
     res.status(200).json({ count });
   } catch (error) {
     res.status(500).json({ message: error.message });

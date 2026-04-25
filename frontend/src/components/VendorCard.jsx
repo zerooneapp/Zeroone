@@ -26,7 +26,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
       {/* Top: Image HUB (Balanced Visual) */}
       <div className="relative w-full aspect-[16/5.2] min-h-[110px] overflow-hidden">
         <img
-          src={vendor.serviceImage || vendor.images?.[0] || vendor.shopImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'}
+          src={vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'}
           alt={vendor.shopName}
           className="w-full h-full object-cover bg-gray-100 opacity-90 transition-transform duration-700"
           onError={(e) => {

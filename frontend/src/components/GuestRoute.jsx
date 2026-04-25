@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
 const GuestRoute = ({ children }) => {
-  const { isAuthenticated, role, isInitialized } = useAuthStore();
+  const { isAuthenticated, role, isInitialized, user } = useAuthStore();
 
   if (!isInitialized) {
     return (
@@ -17,7 +17,7 @@ const GuestRoute = ({ children }) => {
     const dashboardMap = {
       admin: '/admin/dashboard',
       super_admin: '/admin/dashboard',
-      vendor: '/vendor/dashboard',
+      vendor: (user?.status === 'approved' || user?.status === 'active') ? '/vendor/dashboard' : '/vendor-pending',
       staff: '/staff',
       customer: '/'
     };

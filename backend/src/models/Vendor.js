@@ -18,6 +18,7 @@ const vendorSchema = new mongoose.Schema({
   shopImage: { type: String },
   galleryImages: [{ type: String }], // Array of URLs
   shopVideo: { type: String }, // Video URL
+  featuredImage: { type: String }, // User-selected image for Discovery Page
   vendorPhoto: { type: String },
   serviceMode: { type: String, enum: ['shop', 'home'], default: 'shop' },
   workingHours: {

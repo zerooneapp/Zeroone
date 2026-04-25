@@ -143,12 +143,21 @@ const register = async (req, res) => {
       });
     }
 
+    let status = undefined;
+    if (requestedRole === 'vendor') {
+      const Vendor = require('../models/Vendor');
+      const vendor = await Vendor.findOne({ ownerId: user._id });
+      if (vendor) status = vendor.status;
+      else status = 'pending'; // Default for new vendors
+    }
+
     res.status(201).json({
       _id: user._id,
       name: user.name,
       phone: user.phone,
-      image: user.image, // 📸 Return image
+      image: user.image,
       role: user.role,
+      status,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -291,12 +300,20 @@ const verifyOTP = async (req, res) => {
     // Determine if registration is complete (User should have a name)
     const needsRegistration = !finalAccount.name && !staff;
 
+    let status = undefined;
+    if (finalAccount.role === 'vendor') {
+      const Vendor = require('../models/Vendor');
+      const vendor = await Vendor.findOne({ ownerId: finalAccount._id });
+      if (vendor) status = vendor.status;
+    }
+
     res.status(200).json({
       _id: finalAccount._id,
       name: finalAccount.name,
       phone: finalAccount.phone,
-      image: finalAccount.image, // 📸 Return image
+      image: finalAccount.image,
       role: staff ? 'staff' : finalAccount.role,
+      status,
       token: generateToken(finalAccount._id),
       needsRegistration,
       isFirstLogin: staff ? finalAccount.isFirstLogin : undefined

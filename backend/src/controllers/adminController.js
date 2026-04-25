@@ -149,7 +149,7 @@ const getSubscriptionPlans = async (req, res) => {
 const getPendingVendors = async (req, res) => {
   try {
     if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
-    const vendors = await Vendor.find({ status: 'pending' }).populate('ownerId', 'name phone');
+    const vendors = await Vendor.find({ status: 'pending' }).populate('ownerId', 'name phone').lean();
     res.status(200).json(vendors);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -198,7 +198,7 @@ const approveVendor = async (req, res) => {
       role: 'vendor',
       type: 'VENDOR_APPROVED',
       title: 'Congratulations! 🎉',
-      message: 'Your shop has been verified and is now live on ZerOne.',
+      message: 'Your shop has been verified and is now live on ZeroOne.',
       data: { vendorId: vendor._id },
       referenceId: `APPROVE_${vendor._id}`
     });
@@ -228,7 +228,7 @@ const toggleBlockUser = async (req, res) => {
       title: user.isBlocked ? 'Account Restricted' : 'Account Restored',
       message: user.isBlocked
         ? 'Your account has been restricted by the admin team. Please contact support for help.'
-        : 'Your account access has been restored. You can continue using ZerOne.',
+        : 'Your account access has been restored. You can continue using ZeroOne.',
       referenceId: `ACCOUNT_${user.isBlocked ? 'BLOCK' : 'UNBLOCK'}_${user._id}_${Date.now()}`
     });
 
@@ -487,7 +487,8 @@ const getBookingDetail = async (req, res) => {
         select: 'shopName location contact',
         populate: { path: 'ownerId', select: 'name phone' }
       })
-      .populate('staffId', 'name phone');
+      .populate('staffId', 'name phone')
+      .lean();
 
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(booking);
@@ -618,16 +619,19 @@ const getAdminDashboard = async (req, res) => {
       Booking.countDocuments({ status: { $in: ['confirmed', 'ongoing'] } }),
       User.countDocuments({ role: 'customer' }),
       Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Vendor.find().sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name'),
-      User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5),
-      Review.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName'),
+      Vendor.find().sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name').lean(),
+      User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5).lean(),
+      Review.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName').lean(),
       Booking.aggregate([
         { $match: { status: 'completed', completedAt: { $gte: rangeStart } } },
         { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$completedAt' } }, total: { $sum: '$totalPrice' } } },
         { $sort: { _id: 1 } }
       ]),
       Booking.countDocuments({ createdAt: { $gte: rangeStart } }),
-      Vendor.countDocuments({ walletBalance: { $lt: minimumWalletThreshold } }),
+      Vendor.countDocuments({ 
+        walletBalance: { $lt: minimumWalletThreshold },
+        planType: { $ne: 'trial' } 
+      }),
       Vendor.countDocuments({ status: 'inactive' })
     ]);
 
@@ -781,7 +785,7 @@ const toggleVendorActive = async (req, res) => {
       type: vendor.isActive ? 'PARTNER_ACTIVATED' : 'PARTNER_DEACTIVATED',
       title: vendor.isActive ? 'Partner Profile Activated' : 'Partner Profile Deactivated',
       message: vendor.isActive
-        ? 'Your partner profile is active again and visible on ZerOne.'
+        ? 'Your partner profile is active again and visible on ZeroOne.'
         : 'Your partner profile has been deactivated by the admin team.',
       referenceId: `VENDOR_ACTIVE_${vendor._id}_${Date.now()}`
     });
@@ -1051,7 +1055,10 @@ const notifyLowBalance = async (req, res) => {
     const settings = await getBillingSettings();
     const minThreshold = settings.minWalletThreshold || 100;
     
-    const vendors = await Vendor.find({ walletBalance: { $lt: minThreshold } }).select('ownerId');
+    const vendors = await Vendor.find({ 
+      walletBalance: { $lt: minThreshold },
+      planType: { $ne: 'trial' }
+    }).select('ownerId');
     if (vendors.length === 0) return res.status(200).json({ message: 'No low balance vendors found' });
 
     const ownerIds = vendors.map(v => v.ownerId).filter(Boolean);
@@ -1062,7 +1069,7 @@ const notifyLowBalance = async (req, res) => {
         role: 'vendor',
         type: 'LOW_BALANCE',
         title: 'Critical Alert: Wallet Balance Low',
-        message: 'Your partner wallet balance is critically low. Please recharge your wallet immediately to remain active and continue receiving bookings on ZerOne.',
+        message: 'Your partner wallet balance is critically low. Please recharge your wallet immediately to remain active and continue receiving bookings on ZeroOne.',
         referenceId: `LOW_BALANCE_BLAST_${Date.now()}`
       });
     }

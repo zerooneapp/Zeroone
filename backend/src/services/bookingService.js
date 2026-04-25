@@ -300,6 +300,15 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
     throw new Error(`Only confirmed bookings can be cancelled (Current: ${booking.status})`);
   }
 
+  // 🛡️ CUSTOMER TIME GUARD: Cannot cancel after start time
+  if (role === 'customer') {
+    const now = moment().tz('Asia/Kolkata');
+    const start = moment(booking.startTime).tz('Asia/Kolkata');
+    if (now.isSameOrAfter(start)) {
+      throw new Error('You cannot cancel a booking after the appointment time has started. Please contact the partner for assistance.');
+    }
+  }
+
   if (role === 'vendor' && booking.vendorId?.ownerId?.toString() !== userId.toString()) {
     throw new Error('Unauthorized');
   }
@@ -472,6 +481,13 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
 
   if (booking.status !== 'confirmed') {
     throw new Error(`Only confirmed bookings can be rescheduled (Current: ${booking.status})`);
+  }
+
+  // 🛡️ TIME GUARD: Cannot reschedule after start time
+  const now = moment().tz('Asia/Kolkata');
+  const originalStart = moment(booking.startTime).tz('Asia/Kolkata');
+  if (now.isSameOrAfter(originalStart)) {
+    throw new Error('This booking has already started and can no longer be rescheduled.');
   }
 
   // 🛡️ SECURITY GUARD: Block customer-initiated reschedule if vendor is not active

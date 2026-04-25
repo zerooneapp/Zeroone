@@ -278,7 +278,10 @@ const VendorManagement = () => {
                     </div>
                   </td>
                   <td className="px-3 py-3.5">
-                    <span className={cn('text-[15px] font-black tracking-tighter', vendor.walletBalance < minimumWalletThreshold ? 'text-red-500' : 'text-emerald-500')}>
+                    <span className={cn(
+                      'text-[15px] font-black tracking-tighter', 
+                      (vendor.subscription?.type !== 'trial' && vendor.walletBalance < minimumWalletThreshold) ? 'text-red-500' : 'text-emerald-500'
+                    )}>
                       Rs {vendor.walletBalance?.toFixed(2) || '0.00'}
                     </span>
                   </td>
@@ -368,7 +371,7 @@ const VendorManagement = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 px-7 space-y-6 no-scrollbar pb-32">
-                {(selectedVendor.walletBalance < minimumWalletThreshold || !selectedVendor.subscription?.isActive) && (
+                {(!selectedVendor.subscription?.isActive || (selectedVendor.subscription?.type !== 'trial' && selectedVendor.walletBalance < minimumWalletThreshold)) && (
                   <div className="p-3.5 px-5 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl flex items-center gap-4 text-red-500">
                     <AlertCircle size={22} strokeWidth={3} className="shrink-0" />
                     <p className="text-[11px] font-black capitalize tracking-widest leading-normal">
@@ -400,7 +403,11 @@ const VendorManagement = () => {
                   <div className="space-y-6">
                     <Section title="Financials" icon={CreditCard}>
                       <InfoItem label="Active Plan" value={selectedVendor.subscription?.type?.toUpperCase() || 'NONE'} />
-                      <InfoItem label="Vault Balance" value={`Rs ${selectedVendor.walletBalance?.toFixed(2) || '0.00'}`} highlight={selectedVendor.walletBalance < minimumWalletThreshold} />
+                      <InfoItem 
+                        label="Vault Balance" 
+                        value={`Rs ${selectedVendor.walletBalance?.toFixed(2) || '0.00'}`} 
+                        highlight={selectedVendor.subscription?.type !== 'trial' && selectedVendor.walletBalance < minimumWalletThreshold} 
+                      />
                       <InfoItem
                         label="Free Trial Ends"
                         value={selectedVendor.freeTrial?.isActive && selectedVendor.freeTrial?.expiryDate

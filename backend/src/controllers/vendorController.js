@@ -24,6 +24,7 @@ const buildPublicVendorResponse = (vendor, extra = {}) => ({
   location: vendor.location,
   address: vendor.address,
   shopImage: vendor.shopImage,
+  featuredImage: vendor.featuredImage || '',
   galleryImages: vendor.galleryImages || [],
   gallery: vendor.galleryImages || [],
   shopVideo: vendor.shopVideo || '',
@@ -277,7 +278,7 @@ const getNearbyVendors = async (req, res) => {
         price: mainPrice,
         discountedPrice: discountedPrice < mainPrice ? Math.round(discountedPrice) : null,
         offerLabel,
-        serviceImage: primaryService?.image || primaryService?.images?.[0] || '',
+        serviceImage: v.featuredImage || primaryService?.image || primaryService?.images?.[0] || v.shopImage || '',
         serviceType: primaryService?.type || 'shop',
         serviceCount: allServices.length,
         services: allServices,
@@ -351,7 +352,7 @@ const createOffer = async (req, res) => {
 const getOffers = async (req, res) => {
   try {
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
-    const offers = await Offer.find({ vendorId: vendor._id });
+    const offers = await Offer.find({ vendorId: vendor._id }).lean();
     res.status(200).json(offers);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -450,7 +451,7 @@ const getVendorDashboard = async (req, res) => {
     const allBookings = await Booking.find({
       vendorId: vendor._id,
       status: { $in: ['confirmed', 'completed'] }
-    });
+    }).lean();
     const totalEarnings = allBookings.reduce((sum, b) => sum + b.totalPrice, 0);
 
     // 👨‍🔧 Active Staff
@@ -599,7 +600,7 @@ const getVendorDetail = async (req, res) => {
 
 const updateShopProfile = async (req, res) => {
   try {
-    const { workingHours, shopName, address, location } = req.body;
+    const { workingHours, shopName, address, location, featuredImage } = req.body;
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
@@ -613,6 +614,7 @@ const updateShopProfile = async (req, res) => {
     if (shopName) vendor.shopName = shopName;
     if (address) vendor.address = address;
     if (location) vendor.location = location;
+    if (featuredImage !== undefined) vendor.featuredImage = featuredImage;
 
     await vendor.save();
     res.status(200).json(vendor);
