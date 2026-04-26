@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { ArrowLeft, Shield, Lock, Smartphone, Monitor, Trash2, SmartphoneNfc, ArrowRight, ShieldCheck, Fingerprint, X, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Smartphone, Monitor, Trash2, SmartphoneNfc, ArrowRight, ShieldCheck, Fingerprint, X, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';

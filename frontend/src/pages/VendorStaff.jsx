@@ -50,30 +50,32 @@ const VendorStaff = () => {
     fetchStaff();
   }, []);
 
-  const handleToggle = async (id, isActive) => {
+  const handleToggle = async (id, requestedActive) => {
     if (!vendorData?.subscription?.isActive) {
       return toast.error('Account inactive. Recharge to update staff.', { id: 'account-inactive', duration: 2000 });
     }
 
     if (toggleLoadingId === id) return;
 
-    const original = [...staff];
     const member = staff.find(s => s._id === id);
     
-    // Optimistic Update
-    setStaff(prev => prev.map(s => s._id === id ? { ...s, isActive } : s));
+    // 🛡️ LOGIC CHANGE: If toggling OFF, we don't deactivate them globally yet.
+    // Instead, we open the closure modal to record a temporary absence.
+    // This keeps them isActive=true so they automatically return after the closure.
+    if (!requestedActive) {
+      setClosureModal({ isOpen: true, staff: member });
+      return;
+    }
+
+    // If toggling ON, we actually update the status and end any closures
+    const original = [...staff];
+    setStaff(prev => prev.map(s => s._id === id ? { ...s, isActive: true } : s));
 
     try {
       setToggleLoadingId(id);
-      await api.patch(`/staff/${id}`, { isActive });
-      
-      if (isActive) {
-        toast.success(`${member?.name} is back online`);
-      } else {
-        toast.success(`${member?.name} is now off-duty`);
-        // Open closure modal to handle existing bookings if deactivating
-        setClosureModal({ isOpen: true, staff: member });
-      }
+      await api.patch(`/staff/${id}`, { isActive: true });
+      toast.success(`${member?.name} is back online`);
+      fetchStaff(); // Refresh to clear any closure status
     } catch (err) {
       setStaff(original);
       toast.error('Failed to update status');

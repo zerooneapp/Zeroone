@@ -141,7 +141,21 @@ const listStaff = async (req, res) => {
       };
     }));
 
-    res.status(200).json(enrichedStaff);
+    // 🛡️ ENRICH WITH ACTIVE CLOSURES: Check if staff is currently on a recorded absence
+    const StaffClosure = require('../models/StaffClosure');
+    const now = new Date();
+    const finalizedStaff = await Promise.all(enrichedStaff.map(async (s) => {
+      const activeClosure = await StaffClosure.findOne({
+        staffId: s._id,
+        status: 'active',
+        startTime: { $lte: now },
+        endTime: { $gt: now }
+      }).lean();
+      
+      return { ...s, activeClosure };
+    }));
+
+    res.status(200).json(finalizedStaff);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -46,13 +46,19 @@ const Signup = () => {
     
     setLoading(true);
     try {
-      await api.post('/auth/register', { 
+      const res = await api.post('/auth/register', { 
         phone, 
         ...profileData, 
         role: 'customer' 
       });
-      const { useAuthStore } = await import('../store/authStore');
-      await useAuthStore.getState().restoreSession();
+
+      // Update store with new user data and token
+      useAuthStore.getState().setCredentials({
+        token: res.data.token,
+        role: res.data.role,
+        user: res.data
+      });
+
       toast.success('Registration successful!');
       navigate('/', { replace: true });
     } catch (err) {

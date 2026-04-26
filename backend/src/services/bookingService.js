@@ -361,7 +361,7 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
   const reasonSuffix = trimmedReason ? ` Reason: ${trimmedReason}` : '';
   const customerMessage =
     role === 'vendor'
-      ? `Your booking for ${moment(booking.startTime).format('LLL')} was cancelled by the vendor.${reasonSuffix}`
+      ? `Your booking for ${moment(booking.startTime).format('LLL')} was cancelled by ${booking.vendorId.shopName}.${reasonSuffix}`
       : `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
   const internalMessage = `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
 
@@ -461,9 +461,9 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
   const staff = await Staff.findById(booking.staffId);
   const bookingTime = moment(booking.startTime).format('LLL');
 
-  await sendRoleNotifications([
+  const notificationPayloads = [
     {
-      userIds: booking.userId,
+      userId: booking.userId,
       role: 'customer',
       type: 'BOOKING_CANCELLED',
       title: 'Booking Cancelled',
@@ -472,24 +472,40 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
       referenceId: `${booking._id}_EMERGENCY_CANCEL_CUSTOMER`
     },
     {
-      userIds: booking.vendorId.ownerId,
+      userId: booking.vendorId.ownerId,
       role: 'vendor',
       type: 'BOOKING_CANCELLED',
       title: 'Booking Cancelled',
       message: `Booking for ${bookingTime} was cancelled due to an emergency closure.`,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_EMERGENCY_CANCEL_VENDOR`
-    },
-    getStaffNotificationTarget(staff) ? {
-      userIds: getStaffNotificationTarget(staff),
+    }
+  ];
+
+  const staffTargetId = getStaffNotificationTarget(staff);
+  if (staffTargetId) {
+    notificationPayloads.push({
+      userId: staffTargetId,
       role: 'staff',
       type: 'BOOKING_CANCELLED',
       title: 'Booking Rejected',
       message: `Assigned booking for ${bookingTime} was cancelled due to an emergency closure.`,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_EMERGENCY_CANCEL_STAFF`
-    } : null
-  ]);
+    });
+  }
+
+  // 🛡️ Deduplicate by userId: Priority Staff > Vendor > Customer
+  const finalTargets = new Map();
+  notificationPayloads.forEach(p => {
+    if (!p.userId) return;
+    const uid = p.userId.toString();
+    if (!finalTargets.has(uid) || p.role === 'staff' || (p.role === 'vendor' && finalTargets.get(uid).role === 'customer')) {
+      finalTargets.set(uid, { ...p, userIds: p.userId }); // sendNotification expects userIds
+    }
+  });
+
+  await sendRoleNotifications(Array.from(finalTargets.values()));
 
   return booking;
 };

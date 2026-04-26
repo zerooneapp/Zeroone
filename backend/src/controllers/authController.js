@@ -120,6 +120,13 @@ const register = async (req, res) => {
     if (user) {
       if (user.name && !req.body.forceUpdate && user.role !== 'vendor') return res.status(400).json({ message: 'User already exists' });
 
+      // Update all provided fields
+      if (name) user.name = name;
+      if (email) user.email = email;
+      if (gender) user.gender = gender;
+      if (dob) user.dob = dob;
+      if (effectivePassword) user.password = effectivePassword;
+      if (referralCode) user.referralCode = referralCode;
       if (image) user.image = image;
       user.role = requestedRole;
       

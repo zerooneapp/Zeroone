@@ -63,11 +63,24 @@ class NotificationService {
     try {
       if (admin.apps.length === 0) return;
 
-      const notificationId = `${userId}_${payload.data?.type || 'GEN'}_${payload.data?.id || Date.now()}`;
+      // 🛡️ 1. Enhanced Deduplication Key (Role-agnostic for same event)
+      // If payload has a stable ID (like bookingId), use it instead of role-specific referenceId
+      const eventId = payload.data?.bookingId || payload.data?.id || Date.now();
+      const notificationId = `${userId}_${payload.data?.type || 'GEN'}_${eventId}`;
 
-      // 🚫 1. Backend Duplicate Prevention (L1)
-      const exists = await NotificationLog.findOne({ notificationId });
+      // 🚫 2. Backend Duplicate Prevention (L1 - Persistent)
+      const exists = await NotificationLog.findOne({ 
+        notificationId,
+        createdAt: { $gt: new Date(Date.now() - 1000 * 60) } // Only dedupe within last 60 seconds
+      });
       if (exists) return;
+
+      // 🧠 3. Memory-based Throttle (L0 - Immediate)
+      // This catches rapid-fire calls before DB roundtrip
+      if (!global.notificationThrottle) global.notificationThrottle = new Set();
+      if (global.notificationThrottle.has(notificationId)) return;
+      global.notificationThrottle.add(notificationId);
+      setTimeout(() => global.notificationThrottle.delete(notificationId), 5000); // 5s throttle
 
       // 🔄 2. Token Collection (Check both User and Staff)
       let entity = await User.findById(userId);
