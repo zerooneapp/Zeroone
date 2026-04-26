@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import { cn } from '../../../utils/cn';
+import dayjs from 'dayjs';
 
 const VendorManagement = () => {
   const [vendors, setVendors] = useState([]);
@@ -18,9 +19,9 @@ const VendorManagement = () => {
   const [vendorInsights, setVendorInsights] = useState(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insightsRange, setInsightsRange] = useState(() => {
-    const today = new Date();
-    const end = today.toISOString().split('T')[0];
-    const start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+    const today = dayjs();
+    const end = today.format('YYYY-MM-DD');
+    const start = today.startOf('month').format('YYYY-MM-DD');
     return { from: start, to: end };
   });
   const [filters, setFilters] = useState({
@@ -412,10 +413,10 @@ const VendorManagement = () => {
                       <InfoItem
                         label="Free Trial Ends"
                         value={selectedVendor.freeTrial?.isActive && selectedVendor.freeTrial?.expiryDate
-                          ? new Date(selectedVendor.freeTrial.expiryDate).toLocaleDateString()
+                          ? dayjs(selectedVendor.freeTrial.expiryDate).format('YYYY-MM-DD')
                           : 'Not Active'}
                       />
-                      <InfoItem label="Next Sync" value={selectedVendor.subscription?.nextDeductionDate ? new Date(selectedVendor.subscription.nextDeductionDate).toLocaleDateString() : 'N/A'} />
+                      <InfoItem label="Next Sync" value={selectedVendor.subscription?.nextDeductionDate ? dayjs(selectedVendor.subscription.nextDeductionDate).format('YYYY-MM-DD') : 'N/A'} />
                       <div className="mt-4">
                         <button
                           onClick={() => handleAction(selectedVendor._id, 'toggle-active')}
@@ -547,7 +548,7 @@ const VendorManagement = () => {
                                   {booking.services?.map((service) => service.name).join(', ') || 'Service Booking'}
                                 </p>
                                 <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 tracking-widest uppercase mt-1">
-                                  {new Date(booking.startTime).toLocaleDateString('en-IN')} • {booking.staffName}
+                                  {dayjs(booking.startTime).format('YYYY-MM-DD')} • {booking.staffName}
                                 </p>
                               </div>
                               <div className="text-right shrink-0">
@@ -576,7 +577,7 @@ const VendorManagement = () => {
                             <div className="min-w-0">
                               <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">{entry.description}</p>
                               <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 tracking-widest uppercase mt-1">
-                                {new Date(entry.timestamp).toLocaleDateString('en-IN')} • {new Date(entry.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                {dayjs(entry.timestamp).format('YYYY-MM-DD')} • {dayjs(entry.timestamp).format('HH:mm')}
                               </p>
                             </div>
                             <p className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 shrink-0">Rs {entry.amount || 0}</p>

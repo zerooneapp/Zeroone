@@ -424,24 +424,32 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
 const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', closureId = null) => {
   const booking = await Booking.findById(bookingId).populate('vendorId');
   if (!booking) throw new Error('Booking not found');
-  if (booking.status !== 'confirmed') throw new Error('Only confirmed bookings can be cancelled');
+  if (!['confirmed', 'pending'].includes(booking.status)) throw new Error('Only active bookings can be cancelled');
   if (booking.vendorId.ownerId.toString() !== vendorUserId.toString()) throw new Error('Unauthorized');
 
-  const closureWindows = await getActiveClosureWindows(
+  // 🔍 Check if it's a Vendor Closure or a Staff Closure
+  let isValidClosure = false;
+  
+  const vClosures = await getActiveClosureWindows(
     booking.vendorId._id,
     booking.startTime,
     booking.endTime
   );
+  if (vClosures.length > 0) isValidClosure = true;
 
-  if (closureWindows.length === 0) {
-    throw new Error('This booking is not inside any active emergency closure');
+  if (!isValidClosure && closureId) {
+    const StaffClosure = require('../models/StaffClosure');
+    const sClosure = await StaffClosure.findById(closureId);
+    if (sClosure && 
+        sClosure.staffId.toString() === booking.staffId.toString() &&
+        booking.startTime < sClosure.endTime && 
+        booking.endTime > sClosure.startTime) {
+      isValidClosure = true;
+    }
   }
 
-  if (closureId) {
-    const matchingClosure = closureWindows.find((closure) => closure._id.toString() === closureId.toString());
-    if (!matchingClosure) {
-      throw new Error('This booking does not belong to the selected emergency closure');
-    }
+  if (!isValidClosure) {
+    throw new Error('This booking is not inside any active emergency closure (Shop or Staff)');
   }
 
   booking.status = 'cancelled';

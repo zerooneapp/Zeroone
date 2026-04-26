@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Upload, Info, Scissors, User, Phone, CalendarClock, Co
 import { motion } from 'framer-motion';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import dayjs from 'dayjs';
 
 const StaffForm = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const StaffForm = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [availabilityDate, setAvailabilityDate] = useState(new Date().toISOString().split('T')[0]);
+  const [availabilityDate, setAvailabilityDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [savingAvailability, setSavingAvailability] = useState(false);
   const [availability, setAvailability] = useState({
@@ -252,16 +253,24 @@ const StaffForm = () => {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Phone Number</label>
-                <div className="relative">
+                <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 px-4 focus-within:ring-2 focus-within:ring-primary/10 transition-all shadow-sm">
+                  <Phone size={14} className="text-gray-400 mr-2" />
+                  <span className="text-sm font-bold text-gray-400 border-r border-slate-100 dark:border-gray-800 pr-2 mr-2">+91</span>
                   <input
                     required
                     type="tel"
                     placeholder="9876543210"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full py-3 pl-11 pr-4 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white placeholder:text-gray-300"
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/\D/g, '');
+                      if ((val.startsWith('91') || val.startsWith('0')) && val.length > 10) {
+                        val = val.slice(-10);
+                      }
+                      setFormData({ ...formData, phone: val.slice(0, 10) });
+                    }}
+                    maxLength={10}
+                    className="flex-1 py-3 bg-transparent border-none font-bold text-sm outline-none dark:text-white placeholder:text-gray-300"
                   />
-                  <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 </div>
               </div>
               <div className="space-y-1.5">

@@ -5,6 +5,7 @@ import { ArrowLeft, User, Calendar, Phone, ShieldCheck, ArrowRight, Camera } fro
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';
+import dayjs from 'dayjs';
 
 const PersonalInformation = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const PersonalInformation = () => {
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    dob: user?.dob ? new Date(user.dob).toISOString().split('T')[0] : '',
+    dob: user?.dob ? dayjs(user.dob).format('YYYY-MM-DD') : '',
     gender: user?.gender || 'male',
     phone: user?.phone || '',
     image: user?.image || null

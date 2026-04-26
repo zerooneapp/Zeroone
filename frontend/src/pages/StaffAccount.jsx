@@ -11,6 +11,8 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import Navbar from '../layouts/Navbar';
 
+import dayjs from 'dayjs';
+
 const StaffAccount = () => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const StaffAccount = () => {
   });
   const [loading, setLoading] = useState(true);
   const [historyPeriod, setHistoryPeriod] = useState('week');
-  const [historyDate, setHistoryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [historyDate, setHistoryDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [historyView, setHistoryView] = useState('bookings');
   const [history, setHistory] = useState({
     summary: { totalBookings: 0, completedBookings: 0, totalEarnings: 0 },

@@ -726,9 +726,56 @@ const createManualBooking = async (req, res) => {
   }
 };
 
+const getLoyalCustomers = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const loyalCustomers = await Booking.aggregate([
+      { $match: { vendorId: vendor._id, status: { $in: ['confirmed', 'completed'] } } },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $ifNull: ["$userId", false] },
+              "$userId",
+              "$walkInCustomerPhone"
+            ]
+          },
+          bookingCount: { $sum: 1 },
+          lastBooking: { $max: '$startTime' },
+          totalSpent: { $sum: '$totalPrice' },
+          name: { $first: { $ifNull: ["$walkInCustomerName", "Unknown"] } },
+          phone: { $first: { $ifNull: ["$walkInCustomerPhone", "Unknown"] } },
+          isWalkIn: { $first: { $cond: [{ $ifNull: ["$userId", false] }, false, true] } }
+        }
+      },
+      { $sort: { bookingCount: -1 } }
+    ]);
+
+    // Populate user info for registered users
+    const result = await Promise.all(loyalCustomers.map(async (item) => {
+      if (!item.isWalkIn && mongoose.Types.ObjectId.isValid(item._id)) {
+        const user = await User.findById(item._id).select('name phone image');
+        return {
+          ...item,
+          name: user?.name || item.name,
+          phone: user?.phone || item.phone,
+          image: user?.image || ''
+        };
+      }
+      return item;
+    }));
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerVendor, uploadDocs, getVendorProfile, getNearbyVendors, getVendorDetail,
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings, getVendorDashboard,
-  updateShopProfile, createWalkIn, createManualBooking
+  updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers
 };
 

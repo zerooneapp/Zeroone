@@ -12,6 +12,7 @@ import useNotificationStore from '../store/notificationStore';
 import useSocket from '../hooks/useSocket';
 import { cn } from '../utils/cn';
 import logo from '../assests/logo.jpeg';
+import AdminProfileModal from '../components/AdminProfileModal';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ const AdminLayout = () => {
 
   useSocket(currentAdmin?._id);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminProfileOpen, setIsAdminProfileOpen] = useState(false);
 
   React.useEffect(() => {
     if (currentAdmin) {
@@ -180,14 +182,17 @@ const AdminLayout = () => {
 
           <div className="flex items-center gap-4">
             {/* Admin Identity */}
-            <div className="hidden lg:flex items-center gap-3 pr-4 border-r border-gray-100 dark:border-gray-800">
+            <div 
+              onClick={() => setIsAdminProfileOpen(true)}
+              className="hidden lg:flex items-center gap-3 pr-4 border-r border-gray-100 dark:border-gray-800 cursor-pointer group active:scale-95 transition-all"
+            >
               <div className="text-right">
-                <p className="text-sm font-black dark:text-white capitalize">{currentAdmin?.name || 'Admin'}</p>
-                <span className="text-[11px] font-black text-primary dark:text-white capitalize bg-primary/10 dark:bg-primary/25 px-2 py-0.5 rounded-full border border-primary/20 shadow-sm">
+                <p className="text-sm font-black dark:text-white capitalize group-hover:text-primary transition-colors">{currentAdmin?.name || 'Admin'}</p>
+                <span className="text-[11px] font-black text-primary dark:text-white capitalize bg-primary/10 dark:bg-primary/25 px-2 py-0.5 rounded-full border border-primary/20 shadow-sm group-hover:shadow-md transition-all">
                   {isSuperAdmin ? 'Super Admin' : 'Admin'}
                 </span>
               </div>
-              <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center text-primary dark:text-white font-black border border-primary/10 text-base shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center text-primary dark:text-white font-black border border-primary/10 text-base shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
                 {(currentAdmin?.name || 'A').charAt(0)}
               </div>
             </div>
@@ -217,6 +222,11 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      <AdminProfileModal 
+        isOpen={isAdminProfileOpen} 
+        onClose={() => setIsAdminProfileOpen(false)} 
+      />
     </div>
   );
 };

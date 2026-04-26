@@ -44,6 +44,7 @@ import ServiceForm from './pages/ServiceForm';
 import StaffForm from './pages/StaffForm';
 import OfferForm from './pages/OfferForm';
 import PendingVerification from './pages/PendingVerification';
+import LoyalCustomers from './pages/LoyalCustomers';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -225,6 +226,7 @@ function App() {
             <Route path="edit/:id" element={<OfferForm />} />
           </Route>
           <Route path="wallet" element={<VendorWallet />} />
+          <Route path="customers" element={<LoyalCustomers />} />
         </Route>
 
         {/* STAFF PANEL */}

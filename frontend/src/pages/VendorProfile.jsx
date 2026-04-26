@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Store, Camera, Video, MapPin, Loader2,
     Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
-    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle
+    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle, Heart
  } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -292,6 +292,15 @@ const VendorProfile = () => {
          icon: Wallet,
          iconBg: 'bg-emerald-500/10',
          iconColor: 'text-emerald-500',
+      },
+      {
+         key: 'customers',
+         label: 'Loyal Customers',
+         subtitle: 'Track repeat clients & growth',
+         icon: Heart,
+         iconBg: 'bg-rose-500/10',
+         iconColor: 'text-rose-500',
+         path: '/vendor/customers',
       },
       {
          key: 'theme',

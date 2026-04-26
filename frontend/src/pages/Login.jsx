@@ -35,8 +35,13 @@ const CustomerAuth = () => {
   }, [step, timer]);
 
   const handlePhoneChange = (e) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
-    setPhone(val);
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.startsWith('91') && val.length > 10) {
+      val = val.slice(-10);
+    } else if (val.startsWith('0') && val.length > 10) {
+      val = val.slice(-10);
+    }
+    setPhone(val.slice(0, 10));
   };
 
   const handleOTPChange = (e) => {
@@ -133,6 +138,7 @@ const CustomerAuth = () => {
                       onChange={handlePhoneChange}
                       placeholder="Phone Number"
                       autoFocus
+                      maxLength={10}
                       className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#1C2C4E] placeholder:text-gray-300"
                     />
                   </div>

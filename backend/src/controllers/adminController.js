@@ -987,7 +987,7 @@ const getAdminAccounts = async (req, res) => {
 
 const createAdminAccount = async (req, res) => {
   try {
-    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can create admins' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
 
     const { name, phone, password, email } = req.body || {};
     if (!name?.trim() || !phone?.trim() || !password) {
@@ -1017,6 +1017,38 @@ const createAdminAccount = async (req, res) => {
     });
 
     res.status(201).json(sanitizeAdminAccount(admin));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateAdminProfile = async (req, res) => {
+  try {
+    const { name, phone, password } = req.body;
+    const admin = await User.findById(req.user._id);
+    if (!admin) return res.status(404).json({ message: 'Admin not found' });
+
+    if (name) admin.name = name.trim();
+    if (phone) {
+      if (!/^\d{10}$/.test(phone.trim())) {
+        return res.status(400).json({ message: 'Phone must be a valid 10-digit number' });
+      }
+      const existing = await User.findOne({ phone: phone.trim(), _id: { $ne: admin._id } });
+      if (existing) return res.status(400).json({ message: 'Phone number already in use' });
+      admin.phone = phone.trim();
+    }
+    if (password) {
+      if (password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters' });
+      }
+      admin.password = password;
+    }
+
+    await admin.save();
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      admin: sanitizeAdminAccount(admin)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -1115,5 +1147,6 @@ module.exports = {
   updateCategory, deleteCategory, getGlobalSettings, updateGlobalSettings, getSharedSettings,
   broadcastNotification, getSubscriptionPlans,
   getAdminAccounts, createAdminAccount, toggleAdminAccountBlock, deleteAdminAccount,
+  updateAdminProfile,
   extendVendorFreeTrial, getVendorInsights, notifyLowBalance
 };

@@ -35,7 +35,7 @@ const getOverlappingClosures = async (staffId, start, end, excludeClosureId = nu
 const getImpactedBookings = async (staffId, start, end) => (
   Booking.find({
     staffId,
-    status: 'confirmed',
+    status: { $in: ['confirmed', 'pending'] },
     startTime: { $lt: moment(end).toDate() },
     endTime: { $gt: moment(start).toDate() }
   })

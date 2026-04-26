@@ -61,7 +61,7 @@ const Cart = () => {
               bufferTime: service.bufferTime || 0
             }));
             rescheduleSelection = {
-              date: booking.startTime ? new Date(booking.startTime).toISOString().split('T')[0] : null,
+              date: booking.startTime ? dayjs(booking.startTime).format('YYYY-MM-DD') : null,
               time: booking.startTime ? dayjs(booking.startTime).format('HH:mm') : '',
               staffId: booking.staffId?._id || booking.staffId || '',
               staffName: booking.staffId?.name || '',
@@ -96,7 +96,7 @@ const Cart = () => {
     const d = new Date();
     d.setDate(d.getDate() + i);
     return {
-      full: d.toISOString().split('T')[0],
+      full: dayjs(d).format('YYYY-MM-DD'),
       day: d.toLocaleDateString('en-US', { weekday: 'short' }),
       date: d.getDate()
     };
@@ -402,7 +402,7 @@ const Cart = () => {
                     )}
                   >
                     <span className="relative z-10">{d.date}</span>
-                    {d.date === new Date().getDate() && d.full === new Date().toISOString().split('T')[0] && (
+                    {d.full === dayjs().format('YYYY-MM-DD') && (
                       <div className="absolute bottom-1 w-1 h-1 bg-current rounded-full opacity-50" />
                     )}
                   </button>

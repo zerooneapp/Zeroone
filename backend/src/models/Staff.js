@@ -25,12 +25,23 @@ const staffSchema = new mongoose.Schema({
   otpExpires: { type: Date }
 }, { timestamps: true });
 
-// Hash password before saving
+// Hash password and normalize phone before saving
 staffSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
-  const bcrypt = require('bcryptjs');
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  // Normalize Phone
+  if (this.isModified('phone')) {
+    let val = this.phone.replace(/\D/g, '');
+    if ((val.startsWith('91') || val.startsWith('0')) && val.length > 10) {
+      val = val.slice(-10);
+    }
+    this.phone = val.slice(0, 10);
+  }
+
+  // Hash Password
+  if (this.isModified('password')) {
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
 });
 
 // Compare password

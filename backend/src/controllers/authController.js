@@ -120,14 +120,16 @@ const register = async (req, res) => {
     if (user) {
       if (user.name && !req.body.forceUpdate && user.role !== 'vendor') return res.status(400).json({ message: 'User already exists' });
 
-      user.name = name;
-      if (effectivePassword) user.password = effectivePassword;
-      if (email) user.email = email;
-      if (gender) user.gender = gender;
-      if (dob) user.dob = dob;
-      if (referralCode) user.referralCode = referralCode;
       if (image) user.image = image;
       user.role = requestedRole;
+      
+      // Normalize phone if updated
+      let normPhone = phone.replace(/\D/g, '');
+      if ((normPhone.startsWith('91') || normPhone.startsWith('0')) && normPhone.length > 10) {
+        normPhone = normPhone.slice(-10);
+      }
+      user.phone = normPhone.slice(0, 10);
+      
       await user.save();
     } else {
       user = await User.create({
@@ -201,8 +203,15 @@ const me = async (req, res) => {
 // @access  Public
 const sendOTP = async (req, res) => {
   try {
-    const { phone, portal } = req.body;
+    let { phone, portal } = req.body;
     if (!phone) return res.status(400).json({ message: 'Phone number is required' });
+
+    // Normalize phone
+    phone = phone.replace(/\D/g, '');
+    if ((phone.startsWith('91') || phone.startsWith('0')) && phone.length > 10) {
+      phone = phone.slice(-10);
+    }
+    phone = phone.slice(0, 10);
 
     // Check User or Staff
     let user = await User.findOne({ phone });
@@ -273,8 +282,15 @@ const sendOTP = async (req, res) => {
 // @access  Public
 const verifyOTP = async (req, res) => {
   try {
-    const { phone, otp } = req.body;
+    let { phone, otp } = req.body;
     if (!phone || !otp) return res.status(400).json({ message: 'Phone and OTP are required' });
+
+    // Normalize phone
+    phone = phone.replace(/\D/g, '');
+    if ((phone.startsWith('91') || phone.startsWith('0')) && phone.length > 10) {
+      phone = phone.slice(-10);
+    }
+    phone = phone.slice(0, 10);
 
     // Find User or Staff
     let user = await User.findOne({ phone });
