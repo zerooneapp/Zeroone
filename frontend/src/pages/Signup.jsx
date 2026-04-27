@@ -192,11 +192,6 @@ const Signup = () => {
                 <ArrowRight size={16} strokeWidth={3} />
               </Button>
 
-              <div className="text-center px-10 pb-6">
-                <p className="text-[10px] font-bold text-gray-400 leading-relaxed uppercase tracking-widest opacity-60">
-                  By joining, you agree to our <span className="text-[#1C2C4E]">Terms</span> and <span onClick={() => navigate('/privacy-policy')} className="text-[#1C2C4E] border-b border-current cursor-pointer">Privacy</span>
-                </p>
-              </div>
             </div>
           </motion.div>
         </div>

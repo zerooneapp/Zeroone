@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../utils/cn';
 
-const Card = ({ children, className, hover = false }) => {
+const Card = ({ children, className, hover = false, ...props }) => {
   return (
     <div
       className={cn(
@@ -9,6 +9,7 @@ const Card = ({ children, className, hover = false }) => {
         hover && 'hover:shadow-md hover:-translate-y-1',
         className
       )}
+      {...props}
     >
       {children}
     </div>

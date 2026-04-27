@@ -173,12 +173,23 @@ const ServiceDetail = () => {
 
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) return navigate('/login');
+
+    // Optimistic UI Update: Toggle heart immediately
+    const previousFavoriteState = isFavorited;
+    const newState = !previousFavoriteState;
+    setIsFavorited(newState);
+
     try {
       const res = await api.post('/users/favorites/toggle', { vendorId: id });
-      setIsFavorited(res.data.isFavorited);
+      // Sync with server response just in case of mismatch
+      if (res.data.isFavorited !== newState) {
+        setIsFavorited(res.data.isFavorited);
+      }
       toast.success(res.data.isFavorited ? 'Saved to your elite list!' : 'Removed from favorites');
     } catch (err) {
-      toast.error('Logistical error: could not sync favorite');
+      // Rollback if the API call fails
+      setIsFavorited(previousFavoriteState);
+      toast.error('Failed to update favorites');
     }
   };
 
@@ -611,13 +622,6 @@ const ServiceDetail = () => {
               <CheckCircle2 size={14} />
             </div>
             <p className="text-[10px] font-black text-[#0B1222] dark:text-white tracking-tight">Instant Booking Available</p>
-          </div>
-          <div className="flex -space-x-1.5">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden shadow-sm">
-                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent('User')}&background=E2E8F0&color=1C2C4E&bold=true`} alt="avatar" />
-              </div>
-            ))}
           </div>
         </div>
       </div>

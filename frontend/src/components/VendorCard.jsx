@@ -19,7 +19,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
   return (
     <Card
       className={cn(
-        "p-0 overflow-hidden border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_10px_40px_-8px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.03)] backdrop-blur-xl transition-all duration-500 w-full h-auto bg-white/95 dark:bg-gray-900/80 rounded-[24px] mb-1.5 active:scale-[0.98]"
+        "p-0 overflow-hidden border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_10px_40px_-8px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.03)] backdrop-blur-xl transition-all duration-500 w-full h-auto bg-white/95 dark:bg-gray-900/80 rounded-[24px] mb-1.5 active:scale-[0.98] cursor-pointer"
       )}
       onClick={() => navigate(`/service/${vendor._id}`)}
     >

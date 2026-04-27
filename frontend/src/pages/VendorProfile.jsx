@@ -6,6 +6,7 @@ import {
     History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle, Heart
  } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import dayjs from 'dayjs';
 import api from '../services/api';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
@@ -26,16 +27,16 @@ const VendorProfile = () => {
    const [historyBookings, setHistoryBookings] = useState([]);
    const [supportNumber, setSupportNumber] = useState('');
    const [historyFilters, setHistoryFilters] = useState({
-      from: '',
-      to: '',
+      from: dayjs().subtract(8, 'day').format('YYYY-MM-DD'),
+      to: dayjs().format('YYYY-MM-DD'),
       status: ''
    });
    const [transactionLoading, setTransactionLoading] = useState(false);
    const [transactions, setTransactions] = useState([]);
    const [staffOptions, setStaffOptions] = useState([]);
    const [transactionFilters, setTransactionFilters] = useState({
-      from: '',
-      to: '',
+      from: dayjs().subtract(8, 'day').format('YYYY-MM-DD'),
+      to: dayjs().format('YYYY-MM-DD'),
       source: 'total',
       staffId: ''
    });
