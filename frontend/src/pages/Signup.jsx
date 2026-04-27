@@ -130,7 +130,11 @@ const Signup = () => {
                   type="text" 
                   placeholder="Full Name *"
                   value={profileData.name}
-                  onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+                    setProfileData({...profileData, name: filteredValue});
+                  }}
                   className="flex-1 bg-transparent border-none outline-none font-bold text-base text-[#1C2C4E] placeholder:text-gray-300"
                 />
               </div>
@@ -144,6 +148,7 @@ const Signup = () => {
                   <input 
                     type="date"
                     value={profileData.dob}
+                    max={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setProfileData({...profileData, dob: e.target.value})}
                     className="bg-transparent border-none outline-none font-black text-sm text-[#1C2C4E] uppercase tracking-tighter"
                   />
@@ -182,11 +187,6 @@ const Signup = () => {
                 <ArrowRight size={16} strokeWidth={3} />
               </Button>
 
-              <div className="text-center px-10">
-                <p className="text-[10px] font-bold text-gray-400 leading-relaxed uppercase tracking-widest opacity-60">
-                  By joining, you agree to our <span className="text-[#1C2C4E] border-b border-current">Terms</span> and <span className="text-[#1C2C4E] border-b border-current">Privacy</span>
-                </p>
-              </div>
             </div>
           </motion.div>
         </div>

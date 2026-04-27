@@ -163,7 +163,11 @@ const VendorSignup = () => {
                 placeholder="Owner Full Name"
                 className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 h-12 rounded-xl font-bold shadow-sm text-sm"
                 value={formData.ownerName}
-                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+                  setFormData({ ...formData, ownerName: filteredValue });
+                }}
               />
 
               <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-2 flex items-center gap-3 h-12 shadow-sm ring-inset ring-1 ring-black/5">
