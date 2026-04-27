@@ -63,26 +63,33 @@ class NotificationService {
     try {
       if (admin.apps.length === 0) return;
 
-      // 🛡️ 1. Enhanced Deduplication Key (Role-agnostic for same event)
-      // If payload has a stable ID (like bookingId), use it instead of role-specific referenceId
-      const eventId = payload.data?.bookingId || payload.data?.id || Date.now();
-      const notificationId = `${userId}_${payload.data?.type || 'GEN'}_${eventId}`;
+      // 🛡️ 1. Generate a Stable, Content-Aware Deduplication Key
+      // This prevents duplicates even if a stable ID is missing by hashing core content
+      const eventId = payload.data?.bookingId || payload.data?.id || 'GLOBAL';
+      const contentHash = `${payload.title}_${payload.message || payload.body}`.replace(/\s+/g, '').slice(0, 32);
+      const notificationId = `${userId}_${payload.data?.type || 'GEN'}_${eventId}_${contentHash}`;
 
-      // 🚫 2. Backend Duplicate Prevention (L1 - Persistent)
+      // 🧠 2. Immediate Memory Lock (L0 - Prevents race conditions in cluster/parallel calls)
+      if (!global.notificationLock) global.notificationLock = new Set();
+      if (global.notificationLock.has(notificationId)) {
+        console.log(`[PUSH-THROTTLE] Blocking rapid-fire duplicate for user ${userId}`);
+        return;
+      }
+      global.notificationLock.add(notificationId);
+      // Release lock after 10 seconds to allow legitimate future notifications
+      setTimeout(() => global.notificationLock.delete(notificationId), 10000);
+
+      // 🚫 3. Atomic DB Check & Lock (L1 - Persistent check across restarts/processes)
       const exists = await NotificationLog.findOne({ 
         notificationId,
-        createdAt: { $gt: new Date(Date.now() - 1000 * 60) } // Only dedupe within last 60 seconds
+        createdAt: { $gt: new Date(Date.now() - 1000 * 30) } // 30s lookback
       });
-      if (exists) return;
+      if (exists) {
+        console.log(`[PUSH-SKIP] Persistent duplicate blocked for user ${userId}`);
+        return;
+      }
 
-      // 🧠 3. Memory-based Throttle (L0 - Immediate)
-      // This catches rapid-fire calls before DB roundtrip
-      if (!global.notificationThrottle) global.notificationThrottle = new Set();
-      if (global.notificationThrottle.has(notificationId)) return;
-      global.notificationThrottle.add(notificationId);
-      setTimeout(() => global.notificationThrottle.delete(notificationId), 5000); // 5s throttle
-
-      // 🔄 2. Token Collection (Check both User and Staff)
+      // 🔄 4. Token Collection
       let entity = await User.findById(userId);
       if (!entity) {
         entity = await Staff.findById(userId);
@@ -91,14 +98,13 @@ class NotificationService {
       if (!entity) return;
 
       let tokens = [...(entity.fcmTokens || []), ...(entity.fcmTokenMobile || [])];
-      tokens = [...new Set(tokens)].filter(Boolean); // Deduplicate & Filter empty
+      tokens = [...new Set(tokens)].filter(Boolean);
 
       if (!tokens.length) {
-        console.log(`[PUSH-SKIP] No tokens for entity ${userId}`);
         return;
       }
 
-      // 🚀 3. Multicast Send
+      // 🚀 5. Multicast Send
       const response = await admin.messaging().sendEachForMulticast({
         tokens,
         notification: {
@@ -107,25 +113,25 @@ class NotificationService {
         },
         data: toFcmSafeData({
           ...payload.data,
-          notificationId // Sent for Frontend Dedupe (L3)
+          notificationId
         })
       });
 
-      // 📝 4. Log Success (L1/L2 Lock)
+      // 📝 6. Log Transaction for Persistence
+      await NotificationLog.create({
+        notificationId,
+        userId,
+        tokens,
+        successCount: response.successCount
+      });
+
+      // 🧹 7. Token Cleanup on failures
       const invalidTokens = [];
       (response.responses || []).forEach((result, index) => {
         if (result.success) return;
-
         const token = tokens[index];
-        const code = result.error?.code || 'unknown';
-        const message = result.error?.message || 'Unknown push error';
-
-        console.warn(`[PUSH-FAIL] user=${userId} token=${token} code=${code} message=${message}`);
-
-        if (
-          code === 'messaging/invalid-registration-token' ||
-          code === 'messaging/registration-token-not-registered'
-        ) {
+        const code = result.error?.code;
+        if (code === 'messaging/invalid-registration-token' || code === 'messaging/registration-token-not-registered') {
           invalidTokens.push(token);
         }
       });
@@ -134,18 +140,9 @@ class NotificationService {
         entity.fcmTokens = (entity.fcmTokens || []).filter((token) => !invalidTokens.includes(token));
         entity.fcmTokenMobile = (entity.fcmTokenMobile || []).filter((token) => !invalidTokens.includes(token));
         await entity.save();
-        console.log(`[PUSH-CLEANUP] Removed ${invalidTokens.length} invalid token(s) for entity ${userId}`);
       }
 
-      await NotificationLog.create({
-        notificationId,
-        userId,
-        tokens
-      });
-
-      console.log(
-        `[PUSH-SUCCESS] Delivered to ${response.successCount} devices for user ${userId} (failed: ${response.failureCount || 0})`
-      );
+      console.log(`[PUSH-SENT] Delivered to ${response.successCount} devices for user ${userId}`);
     } catch (error) {
       console.error('[PUSH-ERROR]', error.message);
     }
