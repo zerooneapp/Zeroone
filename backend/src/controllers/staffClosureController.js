@@ -99,20 +99,12 @@ const createStaffClosure = async (req, res) => {
       previousIsActive: staff.isActive
     });
 
-    // 🔒 Clear SlotLocks
+    // 🔒 Clear SlotLocks for the duration of the closure
     await SlotLock.deleteMany({
       staffId: staff._id,
       startTime: { $lt: end.toDate() },
       endTime: { $gt: start.toDate() }
     });
-
-    // 🛑 Deactivate if live now
-    const now = new Date();
-    const isLiveNow = start.toDate() <= now && end.toDate() > now;
-    if (isLiveNow) {
-      staff.isActive = false;
-      await staff.save();
-    }
 
     // ⚡ Auto-Cancel Impacted Bookings
     let cancelledCount = 0;
@@ -176,22 +168,7 @@ const endStaffClosure = async (req, res) => {
     }
     await closure.save();
 
-    // Restore staff isActive if needed
-    const staff = await Staff.findById(closure.staffId);
-    if (staff && closure.previousIsActive === true) {
-      // Check if there are other live closures for this staff
-      const hasOtherLive = await StaffClosure.exists({
-        staffId: staff._id,
-        status: 'active',
-        startTime: { $lte: now },
-        endTime: { $gt: now }
-      });
-      
-      if (!hasOtherLive) {
-        staff.isActive = true;
-        await staff.save();
-      }
-    }
+    // Note: Global isActive restoration is no longer needed as deactivation is handled at the slot level
 
     res.status(200).json({
       message: 'Staff closure ended successfully',

@@ -23,6 +23,8 @@ import PaymentMethods from './pages/PaymentMethods';
 import SecuritySettings from './pages/SecuritySettings';
 import Preferences from './pages/Preferences';
 import Notifications from './pages/Notifications';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import VendorPrivacyPolicy from './pages/VendorPrivacyPolicy';
 
 // Auth
 import Login from './pages/Login';
@@ -44,6 +46,7 @@ import ServiceForm from './pages/ServiceForm';
 import StaffForm from './pages/StaffForm';
 import OfferForm from './pages/OfferForm';
 import PendingVerification from './pages/PendingVerification';
+import LoyalCustomers from './pages/LoyalCustomers';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -56,12 +59,10 @@ import CategoryManagement from './pages/admin/categories/CategoryManagement';
 import SubscriptionPlans from './pages/admin/plans/SubscriptionPlans';
 import PlatformSettings from './pages/admin/settings/PlatformSettings';
 import BroadcastSystem from './pages/admin/notifications/BroadcastSystem';
+import AdminNotificationList from './pages/admin/notifications/AdminNotificationList';
 import TransactionManagement from './pages/admin/transactions/TransactionManagement';
 import ReviewManagement from './pages/admin/reviews/ReviewManagement';
 import AdminManagement from './pages/admin/admins/AdminManagement';
-import {
-  AdminNotifications
-} from './pages/AdminModulePlaceholders';
 
 // Components & Utils
 import ProtectedRoute from './components/ProtectedRoute';
@@ -168,6 +169,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/vendor-login" element={<VendorLogin />} />
           <Route path="/vendor-signup" element={<VendorSignup />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/vendor-privacy-policy" element={<VendorPrivacyPolicy />} />
         </Route>
         <Route path="/vendor-verification" element={<VendorVerification />} />
         <Route path="/vendor-pending" element={<PendingVerification />} />
@@ -227,6 +230,7 @@ function App() {
             <Route path="edit/:id" element={<OfferForm />} />
           </Route>
           <Route path="wallet" element={<VendorWallet />} />
+          <Route path="customers" element={<LoyalCustomers />} />
         </Route>
 
         {/* STAFF PANEL */}
@@ -260,7 +264,10 @@ function App() {
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="plans" element={<SubscriptionPlans />} />
           <Route path="settings" element={<PlatformSettings />} />
-          <Route path="notifications" element={<BroadcastSystem />} />
+          <Route path="notifications">
+            <Route index element={<AdminNotificationList />} />
+            <Route path="broadcast" element={<BroadcastSystem />} />
+          </Route>
           <Route path="transactions" element={<TransactionManagement />} />
           <Route path="reviews" element={<ReviewManagement />} />
           <Route path="access" element={<AdminManagement />} />

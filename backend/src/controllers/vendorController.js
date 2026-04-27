@@ -24,6 +24,7 @@ const buildPublicVendorResponse = (vendor, extra = {}) => ({
   location: vendor.location,
   address: vendor.address,
   shopImage: vendor.shopImage,
+  featuredImage: vendor.featuredImage || '',
   galleryImages: vendor.galleryImages || [],
   gallery: vendor.galleryImages || [],
   shopVideo: vendor.shopVideo || '',
@@ -82,7 +83,7 @@ const registerVendor = async (req, res) => {
     if (admins.length > 0) {
       NotificationService.sendNotification({
         userIds: admins.map(a => a._id), role: 'admin', type: 'NEW_VENDOR_REGISTRATION',
-        title: 'New Vendor Registration', message: `A new vendor "${shopName}" has registered and is pending approval.`,
+        title: 'New Partner Registration', message: `A new partner "${shopName}" has registered and is pending approval.`,
         data: { vendorId: vendor._id }, referenceId: `NEW_VENDOR_${vendor._id}`
       });
     }
@@ -277,7 +278,7 @@ const getNearbyVendors = async (req, res) => {
         price: mainPrice,
         discountedPrice: discountedPrice < mainPrice ? Math.round(discountedPrice) : null,
         offerLabel,
-        serviceImage: primaryService?.image || primaryService?.images?.[0] || '',
+        serviceImage: v.featuredImage || primaryService?.image || primaryService?.images?.[0] || v.shopImage || '',
         serviceType: primaryService?.type || 'shop',
         serviceCount: allServices.length,
         services: allServices,
@@ -351,7 +352,7 @@ const createOffer = async (req, res) => {
 const getOffers = async (req, res) => {
   try {
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
-    const offers = await Offer.find({ vendorId: vendor._id });
+    const offers = await Offer.find({ vendorId: vendor._id }).lean();
     res.status(200).json(offers);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -450,7 +451,7 @@ const getVendorDashboard = async (req, res) => {
     const allBookings = await Booking.find({
       vendorId: vendor._id,
       status: { $in: ['confirmed', 'completed'] }
-    });
+    }).lean();
     const totalEarnings = allBookings.reduce((sum, b) => sum + b.totalPrice, 0);
 
     // 👨‍🔧 Active Staff
@@ -599,7 +600,7 @@ const getVendorDetail = async (req, res) => {
 
 const updateShopProfile = async (req, res) => {
   try {
-    const { workingHours, shopName, address, location } = req.body;
+    const { workingHours, shopName, address, location, featuredImage } = req.body;
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
@@ -613,6 +614,7 @@ const updateShopProfile = async (req, res) => {
     if (shopName) vendor.shopName = shopName;
     if (address) vendor.address = address;
     if (location) vendor.location = location;
+    if (featuredImage !== undefined) vendor.featuredImage = featuredImage;
 
     await vendor.save();
     res.status(200).json(vendor);
@@ -638,27 +640,9 @@ const createWalkIn = async (req, res) => {
       startTime: startTime || new Date(),
       endTime: moment(startTime || new Date()).add(totalDuration || 30, 'minutes').toDate(),
       status: 'completed',
+      completedAt: new Date(),
       type: 'shop'
     });
-
-    // 💰 WALLET INTEGRATION: Credit vendor for direct walk-in
-    if (totalPrice > 0) {
-      vendor.walletBalance = (vendor.walletBalance || 0) + totalPrice;
-      await vendor.save();
-
-      const WalletTransaction = require('../models/WalletTransaction');
-      await WalletTransaction.create({
-        vendorId: vendor._id,
-        initiatedByUserId: req.user._id,
-        amount: totalPrice,
-        type: 'credit',
-        category: 'booking_revenue',
-        reason: 'Walk-in service completed',
-        status: 'completed',
-        referenceId: `${booking._id}_WALK_REV`,
-        description: `Direct revenue from Walk-in #${booking._id.toString().slice(-6).toUpperCase()}`
-      });
-    }
 
     // 👨‍🔧 STAFF NOTIFICATION: Alert the professional about their immediate Walk-in
     const staff = await Staff.findById(booking.staffId);
@@ -742,9 +726,56 @@ const createManualBooking = async (req, res) => {
   }
 };
 
+const getLoyalCustomers = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const loyalCustomers = await Booking.aggregate([
+      { $match: { vendorId: vendor._id, status: { $in: ['confirmed', 'completed'] } } },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $ifNull: ["$userId", false] },
+              "$userId",
+              "$walkInCustomerPhone"
+            ]
+          },
+          bookingCount: { $sum: 1 },
+          lastBooking: { $max: '$startTime' },
+          totalSpent: { $sum: '$totalPrice' },
+          name: { $first: { $ifNull: ["$walkInCustomerName", "Unknown"] } },
+          phone: { $first: { $ifNull: ["$walkInCustomerPhone", "Unknown"] } },
+          isWalkIn: { $first: { $cond: [{ $ifNull: ["$userId", false] }, false, true] } }
+        }
+      },
+      { $sort: { bookingCount: -1 } }
+    ]);
+
+    // Populate user info for registered users
+    const result = await Promise.all(loyalCustomers.map(async (item) => {
+      if (!item.isWalkIn && mongoose.Types.ObjectId.isValid(item._id)) {
+        const user = await User.findById(item._id).select('name phone image');
+        return {
+          ...item,
+          name: user?.name || item.name,
+          phone: user?.phone || item.phone,
+          image: user?.image || ''
+        };
+      }
+      return item;
+    }));
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerVendor, uploadDocs, getVendorProfile, getNearbyVendors, getVendorDetail,
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings, getVendorDashboard,
-  updateShopProfile, createWalkIn, createManualBooking
+  updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers
 };
 

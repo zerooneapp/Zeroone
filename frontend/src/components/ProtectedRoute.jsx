@@ -38,8 +38,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   // 🛡️ HARD BLOCK LOGIC FOR VENDORS (Strict Verification Lock)
   if (role === 'vendor' && location.pathname.startsWith('/vendor')) {
-    const user = useAuthStore.getState().user;
-    if (user?.status === 'pending' && location.pathname !== '/vendor-pending') {
+    if (location.pathname !== '/vendor-pending' && !(user?.status === 'approved' || user?.status === 'active')) {
       return <Navigate to="/vendor-pending" replace />;
     }
   }

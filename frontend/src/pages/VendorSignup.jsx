@@ -64,11 +64,15 @@ const VendorSignup = () => {
     if (step === 2 && (!panCardFile || !aadhaarFrontFile || !aadhaarBackFile)) {
       return toast.error('Please upload all identity documents');
     }
+    if (step === 3 && formData.serviceMode === 'shop' && !shopImage) {
+      return toast.error('Please upload shop facade image');
+    }
     setStep(step + 1);
   };
 
   const handleSubmit = async () => {
     if (!formData.address) return toast.error('Please enter shop address');
+    if (!vendorPhoto) return toast.error('Please upload vendor profile photo');
 
     setLoading(true);
     try {
@@ -137,7 +141,7 @@ const VendorSignup = () => {
         </button>
         <div>
           <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
-          <h1 className="text-2xl font-black tracking-tight leading-none">Vendor Application</h1>
+          <h1 className="text-2xl font-black tracking-tight leading-none">Partner Application</h1>
         </div>
       </div>
 
@@ -421,7 +425,7 @@ const VendorSignup = () => {
               <div className="space-y-3">
                 {formData.serviceMode === 'shop' && (
                 <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Façade Image (Optional)</p>
+                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Façade Image</p>
                   <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {shopImage ? (
@@ -433,7 +437,7 @@ const VendorSignup = () => {
                           <Camera className="text-gray-300" size={18} />
                         </div>
                       )}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopImage ? 'SHOP IMAGE READY' : 'ADD FRONT PHOTO (OPTIONAL)'}</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopImage ? 'SHOP IMAGE READY' : 'ADD FRONT PHOTO'}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300" />
                     <input type="file" className="hidden" onChange={(e) => setShopImage(e.target.files[0])} accept="image/*" />
@@ -442,7 +446,7 @@ const VendorSignup = () => {
                 )}
 
                 <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Vendor Profile Photo (Optional)</p>
+                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Partner Profile Photo</p>
                   <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {vendorPhoto ? (
@@ -454,7 +458,7 @@ const VendorSignup = () => {
                           <Upload className="text-gray-300" size={18} />
                         </div>
                       )}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{vendorPhoto ? 'PHOTO READY' : 'ADD OWNER PHOTO (OPTIONAL)'}</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{vendorPhoto ? 'PHOTO READY' : 'ADD OWNER PHOTO'}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300" />
                     <input type="file" className="hidden" onChange={(e) => setVendorPhoto(e.target.files[0])} accept="image/*" />
@@ -477,6 +481,11 @@ const VendorSignup = () => {
           {step < 3 ? 'Continue' : 'Submit Application'}
           <ArrowRight size={18} strokeWidth={3} />
         </Button>
+        <div className="mt-4 text-center">
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+            By submitting, you agree to our <button onClick={() => navigate('/vendor-privacy-policy')} className="text-primary border-b border-primary/30">Partner Policy</button>
+          </p>
+        </div>
       </div>
     </div>
   );

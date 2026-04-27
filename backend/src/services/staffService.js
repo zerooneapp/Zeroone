@@ -60,7 +60,7 @@ const ensureOwnerStaff = async (vendorId) => {
   canonicalOwner.userId = ownerUser._id;
   canonicalOwner.designation = canonicalOwner.designation || 'Owner';
   canonicalOwner.isOwner = true;
-  canonicalOwner.isActive = true;
+  // REMOVED: canonicalOwner.isActive = true; // Let the owner decide their own activity status manually
   if ((!canonicalOwner.services || canonicalOwner.services.length === 0) && currentServices.length > 0) {
     canonicalOwner.services = currentServices;
   }
@@ -138,6 +138,25 @@ const getVendorStaff = async (vendorId, includeInactive = false) => {
 };
 
 const updateStaff = async (vendorId, staffId, updateData) => {
+  // 🛡️ If staff is being re-enabled, end any active closures
+  if (updateData.isActive === true) {
+    const StaffClosure = require('../models/StaffClosure');
+    const now = new Date();
+    const activeClosures = await StaffClosure.find({
+      staffId,
+      vendorId,
+      status: 'active',
+      endTime: { $gt: now }
+    });
+
+    for (const closure of activeClosures) {
+      closure.status = now < closure.startTime ? 'cancelled' : 'completed';
+      closure.endedAt = now;
+      if (now < closure.endTime) closure.endTime = now;
+      await closure.save();
+    }
+  }
+
   const staff = await Staff.findOneAndUpdate(
     { _id: staffId, vendorId },
     updateData,

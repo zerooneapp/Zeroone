@@ -42,12 +42,21 @@ const resolveActorStaffId = async (req) => {
 const formatBookingResponse = (booking, role) => {
   const b = booking.toObject();
   const now = moment().tz('Asia/Kolkata');
+  const startTime = moment(b.startTime).tz('Asia/Kolkata');
   const endTime = moment(b.endTime).tz('Asia/Kolkata');
+  const isPastStart = now.isSameOrAfter(startTime);
   const isPastEnd = now.isAfter(endTime);
 
-  // Instant visibility & Any-time actions per client request
-  b.canCancel = b.status === 'confirmed';
-  b.canReschedule = b.status === 'confirmed';
+  // Consumers cannot cancel/reschedule after start time
+  if (role === 'customer') {
+    b.canCancel = b.status === 'confirmed' && !isPastStart;
+    b.canReschedule = b.status === 'confirmed' && !isPastStart;
+  } else {
+    // Partners/Staff can cancel at any time if confirmed (for no-shows)
+    b.canCancel = b.status === 'confirmed';
+    b.canReschedule = b.status === 'confirmed' && !isPastStart;
+  }
+
   b.canContact = b.status === 'confirmed' && !isPastEnd;
 
   if ((role === 'staff' || role === 'vendor') && b.type !== 'home') {

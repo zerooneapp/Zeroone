@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import { cn } from '../../../utils/cn';
+import dayjs from 'dayjs';
 
 const VendorManagement = () => {
   const [vendors, setVendors] = useState([]);
@@ -18,9 +19,9 @@ const VendorManagement = () => {
   const [vendorInsights, setVendorInsights] = useState(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insightsRange, setInsightsRange] = useState(() => {
-    const today = new Date();
-    const end = today.toISOString().split('T')[0];
-    const start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+    const today = dayjs();
+    const end = today.format('YYYY-MM-DD');
+    const start = today.startOf('month').format('YYYY-MM-DD');
     return { from: start, to: end };
   });
   const [filters, setFilters] = useState({
@@ -278,7 +279,10 @@ const VendorManagement = () => {
                     </div>
                   </td>
                   <td className="px-3 py-3.5">
-                    <span className={cn('text-[15px] font-black tracking-tighter', vendor.walletBalance < minimumWalletThreshold ? 'text-red-500' : 'text-emerald-500')}>
+                    <span className={cn(
+                      'text-[15px] font-black tracking-tighter', 
+                      (vendor.subscription?.type !== 'trial' && vendor.walletBalance < minimumWalletThreshold) ? 'text-red-500' : 'text-emerald-500'
+                    )}>
                       Rs {vendor.walletBalance?.toFixed(2) || '0.00'}
                     </span>
                   </td>
@@ -368,7 +372,7 @@ const VendorManagement = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 px-7 space-y-6 no-scrollbar pb-32">
-                {(selectedVendor.walletBalance < minimumWalletThreshold || !selectedVendor.subscription?.isActive) && (
+                {(!selectedVendor.subscription?.isActive || (selectedVendor.subscription?.type !== 'trial' && selectedVendor.walletBalance < minimumWalletThreshold)) && (
                   <div className="p-3.5 px-5 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl flex items-center gap-4 text-red-500">
                     <AlertCircle size={22} strokeWidth={3} className="shrink-0" />
                     <p className="text-[11px] font-black capitalize tracking-widest leading-normal">
@@ -400,14 +404,17 @@ const VendorManagement = () => {
                   <div className="space-y-6">
                     <Section title="Financials" icon={CreditCard}>
                       <InfoItem label="Active Plan" value={selectedVendor.subscription?.type?.toUpperCase() || 'NONE'} />
-                      <InfoItem label="Vault Balance" value={`Rs ${selectedVendor.walletBalance?.toFixed(2) || '0.00'}`} highlight={selectedVendor.walletBalance < minimumWalletThreshold} />
+                      <InfoItem 
+                        label="Vault Balance" 
+                        value={`Rs ${selectedVendor.walletBalance?.toFixed(2) || '0.00'}`} 
+                        highlight={selectedVendor.subscription?.type !== 'trial' && selectedVendor.walletBalance < minimumWalletThreshold} 
+                      />
                       <InfoItem
                         label="Free Trial Ends"
                         value={selectedVendor.freeTrial?.isActive && selectedVendor.freeTrial?.expiryDate
-                          ? new Date(selectedVendor.freeTrial.expiryDate).toLocaleDateString()
+                          ? dayjs(selectedVendor.freeTrial.expiryDate).format('YYYY-MM-DD')
                           : 'Not Active'}
                       />
-                      <InfoItem label="Next Sync" value={selectedVendor.subscription?.nextDeductionDate ? new Date(selectedVendor.subscription.nextDeductionDate).toLocaleDateString() : 'N/A'} />
                       <div className="mt-4">
                         <button
                           onClick={() => handleAction(selectedVendor._id, 'toggle-active')}
@@ -539,7 +546,7 @@ const VendorManagement = () => {
                                   {booking.services?.map((service) => service.name).join(', ') || 'Service Booking'}
                                 </p>
                                 <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 tracking-widest uppercase mt-1">
-                                  {new Date(booking.startTime).toLocaleDateString('en-IN')} • {booking.staffName}
+                                  {dayjs(booking.startTime).format('YYYY-MM-DD')} • {booking.staffName}
                                 </p>
                               </div>
                               <div className="text-right shrink-0">
@@ -568,7 +575,7 @@ const VendorManagement = () => {
                             <div className="min-w-0">
                               <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">{entry.description}</p>
                               <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 tracking-widest uppercase mt-1">
-                                {new Date(entry.timestamp).toLocaleDateString('en-IN')} • {new Date(entry.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                {dayjs(entry.timestamp).format('YYYY-MM-DD')} • {dayjs(entry.timestamp).format('HH:mm')}
                               </p>
                             </div>
                             <p className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 shrink-0">Rs {entry.amount || 0}</p>

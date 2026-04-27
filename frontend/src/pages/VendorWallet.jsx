@@ -118,7 +118,7 @@ const VendorWallet = () => {
     return [...scopedTransactions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   }, [filter, transactions]);
 
-  const isLowBalance = (wallet?.walletBalance || 0) < (wallet?.minimumWalletThreshold || 0);
+  const isLowBalance = wallet?.subscription?.currentPlan !== 'trial' && (wallet?.walletBalance || 0) < (wallet?.minimumWalletThreshold || 0);
   const monthlyPlan = wallet?.plans?.monthly;
   const dailyPlan = wallet?.plans?.daily;
   const canUseRazorpay = Boolean(wallet?.razorpay?.enabled && wallet?.razorpay?.keyId);
@@ -297,7 +297,9 @@ const VendorWallet = () => {
               </span>
             </div>
             <p className="text-[7px] font-bold text-white/30 uppercase leading-relaxed max-w-[220px]">
-              Maintain at least {moneyFormatter.format(wallet?.minimumWalletThreshold || 0)} to keep bookings active on daily mode.
+              {wallet?.subscription?.currentPlan === 'trial' 
+                ? `You are on free trial. Maintain ${moneyFormatter.format(wallet?.minimumWalletThreshold || 0)} balance after trial ends to stay live.`
+                : `Maintain at least ${moneyFormatter.format(wallet?.minimumWalletThreshold || 0)} to keep bookings active on daily mode.`}
             </p>
           </div>
           <Wallet size={80} className="absolute -right-4 -bottom-4 text-white/5 -rotate-12" />

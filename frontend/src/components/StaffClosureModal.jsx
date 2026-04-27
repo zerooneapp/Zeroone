@@ -7,7 +7,7 @@ import api from '../services/api';
 
 const getInitialWindow = () => {
   const now = dayjs();
-  const start = now.add(30, 'minute').second(0).millisecond(0);
+  const start = now.second(0).millisecond(0);
   const end = start.add(2, 'hour');
 
   return {

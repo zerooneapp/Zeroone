@@ -88,7 +88,9 @@ const buildSlotConflictError = async (message, vendorId, serviceIds, start) => {
 
 const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress) => {
   const { normalizeToGrid } = require('./slotService');
-  const start = normalizeToGrid(startTime);
+  const start = moment.tz(startTime, 'Asia/Kolkata');
+  // Re-normalize to grid just in case
+  start.minutes(start.minutes() < 30 ? 0 : 30).seconds(0).milliseconds(0);
 
   // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
   const vendor = await Vendor.findById(vendorId);
@@ -175,15 +177,17 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
   // 3. Staff Notification
   const staffTargetId = getStaffNotificationTarget(staff);
   if (staffTargetId) {
-      const staffIdStr = staffTargetId.toString();
-      notificationTargets.set(`${staffIdStr}_staff`, {
-        userIds: staffTargetId,
-        role: 'staff',
-        type: 'STAFF_ASSIGNED',
-        title: 'Booking Accepted',
-        message: `You have been assigned a new booking for ${booking.isWalkIn ? 'Walk-in' : 'Customer'}: ${booking.walkInCustomerName || 'Client'}. Services: ${booking.services.map(s => s.name).join(', ')} at ${start.format('LT')}.`,
-        data: { bookingId: booking._id },
-      });
+    const staffIdStr = staffTargetId.toString();
+    // Prioritize Staff specific message over generic Vendor/Customer message if it's the same user
+    notificationTargets.set(staffIdStr, {
+      userIds: staffTargetId,
+      role: 'staff',
+      type: 'STAFF_ASSIGNED',
+      title: 'Booking Accepted',
+      message: `You have been assigned a new booking for ${booking.isWalkIn ? 'Walk-in' : 'Customer'}: ${booking.walkInCustomerName || 'Client'}. Services: ${booking.services.map(s => s.name).join(', ')} at ${start.format('LT')}.`,
+      data: { bookingId: booking._id },
+      referenceId: `${booking._id}_STAFF_ASSIGN`
+    });
   }
 
   await sendRoleNotifications(Array.from(notificationTargets.values()));
@@ -248,7 +252,7 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
     }
   }
 
-  await sendRoleNotifications([
+  const notificationPayloads = [
     {
       userIds: booking.userId,
       role: 'customer',
@@ -266,8 +270,11 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
       message: `Staff ${booking.staffId?.name || 'Professional'} has completed the service for ${booking.userId?.name || 'Customer'}.`,
       data: { bookingId: booking._id },
       referenceId: `${booking._id}_COMPLETE_V`
-    },
-    getStaffNotificationTarget(booking.staffId) ? {
+    }
+  ];
+
+  if (getStaffNotificationTarget(booking.staffId)) {
+    notificationPayloads.push({
       userIds: getStaffNotificationTarget(booking.staffId),
       role: 'staff',
       type: 'BOOKING_COMPLETED',
@@ -275,8 +282,21 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
       message: `Great job! You have completed the service for ${booking.walkInCustomerName || booking.userId?.name || 'Customer'}.`,
       data: { bookingId: booking._id },
       referenceId: `${booking._id}_COMPLETE_S`
-    } : null
-  ]);
+    });
+  }
+
+  // Deduplicate by userId before sending
+  const finalNotifications = new Map();
+  notificationPayloads.forEach(notif => {
+    if (!notif) return;
+    const uid = notif.userIds.toString();
+    // Prioritize Staff > Vendor > Customer message for completion
+    if (!finalNotifications.has(uid) || notif.role === 'staff') {
+      finalNotifications.set(uid, notif);
+    }
+  });
+
+  await sendRoleNotifications(Array.from(finalNotifications.values()));
 
   // Notify Admins for Dashboard Sync (Silent)
   NotificationService.notifyAdmins({
@@ -298,6 +318,15 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
 
   if (booking.status !== 'confirmed') {
     throw new Error(`Only confirmed bookings can be cancelled (Current: ${booking.status})`);
+  }
+
+  // 🛡️ CUSTOMER TIME GUARD: Cannot cancel after start time
+  if (role === 'customer') {
+    const now = moment().tz('Asia/Kolkata');
+    const start = moment(booking.startTime).tz('Asia/Kolkata');
+    if (now.isSameOrAfter(start)) {
+      throw new Error('You cannot cancel a booking after the appointment time has started. Please contact the partner for assistance.');
+    }
   }
 
   if (role === 'vendor' && booking.vendorId?.ownerId?.toString() !== userId.toString()) {
@@ -332,11 +361,12 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
 
   const staff = await Staff.findById(booking.staffId?._id || booking.staffId);
   const reasonSuffix = trimmedReason ? ` Reason: ${trimmedReason}` : '';
+  const formattedTime = moment(booking.startTime).tz('Asia/Kolkata').format('LLL');
   const customerMessage =
     role === 'vendor'
-      ? `Your booking for ${moment(booking.startTime).format('LLL')} was cancelled by the vendor.${reasonSuffix}`
-      : `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
-  const internalMessage = `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
+      ? `Your booking for ${formattedTime} was cancelled by ${booking.vendorId.shopName}.${reasonSuffix}`
+      : `Booking for ${formattedTime} has been cancelled.${reasonSuffix}`;
+  const internalMessage = `Booking for ${formattedTime} has been cancelled.${reasonSuffix}`;
 
   const notificationTargets = new Map();
 
@@ -369,7 +399,8 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
   const staffTargetId = getStaffNotificationTarget(staff);
   if (staffTargetId) {
     const staffIdStr = staffTargetId.toString();
-    notificationTargets.set(`${staffIdStr}_staff`, {
+    // Prioritize staff cancellation info
+    notificationTargets.set(staffIdStr, {
       userIds: staffTargetId,
       role: 'staff',
       type: 'BOOKING_CANCELLED',
@@ -396,24 +427,32 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
 const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', closureId = null) => {
   const booking = await Booking.findById(bookingId).populate('vendorId');
   if (!booking) throw new Error('Booking not found');
-  if (booking.status !== 'confirmed') throw new Error('Only confirmed bookings can be cancelled');
+  if (!['confirmed', 'pending'].includes(booking.status)) throw new Error('Only active bookings can be cancelled');
   if (booking.vendorId.ownerId.toString() !== vendorUserId.toString()) throw new Error('Unauthorized');
 
-  const closureWindows = await getActiveClosureWindows(
+  // 🔍 Check if it's a Vendor Closure or a Staff Closure
+  let isValidClosure = false;
+  
+  const vClosures = await getActiveClosureWindows(
     booking.vendorId._id,
     booking.startTime,
     booking.endTime
   );
+  if (vClosures.length > 0) isValidClosure = true;
 
-  if (closureWindows.length === 0) {
-    throw new Error('This booking is not inside any active emergency closure');
+  if (!isValidClosure && closureId) {
+    const StaffClosure = require('../models/StaffClosure');
+    const sClosure = await StaffClosure.findById(closureId);
+    if (sClosure && 
+        sClosure.staffId.toString() === booking.staffId.toString() &&
+        booking.startTime < sClosure.endTime && 
+        booking.endTime > sClosure.startTime) {
+      isValidClosure = true;
+    }
   }
 
-  if (closureId) {
-    const matchingClosure = closureWindows.find((closure) => closure._id.toString() === closureId.toString());
-    if (!matchingClosure) {
-      throw new Error('This booking does not belong to the selected emergency closure');
-    }
+  if (!isValidClosure) {
+    throw new Error('This booking is not inside any active emergency closure (Shop or Staff)');
   }
 
   booking.status = 'cancelled';
@@ -423,11 +462,11 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
   await booking.save();
 
   const staff = await Staff.findById(booking.staffId);
-  const bookingTime = moment(booking.startTime).format('LLL');
+  const bookingTime = moment(booking.startTime).tz('Asia/Kolkata').format('LLL');
 
-  await sendRoleNotifications([
+  const notificationPayloads = [
     {
-      userIds: booking.userId,
+      userId: booking.userId,
       role: 'customer',
       type: 'BOOKING_CANCELLED',
       title: 'Booking Cancelled',
@@ -436,24 +475,40 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
       referenceId: `${booking._id}_EMERGENCY_CANCEL_CUSTOMER`
     },
     {
-      userIds: booking.vendorId.ownerId,
+      userId: booking.vendorId.ownerId,
       role: 'vendor',
       type: 'BOOKING_CANCELLED',
       title: 'Booking Cancelled',
       message: `Booking for ${bookingTime} was cancelled due to an emergency closure.`,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_EMERGENCY_CANCEL_VENDOR`
-    },
-    getStaffNotificationTarget(staff) ? {
-      userIds: getStaffNotificationTarget(staff),
+    }
+  ];
+
+  const staffTargetId = getStaffNotificationTarget(staff);
+  if (staffTargetId) {
+    notificationPayloads.push({
+      userId: staffTargetId,
       role: 'staff',
       type: 'BOOKING_CANCELLED',
       title: 'Booking Rejected',
       message: `Assigned booking for ${bookingTime} was cancelled due to an emergency closure.`,
       data: { bookingId: booking._id, reason: booking.cancelReason },
       referenceId: `${booking._id}_EMERGENCY_CANCEL_STAFF`
-    } : null
-  ]);
+    });
+  }
+
+  // 🛡️ Deduplicate by userId: Priority Staff > Vendor > Customer
+  const finalTargets = new Map();
+  notificationPayloads.forEach(p => {
+    if (!p.userId) return;
+    const uid = p.userId.toString();
+    if (!finalTargets.has(uid) || p.role === 'staff' || (p.role === 'vendor' && finalTargets.get(uid).role === 'customer')) {
+      finalTargets.set(uid, { ...p, userIds: p.userId }); // sendNotification expects userIds
+    }
+  });
+
+  await sendRoleNotifications(Array.from(finalTargets.values()));
 
   return booking;
 };
@@ -472,6 +527,13 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
 
   if (booking.status !== 'confirmed') {
     throw new Error(`Only confirmed bookings can be rescheduled (Current: ${booking.status})`);
+  }
+
+  // 🛡️ TIME GUARD: Cannot reschedule after start time
+  const now = moment().tz('Asia/Kolkata');
+  const originalStart = moment(booking.startTime).tz('Asia/Kolkata');
+  if (now.isSameOrAfter(originalStart)) {
+    throw new Error('This booking has already started and can no longer be rescheduled.');
   }
 
   // 🛡️ SECURITY GUARD: Block customer-initiated reschedule if vendor is not active

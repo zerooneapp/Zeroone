@@ -19,8 +19,8 @@ const StaffBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
@@ -62,7 +62,7 @@ const StaffBookings = () => {
     const isCorrectStatus = activeTab === 'upcoming'
       ? (b.status === 'confirmed' || b.status === 'assigned')
       : b.status === 'completed';
-    const bookingDate = new Date(b.startTime).toISOString().split('T')[0];
+    const bookingDate = dayjs(b.startTime).format('YYYY-MM-DD');
     const isWithinRange = bookingDate >= startDate && bookingDate <= endDate;
     return isCorrectStatus && isWithinRange;
   });

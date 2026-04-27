@@ -100,11 +100,26 @@ const createClosure = async (req, res) => {
       previousIsShopOpen: vendor.isShopOpen
     });
 
+    // 🔒 Clear SlotLocks in range
     await SlotLock.deleteMany({
       vendorId: vendor._id,
       startTime: { $lt: end.toDate() },
       endTime: { $gt: start.toDate() }
     });
+
+    // ⚡ Auto-Cancel Impacted Bookings for the whole shop
+    const { emergencyCancelBooking } = require('../services/bookingService');
+    const impacted = await getImpactedBookings(vendor._id, start, end);
+    let cancelledCount = 0;
+
+    for (const booking of impacted) {
+      try {
+        await emergencyCancelBooking(req.user._id, booking._id, reason || 'Shop temporarily closed (Emergency)', closure._id);
+        cancelledCount++;
+      } catch (err) {
+        console.error(`[VendorClosure] Failed to auto-cancel booking ${booking._id}:`, err.message);
+      }
+    }
 
     const now = new Date();
     const isLiveNow = start.toDate() <= now && end.toDate() > now;
@@ -113,7 +128,8 @@ const createClosure = async (req, res) => {
       await vendor.save();
     }
 
-    res.status(201).json(await mapClosureResponse(closure, vendor));
+    const response = await mapClosureResponse(closure, vendor);
+    res.status(201).json({ ...response, cancelledCount });
   } catch (error) {
     const status = error.message === 'Vendor not found' ? 404 : 400;
     res.status(status).json({ message: error.message });

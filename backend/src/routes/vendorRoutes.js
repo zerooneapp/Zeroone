@@ -2,7 +2,7 @@ const express = require('express');
 const {
   registerVendor, uploadDocs, getVendorProfile, getNearbyVendors,
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings,
-  getVendorDashboard, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking
+  getVendorDashboard, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers
 } = require('../controllers/vendorController');
 const {
   previewClosure,
@@ -65,6 +65,7 @@ router.patch('/offers/:id', protect, isApprovedVendor, updateOffer);
 router.get('/bookings', protect, isApprovedVendor, getVendorBookings);
 router.patch('/bookings/:id/emergency-cancel', protect, isApprovedVendor, vendorEmergencyCancel);
 router.post('/walk-in', protect, isApprovedVendor, createWalkIn);
+router.get('/loyal-customers', protect, isApprovedVendor, getLoyalCustomers);
 router.post('/manual-booking', protect, isApprovedVendor, createManualBooking);
 
 // Multipart upload for docs

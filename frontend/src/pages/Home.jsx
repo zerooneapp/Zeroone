@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAuthStore } from '../store/authStore';
+import toast from 'react-hot-toast';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -115,6 +116,41 @@ const Home = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const [isListening, setIsListening] = useState(false);
+  const startVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Voice search is not supported in this browser');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.success('Listening...', { icon: '🎙️', duration: 2000 });
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSearch(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+      toast.error('Voice recognition failed');
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
   return (
     <div className="pb-24 animate-in fade-in duration-700 bg-transparent min-h-screen">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
@@ -134,9 +170,12 @@ const Home = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#1C2C4E]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#1C2C4E] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#1C2C4E]/30 transition-all duration-500 outline-none placeholder:text-[#0B1222]/40 dark:placeholder:text-gray-400 placeholder:font-semibold"
             />
-            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400/60 group-focus-within:text-[#1C2C4E] dark:group-focus-within:text-blue-400 z-10 transition-all duration-300">
+            <button 
+              onClick={startVoiceSearch}
+              className={`absolute right-5 top-1/2 -translate-y-1/2 z-10 transition-all duration-300 ${isListening ? 'text-primary animate-pulse scale-125' : 'text-gray-400/60 hover:text-[#1C2C4E]'}`}
+            >
               <Mic size={18} strokeWidth={2.5} />
-            </div>
+            </button>
           </div>
         </div>
       </div>

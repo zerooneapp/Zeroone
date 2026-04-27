@@ -16,5 +16,6 @@ router.get('/services', listServices);
 router.get('/staff', listStaff);
 router.get('/slots', getAvailableSlots);
 router.get('/pricing/preview', previewPublicPricing);
+router.get('/settings/shared', require('../controllers/adminController').getSharedSettings);
 
 module.exports = router;

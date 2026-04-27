@@ -3,8 +3,8 @@ const Booking = require('../models/Booking');
 const VendorClosure = require('../models/VendorClosure');
 
 const normalizeClosureWindow = (startTime, endTime) => {
-  const start = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
-  const end = moment(endTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
+  const start = moment.tz(startTime, 'Asia/Kolkata').seconds(0).milliseconds(0);
+  const end = moment.tz(endTime, 'Asia/Kolkata').seconds(0).milliseconds(0);
 
   if (!start.isValid() || !end.isValid()) {
     throw new Error('Invalid closure time window');

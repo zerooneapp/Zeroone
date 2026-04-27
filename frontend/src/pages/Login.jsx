@@ -35,8 +35,13 @@ const CustomerAuth = () => {
   }, [step, timer]);
 
   const handlePhoneChange = (e) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
-    setPhone(val);
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.startsWith('91') && val.length > 10) {
+      val = val.slice(-10);
+    } else if (val.startsWith('0') && val.length > 10) {
+      val = val.slice(-10);
+    }
+    setPhone(val.slice(0, 10));
   };
 
   const handleOTPChange = (e) => {
@@ -133,6 +138,7 @@ const CustomerAuth = () => {
                       onChange={handlePhoneChange}
                       placeholder="Phone Number"
                       autoFocus
+                      maxLength={10}
                       className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#1C2C4E] placeholder:text-gray-300"
                     />
                   </div>
@@ -229,9 +235,17 @@ const CustomerAuth = () => {
       </div>
 
       {/* Footer Branding */}
-      <div className="pb-8 flex items-center justify-center gap-2 relative z-10">
-        <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] uppercase tracking-wider leading-none">MADE IN INDIA</span>
-        <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
+      <div className="pb-8 flex flex-col items-center justify-center gap-4 relative z-10">
+        <button 
+          onClick={() => navigate('/privacy-policy')}
+          className="text-[9px] font-black text-[#1C2C4E]/40 hover:text-[#1C2C4E] uppercase tracking-[0.2em] transition-colors"
+        >
+          Privacy & Policy
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] uppercase tracking-wider leading-none">MADE IN INDIA</span>
+          <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
+        </div>
       </div>
     </div>
   );

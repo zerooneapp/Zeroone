@@ -117,14 +117,22 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
                   required
                 />
               </div>
-              <div className="relative group">
-                <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+              <div className="relative flex items-center bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-3.5 focus-within:ring-2 focus-within:ring-primary/10 transition-all shadow-sm">
+                <Phone size={16} className="text-slate-400 mr-2" />
+                <span className="text-sm font-bold text-slate-400 border-r border-slate-200 dark:border-gray-800 pr-2 mr-2">+91</span>
                 <input
                   type="tel"
                   placeholder="Phone Number (Optional)"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/10 dark:text-white transition-all shadow-sm focus:shadow-none"
+                  className="flex-1 py-3 bg-transparent border-none text-sm font-bold outline-none dark:text-white"
                   value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={e => {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if ((val.startsWith('91') || val.startsWith('0')) && val.length > 10) {
+                      val = val.slice(-10);
+                    }
+                    setFormData({ ...formData, phone: val.slice(0, 10) });
+                  }}
+                  maxLength={10}
                 />
               </div>
             </div>

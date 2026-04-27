@@ -51,11 +51,17 @@ const StaffCard = ({ staff, onToggle, onEdit }) => {
             <Edit3 size={16} />
          </button>
           <button 
-            onClick={() => onToggle(staff._id, !staff.isActive)}
-            className={`w-11 h-6 rounded-full relative transition-colors duration-300 flex-shrink-0 ${staff.isActive ? 'bg-[#1C2C4E]' : 'bg-slate-200 dark:bg-gray-800'}`}
+            onClick={() => onToggle(staff._id, !staff.isActive || staff.activeClosure)}
+            className={`w-11 h-6 rounded-full relative transition-colors duration-300 flex-shrink-0 ${
+              (staff.isActive && !staff.activeClosure) ? 'bg-[#1C2C4E]' : 
+              staff.activeClosure ? 'bg-amber-500' : 'bg-slate-200 dark:bg-gray-800'
+            }`}
           >
-             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${staff.isActive ? 'left-6' : 'left-1'}`} />
+             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${(staff.isActive && !staff.activeClosure) ? 'left-6' : 'left-1'}`} />
           </button>
+          {staff.activeClosure && (
+            <span className="text-[7px] font-black text-amber-600 uppercase text-center tracking-tighter">On Absence</span>
+          )}
       </div>
     </motion.div>
   );

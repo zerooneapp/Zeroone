@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Settings, ShieldAlert, Wallet, BellRing,
   Save, RefreshCw, ToggleLeft, ToggleRight,
-  Info, ShieldCheck, Zap, AlertCircle, MapPin
+  Info, ShieldCheck, Zap, AlertCircle, MapPin, MessageCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../services/api';
@@ -18,7 +18,8 @@ const PlatformSettings = () => {
       bookingAlerts: true,
       walletAlerts: true,
       reminderAlerts: true
-    }
+    },
+    supportWhatsApp: ""
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,7 +56,7 @@ const PlatformSettings = () => {
         setSaving(false);
         setPendingUpdate(null);
       }
-    }, 500);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [pendingUpdate]);
 
@@ -165,6 +166,24 @@ const PlatformSettings = () => {
           </SettingsCard>
         </div>
 
+        {/* 💬 SUPPORT INFRASTRUCTURE */}
+        <div className="space-y-5 lg:col-span-2">
+          <SettingsCard title="Support Infrastructure" icon={MessageCircle}>
+            <div className="max-w-md">
+              <SettingInput
+                label="Support WhatsApp Number"
+                sub="Primary support node for partner assistance"
+                icon={MessageCircle}
+                value={settings.supportWhatsApp}
+                onChange={(val) => handleUpdate({ supportWhatsApp: val })}
+                unit="WHATSAPP"
+                isDisabled={saving}
+                type="text"
+              />
+            </div>
+          </SettingsCard>
+        </div>
+
       </div>
 
       {/* 📊 FOOTER NOTE */}
@@ -193,7 +212,7 @@ const SettingsCard = ({ title, icon: Icon, children }) => (
   </div>
 );
 
-const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisabled }) => (
+const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisabled, type }) => (
   <div className="space-y-3 group">
     <div className="flex justify-between items-start px-1">
       <div className="space-y-1.5">
@@ -206,16 +225,20 @@ const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisable
     </div>
     <div className="relative">
       <input
-        type="number"
-        min="0"
+        type={type || "number"}
+        min={type === "text" ? undefined : "0"}
         className="w-full pl-5 pr-12 h-12 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[18px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all tracking-tighter shadow-inner"
         value={value}
         onChange={(e) => {
+          if (type === "text") {
+            onChange(e.target.value);
+            return;
+          }
           const val = Number(e.target.value);
           if (val >= 0 || e.target.value === '') onChange(e.target.value);
         }}
         onKeyDown={(e) => {
-          if (e.key === '-' || e.key === 'e') e.preventDefault();
+          if (type !== "text" && (e.key === '-' || e.key === 'e')) e.preventDefault();
         }}
         disabled={isDisabled}
       />

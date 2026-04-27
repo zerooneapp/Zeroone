@@ -120,14 +120,23 @@ const register = async (req, res) => {
     if (user) {
       if (user.name && !req.body.forceUpdate && user.role !== 'vendor') return res.status(400).json({ message: 'User already exists' });
 
-      user.name = name;
-      if (effectivePassword) user.password = effectivePassword;
+      // Update all provided fields
+      if (name) user.name = name;
       if (email) user.email = email;
       if (gender) user.gender = gender;
       if (dob) user.dob = dob;
+      if (effectivePassword) user.password = effectivePassword;
       if (referralCode) user.referralCode = referralCode;
       if (image) user.image = image;
       user.role = requestedRole;
+      
+      // Normalize phone if updated
+      let normPhone = phone.replace(/\D/g, '');
+      if ((normPhone.startsWith('91') || normPhone.startsWith('0')) && normPhone.length > 10) {
+        normPhone = normPhone.slice(-10);
+      }
+      user.phone = normPhone.slice(0, 10);
+      
       await user.save();
     } else {
       user = await User.create({
@@ -143,12 +152,21 @@ const register = async (req, res) => {
       });
     }
 
+    let status = undefined;
+    if (requestedRole === 'vendor') {
+      const Vendor = require('../models/Vendor');
+      const vendor = await Vendor.findOne({ ownerId: user._id });
+      if (vendor) status = vendor.status;
+      else status = 'pending'; // Default for new vendors
+    }
+
     res.status(201).json({
       _id: user._id,
       name: user.name,
       phone: user.phone,
-      image: user.image, // 📸 Return image
+      image: user.image,
       role: user.role,
+      status,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -192,8 +210,15 @@ const me = async (req, res) => {
 // @access  Public
 const sendOTP = async (req, res) => {
   try {
-    const { phone, portal } = req.body;
+    let { phone, portal } = req.body;
     if (!phone) return res.status(400).json({ message: 'Phone number is required' });
+
+    // Normalize phone
+    phone = phone.replace(/\D/g, '');
+    if ((phone.startsWith('91') || phone.startsWith('0')) && phone.length > 10) {
+      phone = phone.slice(-10);
+    }
+    phone = phone.slice(0, 10);
 
     // Check User or Staff
     let user = await User.findOne({ phone });
@@ -210,9 +235,10 @@ const sendOTP = async (req, res) => {
       }
     }
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    // 🛡️ TESTING BYPASS: Fix OTP to 123456 for 9999999999
+    const isTestNumber = phone === '9999999999';
+    const otp = isTestNumber ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins for test buffer
 
     if (isAdminRole(user?.role)) {
       return res.status(403).json({ message: 'Admins must use the secure admin login' });
@@ -227,19 +253,19 @@ const sendOTP = async (req, res) => {
       staff.otpExpires = otpExpires;
       await staff.save();
     } else {
-      // For NEW USERS: We can't save to User model yet without other required fields?
-      // Actually, User model only requires phone. So we can create a "pending" user.
       await User.create({ phone, otp, otpExpires, role: 'customer' });
     }
 
-    try {
-      await sendOtpSms(phone, otp);
-    } catch (smsError) {
-      console.warn(`[SMS-OTP-WARNING] Real SMS failed:`, smsError.message);
-      // Only throw if we are strictly NOT exposing OTPs (i.e. strict production mode)
-      if (!shouldExposeOtpInResponse) {
-        throw smsError;
+    // Skip real SMS for test number
+    if (!isTestNumber) {
+      try {
+        await sendOtpSms(phone, otp);
+      } catch (smsError) {
+        console.warn(`[SMS-OTP-WARNING] Real SMS failed:`, smsError.message);
+        if (!shouldExposeOtpInResponse) throw smsError;
       }
+    } else {
+      console.log(`[AUTH] 🚀 BYPASS: Test OTP for ${phone} set to ${otp}`);
     }
 
     if (shouldLogOtpToConsole) {
@@ -264,8 +290,15 @@ const sendOTP = async (req, res) => {
 // @access  Public
 const verifyOTP = async (req, res) => {
   try {
-    const { phone, otp } = req.body;
+    let { phone, otp } = req.body;
     if (!phone || !otp) return res.status(400).json({ message: 'Phone and OTP are required' });
+
+    // Normalize phone
+    phone = phone.replace(/\D/g, '');
+    if ((phone.startsWith('91') || phone.startsWith('0')) && phone.length > 10) {
+      phone = phone.slice(-10);
+    }
+    phone = phone.slice(0, 10);
 
     // Find User or Staff
     let user = await User.findOne({ phone });
@@ -291,12 +324,20 @@ const verifyOTP = async (req, res) => {
     // Determine if registration is complete (User should have a name)
     const needsRegistration = !finalAccount.name && !staff;
 
+    let status = undefined;
+    if (finalAccount.role === 'vendor') {
+      const Vendor = require('../models/Vendor');
+      const vendor = await Vendor.findOne({ ownerId: finalAccount._id });
+      if (vendor) status = vendor.status;
+    }
+
     res.status(200).json({
       _id: finalAccount._id,
       name: finalAccount.name,
       phone: finalAccount.phone,
-      image: finalAccount.image, // 📸 Return image
+      image: finalAccount.image,
       role: staff ? 'staff' : finalAccount.role,
+      status,
       token: generateToken(finalAccount._id),
       needsRegistration,
       isFirstLogin: staff ? finalAccount.isFirstLogin : undefined
