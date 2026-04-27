@@ -235,9 +235,10 @@ const sendOTP = async (req, res) => {
       }
     }
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    // 🛡️ TESTING BYPASS: Fix OTP to 123456 for 9999999999
+    const isTestNumber = phone === '9999999999';
+    const otp = isTestNumber ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins for test buffer
 
     if (isAdminRole(user?.role)) {
       return res.status(403).json({ message: 'Admins must use the secure admin login' });
@@ -252,19 +253,19 @@ const sendOTP = async (req, res) => {
       staff.otpExpires = otpExpires;
       await staff.save();
     } else {
-      // For NEW USERS: We can't save to User model yet without other required fields?
-      // Actually, User model only requires phone. So we can create a "pending" user.
       await User.create({ phone, otp, otpExpires, role: 'customer' });
     }
 
-    try {
-      await sendOtpSms(phone, otp);
-    } catch (smsError) {
-      console.warn(`[SMS-OTP-WARNING] Real SMS failed:`, smsError.message);
-      // Only throw if we are strictly NOT exposing OTPs (i.e. strict production mode)
-      if (!shouldExposeOtpInResponse) {
-        throw smsError;
+    // Skip real SMS for test number
+    if (!isTestNumber) {
+      try {
+        await sendOtpSms(phone, otp);
+      } catch (smsError) {
+        console.warn(`[SMS-OTP-WARNING] Real SMS failed:`, smsError.message);
+        if (!shouldExposeOtpInResponse) throw smsError;
       }
+    } else {
+      console.log(`[AUTH] 🚀 BYPASS: Test OTP for ${phone} set to ${otp}`);
     }
 
     if (shouldLogOtpToConsole) {

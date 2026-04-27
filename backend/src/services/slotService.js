@@ -230,7 +230,7 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
   let currentStart = shopOpen.clone();
 
   if (targetDate.isSame(now, 'day') && now.isAfter(shopOpen)) {
-    currentStart = normalizeToGrid(now.clone().add(15, 'minutes'));
+    currentStart = normalizeToGrid(now.clone().add(0, 'minutes'));
   }
 
   while (currentStart.clone().add(totalDuration, 'minutes').isSameOrBefore(shopClose)) {

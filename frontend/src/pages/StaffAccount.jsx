@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   User, ShieldCheck, Calendar, Phone,
   LogOut, Briefcase, Award,
-  CheckCircle, TrendingUp, IndianRupee
+  CheckCircle, TrendingUp, IndianRupee, ArrowRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
