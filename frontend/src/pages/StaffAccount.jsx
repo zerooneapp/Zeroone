@@ -139,6 +139,22 @@ const StaffAccount = () => {
             <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 capitalize tracking-tight">{stats.completed}+ Done</p>
           </div>
         </div>
+
+        <button
+          onClick={() => navigate('/vendor-privacy-policy')}
+          className="mt-6 w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-gray-900/50 rounded-2xl border border-white dark:border-gray-800 active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+              <ShieldCheck size={18} className="text-indigo-500" />
+            </div>
+            <div className="text-left">
+              <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Privacy & Conduct</h4>
+              <p className="text-[10px] font-bold text-slate-400">View Staff Guidelines</p>
+            </div>
+          </div>
+          <ArrowRight size={16} className="text-slate-300" />
+        </button>
       </div>
 
       <div className="px-6 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">

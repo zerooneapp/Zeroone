@@ -23,6 +23,8 @@ import PaymentMethods from './pages/PaymentMethods';
 import SecuritySettings from './pages/SecuritySettings';
 import Preferences from './pages/Preferences';
 import Notifications from './pages/Notifications';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import VendorPrivacyPolicy from './pages/VendorPrivacyPolicy';
 
 // Auth
 import Login from './pages/Login';
@@ -167,6 +169,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/vendor-login" element={<VendorLogin />} />
           <Route path="/vendor-signup" element={<VendorSignup />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/vendor-privacy-policy" element={<VendorPrivacyPolicy />} />
         </Route>
         <Route path="/vendor-verification" element={<VendorVerification />} />
         <Route path="/vendor-pending" element={<PendingVerification />} />

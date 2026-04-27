@@ -141,7 +141,7 @@ const VendorSignup = () => {
         </button>
         <div>
           <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
-          <h1 className="text-2xl font-black tracking-tight leading-none">Vendor Application</h1>
+          <h1 className="text-2xl font-black tracking-tight leading-none">Partner Application</h1>
         </div>
       </div>
 
@@ -442,7 +442,7 @@ const VendorSignup = () => {
                 )}
 
                 <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Vendor Profile Photo</p>
+                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Partner Profile Photo</p>
                   <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {vendorPhoto ? (
@@ -477,6 +477,11 @@ const VendorSignup = () => {
           {step < 3 ? 'Continue' : 'Submit Application'}
           <ArrowRight size={18} strokeWidth={3} />
         </Button>
+        <div className="mt-4 text-center">
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+            By submitting, you agree to our <button onClick={() => navigate('/vendor-privacy-policy')} className="text-primary border-b border-primary/30">Partner Policy</button>
+          </p>
+        </div>
       </div>
     </div>
   );

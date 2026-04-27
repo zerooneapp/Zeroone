@@ -83,7 +83,7 @@ const registerVendor = async (req, res) => {
     if (admins.length > 0) {
       NotificationService.sendNotification({
         userIds: admins.map(a => a._id), role: 'admin', type: 'NEW_VENDOR_REGISTRATION',
-        title: 'New Vendor Registration', message: `A new vendor "${shopName}" has registered and is pending approval.`,
+        title: 'New Partner Registration', message: `A new partner "${shopName}" has registered and is pending approval.`,
         data: { vendorId: vendor._id }, referenceId: `NEW_VENDOR_${vendor._id}`
       });
     }
