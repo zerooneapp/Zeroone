@@ -18,7 +18,7 @@ const {
 const TIME_FORMATS = ['HH:mm', 'H:mm', 'hh:mm A', 'h:mm A'];
 
 const normalizeToGrid = (time) => {
-  const m = moment(time).tz('Asia/Kolkata');
+  const m = moment.tz(time, 'Asia/Kolkata');
   const minutes = m.minutes();
 
   if (minutes === 0 || minutes === 30) {
@@ -171,7 +171,7 @@ const getEligibleStaffMembers = async (vendorId, serviceIds) => {
 
 const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookingId = null) => {
   const now = moment().tz('Asia/Kolkata');
-  const targetDate = moment(date).tz('Asia/Kolkata').startOf('day');
+  const targetDate = moment.tz(date, 'Asia/Kolkata').startOf('day');
   const vendorAvailability = await getVendorDayAvailability(vendorId, targetDate);
 
   if (!vendorAvailability) return [];

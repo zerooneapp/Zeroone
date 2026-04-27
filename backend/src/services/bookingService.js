@@ -88,7 +88,9 @@ const buildSlotConflictError = async (message, vendorId, serviceIds, start) => {
 
 const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress) => {
   const { normalizeToGrid } = require('./slotService');
-  const start = normalizeToGrid(startTime);
+  const start = moment.tz(startTime, 'Asia/Kolkata');
+  // Re-normalize to grid just in case
+  start.minutes(start.minutes() < 30 ? 0 : 30).seconds(0).milliseconds(0);
 
   // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
   const vendor = await Vendor.findById(vendorId);
@@ -359,11 +361,12 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
 
   const staff = await Staff.findById(booking.staffId?._id || booking.staffId);
   const reasonSuffix = trimmedReason ? ` Reason: ${trimmedReason}` : '';
+  const formattedTime = moment(booking.startTime).tz('Asia/Kolkata').format('LLL');
   const customerMessage =
     role === 'vendor'
-      ? `Your booking for ${moment(booking.startTime).format('LLL')} was cancelled by ${booking.vendorId.shopName}.${reasonSuffix}`
-      : `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
-  const internalMessage = `Booking for ${moment(booking.startTime).format('LLL')} has been cancelled.${reasonSuffix}`;
+      ? `Your booking for ${formattedTime} was cancelled by ${booking.vendorId.shopName}.${reasonSuffix}`
+      : `Booking for ${formattedTime} has been cancelled.${reasonSuffix}`;
+  const internalMessage = `Booking for ${formattedTime} has been cancelled.${reasonSuffix}`;
 
   const notificationTargets = new Map();
 
@@ -459,7 +462,7 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
   await booking.save();
 
   const staff = await Staff.findById(booking.staffId);
-  const bookingTime = moment(booking.startTime).format('LLL');
+  const bookingTime = moment(booking.startTime).tz('Asia/Kolkata').format('LLL');
 
   const notificationPayloads = [
     {
