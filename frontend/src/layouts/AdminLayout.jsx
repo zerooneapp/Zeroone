@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Store, Users, CalendarRange,
   Tag, CreditCard, Wallet, Star, Bell, Send,
@@ -16,6 +16,8 @@ import AdminProfileModal from '../components/AdminProfileModal';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const scrollRef = useRef(null);
   const { isDarkMode, toggleTheme } = useThemeStore();
   const { admin, isSidebarOpen, toggleSidebar } = useAdminStore();
   const { user, logout } = useAuthStore();
@@ -41,11 +43,17 @@ const AdminLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdminProfileOpen, setIsAdminProfileOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentAdmin) {
       fetchNotifications();
     }
   }, [currentAdmin, fetchNotifications]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
 
   return (
     <div className="h-screen bg-background-light dark:bg-background-dark flex overflow-hidden">
@@ -218,7 +226,10 @@ const AdminLayout = () => {
         </header>
 
         {/* ⚡ CONTENT SCROLL AREA */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar">
+        <main 
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar"
+        >
           <Outlet />
         </main>
       </div>

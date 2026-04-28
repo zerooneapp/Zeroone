@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { RiTeamFill } from 'react-icons/ri';
@@ -13,6 +13,7 @@ const VendorLayout = () => {
   useSocket(user?._id);
   const location = useLocation();
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
   const [isNavVisible, setIsNavVisible] = React.useState(true);
 
   React.useEffect(() => {
@@ -60,6 +61,12 @@ const VendorLayout = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+
   if (!isInitialized) return null;
 
   if (role !== 'vendor') {
@@ -74,7 +81,10 @@ const VendorLayout = () => {
 
   return (
     <div className="bg-slate-50 dark:bg-gray-950 font-sans flex flex-col pb-[58px] sm:pb-0">
-      <div className="flex-1 overflow-y-auto w-full max-w-lg mx-auto bg-white dark:bg-gray-900 shadow-[0_0_100px_rgba(0,0,0,0.03)] dark:shadow-none relative border-x border-slate-100 dark:border-gray-800/50">
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto w-full max-w-lg mx-auto bg-white dark:bg-gray-900 shadow-[0_0_100px_rgba(0,0,0,0.03)] dark:shadow-none relative border-x border-slate-100 dark:border-gray-800/50"
+      >
         <Outlet />
       </div>
 

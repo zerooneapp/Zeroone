@@ -86,26 +86,25 @@ const TransactionManagement = () => {
 
   const handleExportCsv = () => {
     const rows = [
-      ['Reference ID', 'Partner', 'Owner', 'Category', 'Type', 'Amount', 'Status', 'Gateway', 'Payment Id', 'Created At'],
+      ['Reference ID', 'Partner', 'Owner', 'Category', 'Type', 'Amount', 'Status', 'Gateway', 'Created At'],
       ...data.transactions.map((transaction) => ([
         transaction.referenceId || transaction.gatewayPaymentId || transaction._id,
-        transaction.vendor?.shopName || transaction.initiatedBy?.name || '',
-        transaction.vendor?.owner?.name || '',
+        transaction.vendor?.shopName || transaction.initiatedBy?.name || 'N/A',
+        transaction.vendor?.owner?.name || 'N/A',
         prettifyLabel(transaction.category),
         transaction.type,
         transaction.amount,
         transaction.status,
-        transaction.paymentGateway || '',
-        transaction.gatewayPaymentId || '',
-        format(new Date(transaction.timestamp), 'dd MMM yyyy HH:mm:ss')
+        transaction.paymentGateway || 'N/A',
+        format(new Date(transaction.timestamp), 'dd-MM-yyyy HH:mm')
       ]))
     ];
 
-    const csv = rows
+    const csv = "sep=,\n" + rows
       .map((row) => row.map(buildCsvValue).join(','))
       .join('\n');
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
