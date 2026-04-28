@@ -247,7 +247,11 @@ const StaffForm = () => {
                   type="text"
                   placeholder="e.g. Rahul Sharma"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+                    setFormData({ ...formData, name: filteredValue });
+                  }}
                   className="w-full py-3 px-4 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white placeholder:text-gray-300"
                 />
               </div>

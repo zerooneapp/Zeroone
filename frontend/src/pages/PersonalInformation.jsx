@@ -112,7 +112,11 @@ const PersonalInformation = () => {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+                  setFormData({ ...formData, name: filteredValue });
+                }}
                 className="w-full h-11 pl-12 pr-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 text-sm font-black text-[#1C2C4E] dark:text-white tracking-tight focus:border-primary transition-all outline-none shadow-sm"
               />
             </div>
@@ -125,6 +129,7 @@ const PersonalInformation = () => {
               <input
                 type="date"
                 value={formData.dob}
+                max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
                 className="w-full h-11 pl-12 pr-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 text-sm font-black text-[#1C2C4E] dark:text-white tracking-tight focus:border-primary transition-all outline-none shadow-sm"
               />

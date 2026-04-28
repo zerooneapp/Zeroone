@@ -126,7 +126,7 @@ const VendorSignup = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white px-3 py-6 pb-32 transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white px-3 py-6 pb-32 transition-colors duration-500 overflow-x-hidden no-scrollbar">
       {/* Decorative Background Elements */}
       <div className="absolute top-[-5%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-[-5%] left-[-10%] w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
@@ -155,19 +155,24 @@ const VendorSignup = () => {
 
             <div className="space-y-3">
               <Input
+                icon={User}
+                autoFocus
+                placeholder="Owner Full Name"
+                className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 h-12 rounded-xl font-bold shadow-sm text-sm"
+                value={formData.ownerName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+                  setFormData({ ...formData, ownerName: filteredValue });
+                }}
+              />
+
+              <Input
                 icon={Store}
                 placeholder="Shop Name"
                 className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 h-12 rounded-xl font-bold shadow-sm text-sm"
                 value={formData.shopName}
                 onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
-              />
-
-              <Input
-                icon={User}
-                placeholder="Owner Full Name"
-                className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 h-12 rounded-xl font-bold shadow-sm text-sm"
-                value={formData.ownerName}
-                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
               />
 
               <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-2 flex items-center gap-3 h-12 shadow-sm ring-inset ring-1 ring-black/5">

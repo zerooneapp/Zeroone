@@ -88,12 +88,18 @@ const Favorites = () => {
 
                               {/* Heart Button - Optimized for removal */}
                               <button
-                                 onClick={async (e) => {
+                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    try {
-                                       await api.post('/users/favorites/toggle', { vendorId: vendor._id });
-                                       setFavorites(prev => prev.filter(v => v._id !== vendor._id));
-                                    } catch (err) { console.error('Failed to update elite list'); }
+                                    // Optimistic Update: Remove from list immediately
+                                    const previousFavorites = [...favorites];
+                                    setFavorites(prev => prev.filter(v => v._id !== vendor._id));
+                                    
+                                    api.post('/users/favorites/toggle', { vendorId: vendor._id })
+                                       .catch(err => {
+                                          // Rollback on error
+                                          setFavorites(previousFavorites);
+                                          console.error('Failed to update favorites');
+                                       });
                                  }}
                                  className="absolute top-3 right-3.5 p-2 bg-slate-900 text-white rounded-xl shadow-2xl border border-white/10 active:scale-90 transition-all"
                               >

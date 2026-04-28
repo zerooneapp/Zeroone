@@ -215,7 +215,6 @@ const Home = () => {
       <section className="mt-0 px-3">
         <SectionTitle
           title="Nearby Professionals"
-          actionLabel="More"
           className="mb-2 px-2"
         />
 
