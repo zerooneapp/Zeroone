@@ -355,7 +355,7 @@ const getStaffHistory = async (req, res) => {
       end = end.endOf('week');
     }
 
-    const [bookings, earnings] = await Promise.all([
+    const [bookings, completedBookings] = await Promise.all([
       Booking.find({
         staffId: staff._id,
         startTime: { $gte: start.toDate(), $lte: end.toDate() }
@@ -363,19 +363,16 @@ const getStaffHistory = async (req, res) => {
         .populate('vendorId', 'shopName')
         .sort({ startTime: -1 })
         .lean(),
-      WalletTransaction.find({
-        vendorId: staff.vendorId?._id || staff.vendorId,
-        initiatedByUserId: staff.userId,
-        category: 'booking_revenue',
+      Booking.find({
+        staffId: staff._id,
         status: 'completed',
-        timestamp: { $gte: start.toDate(), $lte: end.toDate() }
+        completedAt: { $gte: start.toDate(), $lte: end.toDate() }
       })
-        .sort({ timestamp: -1 })
+        .sort({ completedAt: -1 })
         .lean()
     ]);
 
-    const completedBookings = bookings.filter((booking) => booking.status === 'completed');
-    const totalEarnings = earnings.reduce((sum, transaction) => sum + (transaction.amount || 0), 0);
+    const totalEarnings = completedBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
     res.status(200).json({
       period,
@@ -400,11 +397,11 @@ const getStaffHistory = async (req, res) => {
         services: booking.services || [],
         shopName: booking.vendorId?.shopName || staff.vendorId?.shopName || 'Partner Shop'
       })),
-      earnings: earnings.map((transaction) => ({
-        _id: transaction._id,
-        amount: transaction.amount || 0,
-        description: transaction.description || transaction.reason || 'Booking revenue',
-        timestamp: transaction.timestamp
+      earnings: completedBookings.map((b) => ({
+        _id: b._id,
+        amount: b.totalPrice || 0,
+        description: `Service: ${b.services?.map(s => s.name).join(', ') || 'Service Completed'}`,
+        timestamp: b.completedAt
       }))
     });
   } catch (error) {

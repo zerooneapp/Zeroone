@@ -229,28 +229,9 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
   }
   await booking.save();
 
-  // 2. Revenue Collection: Credit Vendor's Wallet
-  const amount = booking.totalPrice || 0;
-  if (amount > 0) {
-    const vendor = await Vendor.findById(booking.vendorId?._id || booking.vendorId);
-    if (vendor) {
-      vendor.walletBalance = (vendor.walletBalance || 0) + amount;
-      await vendor.save();
-
-      // Log Transaction
-      await WalletTransaction.create({
-        vendorId: vendor._id,
-        initiatedByUserId: userId,
-        amount: amount,
-        type: 'credit',
-        category: 'booking_revenue',
-        reason: `Service completed: ${booking.services.map(s => s.name).join(', ')}`,
-        status: 'completed',
-        referenceId: `${booking._id}_REV`,
-        description: `Revenue from booking #${booking._id.toString().slice(-6).toUpperCase()}`
-      });
-    }
-  }
+  // 2. Revenue Collection: No longer adding booking amount to vendor wallet balance. 
+  // Partners are paid directly by consumers (offline). 
+  // Digital wallet is strictly for platform subscription fees.
 
   const notificationPayloads = [
     {
