@@ -67,14 +67,15 @@ const VendorWallet = () => {
   const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [filter, setFilter] = useState('today');
   const [isTopupOpen, setIsTopupOpen] = useState(false);
   const [topupAmount, setTopupAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = async (background = false) => {
     try {
-      setLoading(true);
+      if (!background) setLoading(true);
       const [dashboardRes, walletRes, transactionsRes] = await Promise.all([
         api.get('/vendor/dashboard'),
         api.get('/vendor/wallet/overview'),
@@ -87,7 +88,7 @@ const VendorWallet = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to load wallet data');
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   };
 
@@ -260,8 +261,13 @@ const VendorWallet = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-               onClick={fetchData}
-               className={`p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 active:rotate-180 transition-all duration-500 ${loading ? 'animate-spin' : ''}`}
+               type="button"
+               onClick={async () => {
+                 setIsRefreshing(true);
+                 await fetchData(true);
+                 setIsRefreshing(false);
+               }}
+               className={`p-2.5 text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-full active:scale-95 transition-all duration-300 ${isRefreshing ? 'animate-spin text-primary' : ''}`}
             >
                <RefreshCw size={16} />
             </button>

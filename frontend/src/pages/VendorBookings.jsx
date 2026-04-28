@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCcw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import BookingCard from '../components/BookingCard';
@@ -19,6 +19,7 @@ const VendorBookings = () => {
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [closures, setClosures] = useState([]);
   const [closuresLoading, setClosuresLoading] = useState(true);
@@ -117,7 +118,19 @@ const VendorBookings = () => {
   };
 
   const refreshAll = async () => {
-    await Promise.all([fetchBookings(), fetchClosures()]);
+    setIsRefreshing(true);
+    try {
+      const [bookingsRes, closuresRes] = await Promise.all([
+        api.get('/vendor/bookings', { params: { status, from: fromDate, to: toDate } }),
+        api.get('/vendor/closures')
+      ]);
+      setBookings(bookingsRes.data);
+      setClosures(closuresRes.data || []);
+    } catch (err) {
+      toast.error('Failed to refresh data');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleEmergencyCancel = async (bookingId, reason, closureId) => {
@@ -187,10 +200,11 @@ const VendorBookings = () => {
             </div>
           </div>
           <button
+            type="button"
             onClick={refreshAll}
-            className={`p-2 text-slate-400 active:rotate-180 transition-all duration-500 ${loading ? 'animate-spin' : ''}`}
+            className={`p-2 text-slate-400 active:scale-95 transition-all duration-500 ${isRefreshing ? 'animate-spin' : ''}`}
           >
-            <RefreshCcw size={18} />
+            <RefreshCw size={18} />
           </button>
         </div>
 

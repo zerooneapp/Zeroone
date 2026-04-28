@@ -74,7 +74,7 @@ const LoyalCustomers = () => {
               placeholder="Search by name or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C2C4E]/20 transition-all"
+              className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C2C4E]/20 transition-all"
             />
           </div>
 
@@ -89,7 +89,7 @@ const LoyalCustomers = () => {
                 onClick={() => setFilter(btn.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all active:scale-95 ${
                   filter === btn.id 
-                    ? 'bg-[#1C2C4E] text-white shadow-lg shadow-[#1C2C4E]/20' 
+                    ? 'bg-[#1C2C4E]/5 text-[#1C2C4E] border border-[#1C2C4E] shadow-sm' 
                     : 'bg-white dark:bg-gray-900 text-slate-500 border border-slate-100 dark:border-gray-800'
                 }`}
               >
@@ -120,7 +120,7 @@ const LoyalCustomers = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
                 key={customer._id}
-                className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-4"
+                className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-3"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ const LoyalCustomers = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-50 dark:border-gray-800">
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-gray-800">
                   <div className="space-y-1">
                     <p className="text-[8px] font-bold text-slate-400 uppercase">Visits</p>
                     <div className="flex items-center gap-1 text-[#1C2C4E] dark:text-white">
@@ -169,10 +169,10 @@ const LoyalCustomers = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2 pt-1.5">
                   <a 
                     href={`tel:${customer.phone}`}
-                    className="flex-1 py-2.5 bg-slate-50 dark:bg-gray-800 text-[#1C2C4E] dark:text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                    className="flex-1 py-2 bg-slate-50 dark:bg-gray-800 text-[#1C2C4E] dark:text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
                   >
                     <Phone size={12} />
                     Call
@@ -183,7 +183,7 @@ const LoyalCustomers = () => {
                       const message = encodeURIComponent(`Hello ${customer.name}, we're happy to have you as a loyal client!`);
                       window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
                     }}
-                    className="flex-1 py-2.5 bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                    className="flex-1 py-2 bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
                   >
                     <MessageSquare size={12} />
                     Message
