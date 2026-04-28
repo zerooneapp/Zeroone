@@ -61,6 +61,11 @@ const calculateDistanceInMeters = (fromLat, fromLng, toLat, toLng) => {
 const registerVendor = async (req, res) => {
   try {
     const { shopName, ownerName, category, address, location, serviceLevel, serviceMode } = req.body;
+    
+    if (ownerName && /[^a-zA-Z\s]/.test(ownerName)) {
+      return res.status(400).json({ message: 'Owner name should only contain alphabets and spaces' });
+    }
+
     const existingVendor = await Vendor.findOne({ ownerId: req.user._id });
     if (existingVendor) return res.status(400).json({ message: 'Vendor already exists' });
 

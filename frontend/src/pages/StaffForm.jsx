@@ -230,9 +230,6 @@ const StaffForm = () => {
                   <span className="text-[7.5px] font-black uppercase tracking-widest leading-none mt-1">Add Photo</span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Upload className="text-white" size={20} />
-              </div>
             </div>
             <input id="image-upload" type="file" hidden onChange={handleImageChange} accept="image/*" />
           </section>

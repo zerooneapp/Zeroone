@@ -11,8 +11,8 @@ const VendorAuth = () => {
   const location = useLocation();
   const { requestOTP, verifyOTP, loading, setCredentials } = useAuthStore();
 
-  const [step, setStep] = useState('phone');
-  const [phone, setPhone] = useState('');
+  const [step, setStep] = useState(location.state?.step || 'phone');
+  const [phone, setPhone] = useState(location.state?.phone || '');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
@@ -55,6 +55,7 @@ const VendorAuth = () => {
 
     const res = await requestOTP(phone, 'vendor');
     if (res.success) {
+      sessionStorage.setItem('pendingPhone', phone);
       toast.success(res.otp ? `Test Mode: OTP is ${res.otp}` : 'Verification code sent successfully');
       setStep('otp');
       setTimer(30);
@@ -74,7 +75,10 @@ const VendorAuth = () => {
     if (res.success) {
       const { role, needsRegistration, token } = res.data;
       if (needsRegistration) {
-        navigate('/vendor-signup', { state: { phone, role: 'vendor' } });
+        // Save current state to history so back button works!
+        navigate('.', { state: { phone, step: 'otp' }, replace: true });
+        // Then push signup
+        setTimeout(() => navigate('/vendor-signup', { state: { phone, role: 'vendor' } }), 10);
         return;
       }
 

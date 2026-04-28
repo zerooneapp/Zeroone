@@ -14,22 +14,29 @@ import toast from 'react-hot-toast';
 const VendorSignup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { phone } = location.state || {};
+  const { phone: statePhone } = location.state || {};
+  const phone = statePhone || sessionStorage.getItem('pendingPhone');
   const setCredentials = useAuthStore(state => state.setCredentials);
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(() => {
+    const saved = sessionStorage.getItem('vendor_signup_step');
+    return saved ? parseInt(saved) : 1;
+  });
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
 
   // Form State
-  const [formData, setFormData] = useState({
-    shopName: '',
-    ownerName: '',
-    category: '',
-    serviceLevel: 'standard', // standard, premium, luxury
-    serviceMode: 'shop',
-    address: '',
-    location: { coordinates: [75.8577, 22.7196] }, // Default Indore
+  const [formData, setFormData] = useState(() => {
+    const saved = sessionStorage.getItem('vendor_signup_form');
+    return saved ? JSON.parse(saved) : {
+      shopName: '',
+      ownerName: '',
+      category: '',
+      serviceLevel: 'standard', // standard, premium, luxury
+      serviceMode: 'shop',
+      address: '',
+      location: { coordinates: [75.8577, 22.7196] }, // Default Indore
+    };
   });
 
   // Media State
@@ -56,6 +63,12 @@ const VendorSignup = () => {
     };
     fetchCategories();
   }, [phone, navigate]);
+
+  // Persist form data to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('vendor_signup_form', JSON.stringify(formData));
+    sessionStorage.setItem('vendor_signup_step', step.toString());
+  }, [formData, step]);
 
   const handleNext = () => {
     if (step === 1 && (!formData.shopName || !formData.ownerName || !formData.category || !formData.serviceMode)) {
@@ -111,6 +124,8 @@ const VendorSignup = () => {
       });
 
       toast.success('Your application is under verification! 🛡️', { duration: 5000 });
+      sessionStorage.removeItem('vendor_signup_form');
+      sessionStorage.removeItem('vendor_signup_step');
       navigate('/vendor-verification', { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Submission failed');
@@ -126,7 +141,7 @@ const VendorSignup = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white px-3 py-6 pb-32 transition-colors duration-500 overflow-x-hidden no-scrollbar">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white px-3 py-6 pb-32 transition-colors duration-500 overflow-x-hidden relative no-scrollbar">
       {/* Decorative Background Elements */}
       <div className="absolute top-[-5%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-[-5%] left-[-10%] w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />

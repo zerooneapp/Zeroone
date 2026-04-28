@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     ArrowLeft, Store, Camera, Video, MapPin, Loader2,
     Save, Plus, X, CheckCircle2, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
@@ -16,10 +16,13 @@ import { cn } from '../utils/cn';
 
 const VendorProfile = () => {
    const navigate = useNavigate();
+   const [searchParams, setSearchParams] = useSearchParams();
+   const activeSection = searchParams.get('section'); // null | 'basic' | 'media' etc
    const { isDarkMode, toggleTheme } = useThemeStore();
    const { logout } = useAuthStore();
    const [loading, setLoading] = useState(false);
-   const [activeSection, setActiveSection] = useState(null); // null | 'basic' | 'media'
+   const [pickerOpen, setPickerOpen] = useState(null); // null | 'start' | 'end'
+   const pickerRef = useRef(null);
    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
    const [deleting, setDeleting] = useState(false);
@@ -40,6 +43,17 @@ const VendorProfile = () => {
       source: 'total',
       staffId: ''
    });
+   // Close picker on outside click
+   useEffect(() => {
+      const handleClickOutside = (event) => {
+         if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+            setPickerOpen(null);
+         }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+   }, []);
+
    const [data, setData] = useState({
       shopName: '',
       address: '',
@@ -359,9 +373,14 @@ const VendorProfile = () => {
          {/* Header */}
          <header className="px-4 pt-5 pb-3 sticky top-0 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 flex items-center gap-3 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
             <button
-               onClick={() => {
-                  if (activeSection) setActiveSection(null);
-                  else navigate(-1);
+               onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (activeSection) {
+                     setSearchParams({});
+                  } else {
+                     navigate('/vendor/dashboard');
+                  }
                }}
                className="p-2 rounded-xl active:scale-90 transition-all"
             >
@@ -397,7 +416,7 @@ const VendorProfile = () => {
                                  window.open(`https://wa.me/${supportNumber.replace(/\D/g, '')}`, '_blank');
                                  return;
                               }
-                              setActiveSection(item.key);
+                              setSearchParams({ section: item.key });
                            }}
                            className="w-full flex items-center gap-3.5 bg-white dark:bg-gray-900 rounded-xl px-4 py-3.5 border border-slate-100 dark:border-gray-800 shadow-sm active:scale-[0.98] transition-all group"
                         >
@@ -471,25 +490,56 @@ const VendorProfile = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                           <div className="space-y-1.5">
+                           <div className="space-y-1.5 relative">
                               <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Open Time</label>
-                              <input
-                                 type="text"
-                                 value={data.workingHours.start}
-                                 onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, start: e.target.value } })}
-                                 className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
-                                 placeholder="09:00 AM"
-                              />
+                              <div 
+                                 onClick={() => setPickerOpen('start')}
+                                 className="relative group cursor-pointer"
+                              >
+                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary transition-colors z-10">
+                                    <Clock size={12} />
+                                 </div>
+                                 <div className="w-full py-2 pl-9 pr-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all group-hover:border-primary/30">
+                                    {data.workingHours.start || '09:00 AM'}
+                                 </div>
+                              </div>
+
+                              <AnimatePresence>
+                                 {pickerOpen === 'start' && (
+                                    <TimePickerOverlay 
+                                       value={data.workingHours.start} 
+                                       onChange={(val) => setData({ ...data, workingHours: { ...data.workingHours, start: val } })}
+                                       onClose={() => setPickerOpen(null)}
+                                       pickerRef={pickerRef}
+                                    />
+                                 )}
+                              </AnimatePresence>
                            </div>
-                           <div className="space-y-1.5">
+
+                           <div className="space-y-1.5 relative">
                               <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Close Time</label>
-                              <input
-                                 type="text"
-                                 value={data.workingHours.end}
-                                 onChange={(e) => setData({ ...data, workingHours: { ...data.workingHours, end: e.target.value } })}
-                                 className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
-                                 placeholder="09:00 PM"
-                              />
+                              <div 
+                                 onClick={() => setPickerOpen('end')}
+                                 className="relative group cursor-pointer"
+                              >
+                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary transition-colors z-10">
+                                    <Clock size={12} />
+                                 </div>
+                                 <div className="w-full py-2 pl-9 pr-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all group-hover:border-primary/30">
+                                    {data.workingHours.end || '09:00 PM'}
+                                 </div>
+                              </div>
+
+                              <AnimatePresence>
+                                 {pickerOpen === 'end' && (
+                                    <TimePickerOverlay 
+                                       value={data.workingHours.end} 
+                                       onChange={(val) => setData({ ...data, workingHours: { ...data.workingHours, end: val } })}
+                                       onClose={() => setPickerOpen(null)}
+                                       pickerRef={pickerRef}
+                                    />
+                                 )}
+                              </AnimatePresence>
                            </div>
                         </div>
 
@@ -1089,6 +1139,97 @@ const VendorProfile = () => {
             )}
          </AnimatePresence>
       </div>
+   );
+};
+
+
+// ── CUSTOM TIME PICKER OVERLAY ──
+const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
+   const time = dayjs(`2000-01-01 ${value || '09:00 AM'}`, 'YYYY-MM-DD hh:mm A');
+   const [h, setH] = useState(time.format('hh'));
+   const [m, setM] = useState(time.format('mm'));
+   const [p, setP] = useState(time.format('A'));
+
+   const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+   const minutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+
+   const handleConfirm = () => {
+      onChange(`${h}:${m} ${p}`);
+      onClose();
+   };
+
+   return (
+      <motion.div 
+         ref={pickerRef}
+         initial={{ opacity: 0, y: 10, scale: 0.95 }}
+         animate={{ opacity: 1, y: 0, scale: 1 }}
+         exit={{ opacity: 0, y: 10, scale: 0.95 }}
+         className="absolute bottom-full mb-3 left-0 right-0 sm:left-auto sm:w-64 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-2xl z-[100] overflow-hidden"
+      >
+         <div className="p-3 border-b border-slate-50 dark:border-gray-800 flex items-center justify-between bg-slate-50/50 dark:bg-gray-950/50">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Select Time</span>
+            <button onClick={onClose} className="text-gray-400 hover:text-red-500"><X size={14} /></button>
+         </div>
+
+         <div className="p-4 grid grid-cols-3 gap-2">
+            {/* Hours */}
+            <div className="space-y-1 max-h-40 overflow-y-auto no-scrollbar py-2">
+               {hours.map(hour => (
+                  <button 
+                     key={hour}
+                     onClick={() => setH(hour)}
+                     className={cn(
+                        "w-full py-2 rounded-lg text-xs font-black transition-all",
+                        h === hour ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
+                     )}
+                  >
+                     {hour}
+                  </button>
+               ))}
+            </div>
+
+            {/* Minutes */}
+            <div className="space-y-1 max-h-40 overflow-y-auto no-scrollbar py-2 border-x border-slate-50 dark:border-gray-800">
+               {minutes.map(min => (
+                  <button 
+                     key={min}
+                     onClick={() => setM(min)}
+                     className={cn(
+                        "w-full py-2 rounded-lg text-xs font-black transition-all",
+                        m === min ? "bg-[#1C2C4E] text-white shadow-lg shadow-[#1C2C4E]/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
+                     )}
+                  >
+                     {min}
+                  </button>
+               ))}
+            </div>
+
+            {/* AM/PM */}
+            <div className="flex flex-col gap-2 justify-center">
+               {['AM', 'PM'].map(period => (
+                  <button 
+                     key={period}
+                     onClick={() => setP(period)}
+                     className={cn(
+                        "w-full py-4 rounded-xl text-[10px] font-black transition-all",
+                        p === period ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-105" : "text-gray-400 bg-slate-50 dark:bg-gray-800"
+                     )}
+                  >
+                     {period}
+                  </button>
+               ))}
+            </div>
+         </div>
+
+         <div className="p-3 bg-slate-50 dark:bg-gray-950 flex gap-2">
+            <button 
+               onClick={handleConfirm}
+               className="flex-1 py-2.5 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+            >
+               Set Time
+            </button>
+         </div>
+      </motion.div>
    );
 };
 

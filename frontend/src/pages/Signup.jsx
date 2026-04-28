@@ -12,14 +12,18 @@ import api from '../services/api';
 const Signup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { phone } = location.state || {};
+  const { phone: statePhone } = location.state || {};
+  const phone = statePhone || sessionStorage.getItem('pendingPhone');
 
   const [loading, setLoading] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: '',
-    dob: '',
-    gender: 'male',
-    image: null
+  const [profileData, setProfileData] = useState(() => {
+    const saved = sessionStorage.getItem('customer_signup_form');
+    return saved ? JSON.parse(saved) : {
+      name: '',
+      dob: '',
+      gender: 'male',
+      image: null
+    };
   });
 
   useEffect(() => {
@@ -27,6 +31,11 @@ const Signup = () => {
       navigate('/login');
     }
   }, [phone, navigate]);
+
+  // Persist form data to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('customer_signup_form', JSON.stringify(profileData));
+  }, [profileData]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -60,6 +69,7 @@ const Signup = () => {
       });
 
       toast.success('Registration successful!');
+      sessionStorage.removeItem('customer_signup_form');
       navigate('/', { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
@@ -76,7 +86,7 @@ const Signup = () => {
       {/* Header Overlay */}
       <div className="absolute top-0 left-0 right-0 p-6 z-20">
         <button
-          onClick={() => navigate('/login')}
+          onClick={() => navigate(-1)}
           className="p-2.5 text-[#1C2C4E] bg-white rounded-xl shadow-sm border border-gray-100 active:scale-95 transition-all"
         >
           <ChevronLeft size={18} strokeWidth={3} />

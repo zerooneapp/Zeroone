@@ -13,8 +13,8 @@ const CustomerAuth = () => {
   const location = useLocation();
   const { requestOTP, verifyOTP, loading, setCredentials } = useAuthStore();
 
-  const [step, setStep] = useState('phone'); // phone, otp
-  const [phone, setPhone] = useState('');
+  const [step, setStep] = useState(location.state?.step || 'phone'); // phone, otp
+  const [phone, setPhone] = useState(location.state?.phone || '');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
@@ -59,6 +59,7 @@ const CustomerAuth = () => {
 
     const res = await requestOTP(phone, 'customer');
     if (res.success) {
+      sessionStorage.setItem('pendingPhone', phone);
       toast.success(res.otp ? `Test Mode: OTP is ${res.otp}` : 'Verification code sent successfully');
       setStep('otp');
       setTimer(30);
@@ -77,7 +78,10 @@ const CustomerAuth = () => {
       const { role, token } = res.data;
 
       if (res.needsRegistration) {
-        navigate('/signup', { state: { phone, role: 'customer' } });
+        // Save current state to history so back button works!
+        navigate('.', { state: { phone, step: 'otp' }, replace: true });
+        // Then push signup
+        setTimeout(() => navigate('/signup', { state: { phone, role: 'customer' } }), 10);
       } else {
         // 🔒 ROLE SECURITY: Prevent cross-portal entry
         if (role !== 'customer') {

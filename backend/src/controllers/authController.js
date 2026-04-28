@@ -112,6 +112,11 @@ const adminLogin = async (req, res) => {
 const register = async (req, res) => {
   try {
     const { phone, name, password, role, email, gender, dob, referralCode, image } = req.body;
+
+    if (name && /[^a-zA-Z\s]/.test(name)) {
+      return res.status(400).json({ message: 'Name should only contain alphabets and spaces' });
+    }
+
     const requestedRole = sanitizePublicRole(role);
     const effectivePassword = password || (requestedRole === 'vendor' ? generateTemporaryPassword() : undefined);
 

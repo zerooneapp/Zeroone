@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Calendar, MapPin, CreditCard, ShieldCheck } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, Clock, Calendar, MapPin, CreditCard, ShieldCheck, X, Shield, Clock3, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import Button from '../components/Button';
@@ -16,6 +16,7 @@ const CheckoutReview = () => {
   const { clearCart } = useCartStore();
   const [loading, setLoading] = React.useState(false);
   const [pricingPreview, setPricingPreview] = React.useState(null);
+  const [showTerms, setShowTerms] = React.useState(false);
 
   if (!bookingData) {
     return (
@@ -287,10 +288,97 @@ const CheckoutReview = () => {
             )}
           </button>
           <p className="text-center text-[7px] text-slate-400 mt-2 font-black tracking-widest opacity-60 leading-none">
-            By clicking confirm, you agree to our terms.
+            By clicking confirm, you agree to our <button onClick={() => setShowTerms(true)} className="underline decoration-slate-400/30 underline-offset-2 hover:text-slate-600 transition-colors">terms.</button>
           </p>
         </div>
       </div>
+
+      {/* Terms Modal */}
+      <AnimatePresence>
+        {showTerms && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+            onClick={() => setShowTerms(false)}
+          >
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              className="bg-white dark:bg-gray-950 w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border border-white/10"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="p-6 pb-4 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight">Terms of Service</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">ZeroOne Booking Policies</p>
+                </div>
+                <button 
+                  onClick={() => setShowTerms(false)}
+                  className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-gray-800 flex items-center justify-center text-slate-600 dark:text-gray-400 active:scale-90 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6 max-h-[60vh] overflow-y-auto space-y-6 no-scrollbar pb-10">
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/30">
+                    <Shield className="text-blue-500" size={20} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-[11px] font-black text-[#1C2C4E] dark:text-white uppercase tracking-widest">1. Booking Commitment</h4>
+                    <p className="text-[12px] font-medium text-slate-500 dark:text-gray-400 leading-relaxed">
+                      By confirming, you commit to attending the service at the scheduled time. Professionals allocate their time specifically for your slot.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-900/30">
+                    <Clock3 className="text-rose-500" size={20} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-[11px] font-black text-[#1C2C4E] dark:text-white uppercase tracking-widest">2. Cancellation Policy</h4>
+                    <p className="text-[12px] font-medium text-slate-500 dark:text-gray-400 leading-relaxed">
+                      Cancellations must be made at least 2 hours in advance. Frequent no-shows or late cancellations may result in platform restrictions or penalties.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-900/30">
+                    <AlertCircle className="text-amber-500" size={20} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-[11px] font-black text-[#1C2C4E] dark:text-white uppercase tracking-widest">3. Payment & Refunds</h4>
+                    <p className="text-[12px] font-medium text-slate-500 dark:text-gray-400 leading-relaxed">
+                      Payments are processed securely. Refunds (if applicable) are governed by the vendor's policy and ZeroOne's standard dispute resolution process.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 dark:bg-gray-800/50 rounded-2xl border border-slate-100 dark:border-gray-800">
+                  <p className="text-[10px] font-bold text-slate-400 leading-relaxed text-center italic">
+                    "We value your time and our professionals' dedication. Let's make every booking a great experience."
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800">
+                <button 
+                  onClick={() => setShowTerms(false)}
+                  className="w-full py-4 bg-[#1C2C4E] dark:bg-primary text-white font-black text-[14px] uppercase tracking-widest rounded-2xl active:scale-[0.98] transition-all shadow-xl shadow-[#1C2C4E]/20"
+                >
+                  I Understand
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
