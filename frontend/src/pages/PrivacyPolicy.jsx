@@ -42,8 +42,8 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 font-sans pb-12">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 py-4">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
+      <header className="sticky top-0 z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+        <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center justify-center shadow-sm active:scale-90 transition-all"
@@ -57,38 +57,38 @@ const PrivacyPolicy = () => {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 mt-8 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 mt-5 space-y-4">
         {/* Intro Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 shadow-xl shadow-blue-500/5 border border-white dark:border-gray-800 relative overflow-hidden"
+          className="bg-white dark:bg-gray-900 rounded-[2rem] p-6 shadow-xl shadow-blue-500/5 border border-white dark:border-gray-800 relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
-          <FileText className="text-blue-500 mb-4" size={32} strokeWidth={1.5} />
-          <h2 className="text-2xl font-black text-[#1C2C4E] dark:text-white tracking-tight">Our Commitment to You</h2>
-          <p className="text-gray-500 dark:text-gray-400 mt-4 leading-relaxed font-medium">
+          <FileText className="text-blue-500 mb-3" size={24} strokeWidth={1.5} />
+          <h2 className="text-xl font-black text-[#1C2C4E] dark:text-white tracking-tight">Our Commitment to You</h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-2.5 text-sm leading-relaxed font-medium">
             At ZeroOne, your privacy is not just a policy—it's a fundamental part of our mission. We build tools to simplify your life while keeping your personal space secure.
           </p>
         </motion.div>
 
         {/* Policy Sections */}
-        <div className="grid gap-4">
+        <div className="grid md:grid-cols-2 gap-3">
           {sections.map((section, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-3xl p-6 border border-white dark:border-gray-800 shadow-sm"
+              className="bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl p-4.5 border border-white dark:border-gray-800 shadow-sm"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center">
                   {section.icon}
                 </div>
                 <h3 className="font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight">{section.title}</h3>
               </div>
-              <p className="text-[13px] font-medium text-gray-600 dark:text-gray-400 leading-relaxed pl-13">
+              <p className="text-[12px] font-medium text-gray-600 dark:text-gray-400 leading-relaxed pl-12">
                 {section.content}
               </p>
             </motion.div>

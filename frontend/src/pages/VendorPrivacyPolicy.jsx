@@ -56,8 +56,8 @@ const VendorPrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 font-sans pb-12">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 py-4">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
+      <header className="sticky top-0 z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+        <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center justify-center shadow-sm active:scale-90 transition-all"
@@ -71,38 +71,38 @@ const VendorPrivacyPolicy = () => {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 mt-8 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 mt-5 space-y-4">
         {/* Intro Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#1C2C4E] rounded-[2.5rem] p-8 shadow-2xl shadow-indigo-500/20 relative overflow-hidden text-white"
+          className="bg-[#1C2C4E] rounded-[2rem] p-6 shadow-2xl shadow-indigo-500/20 relative overflow-hidden text-white"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-3xl" />
-          <FileCheck className="text-indigo-400 mb-4" size={32} strokeWidth={1.5} />
-          <h2 className="text-2xl font-black tracking-tight">Business Integrity</h2>
-          <p className="text-indigo-100/70 mt-4 leading-relaxed font-medium">
+          <FileCheck className="text-indigo-400 mb-3" size={24} strokeWidth={1.5} />
+          <h2 className="text-xl font-black tracking-tight">Business Integrity</h2>
+          <p className="text-indigo-100/70 mt-2.5 text-sm leading-relaxed font-medium">
             This policy outlines how ZeroOne manages business data for our partners and professional guidelines for the staff members operating on the platform.
           </p>
         </motion.div>
 
         {/* Policy Sections */}
-        <div className="grid gap-4">
+        <div className="grid md:grid-cols-2 gap-3">
           {sections.map((section, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-3xl p-6 border border-white dark:border-gray-800 shadow-sm"
+              className="bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl p-4.5 border border-white dark:border-gray-800 shadow-sm"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center">
                   {section.icon}
                 </div>
                 <h3 className="font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight text-sm">{section.title}</h3>
               </div>
-              <p className="text-[12px] font-medium text-gray-600 dark:text-gray-400 leading-relaxed pl-13">
+              <p className="text-[12px] font-medium text-gray-600 dark:text-gray-400 leading-relaxed pl-12">
                 {section.content}
               </p>
             </motion.div>
@@ -114,7 +114,7 @@ const VendorPrivacyPolicy = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-12 space-y-6"
+          className="mt-10 space-y-4"
         >
           <div className="flex items-center gap-3 px-2">
             <div className="w-8 h-[2px] bg-indigo-500" />
@@ -125,7 +125,7 @@ const VendorPrivacyPolicy = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {staffTerms.map((term, idx) => (
-              <div key={idx} className="p-5 rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+              <div key={idx} className="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
                 <h4 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2">{term.title}</h4>
                 <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 leading-relaxed">{term.desc}</p>
               </div>
