@@ -25,6 +25,8 @@ import Preferences from './pages/Preferences';
 import Notifications from './pages/Notifications';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import VendorPrivacyPolicy from './pages/VendorPrivacyPolicy';
+import ContactSupport from './pages/ContactSupport';
+import VendorContactSupport from './pages/VendorContactSupport';
 
 // Auth
 import Login from './pages/Login';
@@ -165,6 +167,8 @@ function App() {
         {/* FULLY PUBLIC ROUTES — No auth required */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/vendor-privacy-policy" element={<VendorPrivacyPolicy />} />
+        <Route path="/contact-support" element={<ContactSupport />} />
+        <Route path="/vendor-contact-support" element={<VendorContactSupport />} />
 
         {/* PUBLIC GUEST ROUTES */}
         <Route element={<GuestRoute />}>

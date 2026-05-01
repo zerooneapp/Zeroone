@@ -240,12 +240,21 @@ const CustomerAuth = () => {
 
       {/* Footer Branding */}
       <div className="pb-8 flex flex-col items-center justify-center gap-4 relative z-10">
-        <button 
-          onClick={() => navigate('/privacy-policy')}
-          className="text-[9px] font-black text-[#1C2C4E]/40 hover:text-[#1C2C4E] uppercase tracking-[0.2em] transition-colors"
-        >
-          Privacy & Policy
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate('/privacy-policy')}
+            className="text-[9px] font-black text-[#1C2C4E]/40 hover:text-[#1C2C4E] uppercase tracking-[0.2em] transition-colors"
+          >
+            Privacy & Policy
+          </button>
+          <span className="text-[#1C2C4E]/20">•</span>
+          <button 
+            onClick={() => navigate('/contact-support')}
+            className="text-[9px] font-black text-[#1C2C4E]/40 hover:text-[#1C2C4E] uppercase tracking-[0.2em] transition-colors"
+          >
+            Contact & Support
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] uppercase tracking-wider leading-none">MADE IN INDIA</span>
           <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
