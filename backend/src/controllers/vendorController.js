@@ -117,33 +117,61 @@ const uploadDocs = async (req, res) => {
     };
 
     const files = req.files;
-    if (files.aadhaarFront) vendor.aadhaarFront = await uploadToCloudinary(files.aadhaarFront[0].buffer);
-    if (files.aadhaarBack) vendor.aadhaarBack = await uploadToCloudinary(files.aadhaarBack[0].buffer);
-    if (files.panCard) vendor.panCard = await uploadToCloudinary(files.panCard[0].buffer);
-    if (files.gstCertificate) vendor.gstCertificate = await uploadToCloudinary(files.gstCertificate[0].buffer);
-    if (files.shopRegistration) vendor.shopRegistration = await uploadToCloudinary(files.shopRegistration[0].buffer);
-    if (files.shopImage) vendor.shopImage = await uploadToCloudinary(files.shopImage[0].buffer);
-    if (files.vendorPhoto) vendor.vendorPhoto = await uploadToCloudinary(files.vendorPhoto[0].buffer);
+    const uploadTasks = [];
 
-    // 🎨 NEW: Gallery & Video
+    // Parallel upload configuration
+    const singleFileKeys = ['aadhaarFront', 'aadhaarBack', 'panCard', 'gstCertificate', 'shopRegistration', 'shopImage', 'vendorPhoto'];
+    
+    singleFileKeys.forEach(key => {
+      if (files[key]) {
+        uploadTasks.push(
+          uploadToCloudinary(files[key][0].buffer).then(url => {
+            vendor[key] = url;
+          })
+        );
+      }
+    });
+
+    // 🎨 Gallery & Video
     if (files.gallery) {
-      const galleryUrls = await Promise.all(
+      const galleryTask = Promise.all(
         files.gallery.map(file => uploadToCloudinary(file.buffer))
-      );
-      vendor.galleryImages = [...(vendor.galleryImages || []), ...galleryUrls];
-    }
-    if (files.video) {
-      vendor.shopVideo = await uploadToCloudinary(files.video[0].buffer, true);
+      ).then(urls => {
+        vendor.galleryImages = [...(vendor.galleryImages || []), ...urls];
+      });
+      uploadTasks.push(galleryTask);
     }
 
+    if (files.video) {
+      uploadTasks.push(
+        uploadToCloudinary(files.video[0].buffer, true).then(url => {
+          vendor.shopVideo = url;
+        })
+      );
+    }
+
+    // Execute all uploads in parallel for maximum speed
+    await Promise.all(uploadTasks);
+
+    // Re-check profile completeness
     const requiresShopImage = (vendor.serviceMode || 'shop') === 'shop';
-    const hasRequiredMedia = vendor.aadhaarFront && vendor.aadhaarBack && vendor.panCard && vendor.vendorPhoto && (!requiresShopImage || vendor.shopImage);
+    const hasRequiredMedia = 
+      vendor.aadhaarFront && 
+      vendor.aadhaarBack && 
+      vendor.panCard && 
+      vendor.vendorPhoto && 
+      (!requiresShopImage || vendor.shopImage);
+
     if (hasRequiredMedia) {
       vendor.isProfileComplete = true;
     }
+
     await vendor.save();
     res.status(200).json(vendor);
-  } catch (error) { res.status(500).json({ message: error.message }); }
+  } catch (error) { 
+    console.error('[UploadDocsError]', error);
+    res.status(500).json({ message: error.message }); 
+  }
 };
 
 const getVendorProfile = async (req, res) => {
@@ -778,9 +806,115 @@ const getLoyalCustomers = async (req, res) => {
   }
 };
 
+const deleteGalleryImage = async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    vendor.galleryImages = vendor.galleryImages.filter(img => img !== imageUrl);
+    
+    if (vendor.featuredImage === imageUrl) {
+      vendor.featuredImage = vendor.galleryImages[0] || vendor.shopImage || '';
+    }
+
+    await vendor.save();
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateSingleMedia = async (req, res) => {
+  try {
+    const { field } = req.body; // e.g., 'shopImage', 'vendorPhoto'
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const uploadToCloudinary = (fileBuffer) => {
+      return new Promise((resolve, reject) => {
+        const options = { folder: 'zerone/vendors', resource_type: 'auto' };
+        const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
+          if (error) reject(error); else resolve(result.secure_url);
+        });
+        uploadStream.end(fileBuffer);
+      });
+    };
+
+    const url = await uploadToCloudinary(req.file.buffer);
+    vendor[field] = url;
+
+    // Trigger re-check of profile completeness
+    const requiresShopImage = (vendor.serviceMode || 'shop') === 'shop';
+    const hasRequiredMedia = 
+      vendor.aadhaarFront && 
+      vendor.aadhaarBack && 
+      vendor.panCard && 
+      vendor.vendorPhoto && 
+      (!requiresShopImage || vendor.shopImage);
+
+    if (hasRequiredMedia) {
+      vendor.isProfileComplete = true;
+    }
+
+    await vendor.save();
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const replaceGalleryImage = async (req, res) => {
+  try {
+    const { oldUrl } = req.body;
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const uploadToCloudinary = (fileBuffer) => {
+      return new Promise((resolve, reject) => {
+        const options = { folder: 'zerone/vendors', resource_type: 'auto' };
+        const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
+          if (error) reject(error); else resolve(result.secure_url);
+        });
+        uploadStream.end(fileBuffer);
+      });
+    };
+
+    const newUrl = await uploadToCloudinary(req.file.buffer);
+    vendor.galleryImages = vendor.galleryImages.map(img => img === oldUrl ? newUrl : img);
+
+    if (vendor.featuredImage === oldUrl) {
+      vendor.featuredImage = newUrl;
+    }
+
+    await vendor.save();
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteVideo = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    vendor.shopVideo = '';
+    await vendor.save();
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerVendor, uploadDocs, getVendorProfile, getNearbyVendors, getVendorDetail,
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings, getVendorDashboard,
-  updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers
+  updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers,
+  deleteGalleryImage, updateSingleMedia, replaceGalleryImage, deleteVideo
 };
 

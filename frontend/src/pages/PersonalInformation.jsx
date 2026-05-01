@@ -83,6 +83,7 @@ const PersonalInformation = () => {
             <input
               type="file"
               accept="image/*"
+              capture="user"
               onChange={handleImageChange}
               className="hidden"
               id="profile-upload"

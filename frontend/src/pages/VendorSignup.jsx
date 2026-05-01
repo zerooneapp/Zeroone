@@ -272,7 +272,7 @@ const VendorSignup = () => {
                     {aadhaarFrontFile && <CheckCircle2 className="text-green-500" size={16} />}
                     <ArrowRight size={14} className="text-gray-300" />
                   </div>
-                  <input type="file" className="hidden" onChange={(e) => setAadhaarFrontFile(e.target.files[0])} accept="image/*" />
+                  <input type="file" className="hidden" onChange={(e) => setAadhaarFrontFile(e.target.files[0])} accept="image/*" capture="environment" />
                 </label>
               </div>
 
@@ -295,7 +295,7 @@ const VendorSignup = () => {
                     {aadhaarBackFile && <CheckCircle2 className="text-green-500" size={16} />}
                     <ArrowRight size={14} className="text-gray-300" />
                   </div>
-                  <input type="file" className="hidden" onChange={(e) => setAadhaarBackFile(e.target.files[0])} accept="image/*" />
+                  <input type="file" className="hidden" onChange={(e) => setAadhaarBackFile(e.target.files[0])} accept="image/*" capture="environment" />
                 </label>
               </div>
 
@@ -318,7 +318,7 @@ const VendorSignup = () => {
                     {panCardFile && <CheckCircle2 className="text-green-500" size={16} />}
                     <ArrowRight size={14} className="text-gray-300" />
                   </div>
-                  <input type="file" className="hidden" onChange={(e) => setPanCardFile(e.target.files[0])} accept="image/*" />
+                  <input type="file" className="hidden" onChange={(e) => setPanCardFile(e.target.files[0])} accept="image/*" capture="environment" />
                 </label>
               </div>
 
@@ -341,7 +341,7 @@ const VendorSignup = () => {
                     {shopRegistrationFile && <CheckCircle2 className="text-green-500" size={16} />}
                     <ArrowRight size={14} className="text-gray-300" />
                   </div>
-                  <input type="file" className="hidden" onChange={(e) => setShopRegistrationFile(e.target.files[0])} accept="image/*" />
+                  <input type="file" className="hidden" onChange={(e) => setShopRegistrationFile(e.target.files[0])} accept="image/*" capture="environment" />
                 </label>
               </div>
 
@@ -364,7 +364,7 @@ const VendorSignup = () => {
                     {gstCertificateFile && <CheckCircle2 className="text-green-500" size={16} />}
                     <ArrowRight size={14} className="text-gray-300" />
                   </div>
-                  <input type="file" className="hidden" onChange={(e) => setGstCertificateFile(e.target.files[0])} accept="image/*" />
+                  <input type="file" className="hidden" onChange={(e) => setGstCertificateFile(e.target.files[0])} accept="image/*" capture="environment" />
                 </label>
               </div>
             </div>
@@ -456,7 +456,7 @@ const VendorSignup = () => {
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{shopImage ? 'SHOP IMAGE READY' : 'ADD FRONT PHOTO'}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300" />
-                    <input type="file" className="hidden" onChange={(e) => setShopImage(e.target.files[0])} accept="image/*" />
+                    <input type="file" className="hidden" onChange={(e) => setShopImage(e.target.files[0])} accept="image/*" capture="environment" />
                   </label>
                 </div>
                 )}
@@ -477,7 +477,7 @@ const VendorSignup = () => {
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{vendorPhoto ? 'PHOTO READY' : 'ADD OWNER PHOTO'}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300" />
-                    <input type="file" className="hidden" onChange={(e) => setVendorPhoto(e.target.files[0])} accept="image/*" />
+                    <input type="file" className="hidden" onChange={(e) => setVendorPhoto(e.target.files[0])} accept="image/*" capture="user" />
                   </label>
                 </div>
               </div>

@@ -184,6 +184,17 @@ const VendorAuth = () => {
                 </div>
 
                 <div className="relative">
+                  {/* Blinking Cursor Animation */}
+                  <style>{`
+                    @keyframes blink {
+                      0%, 100% { opacity: 1; }
+                      50% { opacity: 0; }
+                    }
+                    .animate-blink {
+                      animation: blink 1s step-end infinite;
+                    }
+                  `}</style>
+
                   <input
                     type="tel"
                     maxLength={6}
@@ -192,22 +203,31 @@ const VendorAuth = () => {
                     onFocus={() => setIsOTPFocused(true)}
                     onBlur={() => setIsOTPFocused(false)}
                     autoFocus
-                    className="absolute inset-0 opacity-0 cursor-default"
+                    className="absolute inset-0 opacity-0 cursor-default z-20"
                   />
-                  <div className="flex justify-between gap-3 px-2 pointer-events-none">
-                    {otp.map((digit, index) => (
-                      <div
-                        key={index}
-                        className={cn(
-                          'w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all',
-                          digit || (isOTPFocused && index === otp.join('').length)
-                            ? 'border-[#1C2C4E] text-[#1C2C4E]'
-                            : 'border-gray-50 text-gray-300'
-                        )}
-                      >
-                        {digit}
-                      </div>
-                    ))}
+                  <div className="flex justify-between gap-3 px-2 pointer-events-none relative z-10">
+                    {otp.map((digit, index) => {
+                      const isCurrent = index === otp.join('').length;
+                      const isFilled = digit !== '';
+                      const isActive = isOTPFocused && isCurrent;
+
+                      return (
+                        <div
+                          key={index}
+                          className={cn(
+                            'w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all relative overflow-hidden',
+                            isActive ? 'border-[#1C2C4E] ring-2 ring-[#1C2C4E]/10' : 
+                            isFilled ? 'border-gray-200 text-[#1C2C4E]' : 'border-gray-100 text-gray-300'
+                          )}
+                        >
+                          {digit}
+                          {/* Visual Pointer (Blinking Cursor) */}
+                          {isActive && !digit && (
+                            <div className="absolute w-[2px] h-5 bg-[#1C2C4E] animate-blink" />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

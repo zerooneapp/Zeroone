@@ -105,9 +105,6 @@ const AdminBookingDetail = () => {
                         <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest opacity-60">{booking.userId?.phone}</p>
                      </div>
                   </div>
-                  <div className="pt-2">
-                     <InfoItem label="Email Identity" value={booking.userId?.email} />
-                  </div>
                </Section>
 
                <Section title="Partner Compliance" icon={Store}>

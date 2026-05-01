@@ -152,8 +152,12 @@ const UserManagement = () => {
                         >
                            <td className="px-6 py-3.5">
                               <div className="flex items-center gap-3.5">
-                                 <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-[15px] shadow-lg border border-white/10 shrink-0">
-                                    {user.name?.charAt(0) || 'U'}
+                                 <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-[15px] shadow-lg border border-white/10 shrink-0 overflow-hidden">
+                                    {user.image ? (
+                                       <img src={user.image} className="w-full h-full object-cover" alt="" />
+                                    ) : (
+                                       user.name?.charAt(0) || 'U'
+                                    )}
                                  </div>
                                  <div className="leading-tight">
                                     <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary transition-colors">{user.name}</h4>

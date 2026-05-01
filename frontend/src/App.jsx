@@ -162,6 +162,10 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* FULLY PUBLIC ROUTES — No auth required */}
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/vendor-privacy-policy" element={<VendorPrivacyPolicy />} />
+
         {/* PUBLIC GUEST ROUTES */}
         <Route element={<GuestRoute />}>
           <Route path="/login" element={<Login />} />
@@ -169,8 +173,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/vendor-login" element={<VendorLogin />} />
           <Route path="/vendor-signup" element={<VendorSignup />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/vendor-privacy-policy" element={<VendorPrivacyPolicy />} />
         </Route>
         <Route path="/vendor-verification" element={<VendorVerification />} />
         <Route path="/vendor-pending" element={<PendingVerification />} />

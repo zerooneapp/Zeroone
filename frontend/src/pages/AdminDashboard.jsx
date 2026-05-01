@@ -48,14 +48,25 @@ const AdminDashboard = () => {
 
     const handleAdminSocketEvent = (e) => {
       const notification = e.detail;
-      const criticalTypes = ['NEW_BOOKING', 'BOOKING_COMPLETED', 'VENDOR_SIGNUP', 'LOW_BALANCE', 'NEW_REVIEW'];
+      const criticalTypes = [
+        'NEW_BOOKING', 'BOOKING_COMPLETED', 'BOOKING_CANCELLED',
+        'VENDOR_SIGNUP', 'USER_SIGNUP', 'NEW_USER',
+        'LOW_BALANCE', 'NEW_REVIEW'
+      ];
       if (criticalTypes.includes(notification?.type)) {
         fetchDashboard(false);
       }
     };
 
     window.addEventListener('new-socket-notification', handleAdminSocketEvent);
-    return () => window.removeEventListener('new-socket-notification', handleAdminSocketEvent);
+
+    // Auto-polling for dashboard to ensure consistency
+    const dashboardPoll = setInterval(() => fetchDashboard(false), 30000);
+
+    return () => {
+      window.removeEventListener('new-socket-notification', handleAdminSocketEvent);
+      clearInterval(dashboardPoll);
+    };
   }, [chartRange]);
 
   const handleVendorAction = async (id, action) => {
@@ -336,8 +347,12 @@ const AdminDashboard = () => {
             {data.recentVendors.map((vendor) => (
               <div key={vendor._id} className="p-3.5 px-4.5 border-b border-slate-50 dark:border-gray-800 last:border-0 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-all group">
                 <div className="flex items-center gap-3.5 leading-none">
-                  <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-[15px] font-black">
-                    {vendor.shopName.charAt(0)}
+                  <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-[15px] font-black overflow-hidden shrink-0">
+                    {vendor.featuredImage || vendor.shopImage ? (
+                       <img src={vendor.featuredImage || vendor.shopImage} className="w-full h-full object-cover" alt="" />
+                    ) : (
+                       vendor.shopName.charAt(0)
+                    )}
                   </div>
                   <div>
                     <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{vendor.shopName}</h4>
@@ -380,8 +395,12 @@ const AdminDashboard = () => {
             {data.recentUsers.map((user) => (
               <div key={user._id} className="p-3.5 px-4.5 border-b border-slate-50 dark:border-gray-800 last:border-0 flex items-center justify-between group active:bg-slate-50 transition-all">
                 <div className="flex items-center gap-3.5 leading-none">
-                  <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-slate-100 dark:border-gray-700">
-                    <Users size={18} strokeWidth={3} />
+                  <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-slate-100 dark:border-gray-700 overflow-hidden shrink-0">
+                    {user.image ? (
+                       <img src={user.image} className="w-full h-full object-cover" alt="" />
+                    ) : (
+                       <Users size={18} strokeWidth={3} />
+                    )}
                   </div>
                   <div>
                     <p className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{user.name}</p>

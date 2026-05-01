@@ -341,6 +341,7 @@ const getAllUsers = async (req, res) => {
         $project: {
           name: 1,
           phone: 1,
+          image: 1,
           createdAt: 1,
           isBlocked: 1,
           bookingCount: { $size: '$bookings' }

@@ -121,7 +121,62 @@ const TransactionManagement = () => {
 
   return (
     <div className="space-y-5 pb-20 animate-in fade-in duration-500">
-      <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-emerald-500/20">
+      {/* 📄 PRINT ONLY STYLES */}
+      <style>{`
+        @media print {
+          .no-print, 
+          nav, 
+          aside, 
+          button, 
+          input, 
+          select, 
+          .pagination-controls,
+          header { 
+            display: none !important; 
+          }
+          .print-only { 
+            display: block !important; 
+          }
+          body { 
+            background: white !important; 
+            padding: 20px !important;
+            margin: 0 !important;
+          }
+          .ledger-container {
+            border: none !important;
+            box-shadow: none !important;
+          }
+          table { 
+            width: 100% !important; 
+            border-collapse: collapse !important;
+          }
+          th, td { 
+            border: 1px solid #eee !important;
+            padding: 12px 8px !important;
+            color: black !important;
+          }
+          .animate-in {
+            animation: none !important;
+          }
+        }
+        .print-only { display: none; }
+      `}</style>
+
+      {/* PRINT HEADER (HIDDEN IN UI) */}
+      <div className="print-only mb-8">
+        <div className="flex justify-between items-end border-b-2 border-slate-900 pb-4">
+          <div>
+            <h1 className="text-2xl font-black tracking-tighter">ZERONE CAPITAL LEDGER</h1>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Official Financial Settlement Report</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-bold text-slate-400">Generated on: {format(new Date(), 'dd MMM yyyy, HH:mm')}</p>
+            <p className="text-[10px] font-bold text-slate-400">Platform ID: Z1-ADMIN-FIN</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-emerald-500/20 no-print">
         <div className="space-y-1">
           <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize">Capital Ledger</h1>
           <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Global Financial Movement & Settlement Hub</p>
@@ -144,7 +199,7 @@ const TransactionManagement = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 no-print">
         <SummaryCard
           label="Total Capital Inflow"
           value={data.summary.totalInflow}
@@ -168,7 +223,7 @@ const TransactionManagement = () => {
         />
       </div>
 
-      <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row gap-4 items-center">
+      <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row gap-4 items-center no-print">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-gray-600" size={18} strokeWidth={3} />
           <input
@@ -213,7 +268,7 @@ const TransactionManagement = () => {
               className={cn(
                 'flex-1 h-12 px-4 rounded-xl text-[10px] font-black capitalize tracking-widest transition-all border shadow-sm',
                 filters.status === status
-                  ? 'bg-white dark:bg-gray-800 text-slate-900 dark:text-white border-slate-900/10 dark:border-gray-700'
+                  ? 'bg-white dark:bg-gray-900 text-slate-900 dark:text-white border-slate-900/10 dark:border-gray-700'
                   : 'bg-slate-50 dark:bg-gray-800 text-slate-400 border-slate-100 dark:border-gray-700'
               )}
             >
@@ -223,7 +278,7 @@ const TransactionManagement = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden ledger-container">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full border-collapse min-w-[1000px]">
             <thead>
@@ -332,7 +387,7 @@ const TransactionManagement = () => {
         )}
 
         {!loading && data.transactions.length === 0 && (
-          <div className="p-20 text-center space-y-4">
+          <div className="p-20 text-center space-y-4 no-print">
             <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 border border-slate-100">
               <TrendingUp size={32} strokeWidth={3} />
             </div>
@@ -341,7 +396,7 @@ const TransactionManagement = () => {
         )}
       </div>
 
-      <div className="flex items-center justify-between px-2">
+      <div className="flex items-center justify-between px-2 no-print">
         <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em]">
           Page {data.currentPage} of {data.totalPages}
         </p>

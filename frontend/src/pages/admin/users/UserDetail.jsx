@@ -34,7 +34,26 @@ const UserDetail = () => {
             setLoading(false);
          }
       };
+
       fetchData();
+
+      // Auto-refresh every 30 seconds
+      const pollInterval = setInterval(() => fetchData(), 30000);
+
+      // Listen for socket notifications
+      const handleSocketUpdate = (e) => {
+         const notification = e.detail;
+         if (['NEW_BOOKING', 'BOOKING_COMPLETED', 'BOOKING_CANCELLED'].includes(notification?.type)) {
+            fetchData();
+         }
+      };
+
+      window.addEventListener('new-socket-notification', handleSocketUpdate);
+
+      return () => {
+         clearInterval(pollInterval);
+         window.removeEventListener('new-socket-notification', handleSocketUpdate);
+      };
    }, [id]);
 
    const handleToggleBlock = async () => {
@@ -104,8 +123,12 @@ const UserDetail = () => {
             {/* LEFT: USER DETAILS */}
             <div className="lg:col-span-1 space-y-5">
                <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm text-center">
-                  <div className="w-20 h-20 bg-slate-900 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-3xl font-black shadow-xl border border-white/10">
-                     {user.name?.charAt(0)}
+                  <div className="w-20 h-20 bg-slate-900 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-3xl font-black shadow-xl border border-white/10 overflow-hidden">
+                     {user.image ? (
+                        <img src={user.image} className="w-full h-full object-cover" alt={user.name} />
+                     ) : (
+                        user.name?.charAt(0) || 'U'
+                     )}
                   </div>
                   <h2 className="text-[18px] font-black text-slate-900 dark:text-white capitalize tracking-tighter mb-1 leading-none">{user.name}</h2>
                   <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-[0.2em] mb-5 opacity-60">Customer Since {new Date(user.createdAt).getFullYear()}</p>
@@ -146,7 +169,7 @@ const UserDetail = () => {
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.05 }}
-                        onClick={() => navigate(`/booking-status/${booking._id}`)}
+                        onClick={() => navigate(`/admin/bookings/${booking._id}`)}
                         className="p-4 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex items-center justify-between gap-4 group hover:border-primary transition-all cursor-pointer no-scrollbar"
                      >
                         <div className="flex items-center gap-3.5">

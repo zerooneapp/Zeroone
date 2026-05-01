@@ -253,7 +253,7 @@ const VendorProfile = () => {
       }
    };
 
-   const handleSetFeaturedImage = async (url) => {
+    const handleSetFeaturedImage = async (url) => {
       try {
          setLoading(true);
          await api.patch('/vendor/update-profile', { featuredImage: url });
@@ -261,6 +261,70 @@ const VendorProfile = () => {
          toast.success('Home page image updated!');
       } catch (err) {
          toast.error('Failed to set featured image');
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   const handleDeleteGalleryImage = async (url) => {
+      if (!window.confirm('Delete this image from gallery?')) return;
+      try {
+         setLoading(true);
+         const res = await api.post('/vendor/gallery/delete', { imageUrl: url });
+         setCurrentMedia(res.data);
+         toast.success('Image removed');
+      } catch (err) {
+         toast.error('Failed to delete image');
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   const handleUpdateSingleMedia = async (field, file) => {
+      try {
+         setLoading(true);
+         const formData = new FormData();
+         formData.append('media', file);
+         formData.append('field', field);
+         const res = await api.post('/vendor/media/single', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+         });
+         setCurrentMedia(res.data);
+         toast.success('Image updated!');
+      } catch (err) {
+         toast.error('Update failed');
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   const handleReplaceGalleryImage = async (oldUrl, file) => {
+      try {
+         setLoading(true);
+         const formData = new FormData();
+         formData.append('media', file);
+         formData.append('oldUrl', oldUrl);
+         const res = await api.post('/vendor/gallery/replace', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+         });
+         setCurrentMedia(res.data);
+         toast.success('Image replaced!');
+      } catch (err) {
+         toast.error('Replacement failed');
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   const handleDeleteVideo = async () => {
+      if (!window.confirm('Remove promotional video?')) return;
+      try {
+         setLoading(true);
+         const res = await api.delete('/vendor/video/delete');
+         setCurrentMedia(res.data);
+         toast.success('Video removed');
+      } catch (err) {
+         toast.error('Failed to remove video');
       } finally {
          setLoading(false);
       }
@@ -588,16 +652,31 @@ const VendorProfile = () => {
                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                               {/* Shop Image Option */}
                               {currentMedia?.shopImage && (
-                                 <button 
-                                    onClick={() => handleSetFeaturedImage(currentMedia.shopImage)}
-                                    className={cn(
-                                       "relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
-                                       data.featuredImage === currentMedia.shopImage ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
-                                    )}
-                                 >
-                                    <img src={currentMedia.shopImage} className="w-full h-full object-cover" alt="Shop" />
-                                    {data.featuredImage === currentMedia.shopImage && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
-                                 </button>
+                                 <div className="relative w-16 h-16 shrink-0 group/shop">
+                                    <button 
+                                       onClick={() => handleSetFeaturedImage(currentMedia.shopImage)}
+                                       className={cn(
+                                          "relative w-full h-full rounded-xl overflow-hidden border-2 transition-all",
+                                          data.featuredImage === currentMedia.shopImage ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
+                                       )}
+                                    >
+                                       <img src={currentMedia.shopImage} className="w-full h-full object-cover" alt="Shop" />
+                                       {data.featuredImage === currentMedia.shopImage && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
+                                    </button>
+                                    <input 
+                                       type="file" 
+                                       id="update-shop-image" 
+                                       className="hidden" 
+                                       accept="image/*"
+                                       onChange={(e) => e.target.files[0] && handleUpdateSingleMedia('shopImage', e.target.files[0])} 
+                                    />
+                                    <label 
+                                       htmlFor="update-shop-image"
+                                       className="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-slate-100 dark:border-gray-700 cursor-pointer text-slate-400 hover:text-primary transition-all active:scale-90"
+                                    >
+                                       <Camera size={10} />
+                                    </label>
+                                 </div>
                               )}
                               {/* Gallery Options */}
                               {currentMedia?.galleryImages?.map((img, i) => (
@@ -639,8 +718,29 @@ const VendorProfile = () => {
                         <p className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Manage Gallery</p>
                         <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
                            {currentMedia?.galleryImages?.map((img, i) => (
-                              <div key={i} className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-800 shadow-sm">
+                              <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-800 shadow-sm group/img">
                                  <img src={img} className="w-full h-full object-cover" alt="" />
+                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-all flex items-center justify-center gap-2">
+                                    <input 
+                                       type="file" 
+                                       id={`replace-img-${i}`} 
+                                       className="hidden" 
+                                       accept="image/*"
+                                       onChange={(e) => e.target.files[0] && handleReplaceGalleryImage(img, e.target.files[0])} 
+                                    />
+                                    <label 
+                                       htmlFor={`replace-img-${i}`}
+                                       className="p-1.5 bg-white text-slate-600 rounded-lg shadow-lg cursor-pointer hover:text-primary transition-all active:scale-90"
+                                    >
+                                       <Camera size={12} />
+                                    </label>
+                                    <button 
+                                       onClick={() => handleDeleteGalleryImage(img)}
+                                       className="p-1.5 bg-rose-500 text-white rounded-lg shadow-lg hover:bg-rose-600 transition-all active:scale-90"
+                                    >
+                                       <Trash2 size={12} />
+                                    </button>
+                                 </div>
                               </div>
                            ))}
                            {!currentMedia?.galleryImages?.length && (
@@ -653,9 +753,17 @@ const VendorProfile = () => {
                      <div className="space-y-2">
                         <p className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Promotional Video</p>
                         {currentMedia?.shopVideo ? (
-                           <div className="relative w-full h-24 bg-slate-50 dark:bg-gray-800/50 rounded-xl overflow-hidden flex items-center justify-center border border-slate-100 dark:border-gray-800">
+                           <div className="relative w-full h-24 bg-slate-50 dark:bg-gray-800/50 rounded-xl overflow-hidden flex items-center justify-center border border-slate-100 dark:border-gray-800 group/vid">
                               <Video className="text-gray-300" size={24} />
                               <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-sm"><CheckCircle2 size={10} /></div>
+                              <button 
+                                 onClick={handleDeleteVideo}
+                                 className="absolute inset-0 bg-rose-500/10 opacity-0 group-hover/vid:opacity-100 transition-all flex items-center justify-center backdrop-blur-[1px]"
+                              >
+                                 <div className="p-2 bg-rose-500 text-white rounded-xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                                    <Trash2 size={16} />
+                                 </div>
+                              </button>
                               <p className="absolute bottom-2 left-3 text-[8px] font-black capitalize text-gray-400 opacity-60">Status: Active</p>
                            </div>
                         ) : (

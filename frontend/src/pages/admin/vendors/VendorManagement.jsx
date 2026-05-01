@@ -56,6 +56,17 @@ const VendorManagement = () => {
     return () => clearTimeout(timer);
   }, [fetchVendors]);
 
+  // 🔄 Auto-Polling: Refresh list every 30 seconds for real-time status updates
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      if (!isDrawerOpen && !loading) {
+        fetchVendors();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [fetchVendors, isDrawerOpen, loading]);
+
   useEffect(() => {
     const fetchVendorInsights = async () => {
       if (!isDrawerOpen || !selectedVendor?._id) return;
@@ -139,7 +150,15 @@ const VendorManagement = () => {
     );
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status, vendor) => {
+    if (status === 'pending' && vendor && !vendor.isProfileComplete) {
+      return (
+        <span className="text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter bg-slate-50 text-slate-400 border-slate-200 flex items-center gap-1 w-fit">
+          <AlertCircle size={10} /> Incomplete
+        </span>
+      );
+    }
+
     const styles = {
       pending: 'bg-amber-50 text-amber-500 border-amber-100/50',
       active: 'bg-emerald-50 text-emerald-500 border-emerald-100/50',
@@ -256,8 +275,12 @@ const VendorManagement = () => {
                 >
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-[15px] shadow-lg border border-white/10">
-                        {vendor.shopName.charAt(0)}
+                      <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-[15px] shadow-lg border border-white/10 shrink-0 overflow-hidden">
+                        {vendor.featuredImage || vendor.shopImage ? (
+                           <img src={vendor.featuredImage || vendor.shopImage} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                           vendor.shopName.charAt(0)
+                        )}
                       </div>
                       <div className="leading-tight">
                         <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary transition-colors">{vendor.shopName}</h4>
@@ -286,7 +309,7 @@ const VendorManagement = () => {
                       Rs {vendor.walletBalance?.toFixed(2) || '0.00'}
                     </span>
                   </td>
-                  <td className="px-3 py-3.5">{getStatusBadge(vendor.status)}</td>
+                  <td className="px-3 py-3.5">{getStatusBadge(vendor.status, vendor)}</td>
                   <td className="px-3 py-3.5 text-center">
                     <div className={cn('inline-flex w-3 h-3 rounded-full border border-white dark:border-gray-900 shadow-sm', vendor.isActive ? 'bg-emerald-500' : 'bg-red-500')} />
                   </td>
@@ -352,14 +375,18 @@ const VendorManagement = () => {
             >
               <div className="p-6 px-7 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-950 sticky top-0 z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-900 dark:bg-primary text-white rounded-xl flex items-center justify-center font-black text-[20px] shadow-xl border border-white/10">
-                    {selectedVendor.shopName.charAt(0)}
+                  <div className="w-12 h-12 bg-slate-900 dark:bg-primary text-white rounded-xl flex items-center justify-center font-black text-[20px] shadow-xl border border-white/10 shrink-0 overflow-hidden">
+                    {selectedVendor.featuredImage || selectedVendor.shopImage ? (
+                       <img src={selectedVendor.featuredImage || selectedVendor.shopImage} className="w-full h-full object-cover" alt="" />
+                    ) : (
+                       selectedVendor.shopName.charAt(0)
+                    )}
                   </div>
                   <div className="leading-tight pt-1">
                     <h2 className="text-[20px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{selectedVendor.shopName}</h2>
                     <div className="flex items-center gap-2 mt-1.5">
                       {getLevelBadge(selectedVendor.serviceLevel)}
-                      {getStatusBadge(selectedVendor.status)}
+                      {getStatusBadge(selectedVendor.status, selectedVendor)}
                     </div>
                   </div>
                 </div>
@@ -434,7 +461,14 @@ const VendorManagement = () => {
                       <div className="grid grid-cols-2 gap-2.5">
                         {selectedVendor.status === 'pending' && (
                           <>
-                            <ActionButton onClick={() => handleAction(selectedVendor._id, 'approve')} icon={CheckCircle} label="Approve" color="emerald" />
+                            <ActionButton 
+                              onClick={() => handleAction(selectedVendor._id, 'approve')} 
+                              icon={CheckCircle} 
+                              label="Approve" 
+                              color="emerald" 
+                              disabled={!selectedVendor.isProfileComplete}
+                              tooltip={!selectedVendor.isProfileComplete ? 'Complete profile required' : ''}
+                            />
                             <ActionButton onClick={() => handleAction(selectedVendor._id, 'reject', { rejectionReason: 'Admin rejected' })} icon={XCircle} label="Reject" color="red" />
                           </>
                         )}
@@ -625,24 +659,32 @@ const Stat = ({ label, value, icon: Icon }) => (
   </div>
 );
 
-const ActionButton = ({ icon: Icon, label, color, onClick, active }) => {
+const ActionButton = ({ icon: Icon, label, color, onClick, active, disabled, tooltip }) => {
   const colors = {
-    emerald: 'bg-emerald-50 text-emerald-500 border-emerald-100/50 active:bg-emerald-500 active:text-white',
-    red: 'bg-red-50 text-red-500 border-red-100/50 active:bg-red-500 active:text-white',
-    primary: 'bg-primary/5 text-primary border-primary/10 active:bg-primary active:text-white'
+    emerald: 'bg-emerald-50 text-emerald-500 border-emerald-100/50 active:bg-emerald-500 active:text-white disabled:opacity-40 disabled:bg-slate-50 disabled:text-slate-300 disabled:border-slate-100',
+    red: 'bg-red-50 text-red-500 border-red-100/50 active:bg-red-500 active:text-white disabled:opacity-40',
+    primary: 'bg-primary/5 text-primary border-primary/10 active:bg-primary active:text-white disabled:opacity-40'
   };
 
   return (
     <button
-      onClick={onClick}
+      onClick={!disabled ? onClick : undefined}
+      disabled={disabled}
+      title={tooltip}
       className={cn(
-        'flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border transition-all active:scale-[0.9] shadow-sm',
+        'flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border transition-all shadow-sm relative group/btn',
         colors[color],
-        active && color === 'red' && 'bg-red-500 text-white'
+        active && color === 'red' && 'bg-red-500 text-white',
+        disabled && 'cursor-not-allowed grayscale-[0.5]'
       )}
     >
       <Icon size={20} strokeWidth={3} />
       <span className="text-[10px] font-black capitalize tracking-tighter">{label}</span>
+      {disabled && tooltip && (
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[8px] font-bold rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap z-50">
+          {tooltip}
+        </div>
+      )}
     </button>
   );
 };
