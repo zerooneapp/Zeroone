@@ -416,6 +416,15 @@ const VendorProfile = () => {
          iconColor: 'text-rose-500',
          isLogout: true,
       },
+      {
+         key: 'delete',
+         label: 'Delete Account',
+         subtitle: 'Permanently remove shop data',
+         icon: Trash2,
+         iconBg: 'bg-rose-500/10',
+         iconColor: 'text-rose-500',
+         isDelete: true,
+      },
    ];
 
    const handleDeleteAccount = async () => {
@@ -1086,34 +1095,20 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="space-y-4"
                   >
-                     <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                           <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
-                              <ShieldCheck size={16} />
-                           </div>
-                           <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Security Settings</h2>
+                  <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
+                     <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                           <ShieldCheck size={16} />
                         </div>
-
-                        <div className="space-y-3">
-                           <p className="text-[11px] font-bold text-slate-500 dark:text-gray-400 px-1">
-                              Manage your account security and data privacy.
-                           </p>
-                           
-                           <button
-                              onClick={() => setShowDeleteConfirm(true)}
-                              className="w-full flex items-center gap-3.5 bg-rose-50 dark:bg-rose-900/10 rounded-xl px-4 py-3.5 border border-rose-100 dark:border-rose-900/20 active:scale-[0.98] transition-all group"
-                           >
-                              <div className="w-10 h-10 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center shrink-0">
-                                 <Trash2 size={18} />
-                              </div>
-                              <div className="flex-1 text-left">
-                                 <p className="text-sm font-black text-rose-600 dark:text-rose-400 leading-tight">Delete Account</p>
-                                 <p className="text-[10px] font-medium text-rose-400/70 mt-0.5">Permanently remove shop data</p>
-                              </div>
-                              <ChevronRight size={16} className="text-rose-300 group-active:translate-x-0.5 transition-transform" />
-                           </button>
-                        </div>
+                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Security Settings</h2>
                      </div>
+
+                     <div className="space-y-3">
+                        <p className="text-[11px] font-bold text-slate-500 dark:text-gray-400 px-1 text-center py-8">
+                           Advanced security features are active.
+                        </p>
+                     </div>
+                  </div>
                   </motion.section>
                )}
             </AnimatePresence>

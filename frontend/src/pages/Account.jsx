@@ -15,6 +15,8 @@ const Account = () => {
   const navigate = useNavigate();
 
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -114,7 +116,15 @@ const Account = () => {
           className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-[#1C2C4E]/10 dark:border-gray-800 text-slate-600 dark:text-gray-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
         >
           <LogOut size={16} strokeWidth={3} />
-          Sign out of account
+          Log Out of Account
+        </button>
+
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/20 text-rose-600 dark:text-rose-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
+        >
+          <Trash2 size={16} strokeWidth={3} />
+          Delete Account
         </button>
 
 
@@ -142,7 +152,7 @@ const Account = () => {
               </div>
               <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Confirm Logout</h3>
               <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-1.5 tracking-widest leading-relaxed">
-                Are you sure you want to sign out? You will need to login again.
+                Are you sure you want to log out? You will need to login again.
               </p>
               <div className="flex gap-2.5 mt-6">
                 <button
@@ -156,6 +166,49 @@ const Account = () => {
                   className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black text-[11px] capitalize tracking-widest shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
                 >
                   OK
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !deleting && setShowDeleteConfirm(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-2xl relative z-10 text-center"
+            >
+              <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-5 border border-rose-100">
+                <AlertTriangle size={32} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Wait! Delete?</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-3 uppercase tracking-widest leading-relaxed">
+                This is irreversible. All your profile data, history, and settings will be purged.
+              </p>
+              
+              <div className="flex flex-col gap-2 mt-8">
+                <button
+                  disabled={deleting}
+                  onClick={handleDeleteAccount}
+                  className="w-full py-4 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-500/20 active:scale-95 transition-all flex items-center justify-center"
+                >
+                  {deleting ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Yes, Delete account'}
+                </button>
+                <button
+                  disabled={deleting}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="w-full py-4 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
+                >
+                  I want to stay
                 </button>
               </div>
             </motion.div>

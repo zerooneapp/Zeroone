@@ -53,21 +53,6 @@ const SecuritySettings = () => {
     }
   };
 
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const handleDeleteAccount = async () => {
-    try {
-      setLoading(true);
-      await api.delete('/users/profile');
-      toast.success('Account deleted successfully');
-      logout();
-      navigate('/login');
-    } catch (err) {
-      toast.error('Deletion failed');
-    } finally {
-      setLoading(false);
-      setShowDeleteConfirm(false);
-    }
-  };
 
 
 
@@ -162,23 +147,6 @@ const SecuritySettings = () => {
            </div>
         </section>
 
-        {/* ⚠️ DANGER ZONE */}
-        <section className="space-y-3 pt-4 pb-12">
-           <label className="text-[10px] font-black text-rose-500 tracking-widest ml-1 uppercase">Danger zone</label>
-           <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full flex items-center gap-3.5 bg-rose-50 dark:bg-rose-950/10 rounded-[1.3rem] px-4 py-3.5 border border-rose-100 dark:border-rose-900/20 active:scale-[0.98] transition-all group"
-           >
-              <div className="w-10 h-10 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center shrink-0 border border-rose-100/50">
-                 <Trash2 size={18} strokeWidth={2.5} />
-              </div>
-              <div className="flex-1 text-left leading-none">
-                 <h3 className="text-[13px] font-black text-rose-600 dark:text-rose-400 tracking-tight leading-none">Delete account</h3>
-                 <p className="text-[10px] font-medium text-rose-400/60 mt-2 uppercase tracking-tight">Permanently remove all data</p>
-              </div>
-              <ArrowRight size={14} strokeWidth={3} className="text-rose-200" />
-           </button>
-        </section>
 
 
 
@@ -271,51 +239,6 @@ const SecuritySettings = () => {
          )}
       </AnimatePresence>
 
-      {/* ⚠️ DELETE CONFIRMATION MODAL */}
-      <AnimatePresence>
-         {showDeleteConfirm && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center px-6">
-               <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => !loading && setShowDeleteConfirm(false)}
-                  className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-               />
-               <motion.div
-                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                  className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-2xl relative z-10 text-center"
-               >
-                  <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-5 border border-rose-100">
-                     <AlertTriangle size={32} strokeWidth={2.5} />
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Wait! Delete?</h3>
-                  <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-3 uppercase tracking-widest leading-relaxed">
-                     This is irreversible. All your profile data, history, and settings will be purged.
-                  </p>
-                  
-                  <div className="flex flex-col gap-2 mt-8">
-                     <button
-                        disabled={loading}
-                        onClick={handleDeleteAccount}
-                        className="w-full py-4 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-500/20 active:scale-95 transition-all flex items-center justify-center"
-                     >
-                        {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Yes, Delete account'}
-                     </button>
-                     <button
-                        disabled={loading}
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className="w-full py-4 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
-                     >
-                        I want to stay
-                     </button>
-                  </div>
-               </motion.div>
-            </div>
-         )}
-      </AnimatePresence>
     </div>
   );
 };
