@@ -11,8 +11,18 @@ import toast from 'react-hot-toast';
 const BookingStatusDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [booking, setBooking] = useState(() => {
+    if (window.__PREFETCHED_DATA__?.bookings) {
+      return window.__PREFETCHED_DATA__.bookings.find(b => b._id === id) || null;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(() => {
+    if (window.__PREFETCHED_DATA__?.bookings) {
+      return !window.__PREFETCHED_DATA__.bookings.some(b => b._id === id);
+    }
+    return true;
+  });
   const [cancelling, setCancelling] = useState(false);
   const [showCancelPrompt, setShowCancelPrompt] = useState(false);
   const [cancelReason, setCancelReason] = useState('Change of mind / Want to postpone');
@@ -27,14 +37,20 @@ const BookingStatusDetails = () => {
 
   const fetchDetails = async (showLoading = true) => {
     try {
-      if (showLoading) setLoading(true);
+      const shouldShowLoading = showLoading && !booking;
+      if (shouldShowLoading) setLoading(true);
       const res = await api.get('/bookings/my');
+      
+      if (window.__PREFETCHED_DATA__) {
+        window.__PREFETCHED_DATA__.bookings = res.data;
+      }
+      
       const found = res.data.find(b => b._id === id);
       setBooking(found);
     } catch (err) {
       toast.error('Failed to load details');
     } finally {
-      if (showLoading) setLoading(false);
+      setLoading(false);
     }
   };
 

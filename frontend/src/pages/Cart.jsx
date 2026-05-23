@@ -17,13 +17,32 @@ const Cart = () => {
   const rescheduleTotalDuration = location.state?.rescheduleTotalDuration || null;
   const formatPrice = (amount) => `Rs. ${Number(amount || 0).toFixed(2).replace(/\.00$/, '')}`;
 
-  const [selectedDate, setSelectedDate] = useState(null); // Null initially for progressive reveal
-  const [slots, setSlots] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (window.__PREFETCHED_DATA__?.cartData && window.__PREFETCHED_DATA__.cartData.vendorId === useCartStore.getState().vendor?._id) {
+      return window.__PREFETCHED_DATA__.cartData.date;
+    }
+    return null; // Null initially for progressive reveal
+  });
+  const [slots, setSlots] = useState(() => {
+    if (window.__PREFETCHED_DATA__?.cartData && window.__PREFETCHED_DATA__.cartData.vendorId === useCartStore.getState().vendor?._id) {
+      return window.__PREFETCHED_DATA__.cartData.slots;
+    }
+    return [];
+  });
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [allStaff, setAllStaff] = useState([]);
+  const [allStaff, setAllStaff] = useState(() => {
+    if (window.__PREFETCHED_DATA__?.cartData && window.__PREFETCHED_DATA__.cartData.vendorId === useCartStore.getState().vendor?._id) {
+      return window.__PREFETCHED_DATA__.cartData.staff;
+    }
+    return [];
+  });
   const [selectedStaff, setSelectedStaff] = useState(null);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [loadingStaff, setLoadingStaff] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(() => {
+    return !window.__PREFETCHED_DATA__?.cartData || window.__PREFETCHED_DATA__.cartData.vendorId !== useCartStore.getState().vendor?._id;
+  });
+  const [loadingStaff, setLoadingStaff] = useState(() => {
+    return !window.__PREFETCHED_DATA__?.cartData || window.__PREFETCHED_DATA__.cartData.vendorId !== useCartStore.getState().vendor?._id;
+  });
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [pricingPreview, setPricingPreview] = useState(null);
   const [rescheduleHydrating, setRescheduleHydrating] = useState(false);
@@ -105,6 +124,18 @@ const Cart = () => {
   // 2. Fetch Slots and Staff
   useEffect(() => {
     if (!vendor || items.length === 0 || !selectedDate) return;
+
+    // Check if the prefetch cache matches the current selections
+    const isPrefetchMatch = window.__PREFETCHED_DATA__?.cartData &&
+      window.__PREFETCHED_DATA__.cartData.vendorId === vendor._id &&
+      window.__PREFETCHED_DATA__.cartData.date === selectedDate &&
+      window.__PREFETCHED_DATA__.cartData.serviceIds === items.map(i => i._id).join(',');
+
+    if (isPrefetchMatch && slots.length > 0 && allStaff.length > 0) {
+      // Consume the cache once, then clear it so subsequent selections or date clicks do fetch
+      window.__PREFETCHED_DATA__.cartData = null;
+      return;
+    }
 
     const fetchBookingReadyData = async () => {
       try {

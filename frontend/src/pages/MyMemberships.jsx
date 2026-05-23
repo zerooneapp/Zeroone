@@ -8,15 +8,19 @@ import { cn } from '../utils/cn';
 
 const MyMemberships = () => {
   const navigate = useNavigate();
-  const [memberships, setMemberships] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [memberships, setMemberships] = useState(() => window.__PREFETCHED_DATA__?.memberships || []);
+  const [loading, setLoading] = useState(() => !window.__PREFETCHED_DATA__?.memberships);
 
   useEffect(() => {
     const fetchMemberships = async () => {
       try {
-        setLoading(true);
+        const shouldShowLoading = memberships.length === 0;
+        if (shouldShowLoading) setLoading(true);
         const res = await getMyMemberships();
         setMemberships(res.data || []);
+        if (window.__PREFETCHED_DATA__) {
+          window.__PREFETCHED_DATA__.memberships = res.data;
+        }
       } catch (err) {
         console.error('Failed to fetch memberships');
       } finally {

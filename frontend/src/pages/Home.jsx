@@ -14,10 +14,10 @@ import toast from 'react-hot-toast';
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const [categories, setCategories] = useState([]);
-  const [vendors, setVendors] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState(() => window.__PREFETCHED_DATA__?.categories || []);
+  const [vendors, setVendors] = useState(() => window.__PREFETCHED_DATA__?.vendors?.vendors || []);
+  const [totalPages, setTotalPages] = useState(() => window.__PREFETCHED_DATA__?.vendors?.totalPages || 1);
+  const [loading, setLoading] = useState(() => !window.__PREFETCHED_DATA__?.vendors);
   const [error, setError] = useState(null);
 
   const [search, setSearch] = useState('');
@@ -31,10 +31,18 @@ const Home = () => {
     { id: 'home', label: 'Home' }
   ];
 
-  // 📍 SMART INITIALIZATION: Use Saved Profile Location or Bhopal [lng, lat]
-  const [location, setLocation] = useState({
-    lng: user?.location?.coordinates?.[0] || 77.4126,
-    lat: user?.location?.coordinates?.[1] || 23.2599
+  // 📍 SMART INITIALIZATION: Use Prefetched location, Saved Profile Location or Bhopal [lng, lat]
+  const [location, setLocation] = useState(() => {
+    if (window.__PREFETCHED_DATA__?.location) {
+      return {
+        lng: window.__PREFETCHED_DATA__.location.lng,
+        lat: window.__PREFETCHED_DATA__.location.lat
+      };
+    }
+    return {
+      lng: user?.location?.coordinates?.[0] || 77.4126,
+      lat: user?.location?.coordinates?.[1] || 23.2599
+    };
   });
 
   const debouncedSearch = useDebounce(search, 300);
@@ -70,13 +78,27 @@ const Home = () => {
   // 2. Fetch Categories
   useEffect(() => {
     api.get('/categories')
-      .then(res => setCategories(res.data))
+      .then(res => {
+        setCategories(res.data);
+        if (window.__PREFETCHED_DATA__) {
+          window.__PREFETCHED_DATA__.categories = res.data;
+        }
+      })
       .catch(err => console.error('Failed to fetch categories'));
   }, []);
 
   // 3. Fetch Vendors (Nearby + Search + Filter)
   useEffect(() => {
-    setLoading(true);
+    // Only show loading skeleton if we don't have vendors OR if the search/filters changed
+    const isInitialLoad = vendors.length > 0 &&
+                          debouncedSearch === '' &&
+                          selectedCats.length === 0 &&
+                          selectedServiceMode === 'all' &&
+                          currentPage === 1;
+
+    if (!isInitialLoad) {
+      setLoading(true);
+    }
     const params = {
       lng: location.lng,
       lat: location.lat,
@@ -91,6 +113,20 @@ const Home = () => {
       .then(res => {
         setVendors(res.data.vendors || []);
         setTotalPages(res.data.totalPages || 1);
+        if (window.__PREFETCHED_DATA__) {
+          if (!search && selectedCats.length === 0 && selectedServiceMode === 'all' && currentPage === 1) {
+            window.__PREFETCHED_DATA__.vendors = res.data;
+            window.__PREFETCHED_DATA__.location = location;
+          }
+          if (res.data?.vendors) {
+            res.data.vendors.forEach(v => {
+              window.__PREFETCHED_DATA__.vendorDetails[v._id] = {
+                vendor: v,
+                services: v.services || []
+              };
+            });
+          }
+        }
         setError(null);
       })
       .catch(err => setError('Failed to load professionals nearby'))

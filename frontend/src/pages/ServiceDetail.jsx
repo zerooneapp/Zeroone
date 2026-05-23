@@ -41,9 +41,15 @@ const ServiceDetail = () => {
   const navigate = useNavigate();
   const { vendor: cartVendor, items: cartItems, addItem, removeItem, getTotalPrice } = useCartStore();
 
-  const [vendor, setVendor] = useState(null);
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [vendor, setVendor] = useState(() => {
+    return window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.vendor || null;
+  });
+  const [services, setServices] = useState(() => {
+    return window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.services || [];
+  });
+  const [loading, setLoading] = useState(() => {
+    return !window.__PREFETCHED_DATA__?.vendorDetails?.[id];
+  });
   const [error, setError] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = React.useRef(null);
@@ -65,7 +71,8 @@ const ServiceDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        const shouldShowLoading = !vendor;
+        if (shouldShowLoading) setLoading(true);
         const [vendorRes, servicesRes] = await Promise.all([
           api.get(`/vendors/${id}`),
           api.get(`/services`, { params: { vendorId: id } })
@@ -74,6 +81,13 @@ const ServiceDetail = () => {
         if (vendorRes.data) {
           setVendor(vendorRes.data);
           setServices(servicesRes.data || []);
+
+          if (window.__PREFETCHED_DATA__) {
+            window.__PREFETCHED_DATA__.vendorDetails[id] = {
+              vendor: vendorRes.data,
+              services: servicesRes.data || []
+            };
+          }
           
           // Fetch Shared Settings for feature flags
           const settingsRes = await api.get('/settings/shared');
@@ -277,6 +291,36 @@ const ServiceDetail = () => {
     }
   };
 
+  const prefetchCartData = async () => {
+    try {
+      const todayStr = dayjs().format('YYYY-MM-DD');
+      const serviceIdsStr = cartItems.map(i => i._id).join(',');
+      
+      const [slotsRes, staffRes] = await Promise.all([
+        api.get('/slots', {
+          params: {
+            vendorId: id,
+            date: todayStr,
+            serviceIds: serviceIdsStr
+          }
+        }),
+        api.get('/staff', { params: { vendorId: id, date: todayStr } })
+      ]);
+
+      if (window.__PREFETCHED_DATA__) {
+        window.__PREFETCHED_DATA__.cartData = {
+          vendorId: id,
+          serviceIds: serviceIdsStr,
+          date: todayStr,
+          slots: slotsRes.data?.availableSlots || [],
+          staff: staffRes.data || []
+        };
+      }
+    } catch (e) {
+      console.warn('[Prefetch] Cart slots/staff prefetch failed', e.message);
+    }
+  };
+
   /**
    * Smart Interceptor: Checks for existing bookings before allowing a new one.
    * Prompts user with choice modal if an active appt is found.
@@ -286,6 +330,9 @@ const ServiceDetail = () => {
 
     setLoading(true);
     try {
+      // Trigger prefetch of today's slots/staff in parallel
+      prefetchCartData();
+
       const res = await api.get('/bookings/my');
       const bookingsArray = Array.isArray(res.data) ? res.data : [];
 

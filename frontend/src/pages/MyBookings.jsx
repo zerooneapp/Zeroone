@@ -11,20 +11,24 @@ const MyBookings = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed, cancelled
   const [currentPage, setCurrentPage] = useState(1);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState(() => window.__PREFETCHED_DATA__?.bookings || []);
+  const [loading, setLoading] = useState(() => !window.__PREFETCHED_DATA__?.bookings);
   const [error, setError] = useState(null);
   const itemsPerPage = 5;
 
   const fetchBookings = async (showLoading = true) => {
     try {
-      if (showLoading) setLoading(true);
+      const shouldShowLoading = showLoading && bookings.length === 0;
+      if (shouldShowLoading) setLoading(true);
       const res = await api.get('/bookings/my');
       setBookings(res.data);
+      if (window.__PREFETCHED_DATA__) {
+        window.__PREFETCHED_DATA__.bookings = res.data;
+      }
     } catch (err) {
       setError('Failed to load bookings');
     } finally {
-      if (showLoading) setLoading(false);
+      setLoading(false);
     }
   };
 
