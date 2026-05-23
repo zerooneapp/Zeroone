@@ -1,0 +1,1425 @@
+const Vendor = require('../models/Vendor');
+const User = require('../models/User');
+const Staff = require('../models/Staff');
+const Booking = require('../models/Booking');
+const SubscriptionPlan = require('../models/SubscriptionPlan');
+const Category = require('../models/Category');
+const Service = require('../models/Service');
+const Offer = require('../models/Offer');
+const GlobalSettings = require('../models/GlobalSettings');
+const NotificationService = require('../services/notificationService');
+const moment = require('moment-timezone');
+const {
+  PLAN_LEVELS,
+  addFunds,
+  ensureSubscriptionPlans,
+  getBillingSettings,
+  getVendorSubscriptionState
+} = require('../services/walletService');
+const redis = require('../config/redis');
+const Review = require('../models/Review');
+const WalletTransaction = require('../models/WalletTransaction');
+const mongoose = require('mongoose');
+
+const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin']);
+const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
+const ADMIN_ROLES = new Set(['admin', 'super_admin']);
+
+const safeSendNotification = (payload) => {
+  try {
+    return NotificationService.sendNotification(payload);
+  } catch (error) {
+    console.error('[AdminNotificationError]', error.message);
+    return null;
+  }
+};
+
+const hasAdminAccess = (req) => ADMIN_ROLES.has(req.user?.role);
+const isSuperAdmin = (req) => req.user?.role === 'super_admin';
+const sanitizeAdminAccount = (admin) => ({
+  _id: admin._id,
+  name: admin.name,
+  phone: admin.phone,
+  email: admin.email,
+  image: admin.image,
+  role: admin.role,
+  isBlocked: admin.isBlocked,
+  createdAt: admin.createdAt,
+  updatedAt: admin.updatedAt
+});
+
+// ... (existing functions)
+
+const updateCategory = async (req, res) => {
+  try {
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json(category);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const deleteCategory = async (req, res) => {
+  try {
+    await Category.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Category deleted' });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const getGlobalSettings = async (req, res) => {
+  try {
+    let settings = await GlobalSettings.findOne();
+    if (!settings) {
+      settings = await GlobalSettings.create({});
+    } else if (!settings.features) {
+      // Ensure features object exists for older documents
+      settings.features = { membershipActive: true, subscriptionActive: true };
+      await settings.save();
+    }
+    res.status(200).json(settings);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const getSharedSettings = async (req, res) => {
+  try {
+    let settings = await GlobalSettings.findOne().select('supportWhatsApp discoveryRadius freeTrialDays promotionPricePerDay features');
+    
+    if (!settings) {
+      return res.status(200).json({ 
+        supportWhatsApp: '', 
+        discoveryRadius: 10, 
+        freeTrialDays: 7, 
+        promotionPricePerDay: 10,
+        features: { membershipActive: true, subscriptionActive: true }
+      });
+    }
+
+    const response = settings.toObject();
+    if (!response.features) {
+      response.features = { membershipActive: true, subscriptionActive: true };
+    }
+
+    res.status(200).json(response);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const updateGlobalSettings = async (req, res) => {
+  try {
+    const settings = await GlobalSettings.findOneAndUpdate({}, req.body, { new: true, upsert: true });
+    // Invalidate global settings cache
+    await redis.del('global_settings');
+    res.status(200).json(settings);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const broadcastNotification = async (req, res) => {
+  try {
+    const { title, message } = req.body;
+    const targetRole = req.body.targetRole || req.body.targetAudience;
+
+    if (!title?.trim() || !message?.trim()) {
+      return res.status(400).json({ message: 'Title and message are required' });
+    }
+
+    if (!BROADCAST_TARGETS.has(targetRole)) {
+      return res.status(400).json({ message: 'Invalid broadcast target' });
+    }
+
+    const recipients = [];
+
+    if (targetRole === 'all' || ['customer', 'vendor', 'admin'].includes(targetRole)) {
+      const userRoles = targetRole === 'all' ? ['customer', 'vendor', 'admin'] : [targetRole];
+      const users = await User.find({ role: { $in: userRoles } }).select('_id role');
+      recipients.push(...users.map((user) => ({
+        userId: user._id,
+        role: user.role
+      })));
+    }
+
+    if (targetRole === 'all' || targetRole === 'staff') {
+      const staffMembers = await Staff.find({ isActive: true }).select('_id userId');
+      recipients.push(
+        ...staffMembers
+          .map((staff) => ({
+            userId: getStaffNotificationTarget(staff),
+            role: 'staff'
+          }))
+          .filter((recipient) => recipient.userId)
+      );
+    }
+
+    if (recipients.length === 0) {
+      return res.status(404).json({ message: 'No recipients found for this broadcast' });
+    }
+
+    const uniqueRecipients = Array.from(
+      new Map(
+        recipients.map((recipient) => [`${recipient.role}:${recipient.userId}`, recipient])
+      ).values()
+    );
+
+    await NotificationService.sendNotification({
+      recipients: uniqueRecipients,
+      type: 'BROADCAST',
+      title: title.trim(),
+      message: message.trim(),
+      referenceId: `BROADCAST_${Date.now()}`
+    });
+
+    res.status(200).json({
+      message: `Broadcast sent to ${uniqueRecipients.length} recipients`,
+      count: uniqueRecipients.length
+    });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const getSubscriptionPlans = async (req, res) => {
+  try {
+    await ensureSubscriptionPlans();
+    const plans = await SubscriptionPlan.find({ level: { $in: PLAN_LEVELS } }).sort({ level: 1, type: 1 });
+    res.status(200).json(plans);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+// @desc    Get all pending vendors for approval
+const getPendingVendors = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const vendors = await Vendor.find({ status: 'pending', isProfileComplete: true }).populate('ownerId', 'name phone email').lean();
+    res.status(200).json(vendors);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Approve a vendor
+const approveVendor = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+    if (!vendor.isProfileComplete) {
+      const missing = [];
+      if (!vendor.aadhaarFront) missing.push('aadhaarFront');
+      if (!vendor.aadhaarBack) missing.push('aadhaarBack');
+      if (!vendor.panCard) missing.push('panCard');
+      if ((vendor.serviceMode || 'shop') === 'shop' && !vendor.shopImage) missing.push('shopImage');
+      if (!vendor.vendorPhoto) missing.push('vendorPhoto');
+      console.log('[DEBUG] Approval FAILED. isProfileComplete is FALSE. Missing:', missing.join(', '));
+      return res.status(400).json({
+        message: 'Incomplete profile',
+        missingFields: missing
+      });
+    }
+
+    vendor.status = 'active';
+    vendor.isActive = true;
+    vendor.rejectionReason = undefined;
+    vendor.planType = 'trial';
+
+    const settings = await getBillingSettings();
+    const freeTrialDays = settings.freeTrialDays || 7;
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + freeTrialDays);
+    
+    vendor.freeTrial = { 
+      isActive: true, 
+      expiryDate 
+    };
+
+    await vendor.save();
+
+    console.log('[DEBUG] Calling NotificationService. Is undefined?', !NotificationService);
+    NotificationService.sendNotification({
+      userIds: [vendor.ownerId],
+      role: 'vendor',
+      type: 'VENDOR_APPROVED',
+      title: 'Congratulations! 🎉',
+      message: 'Your partner profile has been verified and is now live on ZeroOne.',
+      data: { vendorId: vendor._id },
+      referenceId: `APPROVE_${vendor._id}`
+    });
+
+    res.status(200).json(vendor);
+  } catch (error) {
+    console.error('[ERROR] approveVendor Failure:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Block/Unblock user
+const toggleBlockUser = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    user.isBlocked = !user.isBlocked;
+    await user.save();
+
+    safeSendNotification({
+      userIds: user._id,
+      role: user.role,
+      type: user.isBlocked ? 'ACCOUNT_BLOCKED' : 'ACCOUNT_UNBLOCKED',
+      title: user.isBlocked ? 'Account Restricted' : 'Account Restored',
+      message: user.isBlocked
+        ? 'Your account has been restricted by the admin team. Please contact support for help.'
+        : 'Your account access has been restored. You can continue using ZeroOne.',
+      referenceId: `ACCOUNT_${user.isBlocked ? 'BLOCK' : 'UNBLOCK'}_${user._id}_${Date.now()}`
+    });
+
+    res.status(200).json({ message: `User ${user.isBlocked ? 'blocked' : 'unblocked'}` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Add funds to vendor wallet
+const addBalance = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const { amount, reason } = req.body || {};
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+    await addFunds(vendor, amount, reason || 'admin_topup');
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// --- SOP EXTENSIONS ---
+
+// 1. Subscription Plans
+const createPlan = async (req, res) => {
+  try {
+    const plan = await SubscriptionPlan.create(req.body);
+    // Invalidate all subscription plans cache
+    const keys = await redis.keys('subscription_plans:*');
+    if (keys.length > 0) await redis.del(keys);
+    res.status(201).json(plan);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updatePlan = async (req, res) => {
+  try {
+    const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    
+    // Invalidate all subscription plans cache with multiple methods for safety
+    try {
+      const keys = await redis.keys('subscription_plans:*');
+      if (keys.length > 0) {
+        await redis.del(keys);
+        console.log(`[CACHE-CLEAR] Invalidated ${keys.length} plan keys`);
+      }
+    } catch (cacheErr) {
+      console.warn('Cache clear failed but DB updated:', cacheErr.message);
+    }
+
+    res.status(200).json(plan);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// 2. Advanced Revenue Dashboard
+const getRevenueReport = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const { date, from, to } = req.query;
+    let start, end;
+    if (date) {
+      start = moment(date).tz('Asia/Kolkata').startOf('day').toDate();
+      end = moment(date).tz('Asia/Kolkata').endOf('day').toDate();
+    } else if (from && to) {
+      start = moment(from).tz('Asia/Kolkata').startOf('day').toDate();
+      end = moment(to).tz('Asia/Kolkata').endOf('day').toDate();
+    } else {
+      start = moment().subtract(30, 'days').toDate();
+      end = new Date();
+    }
+
+    const [revenue, newVendors, totalBookings] = await Promise.all([
+      Booking.aggregate([{ $match: { status: 'completed', completedAt: { $gte: start, $lt: end } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Vendor.countDocuments({ createdAt: { $gte: start, $lt: end } }),
+      Booking.countDocuments({ createdAt: { $gte: start, $lt: end } })
+    ]);
+
+    res.status(200).json({ totalRevenue: revenue[0]?.total || 0, newVendors, totalBookings, period: { start, end } });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 3. User & Booking Management
+const getAllUsers = async (req, res) => {
+  try {
+    const { search, status, page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const filter = { 
+      role: 'customer',
+      name: { $exists: true, $ne: '' } // Only show users who finished initial signup
+    };
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (status === 'blocked') filter.isBlocked = true;
+    if (status === 'active') filter.isBlocked = false;
+
+    // Aggregate with total bookings count
+    const users = await User.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'bookings'
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          phone: 1,
+          image: 1,
+          createdAt: 1,
+          isBlocked: 1,
+          bookingCount: { $size: '$bookings' }
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: parseInt(limit) }
+    ]);
+
+    const totalUsers = await User.countDocuments(filter);
+
+    res.status(200).json({
+      users,
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
+      currentPage: Number(page)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getUserDetail = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const user = await User.findById(req.params.id).select('-otp -otpExpires');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const bookingCount = await Booking.countDocuments({ userId: user._id });
+
+    res.status(200).json({
+      ...user._doc,
+      bookingCount
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getUserBookings = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const bookings = await Booking.find({ userId: req.params.userId })
+      .populate('vendorId', 'shopName')
+      .sort({ createdAt: -1 });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getFilteredBookings = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const { status, date, startDate, endDate, vendorId, search, page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Base Match Stage
+    const matchLine = {};
+    const allowedStatus = ['confirmed', 'completed', 'cancelled'];
+    if (status && allowedStatus.includes(status)) {
+      matchLine.status = status;
+    }
+    if (vendorId) matchLine.vendorId = require('mongoose').Types.ObjectId(vendorId);
+    if (startDate || endDate) {
+      const rangeStart = startDate
+        ? moment(startDate).startOf('day').toDate()
+        : moment(endDate).startOf('day').toDate();
+      const rangeEnd = endDate
+        ? moment(endDate).endOf('day').toDate()
+        : moment(startDate).endOf('day').toDate();
+
+      matchLine.startTime = {
+        $gte: rangeStart,
+        $lte: rangeEnd
+      };
+    } else if (date) {
+      matchLine.startTime = {
+        $gte: moment(date).startOf('day').toDate(),
+        $lt: moment(date).endOf('day').toDate()
+      };
+    }
+
+    const pipeline = [
+      { $match: matchLine },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'vendors',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendor'
+        }
+      },
+      { $unwind: { path: '$vendor', preserveNullAndEmptyArrays: true } }
+    ];
+
+    if (search) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'user.name': { $regex: search, $options: 'i' } },
+            { 'vendor.shopName': { $regex: search, $options: 'i' } },
+            { bookingId: { $regex: search, $options: 'i' } }
+          ]
+        }
+      });
+    }
+
+    pipeline.push(
+      { $sort: { createdAt: -1, startTime: -1 } },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: parseInt(limit) }]
+        }
+      }
+    );
+
+    const result = await Booking.aggregate(pipeline);
+    const bookings = result[0].data;
+    const total = result[0].metadata[0]?.total || 0;
+
+    res.status(200).json({
+      bookings,
+      totalBookings: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: Number(page)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getBookingDetail = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const booking = await Booking.findById(req.params.id)
+      .populate('userId', 'name phone email')
+      .populate({
+        path: 'vendorId',
+        select: 'shopName location contact',
+        populate: { path: 'ownerId', select: 'name phone' }
+      })
+      .populate('staffId', 'name phone')
+      .lean();
+
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const adminCancelBooking = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    booking.status = 'cancelled';
+    booking.cancelledBy = 'admin';
+    booking.cancelledAt = new Date();
+    booking.cancellationReason = req.body.reason || 'Cancelled by Admin';
+
+    await booking.save();
+
+    const hydratedBooking = await Booking.findById(booking._id)
+      .populate('vendorId', 'shopName ownerId')
+      .populate('staffId', 'name userId')
+      .populate('userId', 'name');
+
+    const cancellationReason = booking.cancellationReason || 'Cancelled by Admin';
+    const bookingTime = moment(booking.startTime).tz('Asia/Kolkata').format('D MMMM YYYY, h:mm A');
+
+    await Promise.all([
+      safeSendNotification({
+        userIds: hydratedBooking.userId?._id || booking.userId,
+        role: 'customer',
+        type: 'BOOKING_CANCELLED_INFO',
+        title: 'Booking Cancelled',
+        message: `Your booking for ${bookingTime} was cancelled by the admin team. Reason: ${cancellationReason}.`,
+        data: { bookingId: booking._id, reason: cancellationReason, isActionable: false },
+        referenceId: `${booking._id}_ADMIN_CANCEL_CUSTOMER`
+      }),
+      safeSendNotification({
+        userIds: hydratedBooking.vendorId?.ownerId,
+        role: 'vendor',
+        type: 'BOOKING_CANCELLED_INFO',
+        title: 'Booking Cancelled',
+        message: `Booking scheduled for ${bookingTime} was cancelled by the admin team. Reason: ${cancellationReason}.`,
+        data: { bookingId: booking._id, reason: cancellationReason, isActionable: false },
+        referenceId: `${booking._id}_ADMIN_CANCEL_VENDOR`
+      }),
+      hydratedBooking.staffId ? safeSendNotification({
+        userIds: getStaffNotificationTarget(hydratedBooking.staffId),
+        role: 'staff',
+        type: 'BOOKING_CANCELLED_INFO',
+        title: 'Booking Cancelled',
+        message: `Your assigned booking for ${bookingTime} was cancelled by the admin team.`,
+        data: { bookingId: booking._id, reason: cancellationReason, isActionable: false },
+        referenceId: `${booking._id}_ADMIN_CANCEL_STAFF`
+      }) : null
+    ].filter(Boolean));
+
+    // Logic for refund/wallet could be added here if needed
+
+    res.status(200).json({ message: 'Booking forced cancelled by Admin', booking });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 4. Category Management
+const createCategory = async (req, res) => {
+  try {
+    const category = await Category.create(req.body);
+    res.status(201).json(category);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getCategories = async (req, res) => {
+  try {
+    const filter = {};
+    
+    // If not an admin/super_admin, only show active categories
+    const isAdmin = req.user && ['admin', 'super_admin'].includes(req.user.role);
+    if (!isAdmin) {
+      filter.isActive = true;
+    }
+
+    const categories = await Category.find(filter).sort({ name: 1 });
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAdminDashboard = async (req, res) => {
+  try {
+    const { range = '7d' } = req.query;
+    const days = parseInt(range) || 7;
+    const cacheKey = `admin_dashboard_stats:${range}`;
+
+    try {
+      const cached = await redis.get(cacheKey);
+      if (cached) return res.status(200).json(JSON.parse(cached));
+    } catch (err) {
+      console.warn('Redis read error for admin dashboard:', err.message);
+    }
+
+    const settings = await getBillingSettings();
+    const minimumWalletThreshold = settings.minWalletThreshold || 100;
+
+    const today = moment().tz('Asia/Kolkata').startOf('day');
+    const yesterday = moment().tz('Asia/Kolkata').subtract(1, 'day').startOf('day');
+    const rangeStart = moment().subtract(days, 'days').startOf('day').toDate();
+
+    const platformRevenueFilter = {
+      status: 'completed',
+      category: { $in: ['daily_subscription', 'monthly_subscription'] }
+    };
+
+    const [
+      todayRevenue,
+      yesterdayRevenue,
+      totalRevenue,
+      newVendors,
+      totalPartners,
+      activePartners,
+      pendingPartners,
+      blockedPartners,
+      activeBookings,
+      totalUsers,
+      bookingStats,
+      recentVendors,
+      recentUsers,
+      recentReviews,
+      revenueGraph,
+      totalBookingsInRange,
+      lowBalanceCount,
+      inactiveVendorsCount
+    ] = await Promise.all([
+      WalletTransaction.aggregate([
+        { $match: { ...platformRevenueFilter, timestamp: { $gte: today.toDate() } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      WalletTransaction.aggregate([
+        { $match: { ...platformRevenueFilter, timestamp: { $gte: yesterday.toDate(), $lt: today.toDate() } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      WalletTransaction.aggregate([
+        { $match: platformRevenueFilter },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      Vendor.countDocuments({ status: 'pending' }),
+      Vendor.countDocuments({}),
+      Vendor.countDocuments({ status: 'active' }),
+      Vendor.countDocuments({ status: 'pending' }),
+      Vendor.countDocuments({ status: 'blocked' }),
+      Booking.countDocuments({ status: 'confirmed' }),
+      User.countDocuments({ role: 'customer' }),
+      Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Vendor.find().sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name').lean(),
+      User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5).lean(),
+      Review.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName').lean(),
+      WalletTransaction.aggregate([
+        { $match: { ...platformRevenueFilter, timestamp: { $gte: rangeStart } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } }, total: { $sum: '$amount' } } },
+        { $sort: { _id: 1 } }
+      ]),
+      Booking.countDocuments({ createdAt: { $gte: rangeStart } }),
+      Vendor.countDocuments({ 
+        walletBalance: { $lt: minimumWalletThreshold },
+        planType: { $ne: 'trial' } 
+      }),
+      Vendor.countDocuments({ status: 'inactive' })
+    ]);
+
+    const stats = { active: 0, completed: 0, cancelled: 0 };
+    bookingStats.forEach(s => {
+      if (['confirmed', 'ongoing'].includes(s._id)) stats.active += s.count;
+      if (s._id === 'completed') stats.completed = s.count;
+      if (s._id === 'cancelled') stats.cancelled = s.count;
+    });
+
+    // 填充日期缺口，确保图表显示连续的日期范围 (Fill date gaps)
+    const revenueMap = new Map(revenueGraph.map(g => [g._id, g.total]));
+    const filledGraph = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const dateStr = moment().subtract(i, 'days').format('YYYY-MM-DD');
+      filledGraph.push({
+        date: moment(dateStr).format('DD MMM'),
+        amount: revenueMap.get(dateStr) || 0
+      });
+    }
+
+    const dashboardData = {
+      todayRevenue: todayRevenue[0]?.total || 0,
+      yesterdayRevenue: yesterdayRevenue[0]?.total || 0,
+      totalRevenue: totalRevenue[0]?.total || 0,
+      newVendors,
+      totalPartners,
+      totalActivePartners: activePartners, // Mapping for frontend
+      activePartners,
+      pendingPartners,
+      blockedPartners,
+      activeBookings,
+      totalUsers,
+      bookingStats: stats,
+      recentVendors,
+      recentUsers,
+      recentReviews,
+      alerts: {
+        lowBalanceVendors: lowBalanceCount,
+        inactiveVendors: inactiveVendorsCount
+      },
+      revenueGraph: filledGraph,
+      totalBookingsInRange: totalBookingsInRange || 0
+    };
+
+    try {
+      await redis.setEx(cacheKey, 300, JSON.stringify(dashboardData)); // 5 min cache
+    } catch (err) {
+      console.warn('Redis write error for admin dashboard:', err.message);
+    }
+
+    res.status(200).json(dashboardData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 🏪 VENDOR MANAGEMENT SYSTEM (STEP 3 - REFINED)
+const getVendors = async (req, res) => {
+  try {
+    const { search, status, serviceLevel, planType, isActive, page = 1, limit = 10 } = req.query;
+    const filter = {};
+    const settings = await getBillingSettings();
+
+    if (search) {
+      filter.shopName = { $regex: search, $options: 'i' };
+    }
+    if (status) filter.status = status;
+    if (serviceLevel) filter.serviceLevel = serviceLevel;
+    if (isActive !== undefined) filter.isActive = isActive === 'true';
+    if (planType) filter.planType = planType;
+
+    const vendors = await Vendor.find(filter)
+      .populate('ownerId', 'name phone email')
+      .populate('category', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const count = await Vendor.countDocuments(filter);
+    const hydratedVendors = await Promise.all(vendors.map(async (v) => {
+      const subscriptionState = await getVendorSubscriptionState(v);
+      return {
+        ...v._doc,
+        subscription: {
+          type: subscriptionState.currentPlan,
+          isActive: subscriptionState.isActive
+        }
+      };
+    }));
+
+    res.status(200).json({
+      vendors: hydratedVendors,
+      minimumWalletThreshold: settings.minWalletThreshold || 100,
+      freeTrialDays: settings.freeTrialDays || 7,
+      totalPages: Math.ceil(count / limit),
+      currentPage: Number(page),
+      totalVendors: count
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const rejectVendor = async (req, res) => {
+  try {
+    const { rejectionReason } = req.body;
+    if (!rejectionReason) return res.status(400).json({ message: 'Reason required' });
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    vendor.status = 'rejected';
+    vendor.isActive = false;
+    vendor.rejectionReason = rejectionReason;
+    await vendor.save();
+
+    NotificationService.sendNotification({
+      userIds: [vendor.ownerId],
+      role: 'vendor',
+      type: 'VENDOR_REJECTED',
+      title: 'Partner Profile Rejected',
+      message: `Your partner profile could not be approved. Reason: ${rejectionReason}. Please update your documents and try again.`,
+      data: { vendorId: vendor._id, reason: rejectionReason },
+      referenceId: `REJECT_${vendor._id}`
+    });
+
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const toggleBlockVendor = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    if (vendor.status === 'blocked') {
+      const subscriptionState = await getVendorSubscriptionState(vendor);
+      vendor.status = subscriptionState.isActive ? 'active' : 'inactive';
+    } else {
+      vendor.status = 'blocked';
+    }
+
+    await vendor.save();
+
+    safeSendNotification({
+      userIds: vendor.ownerId,
+      role: 'vendor',
+      type: vendor.status === 'blocked' ? 'ACCOUNT_BLOCKED' : 'ACCOUNT_UNBLOCKED',
+      title: vendor.status === 'blocked' ? 'Partner Account Restricted' : 'Partner Account Restored',
+      message: vendor.status === 'blocked'
+        ? 'Your partner account has been restricted by the admin team. Please contact support for details.'
+        : 'Your partner account has been restored and is available again.',
+      referenceId: `VENDOR_${vendor.status === 'blocked' ? 'BLOCK' : 'UNBLOCK'}_${vendor._id}_${Date.now()}`
+    });
+
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const toggleVendorActive = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    vendor.isActive = !vendor.isActive;
+    await vendor.save();
+
+    safeSendNotification({
+      userIds: vendor.ownerId,
+      role: 'vendor',
+      type: vendor.isActive ? 'PARTNER_ACTIVATED' : 'PARTNER_DEACTIVATED',
+      title: vendor.isActive ? 'Partner Profile Activated' : 'Partner Profile Deactivated',
+      message: vendor.isActive
+        ? 'Your partner profile is active again and visible on ZeroOne.'
+        : 'Your partner profile has been deactivated by the admin team.',
+      referenceId: `VENDOR_ACTIVE_${vendor._id}_${Date.now()}`
+    });
+
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const extendVendorFreeTrial = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+
+    const vendor = await Vendor.findById(req.params.id).populate('ownerId', 'name');
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    const extensionDays = Number(req.body?.days);
+    if (!Number.isFinite(extensionDays) || extensionDays <= 0) {
+      return res.status(400).json({ message: 'A valid trial extension in days is required' });
+    }
+
+    const subscriptionState = await getVendorSubscriptionState(vendor);
+    if (subscriptionState.isMonthlyActive) {
+      return res.status(400).json({ message: 'Monthly subscription is already active for this vendor' });
+    }
+
+    // Set expiry to TODAY + extensionDays, at the very end of that day (Full Day logic)
+    const nextExpiry = moment().tz('Asia/Kolkata').add(extensionDays, 'days').endOf('day').toDate();
+
+    vendor.freeTrial = {
+      ...(vendor.freeTrial || {}),
+      isActive: true,
+      expiryDate: nextExpiry
+    };
+
+    vendor.planType = 'trial';
+    if (!['pending', 'blocked', 'rejected'].includes(vendor.status)) {
+      vendor.status = 'active';
+      vendor.isActive = true;
+    }
+
+    await vendor.save();
+
+    await NotificationService.sendNotification({
+      userIds: vendor.ownerId?._id || vendor.ownerId,
+      role: 'vendor',
+      type: 'TRIAL_EXTENDED',
+      title: 'Free Trial Extended',
+      message: `Your free trial has been extended by ${extensionDays} day${extensionDays > 1 ? 's' : ''} and is now active until ${moment(nextExpiry).format('D MMMM YYYY')}.`,
+      referenceId: `TRIAL_EXTEND_${vendor._id}_${Date.now()}`
+    });
+
+    res.status(200).json({
+      message: `Free trial extended until ${moment(nextExpiry).format('D MMMM YYYY')}`,
+      vendor
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getVendorInsights = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.params.id).populate('ownerId', 'name phone');
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    const { from, to } = req.query;
+    const now = moment().tz('Asia/Kolkata');
+    const startDate = from
+      ? moment.tz(from, 'YYYY-MM-DD', 'Asia/Kolkata').startOf('day')
+      : now.clone().startOf('month');
+    const endDate = to
+      ? moment.tz(to, 'YYYY-MM-DD', 'Asia/Kolkata').endOf('day')
+      : now.clone().endOf('day');
+
+    const [bookings, completedBookingsData] = await Promise.all([
+      Booking.find({
+        vendorId: vendor._id,
+        startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+      })
+        .populate('userId', 'name')
+        .populate('staffId', 'name')
+        .sort({ startTime: -1 })
+        .limit(20)
+        .lean(),
+      Booking.find({
+        vendorId: vendor._id,
+        status: 'completed',
+        startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+      }).select('totalPrice')
+    ]);
+
+    const totalRevenue = completedBookingsData.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+    const totalBookings = bookings.length;
+    const completedBookings = bookings.filter((booking) => booking.status === 'completed').length;
+    const cancelledBookings = bookings.filter((booking) => booking.status === 'cancelled').length;
+
+    res.status(200).json({
+      vendor: {
+        _id: vendor._id,
+        shopName: vendor.shopName,
+        ownerName: vendor.ownerId?.name || ''
+      },
+      range: {
+        from: startDate.format('YYYY-MM-DD'),
+        to: endDate.format('YYYY-MM-DD')
+      },
+      summary: {
+        totalBookings,
+        completedBookings,
+        cancelledBookings,
+        totalRevenue
+      },
+      bookings: bookings.map((booking) => ({
+        _id: booking._id,
+        customerName: booking.walkInCustomerName || booking.userId?.name || 'Customer',
+        staffName: booking.staffId?.name || 'Owner',
+        status: booking.status,
+        totalPrice: booking.totalPrice,
+        startTime: booking.startTime,
+        services: booking.services || []
+      })),
+      revenue: completedBookingsData.slice(0, 20).map((item) => ({
+        _id: item._id,
+        amount: item.totalPrice || 0,
+        description: 'Service completed',
+        timestamp: item.startTime
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAdminAccounts = async (req, res) => {
+  try {
+    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can manage admin access' });
+
+    const { search = '', status = 'all' } = req.query;
+    const filter = { role: { $in: ['admin', 'super_admin'] } };
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (status === 'blocked') filter.isBlocked = true;
+    if (status === 'active') filter.isBlocked = false;
+
+    const admins = await User.find(filter)
+      .select('-password -otp -otpExpires')
+      .sort({ role: 1, createdAt: -1 });
+
+    res.status(200).json(admins.map(sanitizeAdminAccount));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const createAdminAccount = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+
+    const { name, phone, password, email } = req.body || {};
+    if (!name?.trim() || !phone?.trim() || !password) {
+      return res.status(400).json({ message: 'Name, phone and password are required' });
+    }
+
+    if (!/^\d{10}$/.test(phone.trim())) {
+      return res.status(400).json({ message: 'Admin phone must be a valid 10-digit number' });
+    }
+
+    if (String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    const existingUser = await User.findOne({ phone: phone.trim() });
+    if (existingUser) {
+      return res.status(400).json({ message: 'An account with this phone number already exists' });
+    }
+
+    const admin = await User.create({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email?.trim() || undefined,
+      password,
+      role: 'admin',
+      isBlocked: false
+    });
+
+    res.status(201).json(sanitizeAdminAccount(admin));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateAdminProfile = async (req, res) => {
+  try {
+    const { name, phone, password } = req.body;
+    const admin = await User.findById(req.user._id);
+    if (!admin) return res.status(404).json({ message: 'Admin not found' });
+
+    if (name) admin.name = name.trim();
+    if (phone) {
+      if (!/^\d{10}$/.test(phone.trim())) {
+        return res.status(400).json({ message: 'Phone must be a valid 10-digit number' });
+      }
+      const existing = await User.findOne({ phone: phone.trim(), _id: { $ne: admin._id } });
+      if (existing) return res.status(400).json({ message: 'Phone number already in use' });
+      admin.phone = phone.trim();
+    }
+    if (password) {
+      if (password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters' });
+      }
+      admin.password = password;
+    }
+
+    await admin.save();
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      admin: sanitizeAdminAccount(admin)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const toggleAdminAccountBlock = async (req, res) => {
+  try {
+    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can update admin access' });
+
+    const admin = await User.findById(req.params.id);
+    if (!admin || !ADMIN_ROLES.has(admin.role)) {
+      return res.status(404).json({ message: 'Admin account not found' });
+    }
+
+    if (String(admin._id) === String(req.user._id)) {
+      return res.status(400).json({ message: 'You cannot block your own account' });
+    }
+
+    if (admin.role === 'super_admin') {
+      return res.status(400).json({ message: 'Super admin accounts cannot be blocked here' });
+    }
+
+    admin.isBlocked = !admin.isBlocked;
+    await admin.save();
+
+    res.status(200).json({
+      message: `Admin ${admin.isBlocked ? 'blocked' : 'unblocked'} successfully`,
+      admin: sanitizeAdminAccount(admin)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteAdminAccount = async (req, res) => {
+  try {
+    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can delete admin accounts' });
+
+    const admin = await User.findById(req.params.id);
+    if (!admin || !ADMIN_ROLES.has(admin.role)) {
+      return res.status(404).json({ message: 'Admin account not found' });
+    }
+
+    if (String(admin._id) === String(req.user._id)) {
+      return res.status(400).json({ message: 'You cannot delete your own account' });
+    }
+
+    if (admin.role === 'super_admin') {
+      return res.status(400).json({ message: 'Super admin accounts cannot be deleted here' });
+    }
+
+    await admin.deleteOne();
+
+    res.status(200).json({ message: 'Admin account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteVendor = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    const ownerId = vendor.ownerId;
+
+    // Perform Cleanup (Delete all associated records)
+    await Promise.all([
+      Vendor.findByIdAndDelete(req.params.id),
+      User.findByIdAndDelete(ownerId),
+      Staff.deleteMany({ vendorId: req.params.id }),
+      Service.deleteMany({ vendorId: req.params.id }),
+      Booking.deleteMany({ vendorId: req.params.id }),
+      Offer.deleteMany({ vendorId: req.params.id }),
+      WalletTransaction.deleteMany({ vendorId: req.params.id }),
+      Review.deleteMany({ vendorId: req.params.id })
+    ]);
+
+    res.status(200).json({ message: 'Partner and all associated data deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const notifyLowBalance = async (req, res) => {
+  try {
+    const settings = await getBillingSettings();
+    const minThreshold = settings.minWalletThreshold || 100;
+    
+    const vendors = await Vendor.find({ 
+      walletBalance: { $lt: minThreshold },
+      planType: { $ne: 'trial' }
+    }).select('ownerId');
+    if (vendors.length === 0) return res.status(200).json({ message: 'No low balance partners found' });
+
+    const ownerIds = vendors.map(v => v.ownerId).filter(Boolean);
+    
+    if (ownerIds.length > 0) {
+      await NotificationService.sendNotification({
+        userIds: ownerIds,
+        role: 'vendor',
+        type: 'LOW_BALANCE',
+        title: 'Critical Alert: Wallet Balance Low',
+        message: 'Your partner wallet balance is critically low. Please recharge your wallet immediately to remain active and continue receiving bookings on ZeroOne.',
+        referenceId: `LOW_BALANCE_BLAST_${Date.now()}`
+      });
+    }
+
+    res.status(200).json({ message: `Notified ${ownerIds.length} partners successfully` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getStaffLiveReport = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'Start date and end date are required' });
+    }
+
+    const start = moment(startDate).tz('Asia/Kolkata').startOf('day').toDate();
+    const end = moment(endDate).tz('Asia/Kolkata').endOf('day').toDate();
+
+    const report = await Booking.aggregate([
+      {
+        $match: {
+          startTime: { $gte: start, $lte: end }
+        }
+      },
+      {
+        $group: {
+          _id: '$staffId',
+          totalBookings: { $sum: 1 },
+          totalEarning: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
+            }
+          },
+          cancelledByStaff: {
+            $sum: {
+              $cond: [
+                { 
+                  $and: [
+                    { $eq: ['$status', 'cancelled'] }, 
+                    { $eq: ['$cancelledByRole', 'staff'] }
+                  ] 
+                }, 
+                1, 
+                0
+              ]
+            }
+          },
+          // Active Days as "Attendance"
+          activeDays: {
+            $addToSet: {
+              $dateToString: { format: "%Y-%m-%d", date: "$startTime", timezone: "Asia/Kolkata" }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'staffs',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'staffInfo'
+        }
+      },
+      { $unwind: { path: '$staffInfo', preserveNullAndEmptyArrays: false } },
+      {
+        $lookup: {
+          from: 'vendors',
+          localField: 'staffInfo.vendorId',
+          foreignField: '_id',
+          as: 'vendorInfo'
+        }
+      },
+      { $unwind: { path: '$vendorInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          staffName: '$staffInfo.name',
+          shopName: { $ifNull: ['$vendorInfo.shopName', 'Unknown Shop'] },
+          totalBookings: 1,
+          totalEarning: 1,
+          cancelledByStaff: 1,
+          attendance: { $size: '$activeDays' }
+        }
+      },
+      { $sort: { totalEarning: -1 } }
+    ]);
+
+    res.status(200).json(report);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getWithdrawalRequests = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+    
+    const WithdrawalRequest = require('../models/WithdrawalRequest');
+    const requests = await WithdrawalRequest.find(filter)
+      .populate('vendorId', 'shopName ownerName walletBalance')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(requests);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const processWithdrawalRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, rejectionReason, adminNotes } = req.body;
+
+    const WithdrawalRequest = require('../models/WithdrawalRequest');
+    const request = await WithdrawalRequest.findById(id).populate('vendorId');
+    if (!request) return res.status(404).json({ message: 'Request not found' });
+
+    if (request.status !== 'pending') {
+      return res.status(400).json({ message: 'Request already processed' });
+    }
+
+    if (status === 'approved') {
+      const vendor = request.vendorId;
+      if (vendor.walletBalance < request.amount) {
+        return res.status(400).json({ message: 'Partner has insufficient balance now' });
+      }
+
+      // Deduct balance
+      vendor.walletBalance -= request.amount;
+      await vendor.save();
+
+      // Create transaction record
+      const { createWalletTransaction } = require('../services/walletService');
+      await createWalletTransaction({
+        vendorId: vendor._id,
+        amount: request.amount,
+        type: 'debit',
+        reason: 'wallet_withdrawal',
+        category: 'wallet_withdrawal', // Note: Need to add this to enum in WalletTransaction model
+        status: 'completed',
+        paymentGateway: 'system',
+        paymentMethod: request.method,
+        referenceId: request.referenceId,
+        description: `Wallet withdrawal approved: ${request.method}`
+      });
+
+      request.status = 'approved';
+      request.processedAt = new Date();
+    } else if (status === 'rejected') {
+      request.status = 'rejected';
+      request.rejectionReason = rejectionReason;
+      request.processedAt = new Date();
+    }
+
+    request.adminNotes = adminNotes;
+    await request.save();
+
+    // Notify Vendor
+    const NotificationService = require('../services/notificationService');
+    await NotificationService.sendNotification({
+      userIds: request.vendorId.ownerId,
+      role: 'vendor',
+      type: 'WITHDRAWAL_STATUS',
+      title: status === 'approved' ? 'Withdrawal Approved' : 'Withdrawal Rejected',
+      message: status === 'approved' 
+        ? `Your withdrawal request of ₹${request.amount} has been approved and processed.` 
+        : `Your withdrawal request of ₹${request.amount} was rejected. Reason: ${rejectionReason}`,
+      referenceId: `WITHDRAW_NOTIFY_${request._id}`
+    });
+
+    res.status(200).json({ message: `Request ${status} successfully`, request });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  getPendingVendors, approveVendor, rejectVendor, toggleBlockUser, addBalance,
+  createPlan, updatePlan, getRevenueReport, getAllUsers, getUserBookings,
+  getFilteredBookings, createCategory, getCategories, getAdminDashboard,
+  getVendors, toggleBlockVendor, toggleVendorActive, getUserDetail,
+  getBookingDetail, adminCancelBooking,
+  updateCategory, deleteCategory, getGlobalSettings, updateGlobalSettings, getSharedSettings,
+  broadcastNotification, getSubscriptionPlans,
+  getAdminAccounts, createAdminAccount, toggleAdminAccountBlock, deleteAdminAccount,
+  updateAdminProfile,
+  extendVendorFreeTrial, getVendorInsights, notifyLowBalance,
+  getStaffLiveReport,
+  getWithdrawalRequests,
+  processWithdrawalRequest,
+  deleteVendor
+};

@@ -1,0 +1,620 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Calendar, Clock, User, ChevronRight, AlertCircle, CheckCircle2, ShoppingBag } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCartStore } from '../store/cartStore';
+import Button from '../components/Button';
+import SectionTitle from '../components/SectionTitle';
+import api from '../services/api';
+import { cn } from '../utils/cn';
+import toast from 'react-hot-toast';
+import dayjs from 'dayjs';
+
+const Cart = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { items, vendor, clearCart, rescheduleBookingId, setRescheduleBookingId, addItem, getTotalPrice } = useCartStore();
+  const rescheduleTotalDuration = location.state?.rescheduleTotalDuration || null;
+  const formatPrice = (amount) => `Rs. ${Number(amount || 0).toFixed(2).replace(/\.00$/, '')}`;
+
+  const [selectedDate, setSelectedDate] = useState(null); // Null initially for progressive reveal
+  const [slots, setSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [allStaff, setAllStaff] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [loadingStaff, setLoadingStaff] = useState(false);
+  const [showFullCalendar, setShowFullCalendar] = useState(false);
+  const [pricingPreview, setPricingPreview] = useState(null);
+  const [rescheduleHydrating, setRescheduleHydrating] = useState(false);
+  const [reschedulePrefill, setReschedulePrefill] = useState(null);
+  const [prefillApplied, setPrefillApplied] = useState(false);
+  const [skipNextStaffReset, setSkipNextStaffReset] = useState(false);
+
+  // 🔄 INITIALIZE RESCHEDULE MODE (If navigated from Status Details)
+  useEffect(() => {
+    const hydrateRescheduleState = async () => {
+      if (!location.state?.rescheduleBookingId) return;
+
+      setRescheduleHydrating(true);
+
+      try {
+        clearCart();
+        setRescheduleBookingId(location.state.rescheduleBookingId);
+
+        let vendorData = location.state.vendor || null;
+        let rescheduleItems = location.state.rescheduleItems || [];
+        let rescheduleSelection = location.state.rescheduleSelection || null;
+
+        if (!vendorData || rescheduleItems.length === 0) {
+          const res = await api.get('/bookings/my');
+          const bookings = Array.isArray(res.data) ? res.data : [];
+          const booking = bookings.find((item) => String(item._id) === String(location.state.rescheduleBookingId));
+
+          if (booking) {
+            vendorData = booking.vendorId || vendorData;
+            rescheduleItems = (booking.services || []).map((service) => ({
+              _id: service.serviceId,
+              name: service.name,
+              price: service.price,
+              duration: service.duration,
+              bufferTime: service.bufferTime || 0
+            }));
+            rescheduleSelection = {
+              date: booking.startTime ? dayjs(booking.startTime).format('YYYY-MM-DD') : null,
+              time: booking.startTime ? dayjs(booking.startTime).format('HH:mm') : '',
+              staffId: booking.staffId?._id || booking.staffId || '',
+              staffName: booking.staffId?.name || '',
+              staffImage: booking.staffId?.image || ''
+            };
+          }
+        }
+
+        if (vendorData && rescheduleItems.length > 0) {
+          rescheduleItems.forEach((item) => {
+            addItem(vendorData, item);
+          });
+        }
+
+        if (rescheduleSelection?.date) {
+          setSelectedDate(rescheduleSelection.date);
+          setReschedulePrefill(rescheduleSelection);
+          setPrefillApplied(false);
+        }
+      } catch (error) {
+        toast.error('Failed to load booking for reschedule');
+      } finally {
+        setRescheduleHydrating(false);
+      }
+    };
+
+    hydrateRescheduleState();
+  }, [location.state, clearCart, setRescheduleBookingId, addItem]);
+
+  // 1. Generate Next 30 Days
+  const dates = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return {
+      full: dayjs(d).format('YYYY-MM-DD'),
+      day: d.toLocaleDateString('en-US', { weekday: 'short' }),
+      date: d.getDate()
+    };
+  });
+
+  // 2. Fetch Slots and Staff
+  useEffect(() => {
+    if (!vendor || items.length === 0 || !selectedDate) return;
+
+    const fetchBookingReadyData = async () => {
+      try {
+        setLoadingSlots(true);
+        setLoadingStaff(true);
+
+        const [slotsRes, staffRes] = await Promise.all([
+          api.get('/slots', {
+            params: {
+              vendorId: vendor?._id,
+              date: selectedDate,
+              serviceIds: items?.map(i => i?._id).filter(id => !!id).join(','),
+              excludeBookingId: rescheduleBookingId
+            }
+          }),
+          api.get('/staff', { params: { vendorId: vendor?._id, date: selectedDate } })
+        ]);
+
+        setSlots(slotsRes.data?.availableSlots || []);
+        setAllStaff(staffRes.data || []);
+      } catch (err) {
+        console.error('Failed to fetch booking data');
+      } finally {
+        setLoadingSlots(false);
+        setLoadingStaff(false);
+      }
+    };
+
+    fetchBookingReadyData();
+  }, [vendor, items, selectedDate]);
+
+  useEffect(() => {
+    if (!vendor?._id || items.length === 0) {
+      setPricingPreview(null);
+      return;
+    }
+
+    const fetchPricingPreview = async () => {
+      try {
+        const res = await api.get('/pricing/preview', {
+          params: {
+            vendorId: vendor._id,
+            serviceIds: items.map((item) => item._id).join(',')
+          }
+        });
+        setPricingPreview(res.data);
+      } catch (err) {
+        setPricingPreview(null);
+      }
+    };
+
+    fetchPricingPreview();
+  }, [vendor?._id, items]);
+
+  // 3. Filter Staff based on selected slot and services
+  useEffect(() => {
+    if (
+      prefillApplied ||
+      !reschedulePrefill?.date ||
+      !selectedDate ||
+      selectedDate !== reschedulePrefill.date ||
+      loadingSlots ||
+      loadingStaff
+    ) {
+      return;
+    }
+
+    const fallbackSlot = {
+      time: reschedulePrefill.time,
+      availableStaff: reschedulePrefill.staffId ? [String(reschedulePrefill.staffId)] : [],
+      isCurrentBookingSlot: true
+    };
+
+    const nextSelectedSlot = slots.find((slot) => slot.time === reschedulePrefill.time) || fallbackSlot;
+    setSkipNextStaffReset(true);
+    setSelectedSlot(nextSelectedSlot);
+
+    const matchedStaff = allStaff.find((member) => String(member._id) === String(reschedulePrefill.staffId));
+    if (matchedStaff) {
+      setSelectedStaff(matchedStaff);
+    } else if (reschedulePrefill.staffId) {
+      setSelectedStaff({
+        _id: reschedulePrefill.staffId,
+        name: reschedulePrefill.staffName || 'Selected Staff',
+        image: reschedulePrefill.staffImage || '',
+        services: items.map((item) => item._id)
+      });
+    }
+
+    setPrefillApplied(true);
+  }, [
+    prefillApplied,
+    reschedulePrefill,
+    selectedDate,
+    slots,
+    allStaff,
+    loadingSlots,
+    loadingStaff,
+    items
+  ]);
+
+  const displaySlots = slots.map(slot => ({
+    ...slot,
+    isCurrentBookingSlot: reschedulePrefill?.date === selectedDate && slot.time === reschedulePrefill?.time
+  }));
+
+  // Fallback: If for some reason the backend doesn't return the current slot, inject it manually
+  if (
+    reschedulePrefill?.date === selectedDate &&
+    reschedulePrefill?.time &&
+    !displaySlots.some((slot) => slot.time === reschedulePrefill.time)
+  ) {
+    displaySlots.unshift({
+      time: reschedulePrefill.time,
+      availableStaff: reschedulePrefill.staffId ? [String(reschedulePrefill.staffId)] : [],
+      isCurrentBookingSlot: true
+    });
+  }
+
+  const staffPool = selectedSlot?.isCurrentBookingSlot && selectedStaff && !allStaff.some((member) => String(member._id) === String(selectedStaff._id))
+    ? [selectedStaff, ...allStaff]
+    : allStaff;
+
+  const availableStaff = (staffPool || []).filter((staff) => {
+    // Check if staff supports all items in the current cart
+    const supportsAllSelectedServices = (items || []).every((item) =>
+      staff.services?.some((s) => {
+        const id = s?._id || s;
+        return String(id) === String(item._id);
+      })
+    );
+
+    if (!supportsAllSelectedServices) {
+      return false;
+    }
+
+    if (selectedSlot?.availableStaff) {
+      return selectedSlot.availableStaff.some((availableStaffId) => String(availableStaffId) === String(staff._id));
+    }
+
+    return true;
+  });
+
+  // Reset states when dependencies change for progressive reveal
+  useEffect(() => {
+    setSelectedSlot(null);
+    setSelectedStaff(null);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (skipNextStaffReset) {
+      setSkipNextStaffReset(false);
+      return;
+    }
+    setSelectedStaff(null);
+  }, [selectedSlot, skipNextStaffReset]);
+
+  const handleContinue = () => {
+    if (!selectedSlot) return alert("Please select a time slot");
+    if (
+      rescheduleBookingId &&
+      reschedulePrefill &&
+      selectedDate === reschedulePrefill.date &&
+      selectedSlot.time === reschedulePrefill.time &&
+      String(selectedStaff?._id || '') === String(reschedulePrefill.staffId || '')
+    ) {
+      return toast.error('Please choose a new slot or professional to reschedule');
+    }
+
+    navigate('/checkout-review', {
+      state: {
+        selectedDate,
+        selectedSlot: selectedSlot.time,
+        selectedStaff,
+        items,
+        vendor,
+        rescheduleBookingId,
+        totalDurationOverride: rescheduleTotalDuration
+      }
+    });
+  };
+
+  const formatTo12H = (time24) => {
+    if (!time24) return '--:--';
+    const [h, m] = time24.split(':');
+    const hour = parseInt(h);
+    const suffix = hour >= 12 ? 'PM' : 'AM';
+    const h12 = hour % 12 || 12;
+    return `${h12}:${m} ${suffix}`;
+  };
+
+  if (rescheduleHydrating) {
+    return (
+      <div className="p-10 text-center flex flex-col items-center justify-center min-h-[60vh]">
+        <ShoppingBag size={64} className="text-gray-200 mb-4 animate-pulse" />
+        <p className="text-gray-500 font-medium">Loading your booking...</p>
+      </div>
+    );
+  }
+
+  if (!vendor || items.length === 0) {
+    return (
+      <div className="p-10 text-center flex flex-col items-center justify-center min-h-[60vh]">
+        <ShoppingBag size={64} className="text-gray-200 mb-4" />
+        <p className="text-gray-500 font-medium">Your cart is empty</p>
+        <Button className="mt-6" onClick={() => navigate('/')}>Find Services</Button>
+      </div>
+    );
+  }
+
+  const pricingMap = (pricingPreview?.services || []).reduce((acc, service) => {
+    acc[service.serviceId] = service;
+    return acc;
+  }, {});
+  const displayTotal = pricingPreview?.finalTotal ?? getTotalPrice();
+  const originalTotal = pricingPreview?.originalTotal ?? getTotalPrice();
+  const totalSavings = pricingPreview?.totalDiscount ?? 0;
+
+  return (
+    <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in slide-in-from-right-4 duration-500">
+      {/* Header */}
+      <div className="p-2.5 py-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
+          <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
+        </button>
+        <div className="text-center leading-none">
+          <p className="text-[10px] font-black tracking-widest text-slate-400">Step 1 of 3</p>
+          <h1 className="font-extrabold text-[15px] text-gray-900 dark:text-white tracking-tight mt-0.5">Select Date & Time</h1>
+        </div>
+        <div className="w-10"></div>
+      </div>
+
+      <div className="px-5 mt-4 space-y-5 pb-24">
+        {/* Date Selection */}
+        <section>
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Select booking date</span>
+            <button
+              onClick={() => setShowFullCalendar(!showFullCalendar)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-blue-500/10 rounded-lg text-[10px] font-black text-[#1C2C4E] dark:text-blue-400 tracking-widest border border-slate-100 dark:border-blue-500/20 active:scale-95 transition-all shadow-sm"
+            >
+              <Calendar size={13} strokeWidth={3} />
+              {showFullCalendar ? 'List' : 'Calendar'}
+            </button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {!showFullCalendar ? (
+              <motion.div
+                key="list-view"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="flex gap-2 overflow-x-auto no-scrollbar pb-2 pt-2 px-1"
+              >
+                {dates.map((d) => (
+                  <button
+                    key={d.full}
+                    onClick={() => setSelectedDate(d.full)}
+                    className={cn(
+                      "flex flex-col items-center min-w-[50px] py-2 rounded-xl transition-all border shadow-sm",
+                      selectedDate === d.full
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-xl scale-105"
+                        : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 text-slate-400 shadow-sm"
+                    )}
+                  >
+                    <span className="text-[9px] uppercase font-black opacity-60 tracking-widest leading-none">{d.day}</span>
+                    <span className="text-[14px] font-black mt-1 tracking-tighter leading-none">{d.date}</span>
+                  </button>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="grid-view"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="grid grid-cols-7 gap-1 bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm"
+              >
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                  <div key={i} className="text-[8px] font-black text-slate-300 dark:text-slate-600 text-center uppercase py-1 tracking-widest">{day}</div>
+                ))}
+                {Array.from({ length: (new Date().getDay() + 6) % 7 }).map((_, i) => (
+                  <div key={`pad-${i}`} className="aspect-square" />
+                ))}
+                {dates.map((d) => (
+                  <button
+                    key={d.full}
+                    onClick={() => setSelectedDate(d.full)}
+                    className={cn(
+                      "aspect-square flex flex-col items-center justify-center rounded-xl transition-all text-[10px] font-black relative active:scale-90",
+                      selectedDate === d.full
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-md"
+                        : "bg-slate-50/50 dark:bg-gray-800/20 text-slate-400 hover:bg-slate-100 border border-slate-50 dark:border-transparent"
+                    )}
+                  >
+                    <span className="relative z-10">{d.date}</span>
+                    {d.full === dayjs().format('YYYY-MM-DD') && (
+                      <div className="absolute bottom-1 w-1 h-1 bg-current rounded-full opacity-50" />
+                    )}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+
+        {/* Selected Services Summary */}
+        <section className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+          <p className="text-[11px] font-black text-slate-400 tracking-widest mb-3 px-1 leading-none capitalize">Booking summary</p>
+          <div className="space-y-2.5">
+            {items.map(item => {
+              const priceMeta = pricingMap[item._id] || {
+                originalPrice: item.price,
+                finalPrice: item.price,
+                discount: 0
+              };
+
+              return (
+              <div key={item._id} className="flex justify-between items-center px-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#1C2C4E]" />
+                  <div className="flex flex-col">
+                    <span className="font-black text-[12px] text-gray-900 dark:text-white tracking-tight truncate max-w-[200px] leading-none capitalize">{item?.name || 'Service'}</span>
+                  </div>
+                </div>
+                <span className="font-black text-[13px] text-gray-900 dark:text-gray-300 tracking-tighter leading-none">₹{item?.price || 0}</span>
+                {false && priceMeta.discount > 0 && (
+                  <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest text-right ml-2">
+                    Now â‚¹{priceMeta.finalPrice}
+                  </p>
+                )}
+              </div>
+            )})}
+            <div className="h-[1px] bg-slate-50 dark:bg-gray-800 my-1" />
+            <div className="flex justify-between items-center font-black text-gray-900 dark:text-white tracking-widest capitalize text-[12px] px-1 leading-none">
+              <span>Total Value</span>
+              <span className="text-[#1C2C4E] dark:text-gray-400 tracking-tighter">{formatPrice(originalTotal)}</span>
+            </div>
+            {totalSavings > 0 && (
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1 text-emerald-500">
+                <span>Discounted Value</span>
+                <span>{formatPrice(displayTotal)}</span>
+              </div>
+            )}
+            {totalSavings > 0 && (
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1 text-slate-400">
+                <span>You Save</span>
+                <span>{formatPrice(totalSavings)}</span>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Time Slots */}
+        <AnimatePresence>
+          {selectedDate && (
+            <motion.section
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-2"
+            >
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Select time</span>
+                <span className="text-[9px] font-black text-emerald-500 tracking-widest capitalize">{items.length} services ready</span>
+              </div>
+              {loadingSlots ? (
+                <div className="grid grid-cols-3 gap-1.5 mt-2">
+                  {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-9 bg-slate-50 dark:bg-gray-800 rounded-lg animate-pulse border border-slate-100 dark:border-gray-800" />)}
+                </div>
+              ) : displaySlots.length === 0 ? (
+                <div className="p-4 text-center bg-red-500/5 rounded-xl border border-red-500/10 mt-2">
+                  <AlertCircle className="mx-auto text-red-500 mb-1" size={16} strokeWidth={3} />
+                  <p className="text-[8px] text-red-600 dark:text-red-400 font-black uppercase tracking-widest">
+                    Full House. Try another day.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2 p-1.5">
+                  {displaySlots.map((slot) => (
+                    <button
+                      key={slot.time}
+                      onClick={() => setSelectedSlot(slot)}
+                      className={cn(
+                        "py-3 rounded-lg font-black text-[11px] transition-all border border-slate-100 dark:border-gray-800 text-center capitalize tracking-widest shadow-sm active:scale-95",
+                        selectedSlot?.time === slot.time
+                          ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-lg"
+                          : slot.isCurrentBookingSlot
+                            ? "bg-amber-500/5 border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-sm"
+                            : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#1C2C4E]/10"
+                      )}
+                    >
+                      {formatTo12H(slot.time)}
+                      {slot.isCurrentBookingSlot && (
+                        <span className="block text-[7px] font-black opacity-70 mt-1 tracking-widest">
+                          Current
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* Staff Selection */}
+        <AnimatePresence>
+          {selectedSlot && (
+            <motion.section
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-2"
+            >
+              <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 capitalize leading-none">Choose professional</p>
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-2.5 px-1.5">
+                {availableStaff.map((s) => (
+                  <button
+                    key={s._id}
+                    onClick={() => {
+                      if (s.isOffDay) {
+                        toast.error(`${s.name} is not available on this date`);
+                        return;
+                      }
+                      setSelectedStaff(selectedStaff?._id === s._id ? null : s);
+                    }}
+                    className={cn(
+                      "relative flex flex-col items-center min-w-[80px] p-2 rounded-xl border transition-all active:scale-95 shadow-sm",
+                      selectedStaff?._id === s._id
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-xl scale-105"
+                        : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden mb-1.5 border border-slate-100 dark:border-gray-700 shadow-inner relative",
+                      s.isOffDay && "opacity-40 grayscale"
+                    )}>
+                      <img 
+                        src={s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} 
+                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true` }}
+                        className="w-full h-full object-cover" 
+                      />
+                      {s.isOffDay && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
+                           <span className="text-[6px] font-black text-white bg-red-600 px-1 py-0.5 rounded-full uppercase tracking-tighter">OFF</span>
+                        </div>
+                      )}
+                    </div>
+                    <span className={cn(
+                      "text-[10px] font-black truncate w-full text-center tracking-widest leading-tight capitalize",
+                      selectedStaff?._id === s._id ? "text-[#1C2C4E] dark:text-white" : "text-slate-400"
+                    )}>
+                      {s.name?.split(' ')[0] || 'Staff'}
+                    </span>
+
+                    {selectedStaff?._id === s._id && (
+                      <div className="absolute top-1 right-1 bg-emerald-500 text-white p-0.5 rounded-full ring-2 ring-slate-900 shadow-lg">
+                        <CheckCircle2 size={10} strokeWidth={3} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+                {availableStaff.length === 0 && !loadingStaff && (
+                  <div className="w-full bg-slate-50 dark:bg-gray-900/50 p-3 rounded-xl text-center border border-dashed border-slate-200 dark:border-gray-800">
+                    <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">No matching agents</p>
+                  </div>
+                )}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Sticky Bottom Bar */}
+        <motion.div
+          initial={{ y: 100, opacity: 0, scale: 0.9 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
+          className="fixed left-4 right-4 bg-slate-900 dark:bg-gray-900 py-2 px-5 rounded-2xl shadow-2xl z-50 border border-white/10 backdrop-blur-xl"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 54px)' }}
+        >
+        <div className="flex items-center justify-between">
+          <div className="leading-none">
+            <p className="text-[9px] font-black text-white/40 tracking-widest mb-1 leading-none capitalize">Net payable</p>
+            {totalSavings > 0 && (
+              <p className="text-[8px] font-black text-white/40 line-through tracking-widest mb-1 leading-none">
+                {formatPrice(originalTotal)}
+              </p>
+            )}
+            <p className="text-[20px] font-black text-white tracking-tighter leading-none">{formatPrice(displayTotal)}</p>
+            {totalSavings > 0 && (
+              <p className="text-[8px] font-black text-emerald-400 tracking-widest mt-1 leading-none">
+                Save {formatPrice(totalSavings)}
+              </p>
+            )}
+          </div>
+          <button
+            disabled={!selectedSlot}
+            onClick={handleContinue}
+            className="px-5 py-2.5 bg-white text-slate-900 rounded-xl font-black text-[12px] tracking-widest shadow-xl active:scale-95 disabled:opacity-30 transition-all flex items-center gap-1.5 border-b-2 border-slate-200 capitalize"
+          >
+            {rescheduleBookingId ? 'Reschedule' : 'Continue'}
+            <ChevronRight size={16} strokeWidth={3} />
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Cart;

@@ -1,0 +1,104 @@
+const express = require('express');
+const {
+  registerVendor, uploadDocs, getVendorProfile, getNearbyVendors,
+  updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings,
+  getVendorDashboard, getVendorDashboardBundle, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers,
+  deleteGalleryImage, updateSingleMedia, replaceGalleryImage, deleteVideo, getLiveReport
+} = require('../controllers/vendorController');
+const {
+  previewClosure,
+  createClosure,
+  listActiveClosures,
+  endClosure
+} = require('../controllers/vendorClosureController');
+const {
+  previewStaffClosure,
+  createStaffClosure,
+  listStaffClosures,
+  endStaffClosure
+} = require('../controllers/staffClosureController');
+const {
+  getVendorWalletOverview,
+  createWalletTopupOrder,
+  verifyWalletTopup,
+  createMonthlySubscriptionOrder,
+  verifyMonthlySubscription,
+  requestWithdrawal,
+  getMyWithdrawalRequests
+} = require('../controllers/billingController');
+const { vendorEmergencyCancel } = require('../controllers/bookingController');
+const { getMyVendorReviews } = require('../controllers/reviewController');
+const { getTransactions } = require('../controllers/transactionController');
+const { protect } = require('../middleware/authMiddleware');
+const { isApprovedVendor } = require('../middleware/vendorMiddleware');
+const upload = require('../middleware/uploadMiddleware');
+
+const router = express.Router();
+
+router.post('/register', protect, registerVendor);
+router.get('/profile', protect, getVendorProfile);
+router.get('/dashboard', protect, isApprovedVendor, getVendorDashboard);
+router.get('/dashboard-bundle', protect, isApprovedVendor, getVendorDashboardBundle);
+router.get('/nearby', getNearbyVendors); // Public discovery
+router.get('/transactions', protect, isApprovedVendor, getTransactions);
+router.get('/reviews', protect, isApprovedVendor, getMyVendorReviews);
+router.get('/wallet/overview', protect, isApprovedVendor, getVendorWalletOverview);
+router.post('/wallet/topup/order', protect, isApprovedVendor, createWalletTopupOrder);
+router.post('/wallet/topup/verify', protect, isApprovedVendor, verifyWalletTopup);
+router.post('/wallet/subscription/order', protect, isApprovedVendor, createMonthlySubscriptionOrder);
+router.post('/wallet/subscription/verify', protect, isApprovedVendor, verifyMonthlySubscription);
+router.post('/wallet/withdraw', protect, isApprovedVendor, requestWithdrawal);
+router.get('/wallet/withdrawals', protect, isApprovedVendor, getMyWithdrawalRequests);
+
+// 1. Shop Control
+router.patch('/shop-status', protect, isApprovedVendor, updateShopStatus);
+router.patch('/update-profile', protect, isApprovedVendor, updateShopProfile);
+router.post('/closures/preview', protect, isApprovedVendor, previewClosure);
+router.post('/closures', protect, isApprovedVendor, createClosure);
+router.get('/closures', protect, isApprovedVendor, listActiveClosures);
+router.patch('/closures/:id/end', protect, isApprovedVendor, endClosure);
+
+// 4. Staff Closures
+router.post('/staff-closures/preview', protect, isApprovedVendor, previewStaffClosure);
+router.post('/staff-closures', protect, isApprovedVendor, createStaffClosure);
+router.get('/staff-closures', protect, isApprovedVendor, listStaffClosures);
+router.patch('/staff-closures/:id/end', protect, isApprovedVendor, endStaffClosure);
+
+// 2. Offer Management
+router.post('/offers', protect, isApprovedVendor, createOffer);
+router.get('/offers', protect, isApprovedVendor, getOffers);
+router.patch('/offers/:id', protect, isApprovedVendor, updateOffer);
+
+// 3. Filtered Bookings
+router.get('/bookings', protect, isApprovedVendor, getVendorBookings);
+router.patch('/bookings/:id/emergency-cancel', protect, isApprovedVendor, vendorEmergencyCancel);
+router.post('/walk-in', protect, isApprovedVendor, createWalkIn);
+router.get('/loyal-customers', protect, isApprovedVendor, getLoyalCustomers);
+router.post('/manual-booking', protect, isApprovedVendor, createManualBooking);
+router.get('/live-report', protect, isApprovedVendor, getLiveReport);
+
+// Multipart upload for docs
+router.post(
+  '/upload-docs',
+  protect,
+  upload.fields([
+    { name: 'aadhaarFront', maxCount: 1 },
+    { name: 'aadhaarBack', maxCount: 1 },
+    { name: 'panCard', maxCount: 1 },
+    { name: 'gstCertificate', maxCount: 1 },
+    { name: 'shopRegistration', maxCount: 1 },
+    { name: 'shopImage', maxCount: 1 },
+    { name: 'vendorPhoto', maxCount: 1 },
+    { name: 'gallery', maxCount: 5 },
+    { name: 'video', maxCount: 1 },
+  ]),
+  uploadDocs
+);
+
+// 6. Media Management (NEW)
+router.post('/gallery/delete', protect, isApprovedVendor, deleteGalleryImage);
+router.post('/gallery/replace', protect, isApprovedVendor, upload.single('media'), replaceGalleryImage);
+router.post('/media/single', protect, isApprovedVendor, upload.single('media'), updateSingleMedia);
+router.delete('/video/delete', protect, isApprovedVendor, deleteVideo);
+
+module.exports = router;
