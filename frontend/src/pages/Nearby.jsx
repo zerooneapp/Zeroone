@@ -122,7 +122,7 @@ const Nearby = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-20 animate-in fade-in duration-500">
       {/* Sticky Header with Search */}
-      <div className="sticky top-16 z-40 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md pt-2">
+      <div className="sticky top-[88px] z-40 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md pt-2">
         <div className="px-4 flex items-center gap-3 mb-2">
           <button 
             onClick={() => navigate(-1)}

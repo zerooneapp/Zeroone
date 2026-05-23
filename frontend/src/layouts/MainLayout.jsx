@@ -35,7 +35,7 @@ const MainLayout = () => {
       {!shouldHideHeader && (
         <Header onOpenNotifications={() => setShowNotifications(true)} />
       )}
-      <main className={`max-w-4xl mx-auto animate-in fade-in duration-500 ${!shouldHideHeader ? 'pt-[60px]' : ''}`}>
+      <main className={`max-w-4xl mx-auto animate-in fade-in duration-500 ${!shouldHideHeader ? 'pt-[104px]' : ''}`}>
         <Suspense fallback={null}>
           <Outlet />
         </Suspense>
