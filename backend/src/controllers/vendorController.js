@@ -650,12 +650,8 @@ const updateShopProfile = async (req, res) => {
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
-    const { isShopCurrentlyOpen } = require('../utils/shopStatus');
-
     if (workingHours) {
       vendor.workingHours = workingHours;
-      vendor.isShopOpen = isShopCurrentlyOpen(workingHours);
-      if (vendor.isShopOpen) vendor.isClosedToday = false;
     }
     if (shopName) vendor.shopName = shopName;
     if (address) vendor.address = address;
