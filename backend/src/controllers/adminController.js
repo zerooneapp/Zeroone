@@ -52,7 +52,7 @@ const sanitizeAdminAccount = (admin) => ({
 
 const updateCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
     res.status(200).json(category);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -103,7 +103,7 @@ const getSharedSettings = async (req, res) => {
 
 const updateGlobalSettings = async (req, res) => {
   try {
-    const settings = await GlobalSettings.findOneAndUpdate({}, req.body, { new: true, upsert: true });
+    const settings = await GlobalSettings.findOneAndUpdate({}, req.body, { returnDocument: 'after', upsert: true });
     // Invalidate global settings cache
     await redis.del('global_settings');
     res.status(200).json(settings);
@@ -305,7 +305,7 @@ const createPlan = async (req, res) => {
 
 const updatePlan = async (req, res) => {
   try {
-    const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
     
     // Invalidate all subscription plans cache with multiple methods for safety
     try {

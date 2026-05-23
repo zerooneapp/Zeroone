@@ -68,7 +68,7 @@ exports.approvePromotion = async (req, res) => {
     const vendor = await Vendor.findByIdAndUpdate(request.vendorId, {
       isPromoted: true,
       promotionExpiry: endDate
-    }, { new: true });
+    }, { returnDocument: 'after' });
 
     if (vendor) {
        // Notify Vendor

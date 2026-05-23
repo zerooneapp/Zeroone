@@ -383,7 +383,7 @@ const getOffers = async (req, res) => {
 const updateOffer = async (req, res) => {
   try {
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
-    const offer = await Offer.findOneAndUpdate({ _id: req.params.id, vendorId: vendor._id }, req.body, { new: true });
+    const offer = await Offer.findOneAndUpdate({ _id: req.params.id, vendorId: vendor._id }, req.body, { returnDocument: 'after' });
     res.status(200).json(offer);
   } catch (error) { res.status(400).json({ message: error.message }); }
 };

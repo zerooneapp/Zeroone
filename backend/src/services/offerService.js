@@ -16,7 +16,7 @@ const updateOffer = async (vendorId, offerId, updateData) => {
   return await Offer.findOneAndUpdate(
     { _id: offerId, vendorId },
     updateData,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 };
 

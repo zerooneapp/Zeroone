@@ -125,7 +125,7 @@ const updateService = async (vendorId, serviceId, updateData) => {
   const service = await Service.findOneAndUpdate(
     { _id: serviceId, vendorId },
     updateData,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   if (service) {
@@ -139,7 +139,7 @@ const softDeleteService = async (vendorId, serviceId) => {
   const service = await Service.findOneAndUpdate(
     { _id: serviceId, vendorId },
     { isActive: false, showOnHome: false },
-    { new: true }
+    { returnDocument: 'after' }
   );
   if (service) {
     await ensureVendorHomeService(vendorId);

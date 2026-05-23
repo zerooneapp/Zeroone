@@ -99,7 +99,7 @@ exports.updatePlan = async (req, res) => {
     const plan = await VendorMembershipPlan.findOneAndUpdate(
       { _id: id, vendorId },
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!plan) return res.status(404).json({ message: 'Plan not found' });

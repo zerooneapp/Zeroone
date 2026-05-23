@@ -280,7 +280,7 @@ class NotificationService {
                 createdAt: new Date()
               } 
             },
-            { upsert: true, new: true, rawResult: true }
+            { upsert: true, returnDocument: 'after', rawResult: true }
           );
           
           // Only proceed if it was newly inserted

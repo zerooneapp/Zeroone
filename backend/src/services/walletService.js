@@ -116,7 +116,7 @@ const ensureSubscriptionPlans = async () => {
         SubscriptionPlan.findOneAndUpdate(
           { level, type },
           { $setOnInsert: { price: DEFAULT_PLAN_PRICES[level][type] } },
-          { upsert: true, new: true }
+          { upsert: true, returnDocument: 'after' }
         )
       );
     }
