@@ -15,6 +15,7 @@ const VendorStaff = () => {
     staffLoading: loading,
     dashboardData: vendorData,
     fetchStaff,
+    fetchDashboard,
     setStaffData: setStaff
   } = useVendorStore();
 
@@ -35,6 +36,9 @@ const VendorStaff = () => {
   const handleFetch = async (force = false) => {
     try {
       await fetchStaff(force);
+      if (!vendorData) {
+        await fetchDashboard();
+      }
       
       // Secondary check for home service mode if vendorData is already available
       if (vendorData && vendorData.serviceMode === 'home') {

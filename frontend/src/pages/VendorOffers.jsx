@@ -14,6 +14,7 @@ const VendorOffers = () => {
     promotionsLoading: loading,
     dashboardData: vendorData,
     fetchPromotions,
+    fetchDashboard,
     setPromotionsData: setOffers
   } = useVendorStore();
 
@@ -22,6 +23,9 @@ const VendorOffers = () => {
   const handleFetch = async (force = false) => {
     try {
       await fetchPromotions(force);
+      if (!vendorData) {
+        await fetchDashboard();
+      }
     } catch (err) {
       toast.error('Failed to load promotions');
     }

@@ -14,6 +14,7 @@ const VendorServices = () => {
     servicesLoading: loading,
     dashboardData: vendorData,
     fetchServices,
+    fetchDashboard,
     setServicesData: setServices
   } = useVendorStore();
 
@@ -24,6 +25,9 @@ const VendorServices = () => {
   const handleFetch = async (force = false) => {
     try {
       await fetchServices(force);
+      if (!vendorData) {
+        await fetchDashboard();
+      }
     } catch (err) {
       toast.error('Failed to load services');
     }
