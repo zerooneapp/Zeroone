@@ -55,7 +55,7 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
             className="fixed right-0 top-0 h-full w-full max-w-sm bg-slate-50 dark:bg-gray-950 shadow-2xl z-[120] flex flex-col border-l border-slate-100 dark:border-gray-800"
           >
-            <div className="px-4 pt-5 pb-3 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 transition-colors">
+            <div className="px-4 pt-12 pb-3 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 transition-colors">
               <div>
                 <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Notifications</h2>
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">
