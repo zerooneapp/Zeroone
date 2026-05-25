@@ -52,8 +52,25 @@ const vendorSchema = new mongoose.Schema({
   isClosedToday: { type: Boolean, default: false },
   closedDates: [{ type: Date }],
   isPromoted: { type: Boolean, default: false },
-  promotionExpiry: { type: Date }
+  promotionExpiry: { type: Date },
+  todayOpenDurationMs: { type: Number, default: 0 },
+  lastOpenedAt: { type: Date }
 }, { timestamps: true });
+
+vendorSchema.pre('save', async function () {
+  if (this.isModified('isShopOpen')) {
+    const now = new Date();
+    if (this.isShopOpen) {
+      this.lastOpenedAt = now;
+    } else {
+      if (this.lastOpenedAt) {
+        const duration = now.getTime() - new Date(this.lastOpenedAt).getTime();
+        this.todayOpenDurationMs = (this.todayOpenDurationMs || 0) + duration;
+        this.lastOpenedAt = null;
+      }
+    }
+  }
+});
 
 vendorSchema.index({ location: '2dsphere' });
 

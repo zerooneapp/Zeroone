@@ -177,7 +177,17 @@ const getVendorSubscriptionState = async (vendor, options = {}) => {
   const dailyPrice = basePrice + gstAmount;
   
   // Rule: Balance must be >= (Threshold + Daily Fees) to stay active
-  const totalRequired = Number(minimumWalletThreshold) + dailyPrice;
+  // But if today's daily fee has already been deducted, totalRequired is just the threshold!
+  const todayStr = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+  const didDeductToday = Boolean(
+    vendor.lastDeductionDate &&
+    moment(vendor.lastDeductionDate).tz('Asia/Kolkata').format('YYYY-MM-DD') === todayStr
+  );
+
+  const totalRequired = didDeductToday
+    ? Number(minimumWalletThreshold)
+    : Number(minimumWalletThreshold) + dailyPrice;
+
   const isDailyActive = effectivePlanType === 'daily' && Number(vendor.walletBalance || 0) >= totalRequired;
 
   return {
@@ -256,7 +266,6 @@ const formatInr = (amount = 0) => `Rs ${Number(amount || 0).toLocaleString('en-I
 const processDailyDeduction = async (vendor) => {
   normalizeVendorPlanState(vendor);
   const today = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
-  const yesterday = moment().tz('Asia/Kolkata').subtract(1, 'day').format('YYYY-MM-DD');
 
   if (
     vendor.lastDeductionDate &&
@@ -275,17 +284,25 @@ const processDailyDeduction = async (vendor) => {
     return vendor.save();
   }
 
-  // 2. Post-Paid Deduction: Take money for the day that just passed
-  // We only deduct if the vendor was "Discoverable" (Active) during that period
+  // 2. Today-Paid Deduction: Take money for the current day (today)
+  // We only deduct if the vendor was open for at least 3 hours today
   const dailyPlan = await getSubscriptionPlanForVendor('daily', vendor.serviceLevel);
   const basePrice = dailyPlan.price || 0;
   const gstAmount = dailyPlan.gstPercent ? (basePrice * dailyPlan.gstPercent) / 100 : 0;
   const dailyPrice = basePrice + gstAmount;
 
-  const wasActiveYesterday = vendor.status === 'active';
+  // Calculate cumulative open duration today
+  let totalOpenDurationMs = vendor.todayOpenDurationMs || 0;
+  if (vendor.isShopOpen && vendor.lastOpenedAt) {
+    const currentSession = Date.now() - new Date(vendor.lastOpenedAt).getTime();
+    totalOpenDurationMs += currentSession;
+  }
 
-  if (wasActiveYesterday) {
-    const referenceId = `POST_DAILY_${vendor._id}_${today}`;
+  const minOpenDurationMs = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+  const wasOpenAtLeast3Hours = totalOpenDurationMs >= minOpenDurationMs;
+
+  if (wasOpenAtLeast3Hours) {
+    const referenceId = `TODAY_DAILY_${vendor._id}_${today}`;
     
     // 🛡️ IDEMPOTENCY CHECK: Ensure we haven't already deducted for this day
     const existing = await WalletTransaction.findOne({ referenceId });
@@ -301,19 +318,24 @@ const processDailyDeduction = async (vendor) => {
         paymentGateway: 'system',
         paymentMethod: 'wallet',
         referenceId,
-        description: `${getNormalizedServiceLevel(vendor.serviceLevel)} Service Day: ${yesterday}. (Base: ₹${basePrice} + GST: ₹${gstAmount})`
+        description: `${getNormalizedServiceLevel(vendor.serviceLevel)} Service Day: ${today}. (Base: ₹${basePrice} + GST: ₹${gstAmount})`
       });
     }
   }
 
-  // 3. Status Update: Set status for the UPCOMING day based on new balance
-  // Rule: Balance must be >= (Threshold + Daily Fees)
-  const isBalanceSufficient = vendor.walletBalance >= state.totalRequired;
-  vendor.status = isBalanceSufficient ? 'active' : 'inactive';
-  vendor.lastDeductionDate = new Date();
+  // Reset open duration tracking fields for the next billing cycle
+  vendor.todayOpenDurationMs = 0;
+  vendor.lastOpenedAt = vendor.isShopOpen ? new Date() : null;
 
-  if (!isBalanceSufficient) {
-    const shortfall = Math.max(state.totalRequired - vendor.walletBalance, 0);
+  // 3. Status Update: Set status based on new balance
+  // Since we updated lastDeductionDate to today, the threshold check will dynamically
+  // drop to just minimumWalletThreshold (e.g. ₹10) for the rest of today.
+  vendor.lastDeductionDate = new Date();
+  const updatedState = await getVendorSubscriptionState(vendor);
+  vendor.status = updatedState.isActive ? 'active' : 'inactive';
+
+  if (!updatedState.isActive) {
+    const shortfall = Math.max(updatedState.totalRequired - vendor.walletBalance, 0);
     await NotificationService.sendNotification({
       userIds: vendor.ownerId,
       role: 'vendor',
@@ -349,22 +371,8 @@ const addFunds = async (vendor, amount, reason = 'admin_topup', options = {}) =>
     metadata: options.metadata || {}
   });
 
-  if (vendor.planType === 'daily') {
-    const didDeductToday = Boolean(
-      vendor.lastDeductionDate &&
-      moment(vendor.lastDeductionDate).tz('Asia/Kolkata').isSame(moment().tz('Asia/Kolkata'), 'day')
-    );
-
-    if (!didDeductToday) {
-      await processDailyDeduction(vendor);
-    } else {
-      vendor.status = await getUpdatedStatus(vendor);
-      await vendor.save();
-    }
-  } else {
-    vendor.status = await getUpdatedStatus(vendor);
-    await vendor.save();
-  }
+  vendor.status = await getUpdatedStatus(vendor);
+  await vendor.save();
 
   await NotificationService.sendNotification({
     userIds: vendor.ownerId,
