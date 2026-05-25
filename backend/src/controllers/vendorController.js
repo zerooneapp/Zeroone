@@ -17,8 +17,13 @@ const {
   getVendorSubscriptionState
 } = require('../services/walletService');
 const Staff = require('../models/Staff');
+const { hasLegacyShopOfflineClosure } = require('../services/vendorClosureService');
 
 const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
+
+const getOperationalShopOpen = async (vendor) => (
+  vendor.isShopOpen || await hasLegacyShopOfflineClosure(vendor._id)
+);
 
 const buildPublicVendorResponse = (vendor, extra = {}) => {
   const { isShopCurrentlyOpen } = require('../utils/shopStatus');
@@ -257,6 +262,7 @@ const getNearbyVendors = async (req, res) => {
     const vendors = await Vendor.aggregate(pipeline);
 
     const enrichedVendors = await Promise.all(vendors.map(async (v) => {
+      const operationalShopOpen = await getOperationalShopOpen(v);
       const allServices = await Service.find({ vendorId: v._id, isActive: true })
         .select('_id name price image images duration showOnHome type')
         .sort({ showOnHome: -1, price: 1, createdAt: 1 })
@@ -298,7 +304,7 @@ const getNearbyVendors = async (req, res) => {
         }
       }
 
-      return buildPublicVendorResponse(v, {
+      return buildPublicVendorResponse({ ...v, isShopOpen: operationalShopOpen }, {
         dist: v.dist,
         service: primaryService?.name || 'Beauty Service',
         price: mainPrice,
@@ -515,13 +521,15 @@ const getVendorDashboard = async (req, res) => {
 
     const { isShopCurrentlyOpen } = require('../utils/shopStatus');
     const dynamicIsShopOpen = isShopCurrentlyOpen(vendor.workingHours);
+    const operationalShopOpen = await getOperationalShopOpen(vendor);
 
     res.status(200).json({
       vendorId: vendor._id,
       shopName: vendor.shopName,
       address: vendor.address,
       rating: vendor.rating,
-      isShopOpen: vendor.isShopOpen && dynamicIsShopOpen,
+      isShopOpen: operationalShopOpen,
+      isOpenNow: operationalShopOpen && dynamicIsShopOpen,
       isClosedToday: vendor.isClosedToday,
       workingHours: vendor.workingHours,
       walletBalance: vendor.walletBalance,
@@ -640,7 +648,8 @@ const getVendorDetail = async (req, res) => {
       $or: [{ expiryDate: { $gt: new Date() } }, { expiryDate: null }]
     });
 
-    res.status(200).json(buildPublicVendorResponse(vendor, { activeOffers }));
+    const operationalShopOpen = await getOperationalShopOpen(vendor);
+    res.status(200).json(buildPublicVendorResponse({ ...vendor, isShopOpen: operationalShopOpen }, { activeOffers }));
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
@@ -1112,6 +1121,7 @@ const getVendorDashboardBundle = async (req, res) => {
 
     const { isShopCurrentlyOpen } = require('../utils/shopStatus');
     const dynamicIsShopOpen = isShopCurrentlyOpen(vendor.workingHours);
+    const operationalShopOpen = await getOperationalShopOpen(vendor);
 
     const dailyTotal = (dailyPlan.price || 0) + (dailyPlan.gstPercent ? (dailyPlan.price * dailyPlan.gstPercent) / 100 : 0);
     const requiredBalanceToday = (billingSettings.minWalletThreshold || 100) + dailyTotal;
@@ -1123,7 +1133,8 @@ const getVendorDashboardBundle = async (req, res) => {
         vendorId: vendor._id,
         shopName: vendor.shopName,
         rating: vendor.rating,
-        isShopOpen: vendor.isShopOpen && dynamicIsShopOpen,
+        isShopOpen: operationalShopOpen,
+        isOpenNow: operationalShopOpen && dynamicIsShopOpen,
         isClosedToday: vendor.isClosedToday,
         workingHours: vendor.workingHours,
         serviceLevel: vendor.serviceLevel,

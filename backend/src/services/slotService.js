@@ -9,7 +9,8 @@ const moment = require('moment-timezone');
 const { ensureOwnerStaff } = require('./staffService');
 const {
   getActiveClosureWindows: getVendorClosureWindows,
-  hasClosureOverlap: hasVendorClosureOverlap
+  hasClosureOverlap: hasVendorClosureOverlap,
+  hasLegacyShopOfflineClosure
 } = require('./vendorClosureService');
 const {
   getActiveClosureWindows: getStaffClosureWindows
@@ -72,7 +73,10 @@ const getVendorDayAvailability = async (vendorId, targetDate, existingVendor = n
 
   const now = moment().tz('Asia/Kolkata');
   if (targetDate.isBefore(now, 'day')) return null;
-  if (!vendor.isShopOpen && targetDate.isSame(now, 'day')) return null;
+  if (!vendor.isShopOpen && targetDate.isSame(now, 'day')) {
+    const isLegacyClosureOffline = await hasLegacyShopOfflineClosure(vendor._id, now.toDate());
+    if (!isLegacyClosureOffline) return null;
+  }
   if (vendor.isClosedToday && targetDate.isSame(now, 'day')) return null;
 
   const isClosedDay = vendor.closedDates?.some((d) => moment(d).tz('Asia/Kolkata').isSame(targetDate, 'day'));

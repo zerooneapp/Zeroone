@@ -71,10 +71,27 @@ const hasClosureOverlap = (start, end, closureWindows = []) => (
   closureWindows.some((closure) => start.isBefore(closure.end) && end.isAfter(closure.start))
 );
 
+// Legacy closures could persist an offline shop flag; only bypass that marked state.
+const hasLegacyShopOfflineClosure = async (vendorId, referenceTime = new Date()) => {
+  const now = moment(referenceTime).tz('Asia/Kolkata');
+  if (!now.isValid()) return false;
+
+  const closure = await VendorClosure.collection.findOne({
+    vendorId,
+    status: 'active',
+    previousIsShopOpen: true,
+    startTime: { $lte: now.toDate() },
+    endTime: { $gt: now.toDate() }
+  }, { projection: { _id: 1 } });
+
+  return Boolean(closure);
+};
+
 module.exports = {
   normalizeClosureWindow,
   getOverlappingClosures,
   getImpactedBookings,
   getActiveClosureWindows,
-  hasClosureOverlap
+  hasClosureOverlap,
+  hasLegacyShopOfflineClosure
 };
