@@ -95,7 +95,7 @@ const BookingStatusDetails = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
-      <header className="p-2.5 py-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <header className="px-2.5 pt-12 pb-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}

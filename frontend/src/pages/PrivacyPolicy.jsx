@@ -42,7 +42,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 font-sans pb-12">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+      <header className="sticky top-0 z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 pt-12 pb-3">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}

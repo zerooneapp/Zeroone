@@ -72,7 +72,7 @@ const VendorReviews = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 pb-20">
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 py-3">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-12 pb-3">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 active:scale-90 transition-all">
             <ArrowLeft size={20} strokeWidth={3} />

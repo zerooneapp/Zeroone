@@ -35,7 +35,7 @@ const Account = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500 pb-28">
-      <header className="p-2.5 py-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+      <header className="px-2.5 pt-12 pb-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}

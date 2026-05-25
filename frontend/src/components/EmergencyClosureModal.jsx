@@ -93,7 +93,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
     try {
       setCreating(true);
       const res = await api.post('/vendor/closures', payload);
-      toast.success('Emergency closure activated');
+      toast.success('Booking window blocked successfully');
       onCreated?.(res.data);
       onClose();
     } catch (err) {
@@ -130,7 +130,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
             <div className="p-4 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-4">
               <div>
                 <p className="text-[9px] font-black capitalize tracking-[0.25em] text-amber-500">Emergency Window</p>
-                <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-1">Temporary Shop Closure</h2>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-1">Emergency Booking Window</h2>
               </div>
               <button
                 onClick={onClose}
@@ -240,13 +240,13 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                       </div>
                       <div className="space-y-1">
                         <p className="text-[10px] font-black capitalize tracking-[0.2em] text-amber-600 dark:text-amber-400">
-                          Impact Preview
+                          Booking Impact Preview
                         </p>
                         <p className="text-[12px] font-black text-slate-900 dark:text-white">
-                          {preview.impactedBookings.length} confirmed booking{preview.impactedBookings.length === 1 ? '' : 's'} affected.
+                          {preview.impactedBookings.length} confirmed booking{preview.impactedBookings.length === 1 ? '' : 's'} to resolve.
                         </p>
                         <p className="text-[11px] font-black text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1.5">
-                          <span className="opacity-60 uppercase tracking-widest text-[8px]">Estimated Loss:</span>
+                          <span className="opacity-60 uppercase tracking-widest text-[8px]">Affected Value:</span>
                           ₹{preview.impactedBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0)}
                         </p>
                         {preview.conflicts?.length > 0 && (
@@ -322,7 +322,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                 {creating ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  'Activate Closure'
+                  'Block Booking Window'
                 )}
               </button>
             </div>
