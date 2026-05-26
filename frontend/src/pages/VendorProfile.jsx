@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     ArrowLeft, Store, Camera, Video, MapPin, Loader2,
     Save, Plus, X, CheckCircle2, XCircle, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
-    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star
+    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone
  } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -20,7 +20,7 @@ const VendorProfile = () => {
    const navigate = useNavigate();
    const [searchParams, setSearchParams] = useSearchParams();
    const activeSection = searchParams.get('section'); // null | 'basic' | 'media' etc
-   const { isDarkMode, toggleTheme } = useThemeStore();
+   const { isDarkMode, themeMode, setThemeMode } = useThemeStore();
    const { logout } = useAuthStore();
    const [loading, setLoading] = useState(false);
    const [pickerOpen, setPickerOpen] = useState(null); // null | 'start' | 'end'
@@ -473,12 +473,11 @@ const VendorProfile = () => {
       },
       {
          key: 'theme',
-         label: isDarkMode ? 'Light Mode' : 'Dark Mode',
-         subtitle: isDarkMode ? 'Switch to light theme' : 'Switch to dark theme',
-         icon: isDarkMode ? Sun : Moon,
-         iconBg: isDarkMode ? 'bg-amber-500/10' : 'bg-slate-500/10',
-         iconColor: isDarkMode ? 'text-amber-500' : 'text-slate-500',
-         isToggle: true,
+         label: 'Appearance',
+         subtitle: themeMode === 'system' ? 'Following system default' : isDarkMode ? 'Dark mode on' : 'Light mode on',
+         icon: themeMode === 'system' ? Smartphone : isDarkMode ? Moon : Sun,
+         iconBg: themeMode === 'system' ? 'bg-blue-500/10' : isDarkMode ? 'bg-slate-500/10' : 'bg-amber-500/10',
+         iconColor: themeMode === 'system' ? 'text-blue-500' : isDarkMode ? 'text-slate-500' : 'text-amber-500',
       },
       {
          key: 'security',
@@ -623,7 +622,7 @@ const VendorProfile = () => {
                <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
             </button>
             <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-               {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'security' ? 'Security' : 'Account Settings'}
+               {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'security' ? 'Security' : activeSection === 'theme' ? 'Appearance' : 'Account Settings'}
             </h1>
          </header>
 
@@ -643,7 +642,6 @@ const VendorProfile = () => {
                         <button
                            key={item.key}
                            onClick={() => {
-                              if (item.isToggle) { toggleTheme(); return; }
                               if (item.isLogout) { setShowLogoutConfirm(true); return; }
                               if (item.path) { navigate(item.path); return; }
                               if (item.isDelete) { setShowDeleteConfirm(true); return; }
@@ -663,16 +661,74 @@ const VendorProfile = () => {
                               <p className="text-sm font-black text-slate-800 dark:text-white leading-tight">{item.label}</p>
                               <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-0.5">{item.subtitle}</p>
                            </div>
-                           {item.isToggle ? (
-                               <div className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${isDarkMode ? 'bg-[#1C2C4E]' : 'bg-slate-200'}`}>
-                                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${isDarkMode ? 'left-6' : 'left-1'}`} />
-                               </div>
-                            ) : (
-                               <ChevronRight size={16} className="text-slate-300 dark:text-gray-600 group-active:translate-x-0.5 transition-transform" />
-                            )}
+                           <ChevronRight size={16} className="text-slate-300 dark:text-gray-600 group-active:translate-x-0.5 transition-transform" />
                         </button>
                      ))}
                   </motion.div>
+               )}
+
+               {/* ── THEME SECTION ── */}
+               {activeSection === 'theme' && (
+                  <motion.section
+                     key="theme"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="space-y-4"
+                  >
+                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center gap-3.5 px-4 pt-4 pb-3 border-b border-slate-100 dark:border-gray-800">
+                           <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
+                              {isDarkMode ? <Moon size={18} className="text-orange-500" /> : <Sun size={18} className="text-orange-500" />}
+                           </div>
+                           <div className="space-y-0.5 text-left">
+                              <h3 className="text-[13px] font-black text-slate-800 dark:text-white tracking-tight leading-none">Dark mode</h3>
+                              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 leading-tight">
+                                 {themeMode === 'system' ? "We'll adjust based on your device's system settings" : themeMode === 'dark' ? 'Sleek energy efficient theme' : 'Classic light appearance'}
+                              </p>
+                           </div>
+                        </div>
+
+                        {/* Options */}
+                        {[
+                           { mode: 'dark', label: 'On', icon: Moon },
+                           { mode: 'light', label: 'Off', icon: Sun },
+                           { mode: 'system', label: 'System default', icon: Smartphone },
+                        ].map(({ mode, label, icon: Icon }, index, arr) => {
+                           const isSelected = themeMode === mode;
+                           return (
+                              <button
+                                 key={mode}
+                                 onClick={() => setThemeMode(mode)}
+                                 className={`w-full flex items-center justify-between px-5 py-4 text-left transition-all active:scale-[0.98] ${
+                                    index < arr.length - 1 ? 'border-b border-slate-100 dark:border-gray-800' : ''
+                                 } ${isSelected ? 'bg-slate-50 dark:bg-gray-800/60' : 'hover:bg-slate-50/60 dark:hover:bg-gray-800/30'}`}
+                              >
+                                 <div className="flex items-center gap-3">
+                                    <Icon size={15} strokeWidth={2.5} className={isSelected ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-gray-500'} />
+                                    <span className={`text-[13px] font-black tracking-tight ${isSelected ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-gray-400'}`}>
+                                       {label}
+                                    </span>
+                                 </div>
+                                 {/* Animated radio */}
+                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                    isSelected ? 'border-slate-800 dark:border-primary' : 'border-slate-300 dark:border-gray-600'
+                                 }`}>
+                                    {isSelected && (
+                                       <motion.div
+                                          initial={{ scale: 0 }}
+                                          animate={{ scale: 1 }}
+                                          className="w-2.5 h-2.5 rounded-full bg-slate-800 dark:bg-primary"
+                                       />
+                                    )}
+                                 </div>
+                              </button>
+                           );
+                        })}
+                     </div>
+                  </motion.section>
                )}
 
                {/* ── SHOP DETAILS SUBMENU ── */}

@@ -92,6 +92,7 @@ import { saveTokenToBackend } from './services/fcmService';
 
 function App() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode);
+  const onSystemThemeChange = useThemeStore((state) => state.onSystemThemeChange);
   const restoreSession = useAuthStore((state) => state.restoreSession);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isInitialized = useAuthStore((state) => state.isInitialized);
@@ -158,6 +159,14 @@ function App() {
       window.removeEventListener('auth-unauthorized', handleUnauthorized);
     };
   }, [isDarkMode, logout]);
+
+  // Listen for system theme changes (only applies when themeMode === 'system')
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => onSystemThemeChange();
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [onSystemThemeChange]);
 
   const toastStyle = {
     background: isDarkMode ? 'rgba(15, 23, 42, 0.7)' : 'rgba(255, 255, 255, 0.8)',
