@@ -382,7 +382,7 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      <main className="px-3.5 space-y-4 pt-3">
+      <main className="px-3.5 space-y-2 pt-3">
         {data && !data.subscription?.isActive && (
           <section className="px-1 mb-2">
             <div 
@@ -406,7 +406,7 @@ const VendorDashboard = () => {
           </section>
         )}
 
-        <section className="grid grid-cols-4 gap-2.5 px-1">
+        <section className="grid grid-cols-4 gap-1 px-1">
           {actionTiles.map((action) => (
             <button
               key={action.label}
@@ -427,7 +427,7 @@ const VendorDashboard = () => {
                 navigate(action.path);
               }}
               className={cn(
-                "flex flex-col items-center justify-center gap-1.5 py-2.5 bg-white dark:bg-gray-900 rounded-xl border border-[#1C2C4E]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(28,44,78,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(28,44,78,0.2)]",
+                "flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(28,44,78,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(28,44,78,0.2)]",
                 data && !data.subscription?.isActive && action.label !== 'Wallet' && "opacity-60 grayscale-[0.5]"
               )}
             >
@@ -444,8 +444,8 @@ const VendorDashboard = () => {
         </section>
 
         <section className="px-1">
-          <div className="grid grid-cols-4 gap-2 pb-0">
-            <div className="bg-[#1C2C4E] dark:bg-gray-900 py-3 px-2 rounded-xl shadow-lg border border-white/10 flex flex-col justify-center overflow-hidden">
+          <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1 pb-0">
+            <div className="bg-[#1C2C4E] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-white/90 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
               {loading ? (
                 <div className="h-4 w-12 bg-white/20 rounded animate-pulse" />
@@ -453,7 +453,7 @@ const VendorDashboard = () => {
                 <p className="text-[16px] font-black text-white leading-none truncate">&#8377;{data?.stats?.todayEarnings?.toLocaleString() || '0'}</p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Today clients</p>
               {loading ? (
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
@@ -461,25 +461,25 @@ const VendorDashboard = () => {
                 <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">{data?.stats?.todayBookings || '0'}</p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
-              {loading ? (
-                <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
-              ) : (
-                <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
-                  {data?.schedule?.filter((item) => item.status === 'completed').length || 0}
-                </p>
-              )}
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+               <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
+               {loading ? (
+                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
+               ) : (
+                 <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
+                   {data?.schedule?.filter((item) => item.status === 'completed').length || 0}
+                 </p>
+               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-3 px-2 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
-              {loading ? (
-                <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded-pulse animate-pulse" />
-              ) : (
-                <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
-                  {data?.schedule?.filter((item) => ['pending', 'confirmed', 'assigned'].includes(item.status)).length || 0}
-                </p>
-              )}
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+               <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
+               {loading ? (
+                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded-pulse animate-pulse" />
+               ) : (
+                 <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
+                   {data?.schedule?.filter((item) => ['pending', 'confirmed', 'assigned'].includes(item.status)).length || 0}
+                 </p>
+               )}
             </div>
           </div>
         </section>
