@@ -125,6 +125,9 @@ const VendorManagement = () => {
       } else if (action === 'extend-trial') {
         const res = await api.patch(`/admin/vendors/${vendorId}/extend-trial`, payload);
         message = res.data?.message || 'Free trial extended';
+        if (payload.days) {
+          setFreeTrialDays(payload.days);
+        }
       } else if (action === 'delete') {
         if (!window.confirm('Are you absolutely sure you want to DELETE this partner? This will remove all their data, services, staff, and account from the database forever. This action CANNOT be undone.')) return;
         
@@ -536,13 +539,16 @@ const VendorManagement = () => {
                         />
                         <ActionButton
                           onClick={() => {
-                            const days = prompt('Extend free trial by how many days?', freeTrialDays.toString());
+                            const savedDefault = localStorage.getItem('admin_extend_trial_days_default');
+                            const defaultDays = savedDefault || freeTrialDays.toString();
+                            const days = prompt('Extend free trial by how many days?', defaultDays);
                             if (!days) return;
                             const parsedDays = Number(days);
                             if (!Number.isFinite(parsedDays) || parsedDays <= 0) {
                               toast.error('Please enter a valid number of days');
                               return;
                             }
+                            localStorage.setItem('admin_extend_trial_days_default', parsedDays.toString());
                             handleAction(selectedVendor._id, 'extend-trial', { days: parsedDays });
                           }}
                           icon={Plus}
