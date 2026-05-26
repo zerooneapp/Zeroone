@@ -812,7 +812,7 @@ const VendorProfile = () => {
                                  type="button"
                                  onClick={handleFetchLocation}
                                  disabled={locationLoading}
-                                 className="flex items-center gap-1 text-primary text-[8px] font-black capitalize tracking-widest hover:opacity-70 transition-all disabled:opacity-50"
+                                 className="flex items-center gap-1 text-primary dark:text-gray-400 text-[8px] font-black capitalize tracking-widest hover:opacity-70 transition-all disabled:opacity-50"
                               >
                                  {locationLoading ? <Loader2 size={10} className="animate-spin" /> : <MapPin size={10} />}
                                  Auto Fetch

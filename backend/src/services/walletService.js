@@ -293,8 +293,9 @@ const processDailyDeduction = async (vendor) => {
 
   // Calculate cumulative open duration today
   let totalOpenDurationMs = vendor.todayOpenDurationMs || 0;
-  if (vendor.isShopOpen && vendor.lastOpenedAt) {
-    const currentSession = Date.now() - new Date(vendor.lastOpenedAt).getTime();
+  if (vendor.isShopOpen) {
+    const lastOpened = vendor.lastOpenedAt || vendor.createdAt || new Date();
+    const currentSession = Date.now() - new Date(lastOpened).getTime();
     totalOpenDurationMs += currentSession;
   }
 

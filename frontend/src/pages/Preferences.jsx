@@ -73,7 +73,7 @@ const Preferences = () => {
   );
 
   return (
-    <div className="h-[100dvh] bg-slate-50 dark:bg-gray-950 flex flex-col overflow-hidden animate-in fade-in duration-500">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col pb-20 animate-in fade-in duration-500">
       {/* 🛡️ ELITE HEADER */}
       <header className="px-2.5 pt-12 pb-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ const Preferences = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
+      <main className="flex-1 px-5 py-6 space-y-6">
         {/* 🌓 APPEARANCE */}
         <section className="space-y-3">
           <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase text-left block">Appearance</label>

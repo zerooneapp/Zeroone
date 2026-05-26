@@ -248,7 +248,7 @@ const VendorAuth = () => {
                       <button
                         disabled={!canResend}
                         onClick={handleSendOTP}
-                        className={`text-[10px] font-black uppercase tracking-[0.2em] border-b border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E] dark:text-primary' : 'text-gray-300 dark:text-gray-700'}`}
+                        className={`text-[10px] font-black uppercase tracking-[0.2em] border-b border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E] dark:text-gray-300' : 'text-gray-300 dark:text-gray-600'}`}
                       >
                         Resend OTP
                       </button>

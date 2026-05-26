@@ -221,7 +221,7 @@ const CustomerAuth = () => {
                       <button
                         disabled={!canResend}
                         onClick={handleSendOTP}
-                        className={`text-[12px] font-black border-b-2 border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E] dark:text-primary' : 'text-gray-300 dark:text-gray-700'
+                        className={`text-[12px] font-black border-b-2 border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E] dark:text-gray-300' : 'text-gray-300 dark:text-gray-600'
                           }`}
                       >
                         Resend OTP

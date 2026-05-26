@@ -214,6 +214,9 @@ const approveVendor = async (req, res) => {
     vendor.isActive = true;
     vendor.rejectionReason = undefined;
     vendor.planType = 'trial';
+    if (vendor.isShopOpen) {
+      vendor.lastOpenedAt = new Date();
+    }
 
     const settings = await getBillingSettings();
     const freeTrialDays = settings.freeTrialDays || 7;
