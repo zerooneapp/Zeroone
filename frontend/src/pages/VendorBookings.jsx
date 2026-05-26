@@ -180,63 +180,65 @@ const VendorBookings = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-24">
       <header className="px-4 pt-3 pb-2 sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/vendor/dashboard')}
-              className="w-10 h-10 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 flex items-center justify-center active:scale-90 transition-all font-bold"
-            >
-              <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
-            </button>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1">
-                <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
-                  <span className="text-[#1C2C4E] dark:text-white ">Zero</span>
-                  <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
-                </h1>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/vendor/dashboard')}
+                className="w-10 h-10 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 flex items-center justify-center active:scale-90 transition-all font-bold"
+              >
+                <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
+              </button>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-1">
+                  <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
+                    <span className="text-[#1C2C4E] dark:text-white ">Zero</span>
+                    <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
+                  </h1>
 
+                </div>
+                <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80">Bookings Roster</p>
               </div>
-              <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80">Bookings Roster</p>
             </div>
+            <button
+              type="button"
+              onClick={refreshAll}
+              className={`p-2 text-slate-400 active:scale-95 transition-all duration-500 ${(isRefreshing || loading) ? 'animate-spin' : ''}`}
+            >
+              <RefreshCw size={18} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={refreshAll}
-            className={`p-2 text-slate-400 active:scale-95 transition-all duration-500 ${(isRefreshing || loading) ? 'animate-spin' : ''}`}
-          >
-            <RefreshCw size={18} />
-          </button>
-        </div>
 
-        <StatusTabs activeTab={status} onTabChange={setStatus} />
+          <StatusTabs activeTab={status} onTabChange={setStatus} />
 
-        {/* 📅 PREMIUM COMPACT DATE FILTER */}
-        <div className="mt-3 flex items-center gap-1.5 bg-slate-50/50 dark:bg-gray-800/20 p-1 rounded-2xl border border-slate-100 dark:border-gray-800">
-          <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
-            <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
-            />
-          </div>
-          <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20">
-            <ChevronRight size={10} className="text-slate-400" />
-          </div>
-          <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
-            <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
-            />
+          {/* 📅 PREMIUM COMPACT DATE FILTER */}
+          <div className="mt-3 flex items-center gap-1.5 bg-slate-50/50 dark:bg-gray-800/20 p-1 rounded-2xl border border-slate-100 dark:border-gray-800">
+            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
+              <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
+              />
+            </div>
+            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20">
+              <ChevronRight size={10} className="text-slate-400" />
+            </div>
+            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
+              <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
+              />
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="px-4 mt-2 max-w-2xl mx-auto space-y-3">
+      <main className="px-4 mt-2 max-w-4xl mx-auto space-y-3">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (

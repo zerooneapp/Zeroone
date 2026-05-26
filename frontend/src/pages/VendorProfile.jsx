@@ -602,31 +602,33 @@ const VendorProfile = () => {
    return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20 overflow-x-hidden no-scrollbar">
          {/* Header */}
-         <header className="px-4 pt-5 pb-3 sticky top-0 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 flex items-center gap-3 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
-            <button
-               onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (activeSection === 'basic' || activeSection === 'media' || activeSection === 'live_report') {
-                     setSearchParams({ section: 'shop_details' });
-                  } else if (activeSection === 'promotions') {
-                     setSearchParams({});
-                  } else if (activeSection) {
-                     setSearchParams({});
-                  } else {
-                     navigate('/vendor/dashboard');
-                  }
-               }}
-               className="p-2 rounded-xl active:scale-90 transition-all"
-            >
-               <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
-            </button>
-            <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-               {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'security' ? 'Security' : activeSection === 'theme' ? 'Appearance' : 'Account Settings'}
-            </h1>
+         <header className="px-4 pt-5 pb-3 sticky top-0 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+            <div className="max-w-4xl mx-auto flex items-center gap-3">
+               <button
+                  onClick={(e) => {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     if (activeSection === 'basic' || activeSection === 'media' || activeSection === 'live_report') {
+                        setSearchParams({ section: 'shop_details' });
+                     } else if (activeSection === 'promotions') {
+                        setSearchParams({});
+                     } else if (activeSection) {
+                        setSearchParams({});
+                     } else {
+                        navigate('/vendor/dashboard');
+                     }
+                  }}
+                  className="p-2 rounded-xl active:scale-90 transition-all"
+               >
+                  <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
+               </button>
+               <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
+                  {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'security' ? 'Security' : activeSection === 'theme' ? 'Appearance' : 'Account Settings'}
+               </h1>
+            </div>
          </header>
 
-         <main className="px-4 mt-3 max-w-2xl mx-auto">
+         <main className="px-4 mt-3 max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
                {/* ── MENU LIST ── */}
                {!activeSection && (

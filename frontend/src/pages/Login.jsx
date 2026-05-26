@@ -108,9 +108,9 @@ const CustomerAuth = () => {
   };
 
   return (
-    <div className="h-[100dvh] bg-[#F3F2F7] flex flex-col relative overflow-hidden text-[#1C2C4E] animate-in fade-in duration-500 font-sans">
+    <div className="h-[100dvh] bg-[#F3F2F7] dark:bg-gray-950 flex flex-col relative overflow-hidden text-[#1C2C4E] dark:text-white animate-in fade-in duration-500 font-sans">
       {/* Texture Layer (Subtle Paper/Linen) */}
-      <div className="absolute inset-0 opacity-[0.06] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/linen.png')]" />
+      <div className="absolute inset-0 opacity-[0.06] dark:opacity-[0.02] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/linen.png')]" />
 
       {/* Content Area */}
       <div className="flex-1 flex flex-col items-center p-6 pt-8 lg:pt-12 relative z-10">
@@ -126,15 +126,15 @@ const CustomerAuth = () => {
               >
                 <div className="space-y-4 text-center">
                   <img src={logo} alt="ZeroOne Logo" className="w-20 h-20 mx-auto rounded-2xl object-cover mb-2" />
-                  <h1 className="text-[42px] font-bold text-[#1C2C4E] tracking-tight leading-none">Welcome!</h1>
-                  <p className="text-[#1C2C4E]/70 font-medium text-[15px]">Login to continue with your mobile number</p>
+                  <h1 className="text-[42px] font-bold text-[#1C2C4E] dark:text-white tracking-tight leading-none">Welcome!</h1>
+                  <p className="text-[#1C2C4E]/70 dark:text-gray-400 font-medium text-[15px]">Login to continue with your mobile number</p>
                 </div>
 
                 <div className="space-y-6">
-                  <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/50 flex items-center gap-4 h-12 shadow-sm">
+                  <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/50 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-sm">
                     <div className="flex items-center gap-3 pr-2">
-                      <span className="font-medium text-[#1C2C4E] text-base">+91</span>
-                      <div className="w-[1px] h-6 bg-gray-200/80 ml-2" />
+                      <span className="font-medium text-[#1C2C4E] dark:text-white text-base">+91</span>
+                      <div className="w-[1px] h-6 bg-gray-200/80 dark:bg-gray-700 ml-2" />
                     </div>
                     <input
                       type="tel"
@@ -143,14 +143,14 @@ const CustomerAuth = () => {
                       placeholder="Phone Number"
                       autoFocus
                       maxLength={10}
-                      className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#1C2C4E] placeholder:text-gray-300"
+                      className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#1C2C4E] dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600"
                     />
                   </div>
 
                   <Button
                     size="lg"
                     className={cn(
-                      "w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#1C2C4E] shadow-sm active:scale-[0.98]",
+                      "w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#1C2C4E] dark:bg-primary shadow-sm active:scale-[0.98]",
                       phone.length !== 10 && "opacity-90 grayscale-[0.2]"
                     )}
                     onClick={handleSendOTP}
@@ -170,9 +170,9 @@ const CustomerAuth = () => {
                 className="space-y-4 flex-1 flex flex-col justify-center max-h-screen overflow-hidden relative"
               >
                 <div className="space-y-2 text-center">
-                  <h1 className="text-[36px] font-black text-[#1C2C4E] tracking-tight leading-none">Verify OTP</h1>
-                  <p className="text-gray-500 font-medium text-[11px] uppercase tracking-widest">
-                    Code sent to <span className="text-[#1C2C4E] font-bold">+91 {phone}</span>
+                  <h1 className="text-[36px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">Verify OTP</h1>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium text-[11px] uppercase tracking-widest">
+                    Code sent to <span className="text-[#1C2C4E] dark:text-white font-bold">+91 {phone}</span>
                   </p>
                 </div>
 
@@ -192,8 +192,10 @@ const CustomerAuth = () => {
                       <div
                         key={i}
                         className={cn(
-                          "w-10 h-11 bg-white rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
-                          digit || (isOTPFocused && i === otp.join('').length) ? "border-[#1C2C4E] text-[#1C2C4E]" : "border-gray-50 text-gray-200"
+                          "w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
+                          digit || (isOTPFocused && i === otp.join('').length)
+                            ? "border-[#1C2C4E] dark:border-primary text-[#1C2C4E] dark:text-white"
+                            : "border-gray-50 dark:border-gray-800 text-gray-200 dark:text-gray-700"
                         )}
                       >
                         {digit}
@@ -205,27 +207,27 @@ const CustomerAuth = () => {
                 <div className="space-y-4">
                   <Button
                     size="lg"
-                    className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
+                    className="w-full h-[38px] rounded-xl bg-[#1C2C4E] dark:bg-primary text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
                     onClick={handleVerifyOTP}
                     loading={loading}
                     disabled={otp.includes('')}
                   >
-                    Verify & Proceed
+                    Verify &amp; Proceed
                   </Button>
 
                   <div className="text-center space-y-3">
-                    <p className="text-[10px] font-black text-[#1C2C4E]/60 uppercase tracking-widest">Did'nt receive the code?</p>
+                    <p className="text-[10px] font-black text-[#1C2C4E]/60 dark:text-gray-500 uppercase tracking-widest">Did'nt receive the code?</p>
                     <div className="flex flex-col items-center gap-2">
                       <button
                         disabled={!canResend}
                         onClick={handleSendOTP}
-                        className={`text-[12px] font-black border-b-2 border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E]' : 'text-gray-300'
+                        className={`text-[12px] font-black border-b-2 border-current pb-0.5 transition-all ${canResend ? 'text-[#1C2C4E] dark:text-primary' : 'text-gray-300 dark:text-gray-700'
                           }`}
                       >
                         Resend OTP
                       </button>
                       {!canResend && (
-                        <p className="text-[10px] font-black text-[#1C2C4E] opacity-40 uppercase tracking-widest">
+                        <p className="text-[10px] font-black text-[#1C2C4E] dark:text-gray-500 opacity-40 uppercase tracking-widest">
                           Wait 00:{timer < 10 ? `0${timer}` : timer}
                         </p>
                       )}
@@ -243,20 +245,20 @@ const CustomerAuth = () => {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/privacy-policy')}
-            className="text-[9px] font-black text-[#1C2C4E]/40 hover:text-[#1C2C4E] uppercase tracking-[0.2em] transition-colors"
+            className="text-[9px] font-black text-[#1C2C4E]/40 dark:text-gray-600 hover:text-[#1C2C4E] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
           >
-            Privacy & Policy
+            Privacy &amp; Policy
           </button>
-          <span className="text-[#1C2C4E]/20">•</span>
+          <span className="text-[#1C2C4E]/20 dark:text-gray-800">•</span>
           <button 
             onClick={() => navigate('/contact-support')}
-            className="text-[9px] font-black text-[#1C2C4E]/40 hover:text-[#1C2C4E] uppercase tracking-[0.2em] transition-colors"
+            className="text-[9px] font-black text-[#1C2C4E]/40 dark:text-gray-600 hover:text-[#1C2C4E] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
           >
-            Contact & Support
+            Contact &amp; Support
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] uppercase tracking-wider leading-none">MADE IN INDIA</span>
+          <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] dark:text-gray-400 uppercase tracking-wider leading-none">MADE IN INDIA</span>
           <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
         </div>
       </div>

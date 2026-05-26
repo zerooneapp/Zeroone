@@ -52,6 +52,10 @@ export const useThemeStore = create(
       name: 'theme-storage',
       // Only persist themeMode, not isDarkMode (recalculated on load)
       partialize: (state) => ({ themeMode: state.themeMode }),
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        themeMode: persistedState?.themeMode || currentState.themeMode,
+      }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         const mode = state.themeMode || 'system';

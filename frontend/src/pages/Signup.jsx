@@ -79,7 +79,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="h-[100dvh] bg-[#F8F9FA] flex flex-col relative overflow-hidden text-[#1C2C4E] animate-in fade-in duration-500">
+    <div className="h-[100dvh] bg-[#F8F9FA] dark:bg-gray-950 flex flex-col relative overflow-hidden text-[#1C2C4E] dark:text-white animate-in fade-in duration-500">
       {/* Texture Layer (Subtle) */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
 
@@ -87,7 +87,7 @@ const Signup = () => {
       <div className="absolute top-0 left-0 right-0 p-6 z-20">
         <button
           onClick={() => navigate(-1)}
-          className="p-2.5 text-[#1C2C4E] bg-white rounded-xl shadow-sm border border-gray-100 active:scale-95 transition-all"
+          className="p-2.5 text-[#1C2C4E] dark:text-white bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 active:scale-95 transition-all"
         >
           <ChevronLeft size={18} strokeWidth={3} />
         </button>
@@ -127,8 +127,8 @@ const Signup = () => {
                 </div>
               </label>
             </div>
-            <h1 className="text-[28px] font-black text-[#1C2C4E] tracking-tight leading-none">Complete Profile</h1>
-            <p className="text-gray-500 font-medium text-[11px] tracking-tight opacity-70">Help us personalize your experience</p>
+            <h1 className="text-[28px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">Complete Profile</h1>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-[11px] tracking-tight opacity-70">Help us personalize your experience</p>
           </div>
 
           <motion.div
@@ -139,8 +139,8 @@ const Signup = () => {
           >
             {/* Minimalist Input HUD */}
             <div className="space-y-4">
-              <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
-                <div className="bg-[#F8F9FA] p-1.5 rounded-lg">
+              <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/60 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
+                  <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
                   <User size={16} className="text-[#1C2C4E]" />
                 </div>
                 <input
@@ -152,12 +152,12 @@ const Signup = () => {
                     const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
                     setProfileData({ ...profileData, name: filteredValue });
                   }}
-                  className="flex-1 bg-transparent border-none outline-none font-bold text-base text-[#1C2C4E] placeholder:text-gray-300"
+                  className="flex-1 bg-transparent border-none outline-none font-bold text-base text-[#1C2C4E] dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600"
                 />
               </div>
 
-              <div className="bg-white px-5 py-2 rounded-xl border border-gray-200/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
-                <div className="bg-[#F8F9FA] p-1.5 rounded-lg">
+              <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/60 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#1C2C4E]/10">
+                  <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
                   <Calendar size={16} className="text-[#1C2C4E]" />
                 </div>
                 <div className="flex-1 flex flex-col">
@@ -167,7 +167,7 @@ const Signup = () => {
                     value={profileData.dob}
                     max={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setProfileData({ ...profileData, dob: e.target.value })}
-                    className="bg-transparent border-none outline-none font-black text-sm text-[#1C2C4E] uppercase tracking-tighter"
+                    className="bg-transparent border-none outline-none font-black text-sm text-[#1C2C4E] dark:text-white uppercase tracking-tighter"
                   />
                 </div>
               </div>
@@ -195,7 +195,7 @@ const Signup = () => {
             <div className="space-y-6">
               <Button
                 size="lg"
-                className="w-full h-[38px] rounded-xl bg-[#1C2C4E] text-white text-[12px] font-black shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"
+                className="w-full h-[38px] rounded-xl bg-[#1C2C4E] dark:bg-primary text-white text-[12px] font-black shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"
                 onClick={handleCompleteRegistration}
                 loading={loading}
               >
