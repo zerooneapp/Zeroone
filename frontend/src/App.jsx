@@ -319,6 +319,9 @@ function App() {
       <Toaster 
         position="top-center" 
         reverseOrder={false}
+        containerStyle={{
+          top: '75px',
+        }}
         toastOptions={{
           style: toastStyle,
           success: {

@@ -6,7 +6,6 @@ import {
    Lock, Play, LogOut, MapPin
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
-import { useThemeStore } from '../store/themeStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,7 +17,6 @@ import GlassConfirmationModal from '../components/GlassConfirmationModal';
 
 const StaffDashboard = () => {
    const { user, logout } = useAuthStore();
-   const { isDarkMode, toggleTheme } = useThemeStore();
    const { unreadCount, fetchNotifications } = useNotificationStore();
    useSocket(user?._id);
 
@@ -127,9 +125,7 @@ const StaffDashboard = () => {
                </div>
 
                <div className="flex items-center gap-1.5">
-                  <button onClick={toggleTheme} className="p-2 text-slate-700 dark:text-gray-400 transition-all active:scale-90">
-                     {isDarkMode ? <Sun size={17} strokeWidth={3} /> : <Moon size={17} strokeWidth={3} />}
-                  </button>
+
                   <button onClick={() => setShowNotifications(true)} className="relative p-2 text-slate-700 dark:text-gray-400 transition-all active:scale-90">
                      <Bell size={17} strokeWidth={3} />
                      {unreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-950 shadow-sm animate-pulse" />}

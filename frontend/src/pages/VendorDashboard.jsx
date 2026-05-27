@@ -33,7 +33,6 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import api from '../services/api';
-import { useThemeStore } from '../store/themeStore';
 import { useVendorStore } from '../store/vendorStore';
 import { useAuthStore } from '../store/authStore';
 import useSocket from '../hooks/useSocket';
@@ -50,7 +49,6 @@ const prettifyTransactionLabel = (value = '') =>
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
-  const { isDarkMode, toggleTheme } = useThemeStore();
   const { 
     dashboardData: data, 
     dashboardLoading: loading, 
@@ -382,9 +380,9 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      <main className="px-3.5 space-y-2 pt-16">
+      <main className="px-1.5 space-y-2 pt-16">
         {data && !data.subscription?.isActive && (
-          <section className="px-1 mb-2">
+          <section className="px-0.5 mb-2">
             <div 
               onClick={() => navigate('/vendor/wallet')}
               className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer shadow-lg shadow-rose-500/5"
@@ -394,7 +392,7 @@ const VendorDashboard = () => {
                   <Crown size={16} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Profile Inactive</h3>
+                  <h3 className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Profile Active</h3>
                   <p className="text-[9px] font-bold text-rose-500/70 uppercase tracking-tighter">Services hidden from marketplace</p>
                 </div>
               </div>
@@ -406,7 +404,7 @@ const VendorDashboard = () => {
           </section>
         )}
 
-        <section className="grid grid-cols-4 gap-1 px-1">
+        <section className="grid grid-cols-4 gap-1 px-0.5">
           {actionTiles.map((action) => (
             <button
               key={action.label}
@@ -443,7 +441,7 @@ const VendorDashboard = () => {
           ))}
         </section>
 
-        <section className="px-1">
+        <section className="px-0.5">
           <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1 pb-0">
             <div className="bg-[#1C2C4E] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-white/90 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
@@ -486,7 +484,7 @@ const VendorDashboard = () => {
 
         <section className="space-y-2 pt-0">
           {(loading || data?.hasRegisteredStaff) && (
-            <div className="space-y-2 px-1">
+            <div className="space-y-2 px-0.5">
               <h2 className="text-[10px] font-black text-[#1C2C4E] dark:text-white tracking-tight opacity-80 uppercase">
                 Active Staff
               </h2>
@@ -524,7 +522,7 @@ const VendorDashboard = () => {
             </div>
           )}
 
-          <div className="px-1">
+          <div className="px-0.5">
             <h2 className="text-[10px] font-black text-[#1C2C4E] dark:text-white tracking-tight opacity-80 uppercase">
               Today's clients
             </h2>
@@ -533,7 +531,7 @@ const VendorDashboard = () => {
           <div className="space-y-1">
             {loading ? (
               [1, 2, 3].map(i => (
-                <div key={i} className="h-16 bg-white dark:bg-gray-900 mx-1.5 rounded-lg animate-pulse border border-slate-100 dark:border-gray-800" />
+                <div key={i} className="h-16 bg-white dark:bg-gray-900 mx-0.5 rounded-lg animate-pulse border border-slate-100 dark:border-gray-800" />
               ))
             ) : filteredSchedule.length === 0 ? (
               <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
@@ -550,7 +548,7 @@ const VendorDashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-white dark:bg-gray-900 p-2 mx-1.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group"
+                  className="bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">

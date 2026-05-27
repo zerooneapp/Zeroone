@@ -1,12 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
 import useNotificationStore from '../store/notificationStore';
-import { Moon, Sun, Bell, MapPin, Heart, ChevronDown } from 'lucide-react';
+import { Bell, MapPin, Heart, ChevronDown } from 'lucide-react';
 
 const Header = ({ onOpenNotifications }) => {
-  const { isDarkMode, toggleTheme } = useThemeStore();
   const { user } = useAuthStore();
   const { unreadCount, fetchNotifications } = useNotificationStore();
   const navigate = useNavigate();
@@ -46,12 +44,7 @@ const Header = ({ onOpenNotifications }) => {
 
         {/* Right: Premium Action HUD */}
         <div className="flex items-center gap-1">
-          <button
-            onClick={toggleTheme}
-            className="p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
-          >
-            {isDarkMode ? <Sun size={17} strokeWidth={2.5} /> : <Moon size={17} strokeWidth={2.5} />}
-          </button>
+
 
           <button
             onClick={onOpenNotifications}

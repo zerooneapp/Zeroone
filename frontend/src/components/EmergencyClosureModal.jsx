@@ -93,7 +93,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
     try {
       setCreating(true);
       const res = await api.post('/vendor/closures', payload);
-      toast.success('Booking window blocked successfully');
+      toast.success('Emergency closure activated');
       onCreated?.(res.data);
       onClose();
     } catch (err) {

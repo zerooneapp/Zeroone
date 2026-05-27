@@ -16,26 +16,22 @@ const applyTheme = (isDark) => {
 export const useThemeStore = create(
   persist(
     (set, get) => ({
-      // 'light' | 'dark' | 'system'
+      // Force theme to 'system'
       themeMode: 'system',
       isDarkMode: getSystemDark(),
 
       setThemeMode: (mode) => {
-        const isDark =
-          mode === 'dark' ? true :
-          mode === 'light' ? false :
-          getSystemDark();
-        applyTheme(isDark);
-        set({ themeMode: mode, isDarkMode: isDark });
+        // Enforce system mode only
+        const systemDark = getSystemDark();
+        applyTheme(systemDark);
+        set({ themeMode: 'system', isDarkMode: systemDark });
       },
 
-      // Legacy toggle kept for header button — cycles between light/dark
+      // Legacy toggle disabled as we now only support system default theme
       toggleTheme: () => {
-        const { themeMode } = get();
-        const nextMode = themeMode === 'dark' ? 'light' : 'dark';
-        const isDark = nextMode === 'dark';
-        applyTheme(isDark);
-        set({ themeMode: nextMode, isDarkMode: isDark });
+        const systemDark = getSystemDark();
+        applyTheme(systemDark);
+        set({ themeMode: 'system', isDarkMode: systemDark });
       },
 
       // Called by App.jsx when system theme changes
@@ -58,12 +54,9 @@ export const useThemeStore = create(
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        const mode = state.themeMode || 'system';
-        const isDark =
-          mode === 'dark' ? true :
-          mode === 'light' ? false :
-          getSystemDark();
+        const isDark = getSystemDark();
         applyTheme(isDark);
+        state.themeMode = 'system';
         state.isDarkMode = isDark;
       },
     }

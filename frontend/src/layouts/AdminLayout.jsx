@@ -6,7 +6,6 @@ import {
   Menu, X, Sun, Moon, LogOut, ChevronRight, Settings, Shield,
   ArrowDownLeft, Crown, Zap
 } from 'lucide-react';
-import { useThemeStore } from '../store/themeStore';
 import { useAdminStore } from '../store/useAdminStore';
 import { useAuthStore } from '../store/authStore';
 import useNotificationStore from '../store/notificationStore';
@@ -20,7 +19,6 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const scrollRef = useRef(null);
-  const { isDarkMode, toggleTheme } = useThemeStore();
   const { admin, isSidebarOpen, toggleSidebar } = useAdminStore();
   const { user, logout } = useAuthStore();
   const { unreadCount, fetchNotifications } = useNotificationStore();
@@ -214,12 +212,7 @@ const AdminLayout = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleTheme}
-                className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
-              >
-                {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
-              </button>
+
               <button
                 onClick={() => navigate('/admin/notifications')}
                 className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary dark:hover:text-white transition-colors relative"

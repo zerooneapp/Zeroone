@@ -8,21 +8,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Theme: Apply dark class BEFORE React loads to prevent flash -->
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem('theme-storage');
-          var mode = stored ? JSON.parse(stored)?.state?.themeMode : 'system';
-          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var isDark = mode === 'dark' || (mode !== 'light' && systemDark);
-          if (isDark) document.documentElement.classList.add('dark');
-        } catch (e) {
-          // Fallback: use system preference
-          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (isDark) {
             document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
           }
-        }
+        } catch (e) {}
       })();
     </script>
   </head>

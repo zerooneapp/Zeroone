@@ -96,56 +96,23 @@ const Preferences = () => {
         {/* 🌓 APPEARANCE */}
         <section className="space-y-3">
           <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase text-left block">Appearance</label>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm overflow-hidden">
-            {/* Header row */}
-            <div className="flex items-center gap-3.5 px-4 pt-4 pb-3 border-b border-slate-100 dark:border-gray-800">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
-                {isDarkMode ? <Moon size={18} className="text-orange-500" /> : <Sun size={18} className="text-orange-500" />}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm overflow-hidden p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
+                  <Smartphone size={18} className="text-orange-500" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-[13px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">System default</h3>
+                  <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 leading-tight">
+                    We'll adjust based on your device's system settings
+                  </p>
+                </div>
               </div>
-              <div className="space-y-0.5 text-left">
-                <h3 className="text-[13px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">Dark mode</h3>
-                <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 leading-tight">
-                  {themeMode === 'system' ? "We'll adjust based on your device's system settings" : themeMode === 'dark' ? 'Sleek energy efficient theme' : 'Classic light appearance'}
-                </p>
+              <div className="px-3 py-1 bg-slate-50 dark:bg-gray-850 rounded-lg border border-slate-100 dark:border-gray-800">
+                <span className="text-[9px] font-black text-[#1C2C4E] dark:text-white tracking-wider uppercase">Active</span>
               </div>
             </div>
-
-            {/* Options */}
-            {[
-              { mode: 'dark', label: 'On', icon: Moon },
-              { mode: 'light', label: 'Off', icon: Sun },
-              { mode: 'system', label: 'System default', icon: Smartphone },
-            ].map(({ mode, label, icon: Icon }, index, arr) => {
-              const isSelected = themeMode === mode;
-              return (
-                <button
-                  key={mode}
-                  onClick={() => setThemeMode(mode)}
-                  className={`w-full flex items-center justify-between px-5 py-4 text-left transition-all active:scale-[0.98] ${
-                    index < arr.length - 1 ? 'border-b border-slate-100 dark:border-gray-800' : ''
-                  } ${isSelected ? 'bg-slate-50 dark:bg-gray-800/60' : 'hover:bg-slate-50/60 dark:hover:bg-gray-800/30'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon size={15} strokeWidth={2.5} className={isSelected ? 'text-[#1C2C4E] dark:text-white' : 'text-slate-400 dark:text-gray-500'} />
-                    <span className={`text-[13px] font-black tracking-tight ${isSelected ? 'text-[#1C2C4E] dark:text-white' : 'text-slate-500 dark:text-gray-400'}`}>
-                      {label}
-                    </span>
-                  </div>
-                  {/* Radio indicator */}
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                    isSelected ? 'border-[#1C2C4E] dark:border-primary' : 'border-slate-300 dark:border-gray-600'
-                  }`}>
-                    {isSelected && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="w-2.5 h-2.5 rounded-full bg-[#1C2C4E] dark:bg-primary"
-                      />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
           </div>
         </section>
 

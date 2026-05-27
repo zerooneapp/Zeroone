@@ -12,7 +12,6 @@ import autoTable from 'jspdf-autotable';
 import api from '../services/api';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
-import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
 import { cn } from '../utils/cn';
 
@@ -20,7 +19,6 @@ const VendorProfile = () => {
    const navigate = useNavigate();
    const [searchParams, setSearchParams] = useSearchParams();
    const activeSection = searchParams.get('section'); // null | 'basic' | 'media' etc
-   const { isDarkMode, themeMode, setThemeMode } = useThemeStore();
    const { logout } = useAuthStore();
    const [loading, setLoading] = useState(false);
    const [pickerOpen, setPickerOpen] = useState(null); // null | 'start' | 'end'
@@ -471,14 +469,7 @@ const VendorProfile = () => {
          iconBg: 'bg-indigo-500/10',
          iconColor: 'text-indigo-500',
       },
-      {
-         key: 'theme',
-         label: 'Appearance',
-         subtitle: themeMode === 'system' ? 'Following system default' : isDarkMode ? 'Dark mode on' : 'Light mode on',
-         icon: themeMode === 'system' ? Smartphone : isDarkMode ? Moon : Sun,
-         iconBg: themeMode === 'system' ? 'bg-blue-500/10' : isDarkMode ? 'bg-slate-500/10' : 'bg-amber-500/10',
-         iconColor: themeMode === 'system' ? 'text-blue-500' : isDarkMode ? 'text-slate-500' : 'text-amber-500',
-      },
+
       {
          key: 'security',
          label: 'Security',
@@ -667,70 +658,6 @@ const VendorProfile = () => {
                         </button>
                      ))}
                   </motion.div>
-               )}
-
-               {/* ── THEME SECTION ── */}
-               {activeSection === 'theme' && (
-                  <motion.section
-                     key="theme"
-                     initial={{ opacity: 0, x: 24 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     exit={{ opacity: 0, x: 24 }}
-                     transition={{ duration: 0.18 }}
-                     className="space-y-4"
-                  >
-                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                        {/* Header */}
-                        <div className="flex items-center gap-3.5 px-4 pt-4 pb-3 border-b border-slate-100 dark:border-gray-800">
-                           <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
-                              {isDarkMode ? <Moon size={18} className="text-orange-500" /> : <Sun size={18} className="text-orange-500" />}
-                           </div>
-                           <div className="space-y-0.5 text-left">
-                              <h3 className="text-[13px] font-black text-slate-800 dark:text-white tracking-tight leading-none">Dark mode</h3>
-                              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 leading-tight">
-                                 {themeMode === 'system' ? "We'll adjust based on your device's system settings" : themeMode === 'dark' ? 'Sleek energy efficient theme' : 'Classic light appearance'}
-                              </p>
-                           </div>
-                        </div>
-
-                        {/* Options */}
-                        {[
-                           { mode: 'dark', label: 'On', icon: Moon },
-                           { mode: 'light', label: 'Off', icon: Sun },
-                           { mode: 'system', label: 'System default', icon: Smartphone },
-                        ].map(({ mode, label, icon: Icon }, index, arr) => {
-                           const isSelected = themeMode === mode;
-                           return (
-                              <button
-                                 key={mode}
-                                 onClick={() => setThemeMode(mode)}
-                                 className={`w-full flex items-center justify-between px-5 py-4 text-left transition-all active:scale-[0.98] ${
-                                    index < arr.length - 1 ? 'border-b border-slate-100 dark:border-gray-800' : ''
-                                 } ${isSelected ? 'bg-slate-50 dark:bg-gray-800/60' : 'hover:bg-slate-50/60 dark:hover:bg-gray-800/30'}`}
-                              >
-                                 <div className="flex items-center gap-3">
-                                    <Icon size={15} strokeWidth={2.5} className={isSelected ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-gray-500'} />
-                                    <span className={`text-[13px] font-black tracking-tight ${isSelected ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-gray-400'}`}>
-                                       {label}
-                                    </span>
-                                 </div>
-                                 {/* Animated radio */}
-                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                    isSelected ? 'border-slate-800 dark:border-primary' : 'border-slate-300 dark:border-gray-600'
-                                 }`}>
-                                    {isSelected && (
-                                       <motion.div
-                                          initial={{ scale: 0 }}
-                                          animate={{ scale: 1 }}
-                                          className="w-2.5 h-2.5 rounded-full bg-slate-800 dark:bg-primary"
-                                       />
-                                    )}
-                                 </div>
-                              </button>
-                           );
-                        })}
-                     </div>
-                  </motion.section>
                )}
 
                {/* ── SHOP DETAILS SUBMENU ── */}
