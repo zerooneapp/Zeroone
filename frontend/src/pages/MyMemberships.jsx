@@ -132,7 +132,7 @@ const MyMemberships = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32">
-      <header className="px-4 pt-12 pb-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[38px] pb-3 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -147,7 +147,7 @@ const MyMemberships = () => {
         </div>
       </header>
 
-      <main className="px-4 mt-6">
+      <main className="px-4 pt-[112px]">
         {loading ? (
           <div className="space-y-4">
             {[1, 2].map(i => <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-[2.5rem] animate-pulse" />)}

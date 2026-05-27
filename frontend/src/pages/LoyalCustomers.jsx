@@ -51,7 +51,7 @@ const LoyalCustomers = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 py-4 flex items-center gap-4">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[38px] pb-4 flex items-center gap-4">
         <button 
           onClick={() => navigate(-1)}
           className="p-2 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
@@ -63,7 +63,7 @@ const LoyalCustomers = () => {
         </h1>
       </header>
 
-      <main className="pt-24 px-4 space-y-6">
+      <main className="pt-[116px] px-4 space-y-6">
         {/* Search & Filter */}
         <div className="space-y-4">
           <div className="relative">

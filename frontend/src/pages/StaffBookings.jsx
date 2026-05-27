@@ -91,7 +91,7 @@ const StaffBookings = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       {/* 📱 OPTIMIZED MOBILE HEADER */}
-      <div className="sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-3 px-5 pb-2">
+      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[38px] px-5 pb-2">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/staff')}
@@ -156,7 +156,7 @@ const StaffBookings = () => {
       </div>
 
       {/* Assignments List Area */}
-      <div className="p-4 space-y-3">
+      <div className="p-4 pt-[230px] space-y-3">
         <AnimatePresence mode="wait">
           {loading ? (
             <div className="space-y-3 px-1">

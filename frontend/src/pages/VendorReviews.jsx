@@ -72,7 +72,7 @@ const VendorReviews = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 pb-20">
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-12 pb-3">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-[38px] pb-3">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 active:scale-90 transition-all">
             <ArrowLeft size={20} strokeWidth={3} />
@@ -88,7 +88,7 @@ const VendorReviews = () => {
         </div>
       </header>
 
-      <main className="px-4 pt-4 space-y-4">
+      <main className="px-4 pt-[94px] space-y-4">
         <section className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 dark:border-gray-800 rounded-3xl p-4 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>

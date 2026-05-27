@@ -251,7 +251,7 @@ const VendorWallet = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="px-3 pt-4 pb-2.5 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="px-3 pt-[38px] pb-2.5 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center justify-between mb-3.5">
           <div className="flex items-center gap-2.5">
             <button

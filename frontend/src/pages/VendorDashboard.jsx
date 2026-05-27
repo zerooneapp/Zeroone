@@ -337,7 +337,7 @@ const VendorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar pb-24">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 py-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[38px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
             <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
@@ -380,7 +380,7 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      <main className="px-1.5 space-y-2 pt-16">
+      <main className="px-1.5 space-y-2 pt-[104px]">
         {data && !data.subscription?.isActive && (
           <section className="px-0.5 mb-2">
             <div 

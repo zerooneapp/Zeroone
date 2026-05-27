@@ -148,7 +148,7 @@ const MembershipPlans = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="px-4 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[38px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/vendor/profile')}
@@ -171,7 +171,7 @@ const MembershipPlans = () => {
         )}
       </header>
 
-      <main className="px-4 mt-4">
+      <main className="px-4 pt-[94px]">
         {/* Tab Switcher */}
         <div className="flex p-1 bg-slate-100 dark:bg-gray-900 rounded-2xl mb-6">
           <button

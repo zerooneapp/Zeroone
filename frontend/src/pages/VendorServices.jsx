@@ -115,40 +115,42 @@ const VendorServices = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="px-5 pt-5 pb-3 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/vendor/profile?section=shop_details')}
-            className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-1">
-              <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
-                <span className="text-primary dark:text-white">Zero</span>
-                <span className="text-primary/30 dark:text-gray-600">One</span>
-              </h1>
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[38px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/vendor/profile?section=shop_details')}
+              className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
+                  <span className="text-primary dark:text-white">Zero</span>
+                  <span className="text-primary/30 dark:text-gray-600">One</span>
+                </h1>
 
+              </div>
+              <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none">Service List</p>
             </div>
-            <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none">Service List</p>
           </div>
+          <button
+            onClick={() => {
+              if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to add services.', { id: 'account-inactive', duration: 2000 });
+              navigate('/vendor/services/add');
+            }}
+            className={`p-2.5 rounded-xl shadow-xl transition-all ${!vendorData?.subscription?.isActive
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed'
+                : 'bg-primary text-white shadow-primary/20 active:scale-95'
+              }`}
+          >
+            <Plus size={20} />
+          </button>
         </div>
-        <button
-          onClick={() => {
-            if (!vendorData?.subscription?.isActive) return toast.error('Account inactive. Recharge to add services.', { id: 'account-inactive', duration: 2000 });
-            navigate('/vendor/services/add');
-          }}
-          className={`p-2.5 rounded-xl shadow-xl transition-all ${!vendorData?.subscription?.isActive
-              ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed'
-              : 'bg-primary text-white shadow-primary/20 active:scale-95'
-            }`}
-        >
-          <Plus size={20} />
-        </button>
       </header>
 
-      <main className="px-5 mt-3.5">
+      <main className="px-5 pt-[124px]">
         <div className="mb-4 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
