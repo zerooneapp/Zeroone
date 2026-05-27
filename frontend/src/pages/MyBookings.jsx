@@ -88,7 +88,7 @@ const MyBookings = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background-light dark:bg-gray-950 overflow-hidden">
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-12 pb-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm shrink-0">
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-[38px] pb-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}

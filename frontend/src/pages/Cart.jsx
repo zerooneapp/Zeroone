@@ -357,7 +357,7 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in slide-in-from-right-4 duration-500">
       {/* Header */}
-      <div className="px-2.5 pt-12 pb-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <div className="px-2.5 pt-[38px] pb-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>

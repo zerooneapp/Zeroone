@@ -442,7 +442,7 @@ const ServiceDetail = () => {
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">
       {/* Redesigned Secondary Navbar (Fixed) */}
-      <div className="bg-white text-[#1C2C4E] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-12 pb-2">
+      <div className="bg-white text-[#1C2C4E] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[38px] pb-2">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
