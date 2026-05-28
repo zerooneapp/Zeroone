@@ -15,3 +15,7 @@ export const verifyMembershipPurchase = (paymentData) => {
 export const getMyMemberships = () => {
   return api.get('/memberships/my-memberships');
 };
+
+export const deleteMyMembership = (id) => {
+  return api.delete(`/memberships/my-memberships/${id}`);
+};

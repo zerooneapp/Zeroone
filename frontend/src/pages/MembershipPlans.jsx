@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Crown, Calendar, Info, Users, Phone, ShieldCheck, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Crown, Calendar, Info, Users, Phone, ShieldCheck, Clock, CheckCircle2, XCircle, Trash2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -28,6 +28,11 @@ const MembershipPlans = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [toggleLoadingId, setToggleLoadingId] = useState(null);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);   // holds plan object
+  const [showBlockedPopup, setShowBlockedPopup] = useState(null);    // holds error message
+  const [deletingMemberId, setDeletingMemberId] = useState(null);
+  const [showDeleteMemberConfirm, setShowDeleteMemberConfirm] = useState(null); // holds membership object
 
 
   // Derived state to use store for plans
@@ -37,9 +42,9 @@ const MembershipPlans = () => {
 
   const [globalMembershipActive, setGlobalMembershipActive] = useState(true);
 
-  const fetchData = async () => {
+  const fetchData = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       
       // Check global status
       const settingsRes = await api.get('/settings/shared');
@@ -75,7 +80,7 @@ const MembershipPlans = () => {
       setActionLoadingId(requestId);
       await api.patch(`/memberships/status/${requestId}`, { status });
       toast.success(status === 'active' ? 'Membership approved! 🎉' : 'Request rejected');
-      fetchData();
+      fetchData(false);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
     } finally {
@@ -83,9 +88,32 @@ const MembershipPlans = () => {
     }
   };
 
+  // 🚀 Background Prefetch on mount
+  useEffect(() => {
+    const prefetchData = async () => {
+      try {
+        const settingsRes = await api.get('/settings/shared');
+        const isMembActive = settingsRes.data?.features?.membershipActive !== false;
+        if (isMembActive) {
+          const [membersRes, requestsRes] = await Promise.all([
+            api.get('/memberships/vendor/members?page=1&limit=10'),
+            api.get('/memberships/vendor/requests?page=1&limit=10')
+          ]);
+          setMembers(membersRes.data.memberships || []);
+          setRequests(requestsRes.data.requests || []);
+        }
+      } catch (err) {
+        console.error('Background prefetch error:', err);
+      }
+    };
+    prefetchData();
+  }, []);
 
   useEffect(() => {
-    fetchData();
+    const hasData = activeTab === 'plans'
+      ? storePlans.length > 0
+      : (activeTab === 'members' ? members.length > 0 : requests.length > 0);
+    fetchData(!hasData);
   }, [activeTab]);
 
   const handleToggle = async (id, isActive) => {
@@ -107,6 +135,42 @@ const MembershipPlans = () => {
   };
 
 
+
+  const handleDeletePlan = async (plan) => {
+    try {
+      setDeletingId(plan._id);
+      await api.delete(`/memberships/vendor/plans/${plan._id}`);
+      toast.success('Plan deleted successfully');
+      setShowDeleteConfirm(null);
+      await fetchMemberships();
+    } catch (err) {
+      setShowDeleteConfirm(null);
+      const data = err.response?.data;
+      if (data?.hasActiveMembers) {
+        setShowBlockedPopup(data.message);
+      } else {
+        toast.error(data?.message || 'Failed to delete plan');
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleDeleteMember = async (membership) => {
+    try {
+      setDeletingMemberId(membership._id);
+      await api.delete(`/memberships/vendor/members/${membership._id}`);
+      toast.success('Record deleted successfully');
+      setShowDeleteMemberConfirm(null);
+      fetchData();
+    } catch (err) {
+      setShowDeleteMemberConfirm(null);
+      const data = err.response?.data;
+      toast.error(data?.message || 'Failed to delete record');
+    } finally {
+      setDeletingMemberId(null);
+    }
+  };
 
   const PlanSkeleton = () => (
     <div className="grid gap-4 mt-4">
@@ -314,21 +378,12 @@ const MembershipPlans = () => {
 
                         <div className="flex gap-2 pt-2">
                           <button
-                            onClick={() => navigate(`/vendor/memberships/edit/${plan._id}`)}
-                            className="flex-1 py-2.5 bg-slate-50 dark:bg-gray-800/60 text-slate-600 dark:text-slate-200 font-black text-[9px] uppercase tracking-widest rounded-xl active:scale-95 transition-all"
+                            onClick={() => setShowDeleteConfirm(plan)}
+                            disabled={deletingId === plan._id}
+                            className="w-full py-2.5 bg-red-500/10 text-red-600 dark:text-red-400 font-black text-[9px] uppercase tracking-widest rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                           >
-                            Edit Plan
-                          </button>
-                          <button
-                            onClick={() => handleToggle(plan._id, !plan.isActive)}
-                            disabled={toggleLoadingId === plan._id}
-                            className={`flex-1 py-2.5 font-black text-[9px] uppercase tracking-widest rounded-xl active:scale-95 transition-all ${
-                              plan.isActive 
-                              ? 'bg-red-500/10 text-red-600 dark:text-red-400' 
-                              : 'bg-green-500/10 text-green-600 dark:text-green-400'
-                            }`}
-                          >
-                            {plan.isActive ? 'Pause Plan' : 'Activate Plan'}
+                            <Trash2 size={13} strokeWidth={3} />
+                            {deletingId === plan._id ? 'Deleting...' : 'Delete Plan'}
                           </button>
                         </div>
                       </motion.div>
@@ -457,20 +512,46 @@ const MembershipPlans = () => {
                               <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 rounded-md text-[7px] font-black uppercase tracking-tighter border border-amber-500/10 shrink-0">
                                 {membership.planId?.name}
                               </span>
+                              {/* Status Badge */}
+                              {membership.status !== 'active' && (
+                                <span className={cn(
+                                  "px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-tighter border shrink-0",
+                                  membership.status === 'expired' && "bg-slate-100 dark:bg-gray-800 text-slate-400 border-slate-200 dark:border-gray-700",
+                                  membership.status === 'rejected' && "bg-red-500/10 text-red-500 border-red-500/20",
+                                  membership.status === 'cancelled' && "bg-orange-500/10 text-orange-500 border-orange-500/20",
+                                  membership.status === 'pending' && "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                )}>
+                                  {membership.status}
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center gap-3 mt-1.5">
                               <div className="flex items-center gap-1 text-slate-400">
                                 <Phone size={10} />
                                 <span className="text-[10px] font-bold">{membership.userId?.phone}</span>
                               </div>
-                              <div className="flex items-center gap-1 text-emerald-500">
+                              <div className={cn("flex items-center gap-1", dayjs(membership.endDate).isBefore(dayjs()) ? 'text-slate-400' : 'text-emerald-500')}>
                                 <Calendar size={10} />
-                                <span className="text-[9px] font-black uppercase tracking-tighter">Expires {dayjs(membership.endDate).format('DD MMM')}</span>
+                                <span className="text-[9px] font-black uppercase tracking-tighter">
+                                  {dayjs(membership.endDate).isBefore(dayjs()) ? 'Expired' : 'Expires'} {dayjs(membership.endDate).format('DD MMM')}
+                                </span>
                               </div>
                             </div>
                           </div>
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-900/30">
-                            <ShieldCheck size={16} />
+                          <div className="flex flex-col items-center gap-1.5">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-900/30">
+                              <ShieldCheck size={16} />
+                            </div>
+                            {/* Delete button for past records */}
+                            {(membership.status !== 'active' || dayjs(membership.endDate).isBefore(dayjs())) && (
+                              <button
+                                onClick={() => setShowDeleteMemberConfirm(membership)}
+                                disabled={deletingMemberId === membership._id}
+                                className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 border border-red-100 dark:border-red-900/30 active:scale-90 transition-all disabled:opacity-40"
+                              >
+                                <Trash2 size={14} strokeWidth={2.5} />
+                              </button>
+                            )}
                           </div>
                         </div>
 
@@ -484,12 +565,12 @@ const MembershipPlans = () => {
                               )}
                             </div>
                             <div className="space-y-3">
-                              {membership.usage.map((item) => {
+                              {membership.usage.map((item, idx) => {
                                 const percentage = Math.min((item.usedCount / item.usageLimit) * 100, 100);
                                 const isExhausted = item.usedCount >= item.usageLimit;
 
                                 return (
-                                  <div key={item.serviceId?._id} className="space-y-1.5">
+                                  <div key={item.serviceId?._id || item._id || idx} className="space-y-1.5">
                                     <div className="flex justify-between items-end">
                                       <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200 capitalize">
                                         {item.serviceId?.name}
@@ -525,7 +606,131 @@ const MembershipPlans = () => {
 
         )}
       </main>
-      
+
+
+      {/* 🗑️ DELETE CONFIRMATION POPUP */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !deletingId && setShowDeleteConfirm(null)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-2xl relative z-10 text-center"
+            >
+              <div className="w-14 h-14 bg-red-500/10 text-red-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <Trash2 size={28} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Delete Plan?</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-2 uppercase tracking-widest leading-relaxed">
+                "{showDeleteConfirm.name}" plan permanently delete ho jaayega. Yeh action undo nahi ho sakta.
+              </p>
+              <div className="flex flex-col gap-2 mt-6">
+                <button
+                  disabled={!!deletingId}
+                  onClick={() => handleDeletePlan(showDeleteConfirm)}
+                  className="w-full py-3.5 bg-red-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {deletingId ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Yes, Delete'}
+                </button>
+                <button
+                  disabled={!!deletingId}
+                  onClick={() => setShowDeleteConfirm(null)}
+                  className="w-full py-3.5 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 🚫 BLOCKED POPUP — Active Members Exist */}
+      <AnimatePresence>
+        {showBlockedPopup && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowBlockedPopup(null)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-2xl relative z-10 text-center"
+            >
+              <div className="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
+                <AlertTriangle size={28} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Cannot Delete</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-2 tracking-wide leading-relaxed">
+                {showBlockedPopup}
+              </p>
+              <button
+                onClick={() => setShowBlockedPopup(null)}
+                className="mt-6 w-full py-3.5 bg-slate-900 dark:bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+              >
+                Got it
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* 🗑️ DELETE MEMBER RECORD CONFIRMATION POPUP */}
+      <AnimatePresence>
+        {showDeleteMemberConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !deletingMemberId && setShowDeleteMemberConfirm(null)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-2xl relative z-10 text-center"
+            >
+              <div className="w-14 h-14 bg-red-500/10 text-red-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <Trash2 size={28} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Delete Record?</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-2 tracking-wide leading-relaxed">
+                <span className="capitalize font-black text-slate-700 dark:text-white">{showDeleteMemberConfirm.userId?.name || 'Customer'}</span> ka membership record permanently delete ho jaayega.
+              </p>
+              <div className="flex flex-col gap-2 mt-6">
+                <button
+                  disabled={!!deletingMemberId}
+                  onClick={() => handleDeleteMember(showDeleteMemberConfirm)}
+                  className="w-full py-3.5 bg-red-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {deletingMemberId ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Yes, Delete'}
+                </button>
+                <button
+                  disabled={!!deletingMemberId}
+                  onClick={() => setShowDeleteMemberConfirm(null)}
+                  className="w-full py-3.5 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

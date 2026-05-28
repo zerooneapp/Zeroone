@@ -12,6 +12,7 @@ router.patch('/status/:id', protect, authorize('vendor'), isApprovedVendor, memb
 
 // Vendor Plan Management
 router.get('/vendor/members', protect, authorize('vendor'), isApprovedVendor, membershipController.getVendorMembers);
+router.delete('/vendor/members/:id', protect, authorize('vendor'), isApprovedVendor, membershipController.deleteUserMembership);
 router.post('/vendor/plans', protect, authorize('vendor'), isApprovedVendor, membershipController.createPlan);
 router.get('/vendor/plans/:id', protect, authorize('vendor'), isApprovedVendor, membershipController.getPlanById);
 router.patch('/vendor/plans/:id', protect, authorize('vendor'), isApprovedVendor, membershipController.updatePlan);
@@ -25,5 +26,6 @@ router.post('/request', protect, membershipController.requestManualPurchase);
 router.post('/purchase/order', protect, membershipController.createPurchaseOrder);
 router.post('/purchase/verify', protect, membershipController.verifyPurchase);
 router.get('/my-memberships', protect, membershipController.getUserMemberships);
+router.delete('/my-memberships/:id', protect, membershipController.deleteUserMembershipByUser);
 
 module.exports = router;

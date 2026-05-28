@@ -109,7 +109,7 @@ const SecuritySettings = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
+      <main className="flex-1 overflow-y-auto px-5 pt-6 pb-24 space-y-6">
         {/* 🔐 ACCESS CONTROL */}
         <section className="space-y-3">
           <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase">Auth Controls</label>

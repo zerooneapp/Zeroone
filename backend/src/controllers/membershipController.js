@@ -114,6 +114,20 @@ exports.deletePlan = async (req, res) => {
     const { id } = req.params;
     const vendorId = req.vendor._id;
 
+    // 🛡️ SAFE DELETE: Check if any user has an active membership under this plan
+    const activeMemberCount = await UserMembership.countDocuments({
+      planId: id,
+      status: 'active'
+    });
+
+    if (activeMemberCount > 0) {
+      return res.status(400).json({
+        message: `This plan cannot be deleted as it has ${activeMemberCount} active member(s). Please wait for all memberships to expire before deleting.`,
+        hasActiveMembers: true,
+        activeMemberCount
+      });
+    }
+
     const plan = await VendorMembershipPlan.findOneAndDelete({ _id: id, vendorId });
     if (!plan) return res.status(404).json({ message: 'Plan not found' });
 
@@ -130,7 +144,8 @@ exports.getVendorMembers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const query = { vendorId, status: 'active' };
+    // Show all statuses so vendor can see and clean up expired/past records
+    const query = { vendorId };
 
     const [memberships, total] = await Promise.all([
       UserMembership.find(query)
@@ -149,6 +164,33 @@ exports.getVendorMembers = async (req, res) => {
       pages: Math.ceil(total / limit),
       currentPage: page
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.deleteUserMembership = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vendorId = req.vendor._id;
+
+    const membership = await UserMembership.findOne({ _id: id, vendorId });
+    if (!membership) return res.status(404).json({ message: 'Membership record not found' });
+
+    // 🛡️ Block deletion of currently active memberships
+    if (membership.status === 'active') {
+      const now = new Date();
+      const isStillValid = membership.endDate > now;
+      if (isStillValid) {
+        return res.status(400).json({
+          message: 'Cannot delete an active membership. Wait for it to expire first.',
+          isActive: true
+        });
+      }
+    }
+
+    await UserMembership.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Membership record deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -452,7 +494,7 @@ exports.getVendorMembershipRequests = async (req, res) => {
 
 exports.getUserMemberships = async (req, res) => {
   try {
-    const memberships = await UserMembership.find({ userId: req.user._id })
+    const memberships = await UserMembership.find({ userId: req.user._id, isDeletedByUser: { $ne: true } })
       .populate('vendorId', 'shopName')
       .populate('planId', 'name price')
       .populate('usage.serviceId', 'name')
@@ -462,5 +504,29 @@ exports.getUserMemberships = async (req, res) => {
   } catch (error) {
     console.error('[MEMBERSHIP ERROR] getUserMemberships:', error);
     res.status(500).json({ message: error.message, stack: error.stack });
+  }
+};
+
+exports.deleteUserMembershipByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const membership = await UserMembership.findOne({ _id: id, userId: req.user._id });
+    if (!membership) {
+      return res.status(404).json({ message: 'Membership not found' });
+    }
+
+    const now = new Date();
+    const isExpired = membership.endDate < now || ['expired', 'rejected', 'cancelled'].includes(membership.status);
+    if (!isExpired) {
+      return res.status(400).json({ message: 'Cannot delete an active membership plan' });
+    }
+
+    membership.isDeletedByUser = true;
+    await membership.save();
+
+    res.status(200).json({ message: 'Membership deleted successfully from history' });
+  } catch (error) {
+    console.error('[MEMBERSHIP ERROR] deleteUserMembershipByUser:', error);
+    res.status(500).json({ message: error.message });
   }
 };

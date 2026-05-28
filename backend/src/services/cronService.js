@@ -41,13 +41,28 @@ const initCronJobs = () => {
       const now = moment().tz('Asia/Kolkata');
       const todayStr = now.format('YYYY-MM-DD');
 
-      // Fetch all daily plan vendors that are approved, active, or inactive
+      // Fetch all daily and trial plan vendors that are approved, active, or inactive
       const vendors = await Vendor.find({
-        planType: 'daily',
+        planType: { $in: ['daily', 'trial'] },
         status: { $in: ['active', 'inactive', 'approved'] }
       });
 
       for (const vendor of vendors) {
+        // Normalize trial plans on the fly if their trial has expired
+        if (vendor.planType === 'trial') {
+          try {
+            const { getUpdatedStatus } = require('./walletService');
+            await getUpdatedStatus(vendor);
+          } catch (err) {
+            console.error(`[CRON-BILLING-ERROR] Failed to normalize status for trial vendor ${vendor.shopName}:`, err.message);
+          }
+        }
+
+        // If the vendor is not on a daily plan (e.g. trial is still active), skip deduction
+        if (vendor.planType !== 'daily') {
+          continue;
+        }
+
         // Skip if already processed today
         if (
           vendor.lastDeductionDate &&

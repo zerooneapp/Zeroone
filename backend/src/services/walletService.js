@@ -219,8 +219,11 @@ const getUpdatedStatus = async (vendor) => {
   const nextStatus = isActive ? 'active' : 'inactive';
 
   // 4. Persistence
-  if (didChange || vendor.status !== nextStatus) {
+  if (didChange || vendor.status !== nextStatus || (nextStatus === 'inactive' && vendor.isShopOpen !== false)) {
     vendor.status = nextStatus;
+    if (nextStatus === 'inactive') {
+      vendor.isShopOpen = false;
+    }
     await vendor.save();
   }
 
@@ -308,19 +311,22 @@ const processDailyDeduction = async (vendor) => {
     // 🛡️ IDEMPOTENCY CHECK: Ensure we haven't already deducted for this day
     const existing = await WalletTransaction.findOne({ referenceId });
     if (!existing) {
-      vendor.walletBalance -= dailyPrice;
-      await createWalletTransaction({
-        vendorId: vendor._id,
-        initiatedByUserId: vendor.ownerId,
-        amount: dailyPrice,
-        type: 'debit',
-        reason: 'daily_subscription',
-        category: 'daily_subscription',
-        paymentGateway: 'system',
-        paymentMethod: 'wallet',
-        referenceId,
-        description: `${getNormalizedServiceLevel(vendor.serviceLevel)} Service Day: ${today}. (Base: ₹${basePrice} + GST: ₹${gstAmount})`
-      });
+      const deductAmount = Math.max(0, Math.min(vendor.walletBalance, dailyPrice));
+      if (deductAmount > 0) {
+        vendor.walletBalance -= deductAmount;
+        await createWalletTransaction({
+          vendorId: vendor._id,
+          initiatedByUserId: vendor.ownerId,
+          amount: deductAmount,
+          type: 'debit',
+          reason: 'daily_subscription',
+          category: 'daily_subscription',
+          paymentGateway: 'system',
+          paymentMethod: 'wallet',
+          referenceId,
+          description: `${getNormalizedServiceLevel(vendor.serviceLevel)} Service Day: ${today}. (Base: ₹${basePrice} + GST: ₹${gstAmount})`
+        });
+      }
     }
   }
 
@@ -336,6 +342,7 @@ const processDailyDeduction = async (vendor) => {
   vendor.status = updatedState.isActive ? 'active' : 'inactive';
 
   if (!updatedState.isActive) {
+    vendor.isShopOpen = false; // Auto-toggle OFF
     const shortfall = Math.max(updatedState.totalRequired - vendor.walletBalance, 0);
     await NotificationService.sendNotification({
       userIds: vendor.ownerId,

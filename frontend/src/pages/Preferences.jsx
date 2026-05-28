@@ -109,7 +109,7 @@ const Preferences = () => {
                   </p>
                 </div>
               </div>
-              <div className="px-3 py-1 bg-slate-50 dark:bg-gray-850 rounded-lg border border-slate-100 dark:border-gray-800">
+              <div className="px-3 py-1 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-800">
                 <span className="text-[9px] font-black text-[#1C2C4E] dark:text-white tracking-wider uppercase">Active</span>
               </div>
             </div>
