@@ -86,7 +86,7 @@ const VendorLayout = () => {
     <div className="min-h-screen w-full bg-slate-50 dark:bg-gray-950 font-sans flex flex-col pb-[58px] sm:pb-0">
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 shadow-[0_0_100px_rgba(0,0,0,0.03)] dark:shadow-none relative border-x border-slate-100 dark:border-gray-800/50"
+        className="flex-1 overflow-y-auto w-full max-w-4xl mx-auto bg-slate-50 dark:bg-gray-950 shadow-[0_0_100px_rgba(0,0,0,0.03)] dark:shadow-none relative"
       >
         <Suspense fallback={null}>
           <Outlet />
@@ -108,16 +108,16 @@ const VendorLayout = () => {
                     {isActive && (
                       <motion.div
                         layoutId="active-nav-line-partner"
-                        className="absolute top-0 w-8 h-[3px] bg-[#1C2C4E] dark:bg-white rounded-b-full"
+                        className="absolute top-0 w-8 h-[3px] bg-[#00246b] dark:bg-white rounded-b-full"
                       />
                     )}
 
                     <item.icon
                       size={22}
-                      className="text-[#1C2C4E] dark:text-white"
+                      className="text-[#00246b] dark:text-white"
                     />
 
-                    <span className="text-[10px] font-black uppercase tracking-tight text-[#1C2C4E] dark:text-white">
+                    <span className="text-[10px] font-black uppercase tracking-tight text-[#00246b] dark:text-white">
                       {item.label}
                     </span>
                   </button>

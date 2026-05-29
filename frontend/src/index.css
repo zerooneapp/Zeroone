@@ -61,3 +61,10 @@ input[type="number"] {
 .dark input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
+
+/* Add top padding to the Razorpay checkout modal so its inner content clears the status bar/notch */
+.razorpay-checkout-frame {
+  padding-top: 40px !important;
+  box-sizing: border-box !important;
+}
+

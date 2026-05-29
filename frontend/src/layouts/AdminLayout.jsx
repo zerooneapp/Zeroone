@@ -31,7 +31,6 @@ const AdminLayout = () => {
     { name: "Bookings", path: "/admin/bookings", icon: CalendarRange },
     { name: "Categories", path: "/admin/categories", icon: Tag },
     { name: "Plans", path: "/admin/plans", icon: CreditCard },
-    { name: "Settings", path: "/admin/settings", icon: Settings },
     { name: "Partner Membership", path: "/admin/membership-settings", icon: Crown },
     { name: "Promotions", path: "/admin/promotions", icon: Zap },
     { name: "Transactions", path: "/admin/transactions", icon: Wallet },
@@ -39,6 +38,7 @@ const AdminLayout = () => {
     { name: "Reviews", path: "/admin/reviews", icon: Star },
     { name: "Broadcast", path: "/admin/notifications/broadcast", icon: Send },
     ...(isSuperAdmin ? [{ name: "Admin Access", path: "/admin/access", icon: Shield }] : []),
+    { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 
   useSocket(currentAdmin?._id);

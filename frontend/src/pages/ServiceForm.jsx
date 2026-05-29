@@ -151,7 +151,7 @@ const ServiceForm = () => {
 
    return (
       <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
-         <header className="px-4 pt-[38px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm flex items-center gap-3">
+         <header className="px-4 pt-[40px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm flex items-center gap-3">
             <button
                onClick={() => navigate(-1)}
                className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold shrink-0"
@@ -166,7 +166,7 @@ const ServiceForm = () => {
          <main className="px-4 pt-[94px]">
             <form id="service-form" onSubmit={handleSubmit} className="space-y-6 pb-12 max-w-2xl mx-auto">
                {/* Image Upload */}
-               <section className="space-y-4">
+               <section className="space-y-4 pt-4">
                   <div className="flex items-center justify-between px-1">
                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Service Image</label>
                   </div>
@@ -288,7 +288,7 @@ const ServiceForm = () => {
                               type="button"
                               onClick={() => setFormData({ ...formData, bufferTime: m })}
                               className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap min-w-[64px] border ${formData.bufferTime === m
-                                 ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
+                                 ? 'bg-[#00246b] text-white border-[#00246b] shadow-lg shadow-[#00246b]/20'
                                  : 'bg-white dark:bg-gray-900 text-gray-400 border-slate-100 dark:border-gray-800 shadow-sm'
                                  }`}
                            >
@@ -311,11 +311,11 @@ const ServiceForm = () => {
                   </div>
                </div>
 
-               <div className="p-3.5 bg-blue-500/5 dark:bg-blue-900/10 rounded-xl border border-blue-500/10 dark:border-blue-900/30 flex items-start gap-2.5">
-                  <div className="p-1.5 bg-blue-500/10 rounded-lg shrink-0">
-                     <Info className="text-blue-500" size={14} />
+               <div className="p-3.5 bg-[#00246b]/5 dark:bg-[#00246b]/20 rounded-xl border border-[#00246b]/10 dark:border-[#00246b]/30 flex items-start gap-2.5">
+                  <div className="p-1.5 bg-[#00246b]/10 rounded-lg shrink-0">
+                     <Info className="text-[#00246b] dark:text-white" size={14} />
                   </div>
-                  <p className="text-[8px] font-black text-blue-600/80 dark:text-blue-400/80 leading-relaxed uppercase tracking-widest">
+                  <p className="text-[8px] font-black text-[#00246b]/80 dark:text-white/70 leading-relaxed uppercase tracking-widest">
                      As soon as you save, this service is visible. Ensure accuracy to avoid conflict.
                   </p>
                </div>
@@ -325,7 +325,7 @@ const ServiceForm = () => {
                   <button
                      type="submit"
                      disabled={loading}
-                     className="w-full py-4 bg-slate-900 dark:bg-primary text-white rounded-2xl shadow-xl shadow-black/10 active:scale-95 transition-all disabled:opacity-50 font-black text-[12px] uppercase tracking-widest border border-white/10 flex items-center justify-center gap-2"
+                     className="w-full py-4 bg-[#00246b] dark:bg-[#00246b] text-white rounded-2xl shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50 font-black text-[12px] uppercase tracking-widest border border-white/10 flex items-center justify-center gap-2"
                   >
                      {loading ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

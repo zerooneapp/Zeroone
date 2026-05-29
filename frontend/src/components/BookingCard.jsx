@@ -10,7 +10,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
 
    const getStatusStyles = (status) => {
       switch (status) {
-         case 'confirmed': return 'bg-[#1C2C4E]/10 text-[#1C2C4E] border-[#1C2C4E]/20 dark:bg-gray-800/80 dark:text-blue-400 dark:border-blue-900/30';
+         case 'confirmed': return 'bg-[#00246b]/10 text-[#00246b] border-[#00246b]/20 dark:bg-gray-800/80 dark:text-blue-400 dark:border-blue-900/30';
          case 'completed': return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/30';
          case 'cancelled': return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/10 dark:text-rose-400 dark:border-rose-900/30';
          default: return 'bg-gray-100 text-gray-500';
@@ -40,7 +40,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                      <User size={18} className="text-slate-400 dark:text-gray-500" />
                   )}
                   {booking.isWalkIn && (
-                     <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#1C2C4E] text-white rounded-full flex items-center justify-center border border-white dark:border-gray-900 shadow-sm">
+                     <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#00246b] text-white rounded-full flex items-center justify-center border border-white dark:border-gray-900 shadow-sm">
                         <ShoppingBag size={7} />
                      </div>
                   )}
@@ -81,7 +81,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                   <Calendar size={8} strokeWidth={3} /> Schedule
                </p>
                <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-1">
-                  {dayjs(booking.startTime).format('DD MMM')} <span className="text-[#1C2C4E] dark:text-blue-400">•</span> {dayjs(booking.startTime).format('hh:mm A')}
+                  {dayjs(booking.startTime).format('DD MMM')} <span className="text-[#00246b] dark:text-blue-400">•</span> {dayjs(booking.startTime).format('hh:mm A')}
                </p>
             </div>
             <div className="flex flex-col text-right items-end">
@@ -113,7 +113,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                   <button
                      disabled={isActionLoading}
                      onClick={(e) => { e.stopPropagation(); onComplete(booking._id); }}
-                     className="h-8 px-3 bg-slate-900 dark:bg-[#1C2C4E] text-white rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                     className="h-8 px-3 bg-[#00246b] dark:bg-[#00246b] text-white rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-50"
                   >
                      {isActionLoading ? <div className="w-2.5 h-2.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle2 size={12} />}
                      Complete

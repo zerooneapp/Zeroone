@@ -10,22 +10,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 const AdminPromotions = () => {
   const [plans, setPlans] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPlan, setNewPlan] = useState({ name: '', amount: '', durationDays: '', description: '' });
-  const [tab, setTab] = useState('pending'); // pending | active
+  const [tab, setTab] = useState('pending'); // pending | active | transactions
   const [dailyPrice, setDailyPrice] = useState(10);
   const [savingPrice, setSavingPrice] = useState(false);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [reqRes, settingsRes] = await Promise.all([
+      const [reqRes, settingsRes, txRes] = await Promise.all([
         api.get('/promotions/admin/requests'),
-        api.get('/admin/settings')
+        api.get('/admin/settings'),
+        api.get('/promotions/admin/transactions')
       ]);
       setRequests(reqRes.data);
       setDailyPrice(settingsRes.data.promotionPricePerDay || 10);
+      setTransactions(txRes.data || []);
     } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
@@ -148,6 +151,12 @@ const AdminPromotions = () => {
         >
           Active Boosts ({activeRequests.length})
         </button>
+        <button 
+          onClick={() => setTab('transactions')}
+          className={`pb-3 px-1 text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'transactions' ? 'text-primary dark:text-white border-b-2 border-primary dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+        >
+          Transactions ({transactions.length})
+        </button>
       </div>
 
       {loading ? (
@@ -157,54 +166,95 @@ const AdminPromotions = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {(tab === 'pending' ? pendingRequests : activeRequests).map(req => (
-            <div key={req._id} className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 flex items-center justify-between group hover:shadow-xl transition-all">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 ${req.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-primary/10 text-primary'} rounded-xl flex items-center justify-center`}>
-                  <Zap size={24} strokeWidth={3} />
+          {tab === 'transactions' ? (
+            transactions.map(tx => (
+              <div key={tx._id} className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 flex items-center justify-between group hover:shadow-xl transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 ${tx.category === 'promotion_refund' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'} rounded-xl flex items-center justify-center`}>
+                    {tx.category === 'promotion_refund' ? (
+                      <XCircle size={24} strokeWidth={3} />
+                    ) : (
+                      <CheckCircle size={24} strokeWidth={3} />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize leading-none">
+                      {tx.vendorId?.shopName || 'Unknown Partner'}
+                    </h3>
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                      {tx.description || 'Promotion Payment'} • {new Date(tx.timestamp).toLocaleString('en-GB')}
+                    </p>
+                    {tx.gatewayPaymentId && (
+                      <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 font-mono mt-1">
+                        ID: {tx.gatewayPaymentId}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize leading-none">{req.vendorId?.shopName}</h3>
-                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">
-                    {req.durationDays} Days • {req.status === 'active' ? `Expires ${new Date(req.endDate).toLocaleDateString('en-GB')}` : 'Profile Boost'}
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-6">
-                <div className="text-right leading-none">
-                  <p className="text-[18px] font-black text-slate-900 dark:text-white">₹{req.amountPaid}</p>
-                  <p className={`text-[9px] font-black ${req.status === 'active' ? 'text-emerald-500' : 'text-primary dark:text-white'} uppercase tracking-widest mt-1`}>
-                    {req.status === 'active' ? 'Activated' : 'Payment Verified'}
-                  </p>
+                <div className="flex items-center gap-6">
+                  <div className="text-right leading-none">
+                    <p className={`text-[18px] font-black ${tx.category === 'promotion_refund' ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      {tx.category === 'promotion_refund' ? '-' : '+'}₹{tx.amount}
+                    </p>
+                    <p className={`text-[9px] font-black ${tx.category === 'promotion_refund' ? 'text-rose-500' : 'text-emerald-500'} uppercase tracking-widest mt-1`}>
+                      {tx.category === 'promotion_refund' ? 'Refunded' : 'Paid'}
+                    </p>
+                  </div>
                 </div>
-                {req.status === 'pending' && (
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleApprove(req._id)}
-                      className="p-2.5 bg-emerald-50 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all border border-emerald-100"
-                    >
-                      <CheckCircle size={20} strokeWidth={3} />
-                    </button>
-                    <button 
-                      onClick={() => handleReject(req._id)}
-                      className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-100"
-                    >
-                      <XCircle size={20} strokeWidth={3} />
-                    </button>
-                  </div>
-                )}
-                {req.status === 'active' && (
-                  <div className="px-4 py-2 bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded-lg border border-emerald-500/20">
-                    Live
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
-          {(tab === 'pending' ? pendingRequests : activeRequests).length === 0 && (
+            ))
+          ) : (
+            (tab === 'pending' ? pendingRequests : activeRequests).map(req => (
+              <div key={req._id} className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 flex items-center justify-between group hover:shadow-xl transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 ${req.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-primary/10 text-primary'} rounded-xl flex items-center justify-center`}>
+                    <Zap size={24} strokeWidth={3} />
+                  </div>
+                  <div>
+                    <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize leading-none">{req.vendorId?.shopName}</h3>
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                      {req.durationDays} Days • {req.status === 'active' ? `Expires ${new Date(req.endDate).toLocaleDateString('en-GB')}` : 'Profile Boost'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div className="text-right leading-none">
+                    <p className="text-[18px] font-black text-slate-900 dark:text-white">₹{req.amountPaid}</p>
+                    <p className={`text-[9px] font-black ${req.status === 'active' ? 'text-emerald-500' : 'text-primary dark:text-white'} uppercase tracking-widest mt-1`}>
+                      {req.status === 'active' ? 'Activated' : 'Payment Verified'}
+                    </p>
+                  </div>
+                  {req.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleApprove(req._id)}
+                        className="p-2.5 bg-emerald-50 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all border border-emerald-100"
+                      >
+                        <CheckCircle size={20} strokeWidth={3} />
+                      </button>
+                      <button 
+                        onClick={() => handleReject(req._id)}
+                        className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-100"
+                      >
+                        <XCircle size={20} strokeWidth={3} />
+                      </button>
+                    </div>
+                  )}
+                  {req.status === 'active' && (
+                    <div className="px-4 py-2 bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded-lg border border-emerald-500/20">
+                      Live
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+          
+          {((tab === 'transactions' ? transactions : (tab === 'pending' ? pendingRequests : activeRequests)).length === 0) && (
             <div className="py-20 text-center border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-3xl text-slate-300 font-black uppercase tracking-[0.2em] text-[11px]">
-              No {tab} promotions found
+              No {tab === 'transactions' ? 'transactions' : `${tab} promotions`} found
             </div>
           )}
         </div>

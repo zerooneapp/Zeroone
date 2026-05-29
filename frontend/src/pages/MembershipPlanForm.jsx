@@ -137,7 +137,7 @@ const MembershipPlanForm = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[38px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800/50 flex items-center justify-between">
+        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[40px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
              <button 
                onClick={() => navigate(-1)}
@@ -152,7 +152,7 @@ const MembershipPlanForm = () => {
           <button 
             form="membership-form"
             disabled={loading}
-            className="p-2 bg-[#1C2C4E] text-white rounded-xl shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all disabled:opacity-50"
+            className="p-2 bg-[#00246b] text-white rounded-xl shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50"
           >
              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
           </button>
@@ -233,7 +233,7 @@ const MembershipPlanForm = () => {
                       <button 
                         type="button"
                         onClick={() => navigate('/vendor/services/add')}
-                        className="text-[9px] font-black text-primary uppercase flex items-center gap-1"
+                        className="text-[9px] font-black text-[#00246b] dark:text-white uppercase flex items-center gap-1"
                       >
                          + Create New Service
                       </button>
@@ -255,7 +255,7 @@ const MembershipPlanForm = () => {
                         onClick={() => setShowSelectedOnly(!showSelectedOnly)}
                         className={`px-3 py-2 rounded-xl text-[9px] font-black border transition-all ${
                           showSelectedOnly 
-                            ? 'bg-amber-500 border-amber-500 text-white' 
+                            ? 'bg-[#00246b] border-[#00246b] text-white' 
                             : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
                         }`}
                       >
@@ -274,7 +274,7 @@ const MembershipPlanForm = () => {
                               key={service._id}
                               className={`p-3 rounded-2xl border transition-all flex items-center justify-between ${
                                 isSelected 
-                                  ? 'bg-amber-500/5 border-amber-500/20' 
+                                  ? 'bg-[#00246b]/5 dark:bg-[#00246b]/20 border-[#00246b]/30 dark:border-white/20' 
                                   : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'
                               }`}
                             >
@@ -284,7 +284,7 @@ const MembershipPlanForm = () => {
                                   onClick={() => toggleService(service._id)}
                                   className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
                                     isSelected 
-                                      ? 'bg-amber-500 border-amber-500 text-white' 
+                                      ? 'bg-[#00246b] border-[#00246b] text-white' 
                                       : 'border-gray-300 dark:border-gray-700'
                                   }`}
                                 >
@@ -323,9 +323,9 @@ const MembershipPlanForm = () => {
              </div>
 
              <div className="flex flex-col gap-3">
-                <div className="p-2.5 bg-amber-50 dark:bg-amber-950/10 rounded-xl border border-amber-100 dark:border-amber-900/10 flex items-start gap-2.5">
-                   <Crown className="text-amber-500 mt-0.5" size={14} />
-                   <p className="text-[9px] font-bold text-amber-600/70 leading-relaxed uppercase">
+                <div className="p-2.5 bg-[#00246b]/5 dark:bg-[#00246b]/20 rounded-xl border border-[#00246b]/10 dark:border-[#00246b]/30 flex items-start gap-2.5">
+                   <Crown className="text-[#00246b] dark:text-white mt-0.5" size={14} />
+                   <p className="text-[9px] font-bold text-[#00246b]/70 dark:text-white/70 leading-relaxed uppercase">
                       Customers will be limited to the specified usage counts for each service. If a service limit is reached, they will need to pay the standard price.
                    </p>
                 </div>

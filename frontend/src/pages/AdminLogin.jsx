@@ -102,10 +102,7 @@ const AdminLogin = () => {
         </div>
       </div>
 
-      <div className="pb-8 flex items-center justify-center gap-2 relative z-10">
-        <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] dark:text-gray-400 uppercase tracking-wider leading-none">MADE IN INDIA</span>
-        <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
-      </div>
+      {/* Removed MADE IN INDIA footer */}
     </div>
   );
 };

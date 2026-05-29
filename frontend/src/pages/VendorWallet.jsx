@@ -98,6 +98,26 @@ const VendorWallet = () => {
     }
   };
 
+  const refreshAll = async () => {
+    setIsRefreshing(true);
+    try {
+      const [walletRes, transactionsRes, withdrawalsRes] = await Promise.all([
+        api.get('/vendor/wallet/overview'),
+        api.get('/vendor/transactions'),
+        api.get('/vendor/wallet/withdrawals')
+      ]);
+      useVendorStore.setState({
+        walletData: walletRes.data,
+        transactionsData: transactionsRes.data,
+        withdrawalsData: withdrawalsRes.data
+      });
+    } catch (err) {
+      toast.error('Failed to refresh data');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -251,8 +271,8 @@ const VendorWallet = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="px-3 pt-[38px] pb-2.5 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
-        <div className="flex items-center justify-between mb-3.5">
+      <header className="px-3 pt-[40px] pb-2.5 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => navigate('/vendor/dashboard')}
@@ -264,7 +284,7 @@ const VendorWallet = () => {
               <div className="flex items-center gap-1">
                 <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
                   <span className="text-[#00246b] dark:text-white">Zero</span>
-                  <span className="text-[#00246b]/30 dark:text-gray-600">One</span>
+                  <span className="text-[#00246b]/30 dark:text-white">One</span>
                 </h1>
               </div>
               <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none">Wallet & Finance</p>
@@ -273,14 +293,10 @@ const VendorWallet = () => {
           <div className="flex items-center gap-2">
             <button
                type="button"
-               onClick={async () => {
-                 setIsRefreshing(true);
-                 await fetchData(true);
-                 setIsRefreshing(false);
-               }}
-               className={`p-2.5 text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-full active:scale-95 transition-all duration-300 ${isRefreshing ? 'animate-spin text-[#00246b]' : ''}`}
+               onClick={refreshAll}
+               className={`p-2.5 text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-full active:scale-95 transition-all duration-300 ${isRefreshing ? 'text-[#00246b]' : ''}`}
             >
-               <RefreshCw size={16} />
+               <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
             </button>
             <button
               onClick={() => setIsTopupOpen(true)}
@@ -297,7 +313,9 @@ const VendorWallet = () => {
             </button>
           </div>
         </div>
+      </header>
 
+      <main className="px-3 pt-[94px] space-y-4">
         <div className="p-4 bg-gradient-to-br from-[#00246b] to-[#1E293B] dark:from-primary/20 dark:to-primary/10 rounded-[2rem] text-white shadow-2xl shadow-black/10 relative overflow-hidden">
           <div className="relative z-10 space-y-2.5">
             <div className="flex items-center justify-between">
@@ -344,9 +362,7 @@ const VendorWallet = () => {
             </div>
           </motion.div>
         )}
-      </header>
 
-      <main className="px-3 mt-3.5 space-y-4">
         <div className="p-3 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl shadow-md space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -441,52 +457,50 @@ const VendorWallet = () => {
             <TrendingUp size={12} className="text-slate-300" />
           </div>
           
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-2.5 rounded-2xl shadow-sm text-center">
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 py-1 px-2 rounded-xl shadow-sm text-center">
               <p className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Today</p>
-              <p className="text-[12px] font-black text-gray-900 dark:text-white mt-0.5">
+              <p className="text-[11px] font-black text-gray-900 dark:text-white mt-0.5">
                 {moneyFormatter.format(dashboard?.stats?.todayEarnings || 0)}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-2.5 rounded-2xl shadow-sm text-center">
+            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 py-1 px-2 rounded-xl shadow-sm text-center">
               <p className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">7 Days</p>
-              <p className="text-[12px] font-black text-[#00246b] dark:text-white mt-0.5">
+              <p className="text-[11px] font-black text-[#00246b] dark:text-white mt-0.5">
                 {moneyFormatter.format(dashboard?.stats?.weekEarnings || 0)}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-2.5 rounded-2xl shadow-sm text-center">
+            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 py-1 px-2 rounded-xl shadow-sm text-center">
               <p className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Total</p>
-              <p className="text-[12px] font-black text-green-500 mt-0.5">
+              <p className="text-[11px] font-black text-green-500 mt-0.5">
                 {moneyFormatter.format(dashboard?.stats?.totalEarnings || 0)}
               </p>
             </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-2.5 rounded-2xl shadow-sm text-center">
+            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 py-1 px-2 rounded-xl shadow-sm text-center">
               <div className="flex items-center justify-center gap-1 text-sky-500 mb-0.5">
-                <Eye size={10} />
+                <Eye size={8} />
                 <p className="text-[7px] font-black uppercase">Seen</p>
               </div>
-              <p className="text-sm font-black text-gray-900 dark:text-white">
+              <p className="text-xs font-black text-gray-900 dark:text-white">
                 {engagement.profileViews || 0}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-2.5 rounded-2xl shadow-sm text-center">
+            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 py-1 px-2 rounded-xl shadow-sm text-center">
               <div className="flex items-center justify-center gap-1 text-amber-500 mb-0.5">
-                <TrendingUp size={10} />
+                <TrendingUp size={8} />
                 <p className="text-[7px] font-black uppercase">Opened</p>
               </div>
-              <p className="text-sm font-black text-gray-900 dark:text-white">
+              <p className="text-xs font-black text-gray-900 dark:text-white">
                 {engagement.serviceClicks || 0}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-2.5 rounded-2xl shadow-sm text-center">
+            <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 py-1 px-2 rounded-xl shadow-sm text-center">
               <div className="flex items-center justify-center gap-1 text-rose-500 mb-0.5">
-                <AlertCircle size={10} />
+                <AlertCircle size={8} />
                 <p className="text-[7px] font-black uppercase">At Risk</p>
               </div>
-              <p className="text-sm font-black text-gray-900 dark:text-white">
+              <p className="text-xs font-black text-gray-900 dark:text-white">
                 {engagement.customerLoss || 0}
               </p>
             </div>
@@ -504,25 +518,25 @@ const VendorWallet = () => {
           
           <div className="space-y-2.5">
             {/* DAILY PLAN CARD */}
-            <div className="p-3.5 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm relative overflow-hidden group">
+            <div className="p-2.5 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm relative overflow-hidden group">
               <div className="flex items-start justify-between relative z-10">
                 <div className="space-y-0.5">
                   <p className="text-[7px] font-black text-gray-400 uppercase tracking-[0.2em]">Daily Plan</p>
-                  <h3 className="text-lg font-black text-gray-900 dark:text-white">
-                    {moneyFormatter.format(dailyPlan?.basePrice || dailyPlan?.price || 0)} <span className="text-[9px] text-gray-400 font-bold">/ DAY</span>
+                  <h3 className="text-base font-black text-gray-900 dark:text-white">
+                    {moneyFormatter.format(dailyPlan?.basePrice || dailyPlan?.price || 0)} <span className="text-[8px] text-gray-400 font-bold">/ DAY</span>
                   </h3>
-                  <p className="text-[7.5px] font-bold text-gray-500 uppercase leading-normal max-w-[220px] opacity-80">
+                  <p className="text-[7px] font-bold text-gray-500 uppercase leading-tight max-w-[220px] opacity-80">
                     Daily auto-deduction based on category. Keep threshold balance to stay live.
                   </p>
                 </div>
-                <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-400 group-hover:bg-[#00246b]/5 group-hover:text-[#00246b] transition-all">
-                  <Wallet size={16} />
+                <div className="w-8 h-8 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-400 group-hover:bg-[#00246b]/5 group-hover:text-[#00246b] transition-all">
+                  <Wallet size={14} />
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-slate-50 dark:border-gray-800/60 flex items-center justify-between">
+              <div className="mt-2 pt-2 border-t border-slate-50 dark:border-gray-800/60 flex items-center justify-between">
                 <div>
-                  <p className="text-[6.5px] font-black text-gray-400 uppercase tracking-widest">Min Live Wallet</p>
-                  <p className="text-xs font-black text-rose-500">
+                  <p className="text-[6.5px] font-black text-gray-400 uppercase tracking-widest leading-none">Min Live Wallet</p>
+                  <p className="text-xs font-black text-rose-500 mt-0.5">
                     {moneyFormatter.format(wallet?.minimumWalletThreshold || 0)}
                   </p>
                 </div>
@@ -533,39 +547,39 @@ const VendorWallet = () => {
             </div>
 
             {/* MONTHLY PLAN CARD */}
-            <div className="p-3.5 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm relative overflow-hidden group">
+            <div className="p-2.5 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm relative overflow-hidden group">
               <div className="flex items-start justify-between relative z-10">
                 <div className="space-y-0.5">
                   <p className="text-[7px] font-black text-[#00246b] dark:text-white uppercase tracking-[0.2em]">Monthly Plan (30 Days)</p>
-                  <h3 className="text-lg font-black text-gray-900 dark:text-white">
-                    {moneyFormatter.format(monthlyPlan?.basePrice || monthlyPlan?.price || 0)} <span className="text-[9px] text-gray-400 font-bold">/ 30 DAYS</span>
+                  <h3 className="text-base font-black text-gray-900 dark:text-white">
+                    {moneyFormatter.format(monthlyPlan?.basePrice || monthlyPlan?.price || 0)} <span className="text-[8px] text-gray-400 font-bold">/ 30 DAYS</span>
                   </h3>
-                  <p className="text-[7.5px] font-bold text-gray-500 uppercase leading-normal max-w-[220px] opacity-80">
+                  <p className="text-[7px] font-bold text-gray-500 uppercase leading-tight max-w-[220px] opacity-80">
                     Cycle Retainer covers all platform fees. No daily wallet deductions while active.
                   </p>
                 </div>
-                <div className="w-9 h-9 bg-[#00246b]/5 rounded-lg flex items-center justify-center text-[#00246b] group-hover:bg-[#00246b] group-hover:text-white transition-all">
-                  <Crown size={18} />
+                <div className="w-8 h-8 bg-[#00246b]/5 rounded-lg flex items-center justify-center text-[#00246b] group-hover:bg-[#00246b] group-hover:text-white transition-all">
+                  <Crown size={14} />
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-slate-50 dark:border-gray-800/60 flex items-center justify-between">
+              <div className="mt-2 pt-2 border-t border-slate-50 dark:border-gray-800/60 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                    {(wallet?.subscription?.currentPlan === 'monthly' || wallet?.subscription?.currentPlan === 'trial') && wallet?.subscription?.isActive ? (
                      <div className="flex items-center gap-1.5 text-green-500">
-                        <CheckCircle2 size={12} />
-                        <span className="text-[8px] font-black uppercase">{wallet?.subscription?.currentPlan === 'trial' ? 'Trial Active' : 'Monthly Active'}</span>
+                        <CheckCircle2 size={10} />
+                        <span className="text-[7.5px] font-black uppercase leading-none">{wallet?.subscription?.currentPlan === 'trial' ? 'Trial Active' : 'Monthly Active'}</span>
                      </div>
                    ) : (
                      <button
                        onClick={handleMonthlyPurchase}
                        disabled={submitting || !canUseRazorpay}
-                       className="px-3 py-1.5 bg-[#00246b] text-white rounded-lg text-[7.5px] font-black uppercase tracking-widest shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all"
+                       className="px-2.5 py-1 bg-[#00246b] text-white rounded-lg text-[7px] font-black uppercase tracking-widest shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all"
                      >
                        {submitting ? 'Processing...' : 'Buy Monthly Plan'}
                      </button>
                    )}
                 </div>
-                <p className="text-[6.5px] font-black text-gray-400 uppercase tracking-widest text-right">
+                <p className="text-[6.5px] font-black text-gray-400 uppercase tracking-widest text-right leading-none">
                   Tax Incl: {moneyFormatter.format(monthlyPlan?.price || 0)}
                 </p>
               </div>

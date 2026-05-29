@@ -191,7 +191,7 @@ const StaffForm = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[38px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[40px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -203,13 +203,7 @@ const StaffForm = () => {
             {isEdit ? 'Edit Profile' : 'Add Staff'}
           </h1>
         </div>
-        <button
-          form="staff-form"
-          disabled={loading}
-          className="p-2.5 bg-primary text-white rounded-xl shadow-xl shadow-primary/20 active:scale-95 transition-all disabled:opacity-50"
-        >
-          {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
-        </button>
+
       </header>
 
       <main className="px-4 pt-[110px]">
@@ -326,114 +320,22 @@ const StaffForm = () => {
             </p>
           </div>
 
-          {isEdit && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between px-0.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date Availability</label>
-                <button
-                  type="button"
-                  onClick={saveAvailability}
-                  disabled={availabilityLoading || savingAvailability}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.18em] transition-all ${availabilityLoading || savingAvailability ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-900 dark:bg-primary text-white shadow-lg shadow-slate-900/10 active:scale-[0.98]'}`}
-                >
-                  {savingAvailability ? 'Saving...' : 'Save Schedule'}
-                </button>
-              </div>
-
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Schedule Date</label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={availabilityDate}
-                      onChange={(e) => setAvailabilityDate(e.target.value)}
-                      className="w-full py-3 pl-11 pr-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
-                    />
-                    <CalendarClock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                  </div>
-                </div>
-
-                {availabilityLoading ? (
-                  <div className="h-28 bg-slate-50 dark:bg-gray-800 rounded-xl animate-pulse" />
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setAvailability((prev) => ({ ...prev, useVendorHours: true, isOffDay: false }))}
-                        className={`h-11 rounded-xl border text-[9px] font-black uppercase tracking-[0.16em] transition-all ${availability.useVendorHours ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-slate-50 dark:bg-gray-800 border-slate-200/60 dark:border-gray-700 text-gray-500'}`}
-                      >
-                        Use Shop Hours
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAvailability((prev) => ({ ...prev, useVendorHours: false, isOffDay: !prev.isOffDay }))}
-                        className={`h-11 rounded-xl border text-[9px] font-black uppercase tracking-[0.16em] transition-all ${!availability.useVendorHours && availability.isOffDay ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/20' : 'bg-slate-50 dark:bg-gray-800 border-slate-200/60 dark:border-gray-700 text-gray-500'}`}
-                      >
-                        Mark Off Day
-                      </button>
-                    </div>
-
-                    {!availability.useVendorHours && !availability.isOffDay && (
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Start</label>
-                            <input
-                              type="time"
-                              value={availability.startTime}
-                              onChange={(e) => setAvailability((prev) => ({ ...prev, startTime: e.target.value }))}
-                              className="w-full py-3 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">End</label>
-                            <input
-                              type="time"
-                              value={availability.endTime}
-                              onChange={(e) => setAvailability((prev) => ({ ...prev, endTime: e.target.value }))}
-                              className="w-full py-3 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Break Start</label>
-                            <div className="relative">
-                              <input
-                                type="time"
-                                value={availability.breakStart}
-                                onChange={(e) => setAvailability((prev) => ({ ...prev, breakStart: e.target.value }))}
-                                className="w-full py-3 pl-11 pr-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
-                              />
-                              <Coffee size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                            </div>
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Break End</label>
-                            <input
-                              type="time"
-                              value={availability.breakEnd}
-                              onChange={(e) => setAvailability((prev) => ({ ...prev, breakEnd: e.target.value }))}
-                              className="w-full py-3 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="p-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-relaxed">
-                        Use shop hours for default timing, mark off day for leave, or set custom hours with one optional break.
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-            </section>
-          )}
+          <div className="pt-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 bg-[#00246b] text-white rounded-2xl shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50 font-black text-[12px] uppercase tracking-widest border border-white/10 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Save size={18} strokeWidth={3} />
+                  {isEdit ? 'Update Profile' : 'Add Staff'}
+                </>
+              )}
+            </button>
+          </div>
         </form>
       </main>
     </div>

@@ -114,8 +114,8 @@ const VendorServices = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[38px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-6">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[40px] pb-3 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -128,7 +128,7 @@ const VendorServices = () => {
               <div className="flex items-center gap-1">
                 <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
                   <span className="text-primary dark:text-white">Zero</span>
-                  <span className="text-primary/30 dark:text-gray-600">One</span>
+                  <span className="text-primary/30 dark:text-white">One</span>
                 </h1>
 
               </div>
@@ -150,8 +150,8 @@ const VendorServices = () => {
         </div>
       </header>
 
-      <main className="px-5 pt-[124px]">
-        <div className="mb-4 relative">
+      <main className="px-5 pt-[94px]">
+        <div className="mb-4 mt-3 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
             type="text"

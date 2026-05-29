@@ -105,12 +105,15 @@ exports.rejectPromotion = async (req, res) => {
     const vendor = await Vendor.findById(request.vendorId);
     if (vendor) {
        // Refund to wallet
-       await WalletService.addFunds(
-         vendor,
-         request.amountPaid,
-         'refund',
-         `Promotion request rejected: ${reason || 'N/A'}`
-       );
+        await WalletService.addFunds(
+          vendor,
+          request.amountPaid,
+          'refund',
+          {
+            category: 'promotion_refund',
+            description: `Refund: Promotion request rejected: ${reason || 'N/A'}`
+          }
+        );
 
        await NotificationService.sendNotification({
          userIds: vendor.ownerId,
@@ -228,6 +231,23 @@ exports.verifyPayment = async (req, res) => {
         status: 'pending'
       });
 
+      // Create transaction record for Platform Revenue
+      await WalletTransaction.create({
+        vendorId: vendor._id,
+        initiatedByUserId: req.user._id,
+        amount: amountPaid,
+        type: 'credit',
+        reason: 'promotion_payment',
+        category: 'promotion_payment',
+        status: 'completed',
+        paymentGateway: 'razorpay',
+        gatewayOrderId: razorpay_order_id,
+        gatewayPaymentId: razorpay_payment_id,
+        gatewaySignature: razorpay_signature,
+        description: `Profile Boost Promotion: ${days} days`,
+        referenceId: `PROMO_${promotion._id}`
+      });
+
       // Notify Admin
       NotificationService.notifyAdmins({
         type: 'PROMOTION_REQUEST',
@@ -296,3 +316,33 @@ exports.purchasePromotion = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getPromotionTransactions = async (req, res) => {
+  try {
+    const transactions = await WalletTransaction.find({
+      category: { $in: ['promotion_payment', 'promotion_refund'] }
+    })
+      .populate('vendorId', 'shopName')
+      .sort({ createdAt: -1 });
+    res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getVendorPromotionTransactions = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
+
+    const transactions = await WalletTransaction.find({
+      vendorId: vendor._id,
+      category: { $in: ['promotion_payment', 'promotion_refund'] }
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

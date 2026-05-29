@@ -42,6 +42,7 @@ const VendorDashboard = lazy(() => import('./pages/VendorDashboard'));
 const VendorBookings = lazy(() => import('./pages/VendorBookings'));
 const VendorServices = lazy(() => import('./pages/VendorServices'));
 const VendorStaff = lazy(() => import('./pages/VendorStaff'));
+const VendorStaffProfile = lazy(() => import('./pages/VendorStaffProfile'));
 const VendorOffers = lazy(() => import('./pages/VendorOffers'));
 const VendorWallet = lazy(() => import('./pages/VendorWallet'));
 const VendorProfile = lazy(() => import('./pages/VendorProfile'));
@@ -254,6 +255,7 @@ function App() {
             <Route index element={<VendorStaff />} />
             <Route path="add" element={<StaffForm />} />
             <Route path="edit/:id" element={<StaffForm />} />
+            <Route path=":id" element={<VendorStaffProfile />} />
           </Route>
           <Route path="offers">
             <Route index element={<VendorOffers />} />

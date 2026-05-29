@@ -196,7 +196,7 @@ const MembershipPlans = () => {
           Previous
         </button>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[10px] font-black text-primary uppercase tracking-tighter">Page</span>
+          <span className="text-[10px] font-black text-[#00246b] uppercase tracking-tighter">Page</span>
           <span className="text-xs font-black text-slate-800 dark:text-white">{page} <span className="text-slate-400 font-medium">of</span> {totalPages}</span>
         </div>
         <button
@@ -212,10 +212,10 @@ const MembershipPlans = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[38px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[40px] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/vendor/profile')}
+            onClick={() => navigate('/vendor/profile?section=shop_details')}
             className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all"
           >
             <ArrowLeft size={18} />
@@ -228,21 +228,21 @@ const MembershipPlans = () => {
         {activeTab === 'plans' && (
           <button
             onClick={() => navigate('/vendor/memberships/add')}
-            className="p-2.5 bg-primary text-white rounded-xl shadow-xl shadow-primary/20 active:scale-95 transition-all"
+            className="p-2.5 bg-[#00246b] text-white rounded-xl shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all"
           >
             <Plus size={20} />
           </button>
         )}
       </header>
 
-      <main className="px-4 pt-[94px]">
+      <main className="px-4 pt-[106px]">
         {/* Tab Switcher */}
         <div className="flex p-1 bg-slate-100 dark:bg-gray-900 rounded-2xl mb-6">
           <button
             onClick={() => setActiveTab('plans')}
             className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
               activeTab === 'plans' 
-              ? 'bg-white dark:bg-gray-800 text-primary dark:text-white shadow-sm' 
+              ? 'bg-white dark:bg-gray-800 text-[#00246b] dark:text-white shadow-sm' 
               : 'text-slate-400'
             }`}
           >
@@ -253,7 +253,7 @@ const MembershipPlans = () => {
             onClick={() => setActiveTab('requests')}
             className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
               activeTab === 'requests' 
-              ? 'bg-white dark:bg-gray-800 text-primary dark:text-white shadow-sm' 
+              ? 'bg-white dark:bg-gray-800 text-[#00246b] dark:text-white shadow-sm' 
               : 'text-slate-400'
             }`}
           >
@@ -264,7 +264,7 @@ const MembershipPlans = () => {
             onClick={() => setActiveTab('members')}
             className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
               activeTab === 'members' 
-              ? 'bg-white dark:bg-gray-800 text-primary dark:text-white shadow-sm' 
+              ? 'bg-white dark:bg-gray-800 text-[#00246b] dark:text-white shadow-sm' 
               : 'text-slate-400'
             }`}
           >
@@ -291,7 +291,7 @@ const MembershipPlans = () => {
             </div>
             <button
               onClick={() => navigate('/vendor/dashboard')}
-              className="px-8 py-3.5 bg-slate-900 dark:bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl active:scale-95 transition-all"
+              className="px-8 py-3.5 bg-[#00246b] dark:bg-[#00246b] text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl active:scale-95 transition-all"
             >
               Return to Dashboard
             </button>

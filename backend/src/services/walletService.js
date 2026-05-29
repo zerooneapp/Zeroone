@@ -218,8 +218,15 @@ const getUpdatedStatus = async (vendor) => {
   
   const nextStatus = isActive ? 'active' : 'inactive';
 
+  // If transitioning from inactive to active (e.g. on top-up/recharge)
+  let forceOpenChange = false;
+  if (vendor.status === 'inactive' && nextStatus === 'active') {
+    vendor.isShopOpen = true;
+    forceOpenChange = true;
+  }
+
   // 4. Persistence
-  if (didChange || vendor.status !== nextStatus || (nextStatus === 'inactive' && vendor.isShopOpen !== false)) {
+  if (didChange || forceOpenChange || vendor.status !== nextStatus || (nextStatus === 'inactive' && vendor.isShopOpen !== false)) {
     vendor.status = nextStatus;
     if (nextStatus === 'inactive') {
       vendor.isShopOpen = false;

@@ -16,7 +16,7 @@ const OfferCard = ({ offer, onToggle, onEdit }) => {
       <div className="flex items-center justify-between">
          <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 ${
            offer.discountType === 'percentage' 
-           ? 'bg-[#1C2C4E]/10 text-[#1C2C4E]' 
+           ? 'bg-[#00246b]/10 text-[#00246b]' 
            : 'bg-green-500/10 text-green-600'
          }`}>
             {offer.discountType === 'percentage' ? <Percent size={12} /> : <IndianRupee size={12} />}
@@ -34,7 +34,7 @@ const OfferCard = ({ offer, onToggle, onEdit }) => {
             </button>
             <button 
               onClick={() => onToggle(offer._id, !offer.isActive)}
-              className={`w-10 h-5 rounded-full relative transition-all duration-300 ${offer.isActive && !isExpired ? 'bg-[#1C2C4E]' : 'bg-red-600'}`}
+              className={`w-10 h-5 rounded-full relative transition-all duration-300 ${offer.isActive && !isExpired ? 'bg-[#00246b]' : 'bg-red-600'}`}
             >
                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ${offer.isActive && !isExpired ? 'left-[22px]' : 'left-0.5'}`} />
             </button>

@@ -243,7 +243,6 @@ const VendorAuth = () => {
                   </Button>
 
                   <div className="text-center space-y-3">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Didn&apos;t receive the code?</p>
                     <div>
                       <button
                         disabled={!canResend}
@@ -267,7 +266,7 @@ const VendorAuth = () => {
       </div>
 
       {/* Footer Branding */}
-      <div className="pb-8 flex flex-col items-center justify-center gap-4 relative z-10">
+      <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => {
@@ -277,7 +276,7 @@ const VendorAuth = () => {
             }}
             className="text-[9px] font-black text-[#1C2C4E]/40 dark:text-gray-600 hover:text-[#1C2C4E] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
           >
-            Partner & Staff Policy
+            Partner &amp; Staff Policy
           </button>
           <span className="text-[#1C2C4E]/20 dark:text-gray-800">•</span>
           <button 
@@ -288,12 +287,8 @@ const VendorAuth = () => {
             }}
             className="text-[9px] font-black text-[#1C2C4E]/40 dark:text-gray-600 hover:text-[#1C2C4E] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
           >
-            Contact & Support
+            Contact &amp; Support
           </button>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] dark:text-gray-400 uppercase tracking-wider leading-none">MADE IN INDIA</span>
-          <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
         </div>
       </div>
     </div>

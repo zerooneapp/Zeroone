@@ -28,7 +28,7 @@ const GlassConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, co
 
             {/* Content */}
             <div className="py-4 px-6 text-center">
-              <div className="w-12 h-12 bg-[#1C2C4E]/10 dark:bg-white/10 text-[#1C2C4E] dark:text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+              <div className="w-12 h-12 bg-[#00246b]/10 dark:bg-white/10 text-[#00246b] dark:text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
                 <HelpCircle size={24} strokeWidth={1.5} />
               </div>
 
@@ -52,7 +52,7 @@ const GlassConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, co
                     onConfirm();
                     onClose();
                   }}
-                  className="py-3 bg-[#1C2C4E] text-white rounded-2xl font-black text-[10px] capitalize tracking-tight shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all"
+                  className="py-3 bg-[#00246b] text-white rounded-2xl font-black text-[10px] capitalize tracking-tight shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all"
                 >
                   {confirmText}
                 </button>

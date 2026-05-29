@@ -38,7 +38,7 @@ const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking
 
             {/* Content */}
             <div className="py-3 px-6 text-center">
-              <div className="w-10 h-10 bg-[#1C2C4E]/10 dark:bg-white/10 text-[#1C2C4E] dark:text-white rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-inner">
+              <div className="w-10 h-10 bg-[#00246b]/10 dark:bg-white/10 text-[#00246b] dark:text-white rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-inner">
                 <AlertCircle size={20} strokeWidth={1.5} />
               </div>
 
@@ -63,14 +63,14 @@ const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking
                       }
                     }}
                     value={isManual ? 'manual' : reason}
-                    className="w-full p-3 bg-white/50 dark:bg-gray-900/50 border border-slate-200/50 dark:border-gray-800 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#1C2C4E]/30 appearance-none cursor-pointer"
+                    className="w-full p-3 bg-white/50 dark:bg-gray-900/50 border border-slate-200/50 dark:border-gray-800 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00246b]/30 appearance-none cursor-pointer"
                   >
-                    <option value="" disabled className="text-slate-400">Choose a reason...</option>
-                    <option value="Customer not reachable">1. Customer not reachable</option>
-                    <option value="Customer Running late">2. Customer Running late</option>
-                    <option value="Wrong Booking">3. Wrong Booking</option>
-                    <option value="Emergency">4. Emergency</option>
-                    <option value="manual">Other (Self)</option>
+                    <option value="" disabled className="text-slate-400 dark:text-black dark:bg-gray-950" style={{ color: 'black' }}>Choose a reason...</option>
+                    <option value="Customer not reachable" className="dark:bg-gray-950 dark:text-white">1. Customer not reachable</option>
+                    <option value="Customer Running late" className="dark:bg-gray-950 dark:text-white">2. Customer Running late</option>
+                    <option value="Wrong Booking" className="dark:bg-gray-950 dark:text-white">3. Wrong Booking</option>
+                    <option value="Emergency" className="dark:bg-gray-950 dark:text-white">4. Emergency</option>
+                    <option value="manual" className="dark:bg-gray-950 dark:text-white">Other (Self)</option>
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
                     <AlertCircle size={12} className="rotate-180" />
@@ -86,7 +86,7 @@ const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
                       placeholder="Enter your reason here..."
-                      className="w-full h-20 p-3 bg-white/50 dark:bg-gray-900/50 border border-slate-200/50 dark:border-gray-800 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#1C2C4E]/30 resize-none placeholder:text-slate-300"
+                      className="w-full h-20 p-3 bg-white/50 dark:bg-gray-900/50 border border-slate-200/50 dark:border-gray-800 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#00246b]/30 resize-none placeholder:text-slate-300"
                       autoFocus
                     />
                   </motion.div>
@@ -103,7 +103,7 @@ const CancellationModal = ({ isOpen, onClose, onConfirm, title = "Cancel Booking
                 <button
                   onClick={handleConfirm}
                   disabled={!reason.trim()}
-                  className="py-2.5 bg-[#1C2C4E] text-white rounded-2xl font-black text-[10px] capitalize tracking-tight shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="py-2.5 bg-[#00246b] text-white rounded-2xl font-black text-[10px] capitalize tracking-tight shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>

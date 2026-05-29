@@ -15,6 +15,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import { useVendorStore } from '../store/vendorStore';
 
+const toPascalCase = (str = '') =>
+  str
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
 const LoyalCustomers = () => {
   const navigate = useNavigate();
   const {
@@ -51,14 +59,14 @@ const LoyalCustomers = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[38px] pb-4 flex items-center gap-4">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[40px] pb-4 flex items-center gap-4">
         <button 
           onClick={() => navigate(-1)}
           className="p-2 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
         >
           <ChevronLeft size={20} className="text-slate-600 dark:text-gray-300" />
         </button>
-        <h1 className="text-lg font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight">
+        <h1 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight">
           Loyal Customers
         </h1>
       </header>
@@ -131,8 +139,8 @@ const LoyalCustomers = () => {
                       />
                     </div>
                     <div>
-                      <h3 className="font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight">
-                        {customer.name}
+                      <h3 className="font-black text-[#1C2C4E] dark:text-white tracking-tight">
+                        {toPascalCase(customer.name)}
                       </h3>
                       <p className="text-[10px] font-bold text-slate-400">{customer.phone}</p>
                     </div>

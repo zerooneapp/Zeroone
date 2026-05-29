@@ -663,7 +663,7 @@ const getAdminDashboard = async (req, res) => {
 
     const platformRevenueFilter = {
       status: 'completed',
-      category: { $in: ['daily_subscription', 'monthly_subscription'] }
+      category: { $in: ['daily_subscription', 'monthly_subscription', 'promotion_payment'] }
     };
 
     const [

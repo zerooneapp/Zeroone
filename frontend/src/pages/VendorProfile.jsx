@@ -70,6 +70,8 @@ const VendorProfile = () => {
    const [videoFile, setVideoFile] = useState(null);
    const [promotionPlans, setPromotionPlans] = useState([]);
    const [myPromotions, setMyPromotions] = useState([]);
+   const [promoTransactions, setPromoTransactions] = useState([]);
+   const [promoTab, setPromoTab] = useState('active');
    const [promotionLoading, setPromotionLoading] = useState(false);
    const [promoDays, setPromoDays] = useState(30);
    const [promoPricePerDay, setPromoPricePerDay] = useState(10);
@@ -229,12 +231,14 @@ const VendorProfile = () => {
    const fetchPlans = async () => {
       try {
          setPromotionLoading(true);
-         const [plansRes, myPromosRes] = await Promise.all([
+         const [plansRes, myPromosRes, promoTxnRes] = await Promise.all([
             api.get('/promotions/vendor/plans'),
-            api.get('/promotions/vendor/my-promotions')
+            api.get('/promotions/vendor/my-promotions'),
+            api.get('/promotions/vendor/transactions')
          ]);
          setPromotionPlans(plansRes.data || []);
          setMyPromotions(myPromosRes.data || []);
+         setPromoTransactions(promoTxnRes.data || []);
       } catch (err) {
          console.error('Failed to load promotion data');
       } finally {
@@ -591,9 +595,9 @@ const VendorProfile = () => {
    };
 
    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20 overflow-x-hidden no-scrollbar">
+      <div className="bg-slate-50 dark:bg-gray-950 pb-6 overflow-x-hidden no-scrollbar">
          {/* Header */}
-         <header className="px-4 pt-[38px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+         <header className="px-4 pt-[40px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
             <div className="max-w-4xl mx-auto flex items-center gap-3">
                <button
                   onClick={(e) => {
@@ -619,7 +623,7 @@ const VendorProfile = () => {
             </div>
          </header>
 
-         <main className="px-4 pt-[94px] max-w-4xl mx-auto">
+         <main className="px-4 pt-[106px] max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
                {/* ── MENU LIST ── */}
                {!activeSection && (
@@ -674,7 +678,7 @@ const VendorProfile = () => {
                         { label: 'Basic Info', subtitle: 'Name, address & timing', icon: Store, key: 'basic', color: 'text-blue-500', bg: 'bg-blue-500/10' },
                         { label: 'Shop Media', subtitle: 'Gallery & featured images', icon: Camera, key: 'media', color: 'text-purple-500', bg: 'bg-purple-500/10' },
                         { label: 'Services', subtitle: 'Manage listings & pricing', icon: LayoutGrid, path: '/vendor/services', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                        { label: 'Membership Plan', subtitle: 'Loyalty plans for clients', icon: Crown, path: '/vendor/memberships', color: 'text-primary', bg: 'bg-primary/10', key: 'memberships' },
+                        { label: 'Membership Plan', subtitle: 'Loyalty plans for clients', icon: Crown, path: '/vendor/memberships', color: 'text-amber-500', bg: 'bg-amber-500/10', key: 'memberships' },
                         { label: 'Reviews & Ratings', subtitle: 'View client feedback & stars', icon: Star, path: '/vendor/reviews', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
                         { label: 'Live Report', subtitle: 'Performance PDF report', icon: FileDown, key: 'live_report', color: 'text-blue-500', bg: 'bg-blue-500/10' }
                      ].filter(item => {
@@ -711,10 +715,10 @@ const VendorProfile = () => {
                      animate={{ opacity: 1, x: 0 }}
                      exit={{ opacity: 0, x: 24 }}
                      transition={{ duration: 0.18 }}
-                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-3"
+                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-3 mt-3"
                   >
                      <div className="flex items-center gap-2.5 mb-1">
-                        <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+                        <div className="p-2 bg-[#00246b]/10 text-[#00246b] dark:text-white rounded-lg">
                            <Store size={16} />
                         </div>
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Basic Info</h2>
@@ -727,7 +731,7 @@ const VendorProfile = () => {
                               type="text"
                               value={data.shopName}
                               onChange={(e) => setData({ ...data, shopName: e.target.value })}
-                              className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10"
+                              className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-[#00246b]/10"
                               placeholder="Enter shop name"
                            />
                         </div>
@@ -739,7 +743,7 @@ const VendorProfile = () => {
                                  type="button"
                                  onClick={handleFetchLocation}
                                  disabled={locationLoading}
-                                 className="flex items-center gap-1 text-primary dark:text-gray-400 text-[8px] font-black capitalize tracking-widest hover:opacity-70 transition-all disabled:opacity-50"
+                                 className="flex items-center gap-1 text-[#00246b] dark:text-gray-400 text-[8px] font-black capitalize tracking-widest hover:opacity-70 transition-all disabled:opacity-50"
                               >
                                  {locationLoading ? <Loader2 size={10} className="animate-spin" /> : <MapPin size={10} />}
                                  Auto Fetch
@@ -748,7 +752,7 @@ const VendorProfile = () => {
                            <textarea
                               value={data.address}
                               onChange={(e) => setData({ ...data, address: e.target.value })}
-                              className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-primary/10 min-h-[60px]"
+                              className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-[#00246b]/10 min-h-[60px]"
                               placeholder="Street, City, ZIP"
                            />
                         </div>
@@ -818,10 +822,10 @@ const VendorProfile = () => {
                            loading={loading} 
                            disabled={data.workingHours.start === data.workingHours.end}
                            className={cn(
-                              "w-full rounded-lg py-3 font-black capitalize tracking-widest text-[10px] shadow-lg transition-all active:scale-95",
+                              "w-full rounded-lg py-3 font-black capitalize tracking-widest text-[10px] shadow-lg transition-all active:scale-95 bg-[#00246b] dark:bg-[#00246b] text-white hover:bg-opacity-95",
                               data.workingHours.start === data.workingHours.end 
                                  ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none" 
-                                 : "shadow-primary/20"
+                                 : "shadow-[#00246b]/20"
                            )}
                         >
                            {data.workingHours.start === data.workingHours.end ? 'Invalid Time Range' : 'Save Changes'}
@@ -841,7 +845,7 @@ const VendorProfile = () => {
                       className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-5"
                    >
                      <div className="flex items-center gap-2.5">
-                        <div className="p-2 bg-purple-500/10 text-purple-500 rounded-lg">
+                        <div className="p-2 bg-[#00246b]/10 text-[#00246b] dark:text-white rounded-lg">
                            <Camera size={16} />
                         </div>
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Shop Media</h2>
@@ -1028,7 +1032,7 @@ const VendorProfile = () => {
                         </div>
                      </div>
 
-                     <Button onClick={handleMediaUpload} loading={loading} className="w-full rounded-xl py-3 font-black capitalize tracking-widest text-[10px] bg-slate-900 dark:bg-primary shadow-xl shadow-black/10 active:scale-95 transition-all">
+                     <Button onClick={handleMediaUpload} loading={loading} className="w-full rounded-xl py-3 font-black capitalize tracking-widest text-[10px] bg-[#00246b] dark:bg-[#00246b] hover:bg-opacity-95 shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all">
                         Upload & Sync Gallery
                      </Button>
                      <p className="text-[8px] text-center text-gray-400 font-black capitalize tracking-widest opacity-60">
@@ -1305,35 +1309,137 @@ const VendorProfile = () => {
                      animate={{ opacity: 1, x: 0 }}
                      exit={{ opacity: 0, x: 24 }}
                      transition={{ duration: 0.18 }}
-                     className="space-y-4"
+                     className="space-y-3"
                   >
-                      <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
-                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
-                               <Zap size={18} strokeWidth={3} />
+                      <div className="bg-white dark:bg-gray-900 rounded-xl p-3 shadow-sm border border-slate-100 dark:border-gray-800 space-y-3">
+                         <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-[#00246b]/10 text-[#00246b] rounded-lg">
+                               <Zap size={15} strokeWidth={3} />
                             </div>
                             <div>
-                               <h2 className="text-[14px] font-black text-slate-900 dark:text-white capitalize leading-none">Profile Promotion</h2>
-                               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Enhance visibility in search results</p>
+                               <h2 className="text-[13px] font-black text-slate-900 dark:text-white capitalize leading-none">Profile Promotion</h2>
+                               <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Enhance visibility in search results</p>
                             </div>
                         </div>
 
+                        {/* 📌 SUB TABS */}
+                        <div className="flex gap-3 border-b border-slate-100 dark:border-gray-800 pb-0 mt-1">
+                           <button 
+                              onClick={() => setPromoTab('pending')}
+                              className={`pb-1.5 px-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${promoTab === 'pending' ? 'text-[#00246b] dark:text-white border-b-2 border-[#00246b] dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                           >
+                              Pending Requests ({myPromotions.filter(p => p.status === 'pending' || p.status === 'rejected').length})
+                           </button>
+                           <button 
+                              onClick={() => setPromoTab('active')}
+                              className={`pb-1.5 px-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${promoTab === 'active' ? 'text-[#00246b] dark:text-white border-b-2 border-[#00246b] dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                           >
+                              Active Boosts ({myPromotions.filter(p => p.status === 'active').length})
+                           </button>
+                           <button 
+                              onClick={() => setPromoTab('transactions')}
+                              className={`pb-1.5 px-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${promoTab === 'transactions' ? 'text-[#00246b] dark:text-white border-b-2 border-[#00246b] dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+                           >
+                              Transactions ({promoTransactions.length})
+                           </button>
+                        </div>
+
                         {promotionLoading ? (
-                           <div className="flex flex-col items-center justify-center py-12 gap-3">
-                              <Loader2 className="animate-spin text-primary" size={32} />
-                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Fetching plans...</p>
+                           <div className="flex flex-col items-center justify-center py-6 gap-2">
+                              <Loader2 className="animate-spin text-[#00246b]" size={24} />
+                              <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em]">Fetching plans...</p>
+                           </div>
+                        ) : promoTab === 'transactions' ? (
+                           <div className="space-y-2">
+                              {promoTransactions.length === 0 ? (
+                                 <div className="py-6 text-center bg-slate-50/60 dark:bg-gray-850/40 rounded-xl border border-dashed border-slate-200 dark:border-gray-850">
+                                    <p className="text-[8px] font-black capitalize tracking-widest text-slate-400">No promotion transactions found</p>
+                                 </div>
+                              ) : (
+                                 promoTransactions.map((tx) => {
+                                    const isPayment = tx.category === 'promotion_payment';
+                                    return (
+                                       <div 
+                                          key={tx._id} 
+                                          className={cn(
+                                             "p-2.5 rounded-xl border flex items-center justify-between transition-all",
+                                             isPayment 
+                                                ? "bg-slate-50/70 dark:bg-gray-800/40 border-slate-100 dark:border-gray-800" 
+                                                : "bg-emerald-500/5 border-emerald-500/10"
+                                          )}
+                                       >
+                                          <div className="space-y-1">
+                                             <div className="flex items-center gap-1.5">
+                                                <span className={cn(
+                                                   "px-1.5 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest",
+                                                   isPayment ? "bg-slate-200 dark:bg-gray-700 text-slate-700 dark:text-gray-300" : "bg-emerald-500 text-white"
+                                                )}>
+                                                   {isPayment ? 'Debit / Paid' : 'Credit / Refund'}
+                                                </span>
+                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white capitalize">
+                                                   {isPayment ? 'Visibility Boost Payment' : 'Boost Request Refund'}
+                                                </p>
+                                             </div>
+                                             <p className="text-[8px] font-medium text-slate-500 dark:text-gray-400 leading-tight">
+                                                {tx.description || (isPayment ? 'Profile Boost' : 'Refund')}
+                                             </p>
+                                             <div className="flex items-center gap-2 text-[7.5px] font-black text-slate-400 uppercase tracking-wider mt-0.5">
+                                                <span className="flex items-center gap-0.5">
+                                                   <Calendar size={8} />
+                                                   {new Date(tx.createdAt).toLocaleDateString('en-GB')}
+                                                </span>
+                                                <span className="flex items-center gap-0.5">
+                                                   <Clock size={8} />
+                                                   {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                                {tx.gatewayPaymentId && (
+                                                   <span className="lowercase font-bold">
+                                                      id: {tx.gatewayPaymentId}
+                                                   </span>
+                                                )}
+                                             </div>
+                                          </div>
+                                          <div className="text-right">
+                                             <p className={cn(
+                                                "text-[11px] font-black",
+                                                isPayment ? "text-slate-800 dark:text-white" : "text-emerald-600 dark:text-emerald-400"
+                                             )}>
+                                                {isPayment ? '-' : '+'}₹{tx.amount}
+                                             </p>
+                                             <p className="text-[6.5px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">
+                                                {tx.status}
+                                             </p>
+                                          </div>
+                                       </div>
+                                    );
+                                 })
+                              )}
                            </div>
                         ) : (
-                           <div className="space-y-6">
-                              {/* Active/Pending Promotions */}
-                              {myPromotions.length > 0 && (
-                                 <div className="space-y-3">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Your Promotions</p>
-                                    {myPromotions.filter(p => p.durationDays).map(promo => (
+                           <div className="space-y-4">
+                              {/* Active/Pending list based on selected tab */}
+                              {myPromotions.filter(p => {
+                                 if (promoTab === 'pending') {
+                                    return p.status === 'pending' || p.status === 'rejected';
+                                 } else {
+                                    return p.status === 'active';
+                                 }
+                              }).length > 0 && (
+                                 <div className="space-y-2">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                                       {promoTab === 'pending' ? 'Your Requests' : 'Your Active Boosts'}
+                                    </p>
+                                    {myPromotions.filter(p => {
+                                       if (promoTab === 'pending') {
+                                          return p.status === 'pending' || p.status === 'rejected';
+                                       } else {
+                                          return p.status === 'active';
+                                       }
+                                    }).map(promo => (
                                        <div 
                                           key={promo._id}
                                           className={cn(
-                                             "p-4 rounded-2xl border flex items-center justify-between transition-all",
+                                             "p-3 rounded-xl border flex items-center justify-between transition-all",
                                              promo.status === 'active' 
                                                 ? "bg-emerald-500/5 border-emerald-500/20 shadow-sm shadow-emerald-500/10" 
                                                 : promo.status === 'rejected'
@@ -1342,10 +1448,10 @@ const VendorProfile = () => {
                                           )}
                                        >
                                           <div className="space-y-1">
-                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-[13px] font-black text-slate-800 dark:text-white capitalize">{promo.planId?.name || 'Profile Boost'}</h3>
+                                             <div className="flex items-center gap-1.5">
+                                                <h3 className="text-[11px] font-black text-slate-800 dark:text-white capitalize leading-none">{promo.planId?.name || 'Profile Boost'}</h3>
                                                 <span className={cn(
-                                                   "px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest",
+                                                   "px-1.5 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest",
                                                    promo.status === 'active' ? "bg-emerald-500 text-white" : 
                                                    promo.status === 'rejected' ? "bg-red-500 text-white" : "bg-amber-500 text-white"
                                                 )}>
@@ -1353,103 +1459,103 @@ const VendorProfile = () => {
                                                     promo.status === 'rejected' ? 'Rejected' : 'Pending'}
                                                 </span>
                                              </div>
-                                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{promo.durationDays} Days Duration</p>
+                                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{promo.durationDays} Days Duration</p>
                                              
                                              {promo.status === 'active' ? (
-                                                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                                   <CheckCircle2 size={10} />
+                                                <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                                   <CheckCircle2 size={9} />
                                                    Your profile is now featured at the top in app
                                                 </p>
                                              ) : promo.status === 'rejected' ? (
-                                                <div className="space-y-1">
-                                                   <p className="text-[10px] font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
-                                                      <XCircle size={10} />
+                                                <div className="space-y-0.5">
+                                                   <p className="text-[9px] font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
+                                                      <XCircle size={9} />
                                                       Rejected • Amount Refunded to Wallet
                                                    </p>
                                                    {promo.rejectionReason && (
-                                                      <p className="text-[9px] font-medium text-red-500/70 italic">
+                                                      <p className="text-[8px] font-medium text-red-500/70 italic leading-tight">
                                                          Reason: {promo.rejectionReason}
                                                       </p>
                                                    )}
                                                 </div>
                                              ) : (
-                                                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                                                   <Clock size={10} />
+                                                <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                                   <Clock size={9} />
                                                    Payment Done • Waiting for Admin Approval
                                                 </p>
                                              )}
                                              
                                              {promo.status === 'active' && promo.endDate && (
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                                                <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
                                                    Expires: {new Date(promo.endDate).toLocaleDateString('en-GB')}
                                                 </p>
                                              )}
                                           </div>
                                           <div className="text-right">
-                                             <p className="text-[14px] font-black text-slate-800 dark:text-white">₹{promo.amountPaid}</p>
-                                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">
+                                             <p className="text-[12px] font-black text-slate-800 dark:text-white">₹{promo.amountPaid}</p>
+                                             <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">
                                                 {promo.status === 'rejected' ? 'Refunded' : 'Order Verified'}
                                              </p>
                                           </div>
                                        </div>
                                     ))}
                                  </div>
-                               )}
+                              )}
 
-                               {/* Custom Duration Selection */}
-                               <div className="space-y-4">
-                                  <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/5 rounded-3xl border border-indigo-100/50 dark:border-indigo-900/10">
-                                     <div className="flex items-center justify-between mb-3">
-                                        <div>
-                                           <h3 className="text-[13px] font-black text-slate-800 dark:text-white capitalize">Select Duration</h3>
-                                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Rate: ₹{promoPricePerDay}/day</p>
-                                        </div>
-                                     </div>
+                              {/* Custom Duration Selection */}
+                              <div className="space-y-3">
+                                 <div className="p-3 bg-slate-50/50 dark:bg-gray-900 rounded-2xl border border-slate-200/50 dark:border-gray-800">
+                                    <div className="flex items-center justify-between mb-1.5">
+                                       <div>
+                                          <h3 className="text-[11px] font-black text-slate-800 dark:text-white capitalize leading-none">Select Duration</h3>
+                                          <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Rate: ₹{promoPricePerDay}/day</p>
+                                       </div>
+                                    </div>
 
-                                     <div className="space-y-3">
-                                        <div className="space-y-1">
-                                           <label className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Boost Days</label>
-                                           <div className="relative">
-                                               <input 
-                                                  type="text"
-                                                  inputMode="numeric"
-                                                  value={promoDays}
-                                                  onChange={(e) => {
-                                                     let val = e.target.value.replace(/[^0-9]/g, '');
-                                                     if (val.length > 1 && val.startsWith('0')) {
-                                                        val = val.replace(/^0+/, '');
-                                                     }
-                                                     setPromoDays(val === '' ? 0 : Number(val));
-                                                  }}
-                                                  className="w-full p-3 bg-white dark:bg-gray-800 rounded-xl border border-indigo-50 dark:border-gray-800 font-black text-md text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                               />
-                                               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-300 uppercase tracking-widest">Days</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-xl border border-white/40 dark:border-gray-700/40">
-                                           <div>
-                                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total Pay</p>
-                                              <p className="text-xl font-black text-primary dark:text-white">₹{promoDays * promoPricePerDay}</p>
+                                    <div className="space-y-2">
+                                       <div className="space-y-0.5">
+                                          <label className="text-[7.5px] font-black text-slate-400 uppercase tracking-[0.2em] px-0.5">Boost Days</label>
+                                          <div className="relative">
+                                              <input 
+                                                 type="text"
+                                                 inputMode="numeric"
+                                                 value={promoDays}
+                                                 onChange={(e) => {
+                                                    let val = e.target.value.replace(/[^0-9]/g, '');
+                                                    if (val.length > 1 && val.startsWith('0')) {
+                                                       val = val.replace(/^0+/, '');
+                                                    }
+                                                    setPromoDays(val === '' ? 0 : Number(val));
+                                                 }}
+                                                 className="w-full p-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 font-black text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-[#00246b]/20 outline-none transition-all"
+                                              />
+                                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[8px] font-black text-slate-300 uppercase tracking-widest">Days</span>
                                            </div>
-                                           <button 
-                                              onClick={handlePurchasePromotion}
-                                              disabled={loading || myPromotions.some(p => p.status === 'active' || p.status === 'pending')}
-                                              className="px-6 py-3 bg-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-400 disabled:shadow-none"
-                                           >
-                                              {loading ? 'Wait...' : myPromotions.some(p => p.status === 'active' || p.status === 'pending') ? 'Active' : 'Pay Now'}
-                                           </button>
-                                        </div>
-                                     </div>
-                                  </div>
-                               </div>
+                                       </div>
 
-                              <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex gap-3">
-                                 <AlertTriangle className="text-amber-500 shrink-0" size={16} />
-                                 <p className="text-[9px] font-black text-amber-600/80 leading-relaxed uppercase tracking-tight">
-                                    Once activated, your profile will be prioritized in discovery results for the selected duration. Admin approval takes up to 2 hours.
-                                 </p>
+                                       <div className="flex items-center justify-between p-2.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-xl border border-white/40 dark:border-gray-700/40">
+                                          <div>
+                                             <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Pay</p>
+                                             <p className="text-lg font-black text-[#00246b] dark:text-white mt-0.5">₹{promoDays * promoPricePerDay}</p>
+                                          </div>
+                                          <button 
+                                             onClick={handlePurchasePromotion}
+                                             disabled={loading || myPromotions.some(p => p.status === 'active' || p.status === 'pending')}
+                                             className="px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-400 disabled:shadow-none"
+                                          >
+                                             {loading ? 'Wait...' : myPromotions.some(p => p.status === 'active' || p.status === 'pending') ? 'Active' : 'Pay Now'}
+                                          </button>
+                                       </div>
+                                    </div>
+                                 </div>
                               </div>
+
+                             <div className="p-2.5 bg-amber-500/5 border border-amber-500/10 rounded-xl flex gap-2">
+                                <AlertTriangle className="text-amber-500 shrink-0" size={13} />
+                                <p className="text-[8px] font-black text-amber-600/80 leading-relaxed uppercase tracking-tight">
+                                   Once activated, your profile will be prioritized in discovery results for the selected duration. Admin approval takes up to 2 hours.
+                                </p>
+                             </div>
                            </div>
                         )}
                      </div>

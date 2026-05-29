@@ -49,9 +49,9 @@ const prettifyTransactionLabel = (value = '') =>
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
-  const { 
-    dashboardData: data, 
-    dashboardLoading: loading, 
+  const {
+    dashboardData: data,
+    dashboardLoading: loading,
     dashboardTransactions: recentTransactions,
     dashboardUnreadCount: unreadCount,
     dashboardGlobalFeatures: globalFeatures,
@@ -143,10 +143,10 @@ const VendorDashboard = () => {
   }, [data, selectedAssignee]);
 
   const handleToggleStatus = async () => {
-    console.log('[TOGGLE-DEBUG] Clicked', { 
-      isShopOpen: data?.isShopOpen, 
+    console.log('[TOGGLE-DEBUG] Clicked', {
+      isShopOpen: data?.isShopOpen,
       subscriptionActive: data?.subscription?.isActive,
-      statusLoading 
+      statusLoading
     });
 
     if (!data || !data.subscription) {
@@ -158,7 +158,7 @@ const VendorDashboard = () => {
       console.log('[TOGGLE-DEBUG] Blocked: Subscription inactive');
       return toast.error('Account Inactive. Recharge to resume', { icon: '\uD83D\uDEA8' });
     }
-    
+
     if (statusLoading) {
       console.log('[TOGGLE-DEBUG] Blocked: Already loading');
       return;
@@ -171,7 +171,7 @@ const VendorDashboard = () => {
     if (isCurrentlyActive === true && data.workingHours) {
       console.log('[TOGGLE-DEBUG] Checking Business Hours...');
       const now = dayjs();
-      
+
       const parseWorkingTime = (timeStr = '') => {
         if (!timeStr) return 0;
         const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -197,25 +197,25 @@ const VendorDashboard = () => {
     }
 
     // Optimistic Update
-    setData((prev) => ({ 
-      ...prev, 
+    setData((prev) => ({
+      ...prev,
       isShopOpen: newStatus,
-      isClosedToday: newStatus ? false : prev.isClosedToday 
+      isClosedToday: newStatus ? false : prev.isClosedToday
     }));
 
     try {
       setStatusLoading(true);
       console.log('[TOGGLE-DEBUG] Calling API...', { isShopOpen: newStatus, isClosedToday: newStatus ? false : undefined });
-      await api.patch('/vendor/shop-status', { 
+      await api.patch('/vendor/shop-status', {
         isShopOpen: newStatus,
-        isClosedToday: newStatus ? false : undefined 
+        isClosedToday: newStatus ? false : undefined
       });
       toast.success(newStatus ? 'Shop is now OPEN' : 'Shop is now CLOSED');
     } catch (err) {
-      setData((prev) => ({ 
-        ...prev, 
+      setData((prev) => ({
+        ...prev,
         isShopOpen: isCurrentlyActive,
-        isClosedToday: !isCurrentlyActive && prev.isClosedToday 
+        isClosedToday: !isCurrentlyActive && prev.isClosedToday
       }));
       toast.error('Failed to update status');
     } finally {
@@ -251,7 +251,7 @@ const VendorDashboard = () => {
     { label: 'Wallet', icon: Wallet, path: '/vendor/wallet' }
   ], [data?.serviceMode]);
 
-  const activeSchedule = useMemo(() => 
+  const activeSchedule = useMemo(() =>
     (data?.schedule || []).filter(item => ['pending', 'confirmed', 'assigned'].includes(item.status)),
     [data?.schedule]
   );
@@ -277,7 +277,7 @@ const VendorDashboard = () => {
     cn(
       'min-w-[132px] rounded-2xl border px-3 py-2.5 shadow-sm transition-all active:scale-95 flex items-center gap-2.5',
       selectedAssignee === cardId
-        ? 'border-[#1C2C4E] bg-white shadow-[0_8px_18px_-12px_rgba(28,44,78,0.45)]'
+        ? 'border-[#1C2C4E] dark:border-white bg-white dark:bg-gray-800 shadow-[0_8px_18px_-12px_rgba(28,44,78,0.45)]'
         : 'border-slate-200 bg-white/90 dark:bg-gray-900 dark:border-gray-800'
     );
 
@@ -290,7 +290,7 @@ const VendorDashboard = () => {
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
           <img
-            src={item.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.customerName || 'Customer')}&background=E2E8F0&color=1C2C4E&bold=true`}
+            src={item.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.customerName || 'Customer')}&background=00246b&color=ffffff&bold=true`}
             alt={item.customerName || 'Customer'}
             className="w-full h-full object-cover"
           />
@@ -317,8 +317,8 @@ const VendorDashboard = () => {
       </div>
       <div className="flex items-center gap-2">
         {item.customerPhone && (
-          <a 
-            href={`tel:${item.customerPhone}`} 
+          <a
+            href={`tel:${item.customerPhone}`}
             className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#1C2C4E] dark:text-blue-400"
             title="Call Customer"
           >
@@ -327,7 +327,7 @@ const VendorDashboard = () => {
         )}
         <button
           onClick={() => handleCompleteBooking(item.id)}
-          className="px-4 py-2 bg-[#1C2C4E] dark:bg-[#1C2C4E] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#1C2C4E]/10 transition-all font-bold"
+          className="px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#00246b]/10 transition-all font-bold"
         >
           Done
         </button>
@@ -336,13 +336,13 @@ const VendorDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar pb-24">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[38px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+    <div className="min-h-full bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar pb-6">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[40px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
             <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
-              <span className="text-[#1C2C4E] dark:text-white">Zero</span>
-              <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
+              <span className="text-[#00246b] dark:text-white">Zero</span>
+              <span className="text-[#00246b]/30 dark:text-white">One</span>
             </h1>
           </div>
 
@@ -366,7 +366,7 @@ const VendorDashboard = () => {
                 onClick={handleToggleStatus}
                 className={cn(
                   "w-11 h-6 rounded-full relative transition-all duration-300",
-                  data?.isShopOpen && !data?.isClosedToday ? 'bg-[#1C2C4E]' : 'bg-slate-200 dark:bg-gray-800',
+                  data?.isShopOpen && !data?.isClosedToday ? 'bg-[#00246b]' : 'bg-slate-200 dark:bg-gray-800',
                   statusLoading ? 'opacity-50 cursor-wait' : 'active:scale-95'
                 )}
               >
@@ -383,7 +383,7 @@ const VendorDashboard = () => {
       <main className="px-1.5 space-y-2 pt-[92px]">
         {data && !data.subscription?.isActive && (
           <section className="px-0.5 mb-2">
-            <div 
+            <div
               onClick={() => navigate('/vendor/wallet')}
               className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer shadow-lg shadow-rose-500/5"
             >
@@ -429,11 +429,11 @@ const VendorDashboard = () => {
                 data && !data.subscription?.isActive && action.label !== 'Wallet' && "opacity-60 grayscale-[0.5]"
               )}
             >
-              <div className="w-9 h-9 bg-[#1C2C4E] dark:bg-[#1C2C4E] rounded-2xl flex items-center justify-center shadow-lg shadow-[#1C2C4E]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-9 h-9 bg-[#00246b] dark:bg-[#00246b] rounded-2xl flex items-center justify-center shadow-lg shadow-[#00246b]/20 shrink-0 group-hover:scale-110 transition-transform duration-300">
                 <action.icon size={18} strokeWidth={2.5} className="text-white" />
               </div>
               <div className="px-1 text-center font-black">
-                <span className="text-[10px] text-[#1C2C4E] dark:text-gray-300 tracking-tight leading-none block uppercase">
+                <span className="text-[10px] text-[#00246b] dark:text-gray-300 tracking-tight leading-none block uppercase">
                   {action.label}
                 </span>
               </div>
@@ -443,7 +443,7 @@ const VendorDashboard = () => {
 
         <section className="px-0.5">
           <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1 pb-0">
-            <div className="bg-[#1C2C4E] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col justify-center overflow-hidden">
+            <div className="bg-[#00246b] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col justify-center overflow-hidden">
               <p className="text-[8px] font-black text-white/90 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
               {loading ? (
                 <div className="h-4 w-12 bg-white/20 rounded animate-pulse" />
@@ -460,24 +460,24 @@ const VendorDashboard = () => {
               )}
             </div>
             <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-               <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
-               {loading ? (
-                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
-               ) : (
-                 <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
-                   {data?.schedule?.filter((item) => item.status === 'completed').length || 0}
-                 </p>
-               )}
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
+              {loading ? (
+                <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
+              ) : (
+                <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
+                  {data?.schedule?.filter((item) => item.status === 'completed').length || 0}
+                </p>
+              )}
             </div>
             <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-               <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
-               {loading ? (
-                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded-pulse animate-pulse" />
-               ) : (
-                 <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
-                   {data?.schedule?.filter((item) => ['pending', 'confirmed', 'assigned'].includes(item.status)).length || 0}
-                 </p>
-               )}
+              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
+              {loading ? (
+                <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded-pulse animate-pulse" />
+              ) : (
+                <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
+                  {data?.schedule?.filter((item) => ['pending', 'confirmed', 'assigned'].includes(item.status)).length || 0}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -490,9 +490,9 @@ const VendorDashboard = () => {
               </h2>
               <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
                 {loading ? (
-                   [1, 2, 3].map(i => (
-                     <div key={i} className="min-w-[132px] h-[58px] rounded-2xl border border-slate-100 bg-white dark:bg-gray-900 animate-pulse shrink-0" />
-                   ))
+                  [1, 2, 3].map(i => (
+                    <div key={i} className="min-w-[132px] h-[58px] rounded-2xl border border-slate-100 bg-white dark:bg-gray-900 animate-pulse shrink-0" />
+                  ))
                 ) : (
                   activeStaffCards.map((card) => (
                     <button
@@ -502,7 +502,7 @@ const VendorDashboard = () => {
                     >
                       <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100 dark:border-gray-700 dark:bg-gray-800 shrink-0">
                         <img
-                          src={card.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(card.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`}
+                          src={card.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(card.name || 'Staff')}&background=00246b&color=ffffff&bold=true`}
                           alt={card.name}
                           className="h-full w-full object-cover"
                         />
@@ -553,7 +553,7 @@ const VendorDashboard = () => {
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
                       <img
-                        src={item.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.customerName || 'Customer')}&background=E2E8F0&color=1C2C4E&bold=true`}
+                        src={item.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.customerName || 'Customer')}&background=00246b&color=ffffff&bold=true`}
                         alt={item.customerName || 'Customer'}
                         className="w-full h-full object-cover"
                       />
@@ -580,8 +580,8 @@ const VendorDashboard = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {item.customerPhone && (
-                      <a 
-                        href={`tel:${item.customerPhone}`} 
+                      <a
+                        href={`tel:${item.customerPhone}`}
                         className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#1C2C4E] dark:text-blue-400"
                         title="Call Customer"
                       >
@@ -591,7 +591,7 @@ const VendorDashboard = () => {
                     {item.status === 'confirmed' ? (
                       <button
                         onClick={() => handleCompleteBooking(item.id)}
-                        className="px-4 py-2 bg-[#1C2C4E] dark:bg-[#1C2C4E] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#1C2C4E]/10 transition-all font-bold"
+                        className="px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#00246b]/10 transition-all font-bold"
                       >
                         Done
                       </button>
@@ -661,7 +661,7 @@ const VendorDashboard = () => {
       {isNotificationsOpen && <NotificationDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />}
       {isCreateSlotOpen && <CreateSlotModal isOpen={isCreateSlotOpen} onClose={() => setIsCreateSlotOpen(false)} onRefresh={() => fetchDashboard(true)} />}
       {isClosureModalOpen && <EmergencyClosureModal isOpen={isClosureModalOpen} onClose={() => setIsClosureModalOpen(false)} onCreated={() => fetchDashboard(true)} />}
-      
+
       {/* Enhanced Glass Confirmation Modal */}
       {completeBookingModal.isOpen && (
         <GlassConfirmationModal

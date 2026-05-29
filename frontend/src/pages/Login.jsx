@@ -216,7 +216,6 @@ const CustomerAuth = () => {
                   </Button>
 
                   <div className="text-center space-y-3">
-                    <p className="text-[10px] font-black text-[#1C2C4E]/60 dark:text-gray-500 uppercase tracking-widest">Did'nt receive the code?</p>
                     <div className="flex flex-col items-center gap-2">
                       <button
                         disabled={!canResend}
@@ -241,7 +240,7 @@ const CustomerAuth = () => {
       </div>
 
       {/* Footer Branding */}
-      <div className="pb-8 flex flex-col items-center justify-center gap-4 relative z-10">
+      <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/privacy-policy')}
@@ -256,10 +255,6 @@ const CustomerAuth = () => {
           >
             Contact &amp; Support
           </button>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] h-[8px] font-black text-[#1C2C4E] dark:text-gray-400 uppercase tracking-wider leading-none">MADE IN INDIA</span>
-          <img src="https://flagcdn.com/in.svg" className="h-[8px] w-auto rounded-[1px]" alt="India flag" />
         </div>
       </div>
     </div>

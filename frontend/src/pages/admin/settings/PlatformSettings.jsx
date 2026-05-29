@@ -42,29 +42,21 @@ const PlatformSettings = () => {
     fetchSettings();
   }, []);
 
-  const [pendingUpdate, setPendingUpdate] = useState(null);
-
-  useEffect(() => {
-    if (!pendingUpdate) return;
-    const timer = setTimeout(async () => {
-      try {
-        setSaving(true);
-        await api.patch('/admin/settings', pendingUpdate);
-        toast.success('System Parameters Synchronized ⚙️');
-      } catch (err) {
-        toast.error('Configuration Sync Failed');
-        fetchSettings();
-      } finally {
-        setSaving(false);
-        setPendingUpdate(null);
-      }
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [pendingUpdate]);
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await api.patch('/admin/settings', settings);
+      toast.success('System Parameters Synchronized ⚙️');
+    } catch (err) {
+      toast.error('Configuration Sync Failed');
+      fetchSettings();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleUpdate = (update) => {
     setSettings(prev => ({ ...prev, ...update }));
-    setPendingUpdate(update);
   };
 
   const handleToggle = (key) => {
@@ -91,13 +83,24 @@ const PlatformSettings = () => {
           <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize">Platform Core</h1>
           <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Manage master governance parameters</p>
         </div>
-        <div className="bg-slate-50 dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center gap-4 transition-all hover:border-primary/20">
-          <ShieldAlert size={24} strokeWidth={3} className="text-primary dark:text-white hidden sm:block opacity-60" />
-          <div className="leading-tight">
-            <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-widest">Global State Control</p>
-            <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest leading-relaxed opacity-60">
-              Critical changes affect all partner accounts instantly.
-            </p>
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto justify-end">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3.5 bg-primary text-white font-black text-[11px] uppercase tracking-widest rounded-xl shadow-lg shadow-primary/25 active:scale-95 transition-all disabled:opacity-50 shrink-0"
+          >
+            {saving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
+            {saving ? 'Saving...' : 'Save Settings'}
+          </button>
+
+          <div className="w-full sm:w-auto bg-slate-50 dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center gap-4 transition-all hover:border-primary/20">
+            <ShieldAlert size={24} strokeWidth={3} className="text-primary dark:text-white hidden sm:block opacity-60" />
+            <div className="leading-tight">
+              <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-widest">Global State Control</p>
+              <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest leading-relaxed opacity-60">
+                Critical changes affect all partner accounts instantly.
+              </p>
+            </div>
           </div>
         </div>
       </div>

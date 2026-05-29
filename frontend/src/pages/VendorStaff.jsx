@@ -126,7 +126,7 @@ const VendorStaff = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32 w-full max-w-full overflow-x-hidden">
-      <header className="px-4 pt-[38px] pb-3 sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="px-4 pt-[40px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/vendor/dashboard')}
@@ -138,9 +138,8 @@ const VendorStaff = () => {
             <div className="flex items-center gap-1">
               <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
                 <span className="text-primary dark:text-white">Zero</span>
-                <span className="text-primary/30 dark:text-gray-600">One</span>
+                <span className="text-primary/30 dark:text-white">One</span>
               </h1>
-
             </div>
             <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none">Team Roster</p>
           </div>
@@ -152,14 +151,14 @@ const VendorStaff = () => {
           }}
           className={`p-2.5 rounded-xl shadow-xl transition-all ${!vendorData?.subscription?.isActive
               ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed'
-              : 'bg-primary text-white shadow-primary/20 active:scale-95'
+              : 'bg-[#00246b] text-white shadow-[#00246b]/20 active:scale-95'
             }`}
         >
           <Plus size={20} />
         </button>
       </header>
-
-      <main className="px-4 mt-3.5">
+ 
+      <main className="px-4 pt-[94px]">
         <div className="mb-4 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
@@ -170,7 +169,7 @@ const VendorStaff = () => {
             className="w-full bg-white dark:bg-gray-900 py-3 pl-11 pr-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-md dark:shadow-none dark:text-white"
           />
         </div>
-
+ 
         <AnimatePresence mode="wait">
           {staff.length === 0 ? (
             <motion.div
@@ -178,7 +177,7 @@ const VendorStaff = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="py-12 text-center"
             >
-              <div className="w-20 h-20 bg-primary/5 rounded-[2.5rem] flex items-center justify-center mx-auto text-primary/30 border border-primary/10">
+              <div className="w-20 h-20 bg-[#00246b]/5 rounded-[2.5rem] flex items-center justify-center mx-auto text-[#00246b]/30 border border-[#00246b]/10">
                 <Users size={36} />
               </div>
               <div className="mt-5 space-y-1">
@@ -187,7 +186,7 @@ const VendorStaff = () => {
               </div>
               <button
                 onClick={() => navigate('/vendor/staff/add')}
-                className="mt-6 px-7 py-3.5 bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl shadow-primary/20 active:scale-95 transition-all"
+                className="mt-6 px-7 py-3.5 bg-[#00246b] text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all"
               >
                 Onboard Staff
               </button>
@@ -200,6 +199,7 @@ const VendorStaff = () => {
                   staff={member}
                   onToggle={handleToggle}
                   onEdit={handleEdit}
+                  onCardClick={() => navigate(`/vendor/staff/${member._id}`)}
                   onDelete={(staff) => {
                     if (!vendorData?.subscription?.isActive) {
                       return toast.error('Account inactive. Recharge to delete staff.', { id: 'account-inactive', duration: 2000 });
