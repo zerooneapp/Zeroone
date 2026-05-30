@@ -52,7 +52,7 @@ const AddressPopup = () => {
           // Subtle professional notification
           toast.success(`Service Location Set: ${readableAddress.split(',')[0]}`, {
             style: {
-              background: '#1C2C4E',
+              background: '#00246b',
               color: '#fff',
               fontSize: '12px',
               fontWeight: '900',

@@ -316,7 +316,7 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                 className={`h-11 px-5 rounded-xl text-[10px] font-black capitalize tracking-[0.2em] shadow-lg active:scale-95 transition-all flex items-center justify-center min-w-[140px] ${
                   (!preview || previewing || creating || (preview.conflicts?.length > 0) || dayjs(payload.startTime).isSame(dayjs(payload.endTime)))
                     ? 'bg-slate-200 dark:bg-gray-800 text-slate-400 cursor-not-allowed opacity-60 shadow-none'
-                    : 'bg-slate-900 dark:bg-[#1C2C4E] text-white'
+                    : 'bg-slate-900 dark:bg-[#00246b] text-white'
                 }`}
               >
                 {creating ? (

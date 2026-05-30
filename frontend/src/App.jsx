@@ -174,7 +174,7 @@ function App() {
     backdropFilter: 'blur(12px)',
     WebkitBackdropFilter: 'blur(12px)',
     border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.4)',
-    color: isDarkMode ? '#fff' : '#1C2C4E',
+    color: isDarkMode ? '#fff' : '#00246b',
     borderRadius: '20px',
     padding: '10px 18px',
     fontSize: '11px',
@@ -328,7 +328,7 @@ function App() {
           style: toastStyle,
           success: {
             iconTheme: {
-              primary: isDarkMode ? '#10B981' : '#1C2C4E',
+              primary: isDarkMode ? '#10B981' : '#00246b',
               secondary: '#fff',
             },
           },

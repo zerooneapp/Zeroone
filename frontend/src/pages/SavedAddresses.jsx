@@ -148,7 +148,7 @@ const SavedAddresses = () => {
             <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
           <div className="leading-none">
-            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+            <h1 className="font-extrabold text-[15px] text-[#00246b] dark:text-white tracking-tight">
               Saved addresses
             </h1>
           </div>
@@ -162,21 +162,21 @@ const SavedAddresses = () => {
             type="button"
             onClick={handleFetchCurrentLocation}
             disabled={loading}
-            className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03)] relative overflow-hidden group text-left active:scale-[0.99] transition-all disabled:opacity-70"
+            className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03)] relative overflow-hidden group text-left active:scale-[0.99] transition-all disabled:opacity-70"
           >
             <div className="absolute top-0 right-0 p-3 opacity-5">
-              <MapPin size={40} className="text-[#1C2C4E]" />
+              <MapPin size={40} className="text-[#00246b]" />
             </div>
             <div className="flex items-start gap-3 relative z-10">
               <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center border border-slate-100 dark:border-gray-700 shrink-0">
-                <Navigation size={18} className="text-[#1C2C4E] dark:text-blue-400" />
+                <Navigation size={18} className="text-[#00246b] dark:text-blue-400" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-black text-[#1C2C4E] dark:text-white tracking-tight">Main location</h3>
+                <h3 className="text-sm font-black text-[#00246b] dark:text-white tracking-tight">Main location</h3>
                 <p className="text-[11px] font-medium text-slate-500 leading-relaxed dark:text-gray-400">
                   {user?.address || 'No address set yet'}
                 </p>
-                <p className="text-[9px] font-black text-[#1C2C4E]/40 dark:text-gray-500 tracking-widest uppercase pt-1">
+                <p className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-500 tracking-widest uppercase pt-1">
                   Tap to fetch current location
                 </p>
               </div>
@@ -194,10 +194,10 @@ const SavedAddresses = () => {
                 setSelectedLocation(null);
               }}
               placeholder="Enter complete address manually..."
-              className="w-full h-32 p-4 pt-10 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 text-xs font-bold text-slate-900 dark:text-white tracking-tight focus:border-primary transition-all outline-none resize-none shadow-sm caret-[#1C2C4E]"
+              className="w-full h-32 p-4 pt-10 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 text-xs font-bold text-slate-900 dark:text-white tracking-tight focus:border-primary transition-all outline-none resize-none shadow-sm caret-[#00246b]"
             />
             <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none opacity-40">
-              <Search size={14} className="text-[#1C2C4E]" />
+              <Search size={14} className="text-[#00246b]" />
               <span className="text-[8px] font-black uppercase tracking-[0.2em]">Manual Input</span>
             </div>
           </div>
@@ -208,7 +208,7 @@ const SavedAddresses = () => {
             whileTap={{ scale: 0.95 }}
             onClick={handleSaveAddress}
             disabled={loading}
-            className={`w-full h-12 bg-slate-900 dark:bg-primary text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl shadow-slate-900/20 dark:shadow-primary/20 flex items-center justify-center gap-2 overflow-hidden relative group ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`w-full h-12 bg-[#00246b] dark:bg-[#00246b] text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl shadow-[#00246b]/20 dark:shadow-[#00246b]/20 flex items-center justify-center gap-2 overflow-hidden relative group ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -33,7 +33,7 @@ const NotificationSettings = () => {
           icon: '🔔',
           style: {
               borderRadius: '1rem',
-              background: '#1C2C4E',
+              background: '#00246b',
               color: '#fff',
               fontSize: '12px',
               fontWeight: 'bold'
@@ -48,19 +48,19 @@ const NotificationSettings = () => {
   };
 
   const SettingItem = ({ icon: Icon, title, sub, active, onToggle, color = "blue" }) => (
-    <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03)] flex items-center justify-between group active:scale-[0.99] transition-all">
+    <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03)] flex items-center justify-between group active:scale-[0.99] transition-all">
        <div className="flex items-center gap-3.5">
           <div className={`w-10 h-10 rounded-xl bg-${color}-50 dark:bg-${color}-900/20 flex items-center justify-center border border-${color}-100/50 dark:border-${color}-800/30`}>
              <Icon size={18} className={`text-${color}-500`} strokeWidth={2.5} />
           </div>
           <div className="space-y-0.5">
-             <h3 className="text-[13px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">{title}</h3>
+             <h3 className="text-[13px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">{title}</h3>
              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500">{sub}</p>
           </div>
        </div>
        <button 
          onClick={onToggle}
-         className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${active ? 'bg-[#1C2C4E]' : 'bg-slate-200 dark:bg-gray-800'}`}
+         className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${active ? 'bg-[#00246b]' : 'bg-slate-200 dark:bg-gray-800'}`}
        >
           <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${active ? 'left-6' : 'left-1'}`} />
        </button>
@@ -80,7 +80,7 @@ const NotificationSettings = () => {
             <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
           <div className="leading-none">
-            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+            <h1 className="font-extrabold text-[15px] text-[#00246b] dark:text-white tracking-tight">
               Notification settings
             </h1>
           </div>
@@ -143,8 +143,8 @@ const NotificationSettings = () => {
         </section>
 
         {/* 📚 INFO BOX */}
-        <div className="p-4 bg-slate-900/5 dark:bg-gray-900 border border-dashed border-[#1C2C4E]/20 rounded-2xl flex gap-3">
-           <Info size={18} className="text-[#1C2C4E] opacity-40 shrink-0" />
+        <div className="p-4 bg-slate-900/5 dark:bg-gray-900 border border-dashed border-[#00246b]/20 rounded-2xl flex gap-3">
+           <Info size={18} className="text-[#00246b] opacity-40 shrink-0" />
            <p className="text-[10px] font-bold text-slate-500 dark:text-gray-400 leading-relaxed italic opacity-80">
              Critical security alerts and urgent system updates are enabled by default and cannot be opted-out for your elite account protection.
            </p>

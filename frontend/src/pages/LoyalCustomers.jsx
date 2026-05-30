@@ -66,7 +66,7 @@ const LoyalCustomers = () => {
         >
           <ChevronLeft size={20} className="text-slate-600 dark:text-gray-300" />
         </button>
-        <h1 className="text-lg font-black text-[#1C2C4E] dark:text-white tracking-tight">
+        <h1 className="text-lg font-black text-[#00246b] dark:text-white tracking-tight">
           Loyal Customers
         </h1>
       </header>
@@ -81,7 +81,7 @@ const LoyalCustomers = () => {
               placeholder="Search by name or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C2C4E]/20 transition-all"
+              className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all"
             />
           </div>
 
@@ -96,7 +96,7 @@ const LoyalCustomers = () => {
                 onClick={() => setFilter(btn.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all active:scale-95 ${
                   filter === btn.id 
-                    ? 'bg-[#1C2C4E]/5 text-[#1C2C4E] border border-[#1C2C4E] shadow-sm' 
+                    ? 'bg-[#00246b]/5 text-[#00246b] border border-[#00246b] shadow-sm' 
                     : 'bg-white dark:bg-gray-900 text-slate-500 border border-slate-100 dark:border-gray-800'
                 }`}
               >
@@ -139,7 +139,7 @@ const LoyalCustomers = () => {
                       />
                     </div>
                     <div>
-                      <h3 className="font-black text-[#1C2C4E] dark:text-white tracking-tight">
+                      <h3 className="font-black text-[#00246b] dark:text-white tracking-tight">
                         {toPascalCase(customer.name)}
                       </h3>
                       <p className="text-[10px] font-bold text-slate-400">{customer.phone}</p>
@@ -156,21 +156,21 @@ const LoyalCustomers = () => {
                 <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-gray-800">
                   <div className="space-y-1">
                     <p className="text-[8px] font-bold text-slate-400 uppercase">Visits</p>
-                    <div className="flex items-center gap-1 text-[#1C2C4E] dark:text-white">
+                    <div className="flex items-center gap-1 text-[#00246b] dark:text-white">
                       <Calendar size={10} />
                       <span className="text-xs font-black">{customer.bookingCount}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[8px] font-bold text-slate-400 uppercase">Spend</p>
-                    <div className="flex items-center gap-1 text-[#1C2C4E] dark:text-white">
+                    <div className="flex items-center gap-1 text-[#00246b] dark:text-white">
                       <Wallet size={10} />
                       <span className="text-xs font-black">₹{customer.totalSpent % 1 === 0 ? customer.totalSpent : Number(customer.totalSpent).toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[8px] font-bold text-slate-400 uppercase">Last Visit</p>
-                    <p className="text-[10px] font-black text-[#1C2C4E] dark:text-white">
+                    <p className="text-[10px] font-black text-[#00246b] dark:text-white">
                       {dayjs(customer.lastBooking).format('MMM DD')}
                     </p>
                   </div>
@@ -179,7 +179,7 @@ const LoyalCustomers = () => {
                 <div className="flex gap-2 pt-1.5">
                   <a 
                     href={`tel:${customer.phone}`}
-                    className="flex-1 py-2 bg-slate-50 dark:bg-gray-800 text-[#1C2C4E] dark:text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                    className="flex-1 py-2 bg-slate-50 dark:bg-gray-800 text-[#00246b] dark:text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
                   >
                     <Phone size={12} />
                     Call
@@ -190,7 +190,7 @@ const LoyalCustomers = () => {
                       const message = encodeURIComponent(`Hello ${customer.name}, we're happy to have you as a loyal client!`);
                       window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
                     }}
-                    className="flex-1 py-2 bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                    className="flex-1 py-2 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
                   >
                     <MessageSquare size={12} />
                     Message

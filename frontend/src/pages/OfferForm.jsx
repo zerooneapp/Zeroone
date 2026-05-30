@@ -126,7 +126,7 @@ const OfferForm = () => {
           <button 
             form="offer-form"
             disabled={loading}
-            className="p-2 bg-[#1C2C4E] text-white rounded-xl shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all disabled:opacity-50"
+            className="p-2 bg-[#00246b] text-white rounded-xl shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50"
           >
              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
           </button>
@@ -159,7 +159,7 @@ const OfferForm = () => {
                            onClick={() => setFormData({...formData, discountType: t})}
                            className={`p-2.5 rounded-xl border font-black uppercase text-[11px] flex items-center justify-center gap-2 transition-all ${
                              formData.discountType === t 
-                             ? 'bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-lg shadow-[#1C2C4E]/20' 
+                             ? 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/20' 
                              : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
                            }`}
                          >
@@ -246,8 +246,8 @@ const OfferForm = () => {
                            onClick={() => toggleService(service._id)}
                            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border ${
                              formData.serviceIds.includes(service._id) 
-                             ? 'bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-lg shadow-[#1C2C4E]/20' 
-                             : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400 hover:border-[#1C2C4E]/30'
+                             ? 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/20' 
+                             : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400 hover:border-[#00246b]/30'
                            }`}
                          >
                             {service.name}
@@ -260,8 +260,8 @@ const OfferForm = () => {
              <div className="flex flex-col gap-3">
                 {/* 🚀 SAVINGS PREVIEW */}
                 <div className="p-2.5 bg-slate-50 dark:bg-gray-950/40 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center justify-between shadow-inner">
-                   <span className="text-[9px] font-black text-[#1C2C4E] dark:text-gray-400 uppercase tracking-widest">Customer Savings:</span>
-                   <span className="text-xs font-black text-[#1C2C4E] dark:text-white">
+                   <span className="text-[9px] font-black text-[#00246b] dark:text-gray-400 uppercase tracking-widest">Customer Savings:</span>
+                   <span className="text-xs font-black text-[#00246b] dark:text-white">
                       {formData.discountType === 'percentage'
                         ? `${formData.value}% OFF`
                         : `₹${formData.value} FLAT`}

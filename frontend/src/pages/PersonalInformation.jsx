@@ -81,7 +81,7 @@ const PersonalInformation = () => {
             <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
           <div className="leading-none">
-            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+            <h1 className="font-extrabold text-[15px] text-[#00246b] dark:text-white tracking-tight">
               Personal information
             </h1>
           </div>
@@ -102,7 +102,7 @@ const PersonalInformation = () => {
             />
             <label
               htmlFor="profile-upload"
-              className="w-20 h-20 rounded-[1.5rem] bg-[#1C2C4E] flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-2xl relative z-10 overflow-hidden cursor-pointer"
+              className="w-20 h-20 rounded-[1.5rem] bg-[#00246b] flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-2xl relative z-10 overflow-hidden cursor-pointer"
             >
               {formData.image ? (
                 <img src={formData.image} alt="Profile" className="w-full h-full object-cover" />
@@ -130,7 +130,7 @@ const PersonalInformation = () => {
                   const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
                   setFormData({ ...formData, name: filteredValue });
                 }}
-                className="w-full h-11 pl-12 pr-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 text-sm font-black text-[#1C2C4E] dark:text-white tracking-tight focus:border-primary transition-all outline-none shadow-sm"
+                className="w-full h-11 pl-12 pr-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 text-sm font-black text-[#00246b] dark:text-white tracking-tight focus:border-primary transition-all outline-none shadow-sm"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@ const PersonalInformation = () => {
                 value={formData.dob}
                 max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                className="w-full h-11 pl-12 pr-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 text-sm font-black text-[#1C2C4E] dark:text-white tracking-tight focus:border-primary transition-all outline-none shadow-sm"
+                className="w-full h-11 pl-12 pr-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 text-sm font-black text-[#00246b] dark:text-white tracking-tight focus:border-primary transition-all outline-none shadow-sm"
               />
             </div>
           </div>
@@ -157,21 +157,21 @@ const PersonalInformation = () => {
                 type="tel"
                 value={formData.phone}
                 disabled
-                className="w-full h-11 pl-12 pr-4 bg-slate-50 dark:bg-gray-800/20 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 text-sm font-black text-slate-400 dark:text-gray-500 tracking-tight transition-all outline-none shadow-sm"
+                className="w-full h-11 pl-12 pr-4 bg-slate-50 dark:bg-gray-800/20 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 text-sm font-black text-slate-400 dark:text-gray-500 tracking-tight transition-all outline-none shadow-sm"
               />
             </div>
           </div>
 
           <div className="space-y-1 pt-1">
             <label className="text-[9px] font-black text-slate-400 tracking-widest ml-1 capitalize">Select gender</label>
-            <div className="flex gap-1.5 p-1 bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 dark:border-gray-800 rounded-2xl">
+            <div className="flex gap-1.5 p-1 bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 rounded-2xl">
               {['male', 'female', 'other'].map(g => (
                 <button
                   key={g}
                   onClick={() => setFormData({ ...formData, gender: g })}
                   className={`flex-1 py-2 text-[11px] font-black tracking-widest rounded-xl transition-all capitalize ${formData.gender === g
-                    ? 'bg-[#1C2C4E] text-white shadow-lg'
-                    : 'text-slate-400 hover:text-[#1C2C4E]'
+                    ? 'bg-[#00246b] text-white shadow-lg'
+                    : 'text-slate-400 hover:text-[#00246b]'
                     }`}
                 >
                   {g}
@@ -187,7 +187,7 @@ const PersonalInformation = () => {
             whileTap={{ scale: 0.95 }}
             onClick={handleUpdate}
             disabled={loading}
-            className={`w-full h-12 bg-[#1C2C4E] dark:bg-primary text-white rounded-2xl font-black text-[13px] tracking-tight capitalize shadow-2xl shadow-[#1C2C4E]/20 dark:shadow-primary/20 flex items-center justify-center gap-2 overflow-hidden relative group ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`w-full h-12 bg-[#00246b] dark:bg-[#00246b] text-white rounded-2xl font-black text-[13px] tracking-tight capitalize shadow-2xl shadow-[#00246b]/20 dark:shadow-[#00246b]/20 flex items-center justify-center gap-2 overflow-hidden relative group ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

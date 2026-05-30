@@ -27,18 +27,18 @@ const Header = ({ onOpenNotifications }) => {
         {/* Left: Brand & Location HUD */}
         <div className="flex flex-col gap-1 min-w-0">
           <h1 className="text-[26px] font-black tracking-tighter leading-none flex items-center">
-            <span className="text-[#1C2C4E] dark:text-white">Zero</span>
-            <span className="text-[#1C2C4E]/30 dark:text-gray-600">One</span>
+            <span className="text-[#00246b] dark:text-white">Zero</span>
+            <span className="text-[#00246b]/30 dark:text-white">One</span>
           </h1>
           <button
             onClick={() => navigate('/account/addresses')}
-            className="flex items-center gap-1 text-[10px] font-black text-slate-400 hover:text-[#1C2C4E] transition-colors group"
+            className="flex items-center gap-1 text-[10px] font-black text-slate-400 hover:text-[#00246b] transition-colors group"
           >
-            <MapPin size={10} className="text-[#1C2C4E] dark:text-blue-400 group-hover:scale-110 transition-transform" />
+            <MapPin size={10} className="text-[#00246b] dark:text-blue-400 group-hover:scale-110 transition-transform" />
             <span className="truncate max-w-[150px] uppercase tracking-widest">
               {cleanAddress(user?.address?.split(',')[0]) || 'Select Location'}
             </span>
-            <ChevronDown size={10} strokeWidth={4} className="text-slate-400 opacity-60 group-hover:text-[#1C2C4E] transition-colors" />
+            <ChevronDown size={10} strokeWidth={4} className="text-slate-400 opacity-60 group-hover:text-[#00246b] transition-colors" />
           </button>
         </div>
 
@@ -48,7 +48,7 @@ const Header = ({ onOpenNotifications }) => {
 
           <button
             onClick={onOpenNotifications}
-            className="relative p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
+            className="relative p-1.5 text-[#00246b] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
             <Bell size={18} strokeWidth={2.5} />
             {unreadCount > 0 && (
@@ -58,7 +58,7 @@ const Header = ({ onOpenNotifications }) => {
 
           <button
             onClick={() => navigate('/favorites')}
-            className="p-1.5 text-[#1C2C4E] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
+            className="p-1.5 text-[#00246b] dark:text-gray-300 hover:opacity-70 active:scale-90 transition-all"
           >
             <Heart size={19} strokeWidth={2.5} />
           </button>

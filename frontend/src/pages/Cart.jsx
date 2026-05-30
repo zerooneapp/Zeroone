@@ -375,7 +375,7 @@ const Cart = () => {
             <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Select booking date</span>
             <button
               onClick={() => setShowFullCalendar(!showFullCalendar)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-blue-500/10 rounded-lg text-[10px] font-black text-[#1C2C4E] dark:text-blue-400 tracking-widest border border-slate-100 dark:border-blue-500/20 active:scale-95 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-blue-500/10 rounded-lg text-[10px] font-black text-[#00246b] dark:text-blue-400 tracking-widest border border-slate-100 dark:border-blue-500/20 active:scale-95 transition-all shadow-sm"
             >
               <Calendar size={13} strokeWidth={3} />
               {showFullCalendar ? 'List' : 'Calendar'}
@@ -398,8 +398,8 @@ const Cart = () => {
                     className={cn(
                       "flex flex-col items-center min-w-[50px] py-2 rounded-xl transition-all border shadow-sm",
                       selectedDate === d.full
-                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-xl scale-105"
-                        : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 text-slate-400 shadow-sm"
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-blue-500 text-[#00246b] dark:text-blue-400 shadow-xl scale-105"
+                        : "bg-white dark:bg-gray-900 border-[#00246b]/10 dark:border-gray-800 text-slate-400 shadow-sm"
                     )}
                   >
                     <span className="text-[9px] uppercase font-black opacity-60 tracking-widest leading-none">{d.day}</span>
@@ -428,7 +428,7 @@ const Cart = () => {
                     className={cn(
                       "aspect-square flex flex-col items-center justify-center rounded-xl transition-all text-[10px] font-black relative active:scale-90",
                       selectedDate === d.full
-                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-md"
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-blue-500 text-[#00246b] dark:text-blue-400 shadow-md"
                         : "bg-slate-50/50 dark:bg-gray-800/20 text-slate-400 hover:bg-slate-100 border border-slate-50 dark:border-transparent"
                     )}
                   >
@@ -444,7 +444,7 @@ const Cart = () => {
         </section>
 
         {/* Selected Services Summary */}
-        <section className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+        <section className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
           <p className="text-[11px] font-black text-slate-400 tracking-widest mb-3 px-1 leading-none capitalize">Booking summary</p>
           <div className="space-y-2.5">
             {items.map(item => {
@@ -457,7 +457,7 @@ const Cart = () => {
               return (
               <div key={item._id} className="flex justify-between items-center px-1">
                 <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#1C2C4E]" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#00246b]" />
                   <div className="flex flex-col">
                     <span className="font-black text-[12px] text-gray-900 dark:text-white tracking-tight truncate max-w-[200px] leading-none capitalize">{item?.name || 'Service'}</span>
                   </div>
@@ -473,7 +473,7 @@ const Cart = () => {
             <div className="h-[1px] bg-slate-50 dark:bg-gray-800 my-1" />
             <div className="flex justify-between items-center font-black text-gray-900 dark:text-white tracking-widest capitalize text-[12px] px-1 leading-none">
               <span>Total Value</span>
-              <span className="text-[#1C2C4E] dark:text-gray-400 tracking-tighter">{formatPrice(originalTotal)}</span>
+              <span className="text-[#00246b] dark:text-gray-400 tracking-tighter">{formatPrice(originalTotal)}</span>
             </div>
             {totalSavings > 0 && (
               <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1 text-emerald-500">
@@ -523,10 +523,10 @@ const Cart = () => {
                       className={cn(
                         "py-3 rounded-lg font-black text-[11px] transition-all border border-slate-100 dark:border-gray-800 text-center capitalize tracking-widest shadow-sm active:scale-95",
                         selectedSlot?.time === slot.time
-                          ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-lg"
+                          ? "bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-blue-500 text-[#00246b] dark:text-blue-400 shadow-lg"
                           : slot.isCurrentBookingSlot
                             ? "bg-amber-500/5 border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-sm"
-                            : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#1C2C4E]/10"
+                            : "bg-white dark:bg-gray-900 text-slate-400 shadow-sm border-[#00246b]/10"
                       )}
                     >
                       {formatTo12H(slot.time)}
@@ -567,8 +567,8 @@ const Cart = () => {
                     className={cn(
                       "relative flex flex-col items-center min-w-[80px] p-2 rounded-xl border transition-all active:scale-95 shadow-sm",
                       selectedStaff?._id === s._id
-                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 text-[#1C2C4E] dark:text-blue-400 shadow-xl scale-105"
-                        : "bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm"
+                        ? "bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-blue-500 text-[#00246b] dark:text-blue-400 shadow-xl scale-105"
+                        : "bg-white dark:bg-gray-900 border-[#00246b]/10 dark:border-gray-800 shadow-sm"
                     )}
                   >
                     <div className={cn(
@@ -588,7 +588,7 @@ const Cart = () => {
                     </div>
                     <span className={cn(
                       "text-[10px] font-black truncate w-full text-center tracking-widest leading-tight capitalize",
-                      selectedStaff?._id === s._id ? "text-[#1C2C4E] dark:text-white" : "text-slate-400"
+                      selectedStaff?._id === s._id ? "text-[#00246b] dark:text-white" : "text-slate-400"
                     )}>
                       {s.name?.split(' ')[0] || 'Staff'}
                     </span>

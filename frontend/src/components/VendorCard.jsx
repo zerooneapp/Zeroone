@@ -19,7 +19,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
   return (
     <Card
       className={cn(
-        "p-0 overflow-hidden border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_10px_40px_-8px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.03)] backdrop-blur-xl transition-all duration-500 w-full h-auto bg-white/95 dark:bg-gray-900/80 rounded-[24px] mb-1.5 active:scale-[0.98] cursor-pointer"
+        "p-0 overflow-hidden border border-[#00246b]/10 dark:border-gray-800 shadow-[0_10px_40px_-8px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.03)] backdrop-blur-xl transition-all duration-500 w-full h-auto bg-white/95 dark:bg-gray-900/80 rounded-[24px] mb-1.5 active:scale-[0.98] cursor-pointer"
       )}
       onClick={() => navigate(`/service/${vendor._id}`)}
     >
@@ -35,7 +35,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
         />
         {!vendor.isShopOpen && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <span className="bg-white text-[#1C2C4E] px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg">Closed</span>
+            <span className="bg-white text-[#00246b] px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg">Closed</span>
           </div>
         )}
       </div>
@@ -44,7 +44,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
       <div className={cn("p-2.5 flex flex-col justify-between space-y-1")}>
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
-            <h3 className={cn("font-black text-[#1C2C4E] dark:text-white truncate capitalize tracking-tighter leading-none text-[13px]")}>
+            <h3 className={cn("font-black text-[#00246b] dark:text-white truncate capitalize tracking-tighter leading-none text-[13px]")}>
               {vendor.shopName}
             </h3>
             <div className="flex items-center gap-1 mt-0 opacity-80">
@@ -55,20 +55,20 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
             </div>
 
           </div>
-          <div className="flex items-center gap-1 bg-[#1C2C4E]/5 dark:bg-white/10 px-1.5 py-0.5 rounded-lg shrink-0 border border-[#1C2C4E]/10 dark:border-white/10">
+          <div className="flex items-center gap-1 bg-[#00246b]/5 dark:bg-white/10 px-1.5 py-0.5 rounded-lg shrink-0 border border-[#00246b]/10 dark:border-white/10">
             <Star size={10} fill="#FACC15" className="text-yellow-400 border-none" />
-            <span className="text-[10px] font-black text-[#1C2C4E] dark:text-white">{vendor.rating ?? 0}</span>
+            <span className="text-[10px] font-black text-[#00246b] dark:text-white">{vendor.rating ?? 0}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-800/50">
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <span className="text-[11px] font-bold text-[#1C2C4E] dark:text-gray-300 truncate flex-shrink">
+            <span className="text-[11px] font-bold text-[#00246b] dark:text-gray-300 truncate flex-shrink">
               {vendor.service || 'Service'}
             </span>
             <div className="flex flex-col items-start gap-0.5">
               <div className="flex items-center gap-1.5 leading-none">
-                <p className="text-[14px] font-black text-[#1C2C4E] dark:text-white whitespace-nowrap">
+                <p className="text-[14px] font-black text-[#00246b] dark:text-white whitespace-nowrap">
                   ₹{vendor.discountedPrice || vendor.price || '120'}
                 </p>
                 {vendor.discountedPrice && (
@@ -91,7 +91,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
 
           <button
             className={cn(
-              "font-black tracking-wider capitalize bg-[#1C2C4E] text-white shadow-sm transition-all px-3 py-1.5 text-[11px] rounded-lg"
+              "font-black tracking-wider capitalize bg-[#00246b] text-white shadow-sm transition-all px-3 py-1.5 text-[11px] rounded-lg"
             )}
             onClick={(e) => {
               e.stopPropagation();

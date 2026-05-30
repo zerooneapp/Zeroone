@@ -131,7 +131,7 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
                       key={s._id}
                       type="button"
                       onClick={() => toggleService(s)}
-                      className={`px-3 py-2 rounded-lg text-[9px] font-black capitalize tracking-wider border transition-all ${isSelected ? 'bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] text-[#1C2C4E] shadow-sm transform scale-105' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-slate-400 dark:text-gray-500 shadow-sm'}`}
+                      className={`px-3 py-2 rounded-lg text-[9px] font-black capitalize tracking-wider border transition-all ${isSelected ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] text-[#00246b] shadow-sm transform scale-105' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-slate-400 dark:text-gray-500 shadow-sm'}`}
                     >
                       {s.name} - ₹{s.price}
                     </button>
@@ -149,12 +149,12 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
                     key={st._id}
                     type="button"
                     onClick={() => setFormData({ ...formData, staffId: st._id })}
-                    className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all ${formData.staffId === st._id ? 'bg-slate-50 dark:bg-blue-500/10 border-[#1C2C4E] dark:border-blue-500 shadow-xl transform scale-105' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-slate-400 dark:text-gray-500 shadow-sm'}`}
+                    className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all ${formData.staffId === st._id ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-blue-500 shadow-xl transform scale-105' : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-slate-400 dark:text-gray-500 shadow-sm'}`}
                   >
                     <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-gray-800 overflow-hidden">
                       <img src={st.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(st.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} alt={st.name} className="w-full h-full object-cover" />
                     </div>
-                    <span className={`text-[9px] font-black capitalize truncate ${formData.staffId === st._id ? 'text-[#1C2C4E] dark:text-white' : 'text-slate-400 dark:text-gray-500'}`}>{st.name}</span>
+                    <span className={`text-[9px] font-black capitalize truncate ${formData.staffId === st._id ? 'text-[#00246b] dark:text-white' : 'text-slate-400 dark:text-gray-500'}`}>{st.name}</span>
                   </button>
                 ))}
               </div>

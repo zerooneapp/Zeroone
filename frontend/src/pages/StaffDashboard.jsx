@@ -44,7 +44,7 @@ const StaffDashboard = () => {
             icon: action === 'complete' ? '✅' : '🚀',
             style: {
                borderRadius: '12px',
-               background: '#1C2C4E',
+               background: '#00246b',
                color: '#fff',
                fontSize: '10px',
                fontWeight: '900',

@@ -18,7 +18,7 @@ const BookingSuccess = () => {
    }
 
    return (
-      <div className="min-h-[88vh] flex flex-col items-center justify-center px-4 animate-in fade-in duration-700 pb-16">
+      <div className="min-h-[88vh] flex flex-col items-center pt-[140px] px-4 animate-in fade-in duration-700 pb-16">
          {/* Animated Success Icon */}
          <motion.div
             initial={{ scale: 0 }}
@@ -39,7 +39,7 @@ const BookingSuccess = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.15 }}
-            className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] overflow-hidden mb-6"
+            className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] overflow-hidden mb-6"
          >
             <div className="p-3 px-4 bg-slate-900 dark:bg-gray-800 text-white flex items-center justify-between">
                <div>
@@ -56,15 +56,17 @@ const BookingSuccess = () => {
                   <div className="space-y-1">
                      <p className="text-[8px] font-black text-slate-400 tracking-widest leading-none uppercase">Date</p>
                      <div className="flex items-center gap-1.5 text-[11px] font-black text-gray-900 dark:text-white leading-none mt-1.5">
-                        <Calendar size={11} className="text-primary" />
+                        <Calendar size={11} className="text-[#00246b] dark:text-white" />
                         {dayjs(selectedDate).format('DD-MM-YYYY')}
                      </div>
                   </div>
                   <div className="space-y-1 text-right">
                      <p className="text-[8px] font-black text-slate-400 tracking-widest leading-none uppercase">Time</p>
-                     <div className="flex items-center gap-1.5 text-[11px] font-black text-primary leading-none mt-1.5 justify-end">
-                        <Clock size={11} className="text-primary" />
-                        {dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')}
+                     <div className="flex items-center gap-1.5 text-[11px] font-black text-[#00246b] dark:text-white leading-none mt-1.5 justify-end">
+                        <Clock size={11} className="text-[#00246b] dark:text-white" />
+                        <span>
+                           {dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')} - {dayjs(`${selectedDate} ${selectedSlot}`).add(booking.totalDuration || items.reduce((acc, item) => acc + (item.duration || 0), 0), 'minute').format('hh:mm A')}
+                        </span>
                      </div>
                   </div>
                </div>
@@ -82,7 +84,7 @@ const BookingSuccess = () => {
 
                <div className="flex justify-between items-center pt-3 border-t border-dashed border-slate-100 dark:border-gray-800">
                   <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">Total paid</span>
-                  <span className="text-base font-black text-[#1C2C4E] dark:text-white tracking-tighter">₹{booking.totalPrice}</span>
+                  <span className="text-base font-black text-[#00246b] dark:text-white tracking-tighter">₹{booking.totalPrice}</span>
                </div>
             </div>
          </motion.div>
@@ -91,7 +93,7 @@ const BookingSuccess = () => {
          <div className="w-full max-w-sm space-y-2">
             <button
                onClick={() => navigate('/bookings')}
-               className="w-full h-11 bg-slate-900 dark:bg-primary text-white rounded-xl shadow-lg shadow-black/10 flex items-center justify-center gap-2 font-black text-[10px] tracking-widest border border-white/10 active:scale-95 transition-all uppercase"
+               className="w-full h-11 bg-[#00246b] dark:bg-[#00246b] text-white rounded-xl shadow-lg shadow-[#00246b]/20 flex items-center justify-center gap-2 font-black text-[10px] tracking-widest border border-white/10 active:scale-95 transition-all uppercase"
             >
                <ShoppingBag size={14} />
                View my bookings

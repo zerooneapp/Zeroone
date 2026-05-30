@@ -277,7 +277,7 @@ const VendorDashboard = () => {
     cn(
       'min-w-[132px] rounded-2xl border px-3 py-2.5 shadow-sm transition-all active:scale-95 flex items-center gap-2.5',
       selectedAssignee === cardId
-        ? 'border-[#1C2C4E] dark:border-white bg-white dark:bg-gray-800 shadow-[0_8px_18px_-12px_rgba(28,44,78,0.45)]'
+        ? 'border-[#00246b] dark:border-white bg-white dark:bg-gray-800 shadow-[0_8px_18px_-12px_rgba(28,44,78,0.45)]'
         : 'border-slate-200 bg-white/90 dark:bg-gray-900 dark:border-gray-800'
     );
 
@@ -303,7 +303,7 @@ const VendorDashboard = () => {
           </div>
           <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[#1C2C4E] uppercase">{item.time}</span>
+              <span className="text-[#00246b] uppercase">{item.time}</span>
               <span className="opacity-20">&bull;</span>
               <span className="truncate max-w-[150px]">{item.service}</span>
             </div>
@@ -319,7 +319,7 @@ const VendorDashboard = () => {
         {item.customerPhone && (
           <a
             href={`tel:${item.customerPhone}`}
-            className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#1C2C4E] dark:text-blue-400"
+            className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
             title="Call Customer"
           >
             <Phone size={12} strokeWidth={2.5} />
@@ -425,7 +425,7 @@ const VendorDashboard = () => {
                 navigate(action.path);
               }}
               className={cn(
-                "flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-lg border border-[#1C2C4E]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(28,44,78,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(28,44,78,0.2)]",
+                "flex flex-col items-center justify-center gap-1.5 py-1.5 bg-white dark:bg-gray-900 rounded-lg border border-[#00246b]/5 dark:border-gray-800 shadow-[0_12px_30px_-10px_rgba(28,44,78,0.15)] active:scale-95 transition-all group lg:hover:shadow-[0_20px_40px_-12px_rgba(28,44,78,0.2)]",
                 data && !data.subscription?.isActive && action.label !== 'Wallet' && "opacity-60 grayscale-[0.5]"
               )}
             >
@@ -451,30 +451,30 @@ const VendorDashboard = () => {
                 <p className="text-[16px] font-black text-white leading-none truncate">&#8377;{data?.stats?.todayEarnings?.toLocaleString() || '0'}</p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Today clients</p>
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today clients</p>
               {loading ? (
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
               ) : (
-                <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">{data?.stats?.todayBookings || '0'}</p>
+                <p className="text-[16px] font-black text-[#00246b] dark:text-white leading-none truncate">{data?.stats?.todayBookings || '0'}</p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
               {loading ? (
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
               ) : (
-                <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
+                <p className="text-[16px] font-black text-[#00246b] dark:text-white leading-none truncate">
                   {data?.schedule?.filter((item) => item.status === 'completed').length || 0}
                 </p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
-              <p className="text-[8px] font-black text-[#1C2C4E] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+              <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
               {loading ? (
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded-pulse animate-pulse" />
               ) : (
-                <p className="text-[16px] font-black text-[#1C2C4E] dark:text-white leading-none truncate">
+                <p className="text-[16px] font-black text-[#00246b] dark:text-white leading-none truncate">
                   {data?.schedule?.filter((item) => ['pending', 'confirmed', 'assigned'].includes(item.status)).length || 0}
                 </p>
               )}
@@ -485,7 +485,7 @@ const VendorDashboard = () => {
         <section className="space-y-2 pt-0">
           {(loading || data?.hasRegisteredStaff) && (
             <div className="space-y-2 px-0.5">
-              <h2 className="text-[10px] font-black text-[#1C2C4E] dark:text-white tracking-tight opacity-80 uppercase">
+              <h2 className="text-[10px] font-black text-[#00246b] dark:text-white tracking-tight opacity-80 uppercase">
                 Active Staff
               </h2>
               <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -508,7 +508,7 @@ const VendorDashboard = () => {
                         />
                       </div>
                       <div className="min-w-0 text-left">
-                        <p className="truncate text-[11px] font-black uppercase tracking-tight text-[#1C2C4E] dark:text-white">
+                        <p className="truncate text-[11px] font-black uppercase tracking-tight text-[#00246b] dark:text-white">
                           {card.name}
                         </p>
                         <p className="mt-1 text-[8px] font-bold uppercase tracking-tight text-slate-400">
@@ -523,7 +523,7 @@ const VendorDashboard = () => {
           )}
 
           <div className="px-0.5">
-            <h2 className="text-[10px] font-black text-[#1C2C4E] dark:text-white tracking-tight opacity-80 uppercase">
+            <h2 className="text-[10px] font-black text-[#00246b] dark:text-white tracking-tight opacity-80 uppercase">
               Today's clients
             </h2>
           </div>
@@ -535,7 +535,7 @@ const VendorDashboard = () => {
               ))
             ) : filteredSchedule.length === 0 ? (
               <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
-                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#1C2C4E] transition-colors">
+                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#00246b] transition-colors">
                   <Calendar size={18} />
                 </div>
                 <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">No appointments found</p>
@@ -548,7 +548,7 @@ const VendorDashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group"
+                  className="bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
@@ -560,13 +560,13 @@ const VendorDashboard = () => {
                     </div>
                     <div className="space-y-0">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-tight tracking-tight">
+                        <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-tight tracking-tight">
                           {item.customerName}
                         </h4>
                       </div>
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[#1C2C4E] uppercase">{item.time}</span>
+                          <span className="text-[#00246b] uppercase">{item.time}</span>
                           <span className="opacity-20">&bull;</span>
                           <span className="truncate max-w-[150px]">{item.service}</span>
                         </div>
@@ -582,7 +582,7 @@ const VendorDashboard = () => {
                     {item.customerPhone && (
                       <a
                         href={`tel:${item.customerPhone}`}
-                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#1C2C4E] dark:text-blue-400"
+                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
                         title="Call Customer"
                       >
                         <Phone size={12} strokeWidth={2.5} />
@@ -601,7 +601,7 @@ const VendorDashboard = () => {
                         className="bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[10px] font-bold flex items-center gap-1"
                       >
                         Details
-                        <ChevronRight size={10} className="text-[#1C2C4E]" />
+                        <ChevronRight size={10} className="text-[#00246b]" />
                       </button>
                     )}
                   </div>

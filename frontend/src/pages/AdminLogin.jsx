@@ -41,24 +41,24 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 flex flex-col relative overflow-hidden text-[#1C2C4E] dark:text-white font-sans">
+    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 flex flex-col relative overflow-hidden text-[#00246b] dark:text-white font-sans">
       <div className="absolute inset-0 opacity-[0.06] dark:opacity-[0.02] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/linen.png')]" />
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
         <div className="w-full max-w-sm space-y-8">
           <div className="space-y-4 text-center">
             <img src={logo} alt="ZeroOne Logo" className="w-20 h-20 mx-auto rounded-2xl object-cover mb-2" />
-            <h1 className="text-[40px] font-bold text-[#1C2C4E] dark:text-white tracking-tight leading-none">Admin Login</h1>
-            <p className="text-[#1C2C4E]/70 dark:text-gray-400 font-medium text-[15px]">
+            <h1 className="text-[40px] font-bold text-[#00246b] dark:text-white tracking-tight leading-none">Admin Login</h1>
+            <p className="text-[#00246b]/70 dark:text-gray-400 font-medium text-[15px]">
               Secure access for platform administrators
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/50 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-sm">
-              <Phone size={16} className="text-[#1C2C4E]/50 dark:text-gray-500 shrink-0" />
+              <Phone size={16} className="text-[#00246b]/50 dark:text-gray-500 shrink-0" />
               <div className="flex items-center gap-3 pr-2">
-                <span className="font-medium text-[#1C2C4E] dark:text-white text-base">+91</span>
+                <span className="font-medium text-[#00246b] dark:text-white text-base">+91</span>
                 <div className="w-[1px] h-6 bg-gray-200/80 dark:bg-gray-700 ml-2" />
               </div>
               <input
@@ -67,23 +67,23 @@ const AdminLogin = () => {
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 placeholder="Admin Phone Number"
                 autoFocus
-                className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#1C2C4E] dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#00246b] dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600"
               />
             </div>
 
             <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/50 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-sm">
-              <Lock size={16} className="text-[#1C2C4E]/50 dark:text-gray-500 shrink-0" />
+              <Lock size={16} className="text-[#00246b]/50 dark:text-gray-500 shrink-0" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#1C2C4E] dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                className="flex-1 bg-transparent border-none outline-none font-medium text-base text-[#00246b] dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="text-[#1C2C4E]/50 dark:text-gray-500 active:scale-90 transition-all"
+                className="text-[#00246b]/50 dark:text-gray-500 active:scale-90 transition-all"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -92,7 +92,7 @@ const AdminLogin = () => {
             <Button
               type="submit"
               size="lg"
-              className="w-full h-[42px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#1C2C4E] dark:bg-primary shadow-sm active:scale-[0.98]"
+              className="w-full h-[42px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#00246b] dark:bg-primary shadow-sm active:scale-[0.98]"
               loading={loading}
               disabled={phone.length !== 10 || !password}
             >

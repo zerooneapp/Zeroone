@@ -19,7 +19,7 @@
     -webkit-tap-highlight-color: transparent;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    caret-color: #1C2C4E;
+    caret-color: #00246b;
   }
 
   ::selection {
@@ -28,7 +28,7 @@
   }
 
   input, textarea {
-    caret-color: #1C2C4E;
+    caret-color: #00246b;
   }
 }
 

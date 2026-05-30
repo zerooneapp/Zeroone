@@ -441,7 +441,7 @@ const MembershipPlans = () => {
                          <div className="p-3 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-slate-100 dark:border-gray-800 flex justify-between items-center">
                           <div className="space-y-0.5">
                             <p className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Requested Plan</p>
-                            <p className="text-xs font-black text-[#1C2C4E] dark:text-white capitalize">{request.planId?.name}</p>
+                            <p className="text-xs font-black text-[#00246b] dark:text-white capitalize">{request.planId?.name}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Amount to Collect</p>

@@ -100,7 +100,7 @@ const VendorBookings = () => {
         icon: action === 'complete' ? '✅' : '❌',
         style: {
           borderRadius: '12px',
-          background: '#1C2C4E',
+          background: '#00246b',
           color: '#fff',
           fontSize: '10px',
           fontWeight: '900',
@@ -192,8 +192,8 @@ const VendorBookings = () => {
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-1">
                   <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
-                    <span className="text-[#1C2C4E] dark:text-white ">Zero</span>
-                    <span className="text-[#1C2C4E]/30 dark:text-white">One</span>
+                    <span className="text-[#00246b] dark:text-white ">Zero</span>
+                    <span className="text-[#00246b]/30 dark:text-white">One</span>
                   </h1>
 
                 </div>

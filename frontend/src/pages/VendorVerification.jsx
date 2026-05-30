@@ -42,7 +42,7 @@ const VendorVerification = () => {
             particleCount: 150,
             spread: 70,
             origin: { y: 0.6 },
-            colors: ['#1C2C4E', '#10B981', '#F59E0B']
+            colors: ['#00246b', '#10B981', '#F59E0B']
           });
           
           setTimeout(() => {
@@ -69,7 +69,7 @@ const VendorVerification = () => {
   }, [navigate, restoreSession]);
 
   return (
-    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 text-[#1C2C4E] dark:text-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 text-[#00246b] dark:text-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
       {/* Decorative Gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
@@ -104,8 +104,8 @@ const VendorVerification = () => {
             </div>
 
             <div className="space-y-4">
-              <h1 className="text-3xl font-black tracking-tighter leading-tight text-[#1C2C4E] dark:text-white">Verification in Progress</h1>
-              <p className="text-[#1C2C4E]/60 dark:text-gray-400 font-bold leading-relaxed">
+              <h1 className="text-3xl font-black tracking-tighter leading-tight text-[#00246b] dark:text-white">Verification in Progress</h1>
+              <p className="text-[#00246b]/60 dark:text-gray-400 font-bold leading-relaxed">
                 Thank you for choosing <span className="text-primary font-black">ZeroOne</span>. Your documents have been received and are currently under review by our compliance team.
               </p>
             </div>
@@ -117,7 +117,7 @@ const VendorVerification = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Step 1</p>
-                  <p className="text-sm font-black text-[#1C2C4E] dark:text-white">Application Received</p>
+                  <p className="text-sm font-black text-[#00246b] dark:text-white">Application Received</p>
                 </div>
               </div>
               <div className="w-full h-px bg-gray-100 dark:bg-gray-800 ml-14" />
@@ -127,7 +127,7 @@ const VendorVerification = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Step 2</p>
-                  <p className="text-sm font-black text-[#1C2C4E] dark:text-white">Reviewing Documents</p>
+                  <p className="text-sm font-black text-[#00246b] dark:text-white">Reviewing Documents</p>
                 </div>
               </div>
             </div>
@@ -140,7 +140,7 @@ const VendorVerification = () => {
 
                 <button
                     onClick={handleLogout}
-                    className="text-[#1C2C4E]/70 hover:text-[#1C2C4E] dark:text-gray-500 dark:hover:text-white transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] mt-2"
+                    className="text-[#00246b]/70 hover:text-[#00246b] dark:text-gray-500 dark:hover:text-white transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] mt-2"
                 >
                     <Clock size={12} /> Sign Out & Check Later
                 </button>

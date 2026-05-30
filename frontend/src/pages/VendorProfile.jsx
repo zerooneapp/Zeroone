@@ -877,11 +877,11 @@ const VendorProfile = () => {
                                        onClick={() => handleSetFeaturedImage(currentMedia.shopImage)}
                                        className={cn(
                                           "relative w-full h-full rounded-xl overflow-hidden border-2 transition-all",
-                                          data.featuredImage === currentMedia.shopImage ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
+                                          data.featuredImage === currentMedia.shopImage ? "border-[#00246b] scale-95" : "border-transparent opacity-60 hover:opacity-100"
                                        )}
                                     >
                                        <img src={currentMedia.shopImage} className="w-full h-full object-cover" alt="Shop" />
-                                       {data.featuredImage === currentMedia.shopImage && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
+                                       {data.featuredImage === currentMedia.shopImage && <div className="absolute inset-0 bg-[#00246b]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
                                     </button>
                                     <input 
                                        type="file" 
@@ -905,11 +905,11 @@ const VendorProfile = () => {
                                     onClick={() => handleSetFeaturedImage(img)}
                                     className={cn(
                                        "relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
-                                       data.featuredImage === img ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
+                                       data.featuredImage === img ? "border-[#00246b] scale-95" : "border-transparent opacity-60 hover:opacity-100"
                                     )}
                                  >
                                     <img src={img} className="w-full h-full object-cover" alt={`Gal ${i}`} />
-                                    {data.featuredImage === img && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
+                                    {data.featuredImage === img && <div className="absolute inset-0 bg-[#00246b]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
                                  </button>
                               ))}
                               {/* Service Options */}
@@ -920,12 +920,12 @@ const VendorProfile = () => {
                                        onClick={() => handleSetFeaturedImage(s.image || s.images?.[0])}
                                        className={cn(
                                           "relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
-                                          data.featuredImage === (s.image || s.images?.[0]) ? "border-[#1C2C4E] scale-95" : "border-transparent opacity-60 hover:opacity-100"
+                                          data.featuredImage === (s.image || s.images?.[0]) ? "border-[#00246b] scale-95" : "border-transparent opacity-60 hover:opacity-100"
                                        )}
                                     >
                                        <img src={s.image || s.images?.[0]} className="w-full h-full object-cover" alt={s.name} />
                                        <div className="absolute bottom-0 inset-x-0 bg-black/40 py-0.5 text-[5px] text-white font-black uppercase truncate px-1">{s.name}</div>
-                                       {data.featuredImage === (s.image || s.images?.[0]) && <div className="absolute inset-0 bg-[#1C2C4E]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
+                                       {data.featuredImage === (s.image || s.images?.[0]) && <div className="absolute inset-0 bg-[#00246b]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
                                     </button>
                                  )
                               ))}
@@ -1860,7 +1860,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
                      onClick={() => setM(min)}
                      className={cn(
                         "w-full py-2 rounded-lg text-xs font-black transition-all",
-                        m === min ? "bg-[#1C2C4E] text-white shadow-lg shadow-[#1C2C4E]/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
+                        m === min ? "bg-[#00246b] text-white shadow-lg shadow-[#00246b]/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
                      )}
                   >
                      {min}

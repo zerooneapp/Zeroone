@@ -43,10 +43,10 @@ const VendorContactSupport = () => {
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center justify-center shadow-sm active:scale-90 transition-all"
           >
-            <ArrowLeft size={20} className="text-[#1C2C4E] dark:text-white" />
+            <ArrowLeft size={20} className="text-[#00246b] dark:text-white" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-[#1C2C4E] dark:text-white leading-none">Partner Support</h1>
+            <h1 className="text-xl font-black text-[#00246b] dark:text-white leading-none">Partner Support</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Dedicated Help For Partners</p>
           </div>
         </div>
@@ -57,7 +57,7 @@ const VendorContactSupport = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#1C2C4E] rounded-[2rem] p-6 shadow-2xl shadow-indigo-500/20 relative overflow-hidden text-white"
+          className="bg-[#00246b] rounded-[2rem] p-6 shadow-2xl shadow-indigo-500/20 relative overflow-hidden text-white"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-3xl" />
           <Headphones className="text-indigo-400 mb-3" size={24} strokeWidth={1.5} />
@@ -84,7 +84,7 @@ const VendorContactSupport = () => {
                 <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform">
                   {channel.icon}
                 </div>
-                <h3 className="font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight text-sm">{channel.title}</h3>
+                <h3 className="font-black text-[#00246b] dark:text-white uppercase tracking-tight text-sm">{channel.title}</h3>
               </div>
               <p className="text-[12px] font-medium text-gray-600 dark:text-gray-400 leading-relaxed pl-12 mb-2">
                 {channel.content}

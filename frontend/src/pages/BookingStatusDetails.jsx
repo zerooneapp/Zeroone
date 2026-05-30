@@ -114,7 +114,7 @@ const BookingStatusDetails = () => {
 
       <div className="px-5 mt-4 space-y-4 pb-20">
         {/* Live Status Badge */}
-        <div className="flex flex-col items-center py-4 bg-white dark:bg-gray-900/50 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+        <div className="flex flex-col items-center py-4 bg-white dark:bg-gray-900/50 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
           <div className={`p-3 rounded-2xl border-2 mb-3 shadow-xl ${booking.status === 'confirmed' ? 'bg-blue-500 text-white border-blue-100 dark:border-blue-900/30' :
               booking.status === 'completed' ? 'bg-green-500 text-white border-green-100 dark:border-green-900/30' :
                 'bg-red-500 text-white border-red-100 dark:border-red-900/30'
@@ -153,7 +153,7 @@ const BookingStatusDetails = () => {
         {/* Professional Details (Contact Rule Applies) */}
         <section className="space-y-2">
           <p className="text-[9px] font-black text-slate-400 tracking-widest px-1">Service provider</p>
-          <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center gap-3">
+          <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 overflow-hidden shadow-inner shrink-0">
               <img 
                 src={booking.staffId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.staffId?.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} 
@@ -170,7 +170,7 @@ const BookingStatusDetails = () => {
 
             {booking.canContact && (
               <div className="flex gap-2">
-                <a href={`tel:${booking.staffId?.phone}`} className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20 shadow-sm active:scale-90 transition-all">
+                <a href={`tel:${booking.staffId?.phone}`} className="p-2.5 bg-[#00246b]/10 text-[#00246b] rounded-xl border border-[#00246b]/20 shadow-sm active:scale-90 transition-all">
                   <Phone size={16} strokeWidth={3} />
                 </a>
               </div>
@@ -181,18 +181,18 @@ const BookingStatusDetails = () => {
         </section>
 
         {/* Schedule Info */}
-        <section className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm space-y-3.5">
+        <section className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-sm space-y-3.5">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-[8px] font-black tracking-widest text-slate-400 dark:text-white/40 leading-none uppercase">Scheduled date</p>
               <div className="flex items-center gap-1.5 text-[11px] font-black text-gray-900 dark:text-white tracking-tighter mt-1 leading-none">
-                <Calendar size={12} strokeWidth={3} className="text-primary" />
+                <Calendar size={12} strokeWidth={3} className="text-[#00246b]" />
                 {dayjs(booking.startTime).format('DD-MM-YYYY')}
               </div>
             </div>
             <div className="space-y-1 text-right flex flex-col items-end">
               <p className="text-[8px] font-black tracking-widest text-slate-400 dark:text-white/40 leading-none uppercase">Arrival time</p>
-              <div className="flex items-center gap-1.5 text-[11px] font-black text-primary dark:text-blue-400 tracking-tighter mt-1 leading-none">
+              <div className="flex items-center gap-1.5 text-[11px] font-black text-[#00246b] dark:text-blue-400 tracking-tighter mt-1 leading-none">
                 <Clock size={12} strokeWidth={3} />
                 {dayjs(booking.startTime).format('hh:mm A')}
               </div>
@@ -201,8 +201,8 @@ const BookingStatusDetails = () => {
 
           <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 space-y-2">
             <div className="flex items-start gap-2">
-              <Sparkles size={12} strokeWidth={3} className="text-primary mt-0.5 shrink-0" />
-              <p className="text-[10px] font-black tracking-tight text-[#1C2C4E] dark:text-white leading-tight">
+              <Sparkles size={12} strokeWidth={3} className="text-[#00246b] mt-0.5 shrink-0" />
+              <p className="text-[10px] font-black tracking-tight text-[#00246b] dark:text-white leading-tight">
                 {booking.services?.map(s => s.name).join(', ') || 'Service Details'}
               </p>
             </div>
@@ -219,7 +219,7 @@ const BookingStatusDetails = () => {
         {booking.status === 'confirmed' && (
           <div className="space-y-2 pt-2">
             <button
-              className="w-full h-11 bg-primary text-white rounded-xl shadow-xl shadow-primary/20 font-black text-[10px] tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all border border-white/10 disabled:opacity-50"
+              className="w-full h-11 bg-[#00246b] text-white rounded-xl shadow-xl shadow-[#00246b]/20 font-black text-[10px] tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all border border-white/10 disabled:opacity-50"
               onClick={() => navigate('/cart', {
                 state: {
                   rescheduleBookingId: id,

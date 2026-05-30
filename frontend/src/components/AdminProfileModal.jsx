@@ -104,7 +104,7 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
                 <Shield size={18} />
               </div>
               <div>
-                <h2 className="text-base font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight leading-none">
+                <h2 className="text-base font-black text-[#00246b] dark:text-white uppercase tracking-tight leading-none">
                   Admin Control
                 </h2>
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
@@ -238,7 +238,7 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
 
                 <div className="space-y-1">
                   <label className="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Phone</label>
-                  <div className="relative flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3.5 focus-within:ring-2 focus-within:ring-[#1C2C4E]/20 transition-all">
+                  <div className="relative flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3.5 focus-within:ring-2 focus-within:ring-[#00246b]/20 transition-all">
                     <Phone className="text-slate-300 mr-2" size={16} />
                     <span className="text-[13px] font-bold text-slate-400 border-r border-slate-200 dark:border-gray-700 pr-2 mr-2">+91</span>
                     <input
@@ -272,7 +272,7 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#1C2C4E] text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-[#1C2C4E]/20 hover:shadow-xl active:scale-95 transition-all disabled:opacity-70 flex items-center justify-center gap-2 mt-2"
+                  className="w-full bg-[#00246b] text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-[#00246b]/20 hover:shadow-xl active:scale-95 transition-all disabled:opacity-70 flex items-center justify-center gap-2 mt-2"
                 >
                   {loading ? <Loader2 className="animate-spin" size={14} /> : <UserPlus size={14} />}
                   Create Admin

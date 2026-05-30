@@ -181,9 +181,9 @@ const CheckoutReview = () => {
         <section className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Services</span>
-            <span className="text-[9px] font-black text-[#1C2C4E] tracking-tighter capitalize opacity-80">{items.length} Items</span>
+            <span className="text-[9px] font-black text-[#00246b] tracking-tighter capitalize opacity-80">{items.length} Items</span>
           </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] space-y-3">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] space-y-3">
             {items.map((item) => {
               const priceMeta = pricingMap[item._id] || {
                 originalPrice: item.price,
@@ -241,7 +241,7 @@ const CheckoutReview = () => {
                     {formatPrice(totalPrice)}
                   </span>
                 )}
-                <span className="font-black text-[20px] text-[#1C2C4E] dark:text-white tracking-tighter leading-none">
+                <span className="font-black text-[20px] text-[#00246b] dark:text-white tracking-tighter leading-none">
                   {discountedTotal === 0 ? "₹0" : formatPrice(discountedTotal)}
                 </span>
                 {pricingPreview?.membershipApplied && (
@@ -256,7 +256,7 @@ const CheckoutReview = () => {
 
         <section className="space-y-2">
           <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 leading-none capitalize">Assigned professional</p>
-          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center gap-3 active:scale-95 transition-all">
+          <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center gap-3 active:scale-95 transition-all">
             <div className="w-12 h-12 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shadow-inner shrink-0">
               <img src={selectedStaff?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedStaff?.name || 'Staff')}&background=E2E8F0&color=1C2C4E&bold=true`} className="w-full h-full object-cover" alt={selectedStaff?.name || 'Auto assigned'} />
             </div>
@@ -273,7 +273,7 @@ const CheckoutReview = () => {
 
         <section className="space-y-2">
           <p className="text-[11px] font-black text-slate-400 tracking-widest px-1 leading-none capitalize">Payment method</p>
-          <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center justify-between active:scale-[0.98] transition-all">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] flex items-center justify-between active:scale-[0.98] transition-all">
             <div className="flex items-center gap-4">
               <div className="p-2.5 bg-primary/5 rounded-lg text-primary border border-primary/10 shadow-inner">
                 <CreditCard size={20} />
@@ -283,7 +283,7 @@ const CheckoutReview = () => {
                 <p className="text-[10px] text-slate-400 font-black mt-1.5 tracking-widest leading-none capitalize">Safe & secure payment</p>
               </div>
             </div>
-            <div className="w-6 h-6 rounded-full border-[5px] border-[#1C2C4E] bg-white shadow-lg" />
+            <div className="w-6 h-6 rounded-full border-[5px] border-[#00246b] bg-white shadow-lg" />
           </div>
         </section>
       </div>
@@ -294,7 +294,7 @@ const CheckoutReview = () => {
       >
         <div className="max-w-md mx-auto">
           <button
-            className="w-full h-12 bg-slate-900 dark:bg-primary text-white shadow-xl shadow-black/10 dark:shadow-primary/20 text-[15px] font-black tracking-tight flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50 capitalize"
+            className="w-full h-12 bg-[#00246b] dark:bg-[#00246b] text-white shadow-xl shadow-[#00246b]/20 dark:shadow-[#00246b]/20 text-[15px] font-black tracking-tight flex items-center justify-center gap-3 rounded-xl border border-white/10 active:scale-95 transition-all disabled:opacity-50 capitalize"
             onClick={handleConfirm}
             disabled={loading}
           >
@@ -329,7 +329,7 @@ const CheckoutReview = () => {
             >
               <div className="p-6 pb-4 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight">Terms of Service</h3>
+                  <h3 className="text-lg font-black text-[#00246b] dark:text-white uppercase tracking-tight">Terms of Service</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">ZeroOne Booking Policies</p>
                 </div>
                 <button 
@@ -346,7 +346,7 @@ const CheckoutReview = () => {
                     <Shield className="text-blue-500" size={20} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-[11px] font-black text-[#1C2C4E] dark:text-white uppercase tracking-widest">1. Booking Commitment</h4>
+                    <h4 className="text-[11px] font-black text-[#00246b] dark:text-white uppercase tracking-widest">1. Booking Commitment</h4>
                     <p className="text-[12px] font-medium text-slate-500 dark:text-gray-400 leading-relaxed">
                       By confirming, you commit to attending the service at the scheduled time. Professionals allocate their time specifically for your slot.
                     </p>
@@ -358,7 +358,7 @@ const CheckoutReview = () => {
                     <Clock3 className="text-rose-500" size={20} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-[11px] font-black text-[#1C2C4E] dark:text-white uppercase tracking-widest">2. Cancellation Policy</h4>
+                    <h4 className="text-[11px] font-black text-[#00246b] dark:text-white uppercase tracking-widest">2. Cancellation Policy</h4>
                     <p className="text-[12px] font-medium text-slate-500 dark:text-gray-400 leading-relaxed">
                       Cancellations must be made at least 2 hours in advance. Frequent no-shows or late cancellations may result in platform restrictions or penalties.
                     </p>
@@ -370,7 +370,7 @@ const CheckoutReview = () => {
                     <AlertCircle className="text-amber-500" size={20} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-[11px] font-black text-[#1C2C4E] dark:text-white uppercase tracking-widest">3. Payment & Refunds</h4>
+                    <h4 className="text-[11px] font-black text-[#00246b] dark:text-white uppercase tracking-widest">3. Payment & Refunds</h4>
                     <p className="text-[12px] font-medium text-slate-500 dark:text-gray-400 leading-relaxed">
                       Payments are processed securely. Refunds (if applicable) are governed by the partner's policy and ZeroOne's standard dispute resolution process.
                     </p>
@@ -387,7 +387,7 @@ const CheckoutReview = () => {
               <div className="p-6 bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800">
                 <button 
                   onClick={() => setShowTerms(false)}
-                  className="w-full py-4 bg-[#1C2C4E] dark:bg-primary text-white font-black text-[14px] uppercase tracking-widest rounded-2xl active:scale-[0.98] transition-all shadow-xl shadow-[#1C2C4E]/20"
+                  className="w-full py-4 bg-[#00246b] dark:bg-[#00246b] text-white font-black text-[14px] uppercase tracking-widest rounded-2xl active:scale-[0.98] transition-all shadow-xl shadow-[#00246b]/20"
                 >
                   I Understand
                 </button>

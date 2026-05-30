@@ -22,7 +22,7 @@ const PaymentMethods = () => {
         icon: '🚀',
         style: {
             borderRadius: '1rem',
-            background: '#1C2C4E',
+            background: '#00246b',
             color: '#fff',
             fontSize: '11px',
             fontWeight: 'bold',
@@ -45,7 +45,7 @@ const PaymentMethods = () => {
             <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
           <div className="leading-none">
-            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+            <h1 className="font-extrabold text-[15px] text-[#00246b] dark:text-white tracking-tight">
               Payment methods
             </h1>
           </div>
@@ -67,7 +67,7 @@ const PaymentMethods = () => {
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
              <label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Saved cards</label>
-             <button onClick={handleAddMethod} className="text-[9px] font-black text-[#1C2C4E] flex items-center gap-1 active:scale-95">
+             <button onClick={handleAddMethod} className="text-[9px] font-black text-[#00246b] flex items-center gap-1 active:scale-95">
                 <Plus size={10} strokeWidth={4} /> ADD NEW
              </button>
           </div>
@@ -111,19 +111,19 @@ const PaymentMethods = () => {
                  <button 
                   key={upi} 
                   onClick={handleAddMethod}
-                  className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between group active:scale-[0.99] transition-all shadow-sm"
+                  className="w-full p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 flex items-center justify-between group active:scale-[0.99] transition-all shadow-sm"
                  >
                     <div className="flex items-center gap-3">
                        <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100">
                           <Smartphone size={18} className="text-orange-500" />
                        </div>
                        <div className="space-y-0.5 text-left">
-                          <h3 className="text-[12px] font-black text-[#1C2C4E] dark:text-white tracking-tight">{upi}</h3>
+                          <h3 className="text-[12px] font-black text-[#00246b] dark:text-white tracking-tight">{upi}</h3>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Selected UPI ID</p>
                        </div>
                     </div>
-                    <div className="w-5 h-5 rounded-full border-2 border-[#1C2C4E]/20 flex items-center justify-center">
-                       <div className="w-2 h-2 rounded-full bg-[#1C2C4E] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="w-5 h-5 rounded-full border-2 border-[#00246b]/20 flex items-center justify-center">
+                       <div className="w-2 h-2 rounded-full bg-[#00246b] opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                  </button>
               ))}
@@ -135,18 +135,18 @@ const PaymentMethods = () => {
            <label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Other options</label>
            <button 
              onClick={handleAddMethod}
-             className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center justify-between active:scale-[0.99] transition-all shadow-sm group"
+             className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 flex items-center justify-between active:scale-[0.99] transition-all shadow-sm group"
            >
               <div className="flex items-center gap-3">
                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border border-blue-100">
                     <Landmark size={18} className="text-blue-500" />
                  </div>
                  <div className="space-y-0.5 text-left">
-                    <h3 className="text-[12px] font-black text-[#1C2C4E] dark:text-white tracking-tight">Net banking</h3>
+                    <h3 className="text-[12px] font-black text-[#00246b] dark:text-white tracking-tight">Net banking</h3>
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Support for all major banks</p>
                  </div>
               </div>
-              <ArrowRight size={16} className="text-[#1C2C4E] opacity-20 group-hover:opacity-100 transition-opacity" />
+              <ArrowRight size={16} className="text-[#00246b] opacity-20 group-hover:opacity-100 transition-opacity" />
            </button>
         </section>
 
@@ -164,7 +164,7 @@ const PaymentMethods = () => {
          <motion.button
            whileTap={{ scale: 0.95 }}
            onClick={handleAddMethod}
-           className="w-full h-12 bg-[#1C2C4E] text-white rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase shadow-2xl shadow-[#1C2C4E]/20 flex items-center justify-center gap-2 group"
+           className="w-full h-12 bg-[#00246b] text-white rounded-2xl font-black text-[11px] tracking-[0.2em] uppercase shadow-2xl shadow-[#00246b]/20 flex items-center justify-center gap-2 group"
          >
             Add payment method
             <Plus size={16} strokeWidth={3} className="group-hover:rotate-90 transition-transform" />

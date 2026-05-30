@@ -73,13 +73,13 @@ const SecuritySettings = () => {
 
 
   const SecurityItem = ({ icon: Icon, title, sub, action, type = "normal" }) => (
-    <div className={`p-4 bg-white dark:bg-gray-900 rounded-2xl border ${type === 'danger' ? 'border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.05)]' : 'border-[#1C2C4E]/10 dark:border-gray-800'} shadow-sm flex items-center justify-between group active:scale-[0.99] transition-all`}>
+    <div className={`p-4 bg-white dark:bg-gray-900 rounded-2xl border ${type === 'danger' ? 'border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.05)]' : 'border-[#00246b]/10 dark:border-gray-800'} shadow-sm flex items-center justify-between group active:scale-[0.99] transition-all`}>
        <div className="flex items-center gap-3.5">
           <div className={`w-10 h-10 rounded-xl ${type === 'danger' ? 'bg-red-50' : 'bg-slate-50 dark:bg-gray-800'} flex items-center justify-center border ${type === 'danger' ? 'border-red-100' : 'border-slate-100 dark:border-gray-700'}`}>
-             <Icon size={18} className={type === 'danger' ? 'text-red-500' : 'text-[#1C2C4E] dark:text-blue-400'} strokeWidth={2.5} />
+             <Icon size={18} className={type === 'danger' ? 'text-red-500' : 'text-[#00246b] dark:text-blue-400'} strokeWidth={2.5} />
           </div>
           <div className="space-y-0.5">
-             <h3 className={`text-[13px] font-black tracking-tight leading-none ${type === 'danger' ? 'text-red-600' : 'text-[#1C2C4E] dark:text-white'}`}>{title}</h3>
+             <h3 className={`text-[13px] font-black tracking-tight leading-none ${type === 'danger' ? 'text-red-600' : 'text-[#00246b] dark:text-white'}`}>{title}</h3>
              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500">{sub}</p>
           </div>
        </div>
@@ -102,7 +102,7 @@ const SecuritySettings = () => {
             <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
           <div className="leading-none">
-            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+            <h1 className="font-extrabold text-[15px] text-[#00246b] dark:text-white tracking-tight">
               Security
             </h1>
           </div>
@@ -115,13 +115,13 @@ const SecuritySettings = () => {
           <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase">Auth Controls</label>
           <div className="space-y-3">
 
-             <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center justify-between">
+             <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
                    <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
                       <SmartphoneNfc size={18} className="text-orange-500" strokeWidth={2.5} />
                    </div>
                    <div className="space-y-0.5">
-                      <h3 className="text-[13px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">Two-factor authentication</h3>
+                      <h3 className="text-[13px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">Two-factor authentication</h3>
                       <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500">Enhanced login verification</p>
                    </div>
                 </div>
@@ -143,20 +143,20 @@ const SecuritySettings = () => {
            <div className="space-y-2">
               {user?.fcmTokens?.length > 0 ? (
                  user.fcmTokens.map((t, idx) => (
-                    <div key={idx} className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center gap-3 shadow-sm relative overflow-hidden">
+                    <div key={idx} className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3 shadow-sm relative overflow-hidden">
                        <div className="bg-emerald-500 w-1 h-8 absolute left-0 top-1/2 -translate-y-1/2 rounded-r-full" />
                        {t.deviceType === 'web' ? <Monitor size={18} className="text-slate-400 ml-1" /> : <Smartphone size={18} className="text-slate-400 ml-1" />}
                        <div className="flex-1 space-y-0.5">
-                          <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-none capitalize">{t.deviceType || 'Unknown Device'} • Current</h4>
+                          <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-none capitalize">{t.deviceType || 'Unknown Device'} • Current</h4>
                           <p className="text-[9px] font-bold text-slate-400 italic">Last active: {new Date(t.lastUsedAt).toLocaleString()}</p>
                        </div>
                     </div>
                  ))
               ) : (
-                <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 flex items-center gap-3 opacity-60">
+                <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3 opacity-60">
                    <Monitor size={18} className="text-slate-400" />
                    <div className="flex-1">
-                      <h4 className="text-[12px] font-black text-[#1C2C4E] dark:text-white leading-none">No active tokens found</h4>
+                      <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-none">No active tokens found</h4>
                    </div>
                 </div>
               )}
@@ -167,11 +167,11 @@ const SecuritySettings = () => {
 
 
          {/* 🛡️ SECURITY STATUS BADGE */}
-         <div className="mt-4 flex flex-col items-center justify-center space-y-2 p-6 bg-slate-900/5 rounded-[2rem] border border-dashed border-[#1C2C4E]/10">
+         <div className="mt-4 flex flex-col items-center justify-center space-y-2 p-6 bg-slate-900/5 rounded-[2rem] border border-dashed border-[#00246b]/10">
             <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
                <ShieldCheck size={24} className="text-emerald-500" strokeWidth={3} />
             </div>
-            <h5 className="text-[12px] font-black text-[#1C2C4E] tracking-tight">Your account is secured</h5>
+            <h5 className="text-[12px] font-black text-[#00246b] tracking-tight">Your account is secured</h5>
             <p className="text-[9px] font-medium text-slate-400 text-center leading-relaxed">
               Advanced threat-detection and real-time encryption are actively protecting your elite credentials.
             </p>

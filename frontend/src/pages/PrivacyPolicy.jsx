@@ -48,10 +48,10 @@ const PrivacyPolicy = () => {
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center justify-center shadow-sm active:scale-90 transition-all"
           >
-            <ArrowLeft size={20} className="text-[#1C2C4E] dark:text-white" />
+            <ArrowLeft size={20} className="text-[#00246b] dark:text-white" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-[#1C2C4E] dark:text-white leading-none">Privacy & Policy</h1>
+            <h1 className="text-xl font-black text-[#00246b] dark:text-white leading-none">Privacy & Policy</h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Last Updated: April 2026</p>
           </div>
         </div>
@@ -66,7 +66,7 @@ const PrivacyPolicy = () => {
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
           <FileText className="text-blue-500 mb-3" size={24} strokeWidth={1.5} />
-          <h2 className="text-xl font-black text-[#1C2C4E] dark:text-white tracking-tight">Our Commitment to You</h2>
+          <h2 className="text-xl font-black text-[#00246b] dark:text-white tracking-tight">Our Commitment to You</h2>
           <p className="text-gray-500 dark:text-gray-400 mt-2.5 text-sm leading-relaxed font-medium">
             At ZeroOne, your privacy is not just a policy—it's a fundamental part of our mission. We build tools to simplify your life while keeping your personal space secure.
           </p>
@@ -86,7 +86,7 @@ const PrivacyPolicy = () => {
                 <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center">
                   {section.icon}
                 </div>
-                <h3 className="font-black text-[#1C2C4E] dark:text-white uppercase tracking-tight">{section.title}</h3>
+                <h3 className="font-black text-[#00246b] dark:text-white uppercase tracking-tight">{section.title}</h3>
               </div>
               <p className="text-[12px] font-medium text-gray-600 dark:text-gray-400 leading-relaxed pl-12">
                 {section.content}
@@ -98,7 +98,7 @@ const PrivacyPolicy = () => {
         {/* Footer */}
         <div className="text-center pt-8 space-y-4">
           <div className="flex items-center justify-center gap-2">
-            <span className="text-[10px] font-black text-[#1C2C4E] dark:text-gray-500 uppercase tracking-[0.2em]">ZeroOne Secure System</span>
+            <span className="text-[10px] font-black text-[#00246b] dark:text-gray-500 uppercase tracking-[0.2em]">ZeroOne Secure System</span>
           </div>
           <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest max-w-[240px] mx-auto leading-loose opacity-60">
             By using our platform, you agree to the terms outlined in this document.

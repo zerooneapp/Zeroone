@@ -442,7 +442,7 @@ const ServiceDetail = () => {
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">
       {/* Redesigned Secondary Navbar (Fixed) */}
-      <div className="bg-white text-[#1C2C4E] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[38px] pb-2">
+      <div className="bg-white text-[#00246b] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[38px] pb-2">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
@@ -498,7 +498,7 @@ const ServiceDetail = () => {
               {activeIndex > 0 && (
                 <button
                   onClick={() => handleScrollTo(activeIndex - 1)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#1C2C4E] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#00246b] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
                 >
                   <ChevronLeft size={20} strokeWidth={4} />
                 </button>
@@ -506,7 +506,7 @@ const ServiceDetail = () => {
               {activeIndex < gallery.length - 1 && (
                 <button
                   onClick={() => handleScrollTo(activeIndex + 1)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#1C2C4E] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#00246b] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
                 >
                   <ChevronRight size={20} strokeWidth={4} />
                 </button>
@@ -519,12 +519,12 @@ const ServiceDetail = () => {
             onClick={handleToggleFavorite}
             className={cn(
               "absolute top-4 right-3 w-[36px] h-[36px] rounded-full shadow-2xl backdrop-blur-md transition-all active:scale-90 z-30 flex items-center justify-center",
-              isFavorited ? "bg-white text-[#1C2C4E]" : "bg-white/20 text-white border border-white/30"
+              isFavorited ? "bg-white text-[#00246b]" : "bg-white/20 text-white border border-white/30"
             )}
           >
             <Heart
               size={20}
-              fill={isFavorited ? "#1C2C4E" : "none"}
+              fill={isFavorited ? "#00246b" : "none"}
               strokeWidth={isFavorited ? 0 : 2}
             />
           </button>
@@ -555,23 +555,23 @@ const ServiceDetail = () => {
           onClick={handleOpenLocation}
           className="flex items-center gap-2 py-1.5 px-2 bg-slate-50 dark:bg-gray-950 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm active:scale-[0.98] transition-all text-left group"
         >
-          <div className="w-8 h-8 bg-white dark:bg-gray-300/5 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50 group-hover:bg-[#1C2C4E]/10 transition-colors">
-            <MapPin size={14} className="text-[#1C2C4E] dark:text-gray-400" />
+          <div className="w-8 h-8 bg-white dark:bg-gray-300/5 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50 group-hover:bg-[#00246b]/10 transition-colors">
+            <MapPin size={14} className="text-[#00246b] dark:text-gray-400" />
           </div>
           <div className="min-w-0 pr-0.5">
-            <p className="text-[11px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tight truncate">
+            <p className="text-[11px] font-black text-[#00246b] dark:text-white leading-tight uppercase tracking-tight truncate">
               {vendor.address?.split(',')[0]}
             </p>
-            <p className="text-[7px] font-black text-[#1C2C4E]/30 dark:text-gray-500 uppercase tracking-widest mt-0.5">Location</p>
+            <p className="text-[7px] font-black text-[#00246b]/30 dark:text-gray-500 uppercase tracking-widest mt-0.5">Location</p>
           </div>
         </button>
 
         <div className="flex items-center gap-2 py-1.5 px-2 bg-slate-50 dark:bg-gray-950 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm">
           <div className="w-8 h-8 bg-white dark:bg-gray-300/5 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/50">
-            <Clock size={14} className="text-[#1C2C4E] dark:text-gray-400" />
+            <Clock size={14} className="text-[#00246b] dark:text-gray-400" />
           </div>
           <div className="min-w-0 pr-0.5">
-            <p className="text-[10px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tighter whitespace-nowrap">
+            <p className="text-[10px] font-black text-[#00246b] dark:text-white leading-tight uppercase tracking-tighter whitespace-nowrap">
               {vendor.workingHours?.start} - {vendor.workingHours?.end}
             </p>
             <p className={cn(
@@ -592,7 +592,7 @@ const ServiceDetail = () => {
             <Star size={14} fill="#FACC15" className="text-amber-500" strokeWidth={1.5} />
           </div>
           <div className="min-w-0 pr-0.5">
-            <p className="text-[11px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tight">
+            <p className="text-[11px] font-black text-[#00246b] dark:text-white leading-tight uppercase tracking-tight">
               {vendor.totalReviews ?? 0} Reviews
             </p>
             <p className="text-[7px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest mt-0.5">
@@ -606,10 +606,10 @@ const ServiceDetail = () => {
             <ShieldCheck size={14} className="text-emerald-500" />
           </div>
           <div className="min-w-0 pr-0.5">
-            <p className="text-[11px] font-black text-[#1C2C4E] dark:text-white leading-tight uppercase tracking-tight">
+            <p className="text-[11px] font-black text-[#00246b] dark:text-white leading-tight uppercase tracking-tight">
               Premium Shop
             </p>
-            <p className="text-[7px] font-black text-[#1C2C4E]/30 dark:text-gray-500 uppercase tracking-widest mt-0.5">Trust Secured</p>
+            <p className="text-[7px] font-black text-[#00246b]/30 dark:text-gray-500 uppercase tracking-widest mt-0.5">Trust Secured</p>
           </div>
         </div>
       </div>
@@ -620,9 +620,9 @@ const ServiceDetail = () => {
           <button
             key={cat}
             onClick={() => setSelectedCat(cat)}
-            className={`px-3 py-1.5 rounded-[12px] whitespace-nowrap text-[10px] font-black tracking-widest transition-all ${selectedCat === cat
-              ? 'bg-[#1C2C4E] text-white shadow-xl shadow-[#1C2C4E]/20 scale-105'
-              : 'bg-white dark:bg-gray-900 text-[#0B1222] dark:text-white/60 border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm'
+            className={`px-3 py-1.5 rounded-[12px] whitespace-nowrap text-[10px] font-black tracking-normal transition-all ${selectedCat === cat
+              ? 'bg-[#00246b] text-white shadow-xl shadow-[#00246b]/20 scale-105'
+              : 'bg-white dark:bg-gray-900 text-[#0B1222] dark:text-white/60 border border-[#00246b]/10 dark:border-gray-800 shadow-sm'
               }`}
           >
             {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
@@ -653,7 +653,7 @@ const ServiceDetail = () => {
             return (
               <div
                 key={item._id}
-                className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
+                className="bg-white dark:bg-gray-900 border border-[#00246b]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
@@ -686,12 +686,12 @@ const ServiceDetail = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                    <div className="bg-[#00246b]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#00246b]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
                       Pay At Shop
                     </div>
                     <button
                       onClick={() => removeItem(item._id)}
-                      className="w-8 h-8 bg-black dark:bg-[#1C2C4E] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
+                      className="w-8 h-8 bg-black dark:bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
                     >
                       <Minus size={14} strokeWidth={3} />
                     </button>
@@ -780,7 +780,7 @@ const ServiceDetail = () => {
                         ? "bg-gray-400 text-white cursor-not-allowed opacity-50"
                         : (isRejected || isExpired) && isThisPlan
                         ? "bg-rose-500 text-white shadow-rose-500/20"
-                        : "bg-[#1C2C4E] text-white shadow-[#1C2C4E]/20"
+                        : "bg-[#00246b] text-white shadow-[#00246b]/20"
                       )}
                     >
                       {buyingPlanId === plan._id ? <Loader2 size={12} className="animate-spin" /> : (
@@ -796,7 +796,7 @@ const ServiceDetail = () => {
 
                   {isActive && isThisPlan && (
                     <div className="mt-4 p-3 bg-slate-50 dark:bg-gray-800/50 rounded-2xl border border-slate-100 dark:border-gray-800 space-y-2.5">
-                      <p className="text-[8px] font-black text-[#1C2C4E] dark:text-primary uppercase tracking-[0.2em]">Your Current Usage</p>
+                      <p className="text-[8px] font-black text-[#00246b] dark:text-primary uppercase tracking-[0.2em]">Your Current Usage</p>
                       <div className="space-y-2">
                         {vendorMembership?.usage?.map((u) => {
                           const percentage = Math.min((u.usedCount / u.usageLimit) * 100, 100);
@@ -804,7 +804,7 @@ const ServiceDetail = () => {
                             <div key={u.serviceId?._id} className="space-y-1">
                               <div className="flex justify-between items-center text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase">
                                 <span>{u.serviceId?.name}</span>
-                                <span className="text-[#1C2C4E] dark:text-white">{u.usedCount} / {u.usageLimit} Used</span>
+                                <span className="text-[#00246b] dark:text-white">{u.usedCount} / {u.usageLimit} Used</span>
                               </div>
                               <div className="h-1.5 bg-slate-200 dark:bg-gray-800 rounded-full overflow-hidden">
                                 <div 
@@ -869,12 +869,12 @@ const ServiceDetail = () => {
                     </p>
                   )}
                 </div>
-                <div className="bg-[#1C2C4E]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#1C2C4E]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                <div className="bg-[#00246b]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#00246b]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
                   Pay At Shop
                 </div>
                 <button
                   onClick={() => toggleService(service)}
-                  className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#1C2C4E] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
+                  className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#00246b] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
                 >
                   <Plus size={16} strokeWidth={3} />
                 </button>
@@ -886,7 +886,7 @@ const ServiceDetail = () => {
 
       {/* Trust Badges */}
       <div className="px-3 mt-4">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#1C2C4E]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#00246b]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
           <div className="flex items-center gap-2.5">
             <div className="text-green-500 bg-white dark:bg-gray-800 p-1 rounded-full shadow-sm">
               <CheckCircle2 size={14} />

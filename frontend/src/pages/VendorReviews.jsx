@@ -91,7 +91,7 @@ const VendorReviews = () => {
 
       <main className="px-4 pt-[100px] space-y-2">
         {/* Summary Bar */}
-        <section className="bg-white dark:bg-gray-900 border border-[#1C2C4E]/10 dark:border-gray-800 rounded-xl px-3 py-2 shadow-sm">
+        <section className="bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 rounded-xl px-3 py-2 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-1.5">
               <Star size={13} className="text-yellow-400 fill-yellow-400" />

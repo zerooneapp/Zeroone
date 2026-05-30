@@ -25,7 +25,7 @@ const Preferences = () => {
         icon: '🚀',
         style: {
             borderRadius: '1rem',
-            background: '#1C2C4E',
+            background: '#00246b',
             color: '#fff',
             fontSize: '11px',
             fontWeight: 'bold',
@@ -55,14 +55,14 @@ const Preferences = () => {
   const PreferenceItem = ({ icon: Icon, title, sub, value, action, color = "slate", isLocked = false }) => (
     <button 
       onClick={action}
-      className={`w-full text-left p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center justify-between group active:scale-[0.98] transition-all ${isLocked ? 'cursor-default' : ''}`}
+      className={`w-full text-left p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex items-center justify-between group active:scale-[0.98] transition-all ${isLocked ? 'cursor-default' : ''}`}
     >
        <div className="flex items-center gap-3.5">
           <div className={`w-10 h-10 rounded-xl bg-${color}-50 dark:bg-${color}-900/20 flex items-center justify-center border border-${color}-100/50 dark:border-${color}-800/30`}>
              <Icon size={18} className={`text-${color}-500`} strokeWidth={2.5} />
           </div>
           <div className="space-y-0.5">
-             <h3 className="text-[13px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">{title}</h3>
+             <h3 className="text-[13px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">{title}</h3>
              <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500">{sub}</p>
           </div>
        </div>
@@ -85,7 +85,7 @@ const Preferences = () => {
             <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
           <div className="leading-none">
-            <h1 className="font-extrabold text-[15px] text-[#1C2C4E] dark:text-white tracking-tight">
+            <h1 className="font-extrabold text-[15px] text-[#00246b] dark:text-white tracking-tight">
               Preferences
             </h1>
           </div>
@@ -96,21 +96,21 @@ const Preferences = () => {
         {/* 🌓 APPEARANCE */}
         <section className="space-y-3">
           <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase text-left block">Appearance</label>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm overflow-hidden p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-sm overflow-hidden p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
                   <Smartphone size={18} className="text-orange-500" />
                 </div>
                 <div className="space-y-0.5 text-left">
-                  <h3 className="text-[13px] font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">System default</h3>
+                  <h3 className="text-[13px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">System default</h3>
                   <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 leading-tight">
                     We'll adjust based on your device's system settings
                   </p>
                 </div>
               </div>
               <div className="px-3 py-1 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-800">
-                <span className="text-[9px] font-black text-[#1C2C4E] dark:text-white tracking-wider uppercase">Active</span>
+                <span className="text-[9px] font-black text-[#00246b] dark:text-white tracking-wider uppercase">Active</span>
               </div>
             </div>
           </div>
@@ -156,7 +156,7 @@ const Preferences = () => {
             whileTap={{ scale: 0.95 }}
             onClick={handleUpdate}
             disabled={loading}
-            className="w-full h-12 bg-[#1C2C4E] dark:bg-primary text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl shadow-[#1C2C4E]/20 flex items-center justify-center gap-2 group disabled:opacity-70"
+            className="w-full h-12 bg-[#00246b] dark:bg-[#00246b] text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl shadow-[#00246b]/20 flex items-center justify-center gap-2 group disabled:opacity-70"
           >
             {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : (
               <>

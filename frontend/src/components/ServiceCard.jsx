@@ -8,7 +8,7 @@ const ServiceCard = ({ service, onToggle, onEdit, onSetHome, homeLoadingId }) =>
       <motion.div
          initial={{ opacity: 0, scale: 0.95 }}
          animate={{ opacity: 1, scale: 1 }}
-         className={`p-2.5 bg-white dark:bg-gray-900/40 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-sm flex items-center gap-2 transition-opacity active:scale-[0.98] w-full min-w-0 overflow-hidden`}
+         className={`p-2.5 bg-white dark:bg-gray-900/40 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex items-center gap-2 transition-opacity active:scale-[0.98] w-full min-w-0 overflow-hidden`}
       >
          <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-50 dark:bg-gray-800 flex-shrink-0 border border-slate-100 dark:border-gray-700 shadow-inner group-hover:scale-105 transition-transform">
             {service.image || service.images?.[0] ? (

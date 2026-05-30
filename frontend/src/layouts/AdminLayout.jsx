@@ -72,10 +72,10 @@ const AdminLayout = () => {
           {isSidebarOpen && (
             <span className="text-xl font-black tracking-tighter leading-none flex flex-col">
               <div className="flex items-center">
-                <span className="text-[#1C2C4E] dark:text-white">Zero</span>
+                <span className="text-[#00246b] dark:text-white">Zero</span>
                 <span className="text-[#9ea6b8] dark:text-slate-400">One</span>
               </div>
-              <span className="text-[#1C2C4E]/40 dark:text-slate-500 text-[13px] lowercase not-italic block mt-0.5 tracking-[0.2em] font-black">admin panel</span>
+              <span className="text-[#00246b]/40 dark:text-slate-500 text-[13px] lowercase not-italic block mt-0.5 tracking-[0.2em] font-black">admin panel</span>
             </span>
           )}
         </div>
@@ -140,10 +140,10 @@ const AdminLayout = () => {
             </div>
             <span className="text-lg font-black tracking-tighter leading-none flex flex-col">
               <div className="flex items-center">
-                <span className="text-[#1C2C4E] dark:text-white">Zero</span>
+                <span className="text-[#00246b] dark:text-white">Zero</span>
                 <span className="text-[#9ea6b8] dark:text-gray-500">One</span>
               </div>
-              <span className="text-[#1C2C4E]/40 dark:text-gray-500 text-[11px] lowercase block tracking-widest font-black">admin panel</span>
+              <span className="text-[#00246b]/40 dark:text-gray-500 text-[11px] lowercase block tracking-widest font-black">admin panel</span>
             </span>
           </div>
           <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-gray-400"><X size={20} /></button>

@@ -68,7 +68,7 @@ const Favorites = () => {
                            animate={{ opacity: 1, y: 0 }}
                            transition={{ delay: idx * 0.05 }}
                            key={vendor._id}
-                           className="bg-white dark:bg-gray-900 rounded-2xl border border-[#1C2C4E]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] overflow-hidden group active:scale-[0.98] transition-all"
+                           className="bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] overflow-hidden group active:scale-[0.98] transition-all"
                         >
                            <div className="relative h-32 overflow-hidden bg-slate-50 dark:bg-gray-800 border-b border-slate-50 dark:border-gray-800">
                               <img
@@ -118,7 +118,7 @@ const Favorites = () => {
 
                               <button
                                  onClick={() => navigate(`/service/${vendor._id}`)}
-                                 className="h-10 px-6 bg-slate-900 dark:bg-primary text-white rounded-xl font-black text-[12px] tracking-tight active:scale-95 transition-all border-b-2 border-white/10 shadow-lg capitalize"
+                                 className="h-10 px-6 bg-[#00246b] dark:bg-[#00246b] text-white rounded-xl font-black text-[12px] tracking-tight active:scale-95 transition-all border-b-2 border-white/10 shadow-lg capitalize"
                               >
                                  Book now
                               </button>
@@ -139,7 +139,7 @@ const Favorites = () => {
                      </div>
                      <button
                         onClick={() => navigate('/')}
-                        className="px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-[9px] tracking-widest shadow-xl active:scale-95 transition-all flex items-center gap-2 mx-auto border-b-2 border-white/10"
+                        className="px-8 py-3 bg-[#00246b] dark:bg-[#00246b] text-white rounded-xl font-black text-[9px] tracking-widest shadow-xl active:scale-95 transition-all flex items-center gap-2 mx-auto border-b-2 border-white/10"
                      >
                         <Search size={14} strokeWidth={3} />
                         Find services

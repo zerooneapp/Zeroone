@@ -92,11 +92,11 @@ const MyBookings = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="p-1 px-2 -ml-2 text-[#1C2C4E] dark:text-blue-400 active:scale-90 transition-all"
+            className="p-1 px-2 -ml-2 text-[#00246b] dark:text-blue-400 active:scale-90 transition-all"
           >
             <ChevronRight className="rotate-180" size={18} strokeWidth={3} />
           </button>
-          <h1 className="text-xl font-black text-[#1C2C4E] dark:text-white tracking-tight leading-none">
+          <h1 className="text-xl font-black text-[#00246b] dark:text-white tracking-tight leading-none">
             My bookings
           </h1>
         </div>
@@ -110,8 +110,8 @@ const MyBookings = () => {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                  className={`flex-1 py-2.5 rounded-xl text-[13px] font-black capitalize tracking-tight border ${isActive
-                    ? 'bg-[#1C2C4E] border-[#1C2C4E] text-white shadow-lg shadow-[#1C2C4E]/10'
-                    : 'bg-white dark:bg-gray-900 border-[#1C2C4E]/10 dark:border-gray-800 text-slate-400 shadow-sm hover:text-[#1C2C4E]'
+                    ? 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/10'
+                    : 'bg-white dark:bg-gray-900 border-[#00246b]/10 dark:border-gray-800 text-slate-400 shadow-sm hover:text-[#00246b]'
                   } transition-all active:scale-95`}
               >
                 {tab}
@@ -129,7 +129,7 @@ const MyBookings = () => {
             </div>
             <p className="text-slate-400 text-xs font-black tracking-widest lowercase">No {activeTab} bookings</p>
             <button
-              className="mt-6 px-8 py-3 bg-[#1C2C4E] text-white rounded-xl text-[12px] font-black tracking-widest shadow-lg shadow-[#1C2C4E]/20 active:scale-95 transition-all"
+              className="mt-6 px-8 py-3 bg-[#00246b] text-white rounded-xl text-[12px] font-black tracking-widest shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all"
               onClick={() => navigate('/')}
             >
               Book a Service
@@ -160,13 +160,13 @@ const MyBookings = () => {
                   <div className="space-y-1.5">
                     <p className="text-[9px] font-black text-slate-400 dark:text-gray-400 tracking-widest leading-none uppercase">Schedule</p>
                     <div className="flex items-center gap-1.5 text-[13px] font-black text-gray-900 dark:text-white leading-none mt-1">
-                      <Calendar size={13} strokeWidth={3} className="text-[#1C2C4E] dark:text-gray-400" />
+                      <Calendar size={13} strokeWidth={3} className="text-[#00246b] dark:text-gray-400" />
                       {dayjs(booking.startTime).format('DD-MM-YYYY')}
                     </div>
                   </div>
                   <div className="space-y-1.5 text-right flex flex-col items-end">
                     <p className="text-[9px] font-black text-slate-400 dark:text-white/40 tracking-widest leading-none uppercase">Time</p>
-                    <div className="flex items-center gap-1.5 text-[13px] font-black text-[#1C2C4E] dark:text-white leading-none mt-1">
+                    <div className="flex items-center gap-1.5 text-[13px] font-black text-[#00246b] dark:text-white leading-none mt-1">
                       <Clock size={13} strokeWidth={3} className="dark:text-gray-400" />
                       {dayjs(booking.startTime).format('hh:mm A')}
                     </div>
@@ -180,7 +180,7 @@ const MyBookings = () => {
                     </div>
                     <span className="text-[10px] font-black text-slate-400 dark:text-white/60 tracking-widest uppercase">{booking.staffId?.name || 'Auto assigned'}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 font-black text-[#1C2C4E] dark:text-white active:scale-90 transition-all">
+                  <div className="flex items-center gap-1.5 font-black text-[#00246b] dark:text-white active:scale-90 transition-all">
                     <span className="text-[12px] tracking-tight">Manage</span>
                     <ChevronRight size={16} strokeWidth={3} className="dark:text-gray-400" />
                   </div>
@@ -201,7 +201,7 @@ const MyBookings = () => {
                 
                 <div className="flex flex-col items-center leading-none">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Page</p>
-                  <p className="text-[14px] font-black text-[#1C2C4E] dark:text-white mt-1">{currentPage} <span className="text-slate-300">/</span> {totalPages}</p>
+                  <p className="text-[14px] font-black text-[#00246b] dark:text-white mt-1">{currentPage} <span className="text-slate-300">/</span> {totalPages}</p>
                 </div>
 
                 <button

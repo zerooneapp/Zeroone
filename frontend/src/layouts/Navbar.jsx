@@ -87,7 +87,7 @@ const Navbar = () => {
                   {isActive && (
                     <motion.div
                       layoutId="active-nav-line"
-                      className="absolute top-0 w-8 h-[3px] bg-[#1C2C4E] dark:bg-white rounded-b-full"
+                      className="absolute top-0 w-8 h-[3px] bg-[#00246b] dark:bg-white rounded-b-full"
                       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                     />
                   )}
@@ -96,14 +96,14 @@ const Navbar = () => {
                     size={19}
                     className={cn(
                       "transition-all duration-300",
-                      isActive ? "text-[#1C2C4E] dark:text-white mt-0.5" : "text-[#1C2C4E] dark:text-gray-400"
+                      isActive ? "text-[#00246b] dark:text-white mt-0.5" : "text-[#00246b] dark:text-gray-400"
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
 
                   <span className={cn(
                     "text-[9px] font-black uppercase tracking-wider transition-all",
-                    isActive ? "text-[#1C2C4E] dark:text-white" : "text-[#1C2C4E] dark:text-gray-400"
+                    isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400"
                     )}>
                     {item.label}
                   </span>

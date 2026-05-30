@@ -36,7 +36,7 @@ const MembershipCard = ({ membership, onDelete }) => {
           {membership.status === 'active' && membership.ticketId && (
             <div className="mt-1 inline-flex items-center gap-1 bg-slate-50 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-gray-700">
               <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Digital Ticket</span>
-              <span className="text-[9.5px] font-black text-[#1C2C4E] dark:text-white tracking-wider">{membership.ticketId}</span>
+              <span className="text-[9.5px] font-black text-[#00246b] dark:text-white tracking-wider">{membership.ticketId}</span>
             </div>
           )}
         </div>
@@ -63,7 +63,7 @@ const MembershipCard = ({ membership, onDelete }) => {
                       <p className="text-[9.5px] font-black text-slate-700 dark:text-slate-200 capitalize">
                         {item.serviceId?.name}
                       </p>
-                      <p className="text-[8.5px] font-black text-[#1C2C4E] dark:text-white tracking-tighter">
+                      <p className="text-[8.5px] font-black text-[#00246b] dark:text-white tracking-tighter">
                         {item.usedCount} / {item.usageLimit} <span className="text-slate-400 font-bold ml-0.5 uppercase text-[7px]">Used</span>
                       </p>
                     </div>
@@ -108,7 +108,7 @@ const MembershipCard = ({ membership, onDelete }) => {
           ) : (
             <button
               onClick={() => navigate(`/service/${membership.vendorId?._id}`)}
-              className="px-3 py-1.5 bg-[#1C2C4E] text-white rounded-md font-black text-[7.5px] uppercase tracking-widest shadow-md shadow-[#1C2C4E]/20 active:scale-95 transition-all"
+              className="px-3 py-1.5 bg-[#00246b] text-white rounded-md font-black text-[7.5px] uppercase tracking-widest shadow-md shadow-[#00246b]/20 active:scale-95 transition-all"
             >
               Book Now
             </button>
@@ -165,7 +165,7 @@ const MyMemberships = () => {
             <ArrowLeft size={18} />
           </button>
           <div className="flex flex-col gap-0.5">
-            <h1 className="text-xl font-black tracking-tighter leading-none text-[#1C2C4E] dark:text-white">My Memberships</h1>
+            <h1 className="text-xl font-black tracking-tighter leading-none text-[#00246b] dark:text-white">My Memberships</h1>
             <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none">Exclusive Benefits</p>
           </div>
         </div>
@@ -189,7 +189,7 @@ const MyMemberships = () => {
             </div>
             <button
               onClick={() => navigate('/')}
-              className="px-8 py-3.5 bg-[#1C2C4E] text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl active:scale-95 transition-all"
+              className="px-8 py-3.5 bg-[#00246b] text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl active:scale-95 transition-all"
             >
               Explore Partners
             </button>
