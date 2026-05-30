@@ -149,20 +149,14 @@ const MembershipPlanForm = () => {
                 {isEdit ? 'Edit Plan' : 'Create Plan'}
               </h1>
           </div>
-          <button 
-            form="membership-form"
-            disabled={loading}
-            className="p-2 bg-[#00246b] text-white rounded-xl shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50"
-          >
-             {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
-          </button>
+          <div className="w-9" />
        </header>
 
-       <main className="px-5 pt-[104px]">
-          <form id="membership-form" onSubmit={handleSubmit} className="space-y-4 pb-8">
-             <div className="space-y-4">
+       <main className="px-5 pt-[92px]">
+          <form id="membership-form" onSubmit={handleSubmit} className="space-y-2.5 pb-8">
+             <div className="space-y-2.5">
                 {/* Name */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Plan Name</label>
                    <input 
                      required
@@ -175,7 +169,7 @@ const MembershipPlanForm = () => {
                 </div>
 
                 {/* Description */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Description</label>
                    <textarea 
                      rows="3"
@@ -188,7 +182,7 @@ const MembershipPlanForm = () => {
 
                  <div className="grid grid-cols-2 gap-3">
                     {/* Price */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Plan Price</label>
                        <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">₹</span>
@@ -204,7 +198,7 @@ const MembershipPlanForm = () => {
                        </div>
                     </div>
                     {/* Duration */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Duration (Days)</label>
                         <div className="relative">
                            <input 
@@ -272,41 +266,41 @@ const MembershipPlanForm = () => {
                           return (
                             <div 
                               key={service._id}
-                              className={`p-3 rounded-2xl border transition-all flex items-center justify-between ${
+                              className={`p-2 rounded-xl border transition-all flex items-center justify-between ${
                                 isSelected 
                                   ? 'bg-[#00246b]/5 dark:bg-[#00246b]/20 border-[#00246b]/30 dark:border-white/20' 
                                   : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'
                               }`}
                             >
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2.5">
                                 <button 
                                   type="button"
                                   onClick={() => toggleService(service._id)}
-                                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                  className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
                                     isSelected 
                                       ? 'bg-[#00246b] border-[#00246b] text-white' 
                                       : 'border-gray-300 dark:border-gray-700'
                                   }`}
                                 >
-                                  {isSelected && <Crown size={12} />}
+                                  {isSelected && <Crown size={10} />}
                                 </button>
-                                <div className="flex flex-col">
-                                  <span className={`text-xs font-black ${isSelected ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}>
+                                <div className="flex flex-col leading-none">
+                                  <span className={`text-[11px] font-black leading-tight ${isSelected ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}>
                                     {service.name}
                                   </span>
-                                  <span className="text-[8px] font-bold text-gray-400 uppercase">₹{service.price}</span>
+                                  <span className="text-[7.5px] font-black text-gray-400 uppercase mt-0.5">₹{service.price}</span>
                                 </div>
                               </div>
 
                               {isSelected && (
-                                <div className="flex items-center gap-2">
-                                  <label className="text-[8px] font-black text-gray-400 uppercase">Count:</label>
+                                <div className="flex items-center gap-1.5">
+                                  <label className="text-[7.5px] font-black text-gray-400 uppercase">Count:</label>
                                   <input 
                                     type="text"
                                     inputMode="numeric"
                                     value={selection.usageLimit}
                                     onChange={(e) => handleNumberChange('usageLimit', e.target.value, service._id)}
-                                    className="w-12 p-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-[10px] font-black text-center"
+                                    className="w-10 h-7 p-1 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 text-[9px] font-black text-center"
                                   />
                                 </div>
                               )}
@@ -329,6 +323,23 @@ const MembershipPlanForm = () => {
                       Customers will be limited to the specified usage counts for each service. If a service limit is reached, they will need to pay the standard price.
                    </p>
                 </div>
+             </div>
+
+             <div className="pt-4">
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-12 bg-[#00246b] text-white rounded-2xl shadow-xl shadow-[#00246b]/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest"
+                >
+                   {loading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                   ) : (
+                      <>
+                         <Save size={16} />
+                         {isEdit ? 'Update Plan' : 'Save Plan'}
+                      </>
+                   )}
+                </button>
              </div>
           </form>
        </main>

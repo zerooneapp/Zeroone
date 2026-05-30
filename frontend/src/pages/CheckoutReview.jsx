@@ -15,7 +15,7 @@ const CheckoutReview = () => {
   const bookingData = location.state;
   const { clearCart } = useCartStore();
   const [loading, setLoading] = React.useState(false);
-  const [pricingPreview, setPricingPreview] = React.useState(null);
+  const [pricingPreview, setPricingPreview] = React.useState(bookingData?.pricingPreview ?? null);
   const [showTerms, setShowTerms] = React.useState(false);
 
   if (!bookingData) {
@@ -160,7 +160,11 @@ const CheckoutReview = () => {
               <p className="text-[9px] font-black opacity-40 tracking-widest leading-none capitalize">Time</p>
               <div className="flex items-center justify-center gap-1.5 leading-none mt-1">
                 <Clock size={13} className="opacity-60 text-blue-400" />
-                <span className="font-black text-[13px] tracking-tighter">{dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')}</span>
+                <span className="font-black text-[13px] tracking-tighter">
+                  {dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')}
+                  {' – '}
+                  {dayjs(`${selectedDate} ${selectedSlot}`).add(totalDuration, 'minute').format('hh:mm A')}
+                </span>
               </div>
             </div>
           </div>
@@ -181,7 +185,7 @@ const CheckoutReview = () => {
         <section className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <span className="text-[11px] font-black text-slate-400 tracking-widest leading-none capitalize">Services</span>
-            <span className="text-[9px] font-black text-[#00246b] tracking-tighter capitalize opacity-80">{items.length} Items</span>
+            <span className="text-[9px] font-black text-white/80 tracking-tighter capitalize">{items.length} Items</span>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-[#00246b]/10 dark:border-gray-800 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)] space-y-3">
             {items.map((item) => {

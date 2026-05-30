@@ -308,69 +308,90 @@ const VendorProfile = () => {
       }
    };
 
-   const handleDeleteGalleryImage = async (url) => {
-      if (!window.confirm('Delete this image from gallery?')) return;
-      try {
-         setLoading(true);
-         const res = await api.post('/vendor/gallery/delete', { imageUrl: url });
-         setCurrentMedia(res.data);
-         toast.success('Image removed');
-      } catch (err) {
-         toast.error('Failed to delete image');
-      } finally {
-         setLoading(false);
-      }
-   };
+    const handleDeleteGalleryImage = async (url) => {
+       if (!window.confirm('Delete this image from gallery?')) return;
+       try {
+          setLoading(true);
+          const res = await api.post('/vendor/gallery/delete', { imageUrl: url });
+          setCurrentMedia(res.data);
+          if (data.featuredImage === url) {
+             setData(prev => ({ ...prev, featuredImage: '' }));
+          }
+          toast.success('Image removed');
+       } catch (err) {
+          toast.error('Failed to delete image');
+       } finally {
+          setLoading(false);
+       }
+    };
 
-   const handleUpdateSingleMedia = async (field, file) => {
-      try {
-         setLoading(true);
-         const formData = new FormData();
-         formData.append('media', file);
-         formData.append('field', field);
-         const res = await api.post('/vendor/media/single', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-         });
-         setCurrentMedia(res.data);
-         toast.success('Image updated!');
-      } catch (err) {
-         toast.error('Update failed');
-      } finally {
-         setLoading(false);
-      }
-   };
+    const handleDeleteSingleMedia = async (field) => {
+       if (!window.confirm(`Delete shop ${field === 'shopImage' ? 'profile image' : field}?`)) return;
+       try {
+          setLoading(true);
+          const deletedUrl = currentMedia?.[field];
+          const res = await api.post('/vendor/media/delete-single', { field });
+          setCurrentMedia(res.data);
+          if (data.featuredImage === deletedUrl) {
+             setData(prev => ({ ...prev, featuredImage: '' }));
+          }
+          toast.success('Image deleted');
+       } catch (err) {
+          toast.error('Failed to delete image');
+       } finally {
+          setLoading(false);
+       }
+    };
 
-   const handleReplaceGalleryImage = async (oldUrl, file) => {
-      try {
-         setLoading(true);
-         const formData = new FormData();
-         formData.append('media', file);
-         formData.append('oldUrl', oldUrl);
-         const res = await api.post('/vendor/gallery/replace', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-         });
-         setCurrentMedia(res.data);
-         toast.success('Image replaced!');
-      } catch (err) {
-         toast.error('Replacement failed');
-      } finally {
-         setLoading(false);
-      }
-   };
+    const handleUpdateSingleMedia = async (field, file) => {
+       try {
+          setLoading(true);
+          const formData = new FormData();
+          formData.append('media', file);
+          formData.append('field', field);
+          const res = await api.post('/vendor/media/single', formData, {
+             headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          setCurrentMedia(res.data);
+          toast.success('Image updated!');
+       } catch (err) {
+          toast.error('Update failed');
+       } finally {
+          setLoading(false);
+       }
+    };
 
-   const handleDeleteVideo = async () => {
-      if (!window.confirm('Remove promotional video?')) return;
-      try {
-         setLoading(true);
-         const res = await api.delete('/vendor/video/delete');
-         setCurrentMedia(res.data);
-         toast.success('Video removed');
-      } catch (err) {
-         toast.error('Failed to remove video');
-      } finally {
-         setLoading(false);
-      }
-   };
+    const handleReplaceGalleryImage = async (oldUrl, file) => {
+       try {
+          setLoading(true);
+          const formData = new FormData();
+          formData.append('media', file);
+          formData.append('oldUrl', oldUrl);
+          const res = await api.post('/vendor/gallery/replace', formData, {
+             headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          setCurrentMedia(res.data);
+          toast.success('Image replaced!');
+       } catch (err) {
+          toast.error('Replacement failed');
+       } finally {
+          setLoading(false);
+       }
+    };
+
+    const handleDeleteVideo = async () => {
+       if (!window.confirm('Remove promotional video?')) return;
+       try {
+          setLoading(true);
+          const res = await api.delete('/vendor/video/delete');
+          setCurrentMedia(res.data);
+          toast.success('Video removed');
+       } catch (err) {
+          toast.error('Failed to remove video');
+       } finally {
+          setLoading(false);
+       }
+    };
 
    const handlePurchasePromotion = async () => {
       if (!promoDays || promoDays < 1) return toast.error('Minimum 1 day required');
@@ -896,6 +917,14 @@ const VendorProfile = () => {
                                     >
                                        <Camera size={10} />
                                     </label>
+                                    <button
+                                       type="button"
+                                       onClick={() => handleDeleteSingleMedia('shopImage')}
+                                       className="absolute -top-1 -right-1 p-1.5 bg-rose-500 text-white rounded-lg shadow-lg cursor-pointer hover:bg-rose-600 transition-all active:scale-90 z-10"
+                                       title="Delete image"
+                                    >
+                                       <Trash2 size={10} />
+                                    </button>
                                  </div>
                               )}
                               {/* Gallery Options */}

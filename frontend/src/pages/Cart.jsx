@@ -313,7 +313,8 @@ const Cart = () => {
         items,
         vendor,
         rescheduleBookingId,
-        totalDurationOverride: rescheduleTotalDuration
+        totalDurationOverride: rescheduleTotalDuration,
+        pricingPreview
       }
     });
   };
@@ -622,12 +623,14 @@ const Cart = () => {
         <div className="flex items-center justify-between">
           <div className="leading-none">
             <p className="text-[9px] font-black text-white/40 tracking-widest mb-1 leading-none capitalize">Net payable</p>
-            {totalSavings > 0 && (
-              <p className="text-[8px] font-black text-white/40 line-through tracking-widest mb-1 leading-none">
-                {formatPrice(originalTotal)}
-              </p>
-            )}
-            <p className="text-[20px] font-black text-white tracking-tighter leading-none">{formatPrice(displayTotal)}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[20px] font-black text-white tracking-tighter leading-none">{formatPrice(displayTotal)}</p>
+              {totalSavings > 0 && (
+                <p className="text-[11px] font-black text-white/40 line-through tracking-widest leading-none">
+                  {formatPrice(originalTotal)}
+                </p>
+              )}
+            </div>
             {totalSavings > 0 && (
               <p className="text-[8px] font-black text-emerald-400 tracking-widest mt-1 leading-none">
                 Save {formatPrice(totalSavings)}

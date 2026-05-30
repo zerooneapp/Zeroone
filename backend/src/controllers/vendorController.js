@@ -827,8 +827,11 @@ const deleteGalleryImage = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     vendor.galleryImages = (vendor.galleryImages || []).filter(img => img !== imageUrl);
+    if (vendor.featuredImage === imageUrl) {
+      vendor.featuredImage = '';
+    }
     await vendor.save();
-    res.status(200).json({ message: 'Image deleted', gallery: vendor.galleryImages });
+    res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -855,7 +858,7 @@ const replaceGalleryImage = async (req, res) => {
     const newUrl = await uploadToCloudinary(req.file.buffer);
     vendor.galleryImages = (vendor.galleryImages || []).map(img => img === oldImageUrl ? newUrl : img);
     await vendor.save();
-    res.status(200).json({ message: 'Image replaced', newUrl, gallery: vendor.galleryImages });
+    res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -882,7 +885,27 @@ const updateSingleMedia = async (req, res) => {
     const url = await uploadToCloudinary(req.file.buffer);
     vendor[field] = url;
     await vendor.save();
-    res.status(200).json({ message: `${field} updated`, url });
+    res.status(200).json(vendor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteSingleMedia = async (req, res) => {
+  try {
+    const { field } = req.body;
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    const deletedUrl = vendor[field];
+    vendor[field] = '';
+
+    if (vendor.featuredImage && vendor.featuredImage === deletedUrl) {
+      vendor.featuredImage = '';
+    }
+
+    await vendor.save();
+    res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -894,7 +917,7 @@ const deleteVideo = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     vendor.shopVideo = '';
     await vendor.save();
-    res.status(200).json({ message: 'Video deleted' });
+    res.status(200).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -1208,6 +1231,7 @@ module.exports = {
   deleteGalleryImage,
   replaceGalleryImage,
   updateSingleMedia,
+  deleteSingleMedia,
   deleteVideo,
   getVendorTransactions,
   getLiveReport

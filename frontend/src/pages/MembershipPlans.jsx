@@ -332,57 +332,57 @@ const MembershipPlans = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid gap-4">
+                  <div className="grid gap-3">
                     {plans.map((plan) => (
                       <motion.div
                         key={plan._id}
                         layout
-                        className="bg-white dark:bg-gray-900 rounded-[2rem] border border-slate-100 dark:border-gray-800 p-5 shadow-sm space-y-4"
+                        className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 shadow-sm space-y-3"
                       >
                         <div className="flex justify-between items-start">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="text-lg font-black text-slate-800 dark:text-white capitalize">{plan.name}</h3>
+                              <h3 className="text-base font-black text-slate-800 dark:text-white capitalize">{plan.name}</h3>
                               {!plan.isActive && (
                                 <span className="px-2 py-0.5 bg-red-500/10 text-red-500 rounded-full text-[7px] font-black uppercase tracking-widest border border-red-500/20">Paused</span>
                               )}
                             </div>
                             <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-tight line-clamp-2">{plan.description || 'No description provided'}</p>
                           </div>
-                          <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600">
-                            <Crown size={20} />
+                          <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-600">
+                            <Crown size={16} />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-50 dark:border-gray-800">
+                        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-50 dark:border-gray-800">
                           <div className="space-y-0.5">
                              <p className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Price</p>
-                            <p className="text-sm font-black text-primary dark:text-white">₹{plan.price}</p>
+                            <p className="text-xs font-black text-primary dark:text-white">₹{plan.price}</p>
                           </div>
                           <div className="space-y-0.5">
                             <p className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Duration</p>
-                            <p className="text-sm font-black text-slate-700 dark:text-white">{plan.durationDays} Days</p>
+                            <p className="text-xs font-black text-slate-700 dark:text-white">{plan.durationDays} Days</p>
                           </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                            <p className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Included Services & Limits</p>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1">
                              {plan.services?.map(s => (
-                              <span key={s.serviceId?._id || s._id} className="px-2 py-1 bg-slate-50 dark:bg-gray-800/80 text-slate-600 dark:text-slate-200 rounded-lg text-[9px] font-black border border-slate-100 dark:border-gray-700/50">
+                              <span key={s.serviceId?._id || s._id} className="px-1.5 py-0.5 bg-slate-50 dark:bg-gray-800/80 text-slate-600 dark:text-slate-200 rounded-md text-[9px] font-black border border-slate-100 dark:border-gray-700/50">
                                 {s.serviceId?.name || 'Service'} ({s.usageLimit})
                               </span>
                             ))}
                           </div>
                         </div>
 
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex gap-2 pt-1">
                           <button
                             onClick={() => setShowDeleteConfirm(plan)}
                             disabled={deletingId === plan._id}
-                            className="w-full py-2.5 bg-red-500/10 text-red-600 dark:text-red-400 font-black text-[9px] uppercase tracking-widest rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="w-full py-2 bg-red-500/10 text-red-600 dark:text-red-400 font-black text-[9px] uppercase tracking-widest rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                           >
-                            <Trash2 size={13} strokeWidth={3} />
+                            <Trash2 size={12} strokeWidth={3} />
                             {deletingId === plan._id ? 'Deleting...' : 'Delete Plan'}
                           </button>
                         </div>
@@ -408,15 +408,14 @@ const MembershipPlans = () => {
                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">New purchase requests will appear here.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {requests.map((request) => (
                       <div 
                         key={request._id}
-                        className="bg-white dark:bg-gray-900 p-5 rounded-[2rem] border border-slate-100 dark:border-gray-800 shadow-sm space-y-4"
+                        className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-3"
                       >
-                        {/* ... (Existing request card content) ... */}
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shrink-0 shadow-inner">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shrink-0 shadow-inner">
                             <img 
                               src={request.userId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(request.userId?.name || 'User')}&background=F1F5F9&color=1C2C4E&bold=true`} 
                               className="w-full h-full object-cover" 
@@ -424,28 +423,28 @@ const MembershipPlans = () => {
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-black text-[14px] text-slate-800 dark:text-white truncate capitalize">{request.userId?.name || 'Customer'}</h4>
-                            <div className="flex items-center gap-2 text-slate-400 mt-1">
-                              <Phone size={10} />
-                              <span className="text-[10px] font-bold">{request.userId?.phone}</span>
+                            <h4 className="font-black text-xs text-slate-800 dark:text-white truncate capitalize">{request.userId?.name || 'Customer'}</h4>
+                            <div className="flex items-center gap-1.5 text-slate-400 mt-0.5">
+                              <Phone size={9} />
+                              <span className="text-[9px] font-bold">{request.userId?.phone}</span>
                             </div>
                           </div>
                           <div className={cn(
-                            "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border",
+                            "px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border",
                             request.status === 'pending' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
                           )}>
                             {request.status}
                           </div>
                         </div>
 
-                         <div className="p-3 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-slate-100 dark:border-gray-800 flex justify-between items-center">
+                         <div className="p-2 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-slate-100 dark:border-gray-800 flex justify-between items-center">
                           <div className="space-y-0.5">
-                            <p className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Requested Plan</p>
-                            <p className="text-xs font-black text-[#00246b] dark:text-white capitalize">{request.planId?.name}</p>
+                            <p className="text-[7.5px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Requested Plan</p>
+                            <p className="text-[11px] font-black text-[#00246b] dark:text-white capitalize leading-none">{request.planId?.name}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Amount to Collect</p>
-                            <p className="text-xs font-black text-slate-700 dark:text-white">₹{request.planId?.price}</p>
+                            <p className="text-[7.5px] font-black text-slate-400 dark:text-white/60 uppercase tracking-widest">Amount to Collect</p>
+                            <p className="text-[11px] font-black text-slate-700 dark:text-white leading-none">₹{request.planId?.price}</p>
                           </div>
                         </div>
 
@@ -454,17 +453,17 @@ const MembershipPlans = () => {
                             <button
                               onClick={() => handleRequestAction(request._id, 'active')}
                               disabled={actionLoadingId === request._id}
-                              className="flex-1 py-3 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+                              className="flex-1 py-2 bg-emerald-500 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.1em] flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
                             >
-                              <CheckCircle2 size={14} strokeWidth={3} />
+                              <CheckCircle2 size={12} strokeWidth={3} />
                               Approve
                             </button>
                             <button
                               onClick={() => handleRequestAction(request._id, 'rejected')}
                               disabled={actionLoadingId === request._id}
-                              className="flex-1 py-3 bg-red-500/10 text-red-600 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+                              className="flex-1 py-2 bg-red-500/10 text-red-600 rounded-xl font-black text-[9px] uppercase tracking-[0.1em] flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-50"
                             >
-                              <XCircle size={14} strokeWidth={3} />
+                              <XCircle size={12} strokeWidth={3} />
                               Reject
                             </button>
                           </div>
@@ -492,14 +491,14 @@ const MembershipPlans = () => {
                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">When customers buy your plans, they will appear here.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {members.map((membership) => (
                       <div 
                         key={membership._id}
-                        className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm flex flex-col gap-4"
+                        className="bg-white dark:bg-gray-900 p-3.5 rounded-xl border border-slate-100 dark:border-gray-800 shadow-sm flex flex-col gap-3"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shrink-0 shadow-inner">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-gray-800 overflow-hidden border border-slate-100 dark:border-gray-700 shrink-0 shadow-inner">
                             <img 
                               src={membership.userId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(membership.userId?.name || 'User')}&background=F1F5F9&color=1C2C4E&bold=true`} 
                               className="w-full h-full object-cover" 
@@ -507,15 +506,15 @@ const MembershipPlans = () => {
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-black text-[13px] text-slate-800 dark:text-white truncate capitalize">{membership.userId?.name || 'Customer'}</h4>
-                              <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 rounded-md text-[7px] font-black uppercase tracking-tighter border border-amber-500/10 shrink-0">
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-black text-xs text-slate-800 dark:text-white truncate capitalize">{membership.userId?.name || 'Customer'}</h4>
+                              <span className="px-1 py-0.5 bg-amber-500/10 text-amber-600 rounded-md text-[6.5px] font-black uppercase tracking-tighter border border-amber-500/10 shrink-0">
                                 {membership.planId?.name}
                               </span>
                               {/* Status Badge */}
                               {membership.status !== 'active' && (
                                 <span className={cn(
-                                  "px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-tighter border shrink-0",
+                                  "px-1 py-0.5 rounded-md text-[6.5px] font-black uppercase tracking-tighter border shrink-0",
                                   membership.status === 'expired' && "bg-slate-100 dark:bg-gray-800 text-slate-400 border-slate-200 dark:border-gray-700",
                                   membership.status === 'rejected' && "bg-red-500/10 text-red-500 border-red-500/20",
                                   membership.status === 'cancelled' && "bg-orange-500/10 text-orange-500 border-orange-500/20",
@@ -525,31 +524,31 @@ const MembershipPlans = () => {
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-3 mt-1.5">
+                            <div className="flex items-center gap-2 mt-1">
                               <div className="flex items-center gap-1 text-slate-400">
-                                <Phone size={10} />
-                                <span className="text-[10px] font-bold">{membership.userId?.phone}</span>
+                                <Phone size={9} />
+                                <span className="text-[9px] font-bold">{membership.userId?.phone}</span>
                               </div>
-                              <div className={cn("flex items-center gap-1", dayjs(membership.endDate).isBefore(dayjs()) ? 'text-slate-400' : 'text-emerald-500')}>
-                                <Calendar size={10} />
-                                <span className="text-[9px] font-black uppercase tracking-tighter">
+                              <div className={cn("flex items-center gap-0.5", dayjs(membership.endDate).isBefore(dayjs()) ? 'text-slate-400' : 'text-emerald-500')}>
+                                <Calendar size={9} />
+                                <span className="text-[8px] font-black uppercase tracking-tighter">
                                   {dayjs(membership.endDate).isBefore(dayjs()) ? 'Expired' : 'Expires'} {dayjs(membership.endDate).format('DD MMM')}
                                 </span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-col items-center gap-1.5">
-                            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-900/30">
-                              <ShieldCheck size={16} />
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-900/30">
+                              <ShieldCheck size={14} />
                             </div>
                             {/* Delete button for past records */}
                             {(membership.status !== 'active' || dayjs(membership.endDate).isBefore(dayjs())) && (
                               <button
                                 onClick={() => setShowDeleteMemberConfirm(membership)}
                                 disabled={deletingMemberId === membership._id}
-                                className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 border border-red-100 dark:border-red-900/30 active:scale-90 transition-all disabled:opacity-40"
+                                className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 border border-red-100 dark:border-red-900/30 active:scale-90 transition-all disabled:opacity-40"
                               >
-                                <Trash2 size={14} strokeWidth={2.5} />
+                                <Trash2 size={12} strokeWidth={2.5} />
                               </button>
                             )}
                           </div>
@@ -557,29 +556,29 @@ const MembershipPlans = () => {
 
                         {/* Usage Progress - New Section */}
                         {membership.usage && membership.usage.length > 0 && (
-                          <div className="pt-4 border-t border-slate-50 dark:border-gray-800 space-y-3">
+                          <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 space-y-2">
                             <div className="flex items-center justify-between">
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Usage Progress</p>
+                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Usage Progress</p>
                               {membership.ticketId && (
-                                <p className="text-[8px] font-black text-primary uppercase tracking-widest">{membership.ticketId}</p>
+                                <p className="text-[7.5px] font-black text-[#00246b] dark:text-white uppercase tracking-widest leading-none">{membership.ticketId}</p>
                               )}
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {membership.usage.map((item, idx) => {
                                 const percentage = Math.min((item.usedCount / item.usageLimit) * 100, 100);
                                 const isExhausted = item.usedCount >= item.usageLimit;
 
                                 return (
-                                  <div key={item.serviceId?._id || item._id || idx} className="space-y-1.5">
+                                  <div key={item.serviceId?._id || item._id || idx} className="space-y-1">
                                     <div className="flex justify-between items-end">
-                                      <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200 capitalize">
+                                      <p className="text-[10px] font-bold text-slate-700 dark:text-slate-200 capitalize leading-none">
                                         {item.serviceId?.name}
                                       </p>
-                                      <p className="text-[10px] font-black text-primary tracking-tighter">
-                                        {item.usedCount} / {item.usageLimit} <span className="text-slate-400 font-bold ml-1 uppercase text-[8px]">Used</span>
+                                      <p className="text-[9px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none">
+                                        {item.usedCount} / {item.usageLimit} <span className="text-slate-400 font-bold ml-0.5 uppercase text-[7px]">Used</span>
                                       </p>
                                     </div>
-                                    <div className="h-1.5 bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                    <div className="h-1 bg-slate-100 dark:bg-gray-800 rounded-full overflow-hidden">
                                       <motion.div 
                                         initial={{ width: 0 }}
                                         animate={{ width: `${percentage}%` }}

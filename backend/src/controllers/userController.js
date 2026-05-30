@@ -21,7 +21,7 @@ const updateProfile = async (req, res) => {
     if (location) user.location = location;
     if (dob) user.dob = dob;
     if (gender) user.gender = gender;
-    if (image) user.image = image;
+    if (image !== undefined) user.image = image;
 
     if (typeof is2FAEnabled === 'boolean') user.is2FAEnabled = is2FAEnabled;
     if (typeof isBiometricEnabled === 'boolean') user.isBiometricEnabled = isBiometricEnabled;

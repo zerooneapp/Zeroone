@@ -25,12 +25,12 @@ const Account = () => {
 
 
   const menuItems = [
-    { icon: User, label: 'Personal Information', sub: 'Name, email, and phone', path: '/account/info' },
-    { icon: MapPin, label: 'Saved Addresses', sub: 'Home, office, and more', path: '/account/addresses' },
-    { icon: CreditCard, label: 'Payment Methods', sub: 'Cards, UPI, and Wallets', path: '/account/payments' },
-    { icon: Crown, label: 'My Memberships', sub: 'Active plans & benefits', path: '/account/memberships' },
-    { icon: Shield, label: 'Security', sub: 'Passwords & permissions', path: '/account/security' },
-    { icon: Settings, label: 'Preferences', sub: 'Theme, language, & region', path: '/account/preferences' },
+    { icon: User, label: 'Personal Information', sub: 'Name, email, and phone', path: '/account/info', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { icon: MapPin, label: 'Saved Addresses', sub: 'Home, office, and more', path: '/account/addresses', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { icon: CreditCard, label: 'Payment Methods', sub: 'Cards, UPI, and Wallets', path: '/account/payments', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { icon: Crown, label: 'My Memberships', sub: 'Active plans & benefits', path: '/account/memberships', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { icon: Shield, label: 'Security', sub: 'Passwords & permissions', path: '/account/security', color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { icon: Settings, label: 'Preferences', sub: 'Theme, language, & region', path: '/account/preferences', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
   ];
 
   return (
@@ -56,7 +56,7 @@ const Account = () => {
               </span>
             )}
           </div>
-          <div className="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900 shadow-md" />
+
         </div>
         
         <div className="text-center mt-3 space-y-0.5">
@@ -76,8 +76,8 @@ const Account = () => {
             onClick={() => item.path && navigate(item.path)}
             className="group bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3.5 active:scale-[0.98] transition-all shadow-sm cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-[10px] bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-400 group-hover:bg-primary/5 group-hover:text-primary transition-colors border border-slate-100 dark:border-gray-700">
-              <item.icon size={18} strokeWidth={3} />
+            <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center transition-colors ${item.bg} ${item.color}`}>
+              <item.icon size={18} strokeWidth={2.5} />
             </div>
             <div className="flex-1 leading-none">
               <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">{item.label}</p>
@@ -123,7 +123,7 @@ const Account = () => {
                 <LogOut size={20} strokeWidth={2.5} />
               </div>
               <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Confirm Logout</h3>
-              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-1.5 tracking-widest leading-relaxed">
+              <p className="text-[12px] text-slate-400 dark:text-gray-500 mt-1.5 leading-relaxed">
                 Are you sure you want to log out? You will need to login again.
               </p>
               <div className="flex gap-2.5 mt-6">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { ArrowLeft, User, Calendar, Phone, ShieldCheck, ArrowRight, Camera } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, ShieldCheck, ArrowRight, Camera, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -32,6 +32,17 @@ const PersonalInformation = () => {
   }, [user]);
 
   const [loading, setLoading] = useState(false);
+
+  const handleDeleteImage = async () => {
+    setFormData(prev => ({ ...prev, image: null }));
+    try {
+      const res = await api.patch('/users/profile', { image: '' });
+      updateUser(res.data);
+      toast.success('Profile image removed');
+    } catch (err) {
+      toast.error('Failed to remove image');
+    }
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -113,6 +124,16 @@ const PersonalInformation = () => {
                 <Camera size={18} className="text-white" />
               </div>
             </label>
+            {formData.image && (
+              <button
+                type="button"
+                onClick={handleDeleteImage}
+                className="absolute -top-1 -right-1 z-20 w-6 h-6 bg-rose-500 hover:bg-rose-600 text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-all border-2 border-white dark:border-gray-900"
+                title="Remove profile image"
+              >
+                <Trash2 size={10} strokeWidth={3} />
+              </button>
+            )}
           </div>
         </div>
 

@@ -66,6 +66,14 @@ const ServiceDetail = () => {
   const [membershipActive, setMembershipActive] = useState(true);
   const { role, isAuthenticated, user } = useAuthStore();
   const socket = useSocket(user?._id);
+  const [lightboxImg, setLightboxImg] = useState(null);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const touchStartRef = React.useRef({ distance: 0, scale: 1, x: 0, y: 0 });
+  const panStartRef = React.useRef({ x: 0, y: 0 });
+  const dragStartRef = React.useRef({ x: 0, y: 0 });
+  const viewportRef = React.useRef(null);
 
   // 1. Fetch Main Data (Vendor + Services)
   useEffect(() => {
@@ -403,6 +411,123 @@ const ServiceDetail = () => {
       setActiveIndex(index);
     }
   };
+
+  // Sync state to refs for high-performance touch response without rebinding listeners
+  const zoomScaleRef = React.useRef(1);
+  const panOffsetRef = React.useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    zoomScaleRef.current = zoomScale;
+  }, [zoomScale]);
+
+  useEffect(() => {
+    panOffsetRef.current = panOffset;
+  }, [panOffset]);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const handleStart = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault(); // Prevent native browser pinch-to-zoom
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const distance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        touchStartRef.current = {
+          distance,
+          scale: zoomScaleRef.current,
+          x: (t1.clientX + t2.clientX) / 2,
+          y: (t1.clientY + t2.clientY) / 2
+        };
+      } else if (e.touches.length === 1) {
+        const t = e.touches[0];
+        panStartRef.current = {
+          x: t.clientX - panOffsetRef.current.x,
+          y: t.clientY - panOffsetRef.current.y
+        };
+      }
+    };
+
+    const handleMove = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault(); // Prevent native browser pinch-to-zoom
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const distance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const start = touchStartRef.current;
+        if (start.distance > 0) {
+          const factor = distance / start.distance;
+          const newScale = Math.max(1, Math.min(5, start.scale * factor));
+          setZoomScale(newScale);
+        }
+      } else if (e.touches.length === 1 && zoomScaleRef.current > 1) {
+        e.preventDefault(); // Prevent scrolling page while panning zoomed image
+        const t = e.touches[0];
+        setPanOffset({
+          x: t.clientX - panStartRef.current.x,
+          y: t.clientY - panStartRef.current.y
+        });
+      }
+    };
+
+    const handleEnd = (e) => {
+      if (e.touches.length === 0) {
+        if (zoomScaleRef.current <= 1) {
+          setPanOffset({ x: 0, y: 0 });
+        }
+      }
+    };
+
+    viewport.addEventListener('touchstart', handleStart, { passive: false });
+    viewport.addEventListener('touchmove', handleMove, { passive: false });
+    viewport.addEventListener('touchend', handleEnd, { passive: false });
+
+    return () => {
+      viewport.removeEventListener('touchstart', handleStart);
+      viewport.removeEventListener('touchmove', handleMove);
+      viewport.removeEventListener('touchend', handleEnd);
+    };
+  }, [lightboxImg]);
+
+  // Prevent page zooming globally when lightbox is active
+  useEffect(() => {
+    if (!lightboxImg) return;
+
+    const preventGlobalZoom = (e) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchmove', preventGlobalZoom, { passive: false });
+    return () => {
+      document.removeEventListener('touchmove', preventGlobalZoom);
+    };
+  }, [lightboxImg]);
+
+  const handleMouseDown = (e) => {
+    if (zoomScale > 1) {
+      setIsMouseDown(true);
+      dragStartRef.current = {
+        x: e.clientX - panOffset.x,
+        y: e.clientY - panOffset.y
+      };
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (isMouseDown && zoomScale > 1) {
+      setPanOffset({
+        x: e.clientX - dragStartRef.current.x,
+        y: e.clientY - dragStartRef.current.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+  };
   const filteredServices = useMemo(() => {
     return selectedCat === 'All'
       ? services
@@ -468,7 +593,14 @@ const ServiceDetail = () => {
           >
             {gallery.length > 0 ? (
               gallery.map((img, idx) => (
-                <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative">
+                <div
+                  key={idx}
+                  className="w-full h-full flex-shrink-0 snap-center relative cursor-pointer"
+                  onClick={() => {
+                    setLightboxImg(img);
+                    setZoomScale(1);
+                  }}
+                >
                   <img
                     loading="lazy"
                     src={img}
@@ -479,7 +611,13 @@ const ServiceDetail = () => {
                 </div>
               ))
             ) : (
-              <div className="w-full h-full snap-center">
+              <div
+                className="w-full h-full snap-center cursor-pointer"
+                onClick={() => {
+                  setLightboxImg("https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200");
+                  setZoomScale(1);
+                }}
+              >
                 <img
                   src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200"
                   className="w-full h-full object-cover"
@@ -631,80 +769,82 @@ const ServiceDetail = () => {
       </div>
 
       {/* Selected Services Section */}
-      <div className="px-3 mt-4 space-y-2">
-        <SectionTitle title="Selected Services" className="mb-1" />
-        {cartItems.length > 0 && hasItemsFromThisVendor ? 
-          cartItems.map((item) => {
-            const cartServiceEntry = (cartPricing?.services || []).find(
-              (s) => String(s.serviceId) === String(item._id)
-            );
-            const priceMeta = cartServiceEntry
-              ? {
-                  originalPrice: cartServiceEntry.originalPrice,
-                  finalPrice: cartServiceEntry.finalPrice,
-                  discount: cartServiceEntry.discount
-                }
-              : {
-                  originalPrice: item.price,
-                  finalPrice: item.price,
-                  discount: 0
-                };
+      {selectedCat !== 'Plans' && (
+        <div className="px-3 mt-4 space-y-2">
+          <SectionTitle title="Selected Services" className="mb-1" />
+          {cartItems.length > 0 && hasItemsFromThisVendor ? 
+            cartItems.map((item) => {
+              const cartServiceEntry = (cartPricing?.services || []).find(
+                (s) => String(s.serviceId) === String(item._id)
+              );
+              const priceMeta = cartServiceEntry
+                ? {
+                    originalPrice: cartServiceEntry.originalPrice,
+                    finalPrice: cartServiceEntry.finalPrice,
+                    discount: cartServiceEntry.discount
+                  }
+                : {
+                    originalPrice: item.price,
+                    finalPrice: item.price,
+                    discount: 0
+                  };
 
-            return (
-              <div
-                key={item._id}
-                className="bg-white dark:bg-gray-900 border border-[#00246b]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
-                    <img 
-                      loading="lazy"
-                      src={item.image || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800'} 
-                      className="w-full h-full object-cover" 
-                      alt={item.name} 
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
-                          <Clock size={8} /> {item.duration}m
-                        </span>
-                        <div className="flex items-center gap-1.5 leading-none">
-                          <span className="text-xs font-black text-[#0B1222] dark:text-white">₹{priceMeta.finalPrice}</span>
-                          {priceMeta.discount > 0 && (
-                            <span className="text-[10px] font-bold text-gray-400 line-through">₹{priceMeta.originalPrice}</span>
-                          )}
+              return (
+                <div
+                  key={item._id}
+                  className="bg-white dark:bg-gray-900 border border-[#00246b]/10 rounded-2xl p-2.5 relative shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+                      <img 
+                        loading="lazy"
+                        src={item.image || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800'} 
+                        className="w-full h-full object-cover" 
+                        alt={item.name} 
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{item.name}</h4>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[8px] font-bold text-[#0B1222]/40 dark:text-gray-400 flex items-center gap-1 uppercase">
+                            <Clock size={8} /> {item.duration}m
+                          </span>
+                          <div className="flex items-center gap-1.5 leading-none">
+                            <span className="text-xs font-black text-[#0B1222] dark:text-white">₹{priceMeta.finalPrice}</span>
+                            {priceMeta.discount > 0 && (
+                              <span className="text-[10px] font-bold text-gray-400 line-through">₹{priceMeta.originalPrice}</span>
+                            )}
+                          </div>
                         </div>
+                        {priceMeta.discount > 0 && (
+                          <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest leading-none">
+                            Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
+                          </p>
+                        )}
                       </div>
-                      {priceMeta.discount > 0 && (
-                        <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest leading-none">
-                          Now ₹{priceMeta.finalPrice} • Save ₹{priceMeta.discount}
-                        </p>
-                      )}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="bg-[#00246b]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#00246b]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
-                      Pay At Shop
+                    <div className="flex items-center gap-2">
+                      <div className="bg-[#00246b]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#00246b]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                        Pay At Shop
+                      </div>
+                      <button
+                        onClick={() => removeItem(item._id)}
+                        className="w-8 h-8 bg-black dark:bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
+                      >
+                        <Minus size={14} strokeWidth={3} />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => removeItem(item._id)}
-                      className="w-8 h-8 bg-black dark:bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
-                    >
-                      <Minus size={14} strokeWidth={3} />
-                    </button>
                   </div>
                 </div>
-              </div>
-            );
-          }) : (
-          <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl">
-            <p className="text-[8px] font-black text-[#0B1222]/30 dark:text-gray-400 uppercase tracking-widest">Tap items below to add them</p>
-          </div>
-        )}
-      </div>
+              );
+            }) : (
+            <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl">
+              <p className="text-[8px] font-black text-[#0B1222]/30 dark:text-gray-400 uppercase tracking-widest">Tap items below to add them</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Membership Plans Section */}
       {selectedCat === 'Plans' && (
@@ -733,45 +873,45 @@ const ServiceDetail = () => {
               return (
                 <div 
                   key={plan._id}
-                  className="bg-white dark:bg-gray-900 border border-amber-500/10 rounded-2xl p-4 shadow-sm relative overflow-hidden group"
+                  className="bg-white dark:bg-gray-900 border border-amber-500/10 rounded-2xl p-3 shadow-sm relative overflow-hidden group"
                 >
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full -mr-10 -mt-10 group-hover:scale-110 transition-transform" />
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform" />
                   
                   <div className="flex justify-between items-center relative z-10">
                     <div className="space-y-0.5">
-                      <h4 className="text-base font-black text-[#0B1222] dark:text-white capitalize">{plan.name}</h4>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{plan.durationDays} Days Duration</p>
+                      <h4 className="text-[13px] font-black text-[#0B1222] dark:text-white capitalize">{plan.name}</h4>
+                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{plan.durationDays} Days Duration</p>
                     </div>
-                    <div className="w-9 h-9 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600 border border-amber-500/20">
-                      <Crown size={18} />
+                    <div className="w-8 h-8 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600 border border-amber-500/20">
+                      <Crown size={15} />
                     </div>
                   </div>
 
-                  <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed line-clamp-2">
+                  <p className="text-[9px] font-medium text-slate-500 dark:text-slate-400 mt-1.5 leading-snug line-clamp-1">
                     {plan.description || "Get exclusive access to free services and priority bookings."}
                   </p>
 
-                  <div className="mt-3.5 space-y-1.5">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Free Services Included</p>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em]">Free Services Included</p>
                     <div className="flex flex-wrap gap-1">
                       {plan.services?.map(s => (
-                        <span key={s.serviceId?._id} className="px-2 py-0.5 bg-amber-500/5 text-amber-600 rounded-lg text-[8px] font-black border border-amber-500/10">
+                        <span key={s.serviceId?._id} className="px-1.5 py-0.5 bg-amber-500/5 text-amber-600 rounded-md text-[7px] font-black border border-amber-500/10">
                           {s.serviceId?.name} ({s.usageLimit}x)
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between pt-3.5 border-t border-slate-50 dark:border-gray-800">
+                  <div className="mt-2.5 flex items-center justify-between pt-2.5 border-t border-slate-50 dark:border-gray-800">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">One-time price</p>
-                      <p className="text-xl font-black text-[#0B1222] dark:text-white leading-none">₹{plan.price}</p>
+                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">One-time price</p>
+                      <p className="text-lg font-black text-[#0B1222] dark:text-white leading-none">₹{plan.price}</p>
                     </div>
                     <button
                       onClick={() => handleBuyPlan(plan)}
                       disabled={!canBuy || buyingPlanId === plan._id}
                       className={cn(
-                        "px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transition-all active:scale-95",
+                        "px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg transition-all active:scale-95",
                         isActive && isThisPlan 
                         ? "bg-emerald-500 text-white shadow-emerald-500/20" 
                         : isPending && isThisPlan
@@ -783,7 +923,7 @@ const ServiceDetail = () => {
                         : "bg-[#00246b] text-white shadow-[#00246b]/20"
                       )}
                     >
-                      {buyingPlanId === plan._id ? <Loader2 size={12} className="animate-spin" /> : (
+                      {buyingPlanId === plan._id ? <Loader2 size={11} className="animate-spin" /> : (
                         (isActive && isThisPlan) ? "Active" : 
                         (isPending && isThisPlan) ? "Pending Approval" : 
                         isOtherPlanActive ? "Member (Other Plan)" :
@@ -795,18 +935,18 @@ const ServiceDetail = () => {
                   </div>
 
                   {isActive && isThisPlan && (
-                    <div className="mt-4 p-3 bg-slate-50 dark:bg-gray-800/50 rounded-2xl border border-slate-100 dark:border-gray-800 space-y-2.5">
-                      <p className="text-[8px] font-black text-[#00246b] dark:text-primary uppercase tracking-[0.2em]">Your Current Usage</p>
-                      <div className="space-y-2">
+                    <div className="mt-2.5 p-2.5 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-slate-100 dark:border-gray-800 space-y-2">
+                      <p className="text-[7px] font-black text-[#00246b] dark:text-white uppercase tracking-[0.2em]">Your Current Usage</p>
+                      <div className="space-y-1.5">
                         {vendorMembership?.usage?.map((u) => {
                           const percentage = Math.min((u.usedCount / u.usageLimit) * 100, 100);
                           return (
-                            <div key={u.serviceId?._id} className="space-y-1">
-                              <div className="flex justify-between items-center text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase">
+                            <div key={u.serviceId?._id} className="space-y-0.5">
+                              <div className="flex justify-between items-center text-[8px] font-black text-slate-600 dark:text-slate-400 uppercase">
                                 <span>{u.serviceId?.name}</span>
                                 <span className="text-[#00246b] dark:text-white">{u.usedCount} / {u.usageLimit} Used</span>
                               </div>
-                              <div className="h-1.5 bg-slate-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                              <div className="h-1 bg-slate-200 dark:bg-gray-800 rounded-full overflow-hidden">
                                 <div 
                                   className="h-full bg-amber-500 rounded-full transition-all duration-1000"
                                   style={{ width: `${percentage}%` }}
@@ -826,75 +966,79 @@ const ServiceDetail = () => {
       )}
 
       {/* Available Services Section */}
-      <div className="px-3 mt-4 space-y-2">
-        <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
-        <div className="space-y-2">
-          {filteredServices.map((service) => {
-            const isSelected = cartItems.find(item => item._id === service._id);
-            if (isSelected) return null;
-            const priceMeta = servicePricing[String(service._id)] || {
-              originalPrice: service.price,
-              finalPrice: service.price,
-              discount: 0
-            };
+      {selectedCat !== 'Plans' && (
+        <div className="px-3 mt-4 space-y-2">
+          <SectionTitle title="Available Services" subtitle="Add more to your package" className="mb-1" />
+          <div className="space-y-2">
+            {filteredServices.map((service) => {
+              const isSelected = cartItems.find(item => item._id === service._id);
+              if (isSelected) return null;
+              const priceMeta = servicePricing[String(service._id)] || {
+                originalPrice: service.price,
+                finalPrice: service.price,
+                discount: 0
+              };
 
-            return (
-              <div
-                key={service._id}
-                className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
-              >
-                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
-                  <img 
-                    loading="lazy"
-                    src={service.image || (service.images && service.images[0]) || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800'} 
-                    className="w-full h-full object-cover" 
-                    alt={service.name} 
-                  />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
-                    <div className="flex items-center gap-1.5 leading-none">
-                      <p className="text-[10px] font-black text-[#0B1222] dark:text-white">
-                        {priceMeta.isFreeViaMembership ? 'FREE' : `₹${priceMeta.finalPrice}`}
-                      </p>
-                      {priceMeta.discount > 0 && !priceMeta.isFreeViaMembership && (
-                        <span className="text-[9px] font-bold text-gray-400 line-through">₹{priceMeta.originalPrice}</span>
-                      )}
-                    </div>
-                  {priceMeta.discount > 0 && (
-                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
-                      {priceMeta.isFreeViaMembership 
-                        ? 'FREE with membership ✨' 
-                        : `Now ₹${priceMeta.finalPrice} • Save ₹${priceMeta.discount}`}
-                    </p>
-                  )}
-                </div>
-                <div className="bg-[#00246b]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#00246b]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
-                  Pay At Shop
-                </div>
-                <button
-                  onClick={() => toggleService(service)}
-                  className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#00246b] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
+              return (
+                <div
+                  key={service._id}
+                  className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
                 >
-                  <Plus size={16} strokeWidth={3} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Trust Badges */}
-      <div className="px-3 mt-4">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#00246b]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
-          <div className="flex items-center gap-2.5">
-            <div className="text-green-500 bg-white dark:bg-gray-800 p-1 rounded-full shadow-sm">
-              <CheckCircle2 size={14} />
-            </div>
-            <p className="text-[10px] font-black text-[#0B1222] dark:text-white tracking-tight">Instant Booking Available</p>
+                  <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
+                    <img 
+                      loading="lazy"
+                      src={service.image || (service.images && service.images[0]) || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800'} 
+                      className="w-full h-full object-cover" 
+                      alt={service.name} 
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-[12px] font-black text-[#0B1222] dark:text-white leading-none mb-1">{service.name}</h4>
+                      <div className="flex items-center gap-1.5 leading-none">
+                        <p className="text-[10px] font-black text-[#0B1222] dark:text-white">
+                          {priceMeta.isFreeViaMembership ? 'FREE' : `₹${priceMeta.finalPrice}`}
+                        </p>
+                        {priceMeta.discount > 0 && !priceMeta.isFreeViaMembership && (
+                          <span className="text-[9px] font-bold text-gray-400 line-through">₹{priceMeta.originalPrice}</span>
+                        )}
+                      </div>
+                    {priceMeta.discount > 0 && (
+                      <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-1 leading-none">
+                        {priceMeta.isFreeViaMembership 
+                          ? 'FREE with membership ✨' 
+                          : `Now ₹${priceMeta.finalPrice} • Save ₹${priceMeta.discount}`}
+                      </p>
+                    )}
+                  </div>
+                  <div className="bg-[#00246b]/5 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-[8px] font-black text-[#0B1222] dark:text-gray-400 border border-[#00246b]/10 dark:border-gray-700 uppercase tracking-tighter shadow-sm whitespace-nowrap">
+                    Pay At Shop
+                  </div>
+                  <button
+                    onClick={() => toggleService(service)}
+                    className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#00246b] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
+                  >
+                    <Plus size={16} strokeWidth={3} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Trust Badges */}
+      {selectedCat !== 'Plans' && (
+        <div className="px-3 mt-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-2.5 flex items-center justify-between border border-[#00246b]/10 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.01)]">
+            <div className="flex items-center gap-2.5">
+              <div className="text-green-500 bg-white dark:bg-gray-800 p-1 rounded-full shadow-sm">
+                <CheckCircle2 size={14} />
+              </div>
+              <p className="text-[10px] font-black text-[#0B1222] dark:text-white tracking-tight">Instant Booking Available</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Fixed Sticky Action Bar */}
       <AnimatePresence>
@@ -908,11 +1052,10 @@ const ServiceDetail = () => {
           >
             <div className="flex items-center justify-between max-w-lg mx-auto">
               <div className="flex flex-col">
-                <p className="text-[8px] font-black text-white/40 capitalize tracking-widest mb-0.5 leading-none">Net total</p>
-                {totalSavings > 0 && (
-                  <p className="text-[8px] font-black text-white/40 line-through leading-none mb-1">₹{originalTotal}</p>
-                )}
-                <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-[8px] font-black text-white/40 capitalize tracking-widest leading-none">Net total</p>
+                  <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
+                </div>
                 {totalSavings > 0 && (
                   <div className="mt-1.5 flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-1 rounded-md self-start shadow-sm shadow-emerald-500/10">
                     <Tag size={8} className="text-emerald-400 fill-emerald-400" />
@@ -1015,6 +1158,75 @@ const ServiceDetail = () => {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {lightboxImg && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center pt-[38px] px-4 select-none touch-none"
+          >
+            {/* Top controls header */}
+            <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-50 pt-[38px]">
+              <span className="text-white/60 text-[9px] font-black uppercase tracking-widest leading-none">
+                Gallery Preview
+              </span>
+              <button
+                onClick={() => {
+                  setLightboxImg(null);
+                  setZoomScale(1);
+                  setPanOffset({ x: 0, y: 0 });
+                }}
+                className="w-9 h-9 rounded-xl bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+                title="Close"
+              >
+                <ArrowLeft size={16} strokeWidth={3} className="rotate-180" />
+              </button>
+            </div>
+
+            {/* Main Image Viewport */}
+            <div 
+              ref={viewportRef}
+              className="w-full h-full flex items-center justify-center p-4 relative overflow-hidden"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              <div
+                style={{
+                  transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                  transition: isMouseDown ? 'none' : 'transform 0.1s ease-out',
+                  cursor: zoomScale > 1 ? 'grab' : 'zoom-in'
+                }}
+                className="max-w-full max-h-[75vh] flex items-center justify-center"
+                onDoubleClick={() => {
+                  if (zoomScale > 1) {
+                    setZoomScale(1);
+                    setPanOffset({ x: 0, y: 0 });
+                  } else {
+                    setZoomScale(2);
+                  }
+                }}
+              >
+                <img
+                  src={lightboxImg}
+                  alt="Zoomable Preview"
+                  className="max-w-full max-h-[75vh] object-contain rounded-lg select-none pointer-events-none"
+                />
+              </div>
+            </div>
+
+            {/* Micro Tip Indicator */}
+            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
+              <p className="text-[9px] font-black text-white/40 tracking-widest uppercase">
+                Pinch to zoom • Drag to pan • Double tap to toggle
+              </p>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

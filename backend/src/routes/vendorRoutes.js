@@ -3,7 +3,7 @@ const {
   registerVendor, uploadDocs, getVendorProfile, getNearbyVendors,
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings,
   getVendorDashboard, getVendorDashboardBundle, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers,
-  deleteGalleryImage, updateSingleMedia, replaceGalleryImage, deleteVideo, getLiveReport
+  deleteGalleryImage, updateSingleMedia, replaceGalleryImage, deleteSingleMedia, deleteVideo, getLiveReport
 } = require('../controllers/vendorController');
 const {
   previewClosure,
@@ -99,6 +99,7 @@ router.post(
 router.post('/gallery/delete', protect, isApprovedVendor, deleteGalleryImage);
 router.post('/gallery/replace', protect, isApprovedVendor, upload.single('media'), replaceGalleryImage);
 router.post('/media/single', protect, isApprovedVendor, upload.single('media'), updateSingleMedia);
+router.post('/media/delete-single', protect, isApprovedVendor, deleteSingleMedia);
 router.delete('/video/delete', protect, isApprovedVendor, deleteVideo);
 
 module.exports = router;

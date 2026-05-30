@@ -199,6 +199,17 @@ const BookingStatusDetails = () => {
             </div>
           </div>
 
+          <div className="pt-2 border-t border-slate-50 dark:border-gray-800 flex justify-between items-center text-[10px] font-black tracking-tight">
+            <div className="flex flex-col">
+              <span className="text-[7px] text-slate-400 uppercase tracking-widest leading-none mb-0.5">Start Time</span>
+              <span className="text-gray-900 dark:text-white">{dayjs(booking.startTime).format('hh:mm A')}</span>
+            </div>
+            <div className="flex flex-col text-right">
+              <span className="text-[7px] text-slate-400 uppercase tracking-widest leading-none mb-0.5">End Time</span>
+              <span className="text-gray-900 dark:text-white">{dayjs(booking.endTime).format('hh:mm A')}</span>
+            </div>
+          </div>
+
           <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 space-y-2">
             <div className="flex items-start gap-2">
               <Sparkles size={12} strokeWidth={3} className="text-[#00246b] mt-0.5 shrink-0" />

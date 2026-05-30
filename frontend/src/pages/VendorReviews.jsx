@@ -18,6 +18,12 @@ const VendorReviews = () => {
   const [data, setData] = useState({ summary: { totalReviews: 0, avgRating: 0 }, reviews: [] });
   const [loading, setLoading] = useState(true);
   const [selectedService, setSelectedService] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedService]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -57,6 +63,14 @@ const VendorReviews = () => {
   const filteredReviews = selectedService === 'All'
     ? data.reviews
     : data.reviews.filter((review) => (review.services || []).includes(selectedService));
+
+  const totalReviewsCount = filteredReviews.length;
+  const totalPages = Math.ceil(totalReviewsCount / reviewsPerPage);
+
+  const paginatedReviews = filteredReviews.slice(
+    (currentPage - 1) * reviewsPerPage,
+    currentPage * reviewsPerPage
+  );
 
   if (loading) {
     return (
@@ -138,7 +152,7 @@ const VendorReviews = () => {
               </p>
             </div>
           ) : (
-            filteredReviews.map((review) => (
+            paginatedReviews.map((review) => (
               <div
                 key={review._id}
                 className="bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 rounded-xl px-3 py-2 shadow-sm"
@@ -204,6 +218,30 @@ const VendorReviews = () => {
             ))
           )}
         </section>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-2 py-6 mt-4 border-t border-slate-100 dark:border-gray-800">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-white dark:bg-gray-900 text-[#00246b] dark:text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm border border-slate-100 dark:border-gray-800 disabled:opacity-40 active:scale-95 transition-all"
+            >
+              Previous
+            </button>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[10px] font-black text-[#00246b] dark:text-white uppercase tracking-tighter">Page</span>
+              <span className="text-xs font-black text-slate-800 dark:text-white">{currentPage} <span className="text-slate-400 font-medium">of</span> {totalPages}</span>
+            </div>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-white dark:bg-gray-900 text-[#00246b] dark:text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm border border-slate-100 dark:border-gray-800 disabled:opacity-40 active:scale-95 transition-all"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
