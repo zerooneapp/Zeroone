@@ -24,7 +24,7 @@ const ServiceCard = ({ service, onToggle, onEdit, onSetHome, homeLoadingId }) =>
          <div className="flex-1 min-w-0">
             <h3 className="text-xs font-black text-gray-900 dark:text-white truncate uppercase tracking-tight leading-tight">{service.name}</h3>
             <div className="flex items-center gap-2.5 mt-0.5">
-               <p className="flex items-center gap-0.5 text-[9px] font-black text-primary uppercase tracking-tighter">
+               <p className="flex items-center gap-0.5 text-[9px] font-black text-primary dark:text-white uppercase tracking-tighter">
                   <IndianRupee size={8} strokeWidth={3} /> {service.price}
                </p>
                <div className="w-1 h-1 rounded-full bg-slate-200 dark:bg-gray-800" />
