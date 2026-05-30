@@ -238,7 +238,7 @@ const VendorBookings = () => {
         </div>
       </header>
 
-      <main className="px-4 pt-[238px] max-w-4xl mx-auto space-y-3">
+      <main className="px-4 pt-[225px] max-w-4xl mx-auto space-y-3">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (

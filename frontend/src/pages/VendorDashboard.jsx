@@ -380,7 +380,7 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      <main className="px-1.5 space-y-2 pt-[92px]">
+      <main className="px-2.5 space-y-2 pt-[92px]">
         {data && !data.subscription?.isActive && (
           <section className="px-0.5 mb-2">
             <div
