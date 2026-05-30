@@ -62,6 +62,9 @@ const ReviewManagement = () => {
         await api.post(`/admin/reviews/${id}/approve`);
         toast.success('Review authorized');
       } else {
+        const confirmDelete = window.confirm("Are you sure you want to delete this review?");
+        if (!confirmDelete) return;
+
         await api.delete(`/admin/reviews/${id}`);
         toast.success('Review removed');
       }
@@ -112,13 +115,6 @@ const ReviewManagement = () => {
                   ))}
                 </div>
               </div>
-              <button
-                onClick={handleApproveAll}
-                className="h-11 px-5 bg-slate-900 text-white rounded-xl font-black text-[11px] capitalize tracking-widest shadow-lg shadow-slate-900/10 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
-              >
-                <ShieldCheck size={18} strokeWidth={3} />
-                Verify All
-              </button>
             </div>
           </div>
 
@@ -167,7 +163,7 @@ const ReviewManagement = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <SummaryCard
               label="Global Avg Performance"
               value={`${data.summary.avgRating}/5.0`}
@@ -181,13 +177,6 @@ const ReviewManagement = () => {
               icon={MessageSquare}
               color="slate"
               sub="Total authenticated review nodes"
-            />
-            <SummaryCard
-              label="Quarantined Reviews"
-              value={data.summary.pendingModeration}
-              icon={AlertCircle}
-              color="amber"
-              sub="Nodes awaiting administrative audit"
             />
           </div>
 
@@ -214,11 +203,6 @@ const ReviewManagement = () => {
                     <div className="space-y-1 leading-none">
                       <div className="flex items-center gap-1.5">
                         <h3 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tighter pt-0.5">{review.user}</h3>
-                        {review.status === 'pending' && (
-                          <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded text-[8px] font-black capitalize tracking-widest leading-none">
-                            Awaiting Audit
-                          </span>
-                        )}
                       </div>
                       <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest opacity-60">
                         Target: <span className="text-primary dark:text-white">{review.vendor}</span>
@@ -256,37 +240,16 @@ const ReviewManagement = () => {
                 </div>
    
                 <div className="flex items-center gap-2 mt-auto pt-1">
-                  {review.status === 'pending' ? (
-                    <>
-                      <button
-                        onClick={() => handleAction(review._id, 'approve')}
-                        className="flex-1 h-9 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black capitalize tracking-widest border border-emerald-100 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                      >
-                        <ShieldCheck size={16} strokeWidth={3} />
-                        Authorize
-                      </button>
-                      <button
-                        onClick={() => handleAction(review._id, 'delete')}
-                        className="w-9 h-9 bg-rose-50 text-rose-600 rounded-lg border border-rose-100 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
-                      >
-                        <Ban size={16} strokeWidth={3} />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex-1 h-9 flex items-center gap-2 px-3 opacity-70">
-                        <CheckCircle2 size={14} className="text-emerald-500" />
-                        <span className="text-[10px] font-black text-slate-400 capitalize tracking-widest">Live on Platform</span>
-                      </div>
-                      <button
-                        onClick={() => handleAction(review._id, 'delete')}
-                        className="w-9 h-9 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center"
-                      >
-                        <Trash2 size={16} strokeWidth={3} />
-                      </button>
-                    </>
-                  )}
-   
+                  <div className="flex-1 h-9 flex items-center gap-2 px-3 opacity-70">
+                    <CheckCircle2 size={14} className="text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 capitalize tracking-widest">Live on Platform</span>
+                  </div>
+                  <button
+                    onClick={() => handleAction(review._id, 'delete')}
+                    className="w-9 h-9 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center"
+                  >
+                    <Trash2 size={16} strokeWidth={3} />
+                  </button>
                 </div>
    
                 <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-bl-full transform translate-x-10 -translate-y-10 opacity-0 group-hover:opacity-100 transition-all" />

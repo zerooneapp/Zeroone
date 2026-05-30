@@ -19,6 +19,18 @@ const PersonalInformation = () => {
     image: user?.image || null
   });
 
+  React.useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        name: prev.name || user.name || '',
+        dob: prev.dob || (user.dob ? dayjs(user.dob).format('YYYY-MM-DD') : ''),
+        gender: prev.gender || user.gender || 'male',
+        phone: prev.phone || user.phone || '',
+        image: prev.image || user.image || null
+      }));
+    }
+  }, [user]);
+
   const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {

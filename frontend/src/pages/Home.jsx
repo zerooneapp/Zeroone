@@ -155,10 +155,10 @@ const Home = () => {
 
 
   return (
-    <div className="pb-24 animate-in fade-in duration-700 bg-transparent min-h-screen">
+    <div className="pb-24 bg-transparent min-h-screen">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
       <div className="px-4 pt-0 pb-0.5 mb-0.5">
-        <div className="relative group animate-in slide-in-from-top-3 duration-700 w-full mx-auto">
+        <div className="relative group w-full mx-auto">
           {/* Multi-layered Soft Glow */}
           <div className="absolute -inset-1 bg-gradient-to-r from-[#1C2C4E]/10 via-blue-500/5 to-[#1C2C4E]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
 
@@ -220,26 +220,17 @@ const Home = () => {
           {loading ? (
             <VendorSkeleton />
           ) : (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPage}
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-2.5"
-              >
-                {currentVendors.length > 0 ? (
-                  currentVendors.map((vendor) => (
-                    <VendorCard key={vendor.cardKey || vendor._id} vendor={vendor} variant="full" />
-                  ))
-                ) : (
-                  <div className="py-20 text-center">
-                    <p className="text-[10px] font-black text-[#0B1222] dark:text-white/40 uppercase tracking-widest opacity-25">No Professionals Found</p>
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+            <div className="space-y-2.5">
+              {currentVendors.length > 0 ? (
+                currentVendors.map((vendor) => (
+                  <VendorCard key={vendor.cardKey || vendor._id} vendor={vendor} variant="full" />
+                ))
+              ) : (
+                <div className="py-20 text-center">
+                  <p className="text-[10px] font-black text-[#0B1222] dark:text-white/40 uppercase tracking-widest opacity-25">No Professionals Found</p>
+                </div>
+              )}
+            </div>
           )}
         </div>
 

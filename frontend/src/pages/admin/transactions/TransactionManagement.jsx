@@ -197,7 +197,7 @@ const TransactionManagement = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 no-print">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 no-print">
         <SummaryCard
           label="Total Capital Inflow"
           value={data.summary.totalInflow}
@@ -211,13 +211,6 @@ const TransactionManagement = () => {
           icon={ArrowDownLeft}
           color="rose"
           sub="Daily and monthly subscription deductions"
-        />
-        <SummaryCard
-          label="Pending Settlements"
-          value={data.summary.pendingAmount}
-          icon={Clock}
-          color="amber"
-          sub={`${data.summary.pendingCount || 0} transactions awaiting confirmation`}
         />
       </div>
 

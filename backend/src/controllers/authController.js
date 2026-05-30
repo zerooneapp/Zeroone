@@ -194,6 +194,16 @@ const me = async (req, res) => {
       phone: user.phone,
       image: user.image,
       role: user.role || (req.staff ? 'staff' : (req.user ? req.user.role : 'customer')),
+      email: user.email,
+      dob: user.dob,
+      gender: user.gender,
+      address: user.address,
+      location: user.location,
+      favoriteVendors: user.favoriteVendors,
+      is2FAEnabled: user.is2FAEnabled,
+      isBiometricEnabled: user.isBiometricEnabled,
+      notificationSettings: user.notificationSettings,
+      preferences: user.preferences,
     };
 
     if (responseData.role === 'vendor') {

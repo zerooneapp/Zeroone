@@ -9,7 +9,7 @@ const reviewSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['approved', 'pending'],
-    default: 'pending'
+    default: 'approved'
   },
   moderatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   moderatedAt: { type: Date }

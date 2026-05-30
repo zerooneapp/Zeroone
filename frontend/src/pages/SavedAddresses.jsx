@@ -30,6 +30,13 @@ const SavedAddresses = () => {
   const [manualAddress, setManualAddress] = useState(user?.address || '');
   const [selectedLocation, setSelectedLocation] = useState(() => getInitialLocation(user));
 
+  React.useEffect(() => {
+    if (user) {
+      setManualAddress(prev => prev || user.address || '');
+      setSelectedLocation(prev => prev || getInitialLocation(user));
+    }
+  }, [user]);
+
   const resolveAddressToLocation = async (address) => {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(address)}`
@@ -135,7 +142,7 @@ const SavedAddresses = () => {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => navigate('/account')}
+            onClick={() => navigate(-1)}
             className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all"
           >
             <ArrowLeft size={18} className="text-gray-900 dark:text-white" />

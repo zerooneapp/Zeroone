@@ -458,7 +458,7 @@ const ServiceDetail = () => {
         </div>
       </div>
 
-      <div className="pt-[100px] relative bg-white dark:bg-gray-950 overflow-hidden">
+      <div className="pt-[88px] relative bg-white dark:bg-gray-950 overflow-hidden">
         <div className="relative group">
           {/* Elite Swipeable Carousel */}
           <div
