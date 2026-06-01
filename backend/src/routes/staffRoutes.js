@@ -8,7 +8,8 @@ const {
   getStaffProfile,
   getStaffHistory,
   getStaffAvailabilityForDate,
-  upsertStaffAvailabilityForDate
+  upsertStaffAvailabilityForDate,
+  createStaffManualBooking
 } = require('../controllers/staffController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { isApprovedVendor } = require('../middleware/vendorMiddleware');
@@ -22,6 +23,7 @@ const router = express.Router();
 // Public/Customer access routes
 router.get('/profile', protect, authorize('staff'), getStaffProfile);
 router.get('/history', protect, authorize('staff'), getStaffHistory);
+router.post('/manual-booking', protect, authorize('staff'), createStaffManualBooking);
 router.get('/', listStaff);
 router.get('/:id', getStaffById);
 

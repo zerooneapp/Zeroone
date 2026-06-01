@@ -12,7 +12,7 @@ const VendorReviews = lazy(() => import('./pages/VendorReviews'));
 const Cart = lazy(() => import('./pages/Cart'));
 const CheckoutReview = lazy(() => import('./pages/CheckoutReview'));
 const BookingSuccess = lazy(() => import('./pages/BookingSuccess'));
-const MyBookings = lazy(() => import('./pages/MyBookings'));
+import MyBookings from './pages/MyBookings';
 const BookingStatusDetails = lazy(() => import('./pages/BookingStatusDetails'));
 const Account = lazy(() => import('./pages/Account'));
 const Favorites = lazy(() => import('./pages/Favorites'));
@@ -75,7 +75,7 @@ const PartnerMembership = lazy(() => import('./pages/admin/PartnerMembership'));
 
 // Staff Pages
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
-const StaffBookings = lazy(() => import('./pages/StaffBookings'));
+import StaffBookings from './pages/StaffBookings';
 import StaffAccount from './pages/StaffAccount';
 const StaffHistory = lazy(() => import('./pages/StaffHistory'));
 

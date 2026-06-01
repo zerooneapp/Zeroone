@@ -253,7 +253,7 @@ const VendorWallet = () => {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 animate-pulse">
+      <div className="p-6 space-y-6 pt-[64px] animate-pulse">
         <div className="h-40 bg-gray-100 dark:bg-gray-800 rounded-[3rem]" />
         <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((index) => (

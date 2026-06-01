@@ -3,7 +3,7 @@ import {
    ClipboardList, CheckCircle, Clock,
    ShieldCheck, User, CheckCircle2,
    RefreshCw, Phone, Sun, Moon, Bell,
-   Lock, Play, LogOut, MapPin
+   Lock, Play, LogOut, MapPin, CalendarPlus
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
@@ -14,6 +14,7 @@ import useSocket from '../hooks/useSocket';
 import Navbar from '../layouts/Navbar';
 import NotificationDrawer from '../components/NotificationDrawer';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import StaffCreateBookingModal from '../components/StaffCreateBookingModal';
 
 const StaffDashboard = () => {
    const { user, logout, myBookings, fetchMyBookings, fetchStaffProfile } = useAuthStore();
@@ -21,9 +22,10 @@ const StaffDashboard = () => {
    useSocket(user?._id);
 
    const bookings = [...(myBookings || [])].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-   const [loading, setLoading] = useState(myBookings.length === 0);
+   const [loading, setLoading] = useState(myBookings.length === 0 && !user);
    const [showNotifications, setShowNotifications] = useState(false);
    const [confirmModal, setConfirmModal] = useState({ isOpen: false, bookingId: null });
+   const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
    const activeBookings = bookings.filter(
       (booking) => booking.status === 'confirmed' || booking.status === 'assigned' || booking.status === 'pending'
    );
@@ -132,7 +134,7 @@ const StaffDashboard = () => {
             </div>
          </div>
 
-         <main className="p-4 space-y-3.5 pt-[92px] animate-in fade-in duration-500">
+         <main className="p-4 space-y-3.5 pt-[92px]">
             {/* 📊 COMPACT STATS GRID */}
             <div className="grid grid-cols-2 gap-2.5">
                <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
@@ -151,104 +153,98 @@ const StaffDashboard = () => {
                </div>
             </div>
 
+            {/* ➕ NEW BOOKING TILE */}
+            <button
+               onClick={() => setIsNewBookingOpen(true)}
+               className="w-full flex items-center gap-3 bg-[#00246b] dark:bg-[#00246b] rounded-2xl px-4 py-3.5 shadow-lg shadow-[#00246b]/25 active:scale-[0.98] transition-all group"
+            >
+               <div className="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center shrink-0 group-active:scale-90 transition-transform">
+                  <CalendarPlus size={18} strokeWidth={2.5} className="text-white" />
+               </div>
+               <div className="flex-1 text-left">
+                  <p className="text-[11px] font-black text-white uppercase tracking-tight leading-none">New Booking</p>
+                  <p className="text-[8px] font-bold text-white/60 uppercase tracking-widest mt-0.5">Schedule an appointment</p>
+               </div>
+               <div className="w-6 h-6 bg-white/10 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-base leading-none">+</span>
+               </div>
+            </button>
+
             {/* 📟 THE SINGLE ACTIVE ASSIGNMENT QUEUE */}
             <div className="space-y-3.5">
                <AnimatePresence mode="wait">
                   {loading ? (
-                     <div className="h-56 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl animate-pulse" />
+                     <div className="h-40 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl animate-pulse" />
                   ) : currentTask ? (
-                     <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white dark:bg-gray-900 p-4 px-5 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all"
-                     >
-                        <div className="flex items-center justify-between mb-4">
-                           <div className="flex items-center gap-3.5">
-                              <div className="w-11 h-11 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-300 overflow-hidden border border-slate-100 dark:border-gray-700">
-                                 {currentTask.userId?.image ? <img src={currentTask.userId.image} className="w-full h-full object-cover" alt={currentTask.userId?.name || 'Customer'} /> : <User size={20} strokeWidth={3} />}
-                              </div>
-                              <div className="leading-none">
-                                 <div className="flex items-center gap-2 mb-1.5">
-                                    <h4 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight uppercase truncate max-w-[140px]">{currentTask.userId?.name || 'Client'}</h4>
-                                    <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-widest ${
-                                       currentTask.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                       currentTask.status === 'pending' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' :
-                                       'bg-slate-500/10 text-slate-500 border border-slate-500/20'
-                                    }`}>
-                                       {currentTask.status === 'confirmed' ? 'Accepted' : currentTask.status}
-                                    </span>
+                     <>
+                        <motion.div
+                           initial={{ opacity: 0, scale: 0.98 }}
+                           animate={{ opacity: 1, scale: 1 }}
+                           className="bg-white dark:bg-gray-900 p-3 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all"
+                        >
+                           <div className="flex items-center justify-between mb-2.5">
+                              <div className="flex items-center gap-2.5">
+                                 <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-400 dark:text-gray-300 overflow-hidden border border-slate-100 dark:border-gray-700/60">
+                                    {currentTask.userId?.image ? (
+                                       <img src={currentTask.userId.image} className="w-full h-full object-cover" alt="Client" />
+                                    ) : (
+                                       <User size={16} strokeWidth={3} />
+                                    )}
                                  </div>
-                                 <p className="text-[8px] font-black text-primary dark:text-white uppercase tracking-[0.2em] mt-0.5 shadow-sm">{formatTime(currentTask.startTime)}</p>
-                              </div>
-                           </div>
-                           <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-95 transition-all">
-                              <Play size={14} fill="currentColor" />
-                           </div>
-                        </div>
-
-                        <div className="space-y-2 mb-4">
-                           {currentTask.services?.map((s, idx) => (
-                              <div key={idx} className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-400 opacity-80">
-                                 <div className="w-1.5 h-1.5 bg-primary rounded-full opacity-60" />
-                                 {s.name || s.serviceId?.name || 'Task Node'}
-                              </div>
-                           ))}
-                        </div>
-
-                        {/* 📍 LOCATION AWARENESS */}
-                        <div className="flex items-center justify-between mb-4">
-                           <div className="flex items-center gap-2">
-                              <MapPin size={12} className="text-gray-400" />
-                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[170px]">
-                                 {canNavigateToCustomer ? currentTask.serviceAddress : 'Shop Service'}
-                              </p>
-                           </div>
-                           {canNavigateToCustomer && (
-                              <a 
-                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="text-[9px] font-black text-primary uppercase tracking-widest underline decoration-dotted"
-                              >
-                                 Navigate
-                              </a>
-                           )}
-                        </div>
-
-                        {/* 💰 SERVICE PRICE DISPLAY */}
-                        <div className="flex items-center justify-between mb-5 bg-slate-50/50 dark:bg-gray-800/50 p-3 rounded-xl border border-slate-50 dark:border-gray-800/50">
-                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Service Price</p>
-                           <p className="text-[14px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">
-                              ₹{currentTask.totalPrice || 0}
-                           </p>
-                        </div>
-
-                        {upcomingBookings.length > 0 && (
-                           <div className="mt-4 space-y-2 pb-4">
-                              <h3 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
-                                 Upcoming clients
-                              </h3>
-                              {upcomingBookings.map((booking) => (
-                                 <div
-                                    key={booking._id}
-                                    className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/80 px-2.5 py-2 dark:border-gray-800 dark:bg-gray-800/60"
-                                 >
-                                    <div className="min-w-0">
-                                       <p className="truncate text-[10px] font-black uppercase tracking-tight text-slate-900 dark:text-white">
-                                          {booking.userId?.name || 'Client'}
-                                       </p>
-                                       <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">
-                                          {formatTime(booking.startTime)} • {booking.type === 'home' ? 'Home' : 'Shop'}
-                                       </p>
+                                 <div>
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                       <h3 className="text-[13px] font-black text-slate-900 dark:text-white leading-none">
+                                          {currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client'}
+                                       </h3>
+                                       <span className="text-[7.5px] font-black bg-primary/5 dark:bg-white/10 text-primary dark:text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                                          Active
+                                       </span>
                                     </div>
-                                    <p className="ml-3 max-w-[110px] truncate text-right text-[8px] font-black uppercase tracking-tight text-primary dark:text-white">
-                                       {booking.services?.map((service) => service.name || service.serviceId?.name).filter(Boolean).join(', ') || 'Service'}
-                                    </p>
+                                    <div className="text-[9px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight leading-none flex items-center gap-2">
+                                       <span className="flex items-center gap-0.5 text-primary/75 dark:text-white/60">
+                                          <Clock size={11} strokeWidth={3} /> {formatTime(currentTask.startTime)}
+                                       </span>
+                                       <span className="w-1 h-1 bg-slate-200 dark:bg-gray-700 rounded-full" />
+                                       <span>
+                                          Estimate: {currentTask.totalDuration} Mins
+                                       </span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div className="flex flex-wrap gap-x-3 mb-2.5 px-0.5">
+                              {currentTask.services?.map((s, idx) => (
+                                 <div key={idx} className="text-[9px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-1.5 tracking-tight">
+                                    <div className="w-1 h-1 bg-primary/40 dark:bg-white/30 rounded-full" />
+                                    {s.name || s.serviceId?.name || 'Service Task'}
                                  </div>
                               ))}
                            </div>
-                        )}
-                        
+
+                           <div className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-gray-800/60 mt-2 px-0.5">
+                              <div className="flex items-center gap-1.5">
+                                 <MapPin size={11} className="text-gray-400 shrink-0" />
+                                 <p className="text-[9px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[120px]">
+                                    {canNavigateToCustomer ? currentTask.serviceAddress : 'Shop Service'}
+                                 </p>
+                                 {canNavigateToCustomer && (
+                                    <a
+                                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       className="text-[8px] font-black text-primary uppercase tracking-widest underline decoration-dotted ml-1"
+                                    >
+                                       Nav
+                                    </a>
+                                 )}
+                              </div>
+                              <p className="text-[13px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                                 ₹{currentTask.totalPrice || 0}
+                              </p>
+                           </div>
+                        </motion.div>
+
                         {/* 🔘 FIXED ACTION BAR */}
                         <div className="fixed bottom-20 left-4 right-4 bg-white dark:bg-gray-900 p-2 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-2xl flex gap-2 z-50">
                            {currentTask.canContact && (
@@ -274,7 +270,7 @@ const StaffDashboard = () => {
                               Complete Job
                            </button>
                         </div>
-                     </motion.div>
+                     </>
                   ) : (
                      <div className="py-20 text-center space-y-6 bg-white dark:bg-gray-900/50 rounded-2xl border border-dashed border-slate-200/60 dark:border-gray-800 shadow-sm">
                         <div className="w-20 h-20 bg-slate-50 dark:bg-gray-800 rounded-2xl shadow-inner flex items-center justify-center mx-auto border border-slate-100 dark:border-gray-700">
@@ -289,6 +285,38 @@ const StaffDashboard = () => {
                      </div>
                   )}
                </AnimatePresence>
+
+               {/* 📋 UPCOMING CLIENTS — Separate Section */}
+               {upcomingBookings.length > 0 && (
+                  <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
+                     <div className="px-4 pt-4 pb-2">
+                        <h3 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
+                           Upcoming Clients
+                        </h3>
+                     </div>
+                     <div className="px-3 pb-3 space-y-2">
+                        {upcomingBookings.map((booking) => (
+                           <div
+                              key={booking._id}
+                              className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/80 px-2.5 py-2 dark:border-gray-800 dark:bg-gray-800/60"
+                           >
+                              <div className="min-w-0">
+                                 <p className="truncate text-[10px] font-black uppercase tracking-tight text-slate-900 dark:text-white">
+                                    {booking.userId?.name || booking.walkInCustomerName || 'Client'}
+                                 </p>
+                                 <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">
+                                    {formatTime(booking.startTime)} • {booking.type === 'home' ? 'Home' : 'Shop'}
+                                 </p>
+                              </div>
+                              <p className="ml-3 max-w-[110px] truncate text-right text-[8px] font-black uppercase tracking-tight text-primary dark:text-white">
+                                 {booking.services?.map((service) => service.name || service.serviceId?.name).filter(Boolean).join(', ') || 'Service'}
+                              </p>
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+               )}
+
             </div>
          </main>
 
@@ -304,6 +332,14 @@ const StaffDashboard = () => {
             confirmText="Yes, Done"
             cancelText="Not Yet"
          />
+
+         {isNewBookingOpen && (
+            <StaffCreateBookingModal
+               isOpen={isNewBookingOpen}
+               onClose={() => setIsNewBookingOpen(false)}
+               onRefresh={() => fetchBookings(false)}
+            />
+         )}
       </div>
    );
 };

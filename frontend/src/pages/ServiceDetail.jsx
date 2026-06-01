@@ -552,7 +552,7 @@ const ServiceDetail = () => {
   }, [services, selectedCat]);
 
   if (loading && !vendor) return (
-    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen">
+    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen pt-[64px]">
       <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
       <div className="grid grid-cols-2 gap-4">
         <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />

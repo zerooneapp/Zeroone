@@ -16,11 +16,11 @@ import CancellationModal from '../components/CancellationModal';
 const StaffBookings = () => {
    const { user, myBookings, fetchMyBookings } = useAuthStore();
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState(myBookings);
-  const [loading, setLoading] = useState(myBookings.length === 0);
+  const [bookings, setBookings] = useState(myBookings || []);
+  const [loading, setLoading] = useState(!myBookings);
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed
   const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
-  const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [endDate, setEndDate] = useState(dayjs().add(30, 'day').format('YYYY-MM-DD'));
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
@@ -93,6 +93,17 @@ const StaffBookings = () => {
     }
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'upcoming') {
+      setStartDate(dayjs().format('YYYY-MM-DD'));
+      setEndDate(dayjs().add(30, 'day').format('YYYY-MM-DD'));
+    } else {
+      setStartDate(dayjs().subtract(30, 'day').format('YYYY-MM-DD'));
+      setEndDate(dayjs().format('YYYY-MM-DD'));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       {/* 📱 OPTIMIZED MOBILE HEADER */}
@@ -117,7 +128,6 @@ const StaffBookings = () => {
                 <input
                   type="date"
                   value={startDate}
-                  max={dayjs().format('YYYY-MM-DD')}
                   onChange={(e) => setStartDate(e.target.value)}
                   onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 cursor-pointer"
@@ -135,7 +145,6 @@ const StaffBookings = () => {
                 <input
                   type="date"
                   value={endDate}
-                  max={dayjs().format('YYYY-MM-DD')}
                   onChange={(e) => setEndDate(e.target.value)}
                   onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 cursor-pointer"
@@ -149,7 +158,7 @@ const StaffBookings = () => {
             {['upcoming', 'completed'].map(tab => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabChange(tab)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${activeTab === tab
                   ? 'bg-white dark:bg-gray-800 text-[#00246b] dark:text-white shadow-xl shadow-black/5'
                   : 'text-gray-400'

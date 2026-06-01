@@ -593,6 +593,84 @@ const upsertStaffAvailabilityForDate = async (req, res) => {
   }
 };
 
+const createStaffManualBooking = async (req, res) => {
+  try {
+    const staff = await resolveAuthenticatedStaff(req);
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff profile not linked to this user account' });
+    }
+
+    const { name, phone, serviceIds, startTime } = req.body;
+
+    if (!name || !serviceIds || !serviceIds.length || !startTime) {
+      return res.status(400).json({ message: 'Missing required fields: name, serviceIds, startTime' });
+    }
+
+    const vendorId = staff.vendorId?._id || staff.vendorId;
+    if (!vendorId) {
+      return res.status(400).json({ message: 'Staff is not linked to any vendor' });
+    }
+
+    // Only allow services that belong to this vendor AND are assigned to this staff
+    const assignedServiceIds = (staff.services || []).map(s => String(s._id || s));
+    const validIds = serviceIds.filter(id => assignedServiceIds.includes(String(id)));
+
+    const services = await Service.find({ _id: { $in: validIds }, vendorId });
+    if (services.length === 0) {
+      return res.status(404).json({ message: 'No valid assigned services found' });
+    }
+
+    const totalDuration = services.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
+    const totalPrice = services.reduce((acc, s) => acc + (s.price || 0), 0);
+    const endTime = moment(startTime).add(totalDuration, 'minutes').toDate();
+
+    // Conflict check
+    const existing = await Booking.findOne({
+      staffId: staff._id,
+      status: { $ne: 'cancelled' },
+      startTime: { $lt: endTime },
+      endTime: { $gt: new Date(startTime) }
+    });
+    if (existing) {
+      return res.status(400).json({ message: 'You already have a booking at this time' });
+    }
+
+    const booking = await Booking.create({
+      vendorId,
+      staffId: staff._id,
+      isWalkIn: true,
+      walkInCustomerName: name,
+      walkInCustomerPhone: phone || '',
+      services: services.map(s => ({ serviceId: s._id, name: s.name, price: s.price, duration: s.duration })),
+      totalPrice,
+      totalDuration,
+      startTime: new Date(startTime),
+      endTime,
+      type: 'shop',
+      status: 'confirmed'
+    });
+
+    // Notify vendor owner
+    const Vendor = require('../models/Vendor');
+    const vendor = await Vendor.findById(vendorId).select('ownerId shopName');
+    if (vendor?.ownerId) {
+      await NotificationService.sendNotification({
+        userIds: vendor.ownerId,
+        role: 'vendor',
+        type: 'NEW_BOOKING',
+        title: 'New Appointment Booked',
+        message: `${staff.name} scheduled a new appointment for ${name}. Services: ${services.map(s => s.name).join(', ')}.`,
+        data: { bookingId: booking._id },
+        referenceId: `${booking._id}_STAFF_MANUAL`
+      });
+    }
+
+    res.status(201).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addStaff,
   listStaff,
@@ -603,4 +681,5 @@ module.exports = {
   getStaffHistory,
   getStaffAvailabilityForDate,
   upsertStaffAvailabilityForDate,
+  createStaffManualBooking,
 };
