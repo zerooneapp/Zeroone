@@ -494,15 +494,7 @@ const getVendorDashboard = async (req, res) => {
     }).lean();
     const absentStaffIds = new Set(activeClosures.map(c => c.staffId.toString()));
 
-    const activeStaffCards = [
-      {
-        id: 'owner',
-        type: 'owner',
-        name: vendor.ownerId?.name || 'Owner',
-        image: vendor.ownerId?.image || '',
-        todayBookings: todayBookings.filter((booking) => booking.staffId?.isOwner).length
-      },
-      ...activeStaffMembers
+    const activeStaffCards = activeStaffMembers
         .filter(staff => !absentStaffIds.has(staff._id.toString()))
         .map((staff) => ({
           id: staff._id.toString(),
@@ -510,8 +502,7 @@ const getVendorDashboard = async (req, res) => {
           name: staff.name,
           image: staff.image || staff.userId?.image || '',
           todayBookings: todayBookings.filter((booking) => booking.staffId && booking.staffId._id.toString() === staff._id.toString()).length
-        }))
-    ];
+        }));
     const [billingSettings, subscriptionState, dailyPlan, monthlyPlan] = await Promise.all([
       getBillingSettings(),
       getVendorSubscriptionState(vendor),
@@ -1119,15 +1110,7 @@ const getVendorDashboardBundle = async (req, res) => {
     }).lean();
     const absentStaffIds = new Set(activeClosures.map(c => c.staffId.toString()));
 
-    const activeStaffCards = [
-      {
-        id: 'owner',
-        type: 'owner',
-        name: vendor.ownerName || 'Owner',
-        image: vendor.vendorPhoto || '',
-        todayBookings: todayBookings.filter((booking) => booking.staffId?.isOwner && booking.status !== 'cancelled').length
-      },
-      ...activeStaffMembers
+    const activeStaffCards = activeStaffMembers
         .filter(staff => !absentStaffIds.has(staff._id.toString()))
         .map((staff) => ({
           id: staff._id.toString(),
@@ -1139,8 +1122,7 @@ const getVendorDashboardBundle = async (req, res) => {
             booking.staffId._id.toString() === staff._id.toString() && 
             booking.status !== 'cancelled'
           ).length
-        }))
-    ];
+        }));
 
     const { isShopCurrentlyOpen } = require('../utils/shopStatus');
     const dynamicIsShopOpen = isShopCurrentlyOpen(vendor.workingHours);
@@ -1166,7 +1148,7 @@ const getVendorDashboardBundle = async (req, res) => {
           todayBookings: stats.todayBookings,
           todayEarnings: stats.todayEarnings,
           weekEarnings: stats.weekEarnings,
-          activeStaff: activeStaffMembers.length + 1,
+          activeStaff: activeStaffMembers.length,
           avgRating: vendor.rating
         },
         engagement: {

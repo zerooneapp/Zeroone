@@ -136,7 +136,7 @@ const VendorDashboard = () => {
       return;
     }
 
-    const nextCards = (data.activeStaffCards || []).filter((card) => card.type === 'owner' || data.hasRegisteredStaff);
+    const nextCards = data.activeStaffCards || [];
     if (!nextCards.some((card) => card.id === selectedAssignee) && selectedAssignee !== 'all') {
       setSelectedAssignee('all');
     }
@@ -262,10 +262,7 @@ const VendorDashboard = () => {
     return item.staffId === selectedAssignee;
   }), [activeSchedule, data?.hasRegisteredStaff, selectedAssignee]);
 
-  const activeStaffCards = useMemo(() => (data?.activeStaffCards || []).filter((card) => {
-    if (card.type === 'owner') return true;
-    return data?.hasRegisteredStaff;
-  }), [data?.activeStaffCards, data?.hasRegisteredStaff]);
+  const activeStaffCards = useMemo(() => data?.activeStaffCards || [], [data?.activeStaffCards]);
 
   const displaySchedule = data?.hasRegisteredStaff
     ? filteredSchedule
