@@ -300,7 +300,7 @@ const VendorDashboard = () => {
           </div>
           <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[#00246b] uppercase">{item.time}</span>
+              <span className="text-[#00246b] dark:text-white uppercase">{item.time}</span>
               <span className="opacity-20">&bull;</span>
               <span className="truncate max-w-[150px]">{item.service}</span>
             </div>
@@ -563,7 +563,7 @@ const VendorDashboard = () => {
                       </div>
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[#00246b] uppercase">{item.time}</span>
+                          <span className="text-[#00246b] dark:text-white uppercase">{item.time}</span>
                           <span className="opacity-20">&bull;</span>
                           <span className="truncate max-w-[150px]">{item.service}</span>
                         </div>

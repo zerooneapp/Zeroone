@@ -77,6 +77,7 @@ const PartnerMembership = lazy(() => import('./pages/admin/PartnerMembership'));
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
 const StaffBookings = lazy(() => import('./pages/StaffBookings'));
 import StaffAccount from './pages/StaffAccount';
+const StaffHistory = lazy(() => import('./pages/StaffHistory'));
 
 // Components & Utils
 import ProtectedRoute from './components/ProtectedRoute';
@@ -278,6 +279,7 @@ function App() {
           <Route path="dashboard" element={<Navigate to="/staff" replace />} />
           <Route path="bookings" element={<StaffBookings />} />
           <Route path="account" element={<StaffAccount />} />
+          <Route path="history" element={<StaffHistory />} />
         </Route>
 
         {/* ADMIN PANEL (WITH ADMIN LAYOUT) */}

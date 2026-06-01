@@ -214,11 +214,31 @@ const patchStaff = async (req, res) => {
 const getStaffById = async (req, res) => {
   try {
     const Staff = require('../models/Staff');
+    const Booking = require('../models/Booking');
     const staff = await Staff.findById(req.params.id).populate('services');
     if (!staff || (!staff.isActive && req.user?.role !== 'vendor')) {
       return res.status(404).json({ message: 'Staff member not found or inactive' });
     }
-    res.status(200).json(staff);
+
+    // Calculate earnings for this staff member
+    const matchQuery = { staffId: staff._id, status: { $in: ['confirmed', 'completed'] } };
+    const { startDate, endDate } = req.query;
+    if (startDate && endDate) {
+      const moment = require('moment-timezone');
+      const start = moment.tz(startDate, 'YYYY-MM-DD', 'Asia/Kolkata').startOf('day').toDate();
+      const end = moment.tz(endDate, 'YYYY-MM-DD', 'Asia/Kolkata').endOf('day').toDate();
+      matchQuery.startTime = { $gte: start, $lte: end };
+    }
+
+    const earningsResult = await Booking.aggregate([
+      { $match: matchQuery },
+      { $group: { _id: '$staffId', total: { $sum: '$totalPrice' } } }
+    ]);
+
+    const staffObj = staff.toObject();
+    staffObj.totalEarnings = earningsResult[0]?.total || 0;
+
+    res.status(200).json(staffObj);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -369,6 +389,11 @@ const getStaffHistory = async (req, res) => {
     } else if (period === 'date') {
       start = moment.tz(dateValue, 'YYYY-MM-DD', 'Asia/Kolkata').startOf('day');
       end = start.clone().endOf('day');
+    } else if (period === 'custom') {
+      const sVal = req.query.startDate || moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+      const eVal = req.query.endDate || moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+      start = moment.tz(sVal, 'YYYY-MM-DD', 'Asia/Kolkata').startOf('day');
+      end = moment.tz(eVal, 'YYYY-MM-DD', 'Asia/Kolkata').endOf('day');
     } else {
       start = start.startOf('week');
       end = end.endOf('week');

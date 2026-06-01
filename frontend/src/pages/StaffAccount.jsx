@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   User, ShieldCheck, Calendar, Phone,
   LogOut, Briefcase, Award,
-  CheckCircle, TrendingUp, IndianRupee, ArrowRight
+  CheckCircle, TrendingUp, IndianRupee, ArrowRight,
+  ChevronLeft
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -14,40 +15,39 @@ import Navbar from '../layouts/Navbar';
 import dayjs from 'dayjs';
 
 const StaffAccount = () => {
-  const { logout } = useAuthStore();
+   const { logout, staffProfile, myBookings, fetchMyBookings, fetchStaffProfile } = useAuthStore();
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(staffProfile);
   const [stats, setStats] = useState({
-    skills: 0,
+    skills: staffProfile?.services?.length || 0,
     upcoming: 0,
     completed: 0
   });
-  const [loading, setLoading] = useState(true);
-  const [historyPeriod, setHistoryPeriod] = useState('week');
-  const [historyDate, setHistoryDate] = useState(dayjs().format('YYYY-MM-DD'));
-  const [historyView, setHistoryView] = useState('bookings');
-  const [history, setHistory] = useState({
-    summary: { totalBookings: 0, completedBookings: 0, totalEarnings: 0 },
-    bookings: [],
-    earnings: []
-  });
+  const [loading, setLoading] = useState(!staffProfile);
+
+  useEffect(() => {
+    if (staffProfile) {
+      setProfile(staffProfile);
+    }
+  }, [staffProfile]);
+
+  useEffect(() => {
+    const bookingList = myBookings || [];
+    setStats({
+      skills: staffProfile?.services?.length || 0,
+      upcoming: bookingList.filter((booking) => booking.status === 'confirmed' || booking.status === 'assigned').length,
+      completed: bookingList.filter((booking) => booking.status === 'completed').length
+    });
+  }, [staffProfile, myBookings]);
 
   const fetchProfile = async () => {
     try {
-      setLoading(true);
-      const [profileRes, bookingsRes] = await Promise.all([
-        api.get('/staff/profile'),
-        api.get('/bookings/my')
+      if (!profile) setLoading(true);
+      await Promise.all([
+        fetchStaffProfile(),
+        fetchMyBookings()
       ]);
-
-      const bookingList = bookingsRes.data || [];
-      setProfile(profileRes.data);
-      setStats({
-        skills: profileRes.data?.services?.length || 0,
-        upcoming: bookingList.filter((booking) => booking.status === 'confirmed' || booking.status === 'assigned').length,
-        completed: bookingList.filter((booking) => booking.status === 'completed').length
-      });
     } catch (err) {
       toast.error('Failed to load professional profile');
     } finally {
@@ -55,31 +55,9 @@ const StaffAccount = () => {
     }
   };
 
-  const fetchHistory = async () => {
-    try {
-      const res = await api.get('/staff/history', {
-        params: {
-          period: historyPeriod,
-          ...(historyPeriod === 'date' ? { date: historyDate } : {})
-        }
-      });
-      setHistory(res.data || {
-        summary: { totalBookings: 0, completedBookings: 0, totalEarnings: 0 },
-        bookings: [],
-        earnings: []
-      });
-    } catch (err) {
-      toast.error('Failed to load history');
-    }
-  };
-
   useEffect(() => {
     fetchProfile();
   }, []);
-
-  useEffect(() => {
-    fetchHistory();
-  }, [historyPeriod, historyDate]);
 
   const formatDate = (isoString) => {
     return new Date(isoString).toLocaleDateString('en-IN', {
@@ -98,59 +76,59 @@ const StaffAccount = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <div className="relative px-6 pt-6 pb-8 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-2xl shadow-2xl shadow-slate-200/50 dark:shadow-none">
-        <div className="flex flex-col items-center text-center space-y-4 pt-0">
+      <div className="relative px-4 pt-[45px] pb-4 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-2xl shadow-xl shadow-slate-200/50 dark:shadow-none">
+        <div className="flex flex-col items-center text-center space-y-2.5 pt-0">
           <div className="relative">
-            <div className="w-24 h-24 bg-slate-50 dark:bg-gray-900 rounded-2xl border-4 border-white dark:border-gray-950 shadow-2xl overflow-hidden">
-              {profile?.image ? <img src={profile.image} className="w-full h-full object-cover" alt={profile?.name || 'Staff'} /> : <User size={40} className="text-slate-300 m-7" />}
+            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-900 rounded-2xl border-2 border-white dark:border-gray-950 shadow-xl overflow-hidden flex items-center justify-center">
+              {profile?.image ? <img src={profile.image} className="w-full h-full object-cover" alt={profile?.name || 'Staff'} /> : <User size={28} className="text-slate-300" />}
             </div>
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center border-4 border-white dark:border-gray-950 shadow-lg text-white">
-              <CheckCircle size={14} strokeWidth={3} />
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center border-2 border-white dark:border-gray-950 shadow-md text-white">
+              <CheckCircle size={10} strokeWidth={3} />
             </div>
           </div>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{profile?.name}</h1>
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Professional Partner</span>
+          <div className="space-y-0.5">
+            <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{profile?.name}</h1>
+            <div className="flex items-center justify-center gap-1.5">
+              <span className="text-[8px] font-black text-slate-400 capitalize tracking-[0.2em]">Professional Partner</span>
               <div className="w-1 h-1 bg-primary rounded-full" />
-              <span className="text-[10px] font-black text-primary capitalize tracking-[0.2em]">{profile?.vendorId?.shopName || 'Market'}</span>
+              <span className="text-[8px] font-black text-primary dark:text-white capitalize tracking-[0.2em]">{profile?.vendorId?.shopName || 'Market'}</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mt-6">
-          <div className="p-3 bg-slate-50/80 dark:bg-gray-900/50 rounded-2xl text-center border border-white dark:border-gray-800/50">
-            <Award size={16} strokeWidth={2.5} className="text-primary mx-auto mb-1 opacity-80" />
-            <p className="text-[10px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{stats.skills} Skills</p>
+        <div className="grid grid-cols-3 gap-2 mt-4">
+          <div className="py-2 px-1 bg-[#00246b]/5 dark:bg-gray-900/40 rounded-xl text-center border border-[#00246b]/10 dark:border-gray-800/50">
+            <Award size={14} strokeWidth={2.5} className="text-[#00246b] dark:text-white mx-auto mb-0.5 opacity-80" />
+            <p className="text-[9px] font-black text-[#00246b] dark:text-white capitalize tracking-tight">{stats.skills} Skills</p>
           </div>
-          <div className="p-3 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl text-center border border-emerald-100/50 dark:border-emerald-900/30">
-            <CheckCircle size={16} strokeWidth={2.5} className="text-emerald-500 mx-auto mb-1" />
-            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 capitalize tracking-tight">Verified</p>
+          <div className="py-2 px-1 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl text-center border border-emerald-100/50 dark:border-emerald-900/30">
+            <CheckCircle size={14} strokeWidth={2.5} className="text-emerald-500 mx-auto mb-0.5" />
+            <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 capitalize tracking-tight">Verified</p>
           </div>
-          <div className="p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl text-center border border-blue-100/50 dark:border-blue-900/30">
-            <TrendingUp size={16} strokeWidth={2.5} className="text-blue-500 mx-auto mb-1" />
-            <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 capitalize tracking-tight">{stats.completed}+ Done</p>
+          <div className="py-2 px-1 bg-[#00246b]/5 dark:bg-gray-900/40 rounded-xl text-center border border-[#00246b]/10 dark:border-gray-800/50">
+            <TrendingUp size={14} strokeWidth={2.5} className="text-[#00246b] dark:text-white mx-auto mb-0.5" />
+            <p className="text-[9px] font-black text-[#00246b] dark:text-white capitalize tracking-tight">{stats.completed}+ Done</p>
           </div>
         </div>
 
         <button
           onClick={() => navigate('/vendor-privacy-policy')}
-          className="mt-6 w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-gray-900/50 rounded-2xl border border-white dark:border-gray-800 active:scale-[0.98] transition-all"
+          className="mt-3.5 w-full flex items-center justify-between p-2.5 px-3.5 bg-slate-50/50 dark:bg-gray-900/50 rounded-xl border border-white dark:border-gray-800 active:scale-[0.98] transition-all"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-              <ShieldCheck size={18} className="text-indigo-500" />
+            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+              <ShieldCheck size={16} className="text-indigo-500" />
             </div>
             <div className="text-left">
-              <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Privacy & Conduct</h4>
-              <p className="text-[10px] font-bold text-slate-400">View Staff Guidelines</p>
+              <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight">Privacy & Conduct</h4>
+              <p className="text-[8px] font-bold text-slate-400">View Staff Guidelines</p>
             </div>
           </div>
-          <ArrowRight size={16} className="text-slate-300" />
+          <ArrowRight size={14} className="text-slate-300" />
         </button>
       </div>
 
-      <div className="px-6 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="px-3 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
         <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Work Identity</h2>
@@ -197,7 +175,7 @@ const StaffAccount = () => {
           <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50">
+                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary dark:text-white rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50">
                   <Briefcase size={20} strokeWidth={2.5} className="opacity-80" />
                 </div>
                 <div>
@@ -206,7 +184,7 @@ const StaffAccount = () => {
                 </div>
               </div>
               {profile?.vendorId?.ownerId?.phone && (
-                <a href={`tel:${profile.vendorId.ownerId.phone}`} className="w-9 h-9 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all outline-none">
+                <a href={`tel:${profile.vendorId.ownerId.phone}`} className="w-9 h-9 bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all outline-none">
                   <Phone size={16} strokeWidth={3} />
                 </a>
               )}
@@ -216,139 +194,25 @@ const StaffAccount = () => {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">History</h2>
+            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Work History</h2>
             <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
           </div>
 
-          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: 'week', label: 'Week' },
-                { id: 'month', label: 'Month' },
-                { id: 'date', label: 'Date' }
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setHistoryPeriod(item.id)}
-                  className={`px-3 py-2 rounded-xl text-[9px] font-black capitalize tracking-widest border transition-all ${
-                    historyPeriod === item.id
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 border-slate-100 dark:border-gray-700'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-              {historyPeriod === 'date' && (
-                <input
-                  type="date"
-                  value={historyDate}
-                  onChange={(e) => setHistoryDate(e.target.value)}
-                  className="px-3 py-2 rounded-xl text-[10px] font-black bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-white border border-slate-100 dark:border-gray-700 focus:ring-0"
-                />
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 bg-slate-50/80 dark:bg-gray-800/60 rounded-2xl border border-slate-100 dark:border-gray-700/50">
-                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest">Bookings</p>
-                <p className="text-lg font-black text-slate-900 dark:text-white mt-1">{history.summary?.totalBookings || 0}</p>
+          <button
+            onClick={() => navigate('/staff/history')}
+            className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 active:scale-[0.98] transition-all shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-500">
+                <Calendar size={18} strokeWidth={2.5} />
               </div>
-              <div className="p-3 bg-emerald-50/60 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100/60 dark:border-emerald-900/30">
-                <p className="text-[8px] font-black text-emerald-500 capitalize tracking-widest">Earnings</p>
-                <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1">{formatMoney(history.summary?.totalEarnings || 0)}</p>
+              <div className="text-left">
+                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">History</h4>
+                <p className="text-[10px] font-bold text-slate-400">View bookings & earnings history</p>
               </div>
             </div>
-
-            <div className="flex bg-slate-50 dark:bg-gray-800/50 p-1 rounded-2xl border border-slate-100 dark:border-gray-700/50">
-              {[
-                { id: 'bookings', label: 'Bookings' },
-                { id: 'earnings', label: 'Earnings' }
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setHistoryView(item.id)}
-                  className={`flex-1 py-1.5 rounded-xl text-[9px] font-black capitalize tracking-widest transition-all ${
-                    historyView === item.id
-                      ? 'bg-white dark:bg-gray-900 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-400 dark:text-gray-400'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              {historyView === 'bookings' ? (
-                (history.bookings || []).length === 0 ? (
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-gray-800/60 border border-dashed border-slate-100 dark:border-gray-700 text-center">
-                    <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest">No booking history found</p>
-                  </div>
-                ) : (
-                  history.bookings.slice(0, 8).map((booking) => (
-                    <div
-                      key={booking._id}
-                      className="p-3 rounded-2xl bg-slate-50/70 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-700/50 flex items-start justify-between gap-3"
-                    >
-                      <div className="space-y-1 min-w-0">
-                        <p className="text-[11px] font-black text-slate-900 dark:text-white tracking-tight truncate">
-                          {booking.services?.map((service) => service.name).join(', ') || 'Service Booking'}
-                        </p>
-                        <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest">
-                          {formatDate(booking.startTime)} • {formatTime(booking.startTime)}
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-[7px] font-black capitalize tracking-widest px-2 py-1 rounded-lg border ${
-                            booking.status === 'completed'
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/30'
-                              : booking.status === 'cancelled'
-                                ? 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/10 dark:text-rose-400 dark:border-rose-900/30'
-                                : 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/10 dark:text-blue-400 dark:border-blue-900/30'
-                          }`}>
-                            {booking.status}
-                          </span>
-
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="flex items-center justify-end gap-1 text-emerald-600 dark:text-emerald-400">
-                          <IndianRupee size={12} strokeWidth={3} />
-                          <span className="text-[12px] font-black">{Number(booking.totalPrice || 0)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )
-              ) : (history.earnings || []).length === 0 ? (
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-gray-800/60 border border-dashed border-slate-100 dark:border-gray-700 text-center">
-                  <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest">No earning history found</p>
-                </div>
-              ) : (
-                history.earnings.slice(0, 8).map((entry) => (
-                  <div
-                    key={entry._id}
-                    className="p-3 rounded-2xl bg-slate-50/70 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-700/50 flex items-start justify-between gap-3"
-                  >
-                    <div className="space-y-1 min-w-0">
-                      <p className="text-[11px] font-black text-slate-900 dark:text-white tracking-tight truncate">
-                        {entry.description || 'Booking Revenue'}
-                      </p>
-                      <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest">
-                        {formatDate(entry.timestamp)} • {formatTime(entry.timestamp)}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="flex items-center justify-end gap-1 text-emerald-600 dark:text-emerald-400">
-                        <IndianRupee size={12} strokeWidth={3} />
-                        <span className="text-[12px] font-black">{Number(entry.amount || 0)}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+            <ArrowRight size={16} className="text-slate-300" />
+          </button>
         </div>
 
         <button

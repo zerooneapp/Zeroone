@@ -16,12 +16,12 @@ import NotificationDrawer from '../components/NotificationDrawer';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
 
 const StaffDashboard = () => {
-   const { user, logout } = useAuthStore();
+   const { user, logout, myBookings, fetchMyBookings, fetchStaffProfile } = useAuthStore();
    const { unreadCount, fetchNotifications } = useNotificationStore();
    useSocket(user?._id);
 
-   const [bookings, setBookings] = useState([]);
-   const [loading, setLoading] = useState(true);
+   const bookings = [...(myBookings || [])].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+   const [loading, setLoading] = useState(myBookings.length === 0);
    const [showNotifications, setShowNotifications] = useState(false);
    const [confirmModal, setConfirmModal] = useState({ isOpen: false, bookingId: null });
    const activeBookings = bookings.filter(
@@ -60,21 +60,19 @@ const StaffDashboard = () => {
 
    const fetchBookings = async (showLoading = true) => {
       try {
-         if (showLoading) setLoading(true);
-         const res = await api.get('/bookings/my');
-         // 🚀 QUEUE LOGIC: Keep it sorted by time for "Immediate Next" delivery
-         const sorted = (res.data || []).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-         setBookings(sorted);
+         if (showLoading && myBookings.length === 0) setLoading(true);
+         await fetchMyBookings();
          fetchNotifications(); // Sync global unread count
       } catch (err) {
          console.error('Core sync failed');
       } finally {
-         if (showLoading) setLoading(false);
+         setLoading(false);
       }
    };
 
    useEffect(() => {
       fetchBookings();
+      fetchStaffProfile();
 
       const handleGlobalEvent = (e) => {
          const type = e.detail?.type;
@@ -112,14 +110,14 @@ const StaffDashboard = () => {
    };
 
    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32 animate-in fade-in duration-500">
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32">
          {/* 🏙️ CLEAN MINIMAL HEADER (NO ITALIC) */}
-         <div className="px-5 pt-[40px] pb-2 bg-white/80 dark:bg-gray-900/80 sticky top-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
+         <div className="px-4 pt-[40px] pb-3 bg-white/80 dark:bg-gray-900/80 fixed top-0 left-0 right-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-1">
                   <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
                      <span className="text-primary dark:text-white">Zero</span>
-                     <span className="text-primary/30 dark:text-gray-600">One</span>
+                     <span className="text-primary/30 dark:text-white">One</span>
                   </h1>
 
                </div>
@@ -134,7 +132,7 @@ const StaffDashboard = () => {
             </div>
          </div>
 
-         <main className="p-4 space-y-3.5">
+         <main className="p-4 space-y-3.5 pt-[92px] animate-in fade-in duration-500">
             {/* 📊 COMPACT STATS GRID */}
             <div className="grid grid-cols-2 gap-2.5">
                <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
@@ -180,7 +178,7 @@ const StaffDashboard = () => {
                                        {currentTask.status === 'confirmed' ? 'Accepted' : currentTask.status}
                                     </span>
                                  </div>
-                                 <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-0.5 shadow-sm">{formatTime(currentTask.startTime)}</p>
+                                 <p className="text-[8px] font-black text-primary dark:text-white uppercase tracking-[0.2em] mt-0.5 shadow-sm">{formatTime(currentTask.startTime)}</p>
                               </div>
                            </div>
                            <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-95 transition-all">
@@ -243,7 +241,7 @@ const StaffDashboard = () => {
                                           {formatTime(booking.startTime)} • {booking.type === 'home' ? 'Home' : 'Shop'}
                                        </p>
                                     </div>
-                                    <p className="ml-3 max-w-[110px] truncate text-right text-[8px] font-black uppercase tracking-tight text-primary">
+                                    <p className="ml-3 max-w-[110px] truncate text-right text-[8px] font-black uppercase tracking-tight text-primary dark:text-white">
                                        {booking.services?.map((service) => service.name || service.serviceId?.name).filter(Boolean).join(', ') || 'Service'}
                                     </p>
                                  </div>
@@ -270,7 +268,7 @@ const StaffDashboard = () => {
                            )}
                            <button
                               onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
-                              className="flex-1 h-12 bg-primary text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[10px] uppercase tracking-widest shadow-xl"
+                              className="flex-1 h-12 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[10px] uppercase tracking-widest shadow-xl"
                            >
                               <CheckCircle size={18} strokeWidth={3} />
                               Complete Job

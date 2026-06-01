@@ -11,6 +11,10 @@ export const useAuthStore = create(
       isAuthenticated: false,
       loading: false,
       isInitialized: false,
+      staffProfile: null,
+      staffProfileLoading: false,
+      myBookings: [],
+      myBookingsLoading: false,
       vendorStatus: {
         isActive: false,
         currentPlan: null,
@@ -136,6 +140,30 @@ export const useAuthStore = create(
           });
         } catch (err) {
           console.error('Vendor status sync failed', err);
+        }
+      },
+
+      fetchStaffProfile: async () => {
+        set({ staffProfileLoading: true });
+        try {
+          const res = await api.get('/staff/profile');
+          set({ staffProfile: res.data, staffProfileLoading: false });
+          return { success: true, data: res.data };
+        } catch (err) {
+          set({ staffProfileLoading: false });
+          return { success: false, message: err.message };
+        }
+      },
+
+      fetchMyBookings: async () => {
+        set({ myBookingsLoading: true });
+        try {
+          const res = await api.get('/bookings/my');
+          set({ myBookings: res.data || [], myBookingsLoading: false });
+          return { success: true, data: res.data };
+        } catch (err) {
+          set({ myBookingsLoading: false });
+          return { success: false, message: err.message };
         }
       },
 

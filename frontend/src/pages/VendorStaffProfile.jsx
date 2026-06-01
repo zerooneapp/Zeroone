@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Phone, Scissors, Calendar, ShieldCheck, Clock, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { ArrowLeft, User, Phone, Scissors, Calendar, ShieldCheck, Clock, CheckCircle2, AlertCircle, Sparkles, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import { useVendorStore } from '../store/vendorStore';
@@ -19,6 +19,9 @@ const VendorStaffProfile = () => {
   }, [staffData, id]);
 
   const [staff, setStaff] = useState(storeStaff || null);
+  const [filterPeriod, setFilterPeriod] = useState('lifetime'); // lifetime, custom
+  const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'));
 
   // Sync state if store gets updated
   useEffect(() => {
@@ -26,6 +29,16 @@ const VendorStaffProfile = () => {
       setStaff(storeStaff);
     }
   }, [storeStaff]);
+
+  const fetchStaffDetails = async () => {
+    try {
+      const params = filterPeriod === 'custom' ? { startDate, endDate } : {};
+      const res = await api.get(`/staff/${id}`, { params });
+      setStaff(res.data);
+    } catch (err) {
+      toast.error('Failed to load staff details');
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -41,6 +54,10 @@ const VendorStaffProfile = () => {
   useEffect(() => {
     loadData();
   }, [id, storeStaff]);
+
+  useEffect(() => {
+    fetchStaffDetails();
+  }, [id, filterPeriod, startDate, endDate]);
 
   const totalEarnings = staff?.totalEarnings || 0;
   const isActive = staff ? (staff.isActive && !staff.activeClosure) : false;
@@ -124,11 +141,73 @@ const VendorStaffProfile = () => {
             </div>
           </div>
         </section>
+        {/* Earnings Filter */}
+        <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest pl-1">Earnings Filter</h3>
+            <div className="flex gap-1.5">
+              {[
+                { id: 'lifetime', label: 'Lifetime' },
+                { id: 'custom', label: 'Custom' }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setFilterPeriod(item.id)}
+                  className={`px-2.5 py-1 rounded-lg text-[9px] font-black capitalize tracking-widest border transition-all ${
+                    filterPeriod === item.id
+                      ? 'bg-[#00246b] text-white border-[#00246b]'
+                      : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 border-slate-100 dark:border-gray-700'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filterPeriod === 'custom' && (
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-slate-100 dark:border-gray-800/50 mt-1">
+              <div className="flex-1 space-y-1 text-left">
+                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
+                <div className="relative group">
+                  <input
+                    type="date"
+                    value={startDate}
+                    max={dayjs().format('YYYY-MM-DD')}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 text-gray-300">
+                <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
+              </div>
+
+              <div className="flex-1 space-y-1 text-left">
+                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
+                <div className="relative group">
+                  <input
+                    type="date"
+                    value={endDate}
+                    max={dayjs().format('YYYY-MM-DD')}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
 
         {/* Stats Grid */}
         <section className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl p-3 shadow-sm">
-            <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Total Earnings</p>
+            <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">
+              {filterPeriod === 'custom' ? 'Filtered Earnings' : 'Total Earnings'}
+            </p>
             <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">₹{totalEarnings.toLocaleString()}</p>
           </div>
           <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl p-3 shadow-sm">

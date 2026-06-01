@@ -14,21 +14,26 @@ import Navbar from '../layouts/Navbar';
 import CancellationModal from '../components/CancellationModal';
 
 const StaffBookings = () => {
-  const { user } = useAuthStore();
+   const { user, myBookings, fetchMyBookings } = useAuthStore();
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState(myBookings);
+  const [loading, setLoading] = useState(myBookings.length === 0);
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed
   const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
+  useEffect(() => {
+    if (myBookings) {
+      setBookings(myBookings);
+    }
+  }, [myBookings]);
+
   const fetchBookings = async () => {
     try {
-      setLoading(true);
-      const res = await api.get('/bookings/my');
-      setBookings(res.data || []);
+      if (bookings.length === 0) setLoading(true);
+      await fetchMyBookings();
     } catch (err) {
       toast.error('Failed to sync assignments');
     } finally {
@@ -91,7 +96,7 @@ const StaffBookings = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       {/* 📱 OPTIMIZED MOBILE HEADER */}
-      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[40px] px-5 pb-2">
+      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[40px] px-5 pb-2 transform-gpu">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/staff')}
@@ -112,9 +117,10 @@ const StaffBookings = () => {
                 <input
                   type="date"
                   value={startDate}
-                  max={activeTab === 'completed' ? dayjs().format('YYYY-MM-DD') : undefined}
+                  max={dayjs().format('YYYY-MM-DD')}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 appearance-none"
+                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 cursor-pointer"
                 />
               </div>
             </div>
@@ -129,9 +135,10 @@ const StaffBookings = () => {
                 <input
                   type="date"
                   value={endDate}
-                  max={activeTab === 'completed' ? dayjs().format('YYYY-MM-DD') : undefined}
+                  max={dayjs().format('YYYY-MM-DD')}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 appearance-none"
+                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 cursor-pointer"
                 />
               </div>
             </div>
@@ -144,7 +151,7 @@ const StaffBookings = () => {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${activeTab === tab
-                  ? 'bg-white dark:bg-gray-800 text-primary dark:text-white shadow-xl shadow-black/5'
+                  ? 'bg-white dark:bg-gray-800 text-[#00246b] dark:text-white shadow-xl shadow-black/5'
                   : 'text-gray-400'
                   }`}
               >
@@ -181,7 +188,7 @@ const StaffBookings = () => {
                         <h3 className="text-sm font-black text-slate-900 dark:text-white leading-none">
                           {booking.walkInCustomerName || booking.userId?.name || 'Client'}
                         </h3>
-                        <div className="text-[10px] font-black text-primary uppercase tracking-tighter mt-2 flex items-center gap-3">
+                        <div className="text-[10px] font-black text-primary dark:text-white uppercase tracking-tighter mt-2 flex items-center gap-3">
                           <div className="flex items-center gap-1">
                             <Clock size={11} strokeWidth={3} /> {formatTime(booking.startTime)}
                           </div>
@@ -191,22 +198,12 @@ const StaffBookings = () => {
                         </div>
                       </div>
                     </div>
-
-                    {booking.canContact ? (
-                      <a href={`tel:${booking.userId?.phone}`} className="p-2.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all">
-                        <Phone size={16} strokeWidth={2.5} />
-                      </a>
-                    ) : (
-                      <div className="p-2.5 bg-slate-50 dark:bg-gray-800 text-slate-300 dark:text-gray-600 rounded-xl border border-slate-100 dark:border-gray-800 opacity-40">
-                        <Lock size={16} />
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-3 mb-2.5 px-1">
                     <div className="space-y-1.5">
                       {booking.services?.map((s, idx) => (
-                        <div key={idx} className="text-[10px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-2 tracking-tight">
+                        <div key={idx} className="text-[10px] font-bold text-slate-500 dark:text-white flex items-center gap-2 tracking-tight">
                           <div className="w-1.5 h-1.5 bg-primary/30 rounded-full" />
                           {s.name || s.serviceId?.name || 'Service Task'}
                         </div>
@@ -239,7 +236,7 @@ const StaffBookings = () => {
                       )}
                       <button
                         onClick={() => handleStatusUpdate(booking._id, 'complete')}
-                        className="flex-1 h-8 bg-primary text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-tight shadow-xl active:scale-95 transition-transform"
+                        className="flex-1 h-8 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-tight shadow-xl active:scale-95 transition-transform"
                       >
                         <CheckCircle size={18} />
                         Complete

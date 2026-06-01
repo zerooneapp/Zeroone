@@ -237,15 +237,15 @@ const sendOTP = async (req, res) => {
 
     // Check User or Staff
     let user = await User.findOne({ phone });
-    let staff = !user ? await Staff.findOne({ phone }) : null;
+    let staff = await Staff.findOne({ phone });
 
     // 🛡️ Pre-OTP Role Validation
     if (portal === 'vendor') {
-      if (user && user.role === 'customer' && user.name) {
+      if (user && user.role === 'customer' && user.name && (!staff || staff.isOwner)) {
         return res.status(403).json({ message: 'You are already registered as a Customer. Please use another number for Partner account.' });
       }
     } else if (portal === 'customer') {
-      if (staff || (user && (user.role === 'vendor' || user.role === 'admin' || user.role === 'super_admin'))) {
+      if ((staff && !staff.isOwner) || (user && (user.role === 'vendor' || user.role === 'admin' || user.role === 'super_admin'))) {
         return res.status(403).json({ message: 'You are already registered as a Partner. Please use another number for Customer account.' });
       }
     }
@@ -259,7 +259,13 @@ const sendOTP = async (req, res) => {
       return res.status(403).json({ message: 'Admins must use the secure admin login' });
     }
 
-    if (user) {
+    const isRegularStaff = staff && !staff.isOwner;
+
+    if (isRegularStaff) {
+      staff.otp = otp;
+      staff.otpExpires = otpExpires;
+      await staff.save();
+    } else if (user) {
       user.otp = otp;
       user.otpExpires = otpExpires;
       await user.save();
@@ -317,11 +323,14 @@ const verifyOTP = async (req, res) => {
 
     // Find User or Staff
     let user = await User.findOne({ phone });
-    let staff = !user ? await Staff.findOne({ phone }) : null;
-    let finalAccount = user || staff;
+    let staff = await Staff.findOne({ phone });
+
+    // If they exist in Staff and are not the owner, treat them as Staff
+    const isRegularStaff = staff && !staff.isOwner;
+    let finalAccount = isRegularStaff ? staff : (user || staff);
 
     if (!finalAccount) return res.status(404).json({ message: 'Account not found' });
-    if (isAdminRole(user?.role)) {
+    if (user && isAdminRole(user.role)) {
       return res.status(403).json({ message: 'Admins must use the secure admin login' });
     }
 
@@ -337,10 +346,11 @@ const verifyOTP = async (req, res) => {
     await finalAccount.save();
 
     // Determine if registration is complete (User should have a name)
-    const needsRegistration = !finalAccount.name && !staff;
+    const needsRegistration = isRegularStaff ? false : (!finalAccount.name && (!staff || staff.isOwner));
 
     let status = undefined;
-    if (finalAccount.role === 'vendor') {
+    const resolvedRole = isRegularStaff ? 'staff' : (user ? user.role : (staff ? 'staff' : 'customer'));
+    if (resolvedRole === 'vendor') {
       const Vendor = require('../models/Vendor');
       const vendor = await Vendor.findOne({ ownerId: finalAccount._id });
       if (vendor) status = vendor.status;
@@ -351,11 +361,11 @@ const verifyOTP = async (req, res) => {
       name: finalAccount.name,
       phone: finalAccount.phone,
       image: finalAccount.image,
-      role: staff ? 'staff' : finalAccount.role,
+      role: resolvedRole,
       status,
       token: generateToken(finalAccount._id),
       needsRegistration,
-      isFirstLogin: staff ? finalAccount.isFirstLogin : undefined
+      isFirstLogin: isRegularStaff ? finalAccount.isFirstLogin : (staff ? finalAccount.isFirstLogin : undefined)
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
