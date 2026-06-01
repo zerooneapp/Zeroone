@@ -163,7 +163,7 @@ const Home = () => {
           <div className="absolute -inset-1 bg-gradient-to-r from-[#00246b]/10 via-blue-500/5 to-[#00246b]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
 
           <div className="relative">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400/80 group-focus-within:text-[#00246b] dark:group-focus-within:text-blue-400 z-10 pointer-events-none transition-all duration-300">
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#00246b] dark:text-gray-400/80 group-focus-within:text-[#00246b] dark:group-focus-within:text-blue-400 z-10 pointer-events-none transition-all duration-300">
               <Search size={20} strokeWidth={2.5} />
             </div>
             <input
@@ -171,7 +171,7 @@ const Home = () => {
               placeholder="Search salon, beauty parlour..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#00246b]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#00246b] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#00246b]/30 transition-all duration-500 outline-none placeholder:text-[#0B1222]/40 dark:placeholder:text-gray-400 placeholder:font-semibold"
+              className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-[#00246b]/10 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-[#00246b] dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-[#00246b]/30 transition-all duration-500 outline-none placeholder:text-[#00246b] dark:placeholder:text-gray-400 placeholder:font-semibold"
             />
 
           </div>
@@ -191,7 +191,7 @@ const Home = () => {
                   onClick={() => toggleCategory(cat._id)}
                   className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 outline-none border ${isActive
                     ? 'bg-white dark:bg-gray-900 border-[#00246b] text-[#00246b] dark:text-blue-400 shadow-[0_10px_25px_-4px_rgba(28,44,78,0.15)] scale-105'
-                    : 'bg-white dark:bg-gray-900/50 text-[#00246b]/60 dark:text-gray-400 border-[#00246b]/10 dark:border-gray-700 shadow-sm'
+                    : 'bg-white dark:bg-gray-900/50 text-[#00246b] dark:text-gray-400 border-[#00246b]/10 dark:border-gray-700 shadow-sm'
                     }`}
                 >
                   <span className="relative z-10">{cat.name}</span>

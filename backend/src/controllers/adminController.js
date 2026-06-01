@@ -857,9 +857,12 @@ const toggleBlockVendor = async (req, res) => {
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
-    if (vendor.status === 'blocked') {
+     if (vendor.status === 'blocked') {
       const subscriptionState = await getVendorSubscriptionState(vendor);
       vendor.status = subscriptionState.isActive ? 'active' : 'inactive';
+      if (vendor.status === 'active') {
+        vendor.isShopOpen = true;
+      }
     } else {
       vendor.status = 'blocked';
     }
@@ -934,8 +937,11 @@ const extendVendorFreeTrial = async (req, res) => {
       expiryDate: nextExpiry
     };
 
-    vendor.planType = 'trial';
+     vendor.planType = 'trial';
     if (!['pending', 'blocked', 'rejected'].includes(vendor.status)) {
+      if (vendor.status === 'inactive') {
+        vendor.isShopOpen = true;
+      }
       vendor.status = 'active';
       vendor.isActive = true;
     }

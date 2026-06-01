@@ -420,6 +420,7 @@ const activateMonthlySubscription = async (vendor, options = {}) => {
     isActive: false
   };
   vendor.status = 'active';
+  vendor.isShopOpen = true;
   await vendor.save();
 
   await upsertWalletTransactionRecord(options.existingTransaction, {

@@ -54,7 +54,24 @@ const ServiceDetail = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = React.useRef(null);
   const [selectedCat, setSelectedCat] = useState('All');
-  const [categories, setCategories] = useState(['All']);
+  const [categories, setCategories] = useState(() => {
+    const prefetchedServices = window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.services || [];
+    if (prefetchedServices.length > 0) {
+      const dedupedCategories = [];
+      const seenCategoryKeys = new Set();
+      prefetchedServices
+        .map((service) => service.category)
+        .filter(Boolean)
+        .forEach((category) => {
+          const key = normalizeCategoryValue(category);
+          if (!key || seenCategoryKeys.has(key)) return;
+          seenCategoryKeys.add(key);
+          dedupedCategories.push(category);
+        });
+      return ['All', ...dedupedCategories];
+    }
+    return ['All'];
+  });
   const [isFavorited, setIsFavorited] = useState(false);
   const [servicePricing, setServicePricing] = useState({});
   const [cartPricing, setCartPricing] = useState(null);
@@ -595,7 +612,7 @@ const ServiceDetail = () => {
               gallery.map((img, idx) => (
                 <div
                   key={idx}
-                  className="w-full h-full flex-shrink-0 snap-center relative cursor-pointer"
+                  className="w-full h-full flex-shrink-0 snap-center snap-always relative cursor-pointer"
                   onClick={() => {
                     setLightboxImg(img);
                     setZoomScale(1);
