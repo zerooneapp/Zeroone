@@ -478,7 +478,7 @@ const getVendorDashboard = async (req, res) => {
 
     const [activeStaffCount, activeStaffMembers] = await Promise.all([
       Staff.countDocuments({ vendorId: vendor._id, isActive: true }),
-      Staff.find({ vendorId: vendor._id, isActive: true, isOwner: false })
+      Staff.find({ vendorId: vendor._id, isActive: true })
         .populate('userId', 'image')
         .select('name image userId')
         .lean()
@@ -1061,7 +1061,7 @@ const getVendorDashboardBundle = async (req, res) => {
         .sort({ startTime: 1 })
         .lean(),
       
-      Staff.find({ vendorId: new mongoose.Types.ObjectId(vendor._id), isActive: true, isOwner: false })
+      Staff.find({ vendorId: new mongoose.Types.ObjectId(vendor._id), isActive: true })
         .select('name image userId')
         .populate('userId', 'image')
         .lean(),

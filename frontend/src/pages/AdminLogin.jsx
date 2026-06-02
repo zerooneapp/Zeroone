@@ -92,7 +92,7 @@ const AdminLogin = () => {
             <Button
               type="submit"
               size="lg"
-              className="w-full h-[42px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#00246b] dark:bg-primary shadow-sm active:scale-[0.98]"
+              className="w-full h-[42px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#00246b] dark:bg-[#00246b] shadow-sm active:scale-[0.98]"
               loading={loading}
               disabled={phone.length !== 10 || !password}
             >

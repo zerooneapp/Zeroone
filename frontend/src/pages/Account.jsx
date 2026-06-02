@@ -35,17 +35,9 @@ const Account = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500 pb-28">
-      <header className="px-5 pt-[38px] pb-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
-        <div className="flex items-center gap-3">
-          <div className="leading-none">
-            <h1 className="font-extrabold text-[15px] text-[#00246b] dark:text-white tracking-tight">
-              Profile
-            </h1>
-          </div>
-        </div>
-      </header>
 
-      <div className="flex flex-col items-center pt-2 pb-2">
+
+      <div className="flex flex-col items-center pt-24 pb-2">
         <div className="relative group">
           <div className="w-20 h-20 rounded-full bg-[#00246b] dark:bg-primary shadow-xl flex items-center justify-center border-[3px] border-white dark:border-gray-900 overflow-hidden transition-transform active:scale-95 duration-300">
             {user?.image ? (

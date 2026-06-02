@@ -18,7 +18,7 @@ const BookingSuccess = () => {
    }
 
    return (
-      <div className="min-h-[88vh] flex flex-col items-center pt-[140px] px-4 animate-in fade-in duration-700 pb-16">
+      <div className="min-h-[88vh] flex flex-col items-center pt-[148px] px-4 animate-in fade-in duration-700 pb-16">
          {/* Animated Success Icon */}
          <motion.div
             initial={{ scale: 0 }}
@@ -41,7 +41,7 @@ const BookingSuccess = () => {
             transition={{ delay: 0.15 }}
             className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] overflow-hidden mb-6"
          >
-            <div className="p-3 px-4 bg-slate-900 dark:bg-gray-800 text-white flex items-center justify-between">
+            <div className="p-3 px-4 bg-[#00246b] dark:bg-[#00246b] text-white flex items-center justify-between">
                <div>
                   <h2 className="text-sm font-black truncate tracking-tight leading-none uppercase">{vendor.shopName}</h2>
                   <p className="text-[7px] opacity-60 font-black tracking-widest mt-0.5">ID: #{booking._id.slice(-6).toUpperCase()}</p>

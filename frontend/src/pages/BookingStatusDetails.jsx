@@ -95,7 +95,7 @@ const BookingStatusDetails = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
-      <header className="px-2.5 pt-[38px] pb-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <header className="px-2.5 pt-[46px] pb-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -199,25 +199,22 @@ const BookingStatusDetails = () => {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-50 dark:border-gray-800 flex justify-between items-center text-[10px] font-black tracking-tight">
-            <div className="flex flex-col">
-              <span className="text-[7px] text-slate-400 uppercase tracking-widest leading-none mb-0.5">Start Time</span>
-              <span className="text-gray-900 dark:text-white">{dayjs(booking.startTime).format('hh:mm A')}</span>
-            </div>
-            <div className="flex flex-col text-right">
-              <span className="text-[7px] text-slate-400 uppercase tracking-widest leading-none mb-0.5">End Time</span>
-              <span className="text-gray-900 dark:text-white">{dayjs(booking.endTime).format('hh:mm A')}</span>
-            </div>
-          </div>
-
           <div className="pt-2.5 border-t border-slate-50 dark:border-gray-800 space-y-2">
-            <div className="flex items-start gap-2">
-              <Sparkles size={12} strokeWidth={3} className="text-[#00246b] mt-0.5 shrink-0" />
-              <p className="text-[10px] font-black tracking-tight text-[#00246b] dark:text-white leading-tight">
-                {booking.services?.map(s => s.name).join(', ') || 'Service Details'}
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
+            {booking.services?.map(s => (
+              <div key={s._id || s.serviceId} className="flex justify-between items-center text-[10px] font-black tracking-tight text-[#00246b] dark:text-white leading-tight">
+                <div className="flex items-start gap-2">
+                  <Sparkles size={12} strokeWidth={3} className="text-[#00246b] mt-0.5 shrink-0" />
+                  <span>{s.name}</span>
+                </div>
+                <span className="text-[10px] font-black text-[#00246b] dark:text-white uppercase shrink-0">{s.duration}M</span>
+              </div>
+            )) || (
+              <div className="flex items-start gap-2">
+                <Sparkles size={12} strokeWidth={3} className="text-[#00246b] mt-0.5 shrink-0" />
+                <p className="text-[10px] font-black tracking-tight text-[#00246b] dark:text-white leading-tight">Service Details</p>
+              </div>
+            )}
+            <div className="flex items-start gap-2 pt-1">
               <MapPin size={12} strokeWidth={3} className="text-slate-300 dark:text-gray-600 mt-0.5 shrink-0" />
               <p className="text-[10px] font-black tracking-tight text-slate-400 dark:text-white/60 leading-tight">
                 {booking.serviceAddress || booking.vendorId?.address || 'Location information unavailable'}

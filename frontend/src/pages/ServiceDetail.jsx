@@ -584,7 +584,7 @@ const ServiceDetail = () => {
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">
       {/* Redesigned Secondary Navbar (Fixed) */}
-      <div className="bg-white text-[#00246b] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[38px] pb-2">
+      <div className="bg-white text-[#00246b] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[46px] pb-2">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
@@ -847,7 +847,7 @@ const ServiceDetail = () => {
                       </div>
                       <button
                         onClick={() => removeItem(item._id)}
-                        className="w-8 h-8 bg-black dark:bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
+                        className="w-8 h-8 bg-[#00246b] dark:bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
                       >
                         <Minus size={14} strokeWidth={3} />
                       </button>
@@ -1032,7 +1032,7 @@ const ServiceDetail = () => {
                   </div>
                   <button
                     onClick={() => toggleService(service)}
-                    className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-[#00246b] dark:text-white border border-gray-200 dark:border-gray-800 active:scale-90 transition-all font-black"
+                    className="w-8 h-8 bg-[#00246b] dark:bg-[#00246b] rounded-xl flex items-center justify-center text-white border border-[#00246b] active:scale-90 transition-all font-black"
                   >
                     <Plus size={16} strokeWidth={3} />
                   </button>
@@ -1087,7 +1087,7 @@ const ServiceDetail = () => {
                   "px-5 py-2 rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-xl transition-all active:scale-95 border-b-[2px] flex items-center justify-center min-w-[100px]",
                   !vendor.isShopOpen 
                     ? "bg-rose-500 text-white border-rose-600 shadow-rose-500/20 cursor-not-allowed"
-                    : "bg-white text-[#0B1222] border-gray-100 shadow-black/20 disabled:opacity-30 disabled:grayscale"
+                    : "bg-[#00246b] dark:bg-[#00246b] text-white border-[#00246b] shadow-lg shadow-[#00246b]/20 disabled:opacity-30 disabled:grayscale"
                 )}
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : (!vendor.isShopOpen ? 'Closed Temporarily' : 'Book Now')}
@@ -1151,7 +1151,7 @@ const ServiceDetail = () => {
                       }
                     }
                   })}
-                  className="w-full py-4 bg-[#0B1222] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-[#00246b] dark:bg-[#00246b] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <Clock size={16} />
                   Reschedule Existing
@@ -1184,10 +1184,10 @@ const ServiceDetail = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center pt-[38px] px-4 select-none touch-none"
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center pt-[46px] px-4 select-none touch-none"
           >
             {/* Top controls header */}
-            <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-50 pt-[38px]">
+            <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-50 pt-[46px]">
               <span className="text-white/60 text-[9px] font-black uppercase tracking-widest leading-none">
                 Gallery Preview
               </span>

@@ -115,7 +115,7 @@ const Signup = () => {
                   <img src={profileData.image} alt="Profile" className="w-full h-full object-cover animate-in fade-in zoom-in duration-300" />
                 ) : (
                   <div className="bg-[#00246b]/10 p-4 rounded-full">
-                    <svg className="w-8 h-8 text-[#00246b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-[#00246b] dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -141,7 +141,7 @@ const Signup = () => {
             <div className="space-y-4">
               <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/60 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#00246b]/10">
                   <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
-                  <User size={16} className="text-[#00246b]" />
+                  <User size={16} className="text-[#00246b] dark:text-white" />
                 </div>
                 <input
                   type="text"
@@ -158,7 +158,7 @@ const Signup = () => {
 
               <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/60 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#00246b]/10">
                   <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
-                  <Calendar size={16} className="text-[#00246b]" />
+                  <Calendar size={16} className="text-[#00246b] dark:text-white" />
                 </div>
                 <div className="flex-1 flex flex-col">
                   <span className="text-[7px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Date of Birth</span>
@@ -174,7 +174,7 @@ const Signup = () => {
 
               {/* 👥 GENDER SELECTION HUD */}
               <div className="space-y-1">
-                <p className="text-[8px] font-black text-[#00246b]/40 tracking-widest ml-1">Select gender</p>
+                <p className="text-[8px] font-black text-[#00246b]/40 dark:text-gray-500 tracking-widest ml-1">Select gender</p>
                 <div className="flex gap-1.5 p-1 bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 rounded-xl">
                   {['male', 'female', 'other'].map(g => (
                     <button
@@ -182,7 +182,7 @@ const Signup = () => {
                       onClick={() => setProfileData({ ...profileData, gender: g })}
                       className={`flex-1 py-2 text-[11px] font-black tracking-widest rounded-lg transition-all capitalize ${profileData.gender === g
                           ? 'bg-[#00246b] text-white shadow-lg'
-                          : 'text-gray-400 hover:text-[#00246b]'
+                          : 'text-gray-400 hover:text-[#00246b] dark:hover:text-white'
                         }`}
                     >
                       {g}
@@ -195,7 +195,7 @@ const Signup = () => {
             <div className="space-y-6">
               <Button
                 size="lg"
-                className="w-full h-[38px] rounded-xl bg-[#00246b] dark:bg-primary text-white text-[12px] font-black shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"
+                className="w-full h-[38px] rounded-xl bg-[#00246b] dark:bg-[#00246b] text-white text-[12px] font-black shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"
                 onClick={handleCompleteRegistration}
                 loading={loading}
               >

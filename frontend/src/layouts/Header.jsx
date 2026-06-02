@@ -22,7 +22,7 @@ const Header = ({ onOpenNotifications }) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl px-4 pt-[38px] pb-2 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl px-4 pt-[46px] pb-2 border-b border-slate-100 dark:border-gray-800 shadow-sm">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Brand & Location HUD */}
         <div className="flex flex-col gap-1 min-w-0">

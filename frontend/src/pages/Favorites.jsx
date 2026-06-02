@@ -39,7 +39,7 @@ const Favorites = () => {
    return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32">
          {/* Header (Elite Minimal) */}
-         <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800 px-3 pt-[38px] pb-3">
+         <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800 px-3 pt-[46px] pb-3">
             <div className="flex items-center gap-3">
                <button
                   onClick={() => navigate(-1)}

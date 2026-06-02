@@ -180,7 +180,7 @@ const ReviewPopup = ({ booking, onClose }) => {
               Maybe Later
             </button>
             <Button 
-              className="px-5 py-2 text-[10px] bg-primary text-white rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20"
+              className="px-5 py-2 text-[10px] bg-[#00246b] text-white rounded-xl font-black uppercase tracking-widest shadow-lg shadow-[#00246b]/20"
               onClick={handleSubmit}
               disabled={submitting}
             >

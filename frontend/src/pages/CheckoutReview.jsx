@@ -124,7 +124,7 @@ const CheckoutReview = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32 animate-in fade-in duration-500">
-      <div className="px-2.5 pt-[38px] pb-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <div className="px-2.5 pt-[46px] pb-3 flex items-center justify-between sticky top-0 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all">
           <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
         </button>
@@ -139,7 +139,7 @@ const CheckoutReview = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-slate-900 dark:bg-primary text-white p-3 px-4 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-primary/10 space-y-2 border border-white/10"
+          className="bg-[#00246b] dark:bg-[#00246b] text-white p-3 px-4 rounded-2xl shadow-xl shadow-[#00246b]/10 dark:shadow-[#00246b]/10 space-y-2 border border-white/10"
         >
           <div className="leading-none text-center">
             <h2 className="text-base font-black truncate tracking-tight">{vendor.shopName}</h2>
@@ -162,8 +162,6 @@ const CheckoutReview = () => {
                 <Clock size={13} className="opacity-60 text-blue-400" />
                 <span className="font-black text-[13px] tracking-tighter">
                   {dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')}
-                  {' – '}
-                  {dayjs(`${selectedDate} ${selectedSlot}`).add(totalDuration, 'minute').format('hh:mm A')}
                 </span>
               </div>
             </div>
@@ -202,25 +200,11 @@ const CheckoutReview = () => {
                     <p className="text-[9px] text-slate-400 font-black tracking-tighter leading-none capitalize">
                       {item.duration}m | {item.bufferTime || 0}m Buffer
                     </p>
-                    {priceMeta.discount > 0 && (
-                      <p className="text-[8px] font-black text-emerald-500 tracking-widest uppercase leading-none">
-                        {priceMeta.isFreeViaMembership ? 'FREE with membership' : `Offer price ${formatPrice(priceMeta.finalPrice)}`}
-                      </p>
-                    )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`font-black text-[13px] ${
-                        priceMeta.discount > 0 ? 'text-slate-400 line-through' : 'text-gray-900 dark:text-white'
-                      }`}
-                    >
-                      {priceMeta.isFreeViaMembership ? '₹0' : formatPrice(item.price)}
+                    <span className="font-black text-[13px] text-gray-900 dark:text-white">
+                      {priceMeta.isFreeViaMembership ? '₹0' : formatPrice(priceMeta.finalPrice)}
                     </span>
-                    {priceMeta.discount > 0 && (
-                      <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase">
-                        Save {formatPrice(priceMeta.discount)}
-                      </span>
-                    )}
                   </div>
                 </div>
               );
@@ -229,22 +213,9 @@ const CheckoutReview = () => {
               <span className="text-[10px] font-black text-slate-400 tracking-widest leading-none capitalize">Convenience fee</span>
               <span className="text-[10px] font-black text-emerald-500 tracking-widest leading-none capitalize">Free</span>
             </div>
-            {totalSavings > 0 && (
-              <div className="flex justify-between items-center leading-none">
-                <span className="text-[10px] font-black text-slate-400 tracking-widest leading-none capitalize">Discount</span>
-                <span className="text-[10px] font-black text-emerald-500 tracking-widest leading-none">
-                  -{formatPrice(totalSavings)}
-                </span>
-              </div>
-            )}
             <div className="flex justify-between items-center pt-1.5 leading-none">
               <span className="font-black text-[15px] text-gray-900 dark:text-white tracking-tight leading-none capitalize">To pay</span>
               <div className="flex flex-col items-end">
-                {totalSavings > 0 && (
-                  <span className="text-[10px] font-black text-slate-400 line-through tracking-widest leading-none mb-1">
-                    {formatPrice(totalPrice)}
-                  </span>
-                )}
                 <span className="font-black text-[20px] text-[#00246b] dark:text-white tracking-tighter leading-none">
                   {discountedTotal === 0 ? "₹0" : formatPrice(discountedTotal)}
                 </span>

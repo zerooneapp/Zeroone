@@ -157,7 +157,7 @@ const VendorAuth = () => {
                   <Button
                     size="lg"
                     className={cn(
-                      'w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#00246b] dark:bg-primary shadow-sm active:scale-[0.98]',
+                      'w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#00246b] dark:bg-[#00246b] shadow-sm active:scale-[0.98]',
                       phone.length !== 10 && 'opacity-90 grayscale-[0.2]'
                     )}
                     onClick={handleSendOTP}
@@ -216,7 +216,7 @@ const VendorAuth = () => {
                           key={index}
                           className={cn(
                             'w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all relative overflow-hidden',
-                            isActive ? 'border-[#00246b] dark:border-primary ring-2 ring-[#00246b]/10' : 
+                            isActive ? 'border-[#00246b] dark:border-[#00246b] ring-2 ring-[#00246b]/10' : 
                             isFilled ? 'border-gray-200 dark:border-gray-700 text-[#00246b] dark:text-white' : 'border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-700'
                           )}
                         >
@@ -234,7 +234,7 @@ const VendorAuth = () => {
                 <div className="space-y-4">
                   <Button
                     size="lg"
-                    className="w-full h-[38px] rounded-xl bg-[#00246b] dark:bg-primary text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
+                    className="w-full h-[38px] rounded-xl bg-[#00246b] dark:bg-[#00246b] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
                     onClick={handleVerifyOTP}
                     loading={loading}
                     disabled={otp.includes('')}

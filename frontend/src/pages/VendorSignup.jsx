@@ -125,7 +125,7 @@ const VendorSignup = () => {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
+          <p className="text-[10px] font-black text-[#00246b] uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
           <h1 className="text-2xl font-black tracking-tight leading-none">Partner Application</h1>
         </div>
       </div>
@@ -460,7 +460,7 @@ const VendorSignup = () => {
       <div className="fixed bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light/95 dark:via-background-dark/95 to-transparent z-50">
         <Button
           size="lg"
-          className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 gap-2 text-sm font-black uppercase tracking-widest text-white bg-primary active:scale-95 transition-all"
+          className="w-full h-12 rounded-xl shadow-lg shadow-[#00246b]/10 gap-2 text-sm font-black uppercase tracking-widest text-white bg-[#00246b] dark:bg-[#00246b] active:scale-95 transition-all"
           onClick={step < 3 ? handleNext : handleSubmit}
           loading={loading}
         >
@@ -469,7 +469,7 @@ const VendorSignup = () => {
         </Button>
         <div className="mt-4 text-center">
           <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">
-            By submitting, you agree to our <button onClick={() => navigate('/vendor-privacy-policy')} className="text-primary border-b border-primary/30">Partner Policy</button>
+            By submitting, you agree to our <button onClick={() => navigate('/vendor-privacy-policy')} className="text-[#00246b] border-b border-[#00246b]/30">Partner Policy</button>
           </p>
         </div>
       </div>

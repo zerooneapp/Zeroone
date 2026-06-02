@@ -150,7 +150,7 @@ const CustomerAuth = () => {
                   <Button
                     size="lg"
                     className={cn(
-                      "w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#00246b] dark:bg-primary shadow-sm active:scale-[0.98]",
+                      "w-full h-[38px] rounded-xl text-white text-[12px] font-black transition-all duration-300 bg-[#00246b] dark:bg-[#00246b] shadow-sm active:scale-[0.98]",
                       phone.length !== 10 && "opacity-90 grayscale-[0.2]"
                     )}
                     onClick={handleSendOTP}
@@ -175,7 +175,7 @@ const CustomerAuth = () => {
                     Code sent to <span className="text-[#00246b] dark:text-white font-bold">+91 {phone}</span>
                   </p>
                 </div>
-
+ 
                 <div className="relative">
                   <input
                     type="tel"
@@ -194,7 +194,7 @@ const CustomerAuth = () => {
                         className={cn(
                           "w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
                           digit || (isOTPFocused && i === otp.join('').length)
-                            ? "border-[#00246b] dark:border-primary text-[#00246b] dark:text-white"
+                            ? "border-[#00246b] dark:border-[#00246b] text-[#00246b] dark:text-[#00246b]"
                             : "border-gray-50 dark:border-gray-800 text-gray-200 dark:text-gray-700"
                         )}
                       >
@@ -203,11 +203,11 @@ const CustomerAuth = () => {
                     ))}
                   </div>
                 </div>
-
+ 
                 <div className="space-y-4">
                   <Button
                     size="lg"
-                    className="w-full h-[38px] rounded-xl bg-[#00246b] dark:bg-primary text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
+                    className="w-full h-[38px] rounded-xl bg-[#00246b] dark:bg-[#00246b] text-white text-[12px] font-black shadow-sm active:scale-[0.95]"
                     onClick={handleVerifyOTP}
                     loading={loading}
                     disabled={otp.includes('')}

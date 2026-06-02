@@ -82,7 +82,7 @@ const PersonalInformation = () => {
   return (
     <div className="h-[100vh] bg-slate-50 dark:bg-gray-950 flex flex-col overflow-hidden animate-in fade-in duration-500 mb-2">
       {/* 🛡️ ELITE HEADER (SYNCED WITH ACCOUNT) */}
-      <header className="px-2.5 pt-[38px] pb-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all overflow-hidden">
+      <header className="px-2.5 pt-[46px] pb-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all overflow-hidden">
         <div className="flex items-center gap-3">
           <button
             type="button"
