@@ -456,7 +456,9 @@ const getFilteredBookings = async (req, res) => {
     if (status && allowedStatus.includes(status)) {
       matchLine.status = status;
     }
-    if (vendorId) matchLine.vendorId = require('mongoose').Types.ObjectId(vendorId);
+    if (vendorId) {
+      matchLine.vendorId = new mongoose.Types.ObjectId(vendorId);
+    }
     if (startDate || endDate) {
       const rangeStart = startDate
         ? moment(startDate).startOf('day').toDate()
@@ -476,8 +478,55 @@ const getFilteredBookings = async (req, res) => {
       };
     }
 
-    const pipeline = [
-      { $match: matchLine },
+    let total;
+    if (search) {
+      const countPipeline = [
+        { $match: matchLine },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'vendors',
+            localField: 'vendorId',
+            foreignField: '_id',
+            as: 'vendor'
+          }
+        },
+        { $unwind: { path: '$vendor', preserveNullAndEmptyArrays: true } },
+        {
+          $match: {
+            $or: [
+              { 'user.name': { $regex: search, $options: 'i' } },
+              { 'vendor.shopName': { $regex: search, $options: 'i' } },
+              { bookingId: { $regex: search, $options: 'i' } }
+            ]
+          }
+        },
+        { $count: "total" }
+      ];
+      const countResult = await Booking.aggregate(countPipeline).allowDiskUse(true);
+      total = countResult[0]?.total || 0;
+    } else {
+      total = await Booking.countDocuments(matchLine);
+    }
+
+    const dataPipeline = [
+      { $match: matchLine }
+    ];
+
+    // Optimize: Sort before lookup if no search filter is active
+    if (!search) {
+      dataPipeline.push({ $sort: { createdAt: -1, startTime: -1 } });
+    }
+
+    dataPipeline.push(
       {
         $lookup: {
           from: 'users',
@@ -496,33 +545,29 @@ const getFilteredBookings = async (req, res) => {
         }
       },
       { $unwind: { path: '$vendor', preserveNullAndEmptyArrays: true } }
-    ];
-
-    if (search) {
-      pipeline.push({
-        $match: {
-          $or: [
-            { 'user.name': { $regex: search, $options: 'i' } },
-            { 'vendor.shopName': { $regex: search, $options: 'i' } },
-            { bookingId: { $regex: search, $options: 'i' } }
-          ]
-        }
-      });
-    }
-
-    pipeline.push(
-      { $sort: { createdAt: -1, startTime: -1 } },
-      {
-        $facet: {
-          metadata: [{ $count: "total" }],
-          data: [{ $skip: skip }, { $limit: parseInt(limit) }]
-        }
-      }
     );
 
-    const result = await Booking.aggregate(pipeline);
-    const bookings = result[0].data;
-    const total = result[0].metadata[0]?.total || 0;
+    if (search) {
+      dataPipeline.push(
+        {
+          $match: {
+            $or: [
+              { 'user.name': { $regex: search, $options: 'i' } },
+              { 'vendor.shopName': { $regex: search, $options: 'i' } },
+              { bookingId: { $regex: search, $options: 'i' } }
+            ]
+          }
+        },
+        { $sort: { createdAt: -1, startTime: -1 } }
+      );
+    }
+
+    dataPipeline.push(
+      { $skip: skip },
+      { $limit: parseInt(limit) }
+    );
+
+    const bookings = await Booking.aggregate(dataPipeline).allowDiskUse(true);
 
     res.status(200).json({
       bookings,
