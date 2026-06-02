@@ -77,7 +77,7 @@ const VendorOffers = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="px-4 pt-[40px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="px-4 pt-[48px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/vendor/dashboard')}
@@ -110,7 +110,7 @@ const VendorOffers = () => {
         </button>
       </header>
 
-      <main className="px-4 pt-[94px]">
+      <main className="px-4 pt-[102px]">
         <AnimatePresence mode="wait">
           {offers.length === 0 ? (
             <motion.div

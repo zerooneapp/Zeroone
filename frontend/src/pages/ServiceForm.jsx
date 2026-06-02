@@ -151,7 +151,7 @@ const ServiceForm = () => {
 
    return (
       <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-32">
-         <header className="px-4 pt-[40px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm flex items-center gap-3">
+         <header className="px-4 pt-[48px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm flex items-center gap-3">
             <button
                onClick={() => navigate(-1)}
                className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold shrink-0"
@@ -163,7 +163,7 @@ const ServiceForm = () => {
             </h1>
          </header>
 
-         <main className="px-4 pt-[94px]">
+         <main className="px-4 pt-[102px]">
             <form id="service-form" onSubmit={handleSubmit} className="space-y-6 pb-12 max-w-2xl mx-auto">
                {/* Image Upload */}
                <section className="space-y-4 pt-4">

@@ -63,7 +63,7 @@ const StaffHistory = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       {/* 📱 MOBILE HEADER */}
-      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[40px] px-5 pb-3 transform-gpu">
+      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[48px] px-5 pb-3 transform-gpu">
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate('/staff/account')}
@@ -76,7 +76,7 @@ const StaffHistory = () => {
         </div>
       </div>
 
-      <div className="px-3 pt-[100px] py-4 space-y-4">
+      <div className="px-3 pt-[108px] py-4 space-y-4">
         <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-4">
           <div className="flex flex-wrap gap-2">
             {[

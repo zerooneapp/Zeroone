@@ -179,7 +179,7 @@ const VendorBookings = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-24">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[40px] pb-3 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[48px] pb-3 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -238,7 +238,7 @@ const VendorBookings = () => {
         </div>
       </header>
 
-      <main className="px-4 pt-[225px] max-w-4xl mx-auto space-y-3">
+      <main className="px-4 pt-[233px] max-w-4xl mx-auto space-y-3">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (

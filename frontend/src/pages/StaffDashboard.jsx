@@ -114,7 +114,7 @@ const StaffDashboard = () => {
    return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32">
          {/* 🏙️ CLEAN MINIMAL HEADER (NO ITALIC) */}
-         <div className="px-4 pt-[40px] pb-3 bg-white/80 dark:bg-gray-900/80 fixed top-0 left-0 right-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
+         <div className="px-4 pt-[48px] pb-3 bg-white/80 dark:bg-gray-900/80 fixed top-0 left-0 right-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-1">
                   <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
@@ -134,7 +134,7 @@ const StaffDashboard = () => {
             </div>
          </div>
 
-         <main className="p-4 space-y-3.5 pt-[92px]">
+         <main className="p-4 space-y-3.5 pt-[100px]">
             {/* 📊 COMPACT STATS GRID */}
             <div className="grid grid-cols-2 gap-2.5">
                <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">

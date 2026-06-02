@@ -618,7 +618,7 @@ const VendorProfile = () => {
    return (
       <div className="bg-slate-50 dark:bg-gray-950 pb-6 overflow-x-hidden no-scrollbar">
          {/* Header */}
-         <header className="px-4 pt-[40px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+         <header className="px-4 pt-[48px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
             <div className="max-w-4xl mx-auto flex items-center gap-3">
                <button
                   onClick={(e) => {
@@ -644,7 +644,7 @@ const VendorProfile = () => {
             </div>
          </header>
 
-         <main className="px-4 pt-[106px] max-w-4xl mx-auto">
+         <main className="px-4 pt-[114px] max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
                {/* ── MENU LIST ── */}
                {!activeSection && (

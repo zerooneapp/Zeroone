@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import Navbar from '../layouts/Navbar';
 import CancellationModal from '../components/CancellationModal';
+import GlassConfirmationModal from '../components/GlassConfirmationModal';
 
 const StaffBookings = () => {
    const { user, myBookings, fetchMyBookings } = useAuthStore();
@@ -22,6 +23,7 @@ const StaffBookings = () => {
   const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(dayjs().add(30, 'day').format('YYYY-MM-DD'));
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   useEffect(() => {
@@ -107,7 +109,7 @@ const StaffBookings = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       {/* 📱 OPTIMIZED MOBILE HEADER */}
-      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[40px] px-5 pb-2 transform-gpu">
+      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[48px] px-5 pb-2 transform-gpu">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/staff')}
@@ -172,7 +174,7 @@ const StaffBookings = () => {
       </div>
 
       {/* Assignments List Area */}
-      <div className="p-4 pt-[230px] space-y-3">
+      <div className="p-4 pt-[238px] space-y-3">
         <AnimatePresence mode="wait">
           {loading ? (
             <div className="space-y-3 px-1">
@@ -244,7 +246,10 @@ const StaffBookings = () => {
                         </button>
                       )}
                       <button
-                        onClick={() => handleStatusUpdate(booking._id, 'complete')}
+                        onClick={() => {
+                          setSelectedBookingId(booking._id);
+                          setIsCompleteModalOpen(true);
+                        }}
                         className="flex-1 h-8 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-tight shadow-xl active:scale-95 transition-transform"
                       >
                         <CheckCircle size={18} />
@@ -278,6 +283,22 @@ const StaffBookings = () => {
           setSelectedBookingId(null);
         }}
         onConfirm={(reason) => handleStatusUpdate(selectedBookingId, 'cancel', reason)}
+      />
+
+      <GlassConfirmationModal
+        isOpen={isCompleteModalOpen}
+        onClose={() => {
+          setIsCompleteModalOpen(false);
+          setSelectedBookingId(null);
+        }}
+        onConfirm={() => {
+          handleStatusUpdate(selectedBookingId, 'complete');
+          setIsCompleteModalOpen(false);
+        }}
+        title="Complete Booking"
+        message="Are you sure this booking is fully completed? This will finalize the revenue."
+        confirmText="Yes, Complete"
+        cancelText="Not Yet"
       />
     </div>
   );

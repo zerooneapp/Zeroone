@@ -115,7 +115,7 @@ const VendorServices = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-6">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[40px] pb-3 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[48px] pb-3 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -150,7 +150,7 @@ const VendorServices = () => {
         </div>
       </header>
 
-      <main className="px-5 pt-[94px]">
+      <main className="px-5 pt-[102px]">
         <div className="mb-4 mt-3 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input

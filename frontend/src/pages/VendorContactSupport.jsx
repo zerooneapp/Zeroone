@@ -37,7 +37,7 @@ const VendorContactSupport = () => {
   return (
     <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 font-sans pb-12">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 pt-[40px] pb-3">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-[#F3F2F7]/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 pt-[48px] pb-3">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
@@ -52,7 +52,7 @@ const VendorContactSupport = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-[104px] space-y-4">
+      <main className="max-w-4xl mx-auto px-4 pt-[112px] space-y-4">
         {/* Intro Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

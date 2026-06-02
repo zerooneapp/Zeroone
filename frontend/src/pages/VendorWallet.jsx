@@ -271,7 +271,7 @@ const VendorWallet = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="px-3 pt-[40px] pb-2.5 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="px-3 pt-[48px] pb-2.5 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <button
@@ -315,7 +315,7 @@ const VendorWallet = () => {
         </div>
       </header>
 
-      <main className="px-3 pt-[94px] space-y-4">
+      <main className="px-3 pt-[102px] space-y-4">
         <div className="p-4 bg-gradient-to-br from-[#00246b] to-[#1E293B] dark:from-primary/20 dark:to-primary/10 rounded-[2rem] text-white shadow-2xl shadow-black/10 relative overflow-hidden">
           <div className="relative z-10 space-y-2.5">
             <div className="flex items-center justify-between">

@@ -87,7 +87,7 @@ const VendorReviews = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 pb-20">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-[40px] pb-2">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-2">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)} className="p-1.5 active:scale-90 transition-all">
             <ArrowLeft size={18} strokeWidth={3} />
@@ -103,7 +103,7 @@ const VendorReviews = () => {
         </div>
       </header>
 
-      <main className="px-4 pt-[100px] space-y-2">
+      <main className="px-4 pt-[108px] space-y-2">
         {/* Summary Bar */}
         <section className="bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 rounded-xl px-3 py-2 shadow-sm">
           <div className="flex items-center justify-between gap-4">

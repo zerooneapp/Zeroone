@@ -146,7 +146,7 @@ function App() {
     const handleUnauthorized = () => {
       if (isAuthenticated) {
         logout();
-        toast.error('Session expired, please log in again.');
+        toast.error('Session expired, please log in again.', { id: 'session-expired' });
       }
     };
     window.addEventListener('auth-unauthorized', handleUnauthorized);

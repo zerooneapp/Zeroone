@@ -76,7 +76,13 @@ const StaffAccount = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <div className="relative px-4 pt-[45px] pb-4 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-2xl shadow-xl shadow-slate-200/50 dark:shadow-none">
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-[46px] pb-3 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm flex items-center justify-between shrink-0">
+        <h1 className="text-xl font-black text-[#00246b] dark:text-white tracking-tight leading-none">
+          Profile
+        </h1>
+      </header>
+
+      <div className="relative px-4 pt-[110px] pb-4 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-2xl shadow-xl shadow-slate-200/50 dark:shadow-none">
         <div className="flex flex-col items-center text-center space-y-2.5 pt-0">
           <div className="relative">
             <div className="w-16 h-16 bg-slate-50 dark:bg-gray-900 rounded-2xl border-2 border-white dark:border-gray-950 shadow-xl overflow-hidden flex items-center justify-center">

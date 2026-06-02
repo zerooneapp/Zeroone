@@ -126,7 +126,7 @@ const VendorStaff = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32 w-full max-w-full overflow-x-hidden">
-      <header className="px-4 pt-[40px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
+      <header className="px-4 pt-[48px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl z-50 flex items-center justify-between border-b border-slate-100 dark:border-gray-800/60 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/vendor/dashboard')}
@@ -158,8 +158,8 @@ const VendorStaff = () => {
         </button>
       </header>
  
-      <main className="px-4 pt-[94px]">
-        <div className="mb-4 relative">
+      <main className="px-4 pt-[102px]">
+        <div className="mt-3 mb-4 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
             type="text"

@@ -66,7 +66,7 @@ const VendorStaffProfile = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-24">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-[40px] pb-3">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/vendor/staff')} 
@@ -86,7 +86,7 @@ const VendorStaffProfile = () => {
       </header>
 
       {/* Main Container */}
-      <main className="px-4 pt-[104px] space-y-4 max-w-4xl mx-auto">
+      <main className="px-4 pt-[112px] space-y-4 max-w-4xl mx-auto">
         
         {/* Profile Card */}
         <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3.5 shadow-sm relative overflow-hidden">
