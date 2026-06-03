@@ -65,7 +65,7 @@ const BookingSuccess = () => {
                      <div className="flex items-center gap-1.5 text-[11px] font-black text-[#00246b] dark:text-white leading-none mt-1.5 justify-end">
                         <Clock size={11} className="text-[#00246b] dark:text-white" />
                         <span>
-                           {dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')} - {dayjs(`${selectedDate} ${selectedSlot}`).add(booking.totalDuration || items.reduce((acc, item) => acc + (item.duration || 0), 0), 'minute').format('hh:mm A')}
+                           {dayjs(`${selectedDate} ${selectedSlot}`).format('hh:mm A')}
                         </span>
                      </div>
                   </div>
@@ -73,11 +73,18 @@ const BookingSuccess = () => {
 
                <div className="space-y-2">
                   <p className="text-[8px] font-black text-slate-400 tracking-widest leading-none uppercase">Services</p>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="space-y-1.5">
                      {items.map(item => (
-                        <span key={item._id} className="px-2 py-0.5 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-gray-300 rounded-md text-[9px] font-black border border-slate-100 dark:border-gray-700 tracking-tight uppercase">
-                           {item.name}
-                        </span>
+                        <div key={item._id} className="flex justify-between items-center">
+                           <span className="px-2 py-0.5 bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-gray-300 rounded-md text-[9px] font-black border border-slate-100 dark:border-gray-700 tracking-tight uppercase">
+                              {item.name}
+                           </span>
+                           {item.duration && (
+                              <span className="text-[10px] font-black text-[#00246b] dark:text-white uppercase">
+                                 {item.duration} Mins
+                              </span>
+                           )}
+                        </div>
                      ))}
                   </div>
                </div>

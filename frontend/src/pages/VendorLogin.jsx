@@ -216,14 +216,14 @@ const VendorAuth = () => {
                           key={index}
                           className={cn(
                             'w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all relative overflow-hidden',
-                            isActive ? 'border-[#00246b] dark:border-[#00246b] ring-2 ring-[#00246b]/10' : 
+                            isActive ? 'border-[#00246b] dark:border-white ring-2 ring-[#00246b]/10' : 
                             isFilled ? 'border-gray-200 dark:border-gray-700 text-[#00246b] dark:text-white' : 'border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-700'
                           )}
                         >
                           {digit}
                           {/* Visual Pointer (Blinking Cursor) */}
                           {isActive && !digit && (
-                            <div className="absolute w-[2px] h-5 bg-[#00246b] animate-blink" />
+                            <div className="absolute w-[2px] h-5 bg-[#00246b] dark:bg-white animate-blink" />
                           )}
                         </div>
                       );

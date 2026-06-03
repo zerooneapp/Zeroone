@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { ArrowLeft, Shield, Lock, Smartphone, Monitor, Trash2, SmartphoneNfc, ArrowRight, ShieldCheck, Fingerprint, X, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Smartphone, Monitor, Trash2, ArrowRight, ShieldCheck, Fingerprint, X, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -110,30 +110,7 @@ const SecuritySettings = () => {
       </header>
 
       <main className="flex-1 overflow-y-auto px-5 pt-6 pb-24 space-y-6">
-        {/* 🔐 ACCESS CONTROL */}
-        <section className="space-y-3">
-          <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase">Auth Controls</label>
-          <div className="space-y-3">
 
-             <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
-                   <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center border border-orange-100/50">
-                      <SmartphoneNfc size={18} className="text-orange-500" strokeWidth={2.5} />
-                   </div>
-                   <div className="space-y-0.5">
-                      <h3 className="text-[13px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">Two-factor authentication</h3>
-                      <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500">Enhanced login verification</p>
-                   </div>
-                </div>
-                <button 
-                  onClick={() => handleToggle('twoFactor')}
-                  className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${toggles.twoFactor ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-gray-800'}`}
-                >
-                   <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${toggles.twoFactor ? 'left-6' : 'left-1'}`} />
-                </button>
-             </div>
-          </div>
-        </section>
 
         {/* 📱 ACTIVE SESSIONS */}
         <section className="space-y-3">

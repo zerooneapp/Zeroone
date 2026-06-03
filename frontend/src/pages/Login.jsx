@@ -194,7 +194,7 @@ const CustomerAuth = () => {
                         className={cn(
                           "w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
                           digit || (isOTPFocused && i === otp.join('').length)
-                            ? "border-[#00246b] dark:border-[#00246b] text-[#00246b] dark:text-[#00246b]"
+                            ? "border-[#00246b] dark:border-white text-[#00246b] dark:text-white"
                             : "border-gray-50 dark:border-gray-800 text-gray-200 dark:text-gray-700"
                         )}
                       >
