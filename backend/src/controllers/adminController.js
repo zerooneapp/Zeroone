@@ -1244,11 +1244,38 @@ const deleteVendor = async (req, res) => {
 
     const ownerId = vendor.ownerId;
 
+    // Find all staff members for this vendor to delete their User accounts and other data
+    const staffMembers = await Staff.find({ vendorId: req.params.id }).select('_id userId');
+    const staffIds = staffMembers.map(s => s._id);
+    const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
+
+    const StaffAvailability = require('../models/StaffAvailability');
+    const StaffClosure = require('../models/StaffClosure');
+
+    // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
+    try {
+      const { getIO } = require('../services/socketService');
+      const io = getIO();
+      if (io) {
+        staffUserIds.forEach(id => {
+          io.to(String(id)).emit('FORCE_LOGOUT');
+        });
+        if (ownerId) {
+          io.to(String(ownerId)).emit('FORCE_LOGOUT');
+        }
+      }
+    } catch (err) {
+      console.error('[Socket emit error in deleteVendor]', err.message);
+    }
+
     // Perform Cleanup (Delete all associated records)
     await Promise.all([
       Vendor.findByIdAndDelete(req.params.id),
       User.findByIdAndDelete(ownerId),
+      User.deleteMany({ _id: { $in: staffUserIds } }),
       Staff.deleteMany({ vendorId: req.params.id }),
+      StaffAvailability.deleteMany({ staffId: { $in: staffIds } }),
+      StaffClosure.deleteMany({ staffId: { $in: staffIds } }),
       Service.deleteMany({ vendorId: req.params.id }),
       Booking.deleteMany({ vendorId: req.params.id }),
       Offer.deleteMany({ vendorId: req.params.id }),

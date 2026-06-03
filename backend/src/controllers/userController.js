@@ -64,10 +64,37 @@ const deleteAccount = async (req, res) => {
     if (user.role === 'vendor') {
       const vendor = await Vendor.findOne({ ownerId: userId });
       if (vendor) {
+        // Find all staff members for this vendor to delete their User accounts and other data
+        const staffMembers = await Staff.find({ vendorId: vendor._id }).select('_id userId');
+        const staffIds = staffMembers.map(s => s._id);
+        const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
+
+        const StaffAvailability = require('../models/StaffAvailability');
+        const StaffClosure = require('../models/StaffClosure');
+
+        // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
+        try {
+          const { getIO } = require('../services/socketService');
+          const io = getIO();
+          if (io) {
+            staffUserIds.forEach(id => {
+              io.to(String(id)).emit('FORCE_LOGOUT');
+            });
+            if (userId) {
+              io.to(String(userId)).emit('FORCE_LOGOUT');
+            }
+          }
+        } catch (err) {
+          console.error('[Socket emit error in deleteAccount]', err.message);
+        }
+
         // 1. Remove all vendor-specific data
         await Promise.all([
           Vendor.deleteOne({ _id: vendor._id }),
+          User.deleteMany({ _id: { $in: staffUserIds } }),
           Staff.deleteMany({ vendorId: vendor._id }),
+          StaffAvailability.deleteMany({ staffId: { $in: staffIds } }),
+          StaffClosure.deleteMany({ staffId: { $in: staffIds } }),
           SlotLock.deleteMany({ vendorId: vendor._id }),
           Service.deleteMany({ vendorId: vendor._id }),
           Offer.deleteMany({ vendorId: vendor._id }),

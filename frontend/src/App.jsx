@@ -91,6 +91,7 @@ import { useAuthStore } from './store/authStore';
 import { Toaster, toast } from 'react-hot-toast';
 import { requestForToken, onMessageListener } from './config/firebase';
 import { saveTokenToBackend } from './services/fcmService';
+import useSocket from './hooks/useSocket';
 
 function App() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode);
@@ -99,6 +100,10 @@ function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isInitialized = useAuthStore((state) => state.isInitialized);
   const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
+
+  // Global socket listener for authenticated users
+  useSocket(user?._id);
 
   // Foreground Notification Listener
   useEffect(() => {

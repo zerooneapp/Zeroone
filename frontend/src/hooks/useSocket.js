@@ -33,6 +33,12 @@ const useSocket = (userId) => {
       audio.play().catch(e => console.log('Sound playback failed:', e.message));
     });
 
+    // Listen for Force Logout Events
+    socketRef.current.on('FORCE_LOGOUT', () => {
+      console.log('[SOCKET] Force logout event received');
+      window.dispatchEvent(new CustomEvent('auth-unauthorized'));
+    });
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();

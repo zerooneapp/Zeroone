@@ -8,7 +8,7 @@ const checkVendors = async () => {
     const vendors = await Vendor.find({}).lean();
     console.log(`Total Vendors: ${vendors.length}`);
     vendors.forEach((v, idx) => {
-      console.log(`[${idx}] ID: ${v._id} | shopName: ${v.shopName} | ownerName: ${v.ownerName}`);
+      console.log(`[${idx}] shopName: ${v.shopName} | AadhaarFront: ${v.aadhaarFront ? "Yes" : "No"} | AadhaarBack: ${v.aadhaarBack ? "Yes" : "No"} | PAN: ${v.panCard ? "Yes" : "No"} | shopImage: ${v.shopImage ? "Yes" : "No"}`);
     });
     process.exit(0);
   } catch (error) {

@@ -55,6 +55,14 @@ const VendorSignup = () => {
   };
 
   const handleSubmit = async () => {
+    // 🛡️ RE-VALIDATE STATE TO PREVENT DATA LOSS ON REFRESH
+    if (!files.panCard || !files.aadhaarFront || !files.aadhaarBack) {
+      setStep(2);
+      return toast.error('Identity documents were lost due to page reload. Please upload them again.');
+    }
+    if (formData.serviceMode === 'shop' && !files.shopImage) {
+      return toast.error('Please upload shop facade image');
+    }
     if (!formData.address) return toast.error('Please enter shop address');
     if (!files.vendorPhoto) return toast.error('Please upload partner profile photo');
 
@@ -125,7 +133,7 @@ const VendorSignup = () => {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <p className="text-[10px] font-black text-[#00246b] uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
+          <p className="text-[10px] font-black text-[#00246b] dark:text-white uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
           <h1 className="text-2xl font-black tracking-tight leading-none">Partner Application</h1>
         </div>
       </div>
@@ -469,7 +477,7 @@ const VendorSignup = () => {
         </Button>
         <div className="mt-4 text-center">
           <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">
-            By submitting, you agree to our <button onClick={() => navigate('/vendor-privacy-policy')} className="text-[#00246b] border-b border-[#00246b]/30">Partner Policy</button>
+            By submitting, you agree to our <button onClick={() => navigate('/vendor-privacy-policy')} className="text-[#00246b] dark:text-white border-b border-[#00246b]/30 dark:border-white/30">Partner Policy</button>
           </p>
         </div>
       </div>
