@@ -12,7 +12,9 @@ const VendorAuth = () => {
   const { requestOTP, verifyOTP, loading, setCredentials } = useAuthStore();
 
   const [step, setStep] = useState(location.state?.step || 'phone');
-  const [phone, setPhone] = useState(location.state?.phone || '');
+  const [phone, setPhone] = useState(() => {
+    return location.state?.phone || sessionStorage.getItem('vendor_login_phone_input') || '';
+  });
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
@@ -35,7 +37,9 @@ const VendorAuth = () => {
     } else if (val.startsWith('0') && val.length > 10) {
       val = val.slice(-10);
     }
-    setPhone(val.slice(0, 10));
+    const newPhone = val.slice(0, 10);
+    setPhone(newPhone);
+    sessionStorage.setItem('vendor_login_phone_input', newPhone);
   };
 
   const handleOTPChange = (e) => {
@@ -50,7 +54,7 @@ const VendorAuth = () => {
   const handleSendOTP = async (e) => {
     e?.preventDefault();
     if (phone.length < 10) {
-      return toast.error('Please enter a valid phone number');
+      return toast.error('Please enter a valid phone number', { id: 'auth-error' });
     }
 
     const res = await requestOTP(phone, 'vendor');
@@ -61,14 +65,14 @@ const VendorAuth = () => {
       setTimer(30);
       setCanResend(false);
     } else {
-      toast.error(res.message);
+      toast.error(res.message, { id: 'auth-error' });
     }
   };
 
   const handleVerifyOTP = async () => {
     const otpValue = otp.join('');
     if (otpValue.length < 6) {
-      return toast.error('Please enter the full code');
+      return toast.error('Please enter the full code', { id: 'auth-error' });
     }
 
     const res = await verifyOTP(phone, otpValue, true);
@@ -112,7 +116,7 @@ const VendorAuth = () => {
         navigate('/', { replace: true });
       }
     } else {
-      toast.error(res.message);
+      toast.error(res.message, { id: 'auth-error' });
     }
   };
 
@@ -266,31 +270,33 @@ const VendorAuth = () => {
       </div>
 
       {/* Footer Branding */}
-      <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => {
-              // Save state so back button returns to current step
-              navigate(location.pathname, { state: { phone, step }, replace: true });
-              navigate('/vendor-privacy-policy');
-            }}
-            className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
-          >
-            Partner &amp; Staff Policy
-          </button>
-          <span className="text-[#00246b]/20 dark:text-gray-800">•</span>
-          <button 
-            onClick={() => {
-              // Save state so back button returns to current step
-              navigate(location.pathname, { state: { phone, step }, replace: true });
-              navigate('/vendor-contact-support');
-            }}
-            className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
-          >
-            Contact &amp; Support
-          </button>
+      {step === 'phone' && (
+        <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                // Save state so back button returns to current step
+                navigate(location.pathname, { state: { phone, step }, replace: true });
+                navigate('/vendor-privacy-policy');
+              }}
+              className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
+            >
+              Partner &amp; Staff Policy
+            </button>
+            <span className="text-[#00246b]/20 dark:text-gray-800">•</span>
+            <button 
+              onClick={() => {
+                // Save state so back button returns to current step
+                navigate(location.pathname, { state: { phone, step }, replace: true });
+                navigate('/vendor-contact-support');
+              }}
+              className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
+            >
+              Contact &amp; Support
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
