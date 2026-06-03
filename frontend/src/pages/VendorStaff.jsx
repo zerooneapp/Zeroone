@@ -36,7 +36,9 @@ const VendorStaff = () => {
   const handleFetch = async (force = false) => {
     try {
       await fetchStaff(force);
-      if (!vendorData) {
+      if (force) {
+        await fetchDashboard(force);
+      } else if (!vendorData) {
         await fetchDashboard();
       }
       
@@ -78,7 +80,7 @@ const VendorStaff = () => {
       setToggleLoadingId(id);
       await api.patch(`/staff/${id}`, { isActive: true });
       toast.success(`${member?.name} is back online`);
-      handleFetch(true); // Refresh to clear any closure status
+      handleFetch('silent'); // Refresh to clear any closure status
     } catch (err) {
       setStaff(original);
       toast.error('Failed to update status');
@@ -103,7 +105,7 @@ const VendorStaff = () => {
       toast.success(`${deleteConfirmStaff.name} deleted successfully`, { id: 'delete-staff' });
       setStaff(prev => prev.filter(s => s._id !== deleteConfirmStaff._id));
       setDeleteConfirmStaff(null);
-      handleFetch(true);
+      handleFetch('silent');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete staff member', { id: 'delete-staff' });
     } finally {
@@ -219,7 +221,7 @@ const VendorStaff = () => {
           staff={closureModal.staff}
           onClose={() => setClosureModal({ isOpen: false, staff: null })}
           onCreated={() => {
-            handleFetch(true);
+            handleFetch('silent');
           }}
         />
       )}

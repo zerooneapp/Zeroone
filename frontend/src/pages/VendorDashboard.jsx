@@ -480,7 +480,7 @@ const VendorDashboard = () => {
         </section>
 
         <section className="space-y-2 pt-0">
-          {(loading || data?.hasRegisteredStaff) && (
+          {(loading || (data?.hasRegisteredStaff && activeStaffCards.length > 1)) && (
             <div className="space-y-2 px-0.5">
               <h2 className="text-[10px] font-black text-[#00246b] dark:text-white tracking-tight opacity-80 uppercase">
                 Active Staff

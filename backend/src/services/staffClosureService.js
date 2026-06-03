@@ -40,8 +40,6 @@ const getImpactedBookings = async (staffId, start, end) => (
     endTime: { $gt: moment(start).toDate() }
   })
     .populate('userId', 'name phone image')
-    .populate('staffId', 'name image phone')
-    .populate('vendorId', 'shopName address')
     .sort({ startTime: 1 })
 );
 

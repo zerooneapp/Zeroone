@@ -65,8 +65,7 @@ const findOverlappingBooking = ({ staffId, start, end, excludeBookingId = null }
   const query = {
     staffId,
     status: { $ne: 'cancelled' },
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
+    startTime: start.toDate()
   };
 
   if (excludeBookingId) {
@@ -625,8 +624,7 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
     staffId: resolvedStaffId,
     _id: { $ne: bookingId },
     status: { $ne: 'cancelled' },
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
+    startTime: start.toDate()
   });
 
   if (existingAtNewTime) throw new Error('New slot occupied');

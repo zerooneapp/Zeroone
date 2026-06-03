@@ -176,7 +176,7 @@ const getEligibleStaffMembers = async (vendorId, serviceIds) => {
   return staffMembers;
 };
 
-const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookingId = null) => {
+const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookingId = null, includeUnavailable = false) => {
   const now = moment().tz('Asia/Kolkata');
   const targetDate = moment.tz(date, 'Asia/Kolkata').startOf('day');
   const vendorAvailability = await getVendorDayAvailability(vendorId, targetDate);
@@ -253,6 +253,9 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
       continue;
     }
 
+    let hasAnyStaff = false;
+    const availableStaff = [];
+
     for (const staff of staffMembers) {
       const staffIdStr = staff._id.toString();
       const isAvailableBySchedule = isStaffAvailableForWindow(
@@ -265,8 +268,7 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
 
       const hasOverlap = allBusyBlocks.some((block) => (
         block.staffId === staffIdStr &&
-        currentStart.isBefore(block.end) &&
-        currentEnd.isAfter(block.start)
+        currentStart.isSame(block.start)
       ));
 
       const isStaffOnClosure = staffClosureRecords.some(c => 
@@ -277,13 +279,22 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
 
       if (!isAvailableBySchedule || hasOverlap || isStaffOnClosure) continue;
 
-      let slotObj = availableSlotsWithStaff.find((slot) => slot.time === currentStart.format('HH:mm'));
-      if (!slotObj) {
-        slotObj = { time: currentStart.format('HH:mm'), availableStaff: [] };
-        availableSlotsWithStaff.push(slotObj);
-      }
+      availableStaff.push(staffIdStr);
+      hasAnyStaff = true;
+    }
 
-      slotObj.availableStaff.push(staffIdStr);
+    if (hasAnyStaff) {
+      availableSlotsWithStaff.push({
+        time: currentStart.format('HH:mm'),
+        availableStaff,
+        isBooked: false
+      });
+    } else if (includeUnavailable) {
+      availableSlotsWithStaff.push({
+        time: currentStart.format('HH:mm'),
+        availableStaff: [],
+        isBooked: true
+      });
     }
 
     currentStart.add(15, 'minutes');
@@ -330,15 +341,13 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
     staffId: { $in: staffIds },
     status: { $ne: 'cancelled' },
     _id: { $ne: excludeBookingId },
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
+    startTime: start.toDate()
   });
 
   const lockFilter = {
     staffId: { $in: staffIds },
     expiresAt: { $gt: new Date() },
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
+    startTime: start.toDate()
   };
 
   // 🛡️ CRITICAL FIX: If we are re-locking for the same user, ignore their previous locks

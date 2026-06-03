@@ -45,7 +45,9 @@ export const useVendorStore = create((set, get) => ({
       return;
     }
 
-    set({ dashboardLoading: true });
+    if (force !== 'silent') {
+      set({ dashboardLoading: true });
+    }
     try {
       const { data: bundle } = await api.get('/vendor/dashboard-bundle');
       
@@ -95,7 +97,9 @@ export const useVendorStore = create((set, get) => ({
       return;
     }
 
-    set({ staffLoading: true });
+    if (force !== 'silent') {
+      set({ staffLoading: true });
+    }
     try {
       const res = await api.get('/staff/manage/all', { params: { includeInactive: true } });
       set({
@@ -248,13 +252,15 @@ export const useVendorStore = create((set, get) => ({
     // Check if params are the same as last time
     const paramsChanged = JSON.stringify(params) !== JSON.stringify(lastBookingParams);
 
-    if (bookingsData.length > 0 && !paramsChanged && !force) {
+    if (lastBookingParams && !paramsChanged && !force) {
       // Background refresh
       silentBookingsRefresh(set, params);
       return;
     }
 
-    set({ bookingsLoading: true });
+    if (force !== 'silent') {
+      set({ bookingsLoading: true });
+    }
     try {
       const res = await api.get('/vendor/bookings', { params });
       set({
