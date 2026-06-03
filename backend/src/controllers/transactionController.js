@@ -70,12 +70,50 @@ const getTransactions = async (req, res) => {
         metadata: { bookingId: b._id }
       }));
 
+      // Add membership revenue wallet transactions
+      if (normalizedSource !== 'staff') {
+        const WalletTransaction = require('../models/WalletTransaction');
+        const membershipFilter = {
+          vendorId: req.vendor._id,
+          category: 'membership_revenue',
+          status: 'completed'
+        };
+
+        if (from && to) {
+          membershipFilter.timestamp = {
+            $gte: moment(from).startOf('day').toDate(),
+            $lte: moment(to).endOf('day').toDate()
+          };
+        }
+
+        const membershipTransactions = await WalletTransaction.find(membershipFilter).lean();
+        const formattedMemberships = membershipTransactions.map(tx => ({
+          _id: tx._id,
+          vendorId: tx.vendorId,
+          amount: tx.amount,
+          type: 'credit',
+          category: 'membership_revenue',
+          status: 'completed',
+          timestamp: tx.timestamp,
+          description: tx.description || 'Membership Purchase',
+          sourceType: 'partner',
+          sourceLabel: 'Partner',
+          sourceStaffId: null,
+          metadata: { transactionId: tx._id }
+        }));
+
+        finalTransactions = [...finalTransactions, ...formattedMemberships];
+      }
+
       // Filter by source if not already filtered by staffId
       if (normalizedSource === 'partner') {
         finalTransactions = finalTransactions.filter(t => t.sourceType === 'partner');
       } else if (normalizedSource === 'staff' && !normalizedStaffId) {
         finalTransactions = finalTransactions.filter(t => t.sourceType === 'staff');
       }
+
+      // Sort by timestamp descending
+      finalTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     } else {
       const filter = {
         vendorId: req.vendor._id,

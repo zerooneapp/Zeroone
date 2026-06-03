@@ -27,7 +27,7 @@ const Account = () => {
   const menuItems = [
     { icon: User, label: 'Personal Information', sub: 'Name, email, and phone', path: '/account/info', color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { icon: MapPin, label: 'Saved Addresses', sub: 'Home, office, and more', path: '/account/addresses', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { icon: CreditCard, label: 'Payment Methods', sub: 'Cards, UPI, and Wallets', path: '/account/payments', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    // { icon: CreditCard, label: 'Payment Methods', sub: 'Cards, UPI, and Wallets', path: '/account/payments', color: 'text-purple-500', bg: 'bg-purple-500/10' },
     { icon: Crown, label: 'My Memberships', sub: 'Active plans & benefits', path: '/account/memberships', color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { icon: Shield, label: 'Security', sub: 'Passwords & permissions', path: '/account/security', color: 'text-rose-500', bg: 'bg-rose-500/10' },
     { icon: Settings, label: 'Preferences', sub: 'Theme, language, & region', path: '/account/preferences', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
