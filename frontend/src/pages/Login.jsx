@@ -14,7 +14,9 @@ const CustomerAuth = () => {
   const { requestOTP, verifyOTP, loading, setCredentials } = useAuthStore();
 
   const [step, setStep] = useState(location.state?.step || 'phone'); // phone, otp
-  const [phone, setPhone] = useState(location.state?.phone || '');
+  const [phone, setPhone] = useState(() => {
+    return location.state?.phone || sessionStorage.getItem('login_phone_input') || '';
+  });
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
@@ -41,7 +43,9 @@ const CustomerAuth = () => {
     } else if (val.startsWith('0') && val.length > 10) {
       val = val.slice(-10);
     }
-    setPhone(val.slice(0, 10));
+    const newPhone = val.slice(0, 10);
+    setPhone(newPhone);
+    sessionStorage.setItem('login_phone_input', newPhone);
   };
 
   const handleOTPChange = (e) => {
@@ -55,7 +59,7 @@ const CustomerAuth = () => {
 
   const handleSendOTP = async (e) => {
     e?.preventDefault();
-    if (phone.length < 10) return toast.error('Please enter a valid phone number');
+    if (phone.length < 10) return toast.error('Please enter a valid phone number', { id: 'auth-error' });
 
     const res = await requestOTP(phone, 'customer');
     if (res.success) {
@@ -65,13 +69,13 @@ const CustomerAuth = () => {
       setTimer(30);
       setCanResend(false);
     } else {
-      toast.error(res.message);
+      toast.error(res.message, { id: 'auth-error' });
     }
   };
 
   const handleVerifyOTP = async () => {
     const otpValue = otp.join('');
-    if (otpValue.length < 6) return toast.error('Please enter the full code');
+    if (otpValue.length < 6) return toast.error('Please enter the full code', { id: 'auth-error' });
 
     const res = await verifyOTP(phone, otpValue, true);
     if (res.success) {
@@ -103,7 +107,7 @@ const CustomerAuth = () => {
         navigate(redirectPath, { replace: true });
       }
     } else {
-      toast.error(res.message);
+      toast.error(res.message, { id: 'auth-error' });
     }
   };
 
@@ -195,7 +199,7 @@ const CustomerAuth = () => {
                           "w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
                           digit || (isOTPFocused && i === otp.join('').length)
                             ? "border-[#00246b] dark:border-white text-[#00246b] dark:text-white"
-                            : "border-gray-50 dark:border-gray-800 text-gray-200 dark:text-gray-700"
+                            : "border-gray-300 dark:border-white/40 text-gray-300 dark:text-white/40"
                         )}
                       >
                         {digit}
@@ -240,23 +244,31 @@ const CustomerAuth = () => {
       </div>
 
       {/* Footer Branding */}
-      <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate('/privacy-policy')}
-            className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
-          >
-            Privacy &amp; Policy
-          </button>
-          <span className="text-[#00246b]/20 dark:text-gray-800">•</span>
-          <button 
-            onClick={() => navigate('/contact-support')}
-            className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
-          >
-            Contact &amp; Support
-          </button>
+      {step === 'phone' && (
+        <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                navigate(location.pathname, { state: { phone, step }, replace: true });
+                navigate('/privacy-policy');
+              }}
+              className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
+            >
+              Privacy &amp; Policy
+            </button>
+            <span className="text-[#00246b]/20 dark:text-gray-800">•</span>
+            <button 
+              onClick={() => {
+                navigate(location.pathname, { state: { phone, step }, replace: true });
+                navigate('/contact-support');
+              }}
+              className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
+            >
+              Contact &amp; Support
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

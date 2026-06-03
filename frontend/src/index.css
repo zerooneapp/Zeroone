@@ -30,6 +30,28 @@
   input, textarea {
     caret-color: #00246b;
   }
+
+  /* Fix for autofill white background issue */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active {
+      transition: background-color 5000s ease-in-out 0s;
+  }
+  
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover, 
+  .dark input:-webkit-autofill:focus, 
+  .dark input:-webkit-autofill:active {
+      -webkit-text-fill-color: white !important;
+  }
+  
+  :not(.dark) input:-webkit-autofill,
+  :not(.dark) input:-webkit-autofill:hover, 
+  :not(.dark) input:-webkit-autofill:focus, 
+  :not(.dark) input:-webkit-autofill:active {
+      -webkit-text-fill-color: #00246b !important;
+  }
 }
 
 .glass-effect {

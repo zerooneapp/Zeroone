@@ -21,7 +21,10 @@ const Home = () => {
   const [error, setError] = useState(null);
 
   const [search, setSearch] = useState('');
-  const [selectedCats, setSelectedCats] = useState([]);
+  const [selectedCats, setSelectedCats] = useState(() => {
+    const saved = sessionStorage.getItem('home_selected_cats');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [selectedServiceMode, setSelectedServiceMode] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -77,11 +80,22 @@ const Home = () => {
 
   // 2. Fetch Categories
   useEffect(() => {
+    // If prefetch data is available and we haven't set categories yet, use it
+    if (window.__PREFETCHED_DATA__?.categories?.length > 0 && categories.length === 0) {
+      setCategories(window.__PREFETCHED_DATA__.categories);
+    }
+    
     api.get('/categories')
       .then(res => {
-        setCategories(res.data);
+        // Clean up category names (e.g., removing trailing spaces from 'Makeup Artist ')
+        const cleanedCategories = res.data.map(cat => ({
+          ...cat,
+          name: cat.name ? cat.name.trim() : cat.name
+        }));
+        
+        setCategories(cleanedCategories);
         if (window.__PREFETCHED_DATA__) {
-          window.__PREFETCHED_DATA__.categories = res.data;
+          window.__PREFETCHED_DATA__.categories = cleanedCategories;
         }
       })
       .catch(err => console.error('Failed to fetch categories'));
@@ -134,9 +148,11 @@ const Home = () => {
   }, [location, debouncedSearch, selectedCats, selectedServiceMode, currentPage]);
 
   const toggleCategory = (id) => {
-    setSelectedCats(prev =>
-      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
-    );
+    setSelectedCats(prev => {
+      const newSelection = prev.includes(id) ? [] : [id];
+      sessionStorage.setItem('home_selected_cats', JSON.stringify(newSelection));
+      return newSelection;
+    });
   };
 
   // 🔄 Reset to page 1 when filters change

@@ -22,6 +22,7 @@ const Preferences = () => {
 
   const showFutureUpdate = () => {
     toast('Available in future updates', {
+        id: 'future-update-toast',
         icon: '🚀',
         style: {
             borderRadius: '1rem',
