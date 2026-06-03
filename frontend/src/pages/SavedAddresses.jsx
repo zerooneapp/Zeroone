@@ -169,7 +169,7 @@ const SavedAddresses = () => {
             </div>
             <div className="flex items-start gap-3 relative z-10">
               <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center border border-slate-100 dark:border-gray-700 shrink-0">
-                <Navigation size={18} className="text-[#00246b] dark:text-blue-400" />
+                <Navigation size={18} className="text-[#00246b] dark:text-blue-400 transform -translate-x-[1px] translate-y-[0.5px]" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-sm font-black text-[#00246b] dark:text-white tracking-tight">Main location</h3>
@@ -197,7 +197,7 @@ const SavedAddresses = () => {
               className="w-full h-32 p-4 pt-10 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 text-xs font-bold text-slate-900 dark:text-white tracking-tight focus:border-primary transition-all outline-none resize-none shadow-sm caret-[#00246b]"
             />
             <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none opacity-40">
-              <Search size={14} className="text-[#00246b]" />
+              <Search size={14} className="text-[#00246b] dark:text-white" />
               <span className="text-[8px] font-black uppercase tracking-[0.2em]">Manual Input</span>
             </div>
           </div>

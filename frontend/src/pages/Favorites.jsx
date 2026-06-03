@@ -107,18 +107,18 @@ const Favorites = () => {
                               </button>
                            </div>
 
-                           <div className="p-3.5 px-4 flex items-center justify-between">
-                              <div className="space-y-1.5 leading-none">
-                                 <h3 className="text-[13px] font-black text-slate-900 dark:text-white tracking-tight truncate max-w-[120px]">{vendor.shopName}</h3>
-                                 <div className="flex items-center gap-1 opacity-60">
-                                    <MapPin size={10} strokeWidth={3} className="text-slate-400" />
+                           <div className="p-3.5 px-4 flex items-center justify-between gap-3">
+                              <div className="space-y-1.5 leading-none min-w-0 flex-1">
+                                 <h3 className="text-[13px] font-black text-slate-900 dark:text-white tracking-tight truncate">{vendor.shopName}</h3>
+                                 <div className="flex items-center gap-1 opacity-60 overflow-hidden">
+                                    <MapPin size={10} strokeWidth={3} className="text-slate-400 flex-shrink-0" />
                                     <span className="text-[9px] font-black text-slate-400 tracking-widest truncate">{vendor.address?.split(',')[0]}</span>
                                  </div>
                               </div>
 
                               <button
                                  onClick={() => navigate(`/service/${vendor._id}`)}
-                                 className="h-10 px-6 bg-[#00246b] dark:bg-[#00246b] text-white rounded-xl font-black text-[12px] tracking-tight active:scale-95 transition-all border-b-2 border-white/10 shadow-lg capitalize"
+                                 className="flex-shrink-0 h-10 px-6 bg-[#00246b] dark:bg-[#00246b] text-white rounded-xl font-black text-[12px] tracking-tight active:scale-95 transition-all border-b-2 border-white/10 shadow-lg capitalize"
                               >
                                  Book now
                               </button>

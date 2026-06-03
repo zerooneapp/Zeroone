@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
-    Save, Plus, X, CheckCircle2, XCircle, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
-    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone
- } from 'lucide-react';
+   ArrowLeft, Store, Camera, Video, MapPin, Loader2,
+   Save, Plus, X, CheckCircle2, XCircle, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
+   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import { jsPDF } from 'jspdf';
@@ -79,7 +79,7 @@ const VendorProfile = () => {
 
    const handleFetchLocation = () => {
       if (!navigator.geolocation) return toast.error('GPS not supported');
-      
+
       setLocationLoading(true);
       navigator.geolocation.getCurrentPosition(async (pos) => {
          const { latitude, longitude } = pos.coords;
@@ -87,7 +87,7 @@ const VendorProfile = () => {
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
             const result = await response.json();
             const addr = result.display_name || `${latitude}, ${longitude}`;
-            
+
             setData(prev => ({
                ...prev,
                address: addr,
@@ -122,12 +122,12 @@ const VendorProfile = () => {
          }
       };
       const fetchSharedSettings = async () => {
-          try {
-             const res = await api.get('/settings/shared');
-             setSupportNumber(res.data.supportWhatsApp || '');
-             setPromoPricePerDay(res.data.promotionPricePerDay || 10);
-             if (res.data.features) setGlobalFeatures(res.data.features);
-          } catch (err) {
+         try {
+            const res = await api.get('/settings/shared');
+            setSupportNumber(res.data.supportWhatsApp || '');
+            setPromoPricePerDay(res.data.promotionPricePerDay || 10);
+            if (res.data.features) setGlobalFeatures(res.data.features);
+         } catch (err) {
             console.error('Failed to fetch support number');
          }
       };
@@ -194,7 +194,7 @@ const VendorProfile = () => {
 
    useEffect(() => {
       if (activeSection !== 'media') return;
-      
+
       const fetchServices = async () => {
          try {
             setServicesLoading(true);
@@ -253,7 +253,7 @@ const VendorProfile = () => {
 
    const handleUpdateInfo = async (e) => {
       e.preventDefault();
-      
+
       // 🛑 Validation: Opening and Closing time cannot be same
       if (data.workingHours.start === data.workingHours.end) {
          return toast.error('Opening and Closing time cannot be the same', {
@@ -295,7 +295,7 @@ const VendorProfile = () => {
       }
    };
 
-    const handleSetFeaturedImage = async (url) => {
+   const handleSetFeaturedImage = async (url) => {
       try {
          setLoading(true);
          await api.patch('/vendor/update-profile', { featuredImage: url });
@@ -308,100 +308,100 @@ const VendorProfile = () => {
       }
    };
 
-    const handleDeleteGalleryImage = async (url) => {
-       if (!window.confirm('Delete this image from gallery?')) return;
-       try {
-          setLoading(true);
-          const res = await api.post('/vendor/gallery/delete', { imageUrl: url });
-          setCurrentMedia(res.data);
-          if (data.featuredImage === url) {
-             setData(prev => ({ ...prev, featuredImage: '' }));
-          }
-          toast.success('Image removed');
-       } catch (err) {
-          toast.error('Failed to delete image');
-       } finally {
-          setLoading(false);
-       }
-    };
+   const handleDeleteGalleryImage = async (url) => {
+      if (!window.confirm('Delete this image from gallery?')) return;
+      try {
+         setLoading(true);
+         const res = await api.post('/vendor/gallery/delete', { imageUrl: url });
+         setCurrentMedia(res.data);
+         if (data.featuredImage === url) {
+            setData(prev => ({ ...prev, featuredImage: '' }));
+         }
+         toast.success('Image removed');
+      } catch (err) {
+         toast.error('Failed to delete image');
+      } finally {
+         setLoading(false);
+      }
+   };
 
-    const handleDeleteSingleMedia = async (field) => {
-       if (!window.confirm(`Delete shop ${field === 'shopImage' ? 'profile image' : field}?`)) return;
-       try {
-          setLoading(true);
-          const deletedUrl = currentMedia?.[field];
-          const res = await api.post('/vendor/media/delete-single', { field });
-          setCurrentMedia(res.data);
-          if (data.featuredImage === deletedUrl) {
-             setData(prev => ({ ...prev, featuredImage: '' }));
-          }
-          toast.success('Image deleted');
-       } catch (err) {
-          toast.error('Failed to delete image');
-       } finally {
-          setLoading(false);
-       }
-    };
+   const handleDeleteSingleMedia = async (field) => {
+      if (!window.confirm(`Delete shop ${field === 'shopImage' ? 'profile image' : field}?`)) return;
+      try {
+         setLoading(true);
+         const deletedUrl = currentMedia?.[field];
+         const res = await api.post('/vendor/media/delete-single', { field });
+         setCurrentMedia(res.data);
+         if (data.featuredImage === deletedUrl) {
+            setData(prev => ({ ...prev, featuredImage: '' }));
+         }
+         toast.success('Image deleted');
+      } catch (err) {
+         toast.error('Failed to delete image');
+      } finally {
+         setLoading(false);
+      }
+   };
 
-    const handleUpdateSingleMedia = async (field, file) => {
-       try {
-          setLoading(true);
-          const formData = new FormData();
-          formData.append('media', file);
-          formData.append('field', field);
-          const res = await api.post('/vendor/media/single', formData, {
-             headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          setCurrentMedia(res.data);
-          toast.success('Image updated!');
-       } catch (err) {
-          toast.error('Update failed');
-       } finally {
-          setLoading(false);
-       }
-    };
+   const handleUpdateSingleMedia = async (field, file) => {
+      try {
+         setLoading(true);
+         const formData = new FormData();
+         formData.append('media', file);
+         formData.append('field', field);
+         const res = await api.post('/vendor/media/single', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+         });
+         setCurrentMedia(res.data);
+         toast.success('Image updated!');
+      } catch (err) {
+         toast.error('Update failed');
+      } finally {
+         setLoading(false);
+      }
+   };
 
-    const handleReplaceGalleryImage = async (oldUrl, file) => {
-       try {
-          setLoading(true);
-          const formData = new FormData();
-          formData.append('media', file);
-          formData.append('oldUrl', oldUrl);
-          const res = await api.post('/vendor/gallery/replace', formData, {
-             headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          setCurrentMedia(res.data);
-          toast.success('Image replaced!');
-       } catch (err) {
-          toast.error('Replacement failed');
-       } finally {
-          setLoading(false);
-       }
-    };
+   const handleReplaceGalleryImage = async (oldUrl, file) => {
+      try {
+         setLoading(true);
+         const formData = new FormData();
+         formData.append('media', file);
+         formData.append('oldUrl', oldUrl);
+         const res = await api.post('/vendor/gallery/replace', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+         });
+         setCurrentMedia(res.data);
+         toast.success('Image replaced!');
+      } catch (err) {
+         toast.error('Replacement failed');
+      } finally {
+         setLoading(false);
+      }
+   };
 
-    const handleDeleteVideo = async () => {
-       if (!window.confirm('Remove promotional video?')) return;
-       try {
-          setLoading(true);
-          const res = await api.delete('/vendor/video/delete');
-          setCurrentMedia(res.data);
-          toast.success('Video removed');
-       } catch (err) {
-          toast.error('Failed to remove video');
-       } finally {
-          setLoading(false);
-       }
-    };
+   const handleDeleteVideo = async () => {
+      if (!window.confirm('Remove promotional video?')) return;
+      try {
+         setLoading(true);
+         const res = await api.delete('/vendor/video/delete');
+         setCurrentMedia(res.data);
+         toast.success('Video removed');
+      } catch (err) {
+         toast.error('Failed to remove video');
+      } finally {
+         setLoading(false);
+      }
+   };
 
    const handlePurchasePromotion = async () => {
       if (!promoDays || promoDays < 1) return toast.error('Minimum 1 day required');
-      
+
       try {
          setLoading(true);
-         
+
          // 1. Create order on backend
          const { data: orderData } = await api.post('/promotions/vendor/create-order', { days: promoDays });
-         
+
          const options = {
             key: orderData.key_id,
             amount: orderData.amount,
@@ -420,7 +420,7 @@ const VendorProfile = () => {
                      days: promoDays,
                      amountPaid: orderData.totalAmount
                   });
-                  
+
                   toast.success('Payment successful! Promotion request sent.');
                   fetchPlans(); // Refresh status immediately
                } catch (err) {
@@ -533,18 +533,18 @@ const VendorProfile = () => {
       try {
          setDownloadingReport(true);
          const { data } = await api.get(`/vendor/live-report?from=${reportRange.from}&to=${reportRange.to}`);
-         
+
          const doc = new jsPDF();
-         
+
          // Header
          doc.setFontSize(22);
          doc.setTextColor(0, 36, 107); // #00246b
          doc.text('Performance Report', 105, 20, { align: 'center' });
-         
+
          doc.setFontSize(14);
          doc.setTextColor(50, 50, 50);
          doc.text(data.shopName || 'Shop Report', 105, 30, { align: 'center' });
-         
+
          doc.setFontSize(10);
          doc.setTextColor(100, 100, 100);
          doc.text(`Period: ${dayjs(reportRange.from).format('DD/MM/YYYY')} to ${dayjs(reportRange.to).format('DD/MM/YYYY')}`, 105, 38, { align: 'center' });
@@ -576,7 +576,7 @@ const VendorProfile = () => {
          doc.setFontSize(12);
          doc.setTextColor(0, 36, 107);
          doc.text('Report Summary', 14, finalY);
-         
+
          doc.setFontSize(10);
          doc.setTextColor(50, 50, 50);
          doc.text(`Total Shop Bookings: ${totalBookings}`, 14, finalY + 8);
@@ -584,7 +584,7 @@ const VendorProfile = () => {
 
          // Footer
          const pageCount = doc.internal.getNumberOfPages();
-         for(let i = 1; i <= pageCount; i++) {
+         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             doc.setFontSize(8);
             doc.setTextColor(150, 150, 150);
@@ -644,7 +644,7 @@ const VendorProfile = () => {
             </div>
          </header>
 
-         <main className="px-4 pt-[114px] max-w-4xl mx-auto">
+         <main className="px-4 pt-[110px] max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
                {/* ── MENU LIST ── */}
                {!activeSection && (
@@ -760,7 +760,7 @@ const VendorProfile = () => {
                         <div className="space-y-1.5">
                            <div className="flex items-center justify-between px-1">
                               <label className="text-[9px] font-black capitalize text-gray-400 tracking-widest">Business Address</label>
-                              <button 
+                              <button
                                  type="button"
                                  onClick={handleFetchLocation}
                                  disabled={locationLoading}
@@ -778,10 +778,10 @@ const VendorProfile = () => {
                            />
                         </div>
 
-                         <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                            <div className="space-y-1.5 relative">
                               <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Open Time</label>
-                              <div 
+                              <div
                                  onClick={() => setPickerOpen('start')}
                                  className="relative group cursor-pointer"
                               >
@@ -798,8 +798,8 @@ const VendorProfile = () => {
 
                               <AnimatePresence>
                                  {pickerOpen === 'start' && (
-                                    <TimePickerOverlay 
-                                       value={data.workingHours.start} 
+                                    <TimePickerOverlay
+                                       value={data.workingHours.start}
                                        onChange={(val) => setData({ ...data, workingHours: { ...data.workingHours, start: val } })}
                                        onClose={() => setPickerOpen(null)}
                                        pickerRef={pickerRef}
@@ -810,7 +810,7 @@ const VendorProfile = () => {
 
                            <div className="space-y-1.5 relative">
                               <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Close Time</label>
-                              <div 
+                              <div
                                  onClick={() => setPickerOpen('end')}
                                  className="relative group cursor-pointer"
                               >
@@ -827,8 +827,8 @@ const VendorProfile = () => {
 
                               <AnimatePresence>
                                  {pickerOpen === 'end' && (
-                                    <TimePickerOverlay 
-                                       value={data.workingHours.end} 
+                                    <TimePickerOverlay
+                                       value={data.workingHours.end}
                                        onChange={(val) => setData({ ...data, workingHours: { ...data.workingHours, end: val } })}
                                        onClose={() => setPickerOpen(null)}
                                        pickerRef={pickerRef}
@@ -838,33 +838,33 @@ const VendorProfile = () => {
                            </div>
                         </div>
 
-                        <Button 
-                           type="submit" 
-                           loading={loading} 
+                        <Button
+                           type="submit"
+                           loading={loading}
                            disabled={data.workingHours.start === data.workingHours.end}
                            className={cn(
                               "w-full rounded-lg py-3 font-black capitalize tracking-widest text-[10px] shadow-lg transition-all active:scale-95 bg-[#00246b] dark:bg-[#00246b] text-white hover:bg-opacity-95",
-                              data.workingHours.start === data.workingHours.end 
-                                 ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none" 
+                              data.workingHours.start === data.workingHours.end
+                                 ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
                                  : "shadow-[#00246b]/20"
                            )}
                         >
                            {data.workingHours.start === data.workingHours.end ? 'Invalid Time Range' : 'Save Changes'}
                         </Button>
                      </form>
-                   </motion.section>
-                )}
+                  </motion.section>
+               )}
 
-                {/* ── MEDIA SECTION ── */}
-                {activeSection === 'media' && (
-                   <motion.section
-                      key="media"
-                      initial={{ opacity: 0, x: 24 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 24 }}
-                      transition={{ duration: 0.18 }}
-                      className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-5"
-                   >
+               {/* ── MEDIA SECTION ── */}
+               {activeSection === 'media' && (
+                  <motion.section
+                     key="media"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-5"
+                  >
                      <div className="flex items-center gap-2.5">
                         <div className="p-2 bg-[#00246b]/10 text-[#00246b] dark:text-white rounded-lg">
                            <Camera size={16} />
@@ -872,7 +872,7 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Shop Media</h2>
                      </div>
 
-                      {/* 🏠 Home Page Featured Image (NEW) */}
+                     {/* 🏠 Home Page Featured Image (NEW) */}
                      <div className="space-y-3 p-4 bg-blue-50/40 dark:bg-blue-900/5 rounded-2xl border border-blue-100 dark:border-blue-900/20">
                         <div className="flex items-center justify-between">
                            <div>
@@ -894,7 +894,7 @@ const VendorProfile = () => {
                               {/* Shop Image Option */}
                               {currentMedia?.shopImage && (
                                  <div className="relative w-16 h-16 shrink-0 group/shop">
-                                    <button 
+                                    <button
                                        onClick={() => handleSetFeaturedImage(currentMedia.shopImage)}
                                        className={cn(
                                           "relative w-full h-full rounded-xl overflow-hidden border-2 transition-all",
@@ -904,14 +904,14 @@ const VendorProfile = () => {
                                        <img src={currentMedia.shopImage} className="w-full h-full object-cover" alt="Shop" />
                                        {data.featuredImage === currentMedia.shopImage && <div className="absolute inset-0 bg-[#00246b]/20 flex items-center justify-center"><CheckCircle2 size={12} className="text-white" /></div>}
                                     </button>
-                                    <input 
-                                       type="file" 
-                                       id="update-shop-image" 
-                                       className="hidden" 
+                                    <input
+                                       type="file"
+                                       id="update-shop-image"
+                                       className="hidden"
                                        accept="image/*"
-                                       onChange={(e) => e.target.files[0] && handleUpdateSingleMedia('shopImage', e.target.files[0])} 
+                                       onChange={(e) => e.target.files[0] && handleUpdateSingleMedia('shopImage', e.target.files[0])}
                                     />
-                                    <label 
+                                    <label
                                        htmlFor="update-shop-image"
                                        className="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-slate-100 dark:border-gray-700 cursor-pointer text-slate-400 hover:text-primary transition-all active:scale-90"
                                     >
@@ -929,7 +929,7 @@ const VendorProfile = () => {
                               )}
                               {/* Gallery Options */}
                               {currentMedia?.galleryImages?.map((img, i) => (
-                                 <button 
+                                 <button
                                     key={`gal-${i}`}
                                     onClick={() => handleSetFeaturedImage(img)}
                                     className={cn(
@@ -944,7 +944,7 @@ const VendorProfile = () => {
                               {/* Service Options */}
                               {services.map((s, i) => (
                                  (s.image || s.images?.[0]) && (
-                                    <button 
+                                    <button
                                        key={`serv-${i}`}
                                        onClick={() => handleSetFeaturedImage(s.image || s.images?.[0])}
                                        className={cn(
@@ -970,20 +970,20 @@ const VendorProfile = () => {
                               <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-800 shadow-sm group/img">
                                  <img src={img} className="w-full h-full object-cover" alt="" />
                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-all flex items-center justify-center gap-2">
-                                    <input 
-                                       type="file" 
-                                       id={`replace-img-${i}`} 
-                                       className="hidden" 
+                                    <input
+                                       type="file"
+                                       id={`replace-img-${i}`}
+                                       className="hidden"
                                        accept="image/*"
-                                       onChange={(e) => e.target.files[0] && handleReplaceGalleryImage(img, e.target.files[0])} 
+                                       onChange={(e) => e.target.files[0] && handleReplaceGalleryImage(img, e.target.files[0])}
                                     />
-                                    <label 
+                                    <label
                                        htmlFor={`replace-img-${i}`}
                                        className="p-1.5 bg-white text-slate-600 rounded-lg shadow-lg cursor-pointer hover:text-primary transition-all active:scale-90"
                                     >
                                        <Camera size={12} />
                                     </label>
-                                    <button 
+                                    <button
                                        onClick={() => handleDeleteGalleryImage(img)}
                                        className="p-1.5 bg-rose-500 text-white rounded-lg shadow-lg hover:bg-rose-600 transition-all active:scale-90"
                                     >
@@ -1005,7 +1005,7 @@ const VendorProfile = () => {
                            <div className="relative w-full h-24 bg-slate-50 dark:bg-gray-800/50 rounded-xl overflow-hidden flex items-center justify-center border border-slate-100 dark:border-gray-800 group/vid">
                               <Video className="text-gray-300" size={24} />
                               <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-sm"><CheckCircle2 size={10} /></div>
-                              <button 
+                              <button
                                  onClick={handleDeleteVideo}
                                  className="absolute inset-0 bg-rose-500/10 opacity-0 group-hover/vid:opacity-100 transition-all flex items-center justify-center backdrop-blur-[1px]"
                               >
@@ -1050,7 +1050,7 @@ const VendorProfile = () => {
                                  <p className="text-[11px] font-black text-gray-900 dark:text-white capitalize tracking-tight">Promo Video</p>
                                  <p className="text-[8px] text-gray-400 font-bold tracking-tighter capitalize mt-0.5">MP4 (Max 30s / 50MB)</p>
                               </div>
-                              <button 
+                              <button
                                  type="button"
                                  onClick={() => toast('Video feature coming soon!', { icon: '🚧' })}
                                  className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-not-allowed shadow-md border border-slate-200/60 dark:border-gray-800"
@@ -1115,8 +1115,8 @@ const VendorProfile = () => {
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <p className="text-[8px] font-black capitalize tracking-widest text-gray-400 px-1">
                            Same date in both boxes shows one specific day.
-                         </p>
-                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                            <select
                               value={historyFilters.status}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, status: e.target.value }))}
@@ -1131,7 +1131,7 @@ const VendorProfile = () => {
                               Total {historyBookings.length}
                            </div>
                         </div>
-                        </div>
+                     </div>
 
                      <div className="space-y-2">
                         {historyLoading ? (
@@ -1157,13 +1157,12 @@ const VendorProfile = () => {
                                           {booking.services?.map((service) => service.name).join(', ') || 'Service'}
                                        </p>
                                     </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border ${
-                                       booking.status === 'completed'
-                                          ? 'bg-emerald-50 text-emerald-500 border-emerald-100'
-                                          : booking.status === 'cancelled'
-                                             ? 'bg-red-50 text-red-500 border-red-100'
-                                             : 'bg-blue-50 text-blue-500 border-blue-100'
-                                    }`}>
+                                    <span className={`px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border ${booking.status === 'completed'
+                                       ? 'bg-emerald-50 text-emerald-500 border-emerald-100'
+                                       : booking.status === 'cancelled'
+                                          ? 'bg-red-50 text-red-500 border-red-100'
+                                          : 'bg-blue-50 text-blue-500 border-blue-100'
+                                       }`}>
                                        {booking.status}
                                     </span>
                                  </div>
@@ -1237,8 +1236,8 @@ const VendorProfile = () => {
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <p className="text-[8px] font-black capitalize tracking-widest text-gray-400 px-1">
                            Same date in both boxes shows one specific day.
-                         </p>
-                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                            <select
                               value={transactionFilters.source}
                               onChange={(e) => setTransactionFilters((prev) => ({
@@ -1268,9 +1267,9 @@ const VendorProfile = () => {
                            )}
                            <div className="flex-1 sm:flex-none px-2 h-9 flex items-center justify-center gap-1.5 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize text-slate-500 dark:text-gray-300 shadow-sm">
                               <div className="flex flex-col items-center leading-none px-0.5">
-                                  <span className="text-[6.5px] opacity-40">Qty</span>
-                                  <span>{transactions.length}</span>
-                               </div>
+                                 <span className="text-[6.5px] opacity-40">Qty</span>
+                                 <span>{transactions.length}</span>
+                              </div>
                               <span className="w-px h-3 bg-slate-200 dark:bg-gray-700" />
                               <span className="text-emerald-500 text-[10px] tracking-tight whitespace-nowrap">₹ {transactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0).toLocaleString('en-IN')}</span>
                            </div>
@@ -1340,32 +1339,32 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="space-y-3"
                   >
-                      <div className="bg-white dark:bg-gray-900 rounded-xl p-3 shadow-sm border border-slate-100 dark:border-gray-800 space-y-3">
-                         <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-[#00246b]/10 text-[#00246b] rounded-lg">
-                               <Zap size={15} strokeWidth={3} />
-                            </div>
-                            <div>
-                               <h2 className="text-[13px] font-black text-slate-900 dark:text-white capitalize leading-none">Profile Promotion</h2>
-                               <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Enhance visibility in search results</p>
-                            </div>
+                     <div className="bg-white dark:bg-gray-900 rounded-xl p-3 shadow-sm border border-slate-100 dark:border-gray-800 space-y-3">
+                        <div className="flex items-center gap-2">
+                           <div className="p-1.5 bg-[#00246b]/10 text-[#00246b] rounded-lg">
+                              <Zap size={15} strokeWidth={3} />
+                           </div>
+                           <div>
+                              <h2 className="text-[13px] font-black text-slate-900 dark:text-white capitalize leading-none">Profile Promotion</h2>
+                              <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Enhance visibility in search results</p>
+                           </div>
                         </div>
 
                         {/* 📌 SUB TABS */}
                         <div className="flex gap-3 border-b border-slate-100 dark:border-gray-800 pb-0 mt-1">
-                           <button 
+                           <button
                               onClick={() => setPromoTab('pending')}
                               className={`pb-1.5 px-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${promoTab === 'pending' ? 'text-[#00246b] dark:text-white border-b-2 border-[#00246b] dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
                            >
                               Pending Requests ({myPromotions.filter(p => p.status === 'pending' || p.status === 'rejected').length})
                            </button>
-                           <button 
+                           <button
                               onClick={() => setPromoTab('active')}
                               className={`pb-1.5 px-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${promoTab === 'active' ? 'text-[#00246b] dark:text-white border-b-2 border-[#00246b] dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
                            >
                               Active Boosts ({myPromotions.filter(p => p.status === 'active').length})
                            </button>
-                           <button 
+                           <button
                               onClick={() => setPromoTab('transactions')}
                               className={`pb-1.5 px-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${promoTab === 'transactions' ? 'text-[#00246b] dark:text-white border-b-2 border-[#00246b] dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
                            >
@@ -1388,12 +1387,12 @@ const VendorProfile = () => {
                                  promoTransactions.map((tx) => {
                                     const isPayment = tx.category === 'promotion_payment';
                                     return (
-                                       <div 
-                                          key={tx._id} 
+                                       <div
+                                          key={tx._id}
                                           className={cn(
                                              "p-2.5 rounded-xl border flex items-center justify-between transition-all",
-                                             isPayment 
-                                                ? "bg-slate-50/70 dark:bg-gray-800/40 border-slate-100 dark:border-gray-800" 
+                                             isPayment
+                                                ? "bg-slate-50/70 dark:bg-gray-800/40 border-slate-100 dark:border-gray-800"
                                                 : "bg-emerald-500/5 border-emerald-500/10"
                                           )}
                                        >
@@ -1454,82 +1453,82 @@ const VendorProfile = () => {
                                     return p.status === 'active';
                                  }
                               }).length > 0 && (
-                                 <div className="space-y-2">
-                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
-                                       {promoTab === 'pending' ? 'Your Requests' : 'Your Active Boosts'}
-                                    </p>
-                                    {myPromotions.filter(p => {
-                                       if (promoTab === 'pending') {
-                                          return p.status === 'pending' || p.status === 'rejected';
-                                       } else {
-                                          return p.status === 'active';
-                                       }
-                                    }).map(promo => (
-                                       <div 
-                                          key={promo._id}
-                                          className={cn(
-                                             "p-3 rounded-xl border flex items-center justify-between transition-all",
-                                             promo.status === 'active' 
-                                                ? "bg-emerald-500/5 border-emerald-500/20 shadow-sm shadow-emerald-500/10" 
-                                                : promo.status === 'rejected'
-                                                   ? "bg-red-500/5 border-red-500/20"
-                                                   : "bg-amber-500/5 border-amber-500/20"
-                                          )}
-                                       >
-                                          <div className="space-y-1">
-                                             <div className="flex items-center gap-1.5">
-                                                <h3 className="text-[11px] font-black text-slate-800 dark:text-white capitalize leading-none">{promo.planId?.name || 'Profile Boost'}</h3>
-                                                <span className={cn(
-                                                   "px-1.5 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest",
-                                                   promo.status === 'active' ? "bg-emerald-500 text-white" : 
-                                                   promo.status === 'rejected' ? "bg-red-500 text-white" : "bg-amber-500 text-white"
-                                                )}>
-                                                   {promo.status === 'active' ? 'Activated' : 
-                                                    promo.status === 'rejected' ? 'Rejected' : 'Pending'}
-                                                </span>
-                                             </div>
-                                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{promo.durationDays} Days Duration</p>
-                                             
-                                             {promo.status === 'active' ? (
-                                                <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                                   <CheckCircle2 size={9} />
-                                                   Your profile is now featured at the top in app
-                                                </p>
-                                             ) : promo.status === 'rejected' ? (
-                                                <div className="space-y-0.5">
-                                                   <p className="text-[9px] font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
-                                                      <XCircle size={9} />
-                                                      Rejected • Amount Refunded to Wallet
-                                                   </p>
-                                                   {promo.rejectionReason && (
-                                                      <p className="text-[8px] font-medium text-red-500/70 italic leading-tight">
-                                                         Reason: {promo.rejectionReason}
-                                                      </p>
-                                                   )}
+                                    <div className="space-y-2">
+                                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                                          {promoTab === 'pending' ? 'Your Requests' : 'Your Active Boosts'}
+                                       </p>
+                                       {myPromotions.filter(p => {
+                                          if (promoTab === 'pending') {
+                                             return p.status === 'pending' || p.status === 'rejected';
+                                          } else {
+                                             return p.status === 'active';
+                                          }
+                                       }).map(promo => (
+                                          <div
+                                             key={promo._id}
+                                             className={cn(
+                                                "p-3 rounded-xl border flex items-center justify-between transition-all",
+                                                promo.status === 'active'
+                                                   ? "bg-emerald-500/5 border-emerald-500/20 shadow-sm shadow-emerald-500/10"
+                                                   : promo.status === 'rejected'
+                                                      ? "bg-red-500/5 border-red-500/20"
+                                                      : "bg-amber-500/5 border-amber-500/20"
+                                             )}
+                                          >
+                                             <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5">
+                                                   <h3 className="text-[11px] font-black text-slate-800 dark:text-white capitalize leading-none">{promo.planId?.name || 'Profile Boost'}</h3>
+                                                   <span className={cn(
+                                                      "px-1.5 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest",
+                                                      promo.status === 'active' ? "bg-emerald-500 text-white" :
+                                                         promo.status === 'rejected' ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+                                                   )}>
+                                                      {promo.status === 'active' ? 'Activated' :
+                                                         promo.status === 'rejected' ? 'Rejected' : 'Pending'}
+                                                   </span>
                                                 </div>
-                                             ) : (
-                                                <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                                                   <Clock size={9} />
-                                                   Payment Done • Waiting for Admin Approval
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{promo.durationDays} Days Duration</p>
+
+                                                {promo.status === 'active' ? (
+                                                   <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                                      <CheckCircle2 size={9} />
+                                                      Your profile is now featured at the top in app
+                                                   </p>
+                                                ) : promo.status === 'rejected' ? (
+                                                   <div className="space-y-0.5">
+                                                      <p className="text-[9px] font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
+                                                         <XCircle size={9} />
+                                                         Rejected • Amount Refunded to Wallet
+                                                      </p>
+                                                      {promo.rejectionReason && (
+                                                         <p className="text-[8px] font-medium text-red-500/70 italic leading-tight">
+                                                            Reason: {promo.rejectionReason}
+                                                         </p>
+                                                      )}
+                                                   </div>
+                                                ) : (
+                                                   <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                                      <Clock size={9} />
+                                                      Payment Done • Waiting for Admin Approval
+                                                   </p>
+                                                )}
+
+                                                {promo.status === 'active' && promo.endDate && (
+                                                   <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
+                                                      Expires: {new Date(promo.endDate).toLocaleDateString('en-GB')}
+                                                   </p>
+                                                )}
+                                             </div>
+                                             <div className="text-right">
+                                                <p className="text-[12px] font-black text-slate-800 dark:text-white">₹{promo.amountPaid}</p>
+                                                <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">
+                                                   {promo.status === 'rejected' ? 'Refunded' : 'Order Verified'}
                                                 </p>
-                                             )}
-                                             
-                                             {promo.status === 'active' && promo.endDate && (
-                                                <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
-                                                   Expires: {new Date(promo.endDate).toLocaleDateString('en-GB')}
-                                                </p>
-                                             )}
+                                             </div>
                                           </div>
-                                          <div className="text-right">
-                                             <p className="text-[12px] font-black text-slate-800 dark:text-white">₹{promo.amountPaid}</p>
-                                             <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">
-                                                {promo.status === 'rejected' ? 'Refunded' : 'Order Verified'}
-                                             </p>
-                                          </div>
-                                       </div>
-                                    ))}
-                                 </div>
-                              )}
+                                       ))}
+                                    </div>
+                                 )}
 
                               {/* Custom Duration Selection */}
                               <div className="space-y-3">
@@ -1545,21 +1544,21 @@ const VendorProfile = () => {
                                        <div className="space-y-0.5">
                                           <label className="text-[7.5px] font-black text-slate-400 uppercase tracking-[0.2em] px-0.5">Boost Days</label>
                                           <div className="relative">
-                                              <input 
-                                                 type="text"
-                                                 inputMode="numeric"
-                                                 value={promoDays}
-                                                 onChange={(e) => {
-                                                    let val = e.target.value.replace(/[^0-9]/g, '');
-                                                    if (val.length > 1 && val.startsWith('0')) {
-                                                       val = val.replace(/^0+/, '');
-                                                    }
-                                                    setPromoDays(val === '' ? 0 : Number(val));
-                                                 }}
-                                                 className="w-full p-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 font-black text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-[#00246b]/20 outline-none transition-all"
-                                              />
-                                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[8px] font-black text-slate-300 uppercase tracking-widest">Days</span>
-                                           </div>
+                                             <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={promoDays}
+                                                onChange={(e) => {
+                                                   let val = e.target.value.replace(/[^0-9]/g, '');
+                                                   if (val.length > 1 && val.startsWith('0')) {
+                                                      val = val.replace(/^0+/, '');
+                                                   }
+                                                   setPromoDays(val === '' ? 0 : Number(val));
+                                                }}
+                                                className="w-full p-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 font-black text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-[#00246b]/20 outline-none transition-all"
+                                             />
+                                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[8px] font-black text-slate-300 uppercase tracking-widest">Days</span>
+                                          </div>
                                        </div>
 
                                        <div className="flex items-center justify-between p-2.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-xl border border-white/40 dark:border-gray-700/40">
@@ -1567,7 +1566,7 @@ const VendorProfile = () => {
                                              <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Pay</p>
                                              <p className="text-lg font-black text-[#00246b] dark:text-white mt-0.5">₹{promoDays * promoPricePerDay}</p>
                                           </div>
-                                          <button 
+                                          <button
                                              onClick={handlePurchasePromotion}
                                              disabled={loading || myPromotions.some(p => p.status === 'active' || p.status === 'pending')}
                                              className="px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-400 disabled:shadow-none"
@@ -1579,12 +1578,12 @@ const VendorProfile = () => {
                                  </div>
                               </div>
 
-                             <div className="p-2.5 bg-amber-500/5 border border-amber-500/10 rounded-xl flex gap-2">
-                                <AlertTriangle className="text-amber-500 shrink-0" size={13} />
-                                <p className="text-[8px] font-black text-amber-600/80 leading-relaxed uppercase tracking-tight">
-                                   Once activated, your profile will be prioritized in discovery results for the selected duration. Admin approval takes up to 2 hours.
-                                </p>
-                             </div>
+                              <div className="p-2.5 bg-amber-500/5 border border-amber-500/10 rounded-xl flex gap-2">
+                                 <AlertTriangle className="text-amber-500 shrink-0" size={13} />
+                                 <p className="text-[8px] font-black text-amber-600/80 leading-relaxed uppercase tracking-tight">
+                                    Once activated, your profile will be prioritized in discovery results for the selected duration. Admin approval takes up to 2 hours.
+                                 </p>
+                              </div>
                            </div>
                         )}
                      </div>
@@ -1615,8 +1614,8 @@ const VendorProfile = () => {
                            <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-1.5">
                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">From Date</label>
-                                 <input 
-                                    type="date" 
+                                 <input
+                                    type="date"
                                     value={reportRange.from}
                                     max={dayjs().format('YYYY-MM-DD')}
                                     onChange={(e) => setReportRange(prev => ({ ...prev, from: e.target.value }))}
@@ -1625,8 +1624,8 @@ const VendorProfile = () => {
                               </div>
                               <div className="space-y-1.5">
                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">To Date</label>
-                                 <input 
-                                    type="date" 
+                                 <input
+                                    type="date"
                                     value={reportRange.to}
                                     max={dayjs().format('YYYY-MM-DD')}
                                     onChange={(e) => setReportRange(prev => ({ ...prev, to: e.target.value }))}
@@ -1673,32 +1672,32 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="space-y-4"
                   >
-                  <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
-                     <div className="flex items-center gap-2.5">
-                        <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
-                           <ShieldCheck size={16} />
+                     <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                           <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                              <ShieldCheck size={16} />
+                           </div>
+                           <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Security Settings</h2>
                         </div>
-                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Security Settings</h2>
-                     </div>
 
-                      <div className="mt-4">
-                            <button
-                               onClick={() => setShowDeleteConfirm(true)}
-                               className="w-full flex items-center justify-between p-4 bg-rose-50/50 dark:bg-rose-900/5 rounded-2xl border border-rose-100 dark:border-rose-900/20 active:scale-[0.98] transition-all group"
-                            >
-                               <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-rose-500/10 text-rose-500 rounded-lg">
-                                     <Trash2 size={16} />
-                                  </div>
-                                  <div className="text-left">
-                                     <p className="text-[11px] font-black text-rose-600 dark:text-rose-500 capitalize tracking-tight">Delete Account</p>
-                                     <p className="text-[8px] text-rose-400 font-bold tracking-tighter capitalize mt-0.5">Permanently remove partner data</p>
-                                  </div>
-                               </div>
-                               <ChevronRight size={14} className="text-rose-300 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                         </div>
-                      </div>
+                        <div className="mt-4">
+                           <button
+                              onClick={() => setShowDeleteConfirm(true)}
+                              className="w-full flex items-center justify-between p-4 bg-rose-50/50 dark:bg-rose-900/5 rounded-2xl border border-rose-100 dark:border-rose-900/20 active:scale-[0.98] transition-all group"
+                           >
+                              <div className="flex items-center gap-3">
+                                 <div className="p-2 bg-rose-500/10 text-rose-500 rounded-lg">
+                                    <Trash2 size={16} />
+                                 </div>
+                                 <div className="text-left">
+                                    <p className="text-[11px] font-black text-rose-600 dark:text-rose-500 capitalize tracking-tight">Delete Account</p>
+                                    <p className="text-[8px] text-rose-400 font-bold tracking-tighter capitalize mt-0.5">Permanently remove partner data</p>
+                                 </div>
+                              </div>
+                              <ChevronRight size={14} className="text-rose-300 group-hover:translate-x-1 transition-transform" />
+                           </button>
+                        </div>
+                     </div>
                   </motion.section>
                )}
             </AnimatePresence>
@@ -1852,7 +1851,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
    };
 
    return (
-      <motion.div 
+      <motion.div
          ref={pickerRef}
          initial={{ opacity: 0, y: 10, scale: 0.95 }}
          animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -1868,7 +1867,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
             {/* Hours */}
             <div className="space-y-1 max-h-40 overflow-y-auto no-scrollbar py-2">
                {hours.map(hour => (
-                  <button 
+                  <button
                      key={hour}
                      onClick={() => setH(hour)}
                      className={cn(
@@ -1884,7 +1883,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
             {/* Minutes */}
             <div className="space-y-1 max-h-40 overflow-y-auto no-scrollbar py-2 border-x border-slate-50 dark:border-gray-800">
                {minutes.map(min => (
-                  <button 
+                  <button
                      key={min}
                      onClick={() => setM(min)}
                      className={cn(
@@ -1900,7 +1899,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
             {/* AM/PM */}
             <div className="flex flex-col gap-2 justify-center">
                {['AM', 'PM'].map(period => (
-                  <button 
+                  <button
                      key={period}
                      onClick={() => setP(period)}
                      className={cn(
@@ -1915,7 +1914,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
          </div>
 
          <div className="p-3 bg-slate-50 dark:bg-gray-950 flex gap-2">
-            <button 
+            <button
                onClick={handleConfirm}
                className="flex-1 py-2.5 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
             >

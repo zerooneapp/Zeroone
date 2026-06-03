@@ -120,9 +120,13 @@ const PersonalInformation = () => {
               ) : (
                 <User size={40} className="text-white/20" />
               )}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
-                <Camera size={18} className="text-white" />
-              </div>
+            </label>
+            <label
+              htmlFor="profile-upload"
+              className="absolute -bottom-1 -left-1 z-20 w-6 h-6 bg-[#00246b] hover:bg-opacity-90 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer border-2 border-white dark:border-gray-900 transition-all"
+              title="Change profile image"
+            >
+              <Camera size={10} strokeWidth={3} />
             </label>
             {formData.image && (
               <button

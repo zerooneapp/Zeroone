@@ -16,9 +16,10 @@ const VendorAuth = () => {
     return location.state?.phone || sessionStorage.getItem('vendor_login_phone_input') || '';
   });
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const inputRefs = React.useRef([]);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-  const [isOTPFocused, setIsOTPFocused] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   useEffect(() => {
     let interval;
@@ -64,6 +65,9 @@ const VendorAuth = () => {
       setStep('otp');
       setTimer(30);
       setCanResend(false);
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 50);
     } else {
       toast.error(res.message, { id: 'auth-error' });
     }
@@ -188,7 +192,6 @@ const VendorAuth = () => {
                 </div>
 
                 <div className="relative">
-                  {/* Blinking Cursor Animation */}
                   <style>{`
                     @keyframes blink {
                       0%, 100% { opacity: 1; }
@@ -198,38 +201,78 @@ const VendorAuth = () => {
                       animation: blink 1s step-end infinite;
                     }
                   `}</style>
-
-                  <input
-                    type="tel"
-                    maxLength={6}
-                    value={otp.join('')}
-                    onChange={handleOTPChange}
-                    onFocus={() => setIsOTPFocused(true)}
-                    onBlur={() => setIsOTPFocused(false)}
-                    autoFocus
-                    className="absolute inset-0 opacity-0 cursor-default z-20"
-                  />
-                  <div className="flex justify-between gap-3 px-2 pointer-events-none relative z-10">
+                  <div className="flex justify-between gap-3 px-2">
                     {otp.map((digit, index) => {
-                      const isCurrent = index === otp.join('').length;
                       const isFilled = digit !== '';
-                      const isActive = isOTPFocused && isCurrent;
+                      const isActive = focusedIndex === index;
 
                       return (
-                        <div
+                        <input
                           key={index}
+                          ref={el => inputRefs.current[index] = el}
+                          type="text"
+                          pattern="\d*"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          autoComplete="one-time-code"
+                          onFocus={(e) => {
+                            e.target.select();
+                            setFocusedIndex(index);
+                          }}
+                          onBlur={() => setFocusedIndex(-1)}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                            if (pastedData) {
+                              const newOtp = ['', '', '', '', '', ''];
+                              pastedData.split('').forEach((char, idx) => {
+                                newOtp[idx] = char;
+                              });
+                              setOtp(newOtp);
+                              const lastFocusIndex = Math.min(pastedData.length - 1, 5);
+                              inputRefs.current[lastFocusIndex]?.focus();
+                            }
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            const newOtp = [...otp];
+                            if (val.length > 1) {
+                              const digits = val.split('').slice(0, 6 - index);
+                              digits.forEach((char, idx) => {
+                                newOtp[index + idx] = char;
+                              });
+                              setOtp(newOtp);
+                              const nextIndex = Math.min(index + digits.length, 5);
+                              inputRefs.current[nextIndex]?.focus();
+                            } else {
+                              newOtp[index] = val;
+                              setOtp(newOtp);
+                              if (val && index < 5) {
+                                inputRefs.current[index + 1]?.focus();
+                              }
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Backspace') {
+                              if (!otp[index] && index > 0) {
+                                const newOtp = [...otp];
+                                newOtp[index - 1] = '';
+                                setOtp(newOtp);
+                                inputRefs.current[index - 1]?.focus();
+                              } else {
+                                const newOtp = [...otp];
+                                newOtp[index] = '';
+                                setOtp(newOtp);
+                              }
+                            }
+                          }}
                           className={cn(
-                            'w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all relative overflow-hidden',
+                            'w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border text-center font-bold text-xl shadow-sm transition-all focus:outline-none focus:ring-1 focus:ring-[#00246b] dark:focus:ring-white relative overflow-hidden',
                             isActive ? 'border-[#00246b] dark:border-white ring-2 ring-[#00246b]/10' : 
                             isFilled ? 'border-gray-200 dark:border-gray-700 text-[#00246b] dark:text-white' : 'border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-700'
                           )}
-                        >
-                          {digit}
-                          {/* Visual Pointer (Blinking Cursor) */}
-                          {isActive && !digit && (
-                            <div className="absolute w-[2px] h-5 bg-[#00246b] dark:bg-white animate-blink" />
-                          )}
-                        </div>
+                        />
                       );
                     })}
                   </div>

@@ -84,20 +84,20 @@ const Signup = () => {
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
 
       {/* Header Overlay */}
-      <div className="absolute top-0 left-0 right-0 p-6 z-20">
+      <div className="absolute top-0 left-0 right-0 p-6 pt-16 z-20">
         <button
-          onClick={() => navigate(-1)}
-          className="p-2.5 text-[#00246b] dark:text-white bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 active:scale-95 transition-all"
+          onClick={() => navigate('/login', { state: { step: 'phone', phone } })}
+          className="p-2.5 text-[#00246b] dark:text-white/70 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 active:scale-95 transition-all"
         >
           <ChevronLeft size={18} strokeWidth={3} />
         </button>
       </div>
 
       {/* Main HUD Container */}
-      <div className="flex-1 flex flex-col items-center justify-start p-6 pt-16 lg:pt-20 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-start p-6 pt-35 lg:pt-40 relative z-10">
         <div className="w-full max-w-sm space-y-8 lg:space-y-10">
 
-          <div className="space-y-3 text-center">
+          <div className="space-y-3 text-center mt-28 sm:mt-32">
             <div className="relative w-20 h-20 mx-auto mb-6 group">
               <input
                 type="file"
@@ -115,7 +115,7 @@ const Signup = () => {
                   <img src={profileData.image} alt="Profile" className="w-full h-full object-cover animate-in fade-in zoom-in duration-300" />
                 ) : (
                   <div className="bg-[#00246b]/10 p-4 rounded-full">
-                    <svg className="w-8 h-8 text-[#00246b] dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-[#00246b] dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -127,7 +127,7 @@ const Signup = () => {
                 </div>
               </label>
             </div>
-            <h1 className="text-[28px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">Complete Profile</h1>
+            <h1 className="text-[28px] font-black text-[#00246b] dark:text-white/90 tracking-tight leading-none">Complete Profile</h1>
             <p className="text-gray-500 dark:text-gray-400 font-medium text-[11px] tracking-tight opacity-70">Help us personalize your experience</p>
           </div>
 
@@ -140,8 +140,8 @@ const Signup = () => {
             {/* Minimalist Input HUD */}
             <div className="space-y-4">
               <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/60 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#00246b]/10">
-                  <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
-                  <User size={16} className="text-[#00246b] dark:text-white" />
+                <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
+                  <User size={16} className="text-[#00246b] dark:text-white/70" />
                 </div>
                 <input
                   type="text"
@@ -152,13 +152,13 @@ const Signup = () => {
                     const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
                     setProfileData({ ...profileData, name: filteredValue });
                   }}
-                  className="flex-1 bg-transparent border-none outline-none font-bold text-base text-[#00246b] dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                  className="flex-1 bg-transparent border-none outline-none font-bold text-base text-[#00246b] dark:text-white/80 placeholder:text-gray-300 dark:placeholder:text-gray-600"
                 />
               </div>
 
               <div className="bg-white dark:bg-gray-900 px-5 py-2 rounded-xl border border-gray-200/60 dark:border-gray-700/60 flex items-center gap-4 h-12 shadow-xl shadow-black/[0.03] ring-1 ring-black/[0.02] focus-within:ring-2 focus-within:ring-[#00246b]/10">
-                  <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
-                  <Calendar size={16} className="text-[#00246b] dark:text-white" />
+                <div className="bg-[#F8F9FA] dark:bg-gray-800 p-1.5 rounded-lg">
+                  <Calendar size={16} className="text-[#00246b] dark:text-white/70" />
                 </div>
                 <div className="flex-1 flex flex-col">
                   <span className="text-[7px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Date of Birth</span>
@@ -167,7 +167,7 @@ const Signup = () => {
                     value={profileData.dob}
                     max={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setProfileData({ ...profileData, dob: e.target.value })}
-                    className="bg-transparent border-none outline-none font-black text-sm text-[#00246b] dark:text-white uppercase tracking-tighter"
+                    className="bg-transparent border-none outline-none font-black text-sm text-[#00246b] dark:text-white/80 uppercase tracking-tighter"
                   />
                 </div>
               </div>
@@ -181,8 +181,8 @@ const Signup = () => {
                       key={g}
                       onClick={() => setProfileData({ ...profileData, gender: g })}
                       className={`flex-1 py-2 text-[11px] font-black tracking-widest rounded-lg transition-all capitalize ${profileData.gender === g
-                          ? 'bg-[#00246b] text-white shadow-lg'
-                          : 'text-gray-400 hover:text-[#00246b] dark:hover:text-white'
+                        ? 'bg-[#00246b] text-white shadow-lg'
+                        : 'text-gray-400 hover:text-[#00246b] dark:hover:text-white/80'
                         }`}
                     >
                       {g}

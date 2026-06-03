@@ -117,7 +117,7 @@ const Preferences = () => {
           </div>
         </section>
 
-        {/* 🌍 LOCALIZATION */}
+        {/* 🌍 LOCALIZATION
         <section className="space-y-3">
            <label className="text-[10px] font-black text-slate-400 tracking-widest ml-1 uppercase text-left block">Localization</label>
            <div className="space-y-3">
@@ -150,8 +150,9 @@ const Preferences = () => {
               />
            </div>
         </section>
+        */}
 
-        {/* 🚀 SAVE ACTION */}
+        {/* 🚀 SAVE ACTION
         <div className="pt-2">
           <motion.button
             whileTap={{ scale: 0.95 }}
@@ -167,6 +168,7 @@ const Preferences = () => {
             )}
           </motion.button>
         </div>
+        */}
       </main>
     </div>
   );

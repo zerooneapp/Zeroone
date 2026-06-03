@@ -25,7 +25,7 @@ const Account = () => {
 
 
   const menuItems = [
-    { icon: User, label: 'Personal Information', sub: 'Name, email, and phone', path: '/account/info', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { icon: User, label: 'Personal Information', sub: 'Name, phone, and DOB', path: '/account/info', color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { icon: MapPin, label: 'Saved Addresses', sub: 'Home, office, and more', path: '/account/addresses', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
     // { icon: CreditCard, label: 'Payment Methods', sub: 'Cards, UPI, and Wallets', path: '/account/payments', color: 'text-purple-500', bg: 'bg-purple-500/10' },
     { icon: Crown, label: 'My Memberships', sub: 'Active plans & benefits', path: '/account/memberships', color: 'text-amber-500', bg: 'bg-amber-500/10' },
@@ -37,8 +37,11 @@ const Account = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 animate-in fade-in duration-500 pb-28">
 
 
-      <div className="flex flex-col items-center pt-24 pb-2">
-        <div className="relative group">
+      <div className="flex flex-col items-center pt-24 pb-4">
+        <div 
+          onClick={() => navigate('/account/info')}
+          className="relative group cursor-pointer"
+        >
           <div className="w-20 h-20 rounded-full bg-[#00246b] dark:bg-primary shadow-xl flex items-center justify-center border-[3px] border-white dark:border-gray-900 overflow-hidden transition-transform active:scale-95 duration-300">
             {user?.image ? (
               <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
@@ -51,17 +54,14 @@ const Account = () => {
 
         </div>
         
-        <div className="text-center mt-3 space-y-0.5">
+        <div className="text-center mt-5 space-y-0.5">
           <h2 className="text-lg font-black text-[#00246b] dark:text-white tracking-tight leading-none capitalize">
             {user?.name || 'Guest User'}
           </h2>
-          <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 dark:text-gray-500 capitalize mt-1">
-            {user?.role || 'Customer'}
-          </p>
         </div>
       </div>
 
-      <div className="px-4 mt-2 space-y-1.5">
+      <div className="px-4 mt-4 space-y-1.5">
         {menuItems.map((item, i) => (
           <div
             key={item.label}

@@ -112,7 +112,7 @@ const SecuritySettings = () => {
       <main className="flex-1 overflow-y-auto px-5 pt-6 pb-24 space-y-6">
 
 
-        {/* 📱 ACTIVE SESSIONS */}
+        {/* 📱 ACTIVE SESSIONS (Not needed, commented out to avoid confusing redundant tokens)
         <section className="space-y-3">
            <div className="flex items-center justify-between px-1">
               <label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Active devices</label>
@@ -133,26 +133,16 @@ const SecuritySettings = () => {
                 <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3 opacity-60">
                    <Monitor size={18} className="text-slate-400" />
                    <div className="flex-1">
-                      <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-none">No active tokens found</h4>
+                      <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-none">No other active devices found</h4>
                    </div>
                 </div>
               )}
            </div>
         </section>
+        */}
 
 
 
-
-         {/* 🛡️ SECURITY STATUS BADGE */}
-         <div className="mt-4 flex flex-col items-center justify-center space-y-2 p-6 bg-slate-900/5 rounded-[2rem] border border-dashed border-[#00246b]/10">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-               <ShieldCheck size={24} className="text-emerald-500" strokeWidth={3} />
-            </div>
-            <h5 className="text-[12px] font-black text-[#00246b] tracking-tight">Your account is secured</h5>
-            <p className="text-[9px] font-medium text-slate-400 text-center leading-relaxed">
-              Advanced threat-detection and real-time encryption are actively protecting your elite credentials.
-            </p>
-         </div>
 
          {/* 🔴 DANGER ZONE */}
          <section className="pt-4 border-t border-slate-100 dark:border-gray-800">

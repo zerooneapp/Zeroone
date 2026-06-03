@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, X, MessageSquare, ShieldCheck, Heart, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -13,6 +13,14 @@ const ReviewPopup = ({ booking, onClose }) => {
   const [isManual, setIsManual] = useState(false);
 
   if (!booking) return null;
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const options = [
     "Excellent Service",
@@ -44,7 +52,7 @@ const ReviewPopup = ({ booking, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-5">
         {/* Backdrop (Glassmorphism) */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -55,11 +63,11 @@ const ReviewPopup = ({ booking, onClose }) => {
         />
 
         <motion.div 
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: "100%", opacity: 0 }}
+          initial={{ scale: 0.92, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.92, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-lg bg-white dark:bg-gray-950 rounded-t-[2rem] sm:rounded-[2.5rem] px-5 pt-5 pb-4 sm:pb-5 shadow-2xl space-y-3 overflow-hidden"
+          className="relative w-full max-w-sm bg-white dark:bg-gray-950 rounded-[2.5rem] px-5 pt-5 pb-5 shadow-2xl space-y-3 overflow-hidden"
         >
           {/* Elite Background Graphic */}
           <div className="absolute top-0 right-0 -mr-10 -mt-10 w-36 h-36 bg-primary/5 rounded-full blur-3xl pointer-events-none" />

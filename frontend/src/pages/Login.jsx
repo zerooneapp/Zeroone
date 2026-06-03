@@ -18,9 +18,10 @@ const CustomerAuth = () => {
     return location.state?.phone || sessionStorage.getItem('login_phone_input') || '';
   });
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const inputRefs = React.useRef([]);
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-  const [isOTPFocused, setIsOTPFocused] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const redirectPath =
     location.state?.from?.pathname ||
     new URLSearchParams(location.search).get('redirect') ||
@@ -68,6 +69,10 @@ const CustomerAuth = () => {
       setStep('otp');
       setTimer(30);
       setCanResend(false);
+      // Auto focus first OTP input field on step change to OTP
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 50);
     } else {
       toast.error(res.message, { id: 'auth-error' });
     }
@@ -179,31 +184,79 @@ const CustomerAuth = () => {
                     Code sent to <span className="text-[#00246b] dark:text-white font-bold">+91 {phone}</span>
                   </p>
                 </div>
- 
+
                 <div className="relative">
-                  <input
-                    type="tel"
-                    maxLength={6}
-                    value={otp.join('')}
-                    onChange={handleOTPChange}
-                    onFocus={() => setIsOTPFocused(true)}
-                    onBlur={() => setIsOTPFocused(false)}
-                    autoFocus
-                    className="absolute inset-0 opacity-0 cursor-default"
-                  />
-                  <div className="flex justify-center gap-3 px-2 pointer-events-none">
+                  <div className="flex justify-center gap-3 px-2">
                     {otp.map((digit, i) => (
-                      <div
+                      <input
                         key={i}
+                        ref={el => inputRefs.current[i] = el}
+                        type="text"
+                        pattern="\d*"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        autoComplete="one-time-code"
+                        onFocus={(e) => {
+                          e.target.select();
+                          setFocusedIndex(i);
+                        }}
+                        onBlur={() => setFocusedIndex(-1)}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                          if (pastedData) {
+                            const newOtp = ['', '', '', '', '', ''];
+                            pastedData.split('').forEach((char, idx) => {
+                              newOtp[idx] = char;
+                            });
+                            setOtp(newOtp);
+                            const lastFocusIndex = Math.min(pastedData.length - 1, 5);
+                            inputRefs.current[lastFocusIndex]?.focus();
+                          }
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          const newOtp = [...otp];
+                          if (val.length > 1) {
+                            const digits = val.split('').slice(0, 6 - i);
+                            digits.forEach((char, idx) => {
+                              newOtp[i + idx] = char;
+                            });
+                            setOtp(newOtp);
+                            const nextIndex = Math.min(i + digits.length, 5);
+                            inputRefs.current[nextIndex]?.focus();
+                          } else {
+                            newOtp[i] = val;
+                            setOtp(newOtp);
+                            if (val && i < 5) {
+                              inputRefs.current[i + 1]?.focus();
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Backspace') {
+                            if (!otp[i] && i > 0) {
+                              const newOtp = [...otp];
+                              newOtp[i - 1] = '';
+                              setOtp(newOtp);
+                              inputRefs.current[i - 1]?.focus();
+                            } else {
+                              const newOtp = [...otp];
+                              newOtp[i] = '';
+                              setOtp(newOtp);
+                            }
+                          }
+                        }}
                         className={cn(
-                          "w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border flex items-center justify-center font-bold text-xl shadow-sm transition-all",
-                          digit || (isOTPFocused && i === otp.join('').length)
+                          "w-10 h-11 bg-white dark:bg-gray-900 rounded-xl border text-center font-bold text-xl shadow-sm transition-all focus:outline-none focus:ring-1 focus:ring-[#00246b] dark:focus:ring-white",
+                          focusedIndex === i
                             ? "border-[#00246b] dark:border-white text-[#00246b] dark:text-white"
-                            : "border-gray-300 dark:border-white/40 text-gray-300 dark:text-white/40"
+                            : digit
+                              ? "border-gray-200 dark:border-gray-700 text-[#00246b] dark:text-white"
+                              : "border-gray-300 dark:border-white/40 text-gray-300 dark:text-white/40"
                         )}
-                      >
-                        {digit}
-                      </div>
+                      />
                     ))}
                   </div>
                 </div>
