@@ -11,7 +11,7 @@ const slotCache = new Map();
 
 const getAvailableSlots = async (req, res) => {
   try {
-    const { vendorId, serviceIds, date, excludeBookingId } = req.query;
+    const { vendorId, serviceIds, date, excludeBookingId, includeUnavailable } = req.query;
     if (!vendorId || !serviceIds || !date) {
       return res.status(400).json({ message: 'vendorId, serviceIds, and date are required' });
     }
@@ -35,7 +35,13 @@ const getAvailableSlots = async (req, res) => {
     }
     */
 
-    const slots = await calculateAvailableSlots(vendorId, services, date, excludeBookingId);
+    const slots = await calculateAvailableSlots(
+      vendorId, 
+      services, 
+      date, 
+      excludeBookingId, 
+      includeUnavailable === 'true'
+    );
     
     // Store in Cache
     slotCache.set(cacheKey, { data: slots, timestamp: Date.now() });

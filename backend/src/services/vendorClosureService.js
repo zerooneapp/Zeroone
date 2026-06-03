@@ -35,13 +35,12 @@ const getOverlappingClosures = async (vendorId, start, end, excludeClosureId = n
 const getImpactedBookings = async (vendorId, start, end) => (
   Booking.find({
     vendorId,
-    status: 'confirmed',
+    status: { $in: ['confirmed', 'pending'] },
     startTime: { $lt: moment(end).toDate() },
     endTime: { $gt: moment(start).toDate() }
   })
     .populate('userId', 'name phone image')
     .populate('staffId', 'name image phone')
-    .populate('vendorId', 'shopName address')
     .sort({ startTime: 1 })
 );
 

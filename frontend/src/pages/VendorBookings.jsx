@@ -22,6 +22,8 @@ const VendorBookings = () => {
     bookingsData: bookings, 
     bookingsLoading: loading, 
     fetchBookings,
+    lastBookingParams,
+    fetchDashboard,
     setBookingsData: setBookings 
   } = useVendorStore();
 
@@ -42,7 +44,15 @@ const VendorBookings = () => {
     }
 
     try {
-      await fetchBookings({ status, from: fromDate, to: toDate }, force);
+      const params = { status, from: fromDate, to: toDate };
+      let finalForce = force;
+      if (!force && lastBookingParams) {
+        const isParamsEqual = JSON.stringify(params) === JSON.stringify(lastBookingParams);
+        if (isParamsEqual) {
+          finalForce = 'silent';
+        }
+      }
+      await fetchBookings(params, finalForce);
     } catch (err) {
       toast.error('Failed to load bookings');
     }
@@ -151,6 +161,7 @@ const VendorBookings = () => {
       await api.patch(`/vendor/closures/${closureId}/end`);
       toast.success('Emergency closure ended');
       await refreshAll();
+      await fetchDashboard('silent');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to end closure');
     } finally {

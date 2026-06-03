@@ -90,6 +90,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
           vendorId,
           serviceIds: formData.serviceIds.join(','),
           date: formData.date,
+          includeUnavailable: true,
         }
       });
       setAvailableSlots(res.data?.availableSlots || []);
@@ -204,7 +205,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                   placeholder="e.g. Rahul Sharma"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all caret-[#00246b] dark:caret-white placeholder:text-slate-400/70 dark:placeholder:text-gray-500/70"
                 />
               </div>
 
@@ -218,7 +219,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                   placeholder="e.g. 9876543210"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all caret-[#00246b] dark:caret-white placeholder:text-slate-400/70 dark:placeholder:text-gray-500/70"
                 />
               </div>
 
@@ -304,19 +305,25 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-4 gap-2 p-1.5">
-                    {availableSlots.map(slot => (
-                      <button
-                        key={slot.time}
-                        onClick={() => setFormData({ ...formData, time: slot.time })}
-                        className={`py-2.5 rounded-lg text-[10px] font-black border transition-all active:scale-95 ${
-                          formData.time === slot.time
-                            ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white text-[#00246b] dark:text-white shadow-md'
-                            : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm'
-                        }`}
-                      >
-                        {format12Hr(slot.time)}
-                      </button>
-                    ))}
+                    {availableSlots.map(slot => {
+                      const isBooked = slot.isBooked === true;
+                      return (
+                        <button
+                          key={slot.time}
+                          disabled={isBooked}
+                          onClick={() => !isBooked && setFormData({ ...formData, time: slot.time })}
+                          className={`py-2.5 rounded-lg text-[10px] font-black border transition-all ${
+                            isBooked
+                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 cursor-not-allowed opacity-60'
+                              : formData.time === slot.time
+                              ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white text-[#00246b] dark:text-white shadow-md active:scale-95'
+                              : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm active:scale-95'
+                          }`}
+                        >
+                          {format12Hr(slot.time)}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
