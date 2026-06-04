@@ -96,7 +96,10 @@ const AddWalkInModal = ({ isOpen, onClose, onRefresh }) => {
                   placeholder="Customer Name"
                   className="w-full pl-10 pr-4 py-3 bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/10 dark:text-white transition-all shadow-sm focus:shadow-none"
                   value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                    setFormData({ ...formData, name: val });
+                  }}
                   required
                 />
               </div>

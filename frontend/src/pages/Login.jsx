@@ -178,7 +178,16 @@ const CustomerAuth = () => {
                 exit={{ opacity: 0, scale: 1.02 }}
                 className="space-y-4 flex-1 flex flex-col justify-center max-h-screen overflow-hidden relative"
               >
-                <div className="space-y-2 text-center">
+                <div className="relative space-y-2 text-center">
+                  <button 
+                    onClick={() => {
+                      setStep('phone');
+                      setOtp(['', '', '', '', '', '']);
+                    }}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 -mt-2 p-2 text-gray-400 hover:text-[#00246b] dark:hover:text-white transition-colors"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
                   <h1 className="text-[36px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">Verify OTP</h1>
                   <p className="text-gray-500 dark:text-gray-400 font-medium text-[11px] uppercase tracking-widest">
                     Code sent to <span className="text-[#00246b] dark:text-white font-bold">+91 {phone}</span>
