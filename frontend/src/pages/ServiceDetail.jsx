@@ -586,11 +586,59 @@ const ServiceDetail = () => {
     </div>
   );
 
-  const totalPrice = getTotalPrice();
-  const displayTotal = cartPricing?.finalTotal ?? totalPrice;
-  const originalTotal = cartPricing?.originalTotal ?? totalPrice;
-  const totalSavings = cartPricing?.totalDiscount ?? 0;
-  const hasItemsFromThisVendor = cartVendor?._id === vendor._id;
+  const hasItemsFromThisVendor = cartVendor?._id === vendor?._id;
+
+  const displayTotal = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.finalTotal === 'number') {
+      return cartPricing.finalTotal;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const itemPrice = priceMeta ? priceMeta.finalPrice : item.price;
+      return sum + itemPrice;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
+  const originalTotal = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.originalTotal === 'number') {
+      return cartPricing.originalTotal;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const itemPrice = priceMeta ? priceMeta.originalPrice : item.price;
+      return sum + itemPrice;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
+  const totalSavings = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.totalDiscount === 'number') {
+      return cartPricing.totalDiscount;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const savings = priceMeta ? (priceMeta.originalPrice - priceMeta.finalPrice) : 0;
+      return sum + savings;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
   const hasHomeService = services.some((service) => service.type === 'home' || service.type === 'both');
 
   return (
@@ -829,11 +877,11 @@ const ServiceDetail = () => {
                     finalPrice: cartServiceEntry.finalPrice,
                     discount: cartServiceEntry.discount
                   }
-                : {
+                : (servicePricing[String(item._id)] || {
                     originalPrice: item.price,
                     finalPrice: item.price,
                     discount: 0
-                  };
+                  });
 
               return (
                 <div

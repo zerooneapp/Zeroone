@@ -459,7 +459,7 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
       role: 'staff',
       type: 'BOOKING_CANCELLED_INFO',
       title: 'Booking Cancelled',
-      message: `Your assignment for ${booking.walkInCustomerName || booking.userId?.name || 'Client'} at ${moment(booking.startTime).format('LT')} was cancelled.${reasonSuffix}`,
+      message: `Your assignment for ${booking.walkInCustomerName || booking.userId?.name || 'Client'} at ${moment(booking.startTime).tz('Asia/Kolkata').format('h:mm A')} was cancelled.${reasonSuffix}`,
       data: { bookingId: booking._id, reason: booking.cancelReason, isActionable: false },
       referenceId: `${booking._id}_CANCEL_EVENT`
     });

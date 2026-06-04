@@ -274,7 +274,8 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
 
       const hasOverlap = allBusyBlocks.some((block) => (
         block.staffId === staffIdStr &&
-        currentStart.isSame(block.start)
+        currentStart.isBefore(block.end) &&
+        currentEnd.isAfter(block.start)
       ));
 
       const isStaffOnClosure = staffClosureRecords.some(c => 
