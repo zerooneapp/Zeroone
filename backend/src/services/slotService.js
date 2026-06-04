@@ -56,7 +56,10 @@ const buildAvailabilityWindows = (date, ranges = []) => (
       const start = buildMomentFromTime(date, range.startTime);
       const end = buildMomentFromTime(date, range.endTime);
 
-      if (!start || !end || !end.isAfter(start)) return null;
+      if (!start || !end) return null;
+      if (end.isSameOrBefore(start)) {
+        end.add(1, 'day');
+      }
       return { start, end };
     })
     .filter(Boolean)
@@ -95,7 +98,10 @@ const getVendorDayAvailability = async (vendorId, targetDate, existingVendor = n
   const open = buildMomentFromTime(targetDate, openTimeStr);
   const close = buildMomentFromTime(targetDate, closeTimeStr);
 
-  if (!open || !close || !close.isAfter(open)) return null;
+  if (!open || !close) return null;
+  if (close.isSameOrBefore(open)) {
+    close.add(1, 'day');
+  }
 
   return {
     vendor,

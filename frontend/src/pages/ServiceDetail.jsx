@@ -1065,7 +1065,7 @@ const ServiceDetail = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             className="fixed left-2 right-2 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-[24px]"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 56px)' }}
+            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 48px)' }}
           >
             <div className="flex items-center justify-between max-w-lg mx-auto">
               <div className="flex flex-col">

@@ -86,7 +86,7 @@ const PaymentMethods = () => {
                          <MoreVertical size={16} className="opacity-40" />
                       </div>
                       <div className="space-y-1">
-                         <p className="text-sm font-bold tracking-[0.2em] opacity-80">•••• •••• •••• {card.last4}</p>
+                         <p className="text-sm font-bold tracking-[0.2em] opacity-80 text-white">•••• •••• •••• {card.last4}</p>
                          <div className="flex justify-between items-end">
                             <div className="space-y-0.5">
                                <p className="text-[7px] font-black opacity-30 uppercase tracking-widest">Card Holder</p>
@@ -123,8 +123,8 @@ const PaymentMethods = () => {
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Selected UPI ID</p>
                        </div>
                     </div>
-                    <div className="w-5 h-5 rounded-full border-2 border-[#00246b]/20 flex items-center justify-center">
-                       <div className="w-2 h-2 rounded-full bg-[#00246b] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="w-5 h-5 rounded-full border-2 border-[#00246b]/20 dark:border-white/40 flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-[#00246b] dark:bg-white opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                  </button>
               ))}
