@@ -348,13 +348,15 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
     staffId: { $in: staffIds },
     status: { $ne: 'cancelled' },
     _id: { $ne: excludeBookingId },
-    startTime: start.toDate()
+    startTime: { $lt: end.toDate() },
+    endTime: { $gt: start.toDate() }
   });
 
   const lockFilter = {
     staffId: { $in: staffIds },
     expiresAt: { $gt: new Date() },
-    startTime: start.toDate()
+    startTime: { $lt: end.toDate() },
+    endTime: { $gt: start.toDate() }
   };
 
   // 🛡️ CRITICAL FIX: If we are re-locking for the same user, ignore their previous locks

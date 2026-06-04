@@ -65,7 +65,8 @@ const findOverlappingBooking = ({ staffId, start, end, excludeBookingId = null }
   const query = {
     staffId,
     status: { $ne: 'cancelled' },
-    startTime: start.toDate()
+    startTime: { $lt: end.toDate() },
+    endTime: { $gt: start.toDate() }
   };
 
   if (excludeBookingId) {
