@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft } from 'lucide-react';
 import logo from '../assests/logo.jpeg';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/Button';
@@ -184,7 +185,16 @@ const VendorAuth = () => {
                 exit={{ opacity: 0, scale: 1.05 }}
                 className="space-y-4"
               >
-                <div className="space-y-2 text-center">
+                <div className="relative space-y-2 text-center">
+                  <button 
+                    onClick={() => {
+                      setStep('phone');
+                      setOtp(['', '', '', '', '', '']);
+                    }}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 -mt-2 p-2 text-[#00246b]/60 dark:text-gray-400 hover:text-[#00246b] dark:hover:text-white transition-colors"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
                   <h1 className="text-[28px] font-bold text-[#00246b] dark:text-white">Enter Code</h1>
                   <p className="text-[#00246b]/60 dark:text-gray-400 font-medium text-[11px] uppercase tracking-widest">
                     Verification code sent to <span className="text-[#00246b] dark:text-white font-bold">+91 {phone}</span>

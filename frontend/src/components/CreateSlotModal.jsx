@@ -193,7 +193,10 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                     type="text"
                     placeholder="e.g. Rahul Sharma"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                      setFormData({ ...formData, name: val });
+                    }}
                     className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white shadow-sm focus:shadow-none transition-all caret-[#00246b] dark:caret-white placeholder:text-slate-400/70 dark:placeholder:text-gray-500/70"
                   />
                 </div>

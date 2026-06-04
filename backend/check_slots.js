@@ -9,7 +9,7 @@ const moment = require('moment-timezone');
 async function checkVendorSlots() {
   try {
     // Using the same URI as in logs
-    await mongoose.connect('mongodb+srv://zerooneappinfo_db_user:8xR09oSOETAW3pZh@cluster0.djq3ivp.mongodb.net/ZeroOne');
+    await mongoose.connect('mongodb://zerooneappinfo_db_user:8xR09oSOETAW3pZh@ac-pitmbpp-shard-00-00.djq3ivp.mongodb.net:27017,ac-pitmbpp-shard-00-01.djq3ivp.mongodb.net:27017,ac-pitmbpp-shard-00-02.djq3ivp.mongodb.net:27017/ZeroOne?ssl=true&replicaSet=atlas-mvko1y-shard-0&authSource=admin&retryWrites=true&w=majority');
     console.log('Connected to DB');
 
     const user = await User.findOne({ phone: '9926833280' });
@@ -34,7 +34,7 @@ async function checkVendorSlots() {
     console.log('Vendor Holidays:', vendor.holidays);
     console.log('Is Shop Open:', vendor.isShopOpen, 'Is Closed Today:', vendor.isClosedToday);
 
-    const targetDate = moment('2026-04-27').tz('Asia/Kolkata').startOf('day');
+    const targetDate = moment('2026-06-04').tz('Asia/Kolkata').startOf('day');
     console.log('Target Date:', targetDate.format());
 
     // 1. Check Availability
@@ -42,8 +42,8 @@ async function checkVendorSlots() {
     console.log('Total Availability Records:', allAvailabilities.length);
     allAvailabilities.forEach(a => console.log(`- Day: ${a.day}, Open: ${a.isOpen}`));
     
-    const availability = allAvailabilities.find(a => a.day === 'Mon');
-    console.log('Monday Availability (VendorAvailability):', availability ? (availability.isOpen ? 'Open' : 'Closed') : 'Not Set');
+    const availability = allAvailabilities.find(a => a.day === 'Thu');
+    console.log('Thursday Availability (VendorAvailability):', availability ? (availability.isOpen ? 'Open' : 'Closed') : 'Not Set');
     
     if (vendor.workingHours) {
         console.log('Vendor Working Hours:', vendor.workingHours);
@@ -56,7 +56,7 @@ async function checkVendorSlots() {
       startTime: { $lt: targetDate.clone().add(1, 'day').toDate() },
       endTime: { $gt: targetDate.toDate() }
     });
-    console.log('Vendor Closures for 27th:', closures.length);
+    console.log('Vendor Closures for today:', closures.length);
     closures.forEach(c => console.log(`- From ${c.startTime} to ${c.endTime}`));
 
     // 3. Check Staff
@@ -96,8 +96,8 @@ async function checkVendorSlots() {
 
     // 6. Run Slot Calculation
     const { calculateAvailableSlots } = require('./src/services/slotService');
-    const availableSlots = await calculateAvailableSlots(vendorId, [services[0]._id.toString()], '2026-04-27');
-    console.log('Available Slots for 27th:', availableSlots.length);
+    const availableSlots = await calculateAvailableSlots(vendorId, [services[0]._id.toString()], '2026-06-04');
+    console.log('Available Slots for today:', availableSlots.length);
     if (availableSlots.length > 0) {
         console.log('First 3 slots:', availableSlots.slice(0, 3));
     } else {
