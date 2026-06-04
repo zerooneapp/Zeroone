@@ -127,7 +127,7 @@ const UserDetail = () => {
                      {user.image ? (
                         <img src={user.image} className="w-full h-full object-cover" alt={user.name} />
                      ) : (
-                        user.name?.charAt(0) || 'U'
+                        <User size={40} className="text-white/80" />
                      )}
                   </div>
                   <h2 className="text-[18px] font-black text-slate-900 dark:text-white capitalize tracking-tighter mb-1 leading-none">{user.name}</h2>
@@ -135,6 +135,7 @@ const UserDetail = () => {
 
                   <div className="space-y-3.5 text-left">
                      <InfoItem icon={Phone} label="Contact" value={user.phone} />
+                     {user.dob && <InfoItem icon={Calendar} label="Date of Birth" value={new Date(user.dob).toLocaleDateString()} />}
                      <InfoItem icon={Calendar} label="Member Since" value={new Date(user.createdAt).toLocaleDateString()} />
                      <InfoItem icon={Shield} label="Account Status" value={user.isBlocked ? 'BLOCKED' : 'ACTIVE'} highlight={user.isBlocked} />
                   </div>

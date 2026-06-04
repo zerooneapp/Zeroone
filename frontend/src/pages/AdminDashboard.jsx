@@ -104,13 +104,22 @@ const AdminDashboard = () => {
 
   if (!data) return null;
 
+  const calculateTrend = (current, previous) => {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  const revTrendNum = calculateTrend(data.todayRevenue || 0, data.yesterdayRevenue || 0);
+  const revTrendUp = revTrendNum >= 0;
+  const revTrendFormatted = `${Math.abs(revTrendNum).toFixed(1)}%`;
+
   const kpis = [
     { 
       label: 'Today Revenue', 
       value: `₹${data.todayRevenue || 0}`, 
-      trend: data.todayRevenue >= data.yesterdayRevenue ? '100.0%' : '-100.0%',
-      trendUp: data.todayRevenue >= data.yesterdayRevenue,
-      sub: `+${data.todayRevenue >= data.yesterdayRevenue ? '100.0' : '-100.0'}%`,
+      trend: revTrendFormatted,
+      trendUp: revTrendUp,
+      sub: `${revTrendUp ? '+' : '-'}${revTrendFormatted}`,
       iconSrc: revenueIcon, 
       color: 'amber',
       path: '/admin/transactions'

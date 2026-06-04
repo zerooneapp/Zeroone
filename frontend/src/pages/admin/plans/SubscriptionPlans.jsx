@@ -162,13 +162,13 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
       animate={{ opacity: 1, y: 0 }}
       className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-5 relative group hover:border-primary/30 transition-all"
     >
-      <div className="flex items-center justify-between">
-         <div className={cn("p-2.5 w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm", colors[color])}>
-           <Icon size={24} strokeWidth={2.5} />
+      <div className="flex flex-col items-center justify-center text-center space-y-3">
+         <div className={cn("p-3 w-14 h-14 rounded-2xl flex items-center justify-center border shadow-sm", colors[color])}>
+           <Icon size={28} strokeWidth={2.5} />
          </div>
-         <div className="text-right">
-            <h3 className="text-[20px] font-black text-slate-900 dark:text-white capitalize tracking-tighter leading-none">{level}</h3>
-            <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">Pricing Layer</p>
+         <div>
+            <h3 className="text-[22px] font-black text-slate-900 dark:text-white capitalize tracking-tighter leading-none">{level}</h3>
+            <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1.5 opacity-60">Pricing Layer</p>
          </div>
       </div>
 

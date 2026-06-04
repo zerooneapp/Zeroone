@@ -190,13 +190,14 @@ const AdminLayout = () => {
             <div className="hidden sm:block">
               <h1 className="text-base font-black dark:text-white capitalize tracking-widest flex items-center gap-2">
                 Overview <ChevronRight size={16} className="text-gray-300 dark:text-slate-600" /> <span className="text-primary dark:text-white">Dashboard</span>
+                {/* Overview <ChevronRight size={16} className="text-gray-300 dark:text-slate-600" /> <span className="text-primary dark:text-white">{adminRoutes.find(r => location.pathname.startsWith(r.path))?.name || 'Dashboard'}</span> */}
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             {/* Admin Identity */}
-            <div 
+            <div
               onClick={() => setIsAdminProfileOpen(true)}
               className="hidden lg:flex items-center gap-3 pr-4 border-r border-gray-100 dark:border-gray-800 cursor-pointer group active:scale-95 transition-all"
             >
@@ -227,7 +228,7 @@ const AdminLayout = () => {
         </header>
 
         {/* ⚡ CONTENT SCROLL AREA */}
-        <main 
+        <main
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar bg-gray-50/30 dark:bg-transparent"
         >
@@ -237,9 +238,9 @@ const AdminLayout = () => {
         </main>
       </div>
 
-      <AdminProfileModal 
-        isOpen={isAdminProfileOpen} 
-        onClose={() => setIsAdminProfileOpen(false)} 
+      <AdminProfileModal
+        isOpen={isAdminProfileOpen}
+        onClose={() => setIsAdminProfileOpen(false)}
       />
     </div>
   );

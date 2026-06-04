@@ -39,6 +39,7 @@ const login = async (req, res) => {
       const isMatch = await user.comparePassword(password);
       if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
       if (user.isBlocked) return res.status(403).json({ message: 'Account is blocked' });
+      if (user.isDeleted) return res.status(403).json({ message: 'Account has been deleted' });
     } else {
       // 2. Check Staff Model
       const staff = await Staff.findOne({ phone });
@@ -92,6 +93,7 @@ const adminLogin = async (req, res) => {
     const isMatch = await admin.comparePassword(password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid admin credentials' });
     if (admin.isBlocked) return res.status(403).json({ message: 'Admin account is blocked' });
+    if (admin.isDeleted) return res.status(403).json({ message: 'Admin account has been deleted' });
 
     res.status(200).json({
       _id: admin._id,

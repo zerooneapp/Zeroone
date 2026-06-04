@@ -294,7 +294,7 @@ const ToggleItem = ({ label, sub, isActive, onToggle, isDisabled }) => (
       disabled={isDisabled}
       className={cn(
         "transition-all duration-300 transform",
-        isActive ? "text-primary dark:text-white scale-110" : "text-slate-200 dark:text-gray-600 scale-95 opacity-50"
+        isActive ? "text-primary dark:text-white scale-110" : "text-slate-400 dark:text-slate-400 scale-95"
       )}
     >
       {isActive ? <ToggleRight size={36} strokeWidth={1} /> : <ToggleLeft size={36} strokeWidth={1} />}
