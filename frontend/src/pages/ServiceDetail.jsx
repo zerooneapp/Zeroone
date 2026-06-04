@@ -404,11 +404,23 @@ const ServiceDetail = () => {
     }
   };
 
-  const gallery = vendor ? [
-    vendor.shopImage,
-    ...(vendor.gallery || []),
-    ...(services.flatMap(s => s.images || []))
-  ].filter(Boolean).slice(0, 10) : [];
+  const slides = useMemo(() => {
+    if (!vendor) return [];
+    const list = [];
+    if (vendor.shopVideo) {
+      list.push({ type: 'video', url: vendor.shopVideo });
+    }
+    const imgs = [
+      vendor.shopImage,
+      ...(vendor.gallery || []),
+      ...(services.flatMap(s => s.images || []))
+    ].filter(Boolean);
+    const uniqueImgs = Array.from(new Set(imgs));
+    uniqueImgs.slice(0, 10).forEach(img => {
+      list.push({ type: 'image', url: img });
+    });
+    return list;
+  }, [vendor, services]);
 
   const handleScrollTo = (index) => {
     if (scrollRef.current) {
@@ -574,11 +586,59 @@ const ServiceDetail = () => {
     </div>
   );
 
-  const totalPrice = getTotalPrice();
-  const displayTotal = cartPricing?.finalTotal ?? totalPrice;
-  const originalTotal = cartPricing?.originalTotal ?? totalPrice;
-  const totalSavings = cartPricing?.totalDiscount ?? 0;
-  const hasItemsFromThisVendor = cartVendor?._id === vendor._id;
+  const hasItemsFromThisVendor = cartVendor?._id === vendor?._id;
+
+  const displayTotal = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.finalTotal === 'number') {
+      return cartPricing.finalTotal;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const itemPrice = priceMeta ? priceMeta.finalPrice : item.price;
+      return sum + itemPrice;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
+  const originalTotal = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.originalTotal === 'number') {
+      return cartPricing.originalTotal;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const itemPrice = priceMeta ? priceMeta.originalPrice : item.price;
+      return sum + itemPrice;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
+  const totalSavings = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.totalDiscount === 'number') {
+      return cartPricing.totalDiscount;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const savings = priceMeta ? (priceMeta.originalPrice - priceMeta.finalPrice) : 0;
+      return sum + savings;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
   const hasHomeService = services.some((service) => service.type === 'home' || service.type === 'both');
 
   return (
@@ -608,23 +668,40 @@ const ServiceDetail = () => {
             onScroll={handleScroll}
             className="h-48 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
           >
-            {gallery.length > 0 ? (
-              gallery.map((img, idx) => (
+            {slides.length > 0 ? (
+              slides.map((slide, idx) => (
                 <div
                   key={idx}
-                  className="w-full h-full flex-shrink-0 snap-center snap-always relative cursor-pointer"
-                  onClick={() => {
-                    setLightboxImg(img);
-                    setZoomScale(1);
-                  }}
+                  className="w-full h-full flex-shrink-0 snap-center snap-always relative"
                 >
-                  <img
-                    loading="lazy"
-                    src={img}
-                    className="w-full h-full object-cover"
-                    alt={`${vendor.shopName} gallery ${idx + 1}`}
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
-                  />
+                  {slide.type === 'video' ? (
+                    <div className="w-full h-full relative">
+                      <video
+                        src={slide.url}
+                        className="w-full h-full object-cover"
+                        controls
+                        preload="metadata"
+                        playsInline
+                        muted
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-full h-full cursor-pointer"
+                      onClick={() => {
+                        setLightboxImg(slide.url);
+                        setZoomScale(1);
+                      }}
+                    >
+                      <img
+                        loading="lazy"
+                        src={slide.url}
+                        className="w-full h-full object-cover"
+                        alt={`${vendor.shopName} gallery ${idx + 1}`}
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
@@ -648,7 +725,7 @@ const ServiceDetail = () => {
           </div>
 
           {/* Navigation Arrows */}
-          {gallery.length > 1 && (
+          {slides.length > 1 && (
             <>
               {activeIndex > 0 && (
                 <button
@@ -658,7 +735,7 @@ const ServiceDetail = () => {
                   <ChevronLeft size={20} strokeWidth={4} />
                 </button>
               )}
-              {activeIndex < gallery.length - 1 && (
+              {activeIndex < slides.length - 1 && (
                 <button
                   onClick={() => handleScrollTo(activeIndex + 1)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#00246b] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
@@ -685,9 +762,9 @@ const ServiceDetail = () => {
           </button>
 
           {/* Pagination HUD */}
-          {gallery.length > 1 && (
+          {slides.length > 1 && (
             <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-1.5 z-20">
-              {gallery.map((_, index) => (
+              {slides.map((_, index) => (
                 <div
                   key={`dot-${index}`}
                   className={cn(
@@ -800,11 +877,11 @@ const ServiceDetail = () => {
                     finalPrice: cartServiceEntry.finalPrice,
                     discount: cartServiceEntry.discount
                   }
-                : {
+                : (servicePricing[String(item._id)] || {
                     originalPrice: item.price,
                     finalPrice: item.price,
                     discount: 0
-                  };
+                  });
 
               return (
                 <div
@@ -1065,7 +1142,7 @@ const ServiceDetail = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             className="fixed left-2 right-2 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-[24px]"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 56px)' }}
+            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 48px)' }}
           >
             <div className="flex items-center justify-between max-w-lg mx-auto">
               <div className="flex flex-col">

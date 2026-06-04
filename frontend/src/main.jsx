@@ -64,6 +64,19 @@ const prefetchVendors = (lat, lng) => {
           services: v.services || []
         };
       });
+
+      // 🚀 Silently prefetch each vendor's services in background
+      // so ServiceDetail categories appear instantly
+      res.data.vendors.forEach(v => {
+        api.get('/services', { params: { vendorId: v._id } })
+          .then(sRes => {
+            const services = sRes.data || [];
+            if (window.__PREFETCHED_DATA__.vendorDetails[v._id]) {
+              window.__PREFETCHED_DATA__.vendorDetails[v._id].services = services;
+            }
+          })
+          .catch(() => {}); // Silent fail — non-critical
+      });
     }
   })
   .catch(err => console.warn('[Prefetch] Vendors failed', err.message));

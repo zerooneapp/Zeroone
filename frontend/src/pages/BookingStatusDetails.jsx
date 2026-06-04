@@ -214,6 +214,11 @@ const BookingStatusDetails = () => {
                 <p className="text-[10px] font-black tracking-tight text-[#00246b] dark:text-white leading-tight">Service Details</p>
               </div>
             )}
+            <div className="flex justify-between items-center text-[10px] font-black tracking-tight text-[#00246b] dark:text-white leading-tight pt-1.5 border-t border-dashed border-slate-100 dark:border-gray-800/50">
+              <span className="text-slate-400 dark:text-gray-500 uppercase tracking-widest text-[8px]">Amount Paid</span>
+              <span className="text-[12px] font-black text-emerald-600 dark:text-emerald-400">₹{booking.totalPrice || 0}</span>
+            </div>
+
             <div className="flex items-start gap-2 pt-1">
               <MapPin size={12} strokeWidth={3} className="text-slate-300 dark:text-gray-600 mt-0.5 shrink-0" />
               <p className="text-[10px] font-black tracking-tight text-slate-400 dark:text-white/60 leading-tight">

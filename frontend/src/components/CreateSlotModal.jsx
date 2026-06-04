@@ -269,11 +269,15 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                     {availableSlots.map(slot => (
                       <button
                         key={slot.time}
+                        disabled={slot.availableStaff?.length === 0}
                         onClick={() => setFormData({ ...formData, time: slot.time })}
-                        className={`py-2.5 rounded-lg text-[10px] font-black border transition-all ${formData.time === slot.time
-                          ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white text-[#00246b] dark:text-white shadow-md'
-                          : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm'
-                          }`}
+                        className={`py-2.5 rounded-lg text-[10px] font-black border transition-all ${
+                          slot.availableStaff?.length === 0
+                            ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/30 text-red-500/60 cursor-not-allowed opacity-60'
+                            : formData.time === slot.time
+                              ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white text-[#00246b] dark:text-white shadow-md'
+                              : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm'
+                        }`}
                       >
                         {format12Hr(slot.time)}
                       </button>

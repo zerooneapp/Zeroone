@@ -88,7 +88,7 @@ import AddressPopup from './components/AddressPopup';
 import ScrollToTop from './components/ScrollToTop';
 import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { requestForToken, onMessageListener } from './config/firebase';
 import { saveTokenToBackend } from './services/fcmService';
 import useSocket from './hooks/useSocket';
@@ -101,6 +101,15 @@ function App() {
   const isInitialized = useAuthStore((state) => state.isInitialized);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+
+  // Limit toasts to 1 at a time globally
+  const { toasts } = useToasterStore();
+  useEffect(() => {
+    toasts
+      .filter((t) => t.visible)
+      .filter((_, i) => i >= 1)
+      .forEach((t) => toast.remove(t.id));
+  }, [toasts]);
 
   // Global socket listener for authenticated users
   useSocket(user?._id);

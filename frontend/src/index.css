@@ -44,6 +44,7 @@
   .dark input:-webkit-autofill:focus, 
   .dark input:-webkit-autofill:active {
       -webkit-text-fill-color: white !important;
+      -webkit-box-shadow: 0 0 0px 1000px #111827 inset !important;
   }
   
   :not(.dark) input:-webkit-autofill,
@@ -51,6 +52,7 @@
   :not(.dark) input:-webkit-autofill:focus, 
   :not(.dark) input:-webkit-autofill:active {
       -webkit-text-fill-color: #00246b !important;
+      -webkit-box-shadow: 0 0 0px 1000px white inset !important;
   }
 }
 

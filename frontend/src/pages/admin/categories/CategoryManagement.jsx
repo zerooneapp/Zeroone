@@ -211,7 +211,7 @@ const CategoryManagement = () => {
                   <input
                     type="text"
                     required
-                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300"
+                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white caret-slate-900 dark:caret-white transition-all placeholder:text-slate-300"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. LUXURY SPA"
@@ -220,7 +220,7 @@ const CategoryManagement = () => {
                 <div className="space-y-1.5 leading-none">
                   <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Metadata Details</label>
                   <textarea
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all h-24 resize-none no-scrollbar placeholder:text-slate-300"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white caret-slate-900 dark:caret-white transition-all h-24 resize-none no-scrollbar placeholder:text-slate-300"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Classification details..."
@@ -230,7 +230,7 @@ const CategoryManagement = () => {
                   <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Visual Icon Link</label>
                   <input
                     type="text"
-                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[13px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300"
+                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[13px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white caret-slate-900 dark:caret-white transition-all placeholder:text-slate-300"
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                     placeholder="https://..."
