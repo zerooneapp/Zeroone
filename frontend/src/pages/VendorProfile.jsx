@@ -1050,16 +1050,36 @@ const VendorProfile = () => {
                            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-gray-800">
                               <div>
                                  <p className="text-[11px] font-black text-gray-900 dark:text-white capitalize tracking-tight">Promo Video</p>
-                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter capitalize mt-0.5">MP4 (Max 30s / 50MB)</p>
+                                 <p className="text-[8px] text-gray-400 font-bold tracking-tighter capitalize mt-0.5">MP4/WebM (Max 20MB)</p>
                               </div>
-                              <button
-                                 type="button"
-                                 onClick={() => toast('Video feature coming soon!', { icon: '🚧' })}
-                                 className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-not-allowed shadow-md border border-slate-200/60 dark:border-gray-800"
-                              >
-                                 <Video size={16} className="text-gray-400 opacity-50" />
-                              </button>
+                              <input
+                                 type="file"
+                                 id="video-input"
+                                 className="hidden"
+                                 accept="video/mp4,video/quicktime,video/webm"
+                                 onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                       if (file.size > 20 * 1024 * 1024) {
+                                          toast.error('Video size must be less than 20MB');
+                                          e.target.value = '';
+                                          return;
+                                       }
+                                       setVideoFile(file);
+                                    }
+                                 }}
+                              />
+                              <label htmlFor="video-input" className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-pointer shadow-md border border-slate-200/60 dark:border-gray-800">
+                                 <Video size={16} className={cn("text-gray-400", videoFile && "text-[#00246b] dark:text-blue-400")} />
+                              </label>
                            </div>
+
+                           {videoFile && (
+                              <div className="flex items-center justify-between px-3 py-1.5 bg-blue-500/10 text-[#00246b] dark:text-blue-400 rounded-lg text-[8px] font-black capitalize border border-blue-500/20">
+                                 <span>{videoFile.name.slice(0, 30)}{videoFile.name.length > 30 ? '...' : ''} ({Math.round(videoFile.size / 1024 / 1024 * 10) / 10}MB)</span>
+                                 <X size={10} className="cursor-pointer" onClick={() => setVideoFile(null)} />
+                              </div>
+                           )}
                         </div>
                      </div>
 
