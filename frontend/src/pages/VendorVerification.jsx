@@ -87,10 +87,10 @@ const VendorVerification = () => {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-                className="absolute inset-0 border-4 border-dashed border-primary/20 rounded-full"
+                className="absolute inset-0 border-4 border-dashed border-primary/20 dark:border-white/20 rounded-full"
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary">
+                <div className="w-20 h-20 bg-primary/10 dark:bg-white/10 rounded-3xl flex items-center justify-center text-primary dark:text-white">
                   <FileSearch size={40} strokeWidth={1.5} />
                 </div>
               </div>
@@ -122,7 +122,7 @@ const VendorVerification = () => {
               </div>
               <div className="w-full h-px bg-gray-100 dark:bg-gray-800 ml-14" />
               <div className="flex items-center gap-4 text-left">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary animate-pulse">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white animate-pulse">
                   <Loader2 size={20} className="animate-spin" />
                 </div>
                 <div>
@@ -140,7 +140,7 @@ const VendorVerification = () => {
 
                 <button
                     onClick={handleLogout}
-                    className="text-[#00246b]/70 hover:text-[#00246b] dark:text-gray-500 dark:hover:text-white transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] mt-2"
+                    className="text-[#00246b]/70 hover:text-[#00246b] dark:text-white dark:hover:text-white transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] mt-2"
                 >
                     <Clock size={12} /> Sign Out & Check Later
                 </button>

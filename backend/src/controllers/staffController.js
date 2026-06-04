@@ -235,8 +235,18 @@ const getStaffById = async (req, res) => {
       { $group: { _id: '$staffId', total: { $sum: '$totalPrice' } } }
     ]);
 
+    const StaffClosure = require('../models/StaffClosure');
+    const now = new Date();
+    const activeClosure = await StaffClosure.findOne({
+      staffId: staff._id,
+      status: 'active',
+      startTime: { $lte: now },
+      endTime: { $gt: now }
+    }).lean();
+
     const staffObj = staff.toObject();
     staffObj.totalEarnings = earningsResult[0]?.total || 0;
+    staffObj.activeClosure = activeClosure || null;
 
     res.status(200).json(staffObj);
   } catch (error) {

@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export const useSignupStore = create((set) => ({
   formData: (() => {
     try {
-      const saved = sessionStorage.getItem('vendor_signup_form');
+      const saved = sessionStorage.getItem('vendor_signup_form_v2');
       return saved ? JSON.parse(saved) : {
         shopName: '',
         ownerName: '',
@@ -11,7 +11,7 @@ export const useSignupStore = create((set) => ({
         serviceLevel: 'standard',
         serviceMode: 'shop',
         address: '',
-        location: { coordinates: [75.8577, 22.7196] },
+        location: null,
       };
     } catch (e) {
       return {
@@ -21,7 +21,7 @@ export const useSignupStore = create((set) => ({
         serviceLevel: 'standard',
         serviceMode: 'shop',
         address: '',
-        location: { coordinates: [75.8577, 22.7196] },
+        location: null,
       };
     }
   })(),
@@ -40,7 +40,7 @@ export const useSignupStore = create((set) => ({
   },
   setFormData: (data) => set((state) => {
     const newFormData = typeof data === 'function' ? data(state.formData) : { ...state.formData, ...data };
-    sessionStorage.setItem('vendor_signup_form', JSON.stringify(newFormData));
+    sessionStorage.setItem('vendor_signup_form_v2', JSON.stringify(newFormData));
     return { formData: newFormData };
   }),
   setStep: (step) => {
@@ -51,7 +51,7 @@ export const useSignupStore = create((set) => ({
     files: { ...state.files, [key]: file } 
   })),
   reset: () => {
-    sessionStorage.removeItem('vendor_signup_form');
+    sessionStorage.removeItem('vendor_signup_form_v2');
     sessionStorage.removeItem('vendor_signup_step');
     set({
       formData: {
@@ -61,7 +61,7 @@ export const useSignupStore = create((set) => ({
         serviceLevel: 'standard',
         serviceMode: 'shop',
         address: '',
-        location: { coordinates: [75.8577, 22.7196] },
+        location: null,
       },
       step: 1,
       files: {

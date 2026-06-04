@@ -9,7 +9,7 @@ const { getPricingPreviewForServiceIds } = require('../services/offerPricingServ
 
 const addOffer = async (req, res) => {
   try {
-    const { title, discountType, value, serviceIds, expiryDate } = req.body;
+    const { title, discountType, value, serviceIds, expiryDate, minPurchaseAmount, maxDiscountLimit } = req.body;
     
     // Server-side validation
     if (discountType === 'percentage' && value > 100) {
@@ -24,7 +24,9 @@ const addOffer = async (req, res) => {
       discountType,
       value,
       serviceIds,
-      expiryDate
+      expiryDate,
+      minPurchaseAmount,
+      maxDiscountLimit
     });
 
     res.status(201).json(offer);

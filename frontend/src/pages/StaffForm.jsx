@@ -276,7 +276,11 @@ const StaffForm = () => {
                     type="text"
                     placeholder="e.g. Senior Stylist"
                     value={formData.designation}
-                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+                      setFormData({ ...formData, designation: filteredValue });
+                    }}
                     className="w-full py-3 pl-11 pr-4 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white placeholder:text-gray-300"
                   />
                   <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />

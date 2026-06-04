@@ -229,6 +229,7 @@ const VendorBookings = () => {
               <input
                 type="date"
                 value={fromDate}
+                min={dayjs().format('YYYY-MM-DD')}
                 onChange={(e) => setFromDate(e.target.value)}
                 className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
               />
