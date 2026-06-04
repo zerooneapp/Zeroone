@@ -49,7 +49,7 @@ const TransactionManagement = () => {
     status: 'all'
   });
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/admin/transactions', {
@@ -68,7 +68,7 @@ const TransactionManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, data.currentPage]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

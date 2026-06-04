@@ -708,7 +708,10 @@ const getAdminDashboard = async (req, res) => {
 
     const platformRevenueFilter = {
       status: 'completed',
-      category: { $in: ['daily_subscription', 'monthly_subscription', 'promotion_payment'] }
+      category: { $in: [
+        'daily_subscription', 'monthly_subscription', 'promotion_payment', 
+        'membership_revenue', 'commission', 'wallet_topup', 'admin_topup'
+      ] }
     };
 
     const [
@@ -743,7 +746,7 @@ const getAdminDashboard = async (req, res) => {
         { $match: platformRevenueFilter },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]),
-      Vendor.countDocuments({ status: 'pending' }),
+      Vendor.countDocuments({ createdAt: { $gte: today.toDate() } }),
       Vendor.countDocuments({}),
       Vendor.countDocuments({ status: 'active' }),
       Vendor.countDocuments({ status: 'pending' }),
