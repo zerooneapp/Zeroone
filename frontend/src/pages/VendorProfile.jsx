@@ -265,7 +265,7 @@ const VendorProfile = () => {
       try {
          setLoading(true);
          await api.patch('/vendor/update-profile', data);
-         toast.success('Basic info updated');
+         toast.success('Basic info updated', { id: 'basic-info-update' });
       } catch (err) {
          toast.error('Update failed');
       } finally {
@@ -799,6 +799,7 @@ const VendorProfile = () => {
                               <AnimatePresence>
                                  {pickerOpen === 'start' && (
                                     <TimePickerOverlay
+                                       type="open"
                                        value={data.workingHours.start}
                                        onChange={(val) => setData({ ...data, workingHours: { ...data.workingHours, start: val } })}
                                        onClose={() => setPickerOpen(null)}
@@ -828,6 +829,7 @@ const VendorProfile = () => {
                               <AnimatePresence>
                                  {pickerOpen === 'end' && (
                                     <TimePickerOverlay
+                                       type="close"
                                        value={data.workingHours.end}
                                        onChange={(val) => setData({ ...data, workingHours: { ...data.workingHours, end: val } })}
                                        onClose={() => setPickerOpen(null)}
@@ -1836,14 +1838,23 @@ const VendorProfile = () => {
 
 
 // ── CUSTOM TIME PICKER OVERLAY ──
-const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
+const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef }) => {
    const time = dayjs(`2000-01-01 ${value || '09:00 AM'}`, 'YYYY-MM-DD hh:mm A');
    const [h, setH] = useState(time.format('hh'));
    const [m, setM] = useState(time.format('mm'));
    const [p, setP] = useState(time.format('A'));
 
-   const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
-   const minutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+   const allHours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+   const allMinutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+
+   let hours = allHours;
+   if (type === 'open') {
+      hours = p === 'AM' ? ['06', '07', '08', '09', '10', '11', '12'] : allHours;
+   } else if (type === 'close') {
+      hours = p === 'AM' ? ['12'] : ['06', '07', '08', '09', '10', '11'];
+   }
+   
+   const minutes = (p === 'AM' && h === '12') ? ['00'] : allMinutes;
 
    const handleConfirm = () => {
       onChange(`${h}:${m} ${p}`);
@@ -1860,7 +1871,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
       >
          <div className="p-3 border-b border-slate-50 dark:border-gray-800 flex items-center justify-between bg-slate-50/50 dark:bg-gray-950/50">
             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Select Time</span>
-            <button onClick={onClose} className="text-gray-400 hover:text-red-500"><X size={14} /></button>
+            <button type="button" onClick={onClose} className="text-gray-400 hover:text-red-500"><X size={14} /></button>
          </div>
 
          <div className="p-4 grid grid-cols-3 gap-2">
@@ -1869,7 +1880,11 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
                {hours.map(hour => (
                   <button
                      key={hour}
-                     onClick={() => setH(hour)}
+                     type="button"
+                     onClick={() => {
+                        setH(hour);
+                        if (p === 'AM' && hour === '12') setM('00');
+                     }}
                      className={cn(
                         "w-full py-2 rounded-lg text-xs font-black transition-all",
                         h === hour ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
@@ -1885,6 +1900,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
                {minutes.map(min => (
                   <button
                      key={min}
+                     type="button"
                      onClick={() => setM(min)}
                      className={cn(
                         "w-full py-2 rounded-lg text-xs font-black transition-all",
@@ -1901,7 +1917,23 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
                {['AM', 'PM'].map(period => (
                   <button
                      key={period}
-                     onClick={() => setP(period)}
+                     type="button"
+                     onClick={() => {
+                        setP(period);
+                        if (type === 'open') {
+                           if (period === 'AM') {
+                              if (!['06', '07', '08', '09', '10', '11', '12'].includes(h)) setH('06');
+                              if (h === '12') setM('00');
+                           }
+                        } else if (type === 'close') {
+                           if (period === 'AM') {
+                              setH('12');
+                              setM('00');
+                           } else if (period === 'PM') {
+                              if (!['06', '07', '08', '09', '10', '11'].includes(h)) setH('06');
+                           }
+                        }
+                     }}
                      className={cn(
                         "w-full py-4 rounded-xl text-[10px] font-black transition-all",
                         p === period ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-105" : "text-gray-400 bg-slate-50 dark:bg-gray-800"
@@ -1915,6 +1947,7 @@ const TimePickerOverlay = ({ value, onChange, onClose, pickerRef }) => {
 
          <div className="p-3 bg-slate-50 dark:bg-gray-950 flex gap-2">
             <button
+               type="button"
                onClick={handleConfirm}
                className="flex-1 py-2.5 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
             >
