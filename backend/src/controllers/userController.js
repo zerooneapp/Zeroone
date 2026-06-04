@@ -50,7 +50,7 @@ const deleteAccount = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // 🧹 COMPREHENSIVE CLEANUP
+    // 🧹 COMPREHENSIVE CLEANUP (SOFT DELETE)
     const Vendor = require('../models/Vendor');
     const Staff = require('../models/Staff');
     const SlotLock = require('../models/SlotLock');
@@ -61,16 +61,14 @@ const deleteAccount = async (req, res) => {
     const WalletTransaction = require('../models/WalletTransaction');
     const Notification = require('../models/Notification');
 
+    const timestamp = Date.now();
+
     if (user.role === 'vendor') {
       const vendor = await Vendor.findOne({ ownerId: userId });
       if (vendor) {
-        // Find all staff members for this vendor to delete their User accounts and other data
+        // Find all staff members for this vendor to soft delete their User accounts
         const staffMembers = await Staff.find({ vendorId: vendor._id }).select('_id userId');
-        const staffIds = staffMembers.map(s => s._id);
         const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
-
-        const StaffAvailability = require('../models/StaffAvailability');
-        const StaffClosure = require('../models/StaffClosure');
 
         // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
         try {
@@ -88,31 +86,35 @@ const deleteAccount = async (req, res) => {
           console.error('[Socket emit error in deleteAccount]', err.message);
         }
 
-        // 1. Remove all vendor-specific data
+        // 1. Soft delete vendor and staff data
+        vendor.status = 'deleted';
+        vendor.isActive = false;
+        vendor.isDeleted = true;
+        vendor.shopName = `[Deleted] ${vendor.shopName}`;
+        await vendor.save();
+
+        const staffUsers = await User.find({ _id: { $in: staffUserIds } });
+        for (const su of staffUsers) {
+          su.isDeleted = true;
+          su.phone = `DEL_${timestamp}_${su.phone}`;
+          su.name = `[Deleted] ${su.name || 'Staff'}`;
+          await su.save();
+        }
+
         await Promise.all([
-          Vendor.deleteOne({ _id: vendor._id }),
-          User.deleteMany({ _id: { $in: staffUserIds } }),
-          Staff.deleteMany({ vendorId: vendor._id }),
-          StaffAvailability.deleteMany({ staffId: { $in: staffIds } }),
-          StaffClosure.deleteMany({ staffId: { $in: staffIds } }),
-          SlotLock.deleteMany({ vendorId: vendor._id }),
-          Service.deleteMany({ vendorId: vendor._id }),
-          Offer.deleteMany({ vendorId: vendor._id }),
-          Booking.deleteMany({ vendorId: vendor._id }),
-          Review.deleteMany({ vendorId: vendor._id }),
-          WalletTransaction.deleteMany({ vendorId: vendor._id })
+          Staff.updateMany({ vendorId: vendor._id }, { isActive: false }),
+          Service.updateMany({ vendorId: vendor._id }, { isActive: false }),
+          SlotLock.deleteMany({ vendorId: vendor._id }) // Slot locks can be hard deleted
         ]);
-        console.log(`[Cleanup] Full vendor data purged for user ${userId}`);
+        console.log(`[Cleanup] Full vendor data soft-deleted for user ${userId}`);
       }
     }
 
-    // 2. Remove user-specific data (regardless of role)
-    await Promise.all([
-      Booking.deleteMany({ userId: userId }),
-      Review.deleteMany({ userId: userId }),
-      Notification.deleteMany({ userId: userId }),
-      User.findByIdAndDelete(userId)
-    ]);
+    // 2. Soft delete user-specific data
+    user.isDeleted = true;
+    user.phone = `DEL_${timestamp}_${user.phone}`;
+    user.name = `[Deleted] ${user.name || 'User'}`;
+    await user.save();
     
     res.status(200).json({ message: 'Account and all associated data deleted successfully' });
   } catch (error) {

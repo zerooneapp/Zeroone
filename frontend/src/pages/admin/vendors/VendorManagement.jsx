@@ -35,15 +35,18 @@ const VendorManagement = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchVendors = useCallback(async () => {
+  const fetchVendors = useCallback(async (isRefresh = false) => {
     try {
-      // Zero-Latency: Only show loading if we have no data yet
-      if (vendors.length === 0) setLoading(true);
-      
+      if (vendors.length === 0 || isRefresh === true) setLoading(true);
+
       const params = { ...filters, page, limit: 10 };
       Object.keys(params).forEach((key) => !params[key] && delete params[key]);
 
-      const res = await api.get('/admin/vendors', { params });
+      const [res] = await Promise.all([
+        api.get('/admin/vendors', { params }),
+        isRefresh === true ? new Promise(r => setTimeout(r, 600)) : Promise.resolve()
+      ]);
+
       setVendors(res.data.vendors || []);
       setTotalPages(res.data.totalPages || 1);
       setMinimumWalletThreshold(res.data.minimumWalletThreshold || 100);
@@ -53,12 +56,12 @@ const VendorManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters, page]);
+  }, [filters, page, vendors.length]);
 
   useEffect(() => {
-    const timer = setTimeout(fetchVendors, 300);
+    const timer = setTimeout(fetchVendors, filters.search ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [fetchVendors]);
+  }, [fetchVendors, filters.search]);
 
   // 🔄 Auto-Polling: Refresh list every 30 seconds for real-time status updates
   useEffect(() => {
@@ -130,17 +133,17 @@ const VendorManagement = () => {
         }
       } else if (action === 'delete') {
         if (!window.confirm('Are you absolutely sure you want to DELETE this partner? This will remove all their data, services, staff, and account from the database forever. This action CANNOT be undone.')) return;
-        
+
         // Smooth Optimistic Update: Remove from UI immediately
         setVendors(prev => prev.filter(v => v._id !== vendorId));
         setIsDrawerOpen(false);
-        
+
         await api.delete(`/admin/vendors/${vendorId}`);
         message = 'Partner deleted successfully';
       }
 
       toast.success(message);
-      
+
       // Only refetch if it wasn't a delete (since delete is already handled optimistically)
       if (action !== 'delete') {
         await fetchVendors();
@@ -164,7 +167,7 @@ const VendorManagement = () => {
     };
 
     return (
-      <span className={cn('text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter', styles[level] || styles.basic)}>
+      <span className={cn('text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter w-fit', styles[level] || styles.basic)}>
         {level}
       </span>
     );
@@ -205,7 +208,7 @@ const VendorManagement = () => {
             <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Manage your elite merchant network</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={fetchVendors} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all">
+            <button onClick={() => fetchVendors(true)} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all hover:text-primary dark:hover:text-white">
               <RefreshCw size={18} strokeWidth={3} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
@@ -236,33 +239,34 @@ const VendorManagement = () => {
             return (
               <div key={field} className="relative group">
                 <select
-                className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
-                value={filters[field]}
-                onChange={(e) => {
-                  setPage(1);
-                  setFilters((prev) => ({ ...prev, [field]: e.target.value }));
-                }}
-              >
-                <option value="">{labels[field]}</option>
-                {field === 'status' && ['pending', 'active', 'inactive', 'blocked', 'rejected'].map((option) => (
-                  <option key={option} value={option}>{option === 'active' ? 'APPROVED' : option.toUpperCase()}</option>
-                ))}
-                {field === 'serviceLevel' && ['standard', 'premium', 'luxury'].map((option) => (
-                  <option key={option} value={option}>{option.toUpperCase()}</option>
-                ))}
-                {field === 'planType' && ['daily', 'monthly', 'trial'].map((option) => (
-                  <option key={option} value={option}>{option.toUpperCase()}</option>
-                ))}
-                {field === 'isActive' && (
-                  <>
-                    <option value="true">VISIBLE</option>
-                    <option value="false">HIDDEN</option>
-                  </>
-                )}
-              </select>
-              <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
-            </div>
-          )})}
+                  className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
+                  value={filters[field]}
+                  onChange={(e) => {
+                    setPage(1);
+                    setFilters((prev) => ({ ...prev, [field]: e.target.value }));
+                  }}
+                >
+                  <option value="">{labels[field]}</option>
+                  {field === 'status' && ['pending', 'active', 'inactive', 'blocked', 'rejected'].map((option) => (
+                    <option key={option} value={option}>{option === 'active' ? 'APPROVED' : option.toUpperCase()}</option>
+                  ))}
+                  {field === 'serviceLevel' && ['standard', 'premium', 'luxury'].map((option) => (
+                    <option key={option} value={option}>{option.toUpperCase()}</option>
+                  ))}
+                  {field === 'planType' && ['daily', 'monthly', 'trial'].map((option) => (
+                    <option key={option} value={option}>{option.toUpperCase()}</option>
+                  ))}
+                  {field === 'isActive' && (
+                    <>
+                      <option value="true">VISIBLE</option>
+                      <option value="false">HIDDEN</option>
+                    </>
+                  )}
+                </select>
+                <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -288,7 +292,7 @@ const VendorManagement = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ 
+                  transition={{
                     duration: 0.2,
                     layout: { type: "spring", damping: 25, stiffness: 300 }
                   }}
@@ -308,7 +312,13 @@ const VendorManagement = () => {
                         )}
                       </div>
                       <div className="leading-tight">
-                        <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary dark:group-hover:text-white transition-colors">{vendor.shopName}</h4>
+                        <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary dark:group-hover:text-white transition-colors">
+                          {vendor.shopName?.startsWith('[Deleted]') ? (
+                            <><span className="text-red-500">[Deleted]</span>{vendor.shopName.substring(9)}</>
+                          ) : (
+                            vendor.shopName
+                          )}
+                        </h4>
                         <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest flex items-center gap-1 mt-1">
                           <MapPin size={10} strokeWidth={3} /> {vendor.address?.split(',')[0] || 'N/A'}
                         </p>
@@ -416,9 +426,9 @@ const VendorManagement = () => {
                     <div className="absolute -inset-1 bg-gradient-to-tr from-primary to-blue-400 rounded-2xl opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
                     <div className="relative w-14 h-14 bg-slate-900 dark:bg-gray-800 text-white rounded-2xl flex items-center justify-center font-black text-[24px] shadow-2xl border border-white/10 shrink-0 overflow-hidden">
                       {selectedVendor.featuredImage || selectedVendor.shopImage ? (
-                         <img src={selectedVendor.featuredImage || selectedVendor.shopImage} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
+                        <img src={selectedVendor.featuredImage || selectedVendor.shopImage} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
                       ) : (
-                         selectedVendor.shopName.charAt(0)
+                        selectedVendor.shopName.charAt(0)
                       )}
                     </div>
                   </div>
@@ -463,8 +473,8 @@ const VendorManagement = () => {
 
                     <Section title="Performance" icon={TrendingUp}>
                       <div className="grid grid-cols-2 gap-3">
-                        <Stat label="Orders" value={selectedVendor.totalBookings || '0'} />
-                        <Stat label="Revenue" value={`Rs ${selectedVendor.totalEarnings || '0'}`} />
+                        <Stat label="Orders" value={vendorInsights?.allTime?.totalBookings ?? selectedVendor.totalBookings ?? '0'} />
+                        <Stat label="Revenue" value={`Rs ${vendorInsights?.allTime?.totalEarnings ?? selectedVendor.totalEarnings ?? '0'}`} />
                         <Stat label="Reach" value={selectedVendor.engagement?.profileViews || selectedVendor.profileViews || '0'} icon={Eye} />
                         <Stat label="CTR" value={selectedVendor.engagement?.serviceClicks || selectedVendor.serviceClicks || '0'} icon={MousePointer2} />
                       </div>
@@ -474,10 +484,10 @@ const VendorManagement = () => {
                   <div className="space-y-6">
                     <Section title="Financials" icon={CreditCard}>
                       <InfoItem label="Active Plan" value={selectedVendor.subscription?.type?.toUpperCase() || 'NONE'} />
-                      <InfoItem 
-                        label="Wallet Balance" 
-                        value={`Rs ${selectedVendor.walletBalance?.toFixed(2) || '0.00'}`} 
-                        highlight={selectedVendor.subscription?.type !== 'trial' && selectedVendor.walletBalance < minimumWalletThreshold} 
+                      <InfoItem
+                        label="Wallet Balance"
+                        value={`Rs ${selectedVendor.walletBalance?.toFixed(2) || '0.00'}`}
+                        highlight={selectedVendor.subscription?.type !== 'trial' && selectedVendor.walletBalance < minimumWalletThreshold}
                       />
                       <InfoItem
                         label="Free Trial Ends"
@@ -504,11 +514,11 @@ const VendorManagement = () => {
                       <div className="grid grid-cols-2 gap-2.5">
                         {selectedVendor.status === 'pending' && (
                           <>
-                            <ActionButton 
-                              onClick={() => handleAction(selectedVendor._id, 'approve')} 
-                              icon={CheckCircle} 
-                              label="Approve" 
-                              color="emerald" 
+                            <ActionButton
+                              onClick={() => handleAction(selectedVendor._id, 'approve')}
+                              icon={CheckCircle}
+                              label="Approve"
+                              color="emerald"
                               disabled={!selectedVendor.isProfileComplete}
                               tooltip={!selectedVendor.isProfileComplete ? 'Complete profile required' : ''}
                             />

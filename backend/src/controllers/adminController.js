@@ -847,8 +847,14 @@ const getVendors = async (req, res) => {
     const count = await Vendor.countDocuments(filter);
     const hydratedVendors = await Promise.all(vendors.map(async (v) => {
       const subscriptionState = await getVendorSubscriptionState(v);
+      const bookingStats = await Booking.aggregate([
+        { $match: { vendorId: v._id, status: 'completed' } },
+        { $group: { _id: null, totalBookings: { $sum: 1 }, totalEarnings: { $sum: '$totalPrice' } } }
+      ]);
       return {
         ...v._doc,
+        totalBookings: bookingStats[0]?.totalBookings || 0,
+        totalEarnings: bookingStats[0]?.totalEarnings || 0,
         subscription: {
           type: subscriptionState.currentPlan,
           isActive: subscriptionState.isActive
@@ -1025,7 +1031,7 @@ const getVendorInsights = async (req, res) => {
       ? moment.tz(to, 'YYYY-MM-DD', 'Asia/Kolkata').endOf('day')
       : now.clone().endOf('day');
 
-    const [bookings, completedBookingsData] = await Promise.all([
+    const [bookings, completedBookingsData, allTimeBookings] = await Promise.all([
       Booking.find({
         vendorId: vendor._id,
         startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
@@ -1039,7 +1045,11 @@ const getVendorInsights = async (req, res) => {
         vendorId: vendor._id,
         status: 'completed',
         startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
-      }).select('totalPrice')
+      }).select('totalPrice'),
+      Booking.aggregate([
+        { $match: { vendorId: vendor._id, status: 'completed' } },
+        { $group: { _id: null, count: { $sum: 1 }, totalRevenue: { $sum: '$totalPrice' } } }
+      ])
     ]);
 
     const totalRevenue = completedBookingsData.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
@@ -1047,11 +1057,18 @@ const getVendorInsights = async (req, res) => {
     const completedBookings = bookings.filter((booking) => booking.status === 'completed').length;
     const cancelledBookings = bookings.filter((booking) => booking.status === 'cancelled').length;
 
+    const allTimeBookingsCount = await Booking.countDocuments({ vendorId: vendor._id });
+    const allTimeEarnings = allTimeBookings.length > 0 ? allTimeBookings[0].totalRevenue : 0;
+
     res.status(200).json({
       vendor: {
         _id: vendor._id,
         shopName: vendor.shopName,
         ownerName: vendor.ownerId?.name || ''
+      },
+      allTime: {
+        totalBookings: allTimeBookingsCount,
+        totalEarnings: allTimeEarnings
       },
       range: {
         from: startDate.format('YYYY-MM-DD'),

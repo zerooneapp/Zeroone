@@ -73,9 +73,9 @@ const TransactionManagement = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchTransactions();
-    }, filters.search ? 250 : 0);
+    }, filters.search ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [filters, data.currentPage]);
+  }, [fetchTransactions, filters.search, data?.currentPage]);
 
   const setPage = (page) => {
     setData((previous) => ({

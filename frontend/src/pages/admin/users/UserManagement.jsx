@@ -29,7 +29,7 @@ const UserManagement = () => {
       try {
          // Zero-Latency: Only show loading if we have no data yet
          if (users.length === 0) setLoading(true);
-         
+
          const params = {
             ...filters,
             page,
@@ -49,9 +49,9 @@ const UserManagement = () => {
    }, [filters, page, users.length]);
 
    useEffect(() => {
-      const timer = setTimeout(fetchUsers, 300);
+      const timer = setTimeout(fetchUsers, filters.search ? 300 : 0);
       return () => clearTimeout(timer);
-   }, [fetchUsers]);
+   }, [fetchUsers, filters.search]);
 
    const handleToggleBlock = async (userId) => {
       if (actionLoadingId === userId) return;
@@ -109,128 +109,164 @@ const UserManagement = () => {
                      placeholder="Search by name or phone..."
                      className="w-full pl-10 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-300"
                      value={filters.search}
-                     onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                     onChange={(e) => { setFilters({ ...filters, search: e.target.value }); setPage(1); }}
                   />
                </div>
-                {['status'].map((f) => (
-                   <div key={f} className="relative group min-w-[120px]">
-                      <select
-                         className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
-                         value={filters[f]}
-                         onChange={(e) => setFilters({ ...filters, [f]: e.target.value })}
-                      >
-                         <option value="">{f.toUpperCase()} : ALL</option>
-                         <option value="active">ACTIVE</option>
-                         <option value="blocked">BLOCKED</option>
-                      </select>
-                      <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
-                   </div>
-                ))}
+               {['status'].map((f) => (
+                  <div key={f} className="relative group min-w-[120px]">
+                     <select
+                        className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
+                        value={filters[f]}
+                        onChange={(e) => { setFilters({ ...filters, [f]: e.target.value }); setPage(1); }}
+                     >
+                        <option value="">{f.toUpperCase()} : ALL</option>
+                        <option value="active">ACTIVE</option>
+                        <option value="blocked">BLOCKED</option>
+                     </select>
+                     <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
+                  </div>
+               ))}
             </div>
          </div>
 
          {/* 📋 TABLE VIEW */}
-         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto no-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[900px]">
-               <thead>
-                  <tr className="bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
-                     <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">User Identity</th>
-                     <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Contact</th>
-                     <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-center">Bookings</th>
-                     <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Joined Date</th>
-                     <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Status</th>
-                     <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-right">Actions</th>
-                  </tr>
-               </thead>
-               <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
-                  <AnimatePresence mode='popLayout' initial={false}>
-                     {users.map((user) => (
-                        <motion.tr
-                           key={user._id}
-                           layout
-                           initial={{ opacity: 0, y: 10 }}
-                           animate={{ opacity: 1, y: 0 }}
-                           exit={{ opacity: 0, scale: 0.95 }}
-                           transition={{ 
-                              duration: 0.2,
-                              layout: { type: "spring", damping: 25, stiffness: 300 }
-                           }}
-                           className="group hover:bg-slate-50/80 dark:hover:bg-gray-800/80 transition-all cursor-pointer"
-                        >
-                           <td className="px-6 py-3.5">
-                              <div className="flex items-center gap-3.5">
-                                 <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-[15px] shadow-lg border border-white/10 shrink-0 overflow-hidden">
-                                    {user.image ? (
-                                       <img src={user.image} className="w-full h-full object-cover" alt="" />
-                                    ) : (
-                                       user.name?.charAt(0) || 'U'
-                                    )}
+         {loading && users.length === 0 ? (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm p-20 flex flex-col items-center justify-center space-y-4 min-h-[400px]">
+               <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+               <p className="font-black text-slate-400 capitalize tracking-widest text-[12px]">Loading Users...</p>
+            </div>
+         ) : (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto no-scrollbar">
+               <table className="w-full text-left border-collapse min-w-[900px]">
+                  <thead>
+                     <tr className="bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
+                        <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">User Identity</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Contact</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-center">Bookings</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Joined Date</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Status</th>
+                        <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-right">Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
+                     <AnimatePresence mode='popLayout' initial={false}>
+                        {users.map((user) => (
+                           <motion.tr
+                              key={user._id}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              transition={{
+                                 duration: 0.2,
+                                 layout: { type: "spring", damping: 25, stiffness: 300 }
+                              }}
+                              className="group hover:bg-slate-50/80 dark:hover:bg-gray-800/80 transition-all cursor-pointer"
+                           >
+                              <td className="px-6 py-3.5">
+                                 <div className="flex items-center gap-3.5">
+                                    <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-[15px] shadow-lg border border-white/10 shrink-0 overflow-hidden">
+                                       {user.image ? (
+                                          <img src={user.image} className="w-full h-full object-cover" alt="" />
+                                       ) : (
+                                          <User size={20} className="text-white/80" />
+                                       )}
+                                    </div>
+                                    <div className="leading-tight">
+                                       <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary dark:group-hover:text-white transition-colors">
+                                          {user.name?.startsWith('[Deleted]') ? (
+                                             <><span className="text-red-500">[Deleted]</span>{user.name.substring(9)}</>
+                                          ) : (
+                                             user.name
+                                          )}
+                                       </h4>
+                                       <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-0.5 opacity-60">Customer</p>
+                                    </div>
                                  </div>
-                                 <div className="leading-tight">
-                                    <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary dark:group-hover:text-white transition-colors">{user.name}</h4>
-                                    <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-0.5 opacity-60">Customer</p>
+                              </td>
+                              <td className="px-4 py-3.5 text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tight opacity-80">
+                                 {user.phone}
+                              </td>
+                              <td className="px-4 py-3.5 text-center">
+                                 <span className="px-2.5 py-1 bg-slate-50 dark:bg-gray-800 rounded-lg text-[12px] font-black text-slate-900 dark:text-white border border-slate-100 dark:border-gray-700 shadow-sm">
+                                    {user.bookingCount || 0}
+                                 </span>
+                              </td>
+                              <td className="px-4 py-3.5 text-[12px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tighter opacity-80">
+                                 {new Date(user.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </td>
+                              <td className="px-4 py-3.5 leading-none">
+                                 <span className={cn(
+                                    "text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter",
+                                    user.isBlocked ? "bg-red-50 text-red-500 border-red-100/50" : "bg-emerald-50 text-emerald-500 border-emerald-100/50"
+                                 )}>
+                                    {user.isBlocked ? 'Blocked' : 'Active'}
+                                 </span>
+                              </td>
+                              <td className="px-6 py-3.5 text-right">
+                                 <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                       onClick={() => navigate(`/admin/users/${user._id}`)}
+                                       className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700"
+                                       title="View Details"
+                                    >
+                                       <Eye size={18} strokeWidth={3} />
+                                    </button>
+                                    <button
+                                       onClick={() => handleToggleBlock(user._id)}
+                                       disabled={actionLoadingId === user._id}
+                                       className={cn(
+                                          "w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 border shadow-sm",
+                                          actionLoadingId === user._id && "opacity-50 animate-pulse",
+                                          user.isBlocked
+                                             ? "bg-emerald-50 text-emerald-500 border-emerald-100/50"
+                                             : "bg-red-50 text-red-500 border-red-100/50"
+                                       )}
+                                       title={user.isBlocked ? "Unblock User" : "Block User"}
+                                    >
+                                       <Ban size={18} strokeWidth={3} />
+                                    </button>
                                  </div>
-                              </div>
-                           </td>
-                           <td className="px-4 py-3.5 text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tight opacity-80">
-                              {user.phone}
-                           </td>
-                           <td className="px-4 py-3.5 text-center">
-                              <span className="px-2.5 py-1 bg-slate-50 dark:bg-gray-800 rounded-lg text-[12px] font-black text-slate-900 dark:text-white border border-slate-100 dark:border-gray-700 shadow-sm">
-                                 {user.bookingCount || 0}
-                              </span>
-                           </td>
-                           <td className="px-4 py-3.5 text-[12px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tighter opacity-80">
-                              {new Date(user.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                           </td>
-                           <td className="px-4 py-3.5 leading-none">
-                              <span className={cn(
-                                 "text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter",
-                                 user.isBlocked ? "bg-red-50 text-red-500 border-red-100/50" : "bg-emerald-50 text-emerald-500 border-emerald-100/50"
-                              )}>
-                                 {user.isBlocked ? 'Blocked' : 'Active'}
-                              </span>
-                           </td>
-                           <td className="px-6 py-3.5 text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                 <button
-                                    onClick={() => navigate(`/admin/users/${user._id}`)}
-                                    className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700"
-                                    title="View Details"
-                                 >
-                                    <Eye size={18} strokeWidth={3} />
-                                 </button>
-                                 <button
-                                    onClick={() => handleToggleBlock(user._id)}
-                                    disabled={actionLoadingId === user._id}
-                                    className={cn(
-                                       "w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 border shadow-sm",
-                                       actionLoadingId === user._id && "opacity-50 animate-pulse",
-                                       user.isBlocked
-                                          ? "bg-emerald-50 text-emerald-500 border-emerald-100/50"
-                                          : "bg-red-50 text-red-500 border-red-100/50"
-                                    )}
-                                    title={user.isBlocked ? "Unblock User" : "Block User"}
-                                 >
-                                    <Ban size={18} strokeWidth={3} />
-                                 </button>
-                              </div>
-                           </td>
-                        </motion.tr>
-                     ))}
-                  </AnimatePresence>
-               </tbody>
-            </table>
+                              </td>
+                           </motion.tr>
+                        ))}
+                     </AnimatePresence>
+                  </tbody>
+               </table>
 
-            {!loading && users.length === 0 && (
-               <div className="p-20 text-center space-y-4">
-                  <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 dark:text-slate-700 border border-slate-100 dark:border-gray-700">
-                     <User size={32} strokeWidth={3} />
+               {!loading && users.length === 0 && (
+                  <div className="p-20 text-center space-y-4">
+                     <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 dark:text-slate-700 border border-slate-100 dark:border-gray-700">
+                        <User size={32} strokeWidth={3} />
+                     </div>
+                     <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[12px]">No users found</p>
                   </div>
-                  <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[12px]">No users found</p>
-               </div>
-            )}
-         </div>
+               )}
+
+               {/* ⚡ PAGINATION */}
+               {totalPages > 1 && (
+                  <div className="p-4 border-t border-slate-100 dark:border-gray-800 flex items-center justify-between bg-slate-50/50 dark:bg-gray-900/50">
+                     <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest opacity-60">Page {page} of {totalPages}</p>
+                     <div className="flex items-center gap-2">
+                        <button
+                           onClick={() => setPage(p => Math.max(1, p - 1))}
+                           disabled={page === 1}
+                           className="px-4 h-9 rounded-xl bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-[11px] font-black text-slate-500 capitalize tracking-widest active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:text-primary transition-all shadow-sm"
+                        >
+                           Previous
+                        </button>
+                        <button
+                           onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                           disabled={page === totalPages}
+                           className="px-4 h-9 rounded-xl bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-[11px] font-black text-slate-500 capitalize tracking-widest active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:text-primary transition-all shadow-sm"
+                        >
+                           Next
+                        </button>
+                     </div>
+                  </div>
+               )}
+            </div>
+         )}
 
       </div>
    );

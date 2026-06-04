@@ -59,9 +59,9 @@ const BookingManagement = () => {
   }, [filters]);
 
   useEffect(() => {
-    const timer = setTimeout(fetchBookings, 300);
+    const timer = setTimeout(fetchBookings, filters.search ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [fetchBookings]);
+  }, [fetchBookings, filters.search]);
 
   const handleForceCancel = async (id) => {
     if (actionLoadingId === id) return;
