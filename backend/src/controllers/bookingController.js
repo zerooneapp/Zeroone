@@ -76,8 +76,7 @@ const createBooking = async (req, res) => {
     // If staffId not provided, recover it from the SlotLock (Atomic resource allocation)
     if (!staffId) {
       const SlotLock = require('../models/SlotLock');
-      const { normalizeToGrid } = require('../services/slotService');
-      const normalizedStart = normalizeToGrid(startTime);
+      const normalizedStart = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
       const lock = await SlotLock.findOne({ userId: req.user._id, vendorId, startTime: normalizedStart.toDate() });
       if (lock) staffId = lock.staffId;
     }

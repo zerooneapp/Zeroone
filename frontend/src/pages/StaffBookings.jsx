@@ -5,7 +5,7 @@ import {
   Lock, ArrowLeft, MapPin
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,11 +17,21 @@ import GlassConfirmationModal from '../components/GlassConfirmationModal';
 const StaffBookings = () => {
    const { user, myBookings, fetchMyBookings } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialTab = location.state?.tab || 'upcoming';
   const [bookings, setBookings] = useState(myBookings || []);
   const [loading, setLoading] = useState(!myBookings);
-  const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed
-  const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
-  const [endDate, setEndDate] = useState(dayjs().add(30, 'day').format('YYYY-MM-DD'));
+  const [activeTab, setActiveTab] = useState(initialTab); // upcoming, completed
+  const [startDate, setStartDate] = useState(
+    initialTab === 'completed'
+      ? dayjs().subtract(30, 'day').format('YYYY-MM-DD')
+      : dayjs().format('YYYY-MM-DD')
+  );
+  const [endDate, setEndDate] = useState(
+    initialTab === 'completed'
+      ? dayjs().format('YYYY-MM-DD')
+      : dayjs().add(30, 'day').format('YYYY-MM-DD')
+  );
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);

@@ -5,6 +5,7 @@ import {
    RefreshCw, Phone, Sun, Moon, Bell,
    Lock, Play, LogOut, MapPin, CalendarPlus
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -17,6 +18,7 @@ import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import StaffCreateBookingModal from '../components/StaffCreateBookingModal';
 
 const StaffDashboard = () => {
+   const navigate = useNavigate();
    const { user, logout, myBookings, fetchMyBookings, fetchStaffProfile } = useAuthStore();
    const { unreadCount, fetchNotifications } = useNotificationStore();
    useSocket(user?._id);
@@ -137,13 +139,19 @@ const StaffDashboard = () => {
          <main className="p-4 space-y-3.5 pt-[100px]">
             {/* 📊 COMPACT STATS GRID */}
             <div className="grid grid-cols-2 gap-2.5">
-               <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
+               <div 
+                  onClick={() => navigate('/staff/bookings', { state: { tab: 'completed' } })}
+                  className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+               >
                   <p className="text-[16px] font-black text-slate-900 dark:text-white leading-none">{todayCompleted}</p>
                   <div className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Today Done
                   </div>
                </div>
-               <div className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
+               <div 
+                  onClick={() => navigate('/staff/bookings', { state: { tab: 'upcoming' } })}
+                  className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+               >
                   <p className="text-[16px] font-black text-slate-900 dark:text-white leading-none">
                      {activeBookings.length}
                   </p>

@@ -87,8 +87,7 @@ const buildSlotConflictError = async (message, vendorId, serviceIds, start) => {
 };
 
 const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress) => {
-  const { normalizeToGrid } = require('./slotService');
-  const start = normalizeToGrid(startTime);
+  const start = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
 
   // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
   const vendor = await Vendor.findById(vendorId);
@@ -574,8 +573,7 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
 };
 
 const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, newStaffId, newServiceAddress, actorStaffId = null) => {
-  const { normalizeToGrid } = require('./slotService');
-  const start = normalizeToGrid(newStartTime);
+  const start = moment(newStartTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
 
   const booking = await Booking.findById(bookingId).populate('vendorId');
   if (!booking) throw new Error('Booking not found');

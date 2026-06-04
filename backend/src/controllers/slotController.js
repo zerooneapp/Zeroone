@@ -70,7 +70,7 @@ const lockSlot = async (req, res) => {
     }
     const realDuration = serviceDetails.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
 
-    const normalizedStart = normalizeToGrid(startTime);
+    const normalizedStart = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
     const end = normalizedStart.clone().add(realDuration, 'minutes');
 
     // 1. User Restriction: One active lock per user per vendor (CLEAR BEFORE CHECKING)

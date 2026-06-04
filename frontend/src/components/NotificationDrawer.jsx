@@ -99,7 +99,7 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                     onClick={() => !n.isRead && markAsRead(n._id)}
                   >
                     {!n.isRead && (
-                      <div className="absolute top-4 right-4 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" />
+                      <div className="absolute top-4 right-4 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse transition-all group-hover:opacity-0" />
                     )}
                     <div className="flex gap-3">
                       <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center justify-center shrink-0">
