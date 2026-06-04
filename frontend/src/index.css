@@ -19,7 +19,7 @@
     -webkit-tap-highlight-color: transparent;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    caret-color: #00246b;
+    @apply caret-black dark:caret-white;
   }
 
   ::selection {
@@ -28,7 +28,7 @@
   }
 
   input, textarea {
-    caret-color: #00246b;
+    @apply caret-black dark:caret-white;
   }
 
   /* Fix for autofill white background issue */

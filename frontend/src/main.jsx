@@ -22,9 +22,15 @@ api.get('/categories')
   })
   .catch(err => console.warn('[Prefetch] Categories failed', err.message));
 
-// Start prefetching bookings and memberships if user is logged in
+// Start prefetching bookings and memberships if user is fully logged in
 const token = localStorage.getItem('token');
-if (token) {
+let isAuthenticated = false;
+try {
+  const authState = JSON.parse(localStorage.getItem('auth-storage'));
+  isAuthenticated = authState?.state?.isAuthenticated;
+} catch (e) {}
+
+if (token && isAuthenticated) {
   api.get('/bookings/my')
     .then(res => {
       window.__PREFETCHED_DATA__.bookings = res.data;

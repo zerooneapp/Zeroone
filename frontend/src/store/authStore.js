@@ -186,7 +186,7 @@ export const useAuthStore = create(
             isAuthenticated: true
           });
 
-          if (res.data.role === 'vendor') {
+          if (res.data.role === 'vendor' && res.data.status !== undefined) {
             get().syncVendorStatus();
           }
         } catch (err) {

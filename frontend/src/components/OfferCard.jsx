@@ -16,8 +16,8 @@ const OfferCard = ({ offer, onToggle, onEdit }) => {
       <div className="flex items-center justify-between">
          <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 ${
            offer.discountType === 'percentage' 
-           ? 'bg-[#00246b]/10 text-[#00246b]' 
-           : 'bg-green-500/10 text-green-600'
+           ? 'bg-[#00246b]/10 text-black dark:text-white' 
+           : 'bg-green-500/10 text-green-600 dark:text-green-400'
          }`}>
             {offer.discountType === 'percentage' ? <Percent size={12} /> : <IndianRupee size={12} />}
             <span className="font-black text-xs uppercase tracking-tight">

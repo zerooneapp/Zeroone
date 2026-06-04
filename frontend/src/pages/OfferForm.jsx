@@ -143,7 +143,10 @@ const OfferForm = () => {
                      type="text" 
                      placeholder="e.g. Summer Special"
                      value={formData.title}
-                     onChange={(e) => setFormData({...formData, title: e.target.value})}
+                     onChange={(e) => {
+                        const val = e.target.value.replace(/[^a-zA-Z0-9\s]/g, '');
+                        setFormData({...formData, title: val});
+                     }}
                      className="w-full p-2.5 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 font-bold focus:ring-2 focus:ring-primary/20 transition-all text-sm"
                    />
                 </div>
@@ -190,6 +193,7 @@ const OfferForm = () => {
                        <input 
                          required
                          type="date" 
+                         min={new Date().toISOString().split('T')[0]}
                          value={formData.expiryDate}
                          onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
                          className="w-full p-2.5 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 font-bold text-sm"
