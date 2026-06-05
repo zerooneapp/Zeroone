@@ -11,7 +11,7 @@ const {
   getVendorInsights, getUserDetail, getBookingDetail, adminCancelBooking,
   updateCategory, deleteCategory, getSubscriptionPlans,
   getGlobalSettings, updateGlobalSettings, broadcastNotification,
-  getStaffLiveReport, deleteVendor
+  getStaffLiveReport, deleteVendor, getAllStaff, toggleBlockStaff
 } = require('../controllers/adminController');
 const { getAdminTransactions } = require('../controllers/transactionController');
 const {
@@ -54,11 +54,15 @@ router.post('/reviews/approve-all', approveAllReviews);
 router.post('/reviews/:id/approve', approveReview);
 router.delete('/reviews/:id', deleteReview);
 
-// User & Booking Management
+// User, Staff & Booking Management
 router.get('/users', getAllUsers);
 router.get('/users/:id', getUserDetail);
 router.patch('/users/:id/block', toggleBlockUser);
 router.get('/users/:userId/bookings', getUserBookings);
+
+router.get('/staff', getAllStaff);
+router.patch('/staff/:id/block', toggleBlockStaff);
+
 router.get('/bookings', getFilteredBookings);
 router.get('/bookings/:id', getBookingDetail);
 router.patch('/bookings/:id/cancel', adminCancelBooking);

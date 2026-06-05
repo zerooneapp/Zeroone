@@ -16,7 +16,7 @@ const WalletTransaction = require('../models/WalletTransaction');
 const moment = require('moment-timezone');
 const NotificationService = require('../services/notificationService');
 
-const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
+const getStaffNotificationTarget = (staff) => staff?._id || null;
 
 const rejectHomeServicePartnerStaffAccess = (req, res) => {
   if (req.vendor && (req.vendor.serviceMode || 'shop') === 'home') {

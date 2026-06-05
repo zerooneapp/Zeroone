@@ -28,6 +28,7 @@ const AdminLayout = () => {
     { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Partners", path: "/admin/vendors", icon: Store },
     { name: "Users", path: "/admin/users", icon: Users },
+    { name: "Staff", path: "/admin/staff", icon: Shield },
     { name: "Bookings", path: "/admin/bookings", icon: CalendarRange },
     { name: "Categories", path: "/admin/categories", icon: Tag },
     { name: "Plans", path: "/admin/plans", icon: CreditCard },

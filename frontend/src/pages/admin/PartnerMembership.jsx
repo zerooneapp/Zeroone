@@ -30,21 +30,40 @@ const PartnerMembership = () => {
     fetchSettings();
   }, []);
 
-  const handleToggle = (field) => {
-    setSettings(prev => ({
-      ...prev,
-      features: {
-        ...prev.features,
-        [field]: !prev.features[field]
-      }
-    }));
+  const handleToggle = async (field) => {
+    // Optimistic update
+    let newSettings;
+    setSettings(prev => {
+      const currentVal = prev?.features?.[field] ?? true;
+      newSettings = {
+        ...prev,
+        features: {
+          ...(prev?.features || {}),
+          [field]: !currentVal
+        }
+      };
+      return newSettings;
+    });
+
+    try {
+      // Auto-save
+      setSaving(true);
+      await api.patch('/admin/settings', newSettings);
+      toast.success('Membership system status updated! ✨');
+    } catch (err) {
+      toast.error('Failed to update settings');
+      // Revert optimistic update
+      fetchSettings();
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
       await api.patch('/admin/settings', settings);
-      toast.success('Membership system status updated! ✨');
+      toast.success('Settings synchronized! ✨');
     } catch (err) {
       toast.error('Failed to update settings');
     } finally {
@@ -52,7 +71,7 @@ const PartnerMembership = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !settings) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <RefreshCw className="w-8 h-8 text-primary animate-spin" />

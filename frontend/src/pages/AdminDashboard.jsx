@@ -119,7 +119,7 @@ const AdminDashboard = () => {
   const trends = {
     dailyRev: getTrendData(data.todayRevenue, data.yesterdayRevenue),
     newVendors: getTrendData(data.newVendors, data.yesterdayNewVendors),
-    activeBookings: getTrendData(data.activeBookings, data.yesterdayActiveBookings),
+    totalBookings: getTrendData(data.totalBookings, data.yesterdayTotalBookings),
     totalUsers: getTrendData(data.totalUsers, data.yesterdayTotalUsers),
     totalPartners: getTrendData(data.totalPartners, data.yesterdayTotalPartners),
     totalRev: getTrendData(data.totalRevenue, data.yesterdayTotalRevenue)
@@ -147,11 +147,11 @@ const AdminDashboard = () => {
       path: '/admin/vendors'
     },
     {
-      label: 'Active Bookings',
-      value: data.activeBookings || 0,
-      trend: trends.activeBookings.formatted,
-      trendUp: trends.activeBookings.isUp,
-      sub: trends.activeBookings.text,
+      label: 'Total Bookings',
+      value: data.totalBookings || 0,
+      trend: trends.totalBookings.formatted,
+      trendUp: trends.totalBookings.isUp,
+      sub: trends.totalBookings.text,
       iconSrc: calendarIcon,
       color: 'emerald',
       path: '/admin/bookings'
