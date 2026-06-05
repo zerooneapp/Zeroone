@@ -175,8 +175,9 @@ const calculatePricingPreview = async (vendorId, services, userId = null) => {
       isFreeViaMembership = true;
       entitlement.remaining -= 1; // Decrement for current session calculation
     } else {
-      // Otherwise apply best offer
-      discount = roundCurrency(serviceDiscountMap[serviceId] || 0);
+      // Otherwise apply best offer for this service individually
+      const bestOfferForOne = getBestOfferForServices([service], offers);
+      discount = bestOfferForOne ? roundCurrency(bestOfferForOne.discount) : 0;
     }
 
     const finalPrice = roundCurrency(Math.max(service.price - discount, 0));

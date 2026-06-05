@@ -116,7 +116,7 @@ const CategoryManagement = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm">
         <div>
           <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Catalog Mastery</h1>
-          <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Manage global service classifications</p>
+          <p className="text-[11px] font-black text-slate-500 capitalize tracking-[0.2em] mt-1 opacity-90">Manage global service classifications</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -148,19 +148,19 @@ const CategoryManagement = () => {
                   cat.isActive ? "bg-emerald-500 shadow-lg shadow-emerald-500/20" : "bg-slate-200"
                 )} />
 
-                <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4 text-slate-400 group-hover:text-primary dark:group-hover:text-white group-hover:bg-slate-900 dark:group-hover:bg-gray-800 transition-all border border-slate-100 dark:border-gray-800 shadow-inner">
+                <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4 text-slate-500 group-hover:text-primary dark:group-hover:text-white group-hover:bg-slate-900 dark:group-hover:bg-gray-800 transition-all border border-slate-100 dark:border-gray-800 shadow-inner">
                   <ImageWithFallback src={cat.image} alt={cat.name} />
                 </div>
 
                 <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight mb-1 truncate group-hover:text-primary dark:group-hover:text-white transition-colors">{cat.name}</h3>
-                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 capitalize tracking-widest line-clamp-2 leading-[1.4] h-8 opacity-60 group-hover:opacity-100 dark:group-hover:text-white/80 transition-all">
+                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-500 capitalize tracking-widest line-clamp-2 leading-[1.4] h-8 opacity-90 group-hover:opacity-100 dark:group-hover:text-white/80 transition-all">
                   {cat.description || "No description provided"}
                 </p>
 
                 <div className="mt-4 flex items-center gap-2 pt-4 border-t border-slate-50 dark:border-gray-800">
                   <button
                     onClick={() => handleOpenModal(cat)}
-                    className="flex-1 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-400 hover:text-primary transition-all flex items-center justify-center border border-slate-100 dark:border-gray-700 active:scale-90"
+                    className="flex-1 h-9 bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-500 hover:text-primary transition-all flex items-center justify-center border border-slate-100 dark:border-gray-700 active:scale-90"
                   >
                     <Edit2 size={16} strokeWidth={3} />
                   </button>
@@ -179,10 +179,10 @@ const CategoryManagement = () => {
 
       {!loading && categories.length === 0 && (
         <div className="p-20 text-center space-y-4 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-slate-200 dark:border-gray-800 animate-in zoom-in duration-500 shadow-sm">
-          <div className="w-20 h-20 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto text-slate-200 dark:text-gray-700 border border-slate-100 dark:border-gray-800">
+          <div className="w-20 h-20 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto text-slate-300 dark:text-gray-700 border border-slate-100 dark:border-gray-800">
             <Tag size={40} strokeWidth={3} />
           </div>
-          <p className="font-black text-slate-400 dark:text-gray-600 capitalize tracking-widest text-[12px] opacity-60">
+          <p className="font-black text-slate-500 dark:text-gray-600 capitalize tracking-widest text-[12px] opacity-90">
             No classifications defined — create one to start mapping
           </p>
         </div>
@@ -209,37 +209,37 @@ const CategoryManagement = () => {
                 <h2 className="text-[20px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
                   {editingCategory ? "Update Master Class" : "Define New Class"}
                 </h2>
-                <button onClick={() => setIsModalOpen(false)} className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-400 hover:text-red-500 transition-all border border-slate-100 shadow-sm">
+                <button onClick={() => setIsModalOpen(false)} className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-500 hover:text-red-500 transition-all border border-slate-100 shadow-sm">
                   <X size={20} strokeWidth={3} />
                 </button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5 leading-none">
-                  <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Classification Name</label>
+                  <label className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1 opacity-90">Classification Name</label>
                   <input
                     type="text"
                     required
-                    className="w-full px-4 h-11 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-gray-500"
+                    className="w-full px-4 h-11 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all placeholder:text-slate-500 dark:placeholder:text-gray-500"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. LUXURY SPA"
                   />
                 </div>
                 <div className="space-y-1.5 leading-none">
-                  <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Metadata Details</label>
+                  <label className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1 opacity-90">Metadata Details</label>
                   <textarea
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all h-24 resize-none no-scrollbar placeholder:text-slate-400 dark:placeholder:text-gray-500"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all h-24 resize-none no-scrollbar placeholder:text-slate-500 dark:placeholder:text-gray-500"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Classification details..."
                   />
                 </div>
                 <div className="space-y-1.5 leading-none">
-                  <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Visual Icon Link</label>
+                  <label className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1 opacity-90">Visual Icon Link</label>
                   <input
                     type="text"
-                    className="w-full px-4 h-11 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[13px] font-black focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-gray-500"
+                    className="w-full px-4 h-11 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[13px] font-black focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all placeholder:text-slate-500 dark:placeholder:text-gray-500"
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                     placeholder="https://..."
@@ -247,7 +247,7 @@ const CategoryManagement = () => {
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-gray-800/40 rounded-xl mt-2 border border-slate-100 dark:border-gray-700 shadow-inner">
-                  <span className="text-[10px] font-black text-slate-400 capitalize tracking-widest opacity-60">Global Linkage</span>
+                  <span className="text-[10px] font-black text-slate-500 capitalize tracking-widest opacity-90">Global Linkage</span>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
@@ -295,14 +295,14 @@ const CategoryManagement = () => {
               </div>
               <div>
                 <h3 className="text-[20px] font-black text-slate-900 dark:text-white capitalize tracking-tighter leading-none">Security Override</h3>
-                <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-2 px-2 leading-relaxed opacity-60">
+                <p className="text-[11px] font-black text-slate-500 capitalize tracking-widest mt-2 px-2 leading-relaxed opacity-90">
                   Deleting this classification may disrupt active platform services. Execute with caution.
                 </p>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setConfirmData({ open: false, id: null })}
-                  className="flex-1 h-11 bg-slate-50 dark:bg-gray-800 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+                  className="flex-1 h-11 bg-slate-50 dark:bg-gray-800 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
                 >
                   Abort
                 </button>

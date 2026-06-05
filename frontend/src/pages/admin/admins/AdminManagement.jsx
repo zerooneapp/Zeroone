@@ -99,7 +99,7 @@ const AdminManagement = () => {
   if (user?.role !== 'super_admin') {
     return (
       <div className="rounded-3xl border border-slate-200/60 dark:border-gray-800 bg-white dark:bg-gray-900 p-10 text-center">
-        <p className="text-sm font-black uppercase tracking-[0.18em] text-slate-400">Super Admin Access Required</p>
+        <p className="text-sm font-black uppercase tracking-[0.18em] text-slate-500">Super Admin Access Required</p>
       </div>
     );
   }
@@ -109,7 +109,7 @@ const AdminManagement = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Admin Access</h1>
-          <p className="mt-2 text-[12px] font-black uppercase tracking-[0.18em] text-slate-400">
+          <p className="mt-2 text-[12px] font-black uppercase tracking-[0.18em] text-slate-500">
             Create, block, and remove platform admins
           </p>
         </div>
@@ -120,7 +120,7 @@ const AdminManagement = () => {
             { label: 'Blocked', value: counts.blocked }
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-slate-200/60 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">{item.label}</p>
               <p className="mt-2 text-xl font-black text-slate-900 dark:text-white">{item.value}</p>
             </div>
           ))}
@@ -135,7 +135,7 @@ const AdminManagement = () => {
             </div>
             <div>
               <h2 className="text-lg font-black text-slate-900 dark:text-white">Create Admin</h2>
-              <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500">
                 New admins will get all admin powers except admin creation
               </p>
             </div>
@@ -170,7 +170,7 @@ const AdminManagement = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-2xl bg-slate-900 dark:bg-primary px-4 py-3 text-sm font-black uppercase tracking-[0.16em] text-white shadow-xl shadow-slate-900/10 active:scale-[0.98] transition-all disabled:opacity-60"
+              className="w-full rounded-2xl bg-slate-900 dark:bg-primary px-4 py-3 text-sm font-black uppercase tracking-[0.16em] text-white shadow-xl shadow-slate-900/10 active:scale-[0.98] transition-all disabled:opacity-90"
             >
               <span className="inline-flex items-center gap-2">
                 <Plus size={16} />
@@ -183,7 +183,7 @@ const AdminManagement = () => {
         <section className="rounded-3xl border border-slate-200/60 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 value={filters.search}
                 onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
@@ -209,7 +209,7 @@ const AdminManagement = () => {
               ))
             ) : admins.length === 0 ? (
               <div className="rounded-3xl border border-dashed border-slate-200 dark:border-gray-800 px-6 py-12 text-center">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">No admin accounts found</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">No admin accounts found</p>
               </div>
             ) : (
               admins.map((admin) => {
@@ -238,7 +238,7 @@ const AdminManagement = () => {
                             </span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
                           <span>{admin.phone}</span>
                           <span>{admin.email || 'No email added'}</span>
                           <span>{admin.isBlocked ? 'Blocked' : 'Active'}</span>

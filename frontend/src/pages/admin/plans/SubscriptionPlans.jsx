@@ -73,7 +73,7 @@ const SubscriptionPlans = () => {
       <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-primary/20">
         <div className="space-y-1">
           <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize leading-none">Pricing Hub</h1>
-          <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Platform Subscription Yields</p>
+          <p className="text-[12px] font-black text-slate-500 capitalize tracking-[0.2em] opacity-90">Platform Subscription Yields</p>
         </div>
       </div>
 
@@ -168,7 +168,7 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
          </div>
          <div>
             <h3 className="text-[22px] font-black text-slate-900 dark:text-white capitalize tracking-tighter leading-none">{level}</h3>
-            <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1.5 opacity-60">Pricing Layer</p>
+            <p className="text-[11px] font-black text-slate-500 capitalize tracking-widest mt-1.5 opacity-90">Pricing Layer</p>
          </div>
       </div>
 
@@ -176,14 +176,14 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
         {/* DAILY RATE */}
         <div className="space-y-2">
           <div className="flex justify-between items-center px-1">
-            <span className="text-[11px] font-black text-slate-400 capitalize tracking-widest opacity-80">Daily Transmission</span>
+            <span className="text-[11px] font-black text-slate-500 capitalize tracking-widest opacity-80">Daily Transmission</span>
             <div className="flex items-center gap-1.5">
                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                <span className="text-[10px] font-black text-emerald-600 capitalize ">Live Yield</span>
             </div>
           </div>
           <div className="relative group/input">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[12px] group-focus-within/input:text-primary transition-colors ">₹</div>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-500 text-[12px] group-focus-within/input:text-primary transition-colors ">₹</div>
             <input
               type="number"
               min="0"
@@ -204,11 +204,11 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
         {/* MONTHLY RATE */}
         <div className="space-y-2">
           <div className="flex justify-between items-center px-1">
-            <span className="text-[11px] font-black text-slate-400 capitalize tracking-widest opacity-80">Cycle Retainer (30D)</span>
-            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 capitalize  leading-none">Vault Protected</span>
+            <span className="text-[11px] font-black text-slate-500 capitalize tracking-widest opacity-80">Cycle Retainer (30D)</span>
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-600 capitalize  leading-none">Vault Protected</span>
           </div>
           <div className="relative group/input">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[12px] group-focus-within/input:text-primary transition-colors ">₹</div>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-500 text-[12px] group-focus-within/input:text-primary transition-colors ">₹</div>
             <input
               type="number"
               min="0"
@@ -229,11 +229,11 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
         {/* GST SETTING */}
         <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-gray-800 border-dashed">
           <div className="flex justify-between items-center px-1">
-            <span className="text-[11px] font-black text-slate-400 capitalize tracking-widest opacity-80">GST Percentage (%)</span>
+            <span className="text-[11px] font-black text-slate-500 capitalize tracking-widest opacity-80">GST Percentage (%)</span>
             {gstPercent > 0 && <span className="text-[10px] font-black text-amber-500 capitalize  leading-none">+Tax Applied</span>}
           </div>
           <div className="relative group/input">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-[12px] group-focus-within/input:text-primary transition-colors ">%</div>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-500 text-[12px] group-focus-within/input:text-primary transition-colors ">%</div>
             <input
               type="number"
               min="0"
@@ -258,7 +258,7 @@ const PlanCard = ({ level, icon: Icon, color, planData, onFieldChange, onGstChan
         className={cn(
           "w-full h-12 rounded-xl font-black text-[12px] capitalize tracking-[0.2em] transition-all flex items-center justify-center gap-3",
           isSaving 
-            ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+            ? "bg-slate-100 text-slate-500 cursor-not-allowed" 
             : "bg-slate-900 dark:bg-primary text-white hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-slate-900/10 group/btn border border-slate-800"
         )}
       >

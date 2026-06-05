@@ -70,7 +70,7 @@ const PartnerMembership = () => {
       <div className="p-6 bg-white dark:bg-gray-900 rounded-3xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-primary/20">
         <div className="space-y-1">
           <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize leading-none">Partner Membership</h1>
-          <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">System Configuration Hub</p>
+          <p className="text-[12px] font-black text-slate-500 capitalize tracking-[0.2em] opacity-90">System Configuration Hub</p>
         </div>
         <button
           onClick={handleSave}
@@ -78,7 +78,7 @@ const PartnerMembership = () => {
           className={cn(
             "px-8 py-3.5 rounded-2xl font-black text-[12px] capitalize tracking-[0.2em] transition-all flex items-center gap-3",
             saving 
-              ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+              ? "bg-slate-100 text-slate-500 cursor-not-allowed" 
               : "bg-slate-900 dark:bg-primary text-white hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-slate-900/10"
           )}
         >
@@ -111,7 +111,7 @@ const PartnerMembership = () => {
               "p-4 rounded-2xl border flex items-center justify-center transition-colors",
               membershipActive 
                 ? "bg-primary/10 border-primary/20 text-primary" 
-                : "bg-slate-100 border-slate-200 text-slate-400 dark:text-white dark:bg-gray-800 dark:border-gray-700"
+                : "bg-slate-100 border-slate-200 text-slate-500 dark:text-white dark:bg-gray-800 dark:border-gray-700"
             )}>
               <Crown size={32} strokeWidth={2.5} />
             </div>
@@ -131,7 +131,7 @@ const PartnerMembership = () => {
 
           <div className="mt-8 space-y-3 relative z-10">
             <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Membership System</h3>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-500 leading-relaxed">
               Enable this to allow vendors to create loyalty plans for their customers. 
               If disabled, the "Plans" section will be hidden from the vendor dashboard and service pages.
             </p>

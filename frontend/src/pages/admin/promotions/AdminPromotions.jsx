@@ -96,7 +96,7 @@ const AdminPromotions = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white capitalize tracking-tight">Promotion Management</h1>
-          <p className="text-[13px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1">Manage partner profile boosts</p>
+          <p className="text-[13px] font-black text-slate-500 capitalize tracking-[0.2em] mt-1">Manage partner profile boosts</p>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ const AdminPromotions = () => {
             </div>
             <div>
                <h3 className="text-[14px] font-black text-slate-800 dark:text-white capitalize leading-tight">Daily Promotion Rate</h3>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Vendors pay this amount per day of boost</p>
+               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Vendors pay this amount per day of boost</p>
             </div>
          </div>
          <div className="flex items-center gap-3">
@@ -126,12 +126,12 @@ const AdminPromotions = () => {
                   }}
                   className="w-full py-2.5 pl-4 pr-10 bg-white dark:bg-gray-800 border border-indigo-100 dark:border-gray-800 rounded-xl text-sm font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                />
-               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300">/DAY</span>
+               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">/DAY</span>
             </div>
             <button 
                onClick={handleUpdateDailyPrice}
                disabled={savingPrice}
-               className="px-6 py-2.5 bg-slate-900 dark:bg-primary text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg active:scale-95 transition-all disabled:opacity-50"
+               className="px-6 py-2.5 bg-slate-900 dark:bg-primary text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg active:scale-95 transition-all disabled:opacity-80"
             >
                {savingPrice ? 'Syncing...' : 'Update Rate'}
             </button>
@@ -141,19 +141,19 @@ const AdminPromotions = () => {
       <div className="flex gap-4 border-b border-slate-100 dark:border-gray-800">
         <button 
           onClick={() => setTab('pending')}
-          className={`pb-3 px-1 text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'pending' ? 'text-primary dark:text-white border-b-2 border-primary dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+          className={`pb-3 px-1 text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'pending' ? 'text-primary dark:text-white border-b-2 border-primary dark:border-white' : 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
         >
           Pending Requests ({pendingRequests.length})
         </button>
         <button 
           onClick={() => setTab('active')}
-          className={`pb-3 px-1 text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'active' ? 'text-primary dark:text-white border-b-2 border-primary dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+          className={`pb-3 px-1 text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'active' ? 'text-primary dark:text-white border-b-2 border-primary dark:border-white' : 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
         >
           Active Boosts ({activeRequests.length})
         </button>
         <button 
           onClick={() => setTab('transactions')}
-          className={`pb-3 px-1 text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'transactions' ? 'text-primary dark:text-white border-b-2 border-primary dark:border-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+          className={`pb-3 px-1 text-[12px] font-black uppercase tracking-widest transition-all ${tab === 'transactions' ? 'text-primary dark:text-white border-b-2 border-primary dark:border-white' : 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
         >
           Transactions ({transactions.length})
         </button>
@@ -162,7 +162,7 @@ const AdminPromotions = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="animate-spin text-primary" size={40} />
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Loading promotions...</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Loading promotions...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
@@ -181,11 +181,11 @@ const AdminPromotions = () => {
                     <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize leading-none">
                       {tx.vendorId?.shopName || 'Unknown Partner'}
                     </h3>
-                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-2">
                       {tx.description || 'Promotion Payment'} • {new Date(tx.timestamp).toLocaleString('en-GB')}
                     </p>
                     {tx.gatewayPaymentId && (
-                      <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 font-mono mt-1">
+                      <p className="text-[9px] font-bold text-slate-500 dark:text-gray-500 font-mono mt-1">
                         ID: {tx.gatewayPaymentId}
                       </p>
                     )}
@@ -213,7 +213,7 @@ const AdminPromotions = () => {
                   </div>
                   <div>
                     <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize leading-none">{req.vendorId?.shopName}</h3>
-                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-2">
                       {req.durationDays} Days • {req.status === 'active' ? `Expires ${new Date(req.endDate).toLocaleDateString('en-GB')}` : 'Profile Boost'}
                     </p>
                   </div>
@@ -253,7 +253,7 @@ const AdminPromotions = () => {
           )}
           
           {((tab === 'transactions' ? transactions : (tab === 'pending' ? pendingRequests : activeRequests)).length === 0) && (
-            <div className="py-20 text-center border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-3xl text-slate-300 font-black uppercase tracking-[0.2em] text-[11px]">
+            <div className="py-20 text-center border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-3xl text-slate-400 font-black uppercase tracking-[0.2em] text-[11px]">
               No {tab === 'transactions' ? 'transactions' : `${tab} promotions`} found
             </div>
           )}

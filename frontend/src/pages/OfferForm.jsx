@@ -264,7 +264,7 @@ const OfferForm = () => {
                          const isSelected = formData.serviceIds.includes(service._id);
                          let btnClass = 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400 hover:border-[#00246b]/30';
                          if (isUnavailable) {
-                           btnClass = 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-950/50 text-gray-400 border-gray-100 dark:border-gray-800';
+                           btnClass = 'opacity-70 cursor-not-allowed bg-rose-50 dark:bg-rose-950/20 text-rose-500 border-rose-100 dark:border-rose-900/30';
                          } else if (isSelected) {
                            btnClass = 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/20';
                          }
