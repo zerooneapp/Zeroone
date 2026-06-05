@@ -98,16 +98,16 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                     }`}
                     onClick={() => !n.isRead && markAsRead(n._id)}
                   >
-                    {!n.isRead && (
-                      <div className="absolute top-4 right-4 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" />
-                    )}
                     <div className="flex gap-3">
                       <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center justify-center shrink-0">
                         {getIcon(n.type)}
                       </div>
                       <div className="flex-1 min-w-0 pr-6">
                         <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex items-center gap-1.5">
+                            {!n.isRead && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse shrink-0" />
+                            )}
                             <p className="text-[11px] font-black uppercase tracking-tight truncate text-gray-900 dark:text-white">
                               {n.title}
                             </p>

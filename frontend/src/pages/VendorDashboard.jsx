@@ -20,7 +20,8 @@ import {
   Ticket,
   Phone,
   Lock,
-  Crown
+  Crown,
+  IndianRupee
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -292,7 +293,7 @@ const VendorDashboard = () => {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="space-y-0">
+        <div className="space-y-0 min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
               {item.customerName}
@@ -309,14 +310,21 @@ const VendorDashboard = () => {
               <span className="opacity-20">&bull;</span>
               <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
             </div>
+            {item.totalPrice !== undefined && (
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                  TOTAL <IndianRupee size={9} strokeWidth={3} />{item.totalPrice}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {item.customerPhone && (
           <a
             href={`tel:${item.customerPhone}`}
-            className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
+            className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-700/30 shadow-sm active:scale-95 transition-all text-emerald-600 dark:text-emerald-400"
             title="Call Customer"
           >
             <Phone size={12} strokeWidth={2.5} />
@@ -440,7 +448,7 @@ const VendorDashboard = () => {
 
         <section className="px-0.5">
           <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1 pb-0">
-            <div className="bg-[#00246b] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col justify-center overflow-hidden">
+            <div className="bg-[#00246b] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col items-center justify-center text-center overflow-hidden">
               <p className="text-[8px] font-black text-white/90 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
               {loading ? (
                 <div className="h-4 w-12 bg-white/20 rounded animate-pulse" />
@@ -448,7 +456,7 @@ const VendorDashboard = () => {
                 <p className="text-[16px] font-black text-white leading-none truncate">&#8377;{data?.stats?.todayEarnings?.toLocaleString() || '0'}</p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden">
               <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today clients</p>
               {loading ? (
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
@@ -456,7 +464,7 @@ const VendorDashboard = () => {
                 <p className="text-[16px] font-black text-[#00246b] dark:text-white leading-none truncate">{data?.stats?.todayBookings || '0'}</p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden">
               <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
               {loading ? (
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
@@ -466,7 +474,7 @@ const VendorDashboard = () => {
                 </p>
               )}
             </div>
-            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col justify-center overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden">
               <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
               {loading ? (
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded-pulse animate-pulse" />
@@ -555,7 +563,7 @@ const VendorDashboard = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="space-y-0">
+                    <div className="space-y-0 min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-tight tracking-tight">
                           {item.customerName}
@@ -572,14 +580,21 @@ const VendorDashboard = () => {
                           <span className="opacity-20">&bull;</span>
                           <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
                         </div>
+                        {item.totalPrice !== undefined && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                              TOTAL <IndianRupee size={9} strokeWidth={3} />{item.totalPrice}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {item.customerPhone && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {item.customerPhone && item.status === 'confirmed' && (
                       <a
                         href={`tel:${item.customerPhone}`}
-                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
+                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-700/30 shadow-sm active:scale-95 transition-all text-emerald-600 dark:text-emerald-400"
                         title="Call Customer"
                       >
                         <Phone size={12} strokeWidth={2.5} />

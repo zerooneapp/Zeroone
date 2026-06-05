@@ -79,6 +79,7 @@ const VendorWallet = () => {
     walletLoading: loading,
     dashboardData: dashboard,
     fetchWallet,
+    fetchDashboard,
     setWalletData: setWallet
   } = useVendorStore();
 
@@ -104,7 +105,8 @@ const VendorWallet = () => {
       const [walletRes, transactionsRes, withdrawalsRes] = await Promise.all([
         api.get('/vendor/wallet/overview'),
         api.get('/vendor/transactions'),
-        api.get('/vendor/wallet/withdrawals')
+        api.get('/vendor/wallet/withdrawals'),
+        fetchDashboard('silent')
       ]);
       useVendorStore.setState({
         walletData: walletRes.data,
@@ -121,6 +123,17 @@ const VendorWallet = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (isTopupOpen || isWithdrawOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isTopupOpen, isWithdrawOpen]);
 
   const filteredTransactions = useMemo(() => {
     const walletOnlyTransactions = transactions.filter((transaction) => {
@@ -253,7 +266,7 @@ const VendorWallet = () => {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 pt-[64px] animate-pulse">
+      <div className="min-h-screen bg-background-light dark:bg-background-dark p-6 space-y-6 pt-[64px] animate-pulse">
         <div className="h-40 bg-gray-100 dark:bg-gray-800 rounded-[3rem]" />
         <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((index) => (
@@ -704,26 +717,26 @@ const VendorWallet = () => {
                       }`} />
                       <div className="flex justify-between items-start">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-black text-[#00246b] dark:text-white">₹{req.amount.toLocaleString()}</span>
-                            <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter ${
-                              req.status === 'pending' ? 'bg-amber-50 text-amber-500' :
-                              req.status === 'approved' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'
-                            }`}>
-                              {req.status}
-                            </span>
-                          </div>
-                          <p className="text-[8px] font-bold text-slate-500 flex items-center gap-1">
+                          <span className="text-[11px] font-black text-[#00246b] dark:text-white">₹{req.amount.toLocaleString()}</span>
+                          <p className="text-[8px] font-bold text-slate-500 flex items-center gap-1 mt-1">
                             <CreditCard size={10} /> {req.method === 'upi' ? req.upiDetails?.upiId : req.bankDetails?.bankName}
                           </p>
                           <p className="text-[7px] font-bold text-slate-400">
                             {dayjs(req.createdAt).format('DD MMM YYYY, hh:mm A')}
                           </p>
                         </div>
-                        <div className="text-right">
-                           <p className="text-[7px] font-black text-slate-300 uppercase tracking-widest">{req.referenceId}</p>
+                        <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
+                           <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter ${
+                              req.status === 'pending' ? 'bg-amber-50 text-amber-500' :
+                              req.status === 'approved' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'
+                            }`}>
+                              {req.status}
+                           </span>
+                           <p className="text-[7px] font-black text-slate-300 uppercase tracking-widest max-w-[80px] truncate" title={req.referenceId}>
+                             {req.referenceId}
+                           </p>
                            {req.status === 'rejected' && req.rejectionReason && (
-                             <p className="text-[7px] font-bold text-red-500 mt-1 max-w-[100px] leading-tight">
+                             <p className="text-[7px] font-bold text-red-500 mt-1 max-w-[100px] leading-tight text-right">
                                Reason: {req.rejectionReason}
                              </p>
                            )}

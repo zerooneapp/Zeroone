@@ -274,7 +274,8 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
 
       const hasOverlap = allBusyBlocks.some((block) => (
         block.staffId === staffIdStr &&
-        currentStart.isSame(block.start)
+        currentStart.isBefore(block.end) &&
+        currentEnd.isAfter(block.start)
       ));
 
       const isStaffOnClosure = staffClosureRecords.some(c => 
@@ -347,13 +348,15 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
     staffId: { $in: staffIds },
     status: { $ne: 'cancelled' },
     _id: { $ne: excludeBookingId },
-    startTime: start.toDate()
+    startTime: { $lt: end.toDate() },
+    endTime: { $gt: start.toDate() }
   });
 
   const lockFilter = {
     staffId: { $in: staffIds },
     expiresAt: { $gt: new Date() },
-    startTime: start.toDate()
+    startTime: { $lt: end.toDate() },
+    endTime: { $gt: start.toDate() }
   };
 
   // 🛡️ CRITICAL FIX: If we are re-locking for the same user, ignore their previous locks

@@ -184,9 +184,9 @@ const CustomerAuth = () => {
                       setStep('phone');
                       setOtp(['', '', '', '', '', '']);
                     }}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 -mt-2 p-2 text-gray-400 hover:text-[#00246b] dark:hover:text-white transition-colors"
+                    className="fixed top-[48px] left-4 p-2 text-gray-500 hover:text-[#00246b] dark:text-gray-400 dark:hover:text-white transition-colors z-50"
                   >
-                    <ChevronLeft size={24} />
+                    <ChevronLeft size={28} />
                   </button>
                   <h1 className="text-[36px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">Verify OTP</h1>
                   <p className="text-gray-500 dark:text-gray-400 font-medium text-[11px] uppercase tracking-widest">

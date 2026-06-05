@@ -592,6 +592,7 @@ const getVendorDashboard = async (req, res) => {
         customerImage: b.userId?.image || '',
         customerPhone: b.userId?.phone || '',
         service: b.services.map(s => s.name).join(', '),
+        totalPrice: b.totalPrice || 0,
         status: b.status,
         staffId: b.staffId?._id?.toString() || null,
         staffName: b.staffId?.name || 'Owner',
@@ -1010,6 +1011,7 @@ const getVendorDashboardBundle = async (req, res) => {
       dailyPlan,
       monthlyPlan,
       unreadCount,
+      statsDataResult,
       statsData
     ] = await Promise.all([
       getBillingSettings(),
@@ -1017,6 +1019,11 @@ const getVendorDashboardBundle = async (req, res) => {
       getSubscriptionPlanForVendor('monthly', vendor.serviceLevel),
       Notification.countDocuments({ userId: new mongoose.Types.ObjectId(vendor.ownerId), isRead: false, role: 'vendor' }),
       
+      Booking.aggregate([
+        { $match: { vendorId: new mongoose.Types.ObjectId(vendor._id), status: { $in: ['confirmed', 'completed'] } } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+      ]),
+
       // Use Aggregation for all stats in one go - MUCH FASTER
       Booking.aggregate([
         { 
@@ -1042,6 +1049,8 @@ const getVendorDashboardBundle = async (req, res) => {
         }
       ])
     ]);
+
+    const totalEarnings = statsDataResult ? statsDataResult[0]?.total || 0 : 0;
 
     // 2. Secondary Data Fetch (Dependent on initial data or just bulky)
     const [
@@ -1097,7 +1106,8 @@ const getVendorDashboardBundle = async (req, res) => {
     const stats = {
       todayBookings: todayBookings.filter(b => b.status !== 'cancelled').length,
       todayEarnings: todayServiceRevenue + todayMembershipRevenue,
-      weekEarnings: statsData[0]?.weekEarnings || 0
+      weekEarnings: statsData[0]?.weekEarnings || 0,
+      totalEarnings
     };
     
     const StaffClosure = require('../models/StaffClosure');
@@ -1148,6 +1158,7 @@ const getVendorDashboardBundle = async (req, res) => {
           todayBookings: stats.todayBookings,
           todayEarnings: stats.todayEarnings,
           weekEarnings: stats.weekEarnings,
+          totalEarnings: stats.totalEarnings,
           activeStaff: activeStaffMembers.length,
           avgRating: vendor.rating
         },
@@ -1165,6 +1176,7 @@ const getVendorDashboardBundle = async (req, res) => {
           customerImage: b.userId?.image || '',
           customerPhone: b.userId?.phone || b.walkInCustomerPhone || '',
           service: b.services.map(s => s.name).join(', '),
+          totalPrice: b.totalPrice || 0,
           status: b.status,
           staffId: b.staffId?._id?.toString() || null,
           staffName: b.staffId?.name || 'Owner',

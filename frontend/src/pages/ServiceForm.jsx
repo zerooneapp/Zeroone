@@ -221,7 +221,10 @@ const ServiceForm = () => {
                         type="text"
                         placeholder="e.g. Haircut, Hair Color, Facial"
                         value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        onChange={(e) => {
+                           const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                           setFormData({ ...formData, category: val });
+                        }}
                         onBlur={(e) => setFormData({ ...formData, category: normalizeServiceCategory(e.target.value) })}
                         className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-slate-300"
                      />
@@ -234,7 +237,10 @@ const ServiceForm = () => {
                         type="text"
                         placeholder="e.g. Premium Haircut"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => {
+                           const val = e.target.value.replace(/[^a-zA-Z0-9\s\-&']/g, '');
+                           setFormData({ ...formData, name: val });
+                        }}
                         className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-slate-300"
                      />
                   </div>

@@ -21,7 +21,7 @@ const Cart = () => {
     if (window.__PREFETCHED_DATA__?.cartData && window.__PREFETCHED_DATA__.cartData.vendorId === useCartStore.getState().vendor?._id) {
       return window.__PREFETCHED_DATA__.cartData.date;
     }
-    return null; // Null initially for progressive reveal
+    return dayjs().format('YYYY-MM-DD'); // Auto-select today's date
   });
   const [slots, setSlots] = useState(() => {
     if (window.__PREFETCHED_DATA__?.cartData && window.__PREFETCHED_DATA__.cartData.vendorId === useCartStore.getState().vendor?._id) {
@@ -284,6 +284,21 @@ const Cart = () => {
     setSelectedSlot(null);
     setSelectedStaff(null);
   }, [selectedDate]);
+
+  // Auto-select the first available slot when slots load or change
+  useEffect(() => {
+    if (!loadingSlots && displaySlots.length > 0) {
+      if (reschedulePrefill && !prefillApplied) {
+        // Let the reschedule prefill effect handle it
+        return;
+      }
+      
+      const currentSelectedSlotStillExists = displaySlots.some(s => s.time === selectedSlot?.time);
+      if (!selectedSlot || !currentSelectedSlotStillExists) {
+        setSelectedSlot(displaySlots[0]);
+      }
+    }
+  }, [displaySlots, loadingSlots, selectedSlot, reschedulePrefill, prefillApplied]);
 
   useEffect(() => {
     if (skipNextStaffReset) {

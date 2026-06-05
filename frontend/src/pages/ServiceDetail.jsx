@@ -586,11 +586,59 @@ const ServiceDetail = () => {
     </div>
   );
 
-  const totalPrice = getTotalPrice();
-  const displayTotal = cartPricing?.finalTotal ?? totalPrice;
-  const originalTotal = cartPricing?.originalTotal ?? totalPrice;
-  const totalSavings = cartPricing?.totalDiscount ?? 0;
-  const hasItemsFromThisVendor = cartVendor?._id === vendor._id;
+  const hasItemsFromThisVendor = cartVendor?._id === vendor?._id;
+
+  const displayTotal = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.finalTotal === 'number') {
+      return cartPricing.finalTotal;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const itemPrice = priceMeta ? priceMeta.finalPrice : item.price;
+      return sum + itemPrice;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
+  const originalTotal = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.originalTotal === 'number') {
+      return cartPricing.originalTotal;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const itemPrice = priceMeta ? priceMeta.originalPrice : item.price;
+      return sum + itemPrice;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
+  const totalSavings = useMemo(() => {
+    const hasMatchingCount = cartPricing?.services?.length === cartItems.length;
+    const allItemsMatch = hasMatchingCount && cartItems.every(item => 
+      cartPricing.services.some(s => String(s.serviceId) === String(item._id))
+    );
+    
+    if (allItemsMatch && typeof cartPricing?.totalDiscount === 'number') {
+      return cartPricing.totalDiscount;
+    }
+    
+    return cartItems.reduce((sum, item) => {
+      const priceMeta = servicePricing[String(item._id)];
+      const savings = priceMeta ? (priceMeta.originalPrice - priceMeta.finalPrice) : 0;
+      return sum + savings;
+    }, 0);
+  }, [cartPricing, cartItems, servicePricing]);
+
   const hasHomeService = services.some((service) => service.type === 'home' || service.type === 'both');
 
   return (
@@ -829,11 +877,11 @@ const ServiceDetail = () => {
                     finalPrice: cartServiceEntry.finalPrice,
                     discount: cartServiceEntry.discount
                   }
-                : {
+                : (servicePricing[String(item._id)] || {
                     originalPrice: item.price,
                     finalPrice: item.price,
                     discount: 0
-                  };
+                  });
 
               return (
                 <div
@@ -886,7 +934,7 @@ const ServiceDetail = () => {
               );
             }) : (
             <div className="py-3 text-center bg-gray-50/50 dark:bg-gray-900 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl">
-              <p className="text-[8px] font-black text-[#0B1222]/30 dark:text-gray-400 uppercase tracking-widest">Tap items below to add them</p>
+              <p className="text-[8px] font-black text-[#0B1222]/30 dark:text-gray-400 uppercase tracking-widest">Tap services below to add them</p>
             </div>
           )}
         </div>
@@ -1028,7 +1076,8 @@ const ServiceDetail = () => {
               return (
                 <div
                   key={service._id}
-                  className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3"
+                  onClick={() => toggleService(service)}
+                  className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 overflow-hidden shrink-0">
                     <img 
@@ -1060,7 +1109,7 @@ const ServiceDetail = () => {
                     Pay At Shop
                   </div>
                   <button
-                    onClick={() => toggleService(service)}
+                    onClick={(e) => { e.stopPropagation(); toggleService(service); }}
                     className="w-8 h-8 bg-[#00246b] dark:bg-[#00246b] rounded-xl flex items-center justify-center text-white border border-[#00246b] active:scale-90 transition-all font-black"
                   >
                     <Plus size={16} strokeWidth={3} />
@@ -1151,7 +1200,7 @@ const ServiceDetail = () => {
                 Active Booking Found
               </h3>
               <p className="text-[11px] font-bold text-[#0B1222]/40 dark:text-gray-400 text-center mt-3 px-2">
-                You already have a confirmed appointment at <span className="text-[#0B1222] dark:text-white font-black">{vendor.shopName}</span> on {existingBooking ? dayjs(existingBooking.startTime).format('LLL') : ''}.
+                You already have a confirmed appointment at <span className="text-[#0B1222] dark:text-white font-black">{vendor.shopName}</span> on {existingBooking ? dayjs(existingBooking.startTime).format('DD MMM YYYY, h:mm A') : ''}.
               </p>
 
               <div className="space-y-3 mt-8">

@@ -18,6 +18,8 @@ const useNotificationStore = create((set, get) => ({
     }
   },
 
+  clearNotifications: () => set({ notifications: [], unreadCount: 0 }),
+
   addNotification: (notification) => {
     set((state) => {
       const exists = state.notifications.find(n => n._id === notification._id);

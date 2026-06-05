@@ -105,7 +105,7 @@ const VendorServices = () => {
   );
 
   if (loading) return (
-    <div className="p-6 space-y-6 pt-[64px] animate-pulse">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark p-6 space-y-6 pt-[64px] animate-pulse">
       <div className="h-10 w-48 bg-gray-100 dark:bg-gray-800 rounded-xl" />
       <div className="grid gap-4 mt-8">
         {[1, 2, 3, 4].map(i => <div key={i} className="h-28 bg-gray-100 dark:bg-gray-800 rounded-[2rem]" />)}
@@ -169,7 +169,7 @@ const VendorServices = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="py-12 text-center"
             >
-              <div className="w-20 h-20 bg-primary/5 rounded-[2.5rem] flex items-center justify-center mx-auto text-primary/30 border border-primary/10">
+              <div className="w-20 h-20 bg-primary/5 dark:bg-white/5 rounded-[2.5rem] flex items-center justify-center mx-auto text-primary/30 dark:text-white/30 border border-primary/10 dark:border-white/10">
                 <Scissors size={40} />
               </div>
               <div className="mt-5 space-y-1">

@@ -65,7 +65,8 @@ const findOverlappingBooking = ({ staffId, start, end, excludeBookingId = null }
   const query = {
     staffId,
     status: { $ne: 'cancelled' },
-    startTime: start.toDate()
+    startTime: { $lt: end.toDate() },
+    endTime: { $gt: start.toDate() }
   };
 
   if (excludeBookingId) {
@@ -86,8 +87,7 @@ const buildSlotConflictError = async (message, vendorId, serviceIds, start) => {
 };
 
 const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress) => {
-  const { normalizeToGrid } = require('./slotService');
-  const start = normalizeToGrid(startTime);
+  const start = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
 
   // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
   const vendor = await Vendor.findById(vendorId);
@@ -459,7 +459,7 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
       role: 'staff',
       type: 'BOOKING_CANCELLED_INFO',
       title: 'Booking Cancelled',
-      message: `Your assignment for ${booking.walkInCustomerName || booking.userId?.name || 'Client'} at ${moment(booking.startTime).format('LT')} was cancelled.${reasonSuffix}`,
+      message: `Your assignment for ${booking.walkInCustomerName || booking.userId?.name || 'Client'} at ${moment(booking.startTime).tz('Asia/Kolkata').format('h:mm A')} was cancelled.${reasonSuffix}`,
       data: { bookingId: booking._id, reason: booking.cancelReason, isActionable: false },
       referenceId: `${booking._id}_CANCEL_EVENT`
     });
@@ -573,8 +573,7 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
 };
 
 const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, newStaffId, newServiceAddress, actorStaffId = null) => {
-  const { normalizeToGrid } = require('./slotService');
-  const start = normalizeToGrid(newStartTime);
+  const start = moment(newStartTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
 
   const booking = await Booking.findById(bookingId).populate('vendorId');
   if (!booking) throw new Error('Booking not found');

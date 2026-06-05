@@ -29,7 +29,7 @@ const VendorLayout = () => {
     };
 
     const handleFocusIn = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      if ((e.target.tagName === 'INPUT' && e.target.type !== 'date') || e.target.tagName === 'TEXTAREA') {
         setIsNavVisible(false);
       }
     };

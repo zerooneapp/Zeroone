@@ -129,6 +129,10 @@ const StaffForm = () => {
       return toast.error('Please select at least one skill/service ✂️');
     }
 
+    if (!isEdit && !image) {
+      return toast.error('Staff photo is required to create a profile 📸');
+    }
+
     const data = new FormData();
     data.append('name', formData.name);
     data.append('phone', formData.phone);
@@ -232,7 +236,7 @@ const StaffForm = () => {
             {/* Basic Info */}
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Full Name</label>
+                <label className="text-[10px] font-light text-slate-400 uppercase tracking-widest px-0.5">Full Name</label>
                 <input
                   required
                   type="text"
@@ -247,8 +251,8 @@ const StaffForm = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Phone Number</label>
-                <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 px-4 focus-within:ring-2 focus-within:ring-primary/10 transition-all shadow-sm">
+                <label className="text-[10px] font-light text-slate-400 uppercase tracking-widest px-0.5">Phone Number</label>
+                <div className={`relative flex items-center bg-white dark:bg-gray-900 rounded-xl border px-4 focus-within:ring-2 focus-within:ring-primary/10 transition-all shadow-sm ${formData.phone.length > 0 ? 'border-[#00246b] dark:border-[#00246b]' : 'border-slate-200/60 dark:border-gray-800'}`}>
                   <Phone size={14} className="text-gray-400 mr-2" />
                   <span className="text-sm font-bold text-gray-400 border-r border-slate-100 dark:border-gray-800 pr-2 mr-2">+91</span>
                   <input
@@ -269,14 +273,18 @@ const StaffForm = () => {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-0.5">Designation</label>
+                <label className="text-[10px] font-light text-slate-400 uppercase tracking-widest px-0.5">Designation</label>
                 <div className="relative">
                   <input
                     required
                     type="text"
                     placeholder="e.g. Senior Stylist"
                     value={formData.designation}
-                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+                      setFormData({ ...formData, designation: filteredValue });
+                    }}
                     className="w-full py-3 pl-11 pr-4 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-sm dark:shadow-none dark:text-white placeholder:text-gray-300"
                   />
                   <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -287,7 +295,7 @@ const StaffForm = () => {
             {/* Skills/Services Multi-Select */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between px-0.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Assigned Skills</label>
+                <label className="text-[10px] font-light text-slate-400 uppercase tracking-widest">Assigned Skills</label>
                 <span className="text-[9px] text-gray-400 font-bold italic flex items-center gap-1">
                   <Scissors size={8} /> select all that apply
                 </span>

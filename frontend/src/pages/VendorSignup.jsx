@@ -64,10 +64,12 @@ const VendorSignup = () => {
       return toast.error('Please upload shop facade image');
     }
     if (!formData.address) return toast.error('Please enter shop address');
+    if (!formData.location) return toast.error('Please lock your GPS location');
     if (!files.vendorPhoto) return toast.error('Please upload partner profile photo');
 
     setLoading(true);
     try {
+      // 1. Register User Record & Get Token
       const authRes = await api.post('/auth/register', {
         phone,
         name: formData.ownerName,
@@ -75,13 +77,8 @@ const VendorSignup = () => {
         forceUpdate: true
       });
 
-      // 🚀 CRITICAL: Update Auth Store
+      // Temporarily set token for subsequent requests without triggering GuestRoute redirect
       if (authRes.data.token) {
-        setCredentials({
-          token: authRes.data.token,
-          user: authRes.data,
-          role: 'vendor'
-        });
         api.defaults.headers.common['Authorization'] = `Bearer ${authRes.data.token}`;
       }
 
@@ -102,6 +99,15 @@ const VendorSignup = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
+      // 🚀 CRITICAL: Update Auth Store only AFTER all API calls succeed
+      if (authRes.data.token) {
+        setCredentials({
+          token: authRes.data.token,
+          user: authRes.data,
+          role: 'vendor'
+        });
+      }
+
       toast.success('Your application is under verification! 🛡️', { duration: 5000 });
       reset();
       navigate('/vendor-verification', { replace: true });
@@ -119,16 +125,18 @@ const VendorSignup = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white px-3 py-6 pb-32 transition-colors duration-500 overflow-x-hidden relative no-scrollbar">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white px-3 pt-0 pb-32 transition-colors duration-500 relative no-scrollbar">
       {/* Decorative Background Elements */}
-      <div className="absolute top-[-5%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-[-5%] left-[-10%] w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-5%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-5%] left-[-10%] w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      </div>
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 pt-2 relative z-10 px-1">
+      <div className="fixed top-0 left-0 right-0 z-50 pt-12 pb-4 px-4 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl flex items-center gap-3 border-b border-gray-100/10 dark:border-gray-800/50">
         <button
           onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}
-          className="p-3 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm active:scale-90 transition-all text-gray-900 dark:text-white"
+          className="p-3 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm active:scale-90 transition-all text-gray-900 dark:text-white shrink-0"
         >
           <ArrowLeft size={20} />
         </button>
@@ -138,7 +146,7 @@ const VendorSignup = () => {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 pt-[110px]">
         {step === 1 && (
           <div className="space-y-4 relative z-10">
             <div className="space-y-1">
@@ -189,7 +197,7 @@ const VendorSignup = () => {
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
                 <h3 className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Membership Level</h3>
-                <div className="flex items-center gap-1 text-[7px] font-black text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-full">
+                <div className="flex items-center gap-1 text-[7px] font-black text-primary dark:text-white uppercase bg-primary/10 dark:bg-white/10 px-2 py-0.5 rounded-full">
                   <Info size={8} /> Benefits
                 </div>
               </div>
@@ -201,11 +209,11 @@ const VendorSignup = () => {
                     type="button"
                     onClick={() => setFormData({ ...formData, serviceLevel: lvl.id })}
                     className={`px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-3 text-left relative overflow-hidden ${formData.serviceLevel === lvl.id
-                      ? 'bg-primary/5 dark:bg-primary/10 border-primary shadow-sm'
+                      ? 'bg-primary/5 dark:bg-white/10 border-primary dark:border-white shadow-sm'
                       : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 opacity-80'
                       }`}
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${formData.serviceLevel === lvl.id ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${formData.serviceLevel === lvl.id ? 'bg-primary dark:bg-white text-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
                       }`}>
                       <lvl.icon size={16} />
                     </div>
@@ -214,7 +222,7 @@ const VendorSignup = () => {
                       <p className="text-[8px] font-bold text-gray-400 leading-none mt-1">{lvl.desc}</p>
                     </div>
                     {formData.serviceLevel === lvl.id && (
-                      <CheckCircle2 className="text-primary absolute right-3 top-1/2 -translate-y-1/2" size={16} />
+                      <CheckCircle2 className="text-primary dark:text-white absolute right-3 top-1/2 -translate-y-1/2" size={16} />
                     )}
                   </button>
                 ))}
@@ -233,7 +241,7 @@ const VendorSignup = () => {
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Aadhaar Card (Front Side)</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                   <div className="flex items-center gap-3 overflow-hidden">
                     {files.aadhaarFront ? (
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
@@ -256,7 +264,7 @@ const VendorSignup = () => {
 
               <div className="space-y-1.5">
                 <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Aadhaar Card (Back Side)</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                   <div className="flex items-center gap-3 overflow-hidden">
                     {files.aadhaarBack ? (
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
@@ -279,7 +287,7 @@ const VendorSignup = () => {
 
               <div className="space-y-1.5">
                 <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">PAN Card</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                   <div className="flex items-center gap-3 overflow-hidden">
                     {files.panCard ? (
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
@@ -302,7 +310,7 @@ const VendorSignup = () => {
 
               <div className="space-y-1.5">
                 <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Registration (Optional)</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                   <div className="flex items-center gap-3 overflow-hidden">
                     {files.shopRegistration ? (
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
@@ -325,7 +333,7 @@ const VendorSignup = () => {
 
               <div className="space-y-1.5">
                 <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">GST Certificate (Optional)</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                   <div className="flex items-center gap-3 overflow-hidden">
                     {files.gstCertificate ? (
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
@@ -347,8 +355,8 @@ const VendorSignup = () => {
               </div>
             </div>
 
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30 flex items-start gap-2">
-              <Info className="text-amber-500 mt-0.5 shrink-0" size={14} />
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30 flex items-center gap-2">
+              <Info className="text-amber-500 shrink-0" size={14} />
               <p className="text-[8px] font-bold text-amber-600/70 dark:text-amber-500/50 uppercase leading-tight font-mono">
                 Stored securely for verification only.
               </p>
@@ -408,19 +416,28 @@ const VendorSignup = () => {
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 />
 
-                <div className="flex items-center gap-2 px-2">
-                  <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                  <p className="text-[7px] font-bold text-gray-400 uppercase tracking-widest leading-none">
-                    GPS Locked: <span className="text-emerald-500">{formData.location.coordinates[0].toFixed(4)}, {formData.location.coordinates[1].toFixed(4)}</span>
-                  </p>
-                </div>
+                {formData.location ? (
+                  <div className="flex items-center gap-2 px-2">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <p className="text-[7px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+                      GPS Locked: <span className="text-emerald-500">{formData.location.coordinates[0].toFixed(4)}, {formData.location.coordinates[1].toFixed(4)}</span>
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-2">
+                    <div className="w-1 h-1 rounded-full bg-rose-500" />
+                    <p className="text-[7px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+                      GPS Not Locked
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">
                 {formData.serviceMode === 'shop' && (
                 <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Façade Image</p>
-                  <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Facade Image</p>
+                  <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {files.shopImage ? (
                         <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
@@ -441,7 +458,7 @@ const VendorSignup = () => {
 
                 <div className="space-y-1.5">
                   <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Partner Profile Photo</p>
-                  <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                  <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {files.vendorPhoto ? (
                         <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
