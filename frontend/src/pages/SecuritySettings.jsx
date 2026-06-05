@@ -156,7 +156,7 @@ const SecuritySettings = () => {
             </div>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="w-full flex items-center justify-center gap-2.5 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/20 text-rose-600 dark:text-rose-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
+              className="w-full flex items-center justify-center gap-2.5 p-4 rounded-2xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
             >
               <Trash2 size={16} strokeWidth={3} />
               Delete Account
