@@ -494,16 +494,17 @@ exports.getVendorMembershipRequests = async (req, res) => {
 
 exports.getUserMemberships = async (req, res) => {
   try {
+    if (!req.user?._id) return res.status(200).json([]);
     const memberships = await UserMembership.find({ userId: req.user._id, isDeletedByUser: { $ne: true } })
       .populate('vendorId', 'shopName')
       .populate('planId', 'name price')
       .populate('usage.serviceId', 'name')
       .sort({ createdAt: -1 });
 
-    res.status(200).json(memberships);
+    res.status(200).json(memberships || []);
   } catch (error) {
     console.error('[MEMBERSHIP ERROR] getUserMemberships:', error);
-    res.status(500).json({ message: error.message, stack: error.stack });
+    res.status(200).json([]);
   }
 };
 
