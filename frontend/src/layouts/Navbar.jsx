@@ -92,17 +92,17 @@ const Navbar = () => {
                     />
                   )}
 
-                  <item.icon
-                    size={17}
+                   <item.icon
+                    size={19}
                     className={cn(
                       "transition-all duration-300",
                       isActive ? "text-[#00246b] dark:text-white mt-0.5" : "text-[#00246b] dark:text-gray-400"
                     )}
-                    strokeWidth={isActive ? 2.5 : 2}
+                    strokeWidth={isActive ? 3 : 2.5}
                   />
 
                   <span className={cn(
-                    "text-[8px] font-black uppercase tracking-wider transition-all",
+                    "text-[9px] font-black uppercase tracking-wider transition-all",
                     isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400"
                     )}>
                     {item.label}

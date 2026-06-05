@@ -186,7 +186,7 @@ const Home = () => {
               type="text"
               placeholder="Search salon, beauty parlour..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value.trimStart())}
               className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-gray-900 dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-gray-400 dark:focus:border-[#00246b]/30 transition-all duration-500 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-400 placeholder:font-semibold"
             />
 

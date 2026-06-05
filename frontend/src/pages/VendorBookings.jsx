@@ -185,8 +185,11 @@ const VendorBookings = () => {
     });
   };
 
-  // Removed redundant frontend filter because backend already provides filtered data
-  const displayBookings = bookings;
+  // Sort bookings chronologically by their start time
+  const displayBookings = useMemo(() => {
+    if (!bookings) return [];
+    return [...bookings].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  }, [bookings]);
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-24">
@@ -225,9 +228,9 @@ const VendorBookings = () => {
           {/* 📅 PREMIUM COMPACT DATE FILTER */}
           <div className="mt-3 flex items-center gap-1.5 bg-slate-50/50 dark:bg-gray-800/20 p-1 rounded-2xl border border-slate-100 dark:border-gray-800">
             <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
-              <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">Start Date</label>
+              <label className="text-[10px] font-semibold text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">Start date</label>
               <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
-                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">
+                <span className="text-[10px] font-bold text-gray-900 dark:text-white tracking-widest">
                   {fromDate ? dayjs(fromDate).format('DD-MM-YYYY') : 'Select Date'}
                 </span>
                 <ChevronDown size={12} className="text-gray-400" />
@@ -241,13 +244,13 @@ const VendorBookings = () => {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
               />
             </div>
-            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20 text-slate-400 text-[10px] font-black shrink-0">
+            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20 text-slate-400 text-[10px] font-bold shrink-0">
               -
             </div>
             <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
-              <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">End Date</label>
+              <label className="text-[10px] font-semibold text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">End date</label>
               <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
-                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">
+                <span className="text-[10px] font-bold text-gray-900 dark:text-white tracking-widest">
                   {toDate ? dayjs(toDate).format('DD-MM-YYYY') : 'Select Date'}
                 </span>
                 <ChevronDown size={12} className="text-gray-400" />
