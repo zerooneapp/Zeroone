@@ -63,7 +63,11 @@ const getVendorReviews = async (req, res) => {
       ...getApprovedReviewQuery()
     })
       .populate('userId', 'name image')
-      .populate('bookingId', 'services createdAt')
+      .populate({
+        path: 'bookingId',
+        select: 'services createdAt staffId',
+        populate: { path: 'staffId', select: 'name' }
+      })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -78,7 +82,8 @@ const getVendorReviews = async (req, res) => {
       },
       services: (review.bookingId?.services || [])
         .map((service) => service?.name)
-        .filter(Boolean)
+        .filter(Boolean),
+      staffName: review.bookingId?.staffId?.name || null
     }));
 
     const avgRating = normalizedReviews.length
@@ -146,6 +151,10 @@ const submitReview = async (req, res) => {
 
     const vendor = await Vendor.findById(booking.vendorId).select('ownerId shopName');
 
+    const Staff = require('../models/Staff');
+    const staff = await Staff.findById(booking.staffId);
+    const staffUserId = staff?.userId || staff?._id;
+
     await Promise.all([
       vendor?.ownerId ? NotificationService.sendNotification({
         userIds: vendor.ownerId,
@@ -155,6 +164,15 @@ const submitReview = async (req, res) => {
         message: `A new ${rating}-star review was submitted for ${vendor.shopName || 'your shop'} and is now live on your profile.`,
         data: { bookingId: booking._id, rating },
         referenceId: `REVIEW_SUBMITTED_VENDOR_${booking._id}`
+      }) : null,
+      staffUserId ? NotificationService.sendNotification({
+        userIds: staffUserId,
+        role: 'staff',
+        type: 'NEW_REVIEW',
+        title: 'New Review Received!',
+        message: `You received a ${rating}-star review for your recent service.`,
+        data: { bookingId: booking._id, rating },
+        referenceId: `REVIEW_SUBMITTED_STAFF_${booking._id}`
       }) : null
     ].filter(Boolean));
 
@@ -230,6 +248,12 @@ const approveReview = async (req, res) => {
 
     const vendor = await Vendor.findById(review.vendorId).select('ownerId shopName');
 
+    const Booking = require('../models/Booking');
+    const booking = await Booking.findById(review.bookingId);
+    const Staff = require('../models/Staff');
+    const staff = booking ? await Staff.findById(booking.staffId) : null;
+    const staffUserId = staff?.userId || staff?._id;
+
     await Promise.all([
       review.userId ? NotificationService.sendNotification({
         userIds: review.userId._id || review.userId,
@@ -246,6 +270,14 @@ const approveReview = async (req, res) => {
         title: 'New Review Published',
         message: `A new customer review for ${vendor.shopName || 'your shop'} is now visible on your profile.`,
         referenceId: `REVIEW_APPROVED_VENDOR_${review._id}`
+      }) : null,
+      staffUserId ? NotificationService.sendNotification({
+        userIds: staffUserId,
+        role: 'staff',
+        type: 'REVIEW_APPROVED',
+        title: 'New Review Published',
+        message: `A new customer review for your service is now visible on the profile.`,
+        referenceId: `REVIEW_APPROVED_STAFF_${review._id}`
       }) : null
     ].filter(Boolean));
 
@@ -307,7 +339,11 @@ const getMyVendorReviews = async (req, res) => {
       ...getApprovedReviewQuery()
     })
       .populate('userId', 'name image')
-      .populate('bookingId', 'services createdAt')
+      .populate({
+        path: 'bookingId',
+        select: 'services createdAt staffId',
+        populate: { path: 'staffId', select: 'name' }
+      })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -322,7 +358,8 @@ const getMyVendorReviews = async (req, res) => {
       },
       services: (review.bookingId?.services || [])
         .map((service) => service?.name)
-        .filter(Boolean)
+        .filter(Boolean),
+      staffName: review.bookingId?.staffId?.name || null
     }));
 
     res.status(200).json({
@@ -340,9 +377,68 @@ const getMyVendorReviews = async (req, res) => {
   }
 };
 
+const getMyStaffReviews = async (req, res) => {
+  try {
+    const Staff = require('../models/Staff');
+    const staff = await Staff.findById(req.staff._id).populate('vendorId');
+    if (!staff) return res.status(404).json({ message: 'Staff not found' });
+
+    // Find bookings assigned to this staff
+    const Booking = require('../models/Booking');
+    const bookings = await Booking.find({ staffId: staff._id }).select('_id');
+    const bookingIds = bookings.map(b => b._id);
+
+    const reviews = await Review.find({
+      bookingId: { $in: bookingIds },
+      ...getApprovedReviewQuery()
+    })
+      .populate('userId', 'name image')
+      .populate({
+        path: 'bookingId',
+        select: 'services createdAt staffId',
+        populate: { path: 'staffId', select: 'name' }
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const normalizedReviews = reviews.map((review) => ({
+      _id: review._id,
+      rating: review.rating,
+      comment: review.comment || '',
+      date: review.createdAt,
+      user: {
+        name: review.userId?.name || 'Verified User',
+        image: review.userId?.image || ''
+      },
+      services: (review.bookingId?.services || [])
+        .map((service) => service?.name)
+        .filter(Boolean),
+      staffName: review.bookingId?.staffId?.name || staff.name
+    }));
+
+    const avgRating = normalizedReviews.length
+      ? Number((normalizedReviews.reduce((sum, review) => sum + review.rating, 0) / normalizedReviews.length).toFixed(1))
+      : 0;
+
+    res.status(200).json({
+      summary: {
+        totalReviews: normalizedReviews.length,
+        avgRating: avgRating
+      },
+      reviews: normalizedReviews,
+      vendor: {
+        shopName: staff.vendorId?.shopName
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getVendorReviews,
   getMyVendorReviews,
+  getMyStaffReviews,
   getUnreviewedBooking,
   submitReview,
   getAdminReviews,

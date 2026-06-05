@@ -73,8 +73,13 @@ const lockSlot = async (req, res) => {
     const normalizedStart = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
     const end = normalizedStart.clone().add(realDuration, 'minutes');
 
+    const actorId = req.user?._id || req.staff?.userId || req.staff?._id;
+    if (!actorId) {
+      return res.status(401).json({ message: 'User or Staff identity is required to lock a slot' });
+    }
+
     // 1. User Restriction: One active lock per user per vendor (CLEAR BEFORE CHECKING)
-    await SlotLock.deleteMany({ userId: req.user._id, vendorId });
+    await SlotLock.deleteMany({ userId: actorId, vendorId });
 
     // 2. Identify a free staff member for this specific slot
     const staff = await findFirstAvailableStaff(
@@ -84,7 +89,7 @@ const lockSlot = async (req, res) => {
       end.toDate(),
       staffId,
       excludeBookingId,
-      req.user._id // Pass current user to exclude their own locks
+      actorId // Pass current user to exclude their own locks
     );
 
     if (!staff) {
@@ -94,9 +99,10 @@ const lockSlot = async (req, res) => {
     // 3. Create Lock
     try {
       const lock = await SlotLock.create({
-        userId: req.user._id,
+        userId: actorId,
         vendorId,
         staffId: staff._id,
+
         startTime: normalizedStart.toDate(),
         endTime: end.toDate(),
         expiresAt: moment().add(15, 'minutes').toDate(),

@@ -44,6 +44,24 @@ const StaffHistory = () => {
 
   useEffect(() => {
     fetchHistory();
+
+    const handleGlobalEvent = (e) => {
+      const type = e.detail?.type;
+      const refreshTypes = [
+         'STAFF_ASSIGNED',
+         'BOOKING_CANCELLED',
+         'BOOKING_COMPLETED',
+         'BOOKING_RESCHEDULED',
+         'ASSIGNMENT_RECEIVED',
+         'NEW_BOOKING'
+      ];
+      if (refreshTypes.includes(type)) {
+         fetchHistory();
+      }
+    };
+
+    window.addEventListener('new-socket-notification', handleGlobalEvent);
+    return () => window.removeEventListener('new-socket-notification', handleGlobalEvent);
   }, [historyPeriod, historyStartDate, historyEndDate]);
 
   const formatDate = (isoString) => {
@@ -159,8 +177,8 @@ const StaffHistory = () => {
                 onClick={() => setHistoryView(item.id)}
                 className={`flex-1 py-1.5 rounded-xl text-[9px] font-black capitalize tracking-widest transition-all ${
                   historyView === item.id
-                    ? 'bg-white dark:bg-gray-900 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-400 dark:text-gray-400'
+                    ? 'bg-white dark:bg-gray-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-gray-600'
+                    : 'text-slate-400 dark:text-gray-500'
                 }`}
               >
                 {item.label}

@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, CalendarDays, MessageSquareText } from 'lucide-react';
 import api from '../services/api';
 import dayjs from 'dayjs';
-import { useVendorStore } from '../store/vendorStore';
 
-const VendorReviews = () => {
+const StaffReviews = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const {
-    reviewsData,
-    reviewsLoading,
-    fetchReviews: storeFetchReviews
-  } = useVendorStore();
 
   const [vendor, setVendor] = useState(null);
   const [data, setData] = useState({ summary: { totalReviews: 0, avgRating: 0 }, reviews: [] });
@@ -28,22 +21,9 @@ const VendorReviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        if (!id) {
-          // Vendor Mode: Use store for instant loading
-          await storeFetchReviews();
-          setData(reviewsData);
-          setVendor(reviewsData.vendor); // Assuming store version includes vendor info or we get it from dashboardData
-          setLoading(false);
-          return;
-        }
-
-        // Public Mode: Regular fetch
         setLoading(true);
-        const [vendorRes, reviewsRes] = await Promise.all([
-          api.get(`/vendors/${id}`),
-          api.get(`/reviews/vendor/${id}`)
-        ]);
-        setVendor(vendorRes.data);
+        const reviewsRes = await api.get('/staff/reviews');
+        setVendor(reviewsRes.data.vendor);
         setData(reviewsRes.data || { summary: { totalReviews: 0, avgRating: 0 }, reviews: [] });
       } catch (error) {
         setVendor(null);
@@ -54,7 +34,7 @@ const VendorReviews = () => {
     };
 
     fetchReviews();
-  }, [id, reviewsData, storeFetchReviews]);
+  }, []);
 
   const serviceFilters = ['All', ...new Set(
     (data.reviews || []).flatMap((review) => review.services || [])
@@ -256,4 +236,4 @@ const VendorReviews = () => {
   );
 };
 
-export default VendorReviews;
+export default StaffReviews;

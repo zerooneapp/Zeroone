@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import dayjs from 'dayjs';
 import { motion, AnimatePresence } from 'framer-motion';
 import useNotificationStore from '../store/notificationStore';
 import useSocket from '../hooks/useSocket';
@@ -86,11 +87,14 @@ const StaffDashboard = () => {
             'BOOKING_COMPLETED',
             'BOOKING_RESCHEDULED',
             'ASSIGNMENT_RECEIVED',
-            'NEW_BOOKING'
+            'NEW_BOOKING',
+            'NEW_REVIEW',
+            'REVIEW_APPROVED'
          ];
 
          if (refreshTypes.includes(type)) {
             fetchBookings(false);
+            fetchStaffProfile();
          }
       };
 
@@ -102,9 +106,10 @@ const StaffDashboard = () => {
    const currentTask = activeBookings[0];
    const canNavigateToCustomer = currentTask?.type === 'home' && Boolean(currentTask?.serviceAddress);
 
+   const todayStr = dayjs().format('YYYY-MM-DD');
    const todayCompleted = bookings.filter(b =>
       b.status === 'completed' &&
-      new Date(b.startTime).toDateString() === new Date().toDateString()
+      dayjs(b.startTime).format('YYYY-MM-DD') === todayStr
    ).length;
 
    const formatTime = (isoString) => {
