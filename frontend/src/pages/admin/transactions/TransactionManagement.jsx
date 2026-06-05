@@ -168,8 +168,8 @@ const TransactionManagement = () => {
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Official Financial Settlement Report</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold text-slate-400">Generated on: {format(new Date(), 'dd MMM yyyy, HH:mm')}</p>
-            <p className="text-[10px] font-bold text-slate-400">Platform ID: Z1-ADMIN-FIN</p>
+            <p className="text-[10px] font-bold text-slate-500">Generated on: {format(new Date(), 'dd MMM yyyy, HH:mm')}</p>
+            <p className="text-[10px] font-bold text-slate-500">Platform ID: Z1-ADMIN-FIN</p>
           </div>
         </div>
       </div>
@@ -177,12 +177,12 @@ const TransactionManagement = () => {
       <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-emerald-500/20 no-print">
         <div className="space-y-1">
           <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize">Capital Ledger</h1>
-          <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Global Financial Movement & Settlement Hub</p>
+          <p className="text-[12px] font-black text-slate-500 capitalize tracking-[0.2em] opacity-90">Global Financial Movement & Settlement Hub</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportCsv}
-            className="h-11 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2 group"
+            className="h-11 px-4 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2 group"
           >
             <Download size={18} strokeWidth={3} className="group-hover:translate-y-0.5 transition-transform" />
             <span className="text-[11px] font-black capitalize tracking-widest">Live Report</span>
@@ -216,11 +216,11 @@ const TransactionManagement = () => {
 
       <div className="p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row gap-4 items-center no-print">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-gray-600" size={18} strokeWidth={3} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-600" size={18} strokeWidth={3} />
           <input
             type="text"
             placeholder="SEARCH ORDER ID, PAYMENT ID OR VENDOR..."
-            className="w-full pl-11 pr-4 h-12 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[14px] font-black capitalize tracking-widest focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-300"
+            className="w-full pl-11 pr-4 h-12 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[14px] font-black capitalize tracking-widest focus:ring-2 ring-primary/20 outline-none dark:text-white transition-all placeholder:text-slate-400"
             value={filters.search}
             onChange={(event) => {
               const value = event.target.value;
@@ -241,7 +241,7 @@ const TransactionManagement = () => {
                 'flex-1 h-12 px-6 rounded-xl text-[11px] font-black capitalize tracking-widest transition-all border shadow-sm',
                 filters.type === type
                   ? 'bg-slate-900 text-white border-slate-900 scale-[1.02]'
-                  : 'bg-white dark:bg-gray-800 text-slate-400 border-slate-100 dark:border-gray-700 hover:bg-slate-50'
+                  : 'bg-white dark:bg-gray-800 text-slate-500 border-slate-100 dark:border-gray-700 hover:bg-slate-50'
               )}
             >
               {type}
@@ -260,7 +260,7 @@ const TransactionManagement = () => {
                 'flex-1 h-12 px-4 rounded-xl text-[10px] font-black capitalize tracking-widest transition-all border shadow-sm',
                 filters.status === status
                   ? 'bg-white dark:bg-gray-900 text-slate-900 dark:text-white border-slate-900/10 dark:border-gray-700'
-                  : 'bg-slate-50 dark:bg-gray-800 text-slate-400 border-slate-100 dark:border-gray-700'
+                  : 'bg-slate-50 dark:bg-gray-800 text-slate-500 border-slate-100 dark:border-gray-700'
               )}
             >
               {status}
@@ -274,12 +274,12 @@ const TransactionManagement = () => {
           <table className="w-full border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-slate-50/80 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
-                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Reference ID</th>
-                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Partner / Initiator</th>
-                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Classification</th>
-                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-right">Capital Amount</th>
-                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-center">Settlement</th>
-                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-right">Synchronization</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Reference ID</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Partner / Initiator</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80">Classification</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-right">Capital Amount</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-center">Settlement</th>
+                <th className="px-5 py-4 text-left text-[10px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-80 text-right">Synchronization</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-gray-800/40">
@@ -294,21 +294,21 @@ const TransactionManagement = () => {
                   >
                     <td className="px-5 py-4 leading-none max-w-[150px]">
                       <code
-                        className="text-[12px] font-black text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 uppercase tracking-tighter inline-block truncate w-[100px]"
+                        className="text-[12px] font-black text-slate-500 dark:text-slate-500 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 lowercase tracking-tighter inline-block truncate w-[100px]"
                         title={transaction.referenceId || transaction.gatewayPaymentId || transaction._id}
                       >
                         #{String(transaction.referenceId || transaction.gatewayPaymentId || transaction._id).slice(-8)}
                       </code>
                       <div className="flex items-center gap-1 mt-1 opacity-40">
                         <Layers size={10} />
-                        <span className="text-[10px] font-bold text-slate-400 capitalize">
+                        <span className="text-[10px] font-bold text-slate-500 capitalize">
                           {transaction.gatewayOrderId || transaction.paymentGateway || 'manual'}
                         </span>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-gray-800 flex items-center justify-center text-[12px] font-black text-slate-400 capitalize tracking-tighter">
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-gray-800 flex items-center justify-center text-[12px] font-black text-slate-500 capitalize tracking-tighter">
                           {(transaction.vendor?.shopName || transaction.initiatedBy?.name || 'NA')
                             .split(' ')
                             .map((part) => part[0])
@@ -319,7 +319,7 @@ const TransactionManagement = () => {
                           <p className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
                             {transaction.vendor?.shopName || transaction.initiatedBy?.name || 'Unknown'}
                           </p>
-                          <p className="text-[11px] font-black text-slate-400 capitalize opacity-60">
+                          <p className="text-[11px] font-black text-slate-500 capitalize opacity-90">
                             {transaction.vendor?.owner?.name || transaction.initiatedBy?.phone || 'Verified Identity'}
                           </p>
                         </div>
@@ -344,7 +344,7 @@ const TransactionManagement = () => {
                         )}>
                           {transaction.type === 'credit' ? '+' : '-'} {moneyFormatter.format(transaction.amount || 0)}
                         </span>
-                        <p className="text-[11px] font-black text-slate-300 capitalize mt-0.5">
+                        <p className="text-[11px] font-black text-slate-400 capitalize mt-0.5">
                           {prettifyLabel(transaction.paymentMethod || transaction.paymentGateway || 'manual')}
                         </p>
                       </div>
@@ -359,7 +359,7 @@ const TransactionManagement = () => {
                         <p className="text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
                           {format(new Date(transaction.timestamp), 'dd MMM yyyy')}
                         </p>
-                        <p className="text-[11px] font-black text-slate-400 capitalize opacity-60 mt-0.5">
+                        <p className="text-[11px] font-black text-slate-500 capitalize opacity-90 mt-0.5">
                           {format(new Date(transaction.timestamp), 'HH:mm:ss')}
                         </p>
                       </div>
@@ -373,25 +373,25 @@ const TransactionManagement = () => {
 
         {loading && (
           <div className="p-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 border border-slate-100 animate-pulse">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-300 border border-slate-100 animate-pulse">
               <TrendingUp size={32} strokeWidth={3} />
             </div>
-            <p className="font-black text-slate-400 capitalize tracking-widest text-[12px] opacity-60">Synchronizing ledger</p>
+            <p className="font-black text-slate-500 capitalize tracking-widest text-[12px] opacity-90">Synchronizing ledger</p>
           </div>
         )}
 
         {!loading && data.transactions.length === 0 && (
           <div className="p-20 text-center space-y-4 no-print">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 border border-slate-100">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-300 border border-slate-100">
               <TrendingUp size={32} strokeWidth={3} />
             </div>
-            <p className="font-black text-slate-400 capitalize tracking-widest text-[12px] opacity-60">No financial velocity detected in this range</p>
+            <p className="font-black text-slate-500 capitalize tracking-widest text-[12px] opacity-90">No financial velocity detected in this range</p>
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-between px-2 no-print">
-        <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em]">
+        <p className="text-[11px] font-black text-slate-500 capitalize tracking-[0.2em]">
           Page {data.currentPage} of {data.totalPages}
         </p>
         <div className="flex gap-2">
@@ -427,7 +427,7 @@ const SummaryCard = ({ label, value, icon: Icon, color, sub }) => (
         <Icon size={24} strokeWidth={3} />
       </div>
       <div className="text-right">
-        <p className="text-[12px] font-black text-slate-400 capitalize tracking-widest opacity-60 leading-none">{label}</p>
+        <p className="text-[12px] font-black text-slate-500 capitalize tracking-widest opacity-90 leading-none">{label}</p>
         <p className="text-[22px] font-black text-slate-900 dark:text-white tracking-tighter mt-1">
           {moneyFormatter.format(value || 0)}
         </p>
@@ -435,7 +435,7 @@ const SummaryCard = ({ label, value, icon: Icon, color, sub }) => (
     </div>
     <div className="pt-3 border-t border-slate-50 dark:border-gray-800 flex items-center gap-2">
       <div className={cn('w-1.5 h-1.5 rounded-full', color === 'emerald' ? 'bg-emerald-500' : color === 'rose' ? 'bg-rose-500' : 'bg-amber-500')} />
-      <p className="text-[11px] font-black text-slate-400 capitalize tracking-tighter opacity-70">{sub}</p>
+      <p className="text-[11px] font-black text-slate-500 capitalize tracking-tighter opacity-100">{sub}</p>
     </div>
   </div>
 );

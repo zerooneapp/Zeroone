@@ -162,7 +162,7 @@ const VendorManagement = () => {
 
   const getLevelBadge = (level) => {
     const styles = {
-      basic: 'bg-slate-50 text-slate-400 border-slate-200',
+      basic: 'bg-slate-50 text-slate-500 border-slate-200',
       standard: 'bg-blue-50 text-blue-500 border-blue-100',
       premium: 'bg-purple-50 text-purple-500 border-purple-100',
       luxury: 'bg-amber-50 text-amber-600 border-amber-200'
@@ -178,7 +178,7 @@ const VendorManagement = () => {
   const getStatusBadge = (status, vendor) => {
     if (status === 'pending' && vendor && !vendor.isProfileComplete) {
       return (
-        <span className="text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter bg-slate-50 text-slate-400 border-slate-200 flex items-center gap-1 w-fit">
+        <span className="text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter bg-slate-50 text-slate-500 border-slate-200 flex items-center gap-1 w-fit">
           <AlertCircle size={10} /> Incomplete
         </span>
       );
@@ -190,7 +190,7 @@ const VendorManagement = () => {
       inactive: 'bg-orange-50 text-orange-500 border-orange-100/50',
       approved: 'bg-blue-50 text-blue-500 border-blue-100/50',
       blocked: 'bg-red-50 text-red-500 border-red-100/50',
-      rejected: 'bg-slate-50 text-slate-400 border-slate-200'
+      rejected: 'bg-slate-50 text-slate-500 border-slate-200'
     };
 
     return (
@@ -207,14 +207,14 @@ const VendorManagement = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Partner Fleet</h1>
-            <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Manage your elite merchant network</p>
+            <p className="text-[11px] font-black text-slate-500 capitalize tracking-[0.2em] mt-1 opacity-90">Manage your elite merchant network</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-xl px-4 py-2 flex flex-col items-end justify-center min-w-[120px]">
               <span className="text-[10px] font-black text-primary/70 dark:text-primary/80 uppercase tracking-widest">Total Wallet</span>
               <span className="text-[15px] font-black text-primary dark:text-white leading-none mt-0.5">Rs {totalWalletBalance?.toFixed(2) || '0.00'}</span>
             </div>
-            <button onClick={() => fetchVendors(true)} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all hover:text-primary dark:hover:text-white h-full">
+            <button onClick={() => fetchVendors(true)} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-500 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all hover:text-primary dark:hover:text-white h-full">
               <RefreshCw size={18} strokeWidth={3} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
@@ -222,11 +222,11 @@ const VendorManagement = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
           <div className="relative lg:col-span-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} strokeWidth={3} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} strokeWidth={3} />
             <input
               type="text"
               placeholder="Search shop, owner..."
-              className="w-full pl-10 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-300"
+              className="w-full pl-10 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-400"
               value={filters.search}
               onChange={(e) => {
                 setPage(1);
@@ -245,7 +245,7 @@ const VendorManagement = () => {
             return (
               <div key={field} className="relative group">
                 <select
-                  className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
+                  className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-300"
                   value={filters[field]}
                   onChange={(e) => {
                     setPage(1);
@@ -269,7 +269,7 @@ const VendorManagement = () => {
                     </>
                   )}
                 </select>
-                <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
+                <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none group-hover:text-primary transition-colors" />
               </div>
             )
           })}
@@ -280,13 +280,13 @@ const VendorManagement = () => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-900 dark:bg-gray-800 border-b border-slate-900 dark:border-gray-700">
-              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Shop Details</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Owner</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Level & Plan</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Wallet</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Status</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-center">Active</th>
-              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-right">Actions</th>
+              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Shop Details</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Owner</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Level & Plan</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Wallet</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Status</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500 text-center">Active</th>
+              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
@@ -325,7 +325,7 @@ const VendorManagement = () => {
                             vendor.shopName
                           )}
                         </h4>
-                        <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest flex items-center gap-1 mt-1">
+                        <p className="text-[11px] font-black text-slate-500 capitalize tracking-widest flex items-center gap-1 mt-1">
                           <MapPin size={10} strokeWidth={3} /> {vendor.address?.split(',')[0] || 'N/A'}
                         </p>
                       </div>
@@ -337,7 +337,7 @@ const VendorManagement = () => {
                   <td className="px-3 py-3.5 leading-none w-[15%]">
                     <div className="flex flex-col gap-1.5">
                       {getLevelBadge(vendor.serviceLevel)}
-                      <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest pl-0.5">
+                      <div className="text-[10px] font-black text-slate-500 dark:text-slate-500 capitalize tracking-widest pl-0.5">
                         {vendor.subscription?.type || 'No Plan'}
                       </div>
                     </div>
@@ -361,12 +361,12 @@ const VendorManagement = () => {
                           e.stopPropagation();
                           handleAction(vendor._id, 'delete');
                         }}
-                        className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-all active:scale-95"
+                        className="p-1.5 text-slate-500 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-all active:scale-95"
                         title="Delete Partner"
                       >
                         <Trash2 size={16} strokeWidth={3} />
                       </button>
-                      <button className="p-1.5 text-slate-400 dark:text-slate-500 group-hover:text-primary transition-all active:scale-95">
+                      <button className="p-1.5 text-slate-500 dark:text-slate-500 group-hover:text-primary transition-all active:scale-95">
                         <ChevronRight size={18} strokeWidth={3} />
                       </button>
                     </div>
@@ -379,10 +379,10 @@ const VendorManagement = () => {
 
         {vendors.length === 0 && !loading && (
           <div className="p-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 dark:text-slate-700 border border-slate-100 dark:border-gray-700">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-300 dark:text-slate-700 border border-slate-100 dark:border-gray-700">
               <Store size={32} strokeWidth={3} />
             </div>
-            <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[12px]">No elite partners found</p>
+            <p className="font-black text-slate-400 dark:text-slate-600 capitalize tracking-widest text-[12px]">No elite partners found</p>
           </div>
         )}
       </div>
@@ -396,7 +396,7 @@ const VendorManagement = () => {
           >
             Prev
           </button>
-          <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">
+          <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">
             Page {page} / {totalPages}
           </span>
           <button
@@ -451,7 +451,7 @@ const VendorManagement = () => {
                 </div>
                 <button
                   onClick={() => setIsDrawerOpen(false)}
-                  className="p-3 bg-slate-50 dark:bg-gray-800/50 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl text-slate-400 hover:text-red-500 active:scale-95 transition-all border border-slate-100 dark:border-gray-800 group"
+                  className="p-3 bg-slate-50 dark:bg-gray-800/50 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl text-slate-500 hover:text-red-500 active:scale-95 transition-all border border-slate-100 dark:border-gray-800 group"
                 >
                   <XCircle size={22} strokeWidth={2.5} className="transition-transform group-hover:rotate-90" />
                 </button>
@@ -596,7 +596,7 @@ const VendorManagement = () => {
                   <div className="space-y-3.5">
                     <div className="flex items-center gap-2 bg-white dark:bg-gray-950 rounded-xl border border-slate-100 dark:border-gray-800 p-2">
                       <div className="flex-1">
-                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">From</label>
+                        <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest px-1">From</label>
                         <input
                           type="date"
                           max={dayjs().format('YYYY-MM-DD')}
@@ -605,9 +605,9 @@ const VendorManagement = () => {
                           className="w-full bg-transparent px-2 py-1.5 text-[10px] font-black text-slate-900 dark:text-white focus:ring-0 border-none"
                         />
                       </div>
-                      <div className="text-slate-300 dark:text-slate-600 text-sm font-black">›</div>
+                      <div className="text-slate-400 dark:text-slate-600 text-sm font-black">›</div>
                       <div className="flex-1">
-                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">To</label>
+                        <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest px-1">To</label>
                         <input
                           type="date"
                           max={dayjs().format('YYYY-MM-DD')}
@@ -629,13 +629,13 @@ const VendorManagement = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-70">Booking Log</p>
+                      <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1 opacity-100">Booking Log</p>
                       {insightsLoading ? (
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">
                           Loading
                         </div>
                       ) : !(vendorInsights?.bookings || []).length ? (
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">
                           No bookings in range
                         </div>
                       ) : (
@@ -646,16 +646,16 @@ const VendorManagement = () => {
                                 <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">
                                   {booking.customerName}
                                 </p>
-                                <p className="text-[9px] font-black text-slate-400 tracking-widest uppercase mt-1 truncate">
+                                <p className="text-[9px] font-black text-slate-500 tracking-widest uppercase mt-1 truncate">
                                   {booking.services?.map((service) => service.name).join(', ') || 'Service Booking'}
                                 </p>
-                                <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 tracking-widest uppercase mt-1">
+                                <p className="text-[8px] font-black text-slate-400 dark:text-slate-600 tracking-widest uppercase mt-1">
                                   {dayjs(booking.startTime).format('YYYY-MM-DD')} • {booking.staffName}
                                 </p>
                               </div>
                               <div className="text-right shrink-0">
                                 <p className="text-[11px] font-black text-slate-900 dark:text-white">Rs {booking.totalPrice || 0}</p>
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">{booking.status}</p>
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">{booking.status}</p>
                               </div>
                             </div>
                           </div>
@@ -664,13 +664,13 @@ const VendorManagement = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-70">Revenue Log</p>
+                      <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1 opacity-100">Revenue Log</p>
                       {insightsLoading ? (
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">
                           Loading
                         </div>
                       ) : !(vendorInsights?.revenue || []).length ? (
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-center text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">
                           No revenue in range
                         </div>
                       ) : (
@@ -678,7 +678,7 @@ const VendorManagement = () => {
                           <div key={entry._id} className="p-3 rounded-xl bg-white dark:bg-gray-950 border border-slate-100 dark:border-gray-800 flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">{entry.description}</p>
-                              <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 tracking-widest uppercase mt-1">
+                              <p className="text-[8px] font-black text-slate-400 dark:text-slate-600 tracking-widest uppercase mt-1">
                                 {dayjs(entry.timestamp).format('YYYY-MM-DD')} • {dayjs(entry.timestamp).format('HH:mm')}
                               </p>
                             </div>
@@ -714,7 +714,7 @@ const Section = ({ title, icon: Icon, children }) => (
 
 const InfoItem = ({ label, value, highlight }) => (
   <div className="leading-tight">
-    <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mb-1 opacity-60">{label}</p>
+    <p className="text-[11px] font-black text-slate-500 capitalize tracking-widest mb-1 opacity-90">{label}</p>
     <p className={cn('text-[13px] font-black capitalize dark:text-white tracking-tight', highlight && 'text-red-500')}>
       {value || '---'}
     </p>
@@ -723,7 +723,7 @@ const InfoItem = ({ label, value, highlight }) => (
 
 const Stat = ({ label, value, icon: Icon }) => (
   <div className="p-4 bg-white/50 dark:bg-gray-950/50 rounded-2xl border border-slate-100/50 dark:border-gray-800/50 text-center shadow-sm backdrop-blur-sm group hover:border-primary/20 transition-all">
-    <p className="text-[9px] font-black text-slate-400 uppercase mb-1.5 tracking-wider opacity-70 group-hover:text-primary transition-colors">{label}</p>
+    <p className="text-[9px] font-black text-slate-500 uppercase mb-1.5 tracking-wider opacity-100 group-hover:text-primary transition-colors">{label}</p>
     <div className="flex items-center justify-center gap-2">
       {Icon && <Icon size={12} strokeWidth={3} className="text-primary/60" />}
       <span className="text-[15px] font-black dark:text-white tracking-tighter">{value}</span>
@@ -733,7 +733,7 @@ const Stat = ({ label, value, icon: Icon }) => (
 
 const ActionButton = ({ icon: Icon, label, color, onClick, active, disabled, tooltip }) => {
   const colors = {
-    emerald: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-500/20 active:bg-emerald-500 active:text-white disabled:opacity-40 disabled:bg-slate-50 disabled:text-slate-300 disabled:border-slate-100',
+    emerald: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-500/20 active:bg-emerald-500 active:text-white disabled:opacity-40 disabled:bg-slate-50 disabled:text-slate-400 disabled:border-slate-100',
     red: 'bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 border-red-100/50 dark:border-red-500/20 active:bg-red-500 active:text-white disabled:opacity-40',
     primary: 'bg-primary/5 dark:bg-primary/20 text-primary dark:text-white border-primary/10 dark:border-primary/30 active:bg-primary active:text-white disabled:opacity-40'
   };
@@ -765,8 +765,8 @@ const DocumentTile = ({ title, src }) => {
   if (!src) {
     return (
       <div className="space-y-2">
-        <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1">{title}</p>
-        <div className="h-40 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-slate-200 dark:border-gray-700 flex items-center justify-center text-[10px] font-black text-slate-300 capitalize leading-tight text-center p-4">
+        <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1">{title}</p>
+        <div className="h-40 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-slate-200 dark:border-gray-700 flex items-center justify-center text-[10px] font-black text-slate-400 capitalize leading-tight text-center p-4">
           {title} Missing
         </div>
       </div>
@@ -775,7 +775,7 @@ const DocumentTile = ({ title, src }) => {
 
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1">{title}</p>
+      <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1">{title}</p>
       <a href={src} target="_blank" rel="noreferrer" className="block h-40 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 overflow-hidden group relative active:scale-[0.98] transition-all">
         <img src={src} alt={title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
         <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">

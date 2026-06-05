@@ -886,7 +886,7 @@ const VendorProfile = () => {
                               {data.featuredImage ? (
                                  <img src={data.featuredImage} className="w-full h-full object-cover" alt="Featured" />
                               ) : (
-                                 <div className="w-full h-full flex items-center justify-center text-slate-300"><LayoutGrid size={16} /></div>
+                                 <div className="w-full h-full flex items-center justify-center text-slate-900 dark:text-black"><LayoutGrid size={16} /></div>
                               )}
                            </div>
                         </div>
@@ -1071,7 +1071,7 @@ const VendorProfile = () => {
                                  }}
                               />
                               <label htmlFor="video-input" className="p-2 bg-white dark:bg-gray-800 rounded-xl cursor-pointer shadow-md border border-slate-200/60 dark:border-gray-800">
-                                 <Video size={16} className={cn("text-gray-400", videoFile && "text-[#00246b] dark:text-blue-400")} />
+                                 <Plus size={16} className={cn("text-gray-400", videoFile && "text-[#00246b] dark:text-blue-400")} />
                               </label>
                            </div>
 

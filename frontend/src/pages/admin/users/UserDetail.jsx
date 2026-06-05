@@ -131,7 +131,7 @@ const UserDetail = () => {
                      )}
                   </div>
                   <h2 className="text-[18px] font-black text-slate-900 dark:text-white capitalize tracking-tighter mb-1 leading-none">{user.name}</h2>
-                  <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-[0.2em] mb-5 opacity-60">Customer Since {new Date(user.createdAt).getFullYear()}</p>
+                  <p className="text-[7.5px] font-black text-slate-500 capitalize tracking-[0.2em] mb-5 opacity-90">Customer Since {new Date(user.createdAt).getFullYear()}</p>
 
                   <div className="space-y-3.5 text-left">
                      <InfoItem icon={Phone} label="Contact" value={user.phone} />
@@ -160,7 +160,7 @@ const UserDetail = () => {
                   <h3 className="text-[10px] font-black text-slate-900 dark:text-white capitalize tracking-widest flex items-center gap-2">
                      <History size={14} strokeWidth={3} className="text-primary dark:text-white" /> Transaction History
                   </h3>
-                  <span className="text-[8px] font-black text-slate-400 capitalize tracking-widest opacity-60">{bookings.length} Bookings Total</span>
+                  <span className="text-[8px] font-black text-slate-500 capitalize tracking-widest opacity-90">{bookings.length} Bookings Total</span>
                </div>
 
                <div className="space-y-2.5">
@@ -174,12 +174,12 @@ const UserDetail = () => {
                         className="p-4 bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex items-center justify-between gap-4 group hover:border-primary transition-all cursor-pointer no-scrollbar"
                      >
                         <div className="flex items-center gap-3.5">
-                           <div className="w-11 h-11 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-400 dark:text-white group-hover:bg-slate-900 group-hover:text-white transition-all border border-slate-100 dark:border-gray-700 shadow-inner">
+                           <div className="w-11 h-11 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-500 dark:text-white group-hover:bg-slate-900 group-hover:text-white transition-all border border-slate-100 dark:border-gray-700 shadow-inner">
                               <Package size={20} strokeWidth={3} />
                            </div>
                            <div className="leading-tight">
                               <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary dark:group-hover:text-white transition-colors">{booking.vendorId?.shopName || 'Unknown Partner'}</h4>
-                              <p className="text-[9px] font-black text-slate-400 capitalize flex items-center gap-1 mt-0.5 opacity-60">
+                              <p className="text-[9px] font-black text-slate-500 capitalize flex items-center gap-1 mt-0.5 opacity-90">
                                  <Clock size={10} strokeWidth={3} /> {new Date(booking.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                               </p>
                            </div>
@@ -187,17 +187,17 @@ const UserDetail = () => {
 
                         <div className="hidden md:flex items-center gap-8 px-8 border-x border-slate-100 dark:border-gray-800">
                            <div className="text-center">
-                              <p className="text-[7.5px] font-black text-slate-400 capitalize mb-1 tracking-widest opacity-60">Price</p>
+                              <p className="text-[7.5px] font-black text-slate-500 capitalize mb-1 tracking-widest opacity-90">Price</p>
                               <p className="text-[12px] font-black text-slate-900 dark:text-white">₹{booking.totalPrice}</p>
                            </div>
                            <div className="text-center">
-                              <p className="text-[7.5px] font-black text-slate-400 capitalize mb-1 tracking-widest opacity-60">Status</p>
+                              <p className="text-[7.5px] font-black text-slate-500 capitalize mb-1 tracking-widest opacity-90">Status</p>
                               <BookingStatusBadge status={booking.status} />
                            </div>
                         </div>
 
                         <div className="shrink-0">
-                           <div className="w-8 h-8 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-300 group-hover:text-primary transition-all border border-slate-100 dark:border-gray-700">
+                           <div className="w-8 h-8 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-lg text-slate-400 group-hover:text-primary transition-all border border-slate-100 dark:border-gray-700">
                               <ChevronRight size={16} strokeWidth={3} />
                            </div>
                         </div>
@@ -207,9 +207,9 @@ const UserDetail = () => {
                   {bookings.length === 0 && (
                      <div className="p-16 text-center border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-2xl bg-slate-50/30 dark:bg-gray-900/10 space-y-4">
                         <div className="w-14 h-14 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto shadow-sm border border-slate-100 dark:border-gray-700">
-                           <History size={28} className="text-slate-200" strokeWidth={3} />
+                           <History size={28} className="text-slate-300" strokeWidth={3} />
                         </div>
-                        <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[9px] opacity-80">No bookings found in audit logs</p>
+                        <p className="font-black text-slate-400 dark:text-slate-600 capitalize tracking-widest text-[9px] opacity-80">No bookings found in audit logs</p>
                      </div>
                   )}
                </div>
@@ -229,7 +229,7 @@ const InfoItem = ({ icon: Icon, label, value, highlight }) => (
          <Icon size={12} strokeWidth={3} />
       </div>
       <div className="leading-tight pt-0.5">
-         <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-[0.15em] mb-1 opacity-60">{label}</p>
+         <p className="text-[7.5px] font-black text-slate-500 capitalize tracking-[0.15em] mb-1 opacity-90">{label}</p>
          <p className={cn("text-[11px] font-black capitalize text-slate-900 dark:text-white tracking-tight", highlight && "text-red-500")}>
             {value || '---'}
          </p>

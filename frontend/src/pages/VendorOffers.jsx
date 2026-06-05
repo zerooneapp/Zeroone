@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Tag, Search, Gift } from 'lucide-react';
+import { ArrowLeft, Plus, Tag, Search, Gift, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import OfferCard from '../components/OfferCard';
@@ -19,6 +19,7 @@ const VendorOffers = () => {
   } = useVendorStore();
 
   const [toggleLoadingId, setToggleLoadingId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const handleFetch = async (force = false) => {
     try {
@@ -62,6 +63,13 @@ const VendorOffers = () => {
       return toast.error('Account inactive. Recharge to edit offers.', { id: 'account-inactive', duration: 2000 });
     }
     navigate(`/vendor/offers/edit/${offer._id}`);
+  };
+
+  const handleDelete = (id) => {
+    if (!vendorData?.subscription?.isActive) {
+      return toast.error('Account inactive. Recharge to delete offers.', { id: 'account-inactive', duration: 2000 });
+    }
+    setDeleteConfirmId(id);
   };
 
   const memoizedOffers = useMemo(() => offers, [offers]);
@@ -140,12 +148,67 @@ const VendorOffers = () => {
                   offer={offer}
                   onToggle={handleToggle}
                   onEdit={handleEdit}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>
           )}
         </AnimatePresence>
       </main>
+
+      <AnimatePresence>
+        {deleteConfirmId && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDeleteConfirmId(null)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl relative z-10 p-5 text-center border border-white/10"
+            >
+              <div className="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-rose-100/50">
+                <Trash2 size={20} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Delete Offer</h3>
+              <p className="text-[12px] text-slate-400 dark:text-gray-500 mt-1.5 leading-relaxed">
+                Are you sure you want to delete this offer permanently? This action cannot be undone.
+              </p>
+              <div className="flex gap-2.5 mt-6">
+                <button
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-black text-[11px] capitalize tracking-widest active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    const id = deleteConfirmId;
+                    setDeleteConfirmId(null);
+                    const original = [...offers];
+                    setOffers(prev => prev.filter(o => o._id !== id));
+                    try {
+                      await api.delete(`/offers/${id}`);
+                      toast.success('Offer deleted successfully');
+                    } catch (err) {
+                      setOffers(original);
+                      toast.error('Failed to delete offer');
+                    }
+                  }}
+                  className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black text-[11px] capitalize tracking-widest shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
