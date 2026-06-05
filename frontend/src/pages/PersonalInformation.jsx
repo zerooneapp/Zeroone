@@ -117,7 +117,9 @@ const PersonalInformation = () => {
               {formData.image ? (
                 <img src={formData.image} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <User size={40} className="text-white/20" />
+                <span className="text-[28px] font-black text-white capitalize tracking-tighter">
+                  {formData.name ? formData.name.charAt(0).toUpperCase() : 'U'}
+                </span>
               )}
             </label>
             <label

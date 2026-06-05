@@ -534,6 +534,27 @@ const ServiceDetail = () => {
       document.removeEventListener('touchmove', preventGlobalZoom);
     };
   }, [lightboxImg]);
+  
+  // Manage URL hash for physical back button support
+  useEffect(() => {
+    if (lightboxImg) {
+      window.location.hash = 'gallery';
+    } else if (window.location.hash === '#gallery') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [lightboxImg]);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash !== '#gallery') {
+        setLightboxImg(null);
+        setZoomScale(1);
+        setPanOffset({ x: 0, y: 0 });
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const handleMouseDown = (e) => {
     if (zoomScale > 1) {
@@ -1272,9 +1293,13 @@ const ServiceDetail = () => {
               </span>
               <button
                 onClick={() => {
-                  setLightboxImg(null);
-                  setZoomScale(1);
-                  setPanOffset({ x: 0, y: 0 });
+                  if (window.location.hash === '#gallery') {
+                    window.history.back();
+                  } else {
+                    setLightboxImg(null);
+                    setZoomScale(1);
+                    setPanOffset({ x: 0, y: 0 });
+                  }
                 }}
                 className="w-9 h-9 rounded-xl bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
                 title="Close"
