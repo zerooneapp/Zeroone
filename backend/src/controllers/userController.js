@@ -146,6 +146,7 @@ const toggleFavorite = async (req, res) => {
 const getFavorites = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('favoriteVendors', 'shopName address shopImage rating totalReviews');
+    if (!user) return res.status(200).json([]);
     res.status(200).json(user.favoriteVendors || []);
   } catch (error) {
     res.status(500).json({ message: error.message });

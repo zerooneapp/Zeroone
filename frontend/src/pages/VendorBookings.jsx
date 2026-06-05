@@ -227,7 +227,9 @@ const VendorBookings = () => {
             <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
               <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">Start Date</label>
               <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
-                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">{dayjs(fromDate).format('DD-MM-YYYY')}</span>
+                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">
+                  {fromDate ? dayjs(fromDate).format('DD-MM-YYYY') : 'Select Date'}
+                </span>
                 <ChevronDown size={12} className="text-gray-400" />
               </div>
               <input
@@ -245,7 +247,9 @@ const VendorBookings = () => {
             <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
               <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">End Date</label>
               <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
-                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">{dayjs(toDate).format('DD-MM-YYYY')}</span>
+                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">
+                  {toDate ? dayjs(toDate).format('DD-MM-YYYY') : 'Select Date'}
+                </span>
                 <ChevronDown size={12} className="text-gray-400" />
               </div>
               <input

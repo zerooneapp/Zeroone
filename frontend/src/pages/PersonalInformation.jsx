@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { ArrowLeft, User, Calendar, Phone, ShieldCheck, ArrowRight, Camera, Trash2 } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, ShieldCheck, ArrowRight, Upload, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -106,7 +106,6 @@ const PersonalInformation = () => {
             <input
               type="file"
               accept="image/*"
-              capture="user"
               onChange={handleImageChange}
               className="hidden"
               id="profile-upload"
@@ -126,7 +125,7 @@ const PersonalInformation = () => {
               className="absolute -bottom-1 -left-1 z-20 w-6 h-6 bg-[#00246b] hover:bg-opacity-90 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer border-2 border-white dark:border-gray-900 transition-all"
               title="Change profile image"
             >
-              <Camera size={10} strokeWidth={3} />
+              <Upload size={10} strokeWidth={3} />
             </label>
             {formData.image && (
               <button

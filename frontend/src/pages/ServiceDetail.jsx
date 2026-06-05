@@ -563,29 +563,6 @@ const ServiceDetail = () => {
       : services.filter((service) => normalizeCategoryValue(service.category) === normalizeCategoryValue(selectedCat));
   }, [services, selectedCat]);
 
-  if (loading && !vendor) return (
-    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen pt-[64px]">
-      <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
-      <div className="grid grid-cols-2 gap-4">
-        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
-        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
-      </div>
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-50 dark:bg-gray-900 rounded-3xl animate-pulse" />)}
-      </div>
-    </div>
-  );
-
-  if (error || !vendor) return (
-    <div className="p-20 text-center bg-white dark:bg-gray-950 min-h-screen">
-      <div className="flex flex-col items-center gap-4">
-        <AlertCircle size={48} className="text-gray-200" />
-        <p className="text-gray-500 font-bold">{error || 'Partner not found'}</p>
-        <Button className="mt-4" onClick={() => navigate(-1)}>Go Back</Button>
-      </div>
-    </div>
-  );
-
   const hasItemsFromThisVendor = cartVendor?._id === vendor?._id;
 
   const displayTotal = useMemo(() => {
@@ -641,6 +618,29 @@ const ServiceDetail = () => {
 
   const hasHomeService = services.some((service) => service.type === 'home' || service.type === 'both');
 
+  if (loading && !vendor) return (
+    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen pt-[64px]">
+      <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
+        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
+      </div>
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-50 dark:bg-gray-900 rounded-3xl animate-pulse" />)}
+      </div>
+    </div>
+  );
+
+  if (error || !vendor) return (
+    <div className="p-20 text-center bg-white dark:bg-gray-950 min-h-screen">
+      <div className="flex flex-col items-center gap-4">
+        <AlertCircle size={48} className="text-gray-200" />
+        <p className="text-gray-500 font-bold">{error || 'Partner not found'}</p>
+        <Button className="mt-4" onClick={() => navigate(-1)}>Go Back</Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">
       {/* Redesigned Secondary Navbar (Fixed) */}
@@ -680,6 +680,8 @@ const ServiceDetail = () => {
                         src={slide.url}
                         className="w-full h-full object-cover"
                         controls
+                        controlsList="nodownload noplaybackrate"
+                        disablePictureInPicture
                         preload="metadata"
                         playsInline
                         muted
@@ -1149,14 +1151,13 @@ const ServiceDetail = () => {
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <p className="text-[8px] font-black text-white/40 capitalize tracking-widest leading-none">Net total</p>
-                  <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
-                </div>
-                {totalSavings > 0 && (
-                  <div className="mt-1.5 flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-1 rounded-md self-start shadow-sm shadow-emerald-500/10">
-                    <Tag size={8} className="text-emerald-400 fill-emerald-400" />
-                    <p className="text-[8px] font-black text-emerald-400 tracking-widest leading-none uppercase">SAVE ₹{totalSavings}</p>
+                  <div className="flex items-center gap-1.5 leading-none">
+                    <p className="text-lg font-black text-white">₹{displayTotal}</p>
+                    {originalTotal > displayTotal && (
+                      <span className="text-[11px] font-bold text-gray-400/80 line-through">₹{originalTotal}</span>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
               <button
                 onClick={handleProceedToBooking}
