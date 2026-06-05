@@ -32,6 +32,50 @@ const getServiceModeLabel = (type = 'shop') => {
   return 'Shop Service';
 };
 
+// Custom video player to hide native controls (timeline/seek slider) and support custom play overlay
+const VideoPlayer = ({ src }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = React.useRef(null);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(err => {
+          console.error("Playback failed", err);
+        });
+      }
+    }
+  };
+
+  return (
+    <div className="w-full h-full relative cursor-pointer" onClick={togglePlay}>
+      <video
+        ref={videoRef}
+        src={src}
+        className="w-full h-full object-cover"
+        preload="metadata"
+        playsInline
+        muted
+        loop
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
+      {!isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none z-10">
+          <div className="w-12 h-12 rounded-full bg-white/80 dark:bg-black/60 flex items-center justify-center shadow-lg transition-transform active:scale-95">
+            <Play size={18} className="text-[#00246b] dark:text-white fill-current ml-0.5" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 /**
  * ServiceDetail Component
  * Optimized for elite user experience and intelligent booking flow.
@@ -697,16 +741,7 @@ const ServiceDetail = () => {
                 >
                   {slide.type === 'video' ? (
                     <div className="w-full h-full relative">
-                      <video
-                        src={slide.url}
-                        className="w-full h-full object-cover"
-                        controls
-                        controlsList="nodownload noplaybackrate"
-                        disablePictureInPicture
-                        preload="metadata"
-                        playsInline
-                        muted
-                      />
+                      <VideoPlayer src={slide.url} />
                     </div>
                   ) : (
                     <div 

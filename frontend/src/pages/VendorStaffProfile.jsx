@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Phone, Scissors, Calendar, ShieldCheck, Clock, CheckCircle2, AlertCircle, Sparkles, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, User, Phone, Scissors, Calendar, ShieldCheck, Clock, CheckCircle2, AlertCircle, Sparkles, ChevronLeft, Edit3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import { useVendorStore } from '../store/vendorStore';
@@ -11,7 +11,7 @@ const VendorStaffProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const { staffData, fetchStaff } = useVendorStore();
+  const { staffData, fetchStaff, dashboardData } = useVendorStore();
 
   // Find staff from pre-fetched Zustand store
   const storeStaff = useMemo(() => {
@@ -62,6 +62,14 @@ const VendorStaffProfile = () => {
   const totalEarnings = staff?.totalEarnings || 0;
   const isActive = staff ? (staff.isActive && !staff.activeClosure) : false;
   const activeClosure = staff?.activeClosure;
+  
+  const handleEdit = () => {
+    if (!staff) return;
+    if (dashboardData && !dashboardData.subscription?.isActive) {
+      return toast.error('Account inactive. Recharge to edit staff.', { id: 'account-inactive', duration: 2000 });
+    }
+    navigate(`/vendor/staff/edit/${staff._id}`);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-24">
@@ -88,9 +96,18 @@ const VendorStaffProfile = () => {
       {/* Main Container */}
       <main className="px-4 pt-[112px] space-y-4 max-w-4xl mx-auto">
         
-        {/* Profile Card */}
         <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3.5 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00246b]/5 to-transparent rounded-bl-full pointer-events-none" />
+          
+          {staff && (
+            <button 
+              onClick={handleEdit}
+              className="absolute top-3.5 right-3.5 p-2 bg-slate-50 dark:bg-gray-800 text-gray-500 rounded-xl hover:bg-primary/10 hover:text-primary transition-all active:scale-90 z-20 shadow-sm border border-slate-100 dark:border-gray-700"
+              title="Edit Staff Profile"
+            >
+              <Edit3 size={16} />
+            </button>
+          )}
           
           <div className="flex items-center gap-3">
             {/* Avatar */}

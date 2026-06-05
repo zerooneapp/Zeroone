@@ -26,11 +26,6 @@ const StaffCard = ({ staff, onToggle, onEdit, onDelete, onCardClick }) => {
         <div className="flex-1 min-w-0">
            <div className="flex items-center gap-2">
               <h3 className="font-black text-gray-900 dark:text-white truncate tracking-tight flex-1">{staff.name}</h3>
-              {staff.totalEarnings > 0 && (
-                 <div className="bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-tighter whitespace-nowrap flex-shrink-0">
-                    ₹{staff.totalEarnings.toLocaleString()} Earned
-                 </div>
-              )}
            </div>
            <p className="text-[9px] font-bold text-gray-400 dark:text-gray-300 capitalize tracking-tight leading-none mt-0.5">{staff.designation || 'Staff Member'}</p>
            
@@ -50,12 +45,6 @@ const StaffCard = ({ staff, onToggle, onEdit, onDelete, onCardClick }) => {
 
       <div className="flex flex-col gap-1.5 flex-shrink-0 items-center">
          <div className="flex gap-1.5">
-            <button 
-              onClick={() => onEdit(staff)}
-              className="p-2 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-xl hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
-            >
-               <Edit3 size={16} />
-            </button>
             {!staff.isOwner && (
                <button 
                  onClick={() => onDelete && onDelete(staff)}

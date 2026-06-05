@@ -144,16 +144,24 @@ const SecuritySettings = () => {
 
 
 
-         {/* 🔴 DANGER ZONE */}
-         <section className="pt-4 border-t border-slate-100 dark:border-gray-800">
-           <button
-             onClick={() => setShowDeleteConfirm(true)}
-             className="w-full flex items-center justify-center gap-2.5 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/20 text-rose-600 dark:text-rose-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
-           >
-             <Trash2 size={16} strokeWidth={3} />
-             Delete Account
-           </button>
-         </section>
+          {/* 🔴 DANGER ZONE */}
+          <section className="space-y-4">
+            <div className="bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 dark:border-rose-500/20 rounded-2xl p-4 text-left">
+              <h4 className="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <AlertTriangle size={14} /> Warning: Account Deletion
+              </h4>
+              <p className="text-[11px] font-semibold text-slate-500 dark:text-gray-405 leading-relaxed">
+                Deleting your account is permanent and cannot be undone. You will lose all your shop profile details, staff roster, assigned services, booking histories, and active subscription plans immediately.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="w-full flex items-center justify-center gap-2.5 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/20 text-rose-600 dark:text-rose-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
+            >
+              <Trash2 size={16} strokeWidth={3} />
+              Delete Account
+            </button>
+          </section>
       </main>
 
       {/* 🔐 PASSWORD UPDATE MODAL */}
