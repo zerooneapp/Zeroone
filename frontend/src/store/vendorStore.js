@@ -67,22 +67,6 @@ export const useVendorStore = create((set, get) => ({
         dashboardGlobalFeatures: globalFeatures,
         dashboardLoading: false
       });
-
-      // Pre-fetch staff and wallet data while dashboard is loading for seamless transitions
-      get().fetchStaff();
-      get().fetchWallet();
-      get().fetchPromotions();
-      get().fetchServices();
-      get().fetchClients();
-      get().fetchReviews();
-      get().fetchMemberships();
-      
-      // Pre-fetch bookings with default roster view
-      get().fetchBookings({ 
-        status: 'confirmed', 
-        from: dayjs().format('YYYY-MM-DD'), 
-        to: dayjs().add(7, 'day').format('YYYY-MM-DD') 
-      });
     } catch (err) {
       console.error('Failed to load dashboard data', err);
       set({ dashboardLoading: false });
@@ -222,17 +206,16 @@ export const useVendorStore = create((set, get) => ({
   fetchMemberships: async (force = false) => {
     const { membershipData, dashboardData } = get();
     if (membershipData.length > 0 && !force) {
-      silentMembershipRefresh(set);
+      silentMembershipRefresh(set, get);
       return;
     }
 
     set({ membershipLoading: true });
     try {
-      // We use the vendorId from dashboardData if available, otherwise fetch it
       let vId = dashboardData?.vendorId;
       if (!vId) {
-        const dashRes = await api.get('/dashboards/vendor');
-        vId = dashRes.data.vendorId;
+        const dashRes = await api.get('/vendor/dashboard-bundle');
+        vId = dashRes.data.dashboard.vendorId;
       }
       
       const res = await api.get(`/memberships/vendor/${vId}`);
@@ -338,7 +321,7 @@ async function silentDashboardRefresh(set, get) {
       silentReviewsRefresh(set);
     }
     if (get().membershipData.length > 0) {
-      silentMembershipRefresh(set);
+      silentMembershipRefresh(set, get);
     }
     if (get().bookingsData.length > 0 && get().lastBookingParams) {
       silentBookingsRefresh(set, get().lastBookingParams);
@@ -410,10 +393,13 @@ async function silentReviewsRefresh(set) {
   }
 }
 
-async function silentMembershipRefresh(set) {
+async function silentMembershipRefresh(set, get) {
   try {
-    const dashRes = await api.get('/dashboards/vendor');
-    const vId = dashRes.data.vendorId;
+    let vId = get?.()?.dashboardData?.vendorId;
+    if (!vId) {
+      const dashRes = await api.get('/vendor/dashboard-bundle');
+      vId = dashRes.data.dashboard.vendorId;
+    }
     const res = await api.get(`/memberships/vendor/${vId}`);
     set({ membershipData: res.data });
   } catch (err) {

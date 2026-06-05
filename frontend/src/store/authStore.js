@@ -139,8 +139,8 @@ export const useAuthStore = create(
 
       syncVendorStatus: async () => {
         try {
-          const res = await api.get('/vendor/dashboard');
-          const { subscription, walletBalance } = res.data;
+          const res = await api.get('/vendor/dashboard-bundle');
+          const { subscription, walletBalance } = res.data.wallet || {};
           set({
             vendorStatus: {
               isActive: subscription?.isActive || false,
