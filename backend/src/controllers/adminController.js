@@ -81,12 +81,12 @@ const getGlobalSettings = async (req, res) => {
 const getSharedSettings = async (req, res) => {
   try {
     let settings = await GlobalSettings.findOne().select('supportWhatsApp discoveryRadius freeTrialDays promotionPricePerDay features');
-    
+
     if (!settings) {
-      return res.status(200).json({ 
-        supportWhatsApp: '', 
-        discoveryRadius: 10, 
-        freeTrialDays: 7, 
+      return res.status(200).json({
+        supportWhatsApp: '',
+        discoveryRadius: 10,
+        freeTrialDays: 7,
         promotionPricePerDay: 10,
         features: { membershipActive: true, subscriptionActive: true }
       });
@@ -223,10 +223,10 @@ const approveVendor = async (req, res) => {
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + freeTrialDays);
-    
-    vendor.freeTrial = { 
-      isActive: true, 
-      expiryDate 
+
+    vendor.freeTrial = {
+      isActive: true,
+      expiryDate
     };
 
     await vendor.save();
@@ -309,7 +309,7 @@ const createPlan = async (req, res) => {
 const updatePlan = async (req, res) => {
   try {
     const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
-    
+
     // Invalidate all subscription plans cache with multiple methods for safety
     try {
       const keys = await redis.keys('subscription_plans:*');
@@ -361,7 +361,7 @@ const getAllUsers = async (req, res) => {
   try {
     const { search, status, page = 1, limit = 10 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const filter = { 
+    const filter = {
       role: 'customer',
       name: { $exists: true, $ne: '' } // Only show users who finished initial signup
     };
@@ -379,6 +379,9 @@ const getAllUsers = async (req, res) => {
     // Aggregate with total bookings count
     const users = await User.aggregate([
       { $match: filter },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
       {
         $lookup: {
           from: 'bookings',
@@ -396,10 +399,7 @@ const getAllUsers = async (req, res) => {
           isBlocked: 1,
           bookingCount: { $size: '$bookings' }
         }
-      },
-      { $sort: { createdAt: -1 } },
-      { $skip: skip },
-      { $limit: parseInt(limit) }
+      }
     ]);
 
     const totalUsers = await User.countDocuments(filter);
@@ -521,9 +521,13 @@ const getFilteredBookings = async (req, res) => {
       { $match: matchLine }
     ];
 
-    // Optimize: Sort before lookup if no search filter is active
+    // Optimize: Sort, skip, and limit BEFORE lookup if no search filter is active
     if (!search) {
-      dataPipeline.push({ $sort: { createdAt: -1, startTime: -1 } });
+      dataPipeline.push(
+        { $sort: { createdAt: -1, startTime: -1 } },
+        { $skip: skip },
+        { $limit: parseInt(limit) }
+      );
     }
 
     dataPipeline.push(
@@ -558,14 +562,11 @@ const getFilteredBookings = async (req, res) => {
             ]
           }
         },
-        { $sort: { createdAt: -1, startTime: -1 } }
+        { $sort: { createdAt: -1, startTime: -1 } },
+        { $skip: skip },
+        { $limit: parseInt(limit) }
       );
     }
-
-    dataPipeline.push(
-      { $skip: skip },
-      { $limit: parseInt(limit) }
-    );
 
     const bookings = await Booking.aggregate(dataPipeline).allowDiskUse(true);
 
@@ -672,7 +673,7 @@ const createCategory = async (req, res) => {
 const getCategories = async (req, res) => {
   try {
     const filter = {};
-    
+
     // If not an admin/super_admin, only show active categories
     const isAdmin = req.user && ['admin', 'super_admin'].includes(req.user.role);
     if (!isAdmin) {
@@ -708,10 +709,12 @@ const getAdminDashboard = async (req, res) => {
 
     const platformRevenueFilter = {
       status: 'completed',
-      category: { $in: [
-        'daily_subscription', 'monthly_subscription', 'promotion_payment', 
-        'membership_revenue', 'commission', 'wallet_topup', 'admin_topup'
-      ] }
+      category: {
+        $in: [
+          'daily_subscription', 'monthly_subscription', 'promotion_payment',
+          'membership_revenue', 'commission', 'wallet_topup', 'admin_topup'
+        ]
+      }
     };
 
     const [
@@ -719,12 +722,16 @@ const getAdminDashboard = async (req, res) => {
       yesterdayRevenue,
       totalRevenue,
       newVendors,
+      yesterdayNewVendors,
       totalPartners,
+      yesterdayTotalPartners,
       activePartners,
       pendingPartners,
       blockedPartners,
       activeBookings,
+      yesterdayActiveBookings,
       totalUsers,
+      yesterdayTotalUsers,
       bookingStats,
       recentVendors,
       recentUsers,
@@ -747,14 +754,18 @@ const getAdminDashboard = async (req, res) => {
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]),
       Vendor.countDocuments({ createdAt: { $gte: today.toDate() } }),
+      Vendor.countDocuments({ createdAt: { $gte: yesterday.toDate(), $lt: today.toDate() } }),
       Vendor.countDocuments({}),
+      Vendor.countDocuments({ createdAt: { $lt: today.toDate() } }), // Yesterday total partners
       Vendor.countDocuments({ status: 'active' }),
       Vendor.countDocuments({ status: 'pending' }),
       Vendor.countDocuments({ status: 'blocked' }),
       Booking.countDocuments({ status: 'confirmed' }),
+      Booking.countDocuments({ status: 'confirmed', createdAt: { $lt: today.toDate() } }), // Approximation for yesterday's active bookings
       User.countDocuments({ role: 'customer' }),
+      User.countDocuments({ role: 'customer', createdAt: { $lt: today.toDate() } }), // Yesterday total users
       Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Vendor.find().sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name').lean(),
+      Vendor.find({ status: 'pending' }).sort({ createdAt: -1 }).limit(5).populate('ownerId', 'name').lean(),
       User.find({ role: 'customer' }).sort({ createdAt: -1 }).limit(5).lean(),
       Review.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('vendorId', 'shopName').lean(),
       WalletTransaction.aggregate([
@@ -763,9 +774,9 @@ const getAdminDashboard = async (req, res) => {
         { $sort: { _id: 1 } }
       ]),
       Booking.countDocuments({ createdAt: { $gte: rangeStart } }),
-      Vendor.countDocuments({ 
+      Vendor.countDocuments({
         walletBalance: { $lt: minimumWalletThreshold },
-        planType: { $ne: 'trial' } 
+        planType: { $ne: 'trial' }
       }),
       Vendor.countDocuments({ status: 'inactive' })
     ]);
@@ -793,14 +804,19 @@ const getAdminDashboard = async (req, res) => {
       todayRevenue: todayRevenue[0]?.total || 0,
       yesterdayRevenue: yesterdayRevenue[0]?.total || 0,
       totalRevenue: totalRevenue[0]?.total || 0,
+      yesterdayTotalRevenue: (totalRevenue[0]?.total || 0) - (todayRevenue[0]?.total || 0),
       newVendors,
+      yesterdayNewVendors,
       totalPartners,
+      yesterdayTotalPartners,
       totalActivePartners: activePartners, // Mapping for frontend
       activePartners,
       pendingPartners,
       blockedPartners,
       activeBookings,
+      yesterdayActiveBookings,
       totalUsers,
+      yesterdayTotalUsers,
       bookingStats: stats,
       recentVendors,
       recentUsers,
@@ -848,6 +864,12 @@ const getVendors = async (req, res) => {
       .skip((page - 1) * limit);
 
     const count = await Vendor.countDocuments(filter);
+    const walletAggregation = await Vendor.aggregate([
+      { $match: filter },
+      { $group: { _id: null, totalWallet: { $sum: '$walletBalance' } } }
+    ]);
+    const totalWalletBalance = walletAggregation[0]?.totalWallet || 0;
+
     const hydratedVendors = await Promise.all(vendors.map(async (v) => {
       const subscriptionState = await getVendorSubscriptionState(v);
       const bookingStats = await Booking.aggregate([
@@ -871,7 +893,8 @@ const getVendors = async (req, res) => {
       freeTrialDays: settings.freeTrialDays || 7,
       totalPages: Math.ceil(count / limit),
       currentPage: Number(page),
-      totalVendors: count
+      totalVendors: count,
+      totalWalletBalance
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -911,7 +934,7 @@ const toggleBlockVendor = async (req, res) => {
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
-     if (vendor.status === 'blocked') {
+    if (vendor.status === 'blocked') {
       const subscriptionState = await getVendorSubscriptionState(vendor);
       vendor.status = subscriptionState.isActive ? 'active' : 'inactive';
       if (vendor.status === 'active') {
@@ -991,7 +1014,7 @@ const extendVendorFreeTrial = async (req, res) => {
       expiryDate: nextExpiry
     };
 
-     vendor.planType = 'trial';
+    vendor.planType = 'trial';
     if (!['pending', 'blocked', 'rejected'].includes(vendor.status)) {
       if (vendor.status === 'inactive') {
         vendor.isShopOpen = true;
@@ -1313,15 +1336,15 @@ const notifyLowBalance = async (req, res) => {
   try {
     const settings = await getBillingSettings();
     const minThreshold = settings.minWalletThreshold || 100;
-    
-    const vendors = await Vendor.find({ 
+
+    const vendors = await Vendor.find({
       walletBalance: { $lt: minThreshold },
       planType: { $ne: 'trial' }
     }).select('ownerId');
     if (vendors.length === 0) return res.status(200).json({ message: 'No low balance partners found' });
 
     const ownerIds = vendors.map(v => v.ownerId).filter(Boolean);
-    
+
     if (ownerIds.length > 0) {
       await NotificationService.sendNotification({
         userIds: ownerIds,
@@ -1368,13 +1391,13 @@ const getStaffLiveReport = async (req, res) => {
           cancelledByStaff: {
             $sum: {
               $cond: [
-                { 
+                {
                   $and: [
-                    { $eq: ['$status', 'cancelled'] }, 
+                    { $eq: ['$status', 'cancelled'] },
                     { $eq: ['$cancelledByRole', 'staff'] }
-                  ] 
-                }, 
-                1, 
+                  ]
+                },
+                1,
                 0
               ]
             }
@@ -1428,7 +1451,7 @@ const getWithdrawalRequests = async (req, res) => {
   try {
     const { status } = req.query;
     const filter = status ? { status } : {};
-    
+
     const WithdrawalRequest = require('../models/WithdrawalRequest');
     const requests = await WithdrawalRequest.find(filter)
       .populate('vendorId', 'shopName ownerName walletBalance')
@@ -1496,8 +1519,8 @@ const processWithdrawalRequest = async (req, res) => {
       role: 'vendor',
       type: 'WITHDRAWAL_STATUS',
       title: status === 'approved' ? 'Withdrawal Approved' : 'Withdrawal Rejected',
-      message: status === 'approved' 
-        ? `Your withdrawal request of ₹${request.amount} has been approved and processed.` 
+      message: status === 'approved'
+        ? `Your withdrawal request of ₹${request.amount} has been approved and processed.`
         : `Your withdrawal request of ₹${request.amount} was rejected. Reason: ${rejectionReason}`,
       referenceId: `WITHDRAW_NOTIFY_${request._id}`
     });

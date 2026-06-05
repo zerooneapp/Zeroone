@@ -9,6 +9,19 @@ import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import { cn } from '../../../utils/cn';
 
+const ImageWithFallback = ({ src, alt }) => {
+  const [error, setError] = useState(false);
+  if (!src || error) return <Tag size={28} strokeWidth={3} />;
+  return (
+    <img 
+      src={src} 
+      alt={alt} 
+      className="w-full h-full object-cover rounded-xl" 
+      onError={() => setError(true)} 
+    />
+  );
+};
+
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -136,11 +149,7 @@ const CategoryManagement = () => {
                 )} />
 
                 <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4 text-slate-400 group-hover:text-primary dark:group-hover:text-white group-hover:bg-slate-900 dark:group-hover:bg-gray-800 transition-all border border-slate-100 dark:border-gray-800 shadow-inner">
-                  {cat.image ? (
-                    <img src={cat.image} alt={cat.name} className="w-full h-full object-cover rounded-xl" />
-                  ) : (
-                    <Tag size={28} strokeWidth={3} />
-                  )}
+                  <ImageWithFallback src={cat.image} alt={cat.name} />
                 </div>
 
                 <h3 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight mb-1 truncate group-hover:text-primary dark:group-hover:text-white transition-colors">{cat.name}</h3>
@@ -211,7 +220,7 @@ const CategoryManagement = () => {
                   <input
                     type="text"
                     required
-                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white caret-slate-900 dark:caret-white transition-all placeholder:text-slate-300"
+                    className="w-full px-4 h-11 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-gray-500"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. LUXURY SPA"
@@ -220,7 +229,7 @@ const CategoryManagement = () => {
                 <div className="space-y-1.5 leading-none">
                   <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Metadata Details</label>
                   <textarea
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white caret-slate-900 dark:caret-white transition-all h-24 resize-none no-scrollbar placeholder:text-slate-300"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all h-24 resize-none no-scrollbar placeholder:text-slate-400 dark:placeholder:text-gray-500"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Classification details..."
@@ -230,7 +239,7 @@ const CategoryManagement = () => {
                   <label className="text-[10px] font-black text-slate-400 capitalize tracking-widest px-1 opacity-60">Visual Icon Link</label>
                   <input
                     type="text"
-                    className="w-full px-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[13px] font-black capitalize focus:ring-2 ring-primary/20 outline-none dark:text-white caret-slate-900 dark:caret-white transition-all placeholder:text-slate-300"
+                    className="w-full px-4 h-11 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl text-[13px] font-black focus:ring-2 ring-primary/20 outline-none text-slate-900 dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-gray-500"
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                     placeholder="https://..."

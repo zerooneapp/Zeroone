@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Calendar, Download, Loader2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -68,9 +69,9 @@ const ReportModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" onClick={onClose} />
       
       <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between">
@@ -93,9 +94,8 @@ const ReportModal = ({ isOpen, onClose }) => {
                   value={startDate}
                   max={dayjs().format('YYYY-MM-DD')}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[13px] font-black focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[13px] font-black focus:ring-2 focus:ring-primary/20 transition-all"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
 
@@ -107,9 +107,8 @@ const ReportModal = ({ isOpen, onClose }) => {
                   value={endDate}
                   max={dayjs().format('YYYY-MM-DD')}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[13px] font-black focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-800 border-none rounded-xl text-[13px] font-black focus:ring-2 focus:ring-primary/20 transition-all"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
           </div>
@@ -136,7 +135,8 @@ const ReportModal = ({ isOpen, onClose }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

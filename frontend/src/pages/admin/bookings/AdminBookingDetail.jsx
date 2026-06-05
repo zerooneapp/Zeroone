@@ -98,11 +98,11 @@ const AdminBookingDetail = () => {
                <Section title="Customer Intelligence" icon={User}>
                   <div className="flex items-center gap-3.5">
                      <div className="w-11 h-11 bg-slate-900 text-white rounded-lg flex items-center justify-center font-black text-lg shadow-lg border border-white/10">
-                        {booking.userId?.name?.charAt(0)}
+                        {(booking.userId?.name || booking.walkInCustomerName || 'W').charAt(0)}
                      </div>
                      <div className="leading-tight">
-                        <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{booking.userId?.name}</h4>
-                        <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest opacity-60">{booking.userId?.phone}</p>
+                        <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{booking.userId?.name || booking.walkInCustomerName || 'Walk-In Customer'}</h4>
+                        <p className="text-[9px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest">{booking.userId?.phone || booking.walkInCustomerPhone || 'No Contact Provided'}</p>
                      </div>
                   </div>
                </Section>
@@ -114,7 +114,7 @@ const AdminBookingDetail = () => {
                      </div>
                      <div className="leading-tight">
                         <h4 className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{booking.vendorId?.shopName}</h4>
-                        <p className="text-[9px] font-black text-slate-400 capitalize tracking-widest mt-0.5 opacity-60">{booking.vendorId?.location?.address?.split(',')[0]}</p>
+                        <p className="text-[9px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest mt-0.5">{booking.vendorId?.location?.address?.split(',')[0]}</p>
                      </div>
                   </div>
                   <div className="pt-2 space-y-3.5">
@@ -125,13 +125,13 @@ const AdminBookingDetail = () => {
 
                <Section title="Audit Metadata" icon={ShieldAlert}>
                   <div className="space-y-3.5">
-                     <InfoItem label="Internal ID" value={booking._id} />
-                     <InfoItem label="Reference Code" value={booking.bookingId || 'NONE'} />
+                     <InfoItem label="Internal ID" value={`#${booking._id.slice(-8)}`} />
+                     <InfoItem label="Reference Code" value={booking.bookingId ? `#${booking.bookingId}` : 'NONE'} />
                      <InfoItem label="Creation Timestamp" value={new Date(booking.createdAt).toLocaleString()} />
                   </div>
                   <div className="mt-2 p-3.5 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800">
-                     <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-widest mb-1 opacity-60">Administrative Note</p>
-                     <p className="text-[10px] font-black text-slate-500 dark:text-gray-400 leading-relaxed opacity-80">This transaction is subject to platform-wide governance. Overrides are logged in the secure audit path.</p>
+                     <p className="text-[7.5px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest mb-1">Administrative Note</p>
+                     <p className="text-[10px] font-black text-slate-600 dark:text-gray-300 leading-relaxed">This transaction is subject to platform-wide governance. Overrides are logged in the secure audit path.</p>
                   </div>
                </Section>
             </div>
@@ -142,14 +142,14 @@ const AdminBookingDetail = () => {
                {/* STATUS CAROUSEL-STYLE HEADER */}
                <div className="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex items-center justify-between no-scrollbar overflow-x-auto">
                   <div>
-                     <p className="text-[8px] font-black text-slate-400 capitalize tracking-[0.2em] mb-2 opacity-60">Transaction State</p>
+                     <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-[0.2em] mb-2">Transaction State</p>
                      <div className="flex items-center gap-3">
                         <BookingStatusLarge status={booking.status} />
-                        <span className="text-[9px] font-black text-slate-300 capitalize tracking-widest">Global Node</span>
+                        <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest">Global Node</span>
                      </div>
                   </div>
                   <div className="text-right">
-                     <p className="text-[8px] font-black text-slate-400 capitalize tracking-[0.2em] mb-1 opacity-60 font-black">Settlement</p>
+                     <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-[0.2em] mb-1 font-black">Settlement</p>
                      <h3 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">₹{booking.totalPrice}</h3>
                   </div>
                </div>
@@ -168,7 +168,7 @@ const AdminBookingDetail = () => {
                      ))}
                   </div>
                   <div className="pt-4 mt-4 border-t border-slate-100 dark:border-gray-800 flex justify-between items-center px-2">
-                     <span className="text-[8px] font-black text-slate-400 capitalize tracking-widest opacity-60">Total Aggregate Price</span>
+                     <span className="text-[8px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest">Total Aggregate Price</span>
                      <span className="text-[18px] font-black text-slate-900 dark:text-white tracking-tighter">₹{booking.totalPrice}</span>
                   </div>
                </Section>
@@ -232,7 +232,7 @@ const Section = ({ title, icon: Icon, children }) => (
 
 const InfoItem = ({ label, value, highlight }) => (
    <div className="leading-tight">
-      <p className="text-[7.5px] font-black text-slate-400 capitalize tracking-[0.2em] mb-1 leading-none opacity-60">{label}</p>
+      <p className="text-[7.5px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-[0.2em] mb-1 leading-none">{label}</p>
       <p className={cn("text-[11px] font-black capitalize text-slate-900 dark:text-white tracking-tighter truncate", highlight && "text-red-500")}>
          {value || '---'}
       </p>
@@ -268,8 +268,8 @@ const TimelineItem = ({ title, time, active, color = "primary" }) => {
             active ? dots[color] : "bg-slate-200"
          )} />
          <div className="leading-none">
-            <h5 className={cn("text-[10px] font-black capitalize tracking-widest leading-none", active ? "text-slate-900 dark:text-white" : "text-slate-400")}>{title}</h5>
-            <p className="text-[8.5px] font-black text-slate-400 capitalize mt-1.5 tracking-wider opacity-60 leading-none">{time}</p>
+            <h5 className={cn("text-[10px] font-black capitalize tracking-widest leading-none", active ? "text-slate-900 dark:text-white" : "text-slate-500")}>{title}</h5>
+            <p className="text-[8.5px] font-black text-slate-500 dark:text-slate-400 capitalize mt-1.5 tracking-wider leading-none">{time}</p>
          </div>
       </div>
    );

@@ -32,9 +32,8 @@ const BookingManagement = () => {
 
   const fetchBookings = useCallback(async () => {
     try {
-      // Zero-Latency: Only show loading if we have no data yet
-      if (bookings.length === 0) setLoading(true);
-      
+      setLoading(true);
+
       const params = {
         ...filters,
         page,
@@ -110,13 +109,22 @@ const BookingManagement = () => {
             <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Audit real-time transaction activity</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={fetchBookings} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-400 dark:text-white border border-slate-100 dark:border-gray-700 active:scale-90 transition-all shadow-sm">
+            <button
+              onClick={fetchBookings}
+              disabled={loading}
+              className={cn(
+                "p-2.5 rounded-xl border transition-all duration-300 active:scale-90 flex items-center justify-center",
+                loading
+                  ? "bg-primary/10 border-primary/20 text-primary shadow-lg shadow-primary/20"
+                  : "bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-white border-slate-100 dark:border-gray-700 hover:text-primary hover:border-primary/30 shadow-sm hover:shadow-md"
+              )}
+            >
               <RefreshCw size={18} strokeWidth={3} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(140px,0.7fr)_minmax(0,0.8fr)_24px_minmax(0,0.8fr)_minmax(120px,auto)] gap-2.5 items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(140px,0.7fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(120px,auto)] gap-2.5 items-center">
           <div className="relative lg:col-span-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} strokeWidth={3} />
             <input
@@ -147,9 +155,7 @@ const BookingManagement = () => {
             value={filters.startDate}
             onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
           />
-          <div className="hidden lg:flex items-center justify-center text-slate-300 dark:text-slate-600 font-black text-lg">
-            &gt;
-          </div>
+
           <input
             type="date"
             max={new Date().toISOString().split('T')[0]}
@@ -158,10 +164,10 @@ const BookingManagement = () => {
             onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
           />
           <div className="flex items-center gap-2 px-4 h-11 bg-primary/5 dark:bg-primary/20 border border-primary/10 dark:border-primary/30 rounded-xl">
-             <div className="flex flex-col leading-none">
-                <span className="text-[9px] font-black text-primary/50 dark:text-slate-500 uppercase tracking-widest mb-0.5">Total Booking</span>
-                <span className="text-[15px] font-black text-primary dark:text-white tracking-tight">{totalBookings}</span>
-             </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-[9px] font-black text-primary/50 dark:text-slate-500 uppercase tracking-widest mb-0.5">Total Booking</span>
+              <span className="text-[15px] font-black text-primary dark:text-white tracking-tight">{totalBookings}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -170,13 +176,13 @@ const BookingManagement = () => {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto no-scrollbar">
         <table className="w-full text-left border-collapse min-w-[900px]">
           <thead>
-            <tr className="bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
-              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Transaction ID</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Participants</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-center">Price</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Date & Time</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Status</th>
-              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-right">Actions</th>
+            <tr className="bg-slate-900 dark:bg-gray-800 border-b border-slate-900 dark:border-gray-700">
+              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Transaction ID</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Participants</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-center">Price</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Date & Time</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Status</th>
+              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
@@ -188,24 +194,30 @@ const BookingManagement = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ 
+                  transition={{
                     duration: 0.2,
                     layout: { type: "spring", damping: 25, stiffness: 300 }
                   }}
                   className="group hover:bg-slate-50/80 dark:hover:bg-gray-800/80 transition-all cursor-pointer"
                 >
                   <td className="px-6 py-3.5">
-                    <code className="text-[12px] font-black text-slate-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 capitalize tracking-tighter">
+                    <code className="text-[12px] font-black text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 capitalize tracking-tighter">
                       #{booking.bookingId || booking._id.slice(-6)}
                     </code>
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="space-y-1 leading-none">
-                      <div className="flex items-center gap-1.5 text-[14px] font-black capitalize text-slate-900 dark:text-white tracking-tight">
-                        <User size={12} strokeWidth={3} className="text-primary dark:text-white opacity-60" /> {booking.user?.name}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-start gap-1.5">
+                        <User size={12} strokeWidth={3} className="text-primary dark:text-white opacity-60 mt-0.5" /> 
+                        <div className="flex flex-col leading-none">
+                          <span className="text-[14px] font-black capitalize text-slate-900 dark:text-white tracking-tight">{booking.user?.name || booking.walkInCustomerName || 'Walk-In Customer'}</span>
+                          {(booking.user?.phone || booking.walkInCustomerPhone) && (
+                             <span className="text-[9px] font-black text-slate-400 tracking-widest mt-1">{booking.user?.phone || booking.walkInCustomerPhone}</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-widest opacity-60">
-                        <Store size={12} strokeWidth={3} className="text-slate-300 dark:text-white" /> {booking.vendor?.shopName}
+                      <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest mt-1">
+                        <Store size={12} strokeWidth={3} className="text-slate-400 dark:text-slate-500" /> {booking.vendor?.shopName}
                       </div>
                     </div>
                   </td>
@@ -214,9 +226,9 @@ const BookingManagement = () => {
                       ₹{booking.totalPrice}
                     </span>
                   </td>
-                  <td className="px-4 py-3.5 space-y-1 text-[12px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tighter leading-none opacity-80">
-                    <div className="flex items-center gap-1.5"><Calendar size={11} strokeWidth={3} className="text-slate-300 dark:text-white" /> {new Date(booking.startTime || booking.createdAt).toLocaleDateString()}</div>
-                    <div className="flex items-center gap-1.5"><Clock size={11} strokeWidth={3} className="text-slate-300 dark:text-white" /> {new Date(booking.startTime || booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  <td className="px-4 py-3.5 space-y-1 text-[12px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-tighter leading-none">
+                    <div className="flex items-center gap-1.5"><Calendar size={11} strokeWidth={3} className="text-slate-400 dark:text-slate-500" /> {new Date(booking.startTime || booking.createdAt).toLocaleDateString()}</div>
+                    <div className="flex items-center gap-1.5"><Clock size={11} strokeWidth={3} className="text-slate-400 dark:text-slate-500" /> {new Date(booking.startTime || booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                   </td>
                   <td className="px-4 py-3.5 leading-none">
                     {getStatusBadge(booking.status)}
@@ -238,7 +250,7 @@ const BookingManagement = () => {
                       )}
                       <button
                         onClick={() => navigate(`/admin/bookings/${booking._id}`)}
-                        className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
+                        className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-500 dark:text-slate-400 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
                         title="View Order"
                       >
                         <Eye size={18} strokeWidth={3} />
@@ -269,7 +281,7 @@ const BookingManagement = () => {
           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
             Showing Page <span className="text-slate-900 dark:text-white">{page}</span> of <span className="text-slate-900 dark:text-white">{totalPages}</span>
           </div>
-          
+
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setPage(prev => Math.max(1, prev - 1))}
