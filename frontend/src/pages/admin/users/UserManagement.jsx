@@ -139,13 +139,13 @@ const UserManagement = () => {
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto no-scrollbar">
                <table className="w-full text-left border-collapse min-w-[900px]">
                   <thead>
-                     <tr className="bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
-                        <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">User Identity</th>
-                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Contact</th>
-                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-center">Bookings</th>
-                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Joined Date</th>
-                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Status</th>
-                        <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-right">Actions</th>
+                     <tr className="bg-slate-900 dark:bg-gray-800 border-b border-slate-900 dark:border-gray-700">
+                        <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">User Identity</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Contact</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-center">Bookings</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Joined Date</th>
+                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Status</th>
+                        <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-right">Actions</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
@@ -180,7 +180,7 @@ const UserManagement = () => {
                                              user.name
                                           )}
                                        </h4>
-                                       <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-0.5 opacity-60">Customer</p>
+                                       <p className="text-[11px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest mt-0.5">Customer</p>
                                     </div>
                                  </div>
                               </td>
@@ -192,7 +192,7 @@ const UserManagement = () => {
                                     {user.bookingCount || 0}
                                  </span>
                               </td>
-                              <td className="px-4 py-3.5 text-[12px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tighter opacity-80">
+                              <td className="px-4 py-3.5 text-[12px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-tighter">
                                  {new Date(user.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                               </td>
                               <td className="px-4 py-3.5 leading-none">
@@ -207,7 +207,7 @@ const UserManagement = () => {
                                  <div className="flex items-center justify-end gap-1.5">
                                     <button
                                        onClick={() => navigate(`/admin/users/${user._id}`)}
-                                       className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-300 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700"
+                                       className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-500 dark:text-slate-400 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700"
                                        title="View Details"
                                     >
                                        <Eye size={18} strokeWidth={3} />

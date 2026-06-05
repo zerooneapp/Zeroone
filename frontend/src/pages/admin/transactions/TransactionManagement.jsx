@@ -292,10 +292,13 @@ const TransactionManagement = () => {
                     transition={{ delay: index * 0.03 }}
                     className="group hover:bg-slate-50/50 dark:hover:bg-gray-800/30 transition-all cursor-default"
                   >
-                    <td className="px-5 py-4 leading-none">
-                      <span className="text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">
-                        #{transaction.referenceId || transaction.gatewayPaymentId || transaction._id.slice(-6)}
-                      </span>
+                    <td className="px-5 py-4 leading-none max-w-[150px]">
+                      <code
+                        className="text-[12px] font-black text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 uppercase tracking-tighter inline-block truncate w-[100px]"
+                        title={transaction.referenceId || transaction.gatewayPaymentId || transaction._id}
+                      >
+                        #{String(transaction.referenceId || transaction.gatewayPaymentId || transaction._id).slice(-8)}
+                      </code>
                       <div className="flex items-center gap-1 mt-1 opacity-40">
                         <Layers size={10} />
                         <span className="text-[10px] font-bold text-slate-400 capitalize">

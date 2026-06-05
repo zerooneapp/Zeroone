@@ -34,6 +34,7 @@ const VendorManagement = () => {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalWalletBalance, setTotalWalletBalance] = useState(0);
 
   const fetchVendors = useCallback(async (isRefresh = false) => {
     try {
@@ -49,6 +50,7 @@ const VendorManagement = () => {
 
       setVendors(res.data.vendors || []);
       setTotalPages(res.data.totalPages || 1);
+      setTotalWalletBalance(res.data.totalWalletBalance || 0);
       setMinimumWalletThreshold(res.data.minimumWalletThreshold || 100);
       setFreeTrialDays(res.data.freeTrialDays || 7);
     } catch (error) {
@@ -207,8 +209,12 @@ const VendorManagement = () => {
             <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Partner Fleet</h1>
             <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Manage your elite merchant network</p>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => fetchVendors(true)} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all hover:text-primary dark:hover:text-white">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-xl px-4 py-2 flex flex-col items-end justify-center min-w-[120px]">
+              <span className="text-[10px] font-black text-primary/70 dark:text-primary/80 uppercase tracking-widest">Total Wallet</span>
+              <span className="text-[15px] font-black text-primary dark:text-white leading-none mt-0.5">Rs {totalWalletBalance?.toFixed(2) || '0.00'}</span>
+            </div>
+            <button onClick={() => fetchVendors(true)} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-400 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all hover:text-primary dark:hover:text-white h-full">
               <RefreshCw size={18} strokeWidth={3} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
@@ -231,10 +237,10 @@ const VendorManagement = () => {
 
           {['status', 'serviceLevel', 'planType', 'isActive'].map((field) => {
             const labels = {
-              status: 'STATUS',
-              serviceLevel: 'SERVICE LEVEL',
-              planType: 'PLAN TYPE',
-              isActive: 'IS ACTIVE'
+              status: 'ALL',
+              serviceLevel: 'ALL LEVELS',
+              planType: 'ALL PLANS',
+              isActive: 'ALL VISIBILITY'
             };
             return (
               <div key={field} className="relative group">
@@ -273,14 +279,14 @@ const VendorManagement = () => {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto no-scrollbar">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-800">
-              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Shop Details</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Owner</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Level & Plan</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Wallet</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60">Status</th>
-              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-center">Active</th>
-              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 opacity-60 text-right">Actions</th>
+            <tr className="bg-slate-900 dark:bg-gray-800 border-b border-slate-900 dark:border-gray-700">
+              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Shop Details</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Owner</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Level & Plan</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Wallet</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Status</th>
+              <th className="px-3 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-center">Active</th>
+              <th className="px-5 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
@@ -331,7 +337,7 @@ const VendorManagement = () => {
                   <td className="px-3 py-3.5 leading-none w-[15%]">
                     <div className="flex flex-col gap-1.5">
                       {getLevelBadge(vendor.serviceLevel)}
-                      <div className="text-[10px] font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest pl-0.5">
+                      <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest pl-0.5">
                         {vendor.subscription?.type || 'No Plan'}
                       </div>
                     </div>
@@ -355,12 +361,12 @@ const VendorManagement = () => {
                           e.stopPropagation();
                           handleAction(vendor._id, 'delete');
                         }}
-                        className="p-1.5 text-slate-200 hover:text-red-500 transition-all active:scale-95"
+                        className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-all active:scale-95"
                         title="Delete Partner"
                       >
                         <Trash2 size={16} strokeWidth={3} />
                       </button>
-                      <button className="p-1.5 text-slate-200 group-hover:text-primary transition-all active:scale-95">
+                      <button className="p-1.5 text-slate-400 dark:text-slate-500 group-hover:text-primary transition-all active:scale-95">
                         <ChevronRight size={18} strokeWidth={3} />
                       </button>
                     </div>

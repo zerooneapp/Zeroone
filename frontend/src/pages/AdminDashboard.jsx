@@ -109,68 +109,80 @@ const AdminDashboard = () => {
     return ((current - previous) / previous) * 100;
   };
 
-  const revTrendNum = calculateTrend(data.todayRevenue || 0, data.yesterdayRevenue || 0);
-  const revTrendUp = revTrendNum >= 0;
-  const revTrendFormatted = `${Math.abs(revTrendNum).toFixed(1)}%`;
+  const getTrendData = (current, previous) => {
+    const num = calculateTrend(current || 0, previous || 0);
+    const isUp = num >= 0;
+    const formatted = `${Math.abs(num).toFixed(1)}%`;
+    return { isUp, formatted, text: `${isUp ? '+' : '-'}${formatted}` };
+  };
+
+  const trends = {
+    dailyRev: getTrendData(data.todayRevenue, data.yesterdayRevenue),
+    newVendors: getTrendData(data.newVendors, data.yesterdayNewVendors),
+    activeBookings: getTrendData(data.activeBookings, data.yesterdayActiveBookings),
+    totalUsers: getTrendData(data.totalUsers, data.yesterdayTotalUsers),
+    totalPartners: getTrendData(data.totalPartners, data.yesterdayTotalPartners),
+    totalRev: getTrendData(data.totalRevenue, data.yesterdayTotalRevenue)
+  };
 
   const kpis = [
-    { 
-      label: 'Today Revenue', 
-      value: `₹${data.todayRevenue || 0}`, 
-      trend: revTrendFormatted,
-      trendUp: revTrendUp,
-      sub: `${revTrendUp ? '+' : '-'}${revTrendFormatted}`,
-      iconSrc: revenueIcon, 
+    {
+      label: 'Daily Revenue',
+      value: `₹${data.todayRevenue || 0}`,
+      trend: trends.dailyRev.formatted,
+      trendUp: trends.dailyRev.isUp,
+      sub: trends.dailyRev.text,
+      iconSrc: revenueIcon,
       color: 'amber',
       path: '/admin/transactions'
     },
-    { 
-      label: 'New Partners', 
-      value: data.newVendors || 0, 
-      trend: '4.8%', 
-      trendUp: true, 
-      sub: '+4.8%', 
-      iconSrc: partnersIcon, 
+    {
+      label: 'New Partners',
+      value: data.newVendors || 0,
+      trend: trends.newVendors.formatted,
+      trendUp: trends.newVendors.isUp,
+      sub: trends.newVendors.text,
+      iconSrc: partnersIcon,
       color: 'primary',
       path: '/admin/vendors'
     },
-    { 
-      label: 'Active Bookings', 
-      value: data.activeBookings || 0, 
-      trend: '12.5%', 
-      trendUp: true, 
-      sub: '+12.5%', 
-      iconSrc: calendarIcon, 
+    {
+      label: 'Active Bookings',
+      value: data.activeBookings || 0,
+      trend: trends.activeBookings.formatted,
+      trendUp: trends.activeBookings.isUp,
+      sub: trends.activeBookings.text,
+      iconSrc: calendarIcon,
       color: 'emerald',
       path: '/admin/bookings'
     },
-    { 
-      label: 'Total Users', 
-      value: data.totalUsers || 0, 
-      trend: '7.2%', 
-      trendUp: true, 
-      sub: '+7.2%', 
-      iconSrc: usersIcon, 
+    {
+      label: 'Total Users',
+      value: data.totalUsers || 0,
+      trend: trends.totalUsers.formatted,
+      trendUp: trends.totalUsers.isUp,
+      sub: trends.totalUsers.text,
+      iconSrc: usersIcon,
       color: 'blue',
       path: '/admin/users'
     },
-    { 
-      label: 'Total Partners', 
-      value: data.totalPartners || 0, 
-      trend: '2.1%', 
-      trendUp: true, 
-      sub: '+2.1%', 
-      iconSrc: storeIcon, 
+    {
+      label: 'Total Partners',
+      value: data.totalPartners || 0,
+      trend: trends.totalPartners.formatted,
+      trendUp: trends.totalPartners.isUp,
+      sub: trends.totalPartners.text,
+      iconSrc: storeIcon,
       color: 'fuchsia',
       path: '/admin/vendors'
     },
-    { 
-      label: 'Total Revenue', 
-      value: `₹${(data.totalRevenue || 0).toLocaleString()}`, 
-      trend: '15.4%', 
-      trendUp: true, 
-      sub: '+15.4%', 
-      iconSrc: growthIcon, 
+    {
+      label: 'Total Revenue',
+      value: `₹${(data.totalRevenue || 0).toLocaleString()}`,
+      trend: trends.totalRev.formatted,
+      trendUp: trends.totalRev.isUp,
+      sub: trends.totalRev.text,
+      iconSrc: growthIcon,
       color: 'emerald',
       path: '/admin/transactions'
     }
@@ -184,7 +196,7 @@ const AdminDashboard = () => {
           <p className="text-[13px] font-black text-slate-400 capitalize tracking-[0.2em] mt-2">Platform Command Center</p>
         </div>
         <div className="flex items-center gap-2.5">
-          <button 
+          <button
             onClick={() => setIsReportModalOpen(true)}
             className="px-5 py-2.5 bg-slate-900 dark:bg-primary text-white font-black text-[11px] capitalize tracking-widest rounded-xl shadow-xl active:scale-95 transition-all border-b-2 border-white/10 flex items-center gap-2"
           >
@@ -251,7 +263,7 @@ const AdminDashboard = () => {
                     {kpi.sub}
                   </p>
                 </div>
-                
+
                 <div className="w-16 h-16 flex items-center justify-center transition-transform group-hover:scale-110 drop-shadow-[0_10px_10px_rgba(0,0,0,0.1)] -mr-1 -mb-1">
                   <img src={kpi.iconSrc} alt="" className="w-full h-full object-contain" />
                 </div>
@@ -336,8 +348,8 @@ const AdminDashboard = () => {
               };
 
               return (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   onClick={() => navigate('/admin/bookings')}
                   className={cn('p-3 px-4 rounded-xl border transition-all active:scale-[0.98] cursor-pointer hover:shadow-md', colorMap[stat.color])}
                 >
@@ -359,13 +371,16 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">New Requests</h2>
+            <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight flex items-center gap-2">
+              New Partner Requests
+              <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-[11px]">{data.pendingPartners}</span>
+            </h2>
             <button onClick={() => navigate('/admin/vendors')} className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">See All</button>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
             {data.recentVendors.map((vendor) => (
-              <div 
-                key={vendor._id} 
+              <div
+                key={vendor._id}
                 onClick={(e) => {
                   // Don't navigate if clicking buttons
                   if (e.target.closest('button')) return;
@@ -376,9 +391,9 @@ const AdminDashboard = () => {
                 <div className="flex items-center gap-3.5 leading-none">
                   <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-[15px] font-black overflow-hidden shrink-0">
                     {vendor.featuredImage || vendor.shopImage ? (
-                       <img src={vendor.featuredImage || vendor.shopImage} className="w-full h-full object-cover" alt="" />
+                      <img src={vendor.featuredImage || vendor.shopImage} className="w-full h-full object-cover" alt="" />
                     ) : (
-                       vendor.shopName.charAt(0)
+                      vendor.shopName.charAt(0)
                     )}
                   </div>
                   <div>
@@ -420,21 +435,21 @@ const AdminDashboard = () => {
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
             {data.recentUsers.map((user) => (
-              <div 
-                key={user._id} 
+              <div
+                key={user._id}
                 onClick={() => navigate(`/admin/users/${user._id}`)}
                 className="p-3.5 px-4.5 border-b border-slate-50 dark:border-gray-800 last:border-0 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3.5 leading-none">
                   <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-slate-100 dark:border-gray-700 overflow-hidden shrink-0">
                     {user.image ? (
-                       <img src={user.image} className="w-full h-full object-cover" alt="" />
+                      <img src={user.image} className="w-full h-full object-cover" alt="" />
                     ) : (
-                       <Users size={18} strokeWidth={3} />
+                      <Users size={18} strokeWidth={3} />
                     )}
                   </div>
                   <div>
-                    <p className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{user.name}</p>
+                    <p className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{user.name || 'Guest User'}</p>
                     <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{user.phone}</p>
                   </div>
                 </div>

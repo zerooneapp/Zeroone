@@ -187,12 +187,7 @@ const AdminLayout = () => {
             >
               <Menu size={22} />
             </button>
-            <div className="hidden sm:block">
-              <h1 className="text-base font-black dark:text-white capitalize tracking-widest flex items-center gap-2">
-                Overview <ChevronRight size={16} className="text-gray-300 dark:text-slate-600" /> <span className="text-primary dark:text-white">Dashboard</span>
-                {/* Overview <ChevronRight size={16} className="text-gray-300 dark:text-slate-600" /> <span className="text-primary dark:text-white">{adminRoutes.find(r => location.pathname.startsWith(r.path))?.name || 'Dashboard'}</span> */}
-              </h1>
-            </div>
+
           </div>
 
           <div className="flex items-center gap-4">
