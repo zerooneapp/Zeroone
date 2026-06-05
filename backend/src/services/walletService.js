@@ -86,11 +86,13 @@ const upsertWalletTransactionRecord = async (existingTransaction, payload) => {
 };
 
 const getBillingSettings = async () => {
-  try {
-    const cached = await redis.get(CACHE_KEYS.GLOBAL_SETTINGS);
-    if (cached) return JSON.parse(cached);
-  } catch (err) {
-    console.warn('Redis read error for global settings:', err.message);
+  if (redis.isOpen) {
+    try {
+      const cached = await redis.get(CACHE_KEYS.GLOBAL_SETTINGS);
+      if (cached) return JSON.parse(cached);
+    } catch (err) {
+      console.warn('Redis read error for global settings:', err.message);
+    }
   }
 
   let settings = await GlobalSettings.findOne().lean();
@@ -98,10 +100,12 @@ const getBillingSettings = async () => {
     settings = await GlobalSettings.create({}).then(s => s.toObject());
   }
 
-  try {
-    await redis.setEx(CACHE_KEYS.GLOBAL_SETTINGS, 3600, JSON.stringify(settings)); // 1 hour cache
-  } catch (err) {
-    console.warn('Redis write error for global settings:', err.message);
+  if (redis.isOpen) {
+    try {
+      await redis.setEx(CACHE_KEYS.GLOBAL_SETTINGS, 3600, JSON.stringify(settings)); // 1 hour cache
+    } catch (err) {
+      console.warn('Redis write error for global settings:', err.message);
+    }
   }
 
   return settings;
@@ -153,10 +157,12 @@ const getSubscriptionPlanForVendor = async (type, serviceLevel) => {
     throw new Error(`Subscription plan missing for type: ${type}, level: ${normalizedLevel}`);
   }
 
-  try {
-    await redis.setEx(cacheKey, 3600, JSON.stringify(plan)); // 1 hour cache
-  } catch (err) {
-    console.warn('Redis write error for plan:', err.message);
+  if (redis.isOpen) {
+    try {
+      await redis.setEx(cacheKey, 3600, JSON.stringify(plan)); // 1 hour cache
+    } catch (err) {
+      console.warn('Redis write error for plan:', err.message);
+    }
   }
 
   return plan;

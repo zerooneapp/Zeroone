@@ -67,7 +67,7 @@ const VendorOffers = () => {
   const memoizedOffers = useMemo(() => offers, [offers]);
 
   if (loading) return (
-    <div className="p-6 space-y-6 pt-[64px] animate-pulse">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark p-6 space-y-6 pt-[64px] animate-pulse">
       <div className="h-10 w-48 bg-gray-100 dark:bg-gray-800 rounded-xl" />
       <div className="grid gap-4 mt-8">
         {[1, 2, 3].map(i => <div key={i} className="h-40 bg-gray-100 dark:bg-gray-800 rounded-[2.5rem]" />)}

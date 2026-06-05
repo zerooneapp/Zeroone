@@ -118,7 +118,7 @@ const VendorStaff = () => {
   ), [staff, search]);
 
   if (loading) return (
-    <div className="p-6 space-y-6 pt-[64px] animate-pulse">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark p-6 space-y-6 pt-[64px] animate-pulse">
       <div className="h-10 w-48 bg-gray-100 dark:bg-gray-800 rounded-xl" />
       <div className="grid gap-4 mt-8">
         {[1, 2, 3].map(i => <div key={i} className="h-28 bg-gray-100 dark:bg-gray-800 rounded-[2.5rem]" />)}
@@ -167,7 +167,7 @@ const VendorStaff = () => {
             type="text"
             placeholder="Search staff by name..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value.trimStart())}
             className="w-full bg-white dark:bg-gray-900 py-3 pl-11 pr-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 font-bold text-sm focus:ring-2 focus:ring-primary/10 transition-all shadow-md dark:shadow-none dark:text-white"
           />
         </div>

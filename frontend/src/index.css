@@ -58,6 +58,14 @@
       -webkit-text-fill-color: #00246b !important;
       -webkit-box-shadow: 0 0 0px 1000px white inset !important;
   }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
 }
 
 .glass-effect {
@@ -86,9 +94,6 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-.dark input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-}
 
 /* Add top padding to the Razorpay checkout modal so its inner content clears the status bar/notch */
 .razorpay-checkout-frame {

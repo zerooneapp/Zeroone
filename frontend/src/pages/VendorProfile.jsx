@@ -496,14 +496,6 @@ const VendorProfile = () => {
       },
 
       {
-         key: 'security',
-         label: 'Security',
-         subtitle: 'Account protection & privacy',
-         icon: ShieldCheck,
-         iconBg: 'bg-indigo-500/10',
-         iconColor: 'text-indigo-500',
-      },
-      {
          key: 'support',
          label: 'Quick Support',
          subtitle: 'Direct help via WhatsApp',
@@ -520,6 +512,15 @@ const VendorProfile = () => {
          iconBg: 'bg-rose-500/10',
          iconColor: 'text-rose-500',
          isLogout: true,
+      },
+      {
+         key: 'delete',
+         label: 'Delete Account',
+         subtitle: 'Permanently remove partner data',
+         icon: Trash2,
+         iconBg: 'bg-rose-500/10',
+         iconColor: 'text-rose-500',
+         isDelete: true,
       },
    ];
 
@@ -639,7 +640,7 @@ const VendorProfile = () => {
                   <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
                </button>
                <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-                  {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'security' ? 'Security' : activeSection === 'theme' ? 'Appearance' : 'Account Settings'}
+                  {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : 'Account Settings'}
                </h1>
             </div>
          </header>
@@ -843,15 +844,15 @@ const VendorProfile = () => {
                         <Button
                            type="submit"
                            loading={loading}
-                           disabled={data.workingHours.start === data.workingHours.end}
+                           disabled={data.workingHours.start === data.workingHours.end || !!pickerOpen}
                            className={cn(
                               "w-full rounded-lg py-3 font-black capitalize tracking-widest text-[10px] shadow-lg transition-all active:scale-95 bg-[#00246b] dark:bg-[#00246b] text-white hover:bg-opacity-95",
-                              data.workingHours.start === data.workingHours.end
+                              (data.workingHours.start === data.workingHours.end || !!pickerOpen)
                                  ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
                                  : "shadow-[#00246b]/20"
                            )}
                         >
-                           {data.workingHours.start === data.workingHours.end ? 'Invalid Time Range' : 'Save Changes'}
+                           {data.workingHours.start === data.workingHours.end ? 'Invalid Time Range' : pickerOpen ? 'Please Set Time First' : 'Save Changes'}
                         </Button>
                      </form>
                   </motion.section>
@@ -1108,28 +1109,26 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Booking History</h2>
                      </div>
 
-                     <div className="flex items-center gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
-                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
-                           <Calendar size={12} className="text-slate-400" />
+                     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
                            <input
                               type="date"
                               value={historyFilters.from}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
+                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
-                        <div className="text-slate-300 dark:text-gray-700 font-black text-xs shrink-0">
-                           &gt;
+                        <div className="text-slate-300 dark:text-gray-700 font-black text-[10px] sm:text-xs shrink-0 flex justify-center">
+                           -
                         </div>
-                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
-                           <Calendar size={12} className="text-slate-400" />
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
                            <input
                               type="date"
                               value={historyFilters.to}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
+                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
                      </div>
@@ -1170,7 +1169,7 @@ const VendorProfile = () => {
                                  key={booking._id}
                                  className="p-3 bg-slate-50/70 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800 space-y-2"
                               >
-                                 <div className="flex items-center justify-between gap-3">
+                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                        <p className="text-[12px] font-black text-slate-800 dark:text-white leading-tight">
                                           {booking.walkInCustomerName || booking.userId?.name || 'Customer'}
@@ -1179,30 +1178,34 @@ const VendorProfile = () => {
                                           {booking.services?.map((service) => service.name).join(', ') || 'Service'}
                                        </p>
                                     </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border ${booking.status === 'completed'
-                                       ? 'bg-emerald-50 text-emerald-500 border-emerald-100'
-                                       : booking.status === 'cancelled'
-                                          ? 'bg-red-50 text-red-500 border-red-100'
-                                          : 'bg-blue-50 text-blue-500 border-blue-100'
-                                       }`}>
-                                       {booking.status}
-                                    </span>
+                                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                       <span className={`px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border ${booking.status === 'completed'
+                                          ? 'bg-emerald-50 text-emerald-500 border-emerald-100'
+                                          : booking.status === 'cancelled'
+                                             ? 'bg-red-50 text-red-500 border-red-100'
+                                             : 'bg-blue-50 text-blue-500 border-blue-100'
+                                          }`}>
+                                          {booking.status}
+                                       </span>
+                                       <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 dark:text-gray-500">
+                                          <Clock size={10} />
+                                          {new Date(booking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                       </div>
+                                    </div>
                                  </div>
 
-                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider">
-                                    <div className="flex items-center gap-1.5">
-                                       <Calendar size={11} />
-                                       {new Date(booking.startTime).toLocaleDateString('en-GB')}
+                                 <div className="flex items-center justify-between text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider mt-2">
+                                    <div className="flex items-center gap-3">
+                                       <div className="flex items-center gap-1.5">
+                                          <Calendar size={11} />
+                                          {new Date(booking.startTime).toLocaleDateString('en-GB')}
+                                       </div>
+                                       <div className="flex items-center gap-1.5">
+                                          <UserRound size={11} />
+                                          {booking.staffId?.name || 'Unassigned'}
+                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                       <Clock size={11} />
-                                       {new Date(booking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                       <UserRound size={11} />
-                                       {booking.staffId?.name || 'Unassigned'}
-                                    </div>
-                                    <div className="text-right text-[11px] text-slate-800 dark:text-white">
+                                    <div className="text-[11px] text-slate-800 dark:text-white">
                                        Rs {booking.totalPrice || 0}
                                     </div>
                                  </div>
@@ -1229,28 +1232,26 @@ const VendorProfile = () => {
                         <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Transactions</h2>
                      </div>
 
-                     <div className="flex items-center gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
-                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
-                           <Calendar size={12} className="text-slate-400" />
+                     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
                            <input
                               type="date"
                               value={transactionFilters.from}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
+                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
-                        <div className="text-slate-300 dark:text-gray-700 font-black text-xs shrink-0">
-                           &gt;
+                        <div className="text-slate-300 dark:text-gray-700 font-black text-[10px] sm:text-xs shrink-0 flex justify-center">
+                           -
                         </div>
-                        <div className="flex-1 relative flex items-center gap-2 px-2.5 bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800">
-                           <Calendar size={12} className="text-slate-400" />
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
                            <input
                               type="date"
                               value={transactionFilters.to}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full bg-transparent py-2 text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none"
+                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
                      </div>
@@ -1288,8 +1289,8 @@ const VendorProfile = () => {
                               </select>
                            )}
                            <div className="flex-1 sm:flex-none px-2 h-9 flex items-center justify-center gap-1.5 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 text-[10px] font-black capitalize text-slate-500 dark:text-gray-300 shadow-sm">
-                              <div className="flex flex-col items-center leading-none px-0.5">
-                                 <span className="text-[6.5px] opacity-40">Qty</span>
+                              <div className="flex flex-row items-center gap-1 leading-none px-0.5">
+                                 <span className="text-[10px] opacity-60">Qty</span>
                                  <span>{transactions.length}</span>
                               </div>
                               <span className="w-px h-3 bg-slate-200 dark:bg-gray-700" />
@@ -1311,9 +1312,9 @@ const VendorProfile = () => {
                            transactions.map((transaction) => (
                               <div
                                  key={transaction._id}
-                                 className="p-3 bg-slate-50/70 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800 space-y-2"
+                                 className="p-3 bg-slate-50/70 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800"
                               >
-                                 <div className="flex items-center justify-between gap-3">
+                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                        <p className="text-[12px] font-black text-slate-800 dark:text-white leading-tight">
                                           {transaction.sourceType === 'staff' ? transaction.sourceLabel : transaction.sourceType === 'partner' ? 'Partner Earning' : 'Shop Earning'}
@@ -1322,25 +1323,29 @@ const VendorProfile = () => {
                                           {transaction.description || transaction.reason || 'Booking Revenue'}
                                        </p>
                                     </div>
-                                    <span className="px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border bg-emerald-50 text-emerald-500 border-emerald-100">
-                                       {transaction.sourceType}
-                                    </span>
+                                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                       <span className="px-2.5 py-1 rounded-full text-[8px] font-black capitalize tracking-widest border bg-emerald-50 text-emerald-500 border-emerald-100">
+                                          {transaction.sourceType}
+                                       </span>
+                                       <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 dark:text-gray-500">
+                                          <Clock size={10} />
+                                          {new Date(transaction.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                       </div>
+                                    </div>
                                  </div>
 
-                                 <div className="grid grid-cols-2 gap-2 text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider">
-                                    <div className="flex items-center gap-1.5">
-                                       <Calendar size={11} />
-                                       {new Date(transaction.timestamp).toLocaleDateString('en-GB')}
+                                 <div className="flex items-center justify-between text-[9px] font-black text-slate-500 dark:text-gray-400 capitalize tracking-wider mt-2">
+                                    <div className="flex items-center gap-3">
+                                       <div className="flex items-center gap-1.5">
+                                          <Calendar size={11} />
+                                          {new Date(transaction.timestamp).toLocaleDateString('en-GB')}
+                                       </div>
+                                       <div className="flex items-center gap-1.5">
+                                          <UserRound size={11} />
+                                          {transaction.sourceLabel || 'System'}
+                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                       <Clock size={11} />
-                                       {new Date(transaction.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                       <UserRound size={11} />
-                                       {transaction.sourceLabel || 'System'}
-                                    </div>
-                                    <div className="flex items-center justify-end gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">
+                                    <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
                                        <IndianRupee size={11} />
                                        {Number(transaction.amount || 0).toLocaleString('en-IN')}
                                     </div>
@@ -1433,17 +1438,19 @@ const VendorProfile = () => {
                                              <p className="text-[8px] font-medium text-slate-500 dark:text-gray-400 leading-tight">
                                                 {tx.description || (isPayment ? 'Profile Boost' : 'Refund')}
                                              </p>
-                                             <div className="flex items-center gap-2 text-[7.5px] font-black text-slate-400 uppercase tracking-wider mt-0.5">
-                                                <span className="flex items-center gap-0.5">
-                                                   <Calendar size={8} />
-                                                   {new Date(tx.createdAt).toLocaleDateString('en-GB')}
-                                                </span>
-                                                <span className="flex items-center gap-0.5">
-                                                   <Clock size={8} />
-                                                   {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
+                                             <div className="flex flex-col gap-1 mt-1">
+                                                <div className="flex items-center gap-2 text-[7.5px] font-black text-slate-400 uppercase tracking-wider">
+                                                   <span className="flex items-center gap-0.5">
+                                                      <Calendar size={8} />
+                                                      {new Date(tx.createdAt).toLocaleDateString('en-GB')}
+                                                   </span>
+                                                   <span className="flex items-center gap-0.5">
+                                                      <Clock size={8} />
+                                                      {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                   </span>
+                                                </div>
                                                 {tx.gatewayPaymentId && (
-                                                   <span className="lowercase font-bold">
+                                                   <span className="text-[7.5px] font-bold text-slate-400 lowercase tracking-wider truncate w-full">
                                                       id: {tx.gatewayPaymentId}
                                                    </span>
                                                 )}
@@ -1685,43 +1692,6 @@ const VendorProfile = () => {
                   </motion.section>
                )}
 
-               {activeSection === 'security' && (
-                  <motion.section
-                     key="security"
-                     initial={{ opacity: 0, x: 24 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     exit={{ opacity: 0, x: 24 }}
-                     transition={{ duration: 0.18 }}
-                     className="space-y-4"
-                  >
-                     <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                           <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
-                              <ShieldCheck size={16} />
-                           </div>
-                           <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Security Settings</h2>
-                        </div>
-
-                        <div className="mt-4">
-                           <button
-                              onClick={() => setShowDeleteConfirm(true)}
-                              className="w-full flex items-center justify-between p-4 bg-rose-50/50 dark:bg-rose-900/5 rounded-2xl border border-rose-100 dark:border-rose-900/20 active:scale-[0.98] transition-all group"
-                           >
-                              <div className="flex items-center gap-3">
-                                 <div className="p-2 bg-rose-500/10 text-rose-500 rounded-lg">
-                                    <Trash2 size={16} />
-                                 </div>
-                                 <div className="text-left">
-                                    <p className="text-[11px] font-black text-rose-600 dark:text-rose-500 capitalize tracking-tight">Delete Account</p>
-                                    <p className="text-[8px] text-rose-400 font-bold tracking-tighter capitalize mt-0.5">Permanently remove partner data</p>
-                                 </div>
-                              </div>
-                              <ChevronRight size={14} className="text-rose-300 group-hover:translate-x-1 transition-transform" />
-                           </button>
-                        </div>
-                     </div>
-                  </motion.section>
-               )}
             </AnimatePresence>
          </main>
 

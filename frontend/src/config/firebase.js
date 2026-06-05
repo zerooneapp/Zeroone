@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
+import { getMessaging, getToken, onMessage, isSupported, deleteToken } from "firebase/messaging";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWV2ucFD4yiISx-7JJH6M36mwcrekTea0",
@@ -103,3 +103,21 @@ export const onMessageListener = () =>
             reject(error);
         }
     });
+
+export const removeFCMToken = async () => {
+    try {
+        const messaging = await getMessagingInstance();
+        if (!messaging) return false;
+        
+        const deleted = await deleteToken(messaging);
+        if (deleted) {
+            console.log('[FCM] Token deleted successfully');
+        } else {
+            console.log('[FCM] Failed to delete token');
+        }
+        return deleted;
+    } catch (err) {
+        console.log('[FCM] Error deleting token:', err);
+        return false;
+    }
+};

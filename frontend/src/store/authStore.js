@@ -124,6 +124,17 @@ export const useAuthStore = create(
         });
         localStorage.removeItem('token');
         localStorage.removeItem('auth-storage');
+        
+        // Also clear notifications & Firebase push token
+        import('./notificationStore').then((module) => {
+          module.default.getState().clearNotifications();
+        }).catch(() => {});
+        
+        import('../config/firebase').then((module) => {
+          if (module.removeFCMToken) {
+            module.removeFCMToken();
+          }
+        }).catch(() => {});
       },
 
       syncVendorStatus: async () => {

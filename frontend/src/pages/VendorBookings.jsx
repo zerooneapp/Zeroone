@@ -229,19 +229,22 @@ const VendorBookings = () => {
               <input
                 type="date"
                 value={fromDate}
-                min={dayjs().format('YYYY-MM-DD')}
+                min={status === 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
+                max={status !== 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
                 onChange={(e) => setFromDate(e.target.value)}
                 className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
               />
             </div>
-            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20">
-              <ChevronRight size={10} className="text-slate-400" />
+            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20 text-slate-400 text-[10px] font-black">
+              -
             </div>
             <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
               <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
               <input
                 type="date"
                 value={toDate}
+                min={status === 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
+                max={status !== 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
                 onChange={(e) => setToDate(e.target.value)}
                 className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
               />
