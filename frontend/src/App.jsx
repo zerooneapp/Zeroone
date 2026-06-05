@@ -60,6 +60,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const VendorManagement = lazy(() => import('./pages/admin/vendors/VendorManagement'));
 const UserManagement = lazy(() => import('./pages/admin/users/UserManagement'));
 const UserDetail = lazy(() => import('./pages/admin/users/UserDetail'));
+const StaffManagement = lazy(() => import('./pages/admin/staff/StaffManagement'));
 const BookingManagement = lazy(() => import('./pages/admin/bookings/BookingManagement'));
 const AdminBookingDetail = lazy(() => import('./pages/admin/bookings/AdminBookingDetail'));
 const CategoryManagement = lazy(() => import('./pages/admin/categories/CategoryManagement'));
@@ -314,6 +315,7 @@ function App() {
             <Route index element={<UserManagement />} />
             <Route path=":id" element={<UserDetail />} />
           </Route>
+          <Route path="staff" element={<StaffManagement />} />
           <Route path="bookings">
             <Route index element={<BookingManagement />} />
             <Route path=":id" element={<AdminBookingDetail />} />

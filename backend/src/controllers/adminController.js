@@ -22,7 +22,7 @@ const WalletTransaction = require('../models/WalletTransaction');
 const mongoose = require('mongoose');
 
 const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin']);
-const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
+const getStaffNotificationTarget = (staff) => staff?._id || null;
 const ADMIN_ROLES = new Set(['admin', 'super_admin']);
 
 const safeSendNotification = (payload) => {
@@ -103,9 +103,19 @@ const getSharedSettings = async (req, res) => {
 
 const updateGlobalSettings = async (req, res) => {
   try {
-    const settings = await GlobalSettings.findOneAndUpdate({}, req.body, { returnDocument: 'after', upsert: true });
+    const updateData = { ...req.body };
+    delete updateData._id;
+    delete updateData.__v;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+
+    const settings = await GlobalSettings.findOneAndUpdate(
+      {}, 
+      { $set: updateData }, 
+      { new: true, upsert: true }
+    );
     // Invalidate global settings cache
-    await redis.del('global_settings');
+    if (redis.isReady) await redis.del('global_settings');
     res.status(200).json(settings);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -410,6 +420,117 @@ const getAllUsers = async (req, res) => {
       totalPages: Math.ceil(totalUsers / limit),
       currentPage: Number(page)
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAllStaff = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const { search, status, vendorId, page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const filter = {};
+
+    if (search) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+    if (status === 'blocked') filter.isBlocked = true;
+    if (status === 'active') filter.isBlocked = false;
+    if (vendorId) filter.vendorId = new mongoose.Types.ObjectId(vendorId);
+
+    const staffList = await Staff.aggregate([
+      { $match: filter },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+      {
+        $lookup: {
+          from: 'vendors',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendor'
+        }
+      },
+      { $unwind: { path: '$vendor', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'staffId',
+          as: 'bookings'
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          phone: 1,
+          email: 1,
+          image: 1,
+          isBlocked: 1,
+          isActive: 1,
+          createdAt: 1,
+          'vendor.shopName': 1,
+          'user.phone': 1,
+          bookingCount: {
+            $size: {
+              $filter: {
+                input: '$bookings',
+                as: 'b',
+                cond: { $eq: ['$$b.status', 'completed'] }
+              }
+            }
+          }
+        }
+      }
+    ]);
+
+    const totalStaff = await Staff.countDocuments(filter);
+
+    res.status(200).json({
+      staff: staffList,
+      totalStaff,
+      totalPages: Math.ceil(totalStaff / limit),
+      currentPage: Number(page)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const toggleBlockStaff = async (req, res) => {
+  try {
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) return res.status(404).json({ message: 'Staff not found' });
+    
+    staff.isBlocked = !staff.isBlocked;
+    await staff.save();
+
+    // Optionally notify the staff member
+    if (staff.userId) {
+      safeSendNotification({
+        userIds: staff.userId,
+        role: 'staff',
+        type: staff.isBlocked ? 'ACCOUNT_BLOCKED' : 'ACCOUNT_UNBLOCKED',
+        title: staff.isBlocked ? 'Staff Account Restricted' : 'Staff Account Restored',
+        message: staff.isBlocked 
+          ? 'Your staff account has been restricted by the admin team. Please contact your vendor or support.' 
+          : 'Your staff account access has been restored.',
+        referenceId: `STAFF_${staff.isBlocked ? 'BLOCK' : 'UNBLOCK'}_${staff._id}_${Date.now()}`
+      });
+    }
+
+    res.status(200).json({ message: `Staff ${staff.isBlocked ? 'blocked' : 'unblocked'}`, staff });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -728,8 +849,8 @@ const getAdminDashboard = async (req, res) => {
       activePartners,
       pendingPartners,
       blockedPartners,
-      activeBookings,
-      yesterdayActiveBookings,
+      totalBookings,
+      yesterdayTotalBookings,
       totalUsers,
       yesterdayTotalUsers,
       bookingStats,
@@ -760,8 +881,8 @@ const getAdminDashboard = async (req, res) => {
       Vendor.countDocuments({ status: 'active' }),
       Vendor.countDocuments({ status: 'pending' }),
       Vendor.countDocuments({ status: 'blocked' }),
-      Booking.countDocuments({ status: 'confirmed' }),
-      Booking.countDocuments({ status: 'confirmed', createdAt: { $lt: today.toDate() } }), // Approximation for yesterday's active bookings
+      Booking.countDocuments({}),
+      Booking.countDocuments({ createdAt: { $lt: today.toDate() } }), // Yesterday total bookings
       User.countDocuments({ role: 'customer' }),
       User.countDocuments({ role: 'customer', createdAt: { $lt: today.toDate() } }), // Yesterday total users
       Booking.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
@@ -813,8 +934,8 @@ const getAdminDashboard = async (req, res) => {
       activePartners,
       pendingPartners,
       blockedPartners,
-      activeBookings,
-      yesterdayActiveBookings,
+      totalBookings,
+      yesterdayTotalBookings,
       totalUsers,
       yesterdayTotalUsers,
       bookingStats: stats,
@@ -1545,5 +1666,7 @@ module.exports = {
   getStaffLiveReport,
   getWithdrawalRequests,
   processWithdrawalRequest,
-  deleteVendor
+  deleteVendor,
+  getAllStaff,
+  toggleBlockStaff
 };

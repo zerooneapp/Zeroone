@@ -19,7 +19,7 @@ const {
 const Staff = require('../models/Staff');
 const { hasLegacyShopOfflineClosure } = require('../services/vendorClosureService');
 
-const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
+const getStaffNotificationTarget = (staff) => staff?._id || null;
 
 const getOperationalShopOpen = async (vendor) => (
   vendor.isShopOpen || await hasLegacyShopOfflineClosure(vendor._id)
