@@ -34,6 +34,8 @@ const LoyalCustomers = () => {
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // all, repeat, high-spender
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const handleFetch = async (force = false) => {
     try {
@@ -47,6 +49,10 @@ const LoyalCustomers = () => {
     handleFetch();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter]);
+
   const filteredCustomers = customers.filter(c => {
     const trimmedSearch = search.trim().toLowerCase();
     const matchesSearch = !trimmedSearch ||
@@ -59,10 +65,14 @@ const LoyalCustomers = () => {
     return matchesSearch;
   });
 
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[20px] pb-3 flex items-center gap-4">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
         <button 
           onClick={() => navigate(-1)}
           className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
@@ -74,7 +84,7 @@ const LoyalCustomers = () => {
         </h1>
       </header>
 
-      <main className="pt-[74px] px-4 space-y-4">
+      <main className="pt-[104px] px-4 space-y-4">
         {/* Search & Filter */}
         <div className="space-y-3">
           <div className="relative">
@@ -125,63 +135,86 @@ const LoyalCustomers = () => {
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No customers found</p>
             </div>
           ) : (
-            filteredCustomers.map((customer, idx) => (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                key={customer._id}
-                className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 shrink-0 bg-slate-50 dark:bg-gray-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-700">
-                      <img 
-                        src={customer.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name)}&background=E2E8F0&color=1C2C4E&bold=true`} 
-                        alt={customer.name}
-                        className="w-full h-full object-cover"
-                      />
+            <>
+              {paginatedCustomers.map((customer, idx) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  key={customer._id}
+                  className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 shrink-0 bg-slate-50 dark:bg-gray-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-700">
+                        <img 
+                          src={customer.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name)}&background=E2E8F0&color=1C2C4E&bold=true`} 
+                          alt={customer.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-sm text-[#00246b] dark:text-white tracking-tight">
+                          {toPascalCase(customer.name)}
+                        </h3>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-extrabold text-sm text-[#00246b] dark:text-white tracking-tight">
-                        {toPascalCase(customer.name)}
-                      </h3>
-                      <p className="text-[9px] font-bold text-slate-400">{customer.phone}</p>
-                    </div>
+                    {customer.bookingCount >= 2 && (
+                      <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                        <Star size={8} fill="currentColor" />
+                        <span className="text-[7.5px] font-black uppercase tracking-tighter">Loyal</span>
+                      </div>
+                    )}
                   </div>
-                  {customer.bookingCount >= 2 && (
-                    <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                      <Star size={8} fill="currentColor" />
-                      <span className="text-[7.5px] font-black uppercase tracking-tighter">Loyal</span>
-                    </div>
-                  )}
-                </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-1.5 border-t border-slate-100 dark:border-gray-800">
-                  <div className="space-y-0.5">
-                    <p className="text-[7.5px] font-bold text-slate-400 uppercase">Visits</p>
-                    <div className="flex items-center gap-1 text-[#00246b] dark:text-white">
-                      <Calendar size={9} />
-                      <span className="text-xs font-black">{customer.bookingCount}</span>
+                  <div className="grid grid-cols-3 gap-2 pt-1.5 border-t border-slate-100 dark:border-gray-800">
+                    <div className="space-y-0.5">
+                      <p className="text-[7.5px] font-bold text-slate-400 uppercase">Visits</p>
+                      <div className="flex items-center gap-1 text-[#00246b] dark:text-white">
+                        <Calendar size={9} />
+                        <span className="text-xs font-black">{customer.bookingCount}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[7.5px] font-bold text-slate-400 uppercase">Spend</p>
+                      <div className="flex items-center gap-1 text-[#00246b] dark:text-white">
+                        <Wallet size={9} />
+                        <span className="text-xs font-black">₹{customer.totalSpent % 1 === 0 ? customer.totalSpent : Number(customer.totalSpent).toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[7.5px] font-bold text-slate-400 uppercase">Last Visit</p>
+                      <p className="text-[10px] font-black text-[#00246b] dark:text-white">
+                        {dayjs(customer.lastBooking).format('MMM DD')}
+                      </p>
                     </div>
                   </div>
-                  <div className="space-y-0.5">
-                    <p className="text-[7.5px] font-bold text-slate-400 uppercase">Spend</p>
-                    <div className="flex items-center gap-1 text-[#00246b] dark:text-white">
-                      <Wallet size={9} />
-                      <span className="text-xs font-black">₹{customer.totalSpent % 1 === 0 ? customer.totalSpent : Number(customer.totalSpent).toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-[7.5px] font-bold text-slate-400 uppercase">Last Visit</p>
-                    <p className="text-[10px] font-black text-[#00246b] dark:text-white">
-                      {dayjs(customer.lastBooking).format('MMM DD')}
-                    </p>
-                  </div>
-                </div>
 
-              </motion.div>
-            ))
+                </motion.div>
+              ))}
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 pb-8 px-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    className="px-4 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#00246b] dark:text-gray-300 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                  >
+                    Prev
+                  </button>
+                  <span className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    className="px-4 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#00246b] dark:text-gray-300 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

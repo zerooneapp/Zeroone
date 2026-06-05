@@ -63,6 +63,22 @@ const formatBookingResponse = (booking, role) => {
     b.serviceAddress = undefined;
   }
 
+  let originalTotalPrice = 0;
+  b.services = (b.services || []).map(s => {
+    const origPrice = s.originalPrice !== undefined 
+      ? s.originalPrice 
+      : (s.serviceId && s.serviceId.price !== undefined ? s.serviceId.price : s.price);
+    
+    s.originalPrice = origPrice;
+    originalTotalPrice += origPrice;
+    // Keep serviceId as string for consistency if populated
+    if (s.serviceId && typeof s.serviceId === 'object' && s.serviceId._id) {
+      s.serviceId = s.serviceId._id.toString();
+    }
+    return s;
+  });
+  b.originalTotalPrice = originalTotalPrice;
+
   return b;
 };
 
@@ -118,6 +134,7 @@ const getMyBookings = async (req, res) => {
       .populate('userId', 'name phone image')
       .populate('vendorId', 'shopName address')
       .populate('staffId', 'name phone isOwner')
+      .populate('services.serviceId', 'price')
       .sort({ startTime: -1 });
 
     const formatted = bookings.map(b => formatBookingResponse(b, actorRole));

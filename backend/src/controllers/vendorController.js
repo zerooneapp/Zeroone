@@ -421,6 +421,7 @@ const getVendorBookings = async (req, res) => {
     const bookings = await Booking.find(filter)
       .populate('userId', 'name phone image')
       .populate('staffId', 'name')
+      .populate('services.serviceId', 'price')
       .sort({ startTime: -1 });
 
     const now = moment().tz('Asia/Kolkata');
@@ -434,6 +435,22 @@ const getVendorBookings = async (req, res) => {
       if (doc.type !== 'home') {
         doc.serviceAddress = undefined;
       }
+
+      let originalTotalPrice = 0;
+      doc.services = (doc.services || []).map(s => {
+        const origPrice = s.originalPrice !== undefined 
+          ? s.originalPrice 
+          : (s.serviceId && s.serviceId.price !== undefined ? s.serviceId.price : s.price);
+        
+        s.originalPrice = origPrice;
+        originalTotalPrice += origPrice;
+        // Keep serviceId as string for consistency if populated
+        if (s.serviceId && typeof s.serviceId === 'object' && s.serviceId._id) {
+          s.serviceId = s.serviceId._id.toString();
+        }
+        return s;
+      });
+      doc.originalTotalPrice = originalTotalPrice;
 
       return doc;
     });

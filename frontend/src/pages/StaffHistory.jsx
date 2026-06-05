@@ -221,8 +221,17 @@ const StaffHistory = () => {
                     </div>
                     <div className="text-right shrink-0">
                       <div className="flex items-center justify-end gap-1 text-emerald-600 dark:text-emerald-400">
-                        <IndianRupee size={12} strokeWidth={3} />
-                        <span className="text-[12px] font-black">{Number(booking.totalPrice || 0)}</span>
+                        {booking.originalTotalPrice > 0 && booking.originalTotalPrice !== booking.totalPrice ? (
+                          <>
+                            <span className="line-through text-[9px] font-bold text-slate-400 dark:text-gray-500 mr-0.5 flex items-center"><IndianRupee size={9} strokeWidth={2} />{booking.originalTotalPrice}</span>
+                            <span className="flex items-center"><IndianRupee size={12} strokeWidth={3} />{Number(booking.totalPrice || 0)}</span>
+                          </>
+                        ) : (
+                          <>
+                            <IndianRupee size={12} strokeWidth={3} />
+                            <span className="text-[12px] font-black">{Number(booking.totalPrice || 0)}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -234,7 +234,16 @@ const StaffBookings = () => {
                     <div className="flex items-center gap-5 py-1.5 border-y border-slate-50 dark:border-gray-800/40 my-1">
                       <div className="flex flex-col gap-1">
                         <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight leading-none">Price</span>
-                        <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-none">₹{booking.totalPrice}</span>
+                        <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1">
+                          {booking.originalTotalPrice > 0 && booking.originalTotalPrice !== booking.totalPrice ? (
+                            <>
+                              <span className="line-through text-[10px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{booking.originalTotalPrice}</span>
+                              <span>₹{booking.totalPrice}</span>
+                            </>
+                          ) : (
+                            `₹${booking.totalPrice}`
+                          )}
+                        </span>
                       </div>
                       <div className="w-px h-6 bg-slate-100 dark:bg-gray-800" />
                       <div className="flex flex-col gap-1">

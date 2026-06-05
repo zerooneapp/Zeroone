@@ -12,7 +12,8 @@ const bookingSchema = new mongoose.Schema({
     name: { type: String },
     price: { type: Number },
     duration: { type: Number },
-    isFreeViaMembership: { type: Boolean, default: false }
+    isFreeViaMembership: { type: Boolean, default: false },
+    originalPrice: { type: Number }
   }],
   membershipId: { type: mongoose.Schema.Types.ObjectId, ref: 'UserMembership' },
   totalPrice: { type: Number, required: true },

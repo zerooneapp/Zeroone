@@ -98,7 +98,16 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-50 dark:border-gray-800/50 relative z-10">
             <div className="flex items-baseline gap-1">
                <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Total</span>
-               <span className="text-[15px] font-black text-gray-900 dark:text-white tracking-tighter leading-none">₹{booking.totalPrice}</span>
+                <span className="text-[15px] font-black text-gray-900 dark:text-white tracking-tighter leading-none flex items-center gap-1">
+                   {booking.originalTotalPrice > 0 && booking.originalTotalPrice !== booking.totalPrice ? (
+                      <>
+                         <span className="line-through text-[11px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{booking.originalTotalPrice}</span>
+                         <span>₹{booking.totalPrice}</span>
+                      </>
+                   ) : (
+                      `₹${booking.totalPrice}`
+                   )}
+                </span>
             </div>
 
             {booking.status === 'confirmed' && (

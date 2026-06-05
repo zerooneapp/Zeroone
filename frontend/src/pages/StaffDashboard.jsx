@@ -252,8 +252,15 @@ const StaffDashboard = () => {
                                     </a>
                                  )}
                               </div>
-                              <p className="text-[13px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">
-                                 ₹{currentTask.totalPrice || 0}
+                              <p className="text-[13px] font-black text-slate-900 dark:text-white tracking-tighter leading-none flex items-center gap-1">
+                                 {currentTask.originalTotalPrice > 0 && currentTask.originalTotalPrice !== currentTask.totalPrice ? (
+                                    <>
+                                       <span className="line-through text-[10px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{currentTask.originalTotalPrice}</span>
+                                       <span>₹{currentTask.totalPrice}</span>
+                                    </>
+                                 ) : (
+                                    `₹${currentTask.totalPrice}`
+                                 )}
                               </p>
                            </div>
                         </motion.div>

@@ -293,7 +293,7 @@ const VendorDashboard = () => {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="space-y-0 min-w-0 flex-1">
+        <div className="space-y-0">
           <div className="flex items-center gap-2">
             <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight">
               {item.customerName}
@@ -310,21 +310,14 @@ const VendorDashboard = () => {
               <span className="opacity-20">&bull;</span>
               <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
             </div>
-            {item.totalPrice !== undefined && (
-              <div className="flex items-center gap-1 mt-0.5">
-                <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-                  TOTAL <IndianRupee size={9} strokeWidth={3} />{item.totalPrice}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2">
         {item.customerPhone && (
           <a
             href={`tel:${item.customerPhone}`}
-            className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-700/30 shadow-sm active:scale-95 transition-all text-emerald-600 dark:text-emerald-400"
+            className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
             title="Call Customer"
           >
             <Phone size={12} strokeWidth={2.5} />
@@ -563,7 +556,7 @@ const VendorDashboard = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="space-y-0 min-w-0 flex-1">
+                    <div className="space-y-0">
                       <div className="flex items-center gap-2">
                         <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-tight tracking-tight">
                           {item.customerName}
@@ -580,21 +573,14 @@ const VendorDashboard = () => {
                           <span className="opacity-20">&bull;</span>
                           <span className="truncate max-w-[150px]">{item.staffName || 'Owner'}</span>
                         </div>
-                        {item.totalPrice !== undefined && (
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-                              TOTAL <IndianRupee size={9} strokeWidth={3} />{item.totalPrice}
-                            </span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {item.customerPhone && item.status === 'confirmed' && (
+                  <div className="flex items-center gap-2">
+                    {item.customerPhone && (
                       <a
                         href={`tel:${item.customerPhone}`}
-                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-700/30 shadow-sm active:scale-95 transition-all text-emerald-600 dark:text-emerald-400"
+                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
                         title="Call Customer"
                       >
                         <Phone size={12} strokeWidth={2.5} />

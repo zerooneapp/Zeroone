@@ -131,6 +131,7 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
         serviceId: service._id,
         name: service.name,
         price: preview ? preview.finalPrice : service.price,
+        originalPrice: service.price,
         duration: service.duration,
         isFreeViaMembership: preview?.isFreeViaMembership || false
       };
@@ -652,6 +653,8 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
     const preview = (pricingPreview.services || []).find(ps => ps.serviceId.toString() === s.serviceId.toString());
     if (preview) {
       s.price = preview.finalPrice;
+      s.originalPrice = preview.originalPrice;
+      s.isFreeViaMembership = preview.isFreeViaMembership || false;
     }
     return s;
   });
