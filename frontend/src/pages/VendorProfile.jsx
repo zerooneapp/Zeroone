@@ -1110,25 +1110,27 @@ const VendorProfile = () => {
                      </div>
 
                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
+                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
                            <input
                               type="date"
                               value={historyFilters.from}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
+                              className="w-full relative bg-transparent text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
                         <div className="text-slate-300 dark:text-gray-700 font-black text-[10px] sm:text-xs shrink-0 flex justify-center">
                            -
                         </div>
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
+                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
                            <input
                               type="date"
                               value={historyFilters.to}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setHistoryFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
+                              className="w-full relative bg-transparent text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
                      </div>
@@ -1233,25 +1235,27 @@ const VendorProfile = () => {
                      </div>
 
                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
+                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
                            <input
                               type="date"
                               value={transactionFilters.from}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, from: e.target.value }))}
-                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
+                              className="w-full relative bg-transparent text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
                         <div className="text-slate-300 dark:text-gray-700 font-black text-[10px] sm:text-xs shrink-0 flex justify-center">
                            -
                         </div>
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden">
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
+                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
                            <input
                               type="date"
                               value={transactionFilters.to}
                               max={dayjs().format('YYYY-MM-DD')}
                               onChange={(e) => setTransactionFilters((prev) => ({ ...prev, to: e.target.value }))}
-                              className="w-full relative bg-transparent py-2 pl-7 sm:pl-8 pr-1 sm:pr-2 text-[9px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:left-1.5 sm:[&::-webkit-calendar-picker-indicator]:left-2.5 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
+                              className="w-full relative bg-transparent text-[10px] sm:text-[11px] font-black text-slate-800 dark:text-white outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-80 transition-opacity"
                            />
                         </div>
                      </div>

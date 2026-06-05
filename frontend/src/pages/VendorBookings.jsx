@@ -225,7 +225,7 @@ const VendorBookings = () => {
           {/* 📅 PREMIUM COMPACT DATE FILTER */}
           <div className="mt-3 flex items-center gap-1.5 bg-slate-50/50 dark:bg-gray-800/20 p-1 rounded-2xl border border-slate-100 dark:border-gray-800">
             <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
-              <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
               <input
                 type="date"
                 value={fromDate}
@@ -239,7 +239,7 @@ const VendorBookings = () => {
               -
             </div>
             <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
-              <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
               <input
                 type="date"
                 value={toDate}
