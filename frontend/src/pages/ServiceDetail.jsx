@@ -563,29 +563,6 @@ const ServiceDetail = () => {
       : services.filter((service) => normalizeCategoryValue(service.category) === normalizeCategoryValue(selectedCat));
   }, [services, selectedCat]);
 
-  if (loading && !vendor) return (
-    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen pt-[64px]">
-      <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
-      <div className="grid grid-cols-2 gap-4">
-        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
-        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
-      </div>
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-50 dark:bg-gray-900 rounded-3xl animate-pulse" />)}
-      </div>
-    </div>
-  );
-
-  if (error || !vendor) return (
-    <div className="p-20 text-center bg-white dark:bg-gray-950 min-h-screen">
-      <div className="flex flex-col items-center gap-4">
-        <AlertCircle size={48} className="text-gray-200" />
-        <p className="text-gray-500 font-bold">{error || 'Partner not found'}</p>
-        <Button className="mt-4" onClick={() => navigate(-1)}>Go Back</Button>
-      </div>
-    </div>
-  );
-
   const hasItemsFromThisVendor = cartVendor?._id === vendor?._id;
 
   const displayTotal = useMemo(() => {
@@ -640,6 +617,29 @@ const ServiceDetail = () => {
   }, [cartPricing, cartItems, servicePricing]);
 
   const hasHomeService = services.some((service) => service.type === 'home' || service.type === 'both');
+
+  if (loading && !vendor) return (
+    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen pt-[64px]">
+      <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
+        <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
+      </div>
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-50 dark:bg-gray-900 rounded-3xl animate-pulse" />)}
+      </div>
+    </div>
+  );
+
+  if (error || !vendor) return (
+    <div className="p-20 text-center bg-white dark:bg-gray-950 min-h-screen">
+      <div className="flex flex-col items-center gap-4">
+        <AlertCircle size={48} className="text-gray-200" />
+        <p className="text-gray-500 font-bold">{error || 'Partner not found'}</p>
+        <Button className="mt-4" onClick={() => navigate(-1)}>Go Back</Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">

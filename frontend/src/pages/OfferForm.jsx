@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Info, Scissors, Percent, IndianRupee, Calendar, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
+import { useVendorStore } from '../store/vendorStore';
 
 const OfferForm = () => {
   const navigate = useNavigate();
@@ -20,8 +21,20 @@ const OfferForm = () => {
     minPurchaseAmount: '',
     maxDiscountLimit: '',
   });
+  const { promotionsData, fetchPromotions } = useVendorStore();
   const [availableServices, setAvailableServices] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchPromotions();
+  }, []);
+
+  const unavailableServiceIds = useMemo(() => {
+    if (!promotionsData) return [];
+    return promotionsData
+      .filter(offer => offer.isActive && offer._id !== id)
+      .flatMap(offer => offer.serviceIds.map(s => typeof s === 'object' ? s._id : s));
+  }, [promotionsData, id]);
 
   useEffect(() => {
     const init = async () => {
@@ -62,6 +75,9 @@ const OfferForm = () => {
   };
 
   const toggleService = (serviceId) => {
+    if (unavailableServiceIds.includes(serviceId)) {
+      return toast.error('This service already has an active offer. You cannot have multiple offers for the same service.');
+    }
     setFormData(prev => ({
       ...prev,
       serviceIds: prev.serviceIds.includes(serviceId)
@@ -243,20 +259,28 @@ const OfferForm = () => {
                       </span>
                    </div>
                    <div className="flex flex-wrap gap-1.5">
-                      {availableServices.map((service) => (
-                         <button 
-                           key={service._id} 
-                           type="button"
-                           onClick={() => toggleService(service._id)}
-                           className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border ${
-                             formData.serviceIds.includes(service._id) 
-                             ? 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/20' 
-                             : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400 hover:border-[#00246b]/30'
-                           }`}
-                         >
-                            {service.name}
-                         </button>
-                      ))}
+                      {availableServices.map((service) => {
+                         const isUnavailable = unavailableServiceIds.includes(service._id);
+                         const isSelected = formData.serviceIds.includes(service._id);
+                         let btnClass = 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400 hover:border-[#00246b]/30';
+                         if (isUnavailable) {
+                           btnClass = 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-950/50 text-gray-400 border-gray-100 dark:border-gray-800';
+                         } else if (isSelected) {
+                           btnClass = 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/20';
+                         }
+
+                         return (
+                           <button 
+                             key={service._id} 
+                             type="button"
+                             disabled={isUnavailable}
+                             onClick={() => toggleService(service._id)}
+                             className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border ${btnClass}`}
+                           >
+                              {service.name}
+                           </button>
+                         );
+                      })}
                    </div>
                 </div>
              </div>

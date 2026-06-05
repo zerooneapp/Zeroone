@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import BookingCard from '../components/BookingCard';
@@ -224,29 +224,41 @@ const VendorBookings = () => {
 
           {/* 📅 PREMIUM COMPACT DATE FILTER */}
           <div className="mt-3 flex items-center gap-1.5 bg-slate-50/50 dark:bg-gray-800/20 p-1 rounded-2xl border border-slate-100 dark:border-gray-800">
-            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
-              <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
+            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">Start Date</label>
+              <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
+                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">
+                  {fromDate ? dayjs(fromDate).format('DD-MM-YYYY') : 'Select Date'}
+                </span>
+                <ChevronDown size={12} className="text-gray-400" />
+              </div>
               <input
                 type="date"
                 value={fromDate}
                 min={status === 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
                 max={status !== 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
               />
             </div>
-            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20 text-slate-400 text-[10px] font-black">
+            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20 text-slate-400 text-[10px] font-black shrink-0">
               -
             </div>
-            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50">
-              <label className="text-[7px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
+            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">End Date</label>
+              <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
+                <span className="text-[10px] font-black text-gray-900 dark:text-white tracking-widest">
+                  {toDate ? dayjs(toDate).format('DD-MM-YYYY') : 'Select Date'}
+                </span>
+                <ChevronDown size={12} className="text-gray-400" />
+              </div>
               <input
                 type="date"
                 value={toDate}
                 min={status === 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
                 max={status !== 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
                 onChange={(e) => setToDate(e.target.value)}
-                className="bg-transparent border-none p-0 text-[10px] font-black uppercase text-gray-900 dark:text-white focus:ring-0 w-full"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
               />
             </div>
           </div>
