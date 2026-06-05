@@ -20,9 +20,12 @@ const router = express.Router();
 // Removed public routes if they require req.vendor to function. 
 // They can be re-added later if/when they support non-vendor context.
 
+const { getMyStaffReviews } = require('../controllers/reviewController');
+
 // Public/Customer access routes
 router.get('/profile', protect, authorize('staff'), getStaffProfile);
 router.get('/history', protect, authorize('staff'), getStaffHistory);
+router.get('/reviews', protect, authorize('staff'), getMyStaffReviews);
 router.post('/manual-booking', protect, authorize('staff'), createStaffManualBooking);
 router.get('/', listStaff);
 router.get('/:id', getStaffById);

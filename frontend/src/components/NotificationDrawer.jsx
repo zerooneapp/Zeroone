@@ -8,7 +8,7 @@ import useNotificationStore from '../store/notificationStore';
 dayjs.extend(relativeTime);
 
 const NotificationDrawer = ({ isOpen, onClose }) => {
-  const { notifications, loading, fetchNotifications, markAsRead, deleteNotification } = useNotificationStore();
+  const { notifications, loading, fetchNotifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -58,9 +58,19 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
             <div className="px-4 pt-12 pb-3 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 transition-colors">
               <div>
                 <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Notifications</h2>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">
-                  {activeNotifications.length > 0 ? `${activeNotifications.length} updates & alerts` : 'Updates & alerts'}
-                </p>
+                <div className="flex items-center gap-3 mt-1 leading-none">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                    {activeNotifications.length > 0 ? `${activeNotifications.length} updates & alerts` : 'Updates & alerts'}
+                  </p>
+                  {activeNotifications.some(n => !n.isRead) && (
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-[9px] font-black text-blue-500 dark:text-blue-400 uppercase tracking-widest hover:underline leading-none cursor-pointer"
+                    >
+                      • Mark all read
+                    </button>
+                  )}
+                </div>
               </div>
               <button
                 onClick={onClose}

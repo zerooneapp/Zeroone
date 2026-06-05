@@ -48,9 +48,10 @@ const LoyalCustomers = () => {
   }, []);
 
   const filteredCustomers = customers.filter(c => {
-    const matchesSearch = 
-      c.name.toLowerCase().includes(search.toLowerCase()) || 
-      c.phone.includes(search);
+    const trimmedSearch = search.trim().toLowerCase();
+    const matchesSearch = !trimmedSearch ||
+      c.name.toLowerCase().includes(trimmedSearch) || 
+      c.phone.includes(trimmedSearch);
     
     if (filter === 'repeat') return matchesSearch && c.bookingCount >= 2;
     if (filter === 'high-spender') return matchesSearch && c.totalSpent > 1000;
@@ -99,7 +100,7 @@ const LoyalCustomers = () => {
                 onClick={() => setFilter(btn.id)}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider whitespace-nowrap transition-all active:scale-95 ${
                   filter === btn.id 
-                    ? 'bg-[#00246b]/5 text-[#00246b] border border-[#00246b] shadow-sm' 
+                    ? 'bg-[#00246b]/5 text-[#00246b] border border-[#00246b] shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700' 
                     : 'bg-white dark:bg-gray-900 text-slate-500 border border-slate-100 dark:border-gray-800'
                 }`}
               >

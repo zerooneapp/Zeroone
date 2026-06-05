@@ -680,6 +680,8 @@ const ServiceDetail = () => {
                         src={slide.url}
                         className="w-full h-full object-cover"
                         controls
+                        controlsList="nodownload noplaybackrate"
+                        disablePictureInPicture
                         preload="metadata"
                         playsInline
                         muted
@@ -1149,14 +1151,13 @@ const ServiceDetail = () => {
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <p className="text-[8px] font-black text-white/40 capitalize tracking-widest leading-none">Net total</p>
-                  <p className="text-lg font-black text-white leading-none">₹{displayTotal}</p>
-                </div>
-                {totalSavings > 0 && (
-                  <div className="mt-1.5 flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-1 rounded-md self-start shadow-sm shadow-emerald-500/10">
-                    <Tag size={8} className="text-emerald-400 fill-emerald-400" />
-                    <p className="text-[8px] font-black text-emerald-400 tracking-widest leading-none uppercase">SAVE ₹{totalSavings}</p>
+                  <div className="flex items-center gap-1.5 leading-none">
+                    <p className="text-lg font-black text-white">₹{displayTotal}</p>
+                    {originalTotal > displayTotal && (
+                      <span className="text-[11px] font-bold text-gray-400/80 line-through">₹{originalTotal}</span>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
               <button
                 onClick={handleProceedToBooking}

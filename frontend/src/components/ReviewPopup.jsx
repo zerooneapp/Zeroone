@@ -180,15 +180,16 @@ const ReviewPopup = ({ booking, onClose }) => {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 relative z-10 pb-1 sm:pb-0 items-center">
+          <div className="flex justify-between items-center relative z-10 pb-1 sm:pb-0">
             <button 
               onClick={onClose}
-              className="px-3 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="px-3 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-colors shrink-0"
             >
               Maybe Later
             </button>
             <Button 
-              className="px-5 py-2 text-[10px] bg-[#00246b] text-white rounded-xl font-black uppercase tracking-widest shadow-lg shadow-[#00246b]/20"
+              size="sm"
+              className="px-5 py-2.5 text-[10px] bg-[#00246b] text-white rounded-xl font-black uppercase tracking-widest shadow-lg shadow-[#00246b]/20 shrink-0"
               onClick={handleSubmit}
               disabled={submitting}
             >

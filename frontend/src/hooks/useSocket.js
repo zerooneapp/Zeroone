@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import useNotificationStore from '../store/notificationStore';
+import toast from 'react-hot-toast';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -25,6 +26,18 @@ const useSocket = (userId) => {
       console.log('[SOCKET] New notification received:', notification);
       addNotification(notification);
       
+      // Visual Toast
+      toast(notification.title || 'New Notification', {
+        icon: '🔔',
+        style: {
+          borderRadius: '12px',
+          background: '#00246b',
+          color: '#fff',
+          fontSize: '12px',
+          fontWeight: 'bold'
+        }
+      });
+
       // Dispatch a Global Event for Components to React
       window.dispatchEvent(new CustomEvent('new-socket-notification', { detail: notification }));
 

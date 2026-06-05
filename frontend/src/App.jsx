@@ -43,6 +43,7 @@ const VendorBookings = lazy(() => import('./pages/VendorBookings'));
 const VendorServices = lazy(() => import('./pages/VendorServices'));
 const VendorStaff = lazy(() => import('./pages/VendorStaff'));
 const VendorStaffProfile = lazy(() => import('./pages/VendorStaffProfile'));
+const StaffReviews = lazy(() => import('./pages/StaffReviews'));
 const VendorOffers = lazy(() => import('./pages/VendorOffers'));
 const VendorWallet = lazy(() => import('./pages/VendorWallet'));
 const VendorProfile = lazy(() => import('./pages/VendorProfile'));
@@ -294,6 +295,7 @@ function App() {
           <Route path="bookings" element={<StaffBookings />} />
           <Route path="account" element={<StaffAccount />} />
           <Route path="history" element={<StaffHistory />} />
+          <Route path="reviews" element={<StaffReviews />} />
         </Route>
 
         {/* ADMIN PANEL (WITH ADMIN LAYOUT) */}

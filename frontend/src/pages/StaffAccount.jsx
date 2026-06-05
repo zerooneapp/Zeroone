@@ -3,7 +3,7 @@ import {
   User, ShieldCheck, Calendar, Phone,
   LogOut, Briefcase, Award,
   CheckCircle, TrendingUp, IndianRupee, ArrowRight,
-  ChevronLeft
+  ChevronLeft, Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -57,6 +57,26 @@ const StaffAccount = () => {
 
   useEffect(() => {
     fetchProfile();
+
+    const handleGlobalEvent = (e) => {
+      const type = e.detail?.type;
+      const refreshTypes = [
+         'STAFF_ASSIGNED',
+         'BOOKING_CANCELLED',
+         'BOOKING_COMPLETED',
+         'BOOKING_RESCHEDULED',
+         'ASSIGNMENT_RECEIVED',
+         'NEW_BOOKING',
+         'NEW_REVIEW',
+         'REVIEW_APPROVED'
+      ];
+      if (refreshTypes.includes(type)) {
+         fetchProfile();
+      }
+    };
+
+    window.addEventListener('new-socket-notification', handleGlobalEvent);
+    return () => window.removeEventListener('new-socket-notification', handleGlobalEvent);
   }, []);
 
   const formatDate = (isoString) => {
@@ -215,6 +235,22 @@ const StaffAccount = () => {
               <div className="text-left">
                 <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">History</h4>
                 <p className="text-[10px] font-bold text-slate-400">View bookings & earnings history</p>
+              </div>
+            </div>
+            <ArrowRight size={16} className="text-slate-300" />
+          </button>
+
+          <button
+            onClick={() => navigate('/staff/reviews')}
+            className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 active:scale-[0.98] transition-all shadow-sm mt-3"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl text-yellow-500">
+                <Star size={18} strokeWidth={2.5} />
+              </div>
+              <div className="text-left">
+                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Reviews</h4>
+                <p className="text-[10px] font-bold text-slate-400">View customer feedback & ratings</p>
               </div>
             </div>
             <ArrowRight size={16} className="text-slate-300" />

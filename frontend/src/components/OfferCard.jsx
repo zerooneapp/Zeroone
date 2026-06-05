@@ -3,7 +3,7 @@ import { Tag, Calendar, Scissors, Edit3, Trash2, IndianRupee, Percent } from 'lu
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
-const OfferCard = ({ offer, onToggle, onEdit }) => {
+const OfferCard = ({ offer, onToggle, onEdit, onDelete }) => {
   const isExpired = new Date(offer.expiryDate) < new Date();
   
   return (
@@ -26,6 +26,13 @@ const OfferCard = ({ offer, onToggle, onEdit }) => {
          </div>
          
          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => onDelete(offer._id)}
+              className="p-2 bg-gray-50 dark:bg-gray-800 text-red-500 rounded-lg hover:bg-red-500/10 hover:text-red-600 transition-all active:scale-90"
+              title="Delete Offer"
+            >
+               <Trash2 size={15} />
+            </button>
             <button 
               onClick={() => onEdit(offer)}
               className="p-2 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
