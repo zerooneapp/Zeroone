@@ -117,24 +117,24 @@ const AdminNotificationList = () => {
                                 <button 
                                     onClick={handleDeleteSelected}
                                     disabled={selectedIds.length === 0}
-                                    className={`p-2.5 rounded-xl transition-all active:scale-90 ${selectedIds.length > 0 ? 'text-red-500 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20' : 'text-slate-300 dark:text-gray-700'}`}
+                                    className={`p-2.5 rounded-xl transition-all active:scale-90 ${selectedIds.length > 0 ? 'text-red-500 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20' : 'text-slate-400 dark:text-gray-700'}`}
                                 >
                                     <Trash2 size={20} />
                                 </button>
-                                <button onClick={toggleSelectionMode} className="p-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><X size={20} /></button>
+                                <button onClick={toggleSelectionMode} className="p-2.5 text-slate-500 hover:text-slate-600 dark:hover:text-white transition-colors"><X size={20} /></button>
                             </>
                         ) : (
                             <div className="flex items-center gap-1.5">
                                 <button 
                                     onClick={handleMarkAllRead}
-                                    className="p-2.5 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-slate-400 hover:text-primary dark:hover:text-white transition-all shadow-sm active:scale-90"
+                                    className="p-2.5 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-slate-500 hover:text-primary dark:hover:text-white transition-all shadow-sm active:scale-90"
                                     title="Mark all as read"
                                 >
                                     <CheckCircle size={20} />
                                 </button>
                                 <button 
                                     onClick={toggleSelectionMode}
-                                    className="p-2.5 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-slate-400 hover:text-primary dark:hover:text-white transition-all shadow-sm active:scale-90"
+                                    className="p-2.5 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-slate-500 hover:text-primary dark:hover:text-white transition-all shadow-sm active:scale-90"
                                 >
                                     <CheckSquare size={20} />
                                 </button>
@@ -157,10 +157,10 @@ const AdminNotificationList = () => {
                             className="py-32 flex flex-col items-center justify-center text-center select-none"
                         >
                             <div className="p-10 bg-white dark:bg-gray-900 rounded-[3.5rem] mb-6 border border-slate-200/60 dark:border-gray-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
-                                <Bell size={64} strokeWidth={1} className="text-slate-200 dark:text-gray-800" />
+                                <Bell size={64} strokeWidth={1} className="text-slate-300 dark:text-gray-800" />
                             </div>
                             <p className="font-black text-base uppercase tracking-[0.25em] text-slate-900 dark:text-white">Inbox Empty</p>
-                            <p className="text-[11px] text-slate-400 mt-2 uppercase font-black tracking-widest opacity-60">No system notifications to display.</p>
+                            <p className="text-[11px] text-slate-500 mt-2 uppercase font-black tracking-widest opacity-90">No system notifications to display.</p>
                         </motion.div>
                     ) : (
                         notifications.map((n) => (
@@ -187,7 +187,7 @@ const AdminNotificationList = () => {
                                 <div className="flex gap-5">
                                     <div className="relative shrink-0">
                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                                            n.isRead ? 'bg-slate-50 dark:bg-gray-800/50 text-slate-400 dark:text-white/40' : 'bg-slate-50 dark:bg-gray-800 shadow-inner dark:text-white'
+                                            n.isRead ? 'bg-slate-50 dark:bg-gray-800/50 text-slate-500 dark:text-white/40' : 'bg-slate-50 dark:bg-gray-800 shadow-inner dark:text-white'
                                         }`}>
                                             {getIcon(n.type)}
                                         </div>
@@ -196,7 +196,7 @@ const AdminNotificationList = () => {
                                                 {selectedIds.includes(n._id) ? (
                                                     <CheckCircle2 size={20} className="text-primary fill-white shadow-sm" />
                                                 ) : (
-                                                    <Square size={20} className="text-slate-300 fill-white" />
+                                                    <Square size={20} className="text-slate-400 fill-white" />
                                                 )}
                                             </div>
                                         )}
@@ -210,11 +210,11 @@ const AdminNotificationList = () => {
                                             <p className={`text-sm font-black tracking-tight leading-tight ${n.isRead ? 'text-slate-500' : 'text-slate-900 dark:text-white'}`}>
                                                 {n.title}
                                             </p>
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest shrink-0 mt-0.5">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest shrink-0 mt-0.5">
                                                 {dayjs(n.createdAt).fromNow()}
                                             </span>
                                         </div>
-                                        <p className={`text-[11.5px] leading-relaxed font-bold mt-1.5 tracking-tight ${n.isRead ? 'text-slate-400' : 'text-slate-500 dark:text-gray-400'}`}>
+                                        <p className={`text-[11.5px] leading-relaxed font-bold mt-1.5 tracking-tight ${n.isRead ? 'text-slate-500' : 'text-slate-500 dark:text-gray-400'}`}>
                                             {n.message}
                                         </p>
                                     </div>
@@ -241,7 +241,7 @@ const AdminNotificationList = () => {
                             <div className="flex gap-2">
                                 <button 
                                     onClick={() => setIsSelectionMode(false)}
-                                    className="px-5 py-2 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity"
+                                    className="px-5 py-2 text-[10px] font-black uppercase tracking-widest opacity-90 hover:opacity-100 transition-opacity"
                                 >
                                     Cancel
                                 </button>

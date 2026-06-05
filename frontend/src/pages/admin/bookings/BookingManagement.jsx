@@ -92,7 +92,7 @@ const BookingManagement = () => {
       cancelled: "bg-red-50 text-red-500 border-red-100/50"
     };
     return (
-      <span className={cn("text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter", styles[status] || "bg-slate-50 text-slate-400 border-slate-100")}>
+      <span className={cn("text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter", styles[status] || "bg-slate-50 text-slate-500 border-slate-100")}>
         {status}
       </span>
     );
@@ -106,7 +106,7 @@ const BookingManagement = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-[24px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Global Ledger</h1>
-            <p className="text-[11px] font-black text-slate-400 capitalize tracking-[0.2em] mt-1 opacity-60">Audit real-time transaction activity</p>
+            <p className="text-[11px] font-black text-slate-500 capitalize tracking-[0.2em] mt-1 opacity-90">Audit real-time transaction activity</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -116,7 +116,7 @@ const BookingManagement = () => {
                 "p-2.5 rounded-xl border transition-all duration-300 active:scale-90 flex items-center justify-center",
                 loading
                   ? "bg-primary/10 border-primary/20 text-primary shadow-lg shadow-primary/20"
-                  : "bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-white border-slate-100 dark:border-gray-700 hover:text-primary hover:border-primary/30 shadow-sm hover:shadow-md"
+                  : "bg-slate-50 dark:bg-gray-800 text-slate-500 dark:text-white border-slate-100 dark:border-gray-700 hover:text-primary hover:border-primary/30 shadow-sm hover:shadow-md"
               )}
             >
               <RefreshCw size={18} strokeWidth={3} className={loading ? "animate-spin" : ""} />
@@ -126,18 +126,18 @@ const BookingManagement = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(140px,0.7fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(120px,auto)] gap-2.5 items-center">
           <div className="relative lg:col-span-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} strokeWidth={3} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} strokeWidth={3} />
             <input
               type="text"
               placeholder="Search user, partner..."
-              className="w-full pl-10 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-300"
+              className="w-full pl-10 pr-4 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[14px] font-black capitalize tracking-tight focus:ring-2 ring-primary/20 outline-none transition-all dark:text-white placeholder:text-slate-400"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
           <div className="relative group min-w-[140px]">
             <select
-              className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-200"
+              className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-300"
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             >
@@ -146,7 +146,7 @@ const BookingManagement = () => {
               <option value="completed">COMPLETED</option>
               <option value="cancelled">CANCELLED</option>
             </select>
-            <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" />
+            <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none group-hover:text-primary transition-colors" />
           </div>
           <input
             type="date"
@@ -177,12 +177,12 @@ const BookingManagement = () => {
         <table className="w-full text-left border-collapse min-w-[900px]">
           <thead>
             <tr className="bg-slate-900 dark:bg-gray-800 border-b border-slate-900 dark:border-gray-700">
-              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Transaction ID</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Participants</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-center">Price</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Date & Time</th>
-              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400">Status</th>
-              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-300 dark:text-slate-400 text-right">Actions</th>
+              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Transaction ID</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Participants</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500 text-center">Price</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Date & Time</th>
+              <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Status</th>
+              <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
@@ -201,23 +201,23 @@ const BookingManagement = () => {
                   className="group hover:bg-slate-50/80 dark:hover:bg-gray-800/80 transition-all cursor-pointer"
                 >
                   <td className="px-6 py-3.5">
-                    <code className="text-[12px] font-black text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 capitalize tracking-tighter">
+                    <code className="text-[12px] font-black text-slate-500 dark:text-slate-500 bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-gray-700 capitalize tracking-tighter">
                       #{booking.bookingId || booking._id.slice(-6)}
                     </code>
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-start gap-1.5">
-                        <User size={12} strokeWidth={3} className="text-primary dark:text-white opacity-60 mt-0.5" /> 
+                        <User size={12} strokeWidth={3} className="text-primary dark:text-white opacity-90 mt-0.5" /> 
                         <div className="flex flex-col leading-none">
                           <span className="text-[14px] font-black capitalize text-slate-900 dark:text-white tracking-tight">{booking.user?.name || booking.walkInCustomerName || 'Walk-In Customer'}</span>
                           {(booking.user?.phone || booking.walkInCustomerPhone) && (
-                             <span className="text-[9px] font-black text-slate-400 tracking-widest mt-1">{booking.user?.phone || booking.walkInCustomerPhone}</span>
+                             <span className="text-[9px] font-black text-slate-500 tracking-widest mt-1">{booking.user?.phone || booking.walkInCustomerPhone}</span>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-widest mt-1">
-                        <Store size={12} strokeWidth={3} className="text-slate-400 dark:text-slate-500" /> {booking.vendor?.shopName}
+                      <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-500 dark:text-slate-500 capitalize tracking-widest mt-1">
+                        <Store size={12} strokeWidth={3} className="text-slate-500 dark:text-slate-500" /> {booking.vendor?.shopName}
                       </div>
                     </div>
                   </td>
@@ -226,9 +226,9 @@ const BookingManagement = () => {
                       ₹{booking.totalPrice}
                     </span>
                   </td>
-                  <td className="px-4 py-3.5 space-y-1 text-[12px] font-black text-slate-500 dark:text-slate-400 capitalize tracking-tighter leading-none">
-                    <div className="flex items-center gap-1.5"><Calendar size={11} strokeWidth={3} className="text-slate-400 dark:text-slate-500" /> {new Date(booking.startTime || booking.createdAt).toLocaleDateString()}</div>
-                    <div className="flex items-center gap-1.5"><Clock size={11} strokeWidth={3} className="text-slate-400 dark:text-slate-500" /> {new Date(booking.startTime || booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  <td className="px-4 py-3.5 space-y-1 text-[12px] font-black text-slate-500 dark:text-slate-500 capitalize tracking-tighter leading-none">
+                    <div className="flex items-center gap-1.5"><Calendar size={11} strokeWidth={3} className="text-slate-500 dark:text-slate-500" /> {new Date(booking.startTime || booking.createdAt).toLocaleDateString()}</div>
+                    <div className="flex items-center gap-1.5"><Clock size={11} strokeWidth={3} className="text-slate-500 dark:text-slate-500" /> {new Date(booking.startTime || booking.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                   </td>
                   <td className="px-4 py-3.5 leading-none">
                     {getStatusBadge(booking.status)}
@@ -241,7 +241,7 @@ const BookingManagement = () => {
                           disabled={actionLoadingId === booking._id}
                           className={cn(
                             "w-9 h-9 flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 rounded-xl transition-all active:scale-90 border border-red-100/50 shadow-sm",
-                            actionLoadingId === booking._id && "opacity-50 animate-pulse"
+                            actionLoadingId === booking._id && "opacity-80 animate-pulse"
                           )}
                           title="Force Cancel"
                         >
@@ -250,7 +250,7 @@ const BookingManagement = () => {
                       )}
                       <button
                         onClick={() => navigate(`/admin/bookings/${booking._id}`)}
-                        className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-500 dark:text-slate-400 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
+                        className="w-9 h-9 flex items-center justify-center bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-500 dark:text-slate-500 hover:text-primary transition-all active:scale-90 border border-slate-100 dark:border-gray-700 shadow-sm"
                         title="View Order"
                       >
                         <Eye size={18} strokeWidth={3} />
@@ -265,10 +265,10 @@ const BookingManagement = () => {
 
         {!loading && bookings.length === 0 && (
           <div className="p-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-200 dark:text-slate-700 border border-slate-100 dark:border-gray-700">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto text-slate-300 dark:text-slate-700 border border-slate-100 dark:border-gray-700">
               <Package size={32} strokeWidth={3} />
             </div>
-            <p className="font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-[12px] ">
+            <p className="font-black text-slate-400 dark:text-slate-600 capitalize tracking-widest text-[12px] ">
               {filters.search || filters.status || filters.startDate || filters.endDate ? "No matching records in ledger" : "No bookings recorded yet"}
             </p>
           </div>
@@ -278,7 +278,7 @@ const BookingManagement = () => {
       {/* 🔢 PAGINATION */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4">
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
             Showing Page <span className="text-slate-900 dark:text-white">{page}</span> of <span className="text-slate-900 dark:text-white">{totalPages}</span>
           </div>
 
@@ -286,7 +286,7 @@ const BookingManagement = () => {
             <button
               onClick={() => setPage(prev => Math.max(1, prev - 1))}
               disabled={page === 1 || loading}
-              className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-400 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90 shadow-sm"
+              className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-500 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90 shadow-sm"
             >
               <ChevronLeft size={18} strokeWidth={3} />
             </button>
@@ -309,7 +309,7 @@ const BookingManagement = () => {
                         "w-10 h-10 rounded-xl text-[12px] font-black transition-all active:scale-90 border shadow-sm",
                         page === pageNum
                           ? "bg-primary text-white border-primary"
-                          : "bg-white dark:bg-gray-900 text-slate-400 border-slate-200/60 dark:border-gray-800 hover:border-primary/30"
+                          : "bg-white dark:bg-gray-900 text-slate-500 border-slate-200/60 dark:border-gray-800 hover:border-primary/30"
                       )}
                     >
                       {pageNum}
@@ -319,7 +319,7 @@ const BookingManagement = () => {
                   (pageNum === 2 && page > 3) ||
                   (pageNum === totalPages - 1 && page < totalPages - 2)
                 ) {
-                  return <span key={pageNum} className="text-slate-300 font-black px-1">...</span>;
+                  return <span key={pageNum} className="text-slate-400 font-black px-1">...</span>;
                 }
                 return null;
               })}
@@ -328,7 +328,7 @@ const BookingManagement = () => {
             <button
               onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
               disabled={page === totalPages || loading}
-              className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-400 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90 shadow-sm"
+              className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-900 rounded-xl border border-slate-200/60 dark:border-gray-800 text-slate-500 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90 shadow-sm"
             >
               <ChevronRight size={18} strokeWidth={3} />
             </button>

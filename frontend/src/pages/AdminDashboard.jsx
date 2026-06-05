@@ -193,7 +193,7 @@ const AdminDashboard = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="leading-none">
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight capitalize">System Status</h1>
-          <p className="text-[13px] font-black text-slate-400 capitalize tracking-[0.2em] mt-2">Platform Command Center</p>
+          <p className="text-[13px] font-black text-slate-500 capitalize tracking-[0.2em] mt-2">Platform Command Center</p>
         </div>
         <div className="flex items-center gap-2.5">
           <button
@@ -218,7 +218,7 @@ const AdminDashboard = () => {
             <AlertTriangle size={20} strokeWidth={3} className="animate-pulse" />
             <div>
               <p className="text-[13px] font-black capitalize tracking-tight">Critical Alert: Low Wallet Balance</p>
-              <p className="text-[11px] font-black opacity-60 capitalize tracking-widest mt-1">{data.alerts.lowBalanceVendors} Partners Inactive</p>
+              <p className="text-[11px] font-black opacity-90 capitalize tracking-widest mt-1">{data.alerts.lowBalanceVendors} Partners Inactive</p>
             </div>
           </div>
           <button onClick={handleNotifyLowBalance} className="text-[10px] font-black capitalize text-red-500 border-b border-red-500/30">Notify All</button>
@@ -245,7 +245,7 @@ const AdminDashboard = () => {
               className="p-3 bg-white dark:bg-gray-900 rounded-[1.3rem] border border-slate-100 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all flex flex-col min-h-[110px] cursor-pointer"
             >
               <div className="flex justify-between items-start">
-                <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-tight leading-none">
+                <p className="text-[11px] font-black text-slate-500 dark:text-slate-500 capitalize tracking-tight leading-none">
                   {kpi.label}
                 </p>
                 <div className={cn('flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black', kpi.trendUp ? 'text-emerald-500' : 'text-red-500')}>
@@ -277,7 +277,7 @@ const AdminDashboard = () => {
         <div className="lg:col-span-2 p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight capitalize">Platform Revenue</h2>
-            <div className="flex gap-1.5 bg-slate-50 dark:bg-gray-800 p-1 rounded-lg text-[11px] font-black capitalize tracking-widest text-slate-400">
+            <div className="flex gap-1.5 bg-slate-50 dark:bg-gray-800 p-1 rounded-lg text-[11px] font-black capitalize tracking-widest text-slate-500">
               {['7d', '15d', '30d'].map((r) => (
                 <button
                   key={r}
@@ -292,23 +292,25 @@ const AdminDashboard = () => {
 
           <div className="h-64 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.revenueGraph} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={data.revenueGraph} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} strokeOpacity={0.08} />
                 <XAxis
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: 900, fill: isDarkMode ? '#64748b' : '#94a3b8' }}
+                  tick={{ fontSize: 10, fontWeight: 900, fill: isDarkMode ? '#64748b' : '#3D3A3A' }}
                   dy={10}
                   interval={chartRange === '30d' ? 4 : chartRange === '15d' ? 1 : 0}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 11, fontWeight: 900, fill: isDarkMode ? '#64748b' : '#94a3b8' }}
+                  tick={{ fontSize: 11, fontWeight: 900, fill: isDarkMode ? '#64748b' : '#3D3A3A' }}
+                  tickFormatter={(value) => `₹${value}`}
                 />
                 <Tooltip
                   cursor={{ fill: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}
+                  formatter={(value) => [`₹${value}`, 'Amount']}
                   contentStyle={{
                     borderRadius: '16px',
                     border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
@@ -317,7 +319,7 @@ const AdminDashboard = () => {
                     padding: '12px 16px'
                   }}
                   itemStyle={{ fontWeight: 900, fontSize: '14px', color: isDarkMode ? '#f8fafc' : '#0f172a' }}
-                  labelStyle={{ fontSize: '11px', fontWeight: 900, color: '#94a3b8', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                  labelStyle={{ fontSize: '11px', fontWeight: 900, color: isDarkMode ? '#64748b' : '#3D3A3A', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
                 />
                 <Bar dataKey="amount" radius={[6, 6, 6, 6]} barSize={chartRange === '30d' ? 12 : chartRange === '15d' ? 20 : 32}>
                   {data.revenueGraph.map((entry, index) => (
@@ -363,7 +365,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="pt-4 border-t border-slate-50 dark:border-gray-800/60">
-            <p className="text-[10px] font-black text-slate-300 dark:text-slate-600 capitalize tracking-widest text-center">System Healthy</p>
+            <p className="text-[10px] font-black text-slate-500 dark:text-slate-500 capitalize tracking-widest text-center">System Healthy</p>
           </div>
         </div>
       </div>
@@ -398,7 +400,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{vendor.shopName}</h4>
-                    <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{vendor.ownerName || vendor.ownerId?.name} • {vendor.serviceLevel}</p>
+                    <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest mt-1 opacity-90">{vendor.ownerName || vendor.ownerId?.name} • {vendor.serviceLevel}</p>
                   </div>
                 </div>
 
@@ -418,13 +420,13 @@ const AdminDashboard = () => {
                     </button>
                   </div>
                 ) : (
-                  <span className={`text-[9px] font-black capitalize px-2 py-0.5 rounded-md ${vendor.status === 'active' || vendor.status === 'approved' ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-400'}`}>
+                  <span className={`text-[9px] font-black capitalize px-2 py-0.5 rounded-md ${vendor.status === 'active' || vendor.status === 'approved' ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-500'}`}>
                     {vendor.status}
                   </span>
                 )}
               </div>
             ))}
-            {data.recentVendors.length === 0 && <div className="p-10 text-center text-slate-300 font-black capitalize tracking-[0.2em] text-[10px]">No pending requests</div>}
+            {data.recentVendors.length === 0 && <div className="p-10 text-center text-slate-400 font-black capitalize tracking-[0.2em] text-[10px]">No pending requests</div>}
           </div>
         </div>
 
@@ -441,7 +443,7 @@ const AdminDashboard = () => {
                 className="p-3.5 px-4.5 border-b border-slate-50 dark:border-gray-800 last:border-0 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3.5 leading-none">
-                  <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-slate-100 dark:border-gray-700 overflow-hidden shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-gray-800 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-inner border border-slate-100 dark:border-gray-700 overflow-hidden shrink-0">
                     {user.image ? (
                       <img src={user.image} className="w-full h-full object-cover" alt="" />
                     ) : (
@@ -450,10 +452,10 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <p className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{user.name || 'Guest User'}</p>
-                    <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest mt-1 opacity-60">{user.phone}</p>
+                    <p className="text-[11px] font-black text-slate-500 capitalize tracking-widest mt-1 opacity-90">{user.phone}</p>
                   </div>
                 </div>
-                <div className="p-1.5 text-slate-200 group-hover:text-primary transition-all">
+                <div className="p-1.5 text-slate-300 group-hover:text-primary transition-all">
                   <ChevronRight size={16} strokeWidth={3} />
                 </div>
               </div>
@@ -474,16 +476,16 @@ const AdminDashboard = () => {
                 <div className="flex gap-0.5 text-amber-500">
                   {[...Array(5)].map((_, i) => <Star key={i} size={11} fill={i < review.rating ? 'currentColor' : 'none'} strokeWidth={3} />)}
                 </div>
-                <span className="text-[11px] font-black text-slate-400 capitalize tracking-widest truncate max-w-[80px]">{review.vendorId?.shopName}</span>
+                <span className="text-[11px] font-black text-slate-500 capitalize tracking-widest truncate max-w-[80px]">{review.vendorId?.shopName}</span>
               </div>
               <p className="text-[13px] font-black text-slate-600 dark:text-gray-400 line-clamp-2 leading-snug opacity-80">"{review.comment}"</p>
               <div className="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-gray-800">
                 <span className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tight">{review.userId?.name}</span>
-                <button className="text-[11px] font-black text-red-500 capitalize opacity-60 hover:opacity-100 transition-opacity">Block User</button>
+                <button className="text-[11px] font-black text-red-500 capitalize opacity-90 hover:opacity-100 transition-opacity">Block User</button>
               </div>
             </div>
           ))}
-          {data.recentReviews.length === 0 && <div className="lg:col-span-3 py-16 text-center text-slate-300 font-black capitalize tracking-[0.2em] text-[11px] border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-2xl">Clean sheet! No reviews yet.</div>}
+          {data.recentReviews.length === 0 && <div className="lg:col-span-3 py-16 text-center text-slate-400 font-black capitalize tracking-[0.2em] text-[11px] border-2 border-dashed border-slate-100 dark:border-gray-800 rounded-2xl">Clean sheet! No reviews yet.</div>}
         </div>
       </section>
     </div>

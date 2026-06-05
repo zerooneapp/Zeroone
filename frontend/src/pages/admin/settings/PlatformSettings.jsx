@@ -81,23 +81,23 @@ const PlatformSettings = () => {
       <div className="p-5 px-6 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-2 border-b-primary/20">
         <div className="space-y-1">
           <h1 className="text-[28px] font-black text-slate-900 dark:text-white tracking-tighter capitalize">Platform Core</h1>
-          <p className="text-[12px] font-black text-slate-400 capitalize tracking-[0.2em] opacity-60">Manage master governance parameters</p>
+          <p className="text-[12px] font-black text-slate-500 capitalize tracking-[0.2em] opacity-90">Manage master governance parameters</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto justify-end">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3.5 bg-primary text-white font-black text-[11px] uppercase tracking-widest rounded-xl shadow-lg shadow-primary/25 active:scale-95 transition-all disabled:opacity-50 shrink-0"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3.5 bg-primary text-white font-black text-[11px] uppercase tracking-widest rounded-xl shadow-lg shadow-primary/25 active:scale-95 transition-all disabled:opacity-80 shrink-0"
           >
             {saving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
             {saving ? 'Saving...' : 'Save Settings'}
           </button>
 
           <div className="w-full sm:w-auto bg-slate-50 dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center gap-4 transition-all hover:border-primary/20">
-            <ShieldAlert size={24} strokeWidth={3} className="text-primary dark:text-white hidden sm:block opacity-60" />
+            <ShieldAlert size={24} strokeWidth={3} className="text-primary dark:text-white hidden sm:block opacity-90" />
             <div className="leading-tight">
               <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-widest">Global State Control</p>
-              <p className="text-[10px] font-black text-slate-400 capitalize tracking-widest leading-relaxed opacity-60">
+              <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest leading-relaxed opacity-90">
                 Critical changes affect all partner accounts instantly.
               </p>
             </div>
@@ -239,7 +239,7 @@ const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisable
   <div className="space-y-3 group">
     <div className="flex justify-between items-start px-1">
       <div className="space-y-1.5">
-        <h4 className="text-[11px] font-black text-slate-400 dark:text-gray-500 capitalize tracking-[0.2em] opacity-60">{label}</h4>
+        <h4 className="text-[11px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-90">{label}</h4>
         <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">{sub}</p>
       </div>
       <div className="text-primary dark:text-white opacity-80 group-hover:opacity-100 transition-opacity">
@@ -287,14 +287,14 @@ const ToggleItem = ({ label, sub, isActive, onToggle, isDisabled }) => (
   <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-transparent group hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-300">
     <div className="space-y-1.5 leading-none">
       <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">{label}</h4>
-      <p className="text-[11px] font-black text-slate-400 capitalize tracking-widest opacity-60">{sub}</p>
+      <p className="text-[11px] font-black text-slate-500 capitalize tracking-widest opacity-90">{sub}</p>
     </div>
     <button
       onClick={onToggle}
       disabled={isDisabled}
       className={cn(
         "transition-all duration-300 transform",
-        isActive ? "text-primary dark:text-white scale-110" : "text-slate-400 dark:text-slate-400 scale-95"
+        isActive ? "text-primary dark:text-white scale-110" : "text-slate-500 dark:text-slate-500 scale-95"
       )}
     >
       {isActive ? <ToggleRight size={36} strokeWidth={1} /> : <ToggleLeft size={36} strokeWidth={1} />}
