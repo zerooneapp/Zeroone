@@ -15,10 +15,26 @@ const Account = () => {
   const navigate = useNavigate();
 
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleting(true);
+      await api.delete('/users/profile');
+      toast.success('Account deleted successfully');
+      logout();
+      navigate('/login', { replace: true });
+    } catch (err) {
+      toast.error('Deletion failed');
+    } finally {
+      setDeleting(false);
+    }
   };
 
 
@@ -29,7 +45,6 @@ const Account = () => {
     { icon: MapPin, label: 'Saved Addresses', sub: 'Home, office, and more', path: '/account/addresses', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
     { icon: CreditCard, label: 'Payment Methods', sub: 'Cards, UPI, and Wallets', path: '/account/payments', color: 'text-purple-500', bg: 'bg-purple-500/10' },
     { icon: Crown, label: 'My Memberships', sub: 'Active plans & benefits', path: '/account/memberships', color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { icon: Shield, label: 'Security', sub: 'Passwords & permissions', path: '/account/security', color: 'text-rose-500', bg: 'bg-rose-500/10' },
     { icon: Settings, label: 'Preferences', sub: 'Theme', path: '/account/preferences', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
   ];
 
@@ -90,8 +105,13 @@ const Account = () => {
           Log Out of Account
         </button>
 
-
-
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
+        >
+          <Trash2 size={16} strokeWidth={3} />
+          Delete Account
+        </button>
       </div>
 
 
@@ -130,6 +150,49 @@ const Account = () => {
                   className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black text-[11px] capitalize tracking-widest shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
                 >
                   OK
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !deleting && setShowDeleteConfirm(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-2xl relative z-10 text-center"
+            >
+              <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-5 border border-rose-100">
+                <AlertTriangle size={32} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Wait! Delete?</h3>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-gray-500 mt-3 uppercase tracking-widest leading-relaxed">
+                This is irreversible. All your profile data, history, and settings will be purged.
+              </p>
+              
+              <div className="flex flex-col gap-2 mt-8">
+                <button
+                  disabled={deleting}
+                  onClick={handleDeleteAccount}
+                  className="w-full py-4 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-500/20 active:scale-95 transition-all flex items-center justify-center"
+                >
+                  {deleting ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Yes, Delete account'}
+                </button>
+                <button
+                  disabled={deleting}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="w-full py-4 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
+                >
+                  I want to stay
                 </button>
               </div>
             </motion.div>
