@@ -370,6 +370,19 @@ exports.requestManualPurchase = async (req, res) => {
         usageLimit: s.usageLimit
       }))
     });
+    
+    // Notify Vendor of the pending request
+    const vendor = await Vendor.findById(plan.vendorId);
+    if (vendor) {
+      NotificationService.sendNotification({
+        userIds: vendor.ownerId,
+        role: 'vendor',
+        type: 'MEMBERSHIP_REQUESTED',
+        title: 'New Membership Request 👑',
+        message: `${req.user.name || 'A customer'} has requested to buy your "${plan.name}" membership plan for ₹${plan.price}.`,
+        data: { membershipId: membership._id }
+      });
+    }
 
     res.status(201).json({ 
       message: 'Purchase request sent to vendor. Please wait for approval.',

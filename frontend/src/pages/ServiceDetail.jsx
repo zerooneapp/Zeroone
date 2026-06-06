@@ -33,11 +33,15 @@ const getServiceModeLabel = (type = 'shop') => {
 };
 
 // Custom video player to hide native controls (timeline/seek slider) and support custom play overlay
-const VideoPlayer = ({ src }) => {
+const VideoPlayer = ({ src, onClick }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = React.useRef(null);
 
-  const togglePlay = () => {
+  const togglePlay = (e) => {
+    if (onClick) {
+      onClick(e);
+      return;
+    }
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
@@ -128,6 +132,7 @@ const ServiceDetail = () => {
   const { role, isAuthenticated, user } = useAuthStore();
   const socket = useSocket(user?._id);
   const [lightboxImg, setLightboxImg] = useState(null);
+  const [lightboxType, setLightboxType] = useState('image');
   const [zoomScale, setZoomScale] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -185,10 +190,11 @@ const ServiceDetail = () => {
                 dedupedCategories.push(category);
               });
             
-            const cats = ['All', ...dedupedCategories];
+            const cats = ['All'];
             if (isMembActive && plans.length > 0) {
               cats.push('Plans');
             }
+            cats.push(...dedupedCategories);
             setCategories(cats);
           }
         }
@@ -741,13 +747,21 @@ const ServiceDetail = () => {
                 >
                   {slide.type === 'video' ? (
                     <div className="w-full h-full relative">
-                      <VideoPlayer src={slide.url} />
+                      <VideoPlayer
+                        src={slide.url}
+                        onClick={() => {
+                          setLightboxImg(slide.url);
+                          setLightboxType('video');
+                          setZoomScale(1);
+                        }}
+                      />
                     </div>
                   ) : (
                     <div 
                       className="w-full h-full cursor-pointer"
                       onClick={() => {
                         setLightboxImg(slide.url);
+                        setLightboxType('image');
                         setZoomScale(1);
                       }}
                     >
@@ -767,6 +781,7 @@ const ServiceDetail = () => {
                 className="w-full h-full snap-center cursor-pointer"
                 onClick={() => {
                   setLightboxImg("https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200");
+                  setLightboxType('image');
                   setZoomScale(1);
                 }}
               >
@@ -1368,11 +1383,23 @@ const ServiceDetail = () => {
                   }
                 }}
               >
-                <img
-                  src={lightboxImg}
-                  alt="Zoomable Preview"
-                  className="max-w-full max-h-[75vh] object-contain rounded-lg select-none pointer-events-none"
-                />
+                {lightboxType === 'video' ? (
+                  <video
+                    src={lightboxImg}
+                    controls
+                    autoPlay
+                    playsInline
+                    controlsList="nodownload noplaybackrate"
+                    disablePictureInPicture
+                    className="max-w-full max-h-[75vh] object-contain rounded-lg select-none"
+                  />
+                ) : (
+                  <img
+                    src={lightboxImg}
+                    alt="Zoomable Preview"
+                    className="max-w-full max-h-[75vh] object-contain rounded-lg select-none pointer-events-none"
+                  />
+                )}
               </div>
             </div>
 
