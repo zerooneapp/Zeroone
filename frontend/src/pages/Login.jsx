@@ -71,7 +71,7 @@ const CustomerAuth = () => {
       setCanResend(false);
       // Auto focus first OTP input field on step change to OTP
       setTimeout(() => {
-        inputRefs.current[0]?.focus();
+        inputRefs.current[0]?.focus({ preventScroll: true });
       }, 50);
     } else {
       toast.error(res.message, { id: 'auth-error' });
@@ -221,7 +221,7 @@ const CustomerAuth = () => {
                             });
                             setOtp(newOtp);
                             const lastFocusIndex = Math.min(pastedData.length - 1, 5);
-                            inputRefs.current[lastFocusIndex]?.focus();
+                            inputRefs.current[lastFocusIndex]?.focus({ preventScroll: true });
                           }
                         }}
                         onChange={(e) => {
@@ -234,12 +234,12 @@ const CustomerAuth = () => {
                             });
                             setOtp(newOtp);
                             const nextIndex = Math.min(i + digits.length, 5);
-                            inputRefs.current[nextIndex]?.focus();
+                            inputRefs.current[nextIndex]?.focus({ preventScroll: true });
                           } else {
                             newOtp[i] = val;
                             setOtp(newOtp);
                             if (val && i < 5) {
-                              inputRefs.current[i + 1]?.focus();
+                              inputRefs.current[i + 1]?.focus({ preventScroll: true });
                             }
                           }
                         }}
@@ -249,7 +249,7 @@ const CustomerAuth = () => {
                               const newOtp = [...otp];
                               newOtp[i - 1] = '';
                               setOtp(newOtp);
-                              inputRefs.current[i - 1]?.focus();
+                              inputRefs.current[i - 1]?.focus({ preventScroll: true });
                             } else {
                               const newOtp = [...otp];
                               newOtp[i] = '';
