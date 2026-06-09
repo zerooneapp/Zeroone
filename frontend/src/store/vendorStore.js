@@ -36,6 +36,10 @@ export const useVendorStore = create((set, get) => ({
   membershipData: [],
   membershipLoading: false,
 
+  closuresData: [],
+  closuresLoading: false,
+
+
   fetchDashboard: async (force = false) => {
     // If we already have data and it's not a force refresh, don't show loading state
     const { dashboardData } = get();
@@ -83,6 +87,8 @@ export const useVendorStore = create((set, get) => ({
         from: dayjs().format('YYYY-MM-DD'), 
         to: dayjs().add(7, 'day').format('YYYY-MM-DD') 
       });
+      get().fetchClosures();
+
     } catch (err) {
       console.error('Failed to load dashboard data', err);
       set({ dashboardLoading: false });
@@ -228,7 +234,6 @@ export const useVendorStore = create((set, get) => ({
 
     set({ membershipLoading: true });
     try {
-      // We use the vendorId from dashboardData if available, otherwise fetch it
       let vId = dashboardData?.vendorId;
       if (!vId) {
         const dashRes = await api.get('/dashboards/vendor');
@@ -245,6 +250,25 @@ export const useVendorStore = create((set, get) => ({
       set({ membershipLoading: false });
     }
   },
+
+  fetchClosures: async (force = false) => {
+    const { closuresData } = get();
+    if (closuresData.length > 0 && !force) {
+      silentClosuresRefresh(set);
+      return;
+    }
+    if (force !== 'silent') {
+      set({ closuresLoading: true });
+    }
+    try {
+      const res = await api.get('/vendor/closures');
+      set({ closuresData: res.data || [], closuresLoading: false });
+    } catch (err) {
+      console.error('Failed to load closures', err);
+      set({ closuresLoading: false });
+    }
+  },
+
 
   fetchBookings: async (params, force = false) => {
     const { bookingsData, lastBookingParams } = get();
@@ -343,6 +367,10 @@ async function silentDashboardRefresh(set, get) {
     if (get().bookingsData.length > 0 && get().lastBookingParams) {
       silentBookingsRefresh(set, get().lastBookingParams);
     }
+    if (get().closuresData.length > 0) {
+      silentClosuresRefresh(set);
+    }
+
   } catch (err) {
     console.error('Silent dashboard refresh failed', err);
   }
@@ -430,5 +458,14 @@ async function silentBookingsRefresh(set, params) {
     });
   } catch (err) {
     console.error('Silent bookings refresh failed', err);
+  }
+}
+
+async function silentClosuresRefresh(set) {
+  try {
+    const res = await api.get('/vendor/closures');
+    set({ closuresData: res.data || [] });
+  } catch (err) {
+    console.error('Silent closures refresh failed', err);
   }
 }

@@ -90,7 +90,7 @@ const BookingSuccess = () => {
                </div>
 
                <div className="flex justify-between items-center pt-3 border-t border-dashed border-slate-100 dark:border-gray-800">
-                  <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">Total paid</span>
+                  <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">Amount to be paid</span>
                   <span className="text-base font-black text-[#00246b] dark:text-white tracking-tighter">₹{booking.totalPrice}</span>
                </div>
             </div>

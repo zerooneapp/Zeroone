@@ -264,7 +264,7 @@ const getNearbyVendors = async (req, res) => {
     const enrichedVendors = await Promise.all(vendors.map(async (v) => {
       const operationalShopOpen = await getOperationalShopOpen(v);
       const allServices = await Service.find({ vendorId: v._id, isActive: true })
-        .select('_id name price image images duration showOnHome type')
+        .select('_id name price image images duration showOnHome type category')
         .sort({ showOnHome: -1, price: 1, createdAt: 1 })
         .lean();
 

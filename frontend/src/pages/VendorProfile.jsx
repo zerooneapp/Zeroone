@@ -592,7 +592,19 @@ const VendorProfile = () => {
             doc.text(`Generated on ${dayjs().format('MMM DD, YYYY HH:mm')} | Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
          }
 
-         doc.save(`Report_${data.shopName || 'Shop'}_${reportRange.from}.pdf`);
+         const cleanShopName = (data.shopName || 'Shop').replace(/[^a-zA-Z0-9]/g, '_');
+         const filename = `Report_${cleanShopName}_${reportRange.from}.pdf`;
+
+         const blob = doc.output('blob');
+         const blobUrl = URL.createObjectURL(blob);
+         const link = document.createElement('a');
+         link.href = blobUrl;
+         link.download = filename;
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+         setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+
          toast.success('Report downloaded successfully! 📄');
       } catch (error) {
          console.error(error);

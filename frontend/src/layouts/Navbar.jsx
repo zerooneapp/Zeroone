@@ -53,7 +53,7 @@ const Navbar = () => {
     };
   }, []);
 
-  if (!isVisible || !isInitialized) return null;
+  if (!isVisible) return null;
 
   const navItems = role === 'staff'
     ? [

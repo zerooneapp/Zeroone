@@ -185,7 +185,10 @@ const VendorDashboard = () => {
       };
 
       const startMin = parseWorkingTime(data.workingHours?.start);
-      const endMin = parseWorkingTime(data.workingHours?.end);
+      let endMin = parseWorkingTime(data.workingHours?.end);
+      if (endMin === 0 && data.workingHours?.end?.match(/12:00\s*AM/i)) {
+        endMin = 1440;
+      }
       const nowMin = now.hour() * 60 + now.minute();
 
       console.log(`[STATUS-DEBUG] Time Check: Now(${nowMin}), Start(${startMin}), End(${endMin})`);

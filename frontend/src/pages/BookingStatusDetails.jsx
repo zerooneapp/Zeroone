@@ -142,7 +142,7 @@ const BookingStatusDetails = () => {
                 </p>
                 {booking.cancelledByRole && (
                   <p className="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-white/50">
-                    Cancelled by {booking.cancelledByRole}
+                    Cancelled by {booking.cancelledByRole === 'vendor' ? 'stylish' : booking.cancelledByRole}
                   </p>
                 )}
               </div>
@@ -215,7 +215,7 @@ const BookingStatusDetails = () => {
               </div>
             )}
             <div className="flex justify-between items-center text-[10px] font-black tracking-tight text-[#00246b] dark:text-white leading-tight pt-1.5 border-t border-dashed border-slate-100 dark:border-gray-800/50">
-              <span className="text-slate-400 dark:text-gray-500 uppercase tracking-widest text-[8px]">Amount Paid</span>
+              <span className="text-slate-400 dark:text-gray-500 uppercase tracking-widest text-[8px]">Amount to be paid</span>
               <span className="text-[12px] font-black text-emerald-600 dark:text-emerald-400">₹{booking.totalPrice || 0}</span>
             </div>
 

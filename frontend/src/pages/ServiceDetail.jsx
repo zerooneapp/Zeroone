@@ -104,6 +104,10 @@ const ServiceDetail = () => {
   const [selectedCat, setSelectedCat] = useState('All');
   const [categories, setCategories] = useState(() => {
     const prefetchedServices = window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.services || [];
+    const prefetchedPlans = window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.plans || [];
+    const sharedSettings = window.__PREFETCHED_DATA__?.sharedSettings;
+    const isMembActive = sharedSettings?.features?.membershipActive !== false;
+
     if (prefetchedServices.length > 0) {
       const dedupedCategories = [];
       const seenCategoryKeys = new Set();
@@ -116,7 +120,13 @@ const ServiceDetail = () => {
           seenCategoryKeys.add(key);
           dedupedCategories.push(category);
         });
-      return ['All', ...dedupedCategories];
+      
+      const cats = ['All'];
+      if (isMembActive && prefetchedPlans.length > 0) {
+        cats.push('Plans');
+      }
+      cats.push(...dedupedCategories);
+      return cats;
     }
     return ['All'];
   });
@@ -125,14 +135,20 @@ const ServiceDetail = () => {
   const [cartPricing, setCartPricing] = useState(null);
   const [showChoiceModal, setShowChoiceModal] = useState(false);
   const [existingBooking, setExistingBooking] = useState(null);
-  const [membershipPlans, setMembershipPlans] = useState([]);
+  const [membershipPlans, setMembershipPlans] = useState(() => {
+    return window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.plans || [];
+  });
   const [userMemberships, setUserMemberships] = useState([]);
   const [buyingPlanId, setBuyingPlanId] = useState(null);
-  const [membershipActive, setMembershipActive] = useState(true);
+  const [membershipActive, setMembershipActive] = useState(() => {
+    const sharedSettings = window.__PREFETCHED_DATA__?.sharedSettings;
+    return sharedSettings ? sharedSettings.features?.membershipActive !== false : true;
+  });
   const { role, isAuthenticated, user } = useAuthStore();
   const socket = useSocket(user?._id);
   const [lightboxImg, setLightboxImg] = useState(null);
   const [lightboxType, setLightboxType] = useState('image');
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const [zoomScale, setZoomScale] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -140,6 +156,64 @@ const ServiceDetail = () => {
   const panStartRef = React.useRef({ x: 0, y: 0 });
   const dragStartRef = React.useRef({ x: 0, y: 0 });
   const viewportRef = React.useRef(null);
+  const lightboxScrollRef = React.useRef(null);
+
+  const slides = useMemo(() => {
+    if (!vendor) return [];
+    const list = [];
+    if (vendor.shopVideo) {
+      list.push({ type: 'video', url: vendor.shopVideo });
+    }
+    const imgs = [
+      vendor.shopImage,
+      ...(vendor.gallery || []),
+      ...(services.flatMap(s => s.images || []))
+    ].filter(Boolean);
+    const uniqueImgs = Array.from(new Set(imgs));
+    uniqueImgs.slice(0, 10).forEach(img => {
+      list.push({ type: 'image', url: img });
+    });
+    return list;
+  }, [vendor, services]);
+
+  const handleLightboxScroll = (e) => {
+    const scrollLeft = e.target.scrollLeft;
+    const width = e.target.offsetWidth;
+    if (width > 0) {
+      const index = Math.round(scrollLeft / width);
+      if (index !== lightboxIndex) {
+        setLightboxIndex(index);
+        setZoomScale(1);
+        setPanOffset({ x: 0, y: 0 });
+        if (slides[index]) {
+          setLightboxImg(slides[index].url);
+          setLightboxType(slides[index].type);
+        }
+      }
+    }
+  };
+
+  const lastOpenedImg = React.useRef(null);
+
+  useEffect(() => {
+    if (lightboxImg) {
+      if (lastOpenedImg.current === null && lightboxScrollRef.current) {
+        const index = slides.findIndex(s => s.url === lightboxImg);
+        if (index !== -1) {
+          setLightboxIndex(index);
+          setTimeout(() => {
+            if (lightboxScrollRef.current) {
+              const width = lightboxScrollRef.current.offsetWidth;
+              lightboxScrollRef.current.scrollLeft = index * width;
+            }
+          }, 50);
+        }
+      }
+      lastOpenedImg.current = lightboxImg;
+    } else {
+      lastOpenedImg.current = null;
+    }
+  }, [lightboxImg, slides]);
 
   // 1. Fetch Main Data (Vendor + Services)
   useEffect(() => {
@@ -454,23 +528,7 @@ const ServiceDetail = () => {
     }
   };
 
-  const slides = useMemo(() => {
-    if (!vendor) return [];
-    const list = [];
-    if (vendor.shopVideo) {
-      list.push({ type: 'video', url: vendor.shopVideo });
-    }
-    const imgs = [
-      vendor.shopImage,
-      ...(vendor.gallery || []),
-      ...(services.flatMap(s => s.images || []))
-    ].filter(Boolean);
-    const uniqueImgs = Array.from(new Set(imgs));
-    uniqueImgs.slice(0, 10).forEach(img => {
-      list.push({ type: 'image', url: img });
-    });
-    return list;
-  }, [vendor, services]);
+
 
   const handleScrollTo = (index) => {
     if (scrollRef.current) {
@@ -752,6 +810,7 @@ const ServiceDetail = () => {
                         onClick={() => {
                           setLightboxImg(slide.url);
                           setLightboxType('video');
+                          setLightboxIndex(idx);
                           setZoomScale(1);
                         }}
                       />
@@ -762,6 +821,7 @@ const ServiceDetail = () => {
                       onClick={() => {
                         setLightboxImg(slide.url);
                         setLightboxType('image');
+                        setLightboxIndex(idx);
                         setZoomScale(1);
                       }}
                     >
@@ -1360,53 +1420,117 @@ const ServiceDetail = () => {
 
             {/* Main Image Viewport */}
             <div 
-              ref={viewportRef}
-              className="w-full h-full flex items-center justify-center p-4 relative overflow-hidden"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
+              ref={lightboxScrollRef}
+              onScroll={handleLightboxScroll}
+              className={`w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar items-center ${zoomScale > 1 ? 'overflow-x-hidden' : ''}`}
             >
-              <div
-                style={{
-                  transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
-                  transition: isMouseDown ? 'none' : 'transform 0.1s ease-out',
-                  cursor: zoomScale > 1 ? 'grab' : 'zoom-in'
-                }}
-                className="max-w-full max-h-[75vh] flex items-center justify-center"
-                onDoubleClick={() => {
-                  if (zoomScale > 1) {
-                    setZoomScale(1);
-                    setPanOffset({ x: 0, y: 0 });
-                  } else {
-                    setZoomScale(2);
-                  }
-                }}
-              >
-                {lightboxType === 'video' ? (
-                  <video
-                    src={lightboxImg}
-                    controls
-                    autoPlay
-                    playsInline
-                    controlsList="nodownload noplaybackrate"
-                    disablePictureInPicture
-                    className="max-w-full max-h-[75vh] object-contain rounded-lg select-none"
-                  />
-                ) : (
-                  <img
-                    src={lightboxImg}
-                    alt="Zoomable Preview"
-                    className="max-w-full max-h-[75vh] object-contain rounded-lg select-none pointer-events-none"
-                  />
-                )}
-              </div>
+              {slides.map((slide, idx) => (
+                <div 
+                  key={idx}
+                  ref={idx === lightboxIndex ? viewportRef : null}
+                  className="w-full h-full shrink-0 snap-center flex items-center justify-center p-4 relative"
+                  onMouseDown={idx === lightboxIndex ? handleMouseDown : undefined}
+                  onMouseMove={idx === lightboxIndex ? handleMouseMove : undefined}
+                  onMouseUp={idx === lightboxIndex ? handleMouseUp : undefined}
+                  onMouseLeave={idx === lightboxIndex ? handleMouseUp : undefined}
+                >
+                  <div
+                    style={idx === lightboxIndex ? {
+                      transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                      transition: isMouseDown ? 'none' : 'transform 0.1s ease-out',
+                      cursor: zoomScale > 1 ? 'grab' : 'zoom-in'
+                    } : {}}
+                    className="max-w-full max-h-[75vh] flex items-center justify-center pointer-events-auto"
+                    onDoubleClick={() => {
+                      if (idx === lightboxIndex) {
+                        if (zoomScale > 1) {
+                          setZoomScale(1);
+                          setPanOffset({ x: 0, y: 0 });
+                        } else {
+                          setZoomScale(2);
+                        }
+                      }
+                    }}
+                  >
+                    {slide.type === 'video' ? (
+                      <video
+                        src={slide.url}
+                        controls
+                        autoPlay={idx === lightboxIndex}
+                        playsInline
+                        className="max-w-full max-h-[75vh] object-contain rounded-lg select-none"
+                      />
+                    ) : (
+                      <img
+                        src={slide.url}
+                        alt={`Preview ${idx + 1}`}
+                        className="max-w-full max-h-[75vh] object-contain rounded-lg select-none pointer-events-none"
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
+
+            {/* Navigation Arrows for Lightbox */}
+            {slides.length > 1 && (
+              <>
+                {lightboxIndex > 0 && (
+                  <button
+                    onClick={() => {
+                      if (lightboxScrollRef.current) {
+                        const width = lightboxScrollRef.current.offsetWidth;
+                        lightboxScrollRef.current.scrollTo({
+                          left: (lightboxIndex - 1) * width,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white flex items-center justify-center z-50 transition-all active:scale-90 shadow-md"
+                  >
+                    <ChevronLeft size={24} strokeWidth={3} />
+                  </button>
+                )}
+                {lightboxIndex < slides.length - 1 && (
+                  <button
+                    onClick={() => {
+                      if (lightboxScrollRef.current) {
+                        const width = lightboxScrollRef.current.offsetWidth;
+                        lightboxScrollRef.current.scrollTo({
+                          left: (lightboxIndex + 1) * width,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white flex items-center justify-center z-50 transition-all active:scale-90 shadow-md"
+                  >
+                    <ChevronRight size={24} strokeWidth={3} />
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Pagination / Slide indicators */}
+            {slides.length > 1 && (
+              <div className="absolute bottom-12 flex items-center justify-center gap-1.5 z-20">
+                {slides.map((_, index) => (
+                  <div
+                    key={`lightbox-dot-${index}`}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-300 shadow-sm",
+                      lightboxIndex === index
+                        ? "w-6 bg-white"
+                        : "w-1.5 bg-white/40"
+                    )}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Micro Tip Indicator */}
             <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
               <p className="text-[9px] font-black text-white/40 tracking-widest uppercase">
-                Pinch to zoom • Drag to pan • Double tap to toggle
+                Swipe left/right to browse • Double tap to zoom
               </p>
             </div>
           </motion.div>

@@ -136,8 +136,29 @@ const Home = () => {
             res.data.vendors.forEach(v => {
               window.__PREFETCHED_DATA__.vendorDetails[v._id] = {
                 vendor: v,
-                services: v.services || []
+                services: v.services || [],
+                plans: window.__PREFETCHED_DATA__.vendorDetails[v._id]?.plans || []
               };
+
+              // Prefetch services if they are missing or empty
+              if (!v.services || v.services.length === 0) {
+                api.get('/services', { params: { vendorId: v._id } })
+                  .then(sRes => {
+                    if (window.__PREFETCHED_DATA__.vendorDetails[v._id]) {
+                      window.__PREFETCHED_DATA__.vendorDetails[v._id].services = sRes.data || [];
+                    }
+                  })
+                  .catch(() => {});
+              }
+
+              // Prefetch membership plans for the vendor
+              api.get(`/memberships/vendor/${v._id}`)
+                .then(pRes => {
+                  if (window.__PREFETCHED_DATA__.vendorDetails[v._id]) {
+                    window.__PREFETCHED_DATA__.vendorDetails[v._id].plans = pRes.data || [];
+                  }
+                })
+                .catch(() => {});
             });
           }
         }

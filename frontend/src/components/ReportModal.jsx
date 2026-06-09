@@ -56,7 +56,17 @@ const ReportModal = ({ isOpen, onClose }) => {
         margin: { top: 40 }
       });
 
-      doc.save(`ZeroOne_LiveReport_${dayjs().format('YYYY-MM-DD')}.pdf`);
+      const filename = `ZeroOne_LiveReport_${dayjs().format('YYYY-MM-DD')}.pdf`;
+      const blob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+
       toast.success('Report downloaded successfully');
       onClose();
     } catch (err) {

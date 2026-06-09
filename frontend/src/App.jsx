@@ -41,7 +41,7 @@ const VendorVerification = lazy(() => import('./pages/VendorVerification'));
 const VendorDashboard = lazy(() => import('./pages/VendorDashboard'));
 const VendorBookings = lazy(() => import('./pages/VendorBookings'));
 const VendorServices = lazy(() => import('./pages/VendorServices'));
-const VendorStaff = lazy(() => import('./pages/VendorStaff'));
+import VendorStaff from './pages/VendorStaff';
 const VendorStaffProfile = lazy(() => import('./pages/VendorStaffProfile'));
 const StaffReviews = lazy(() => import('./pages/StaffReviews'));
 const VendorOffers = lazy(() => import('./pages/VendorOffers'));

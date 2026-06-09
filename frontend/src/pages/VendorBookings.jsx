@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3, ChevronDown } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3, ChevronDown, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import BookingCard from '../components/BookingCard';
@@ -24,18 +24,22 @@ const VendorBookings = () => {
     fetchBookings,
     lastBookingParams,
     fetchDashboard,
+    fetchClosures,
+    closuresData: closures,
+    closuresLoading,
     setBookingsData: setBookings 
   } = useVendorStore();
 
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
-  const [closures, setClosures] = useState([]);
-  const [closuresLoading, setClosuresLoading] = useState(true);
-  const [closureActionId, setClosureActionId] = useState(null);
   const [endingClosureId, setEndingClosureId] = useState(null);
   const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
   const [completeBookingModal, setCompleteBookingModal] = useState({ isOpen: false, bookingId: null });
   const [cancelBookingModal, setCancelBookingModal] = useState({ isOpen: false, bookingId: null });
+
+
+
 
   const handleFetch = async (force = false) => {
     if (dayjs(fromDate).isAfter(toDate)) {
@@ -58,25 +62,15 @@ const VendorBookings = () => {
     }
   };
 
-  const fetchClosures = async () => {
-    try {
-      setClosuresLoading(true);
-      const res = await api.get('/vendor/closures');
-      setClosures(res.data || []);
-    } catch (err) {
-      toast.error('Failed to load emergency closures');
-    } finally {
-      setClosuresLoading(false);
-    }
-  };
-
   useEffect(() => {
     handleFetch();
   }, [status, fromDate, toDate]);
 
   useEffect(() => {
+    // Closures are prefetched from store — only fetch if not already loaded
     fetchClosures();
   }, []);
+
 
   const handleAction = async (id, action) => {
     if (actionLoadingId === id) return;
@@ -129,12 +123,10 @@ const VendorBookings = () => {
   const refreshAll = async () => {
     setIsRefreshing(true);
     try {
-      const [bookingsRes, closuresRes] = await Promise.all([
-        api.get('/vendor/bookings', { params: { status, from: fromDate, to: toDate } }),
-        api.get('/vendor/closures')
+      await Promise.all([
+        fetchBookings({ status, from: fromDate, to: toDate }, true),
+        fetchClosures(true)
       ]);
-      setBookings(bookingsRes.data);
-      setClosures(closuresRes.data || []);
     } catch (err) {
       toast.error('Failed to refresh data');
     } finally {
@@ -142,18 +134,8 @@ const VendorBookings = () => {
     }
   };
 
-  const handleEmergencyCancel = async (bookingId, reason, closureId) => {
-    try {
-      setClosureActionId(bookingId);
-      await api.patch(`/vendor/bookings/${bookingId}/emergency-cancel`, { reason, closureId });
-      toast.success('Booking cancelled for closure');
-      await refreshAll();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Emergency cancel failed');
-    } finally {
-      setClosureActionId(null);
-    }
-  };
+
+
 
   const handleEndClosure = async (closureId) => {
     try {
@@ -169,21 +151,7 @@ const VendorBookings = () => {
     }
   };
 
-  const handleEmergencyReschedule = (booking, vendor) => {
-    navigate('/cart', {
-      state: {
-        rescheduleBookingId: booking._id,
-        vendor,
-        rescheduleItems: booking.services.map(service => ({
-          _id: service.serviceId,
-          name: service.name,
-          price: service.price,
-          duration: service.duration
-        })),
-        rescheduleTotalDuration: booking.totalDuration
-      }
-    });
-  };
+
 
   // Sort bookings chronologically by their start time
   const displayBookings = useMemo(() => {
@@ -315,47 +283,44 @@ const VendorBookings = () => {
                     impactedBookings.map((booking) => (
                       <div
                         key={booking._id}
-                        className="p-3 rounded-xl bg-white dark:bg-gray-950 border border-amber-100 dark:border-gray-800 shadow-sm"
+                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white dark:bg-gray-950 border border-amber-100 dark:border-gray-800"
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="text-[12px] font-black text-slate-900 dark:text-white">
+                        {/* Left: customer + time + service */}
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">
                                 {booking.userId?.name || booking.walkInCustomerName || 'Customer'}
                               </p>
                               {booking.membershipId && (
-                                <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 rounded-md text-[7px] font-black uppercase tracking-tighter border border-amber-500/10 shrink-0">
-                                  Membership
-                                </span>
+                                <span className="shrink-0 px-1 py-0.5 bg-amber-500/10 text-amber-600 rounded text-[6px] font-black uppercase tracking-tighter border border-amber-500/10">M</span>
                               )}
                             </div>
-                            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400 mt-1">
-                              <Clock3 size={10} />
+                            <div className="flex items-center gap-1 text-[8px] font-bold text-slate-400 mt-0.5">
+                              <Clock3 size={8} />
                               <span>{dayjs(booking.startTime).format('DD MMM, hh:mm A')}</span>
+                              <span className="text-slate-300 dark:text-gray-700">·</span>
+                              <span className="truncate">{booking.services.map(s => s.name).join(', ')}</span>
                             </div>
-                            <p className="text-[10px] font-bold text-slate-500 dark:text-gray-400 mt-2">
-                              {booking.services.map(service => service.name).join(' • ')}
-                            </p>
                           </div>
-                          <div className="flex gap-2 shrink-0">
-                            <button
-                              onClick={() => handleEmergencyReschedule(booking, vendor)}
-                              disabled={closureActionId === booking._id}
-                              className="h-10 px-3 bg-[#00246b] text-white rounded-xl text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
-                            >
-                              Reschedule
-                            </button>
-                            <button
-                              onClick={() => handleEmergencyCancel(booking._id, closure.reason, closure._id)}
-                              disabled={closureActionId === booking._id}
-                              className="h-10 px-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 rounded-xl border border-rose-100 dark:border-rose-900/30 text-[9px] font-black uppercase tracking-[0.16em] active:scale-95 transition-all disabled:opacity-40"
-                            >
-                              {closureActionId === booking._id ? 'Working...' : 'Cancel'}
-                            </button>
-                          </div>
+                        </div>
+                        {/* Right: assigned staff badge */}
+                        <div className="shrink-0">
+                          {booking.staffId?.name ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/30 text-[8px] font-black uppercase tracking-[0.12em] text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                              <User size={8} />
+                              {booking.staffId.name}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/30 text-[8px] font-black uppercase tracking-[0.12em] text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              Processing
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))
+
                   )}
                 </div>
               </div>

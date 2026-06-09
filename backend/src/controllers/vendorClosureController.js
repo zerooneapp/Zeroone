@@ -4,7 +4,8 @@ const SlotLock = require('../models/SlotLock');
 const {
   normalizeClosureWindow,
   getOverlappingClosures,
-  getImpactedBookings
+  getImpactedBookings,
+  autoReassignOrCancelImpactedBookings
 } = require('../services/vendorClosureService');
 
 const getVendorContext = async (userId) => {
@@ -92,6 +93,15 @@ const createClosure = async (req, res) => {
 
     const response = await mapClosureResponse(closure, vendor);
     res.status(201).json(response);
+
+    // 🔄 Auto-process impacted bookings (non-blocking, after response sent)
+    autoReassignOrCancelImpactedBookings(
+      vendor._id,
+      start,
+      end,
+      vendor.ownerId,
+      vendor.shopName
+    ).catch(err => console.error('[CLOSURE-AUTO-PROCESS-ERROR]', err.message));
   } catch (error) {
     const status = error.message === 'Vendor not found' ? 404 : 400;
     res.status(status).json({ message: error.message });

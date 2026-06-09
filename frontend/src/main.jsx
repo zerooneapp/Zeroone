@@ -11,7 +11,8 @@ window.__PREFETCHED_DATA__ = {
   location: null,
   bookings: null,
   memberships: null,
-  vendorDetails: {}, // Mapped by vendorId: { vendor, services }
+  sharedSettings: null,
+  vendorDetails: {}, // Mapped by vendorId: { vendor, services, plans }
   cartData: null,    // Prefetched slots & staff for cart page
 };
 
@@ -21,6 +22,13 @@ api.get('/categories')
     window.__PREFETCHED_DATA__.categories = res.data;
   })
   .catch(err => console.warn('[Prefetch] Categories failed', err.message));
+
+// Start prefetching shared settings immediately on load
+api.get('/settings/shared')
+  .then(res => {
+    window.__PREFETCHED_DATA__.sharedSettings = res.data;
+  })
+  .catch(err => console.warn('[Prefetch] Shared settings failed', err.message));
 
 // Start prefetching bookings and memberships if user is fully logged in
 const token = localStorage.getItem('token');
@@ -61,11 +69,12 @@ const prefetchVendors = (lat, lng) => {
       res.data.vendors.forEach(v => {
         window.__PREFETCHED_DATA__.vendorDetails[v._id] = {
           vendor: v,
-          services: v.services || []
+          services: v.services || [],
+          plans: []
         };
       });
 
-      // 🚀 Silently prefetch each vendor's services in background
+      // 🚀 Silently prefetch each vendor's services and membership plans in background
       // so ServiceDetail categories appear instantly
       res.data.vendors.forEach(v => {
         api.get('/services', { params: { vendorId: v._id } })
@@ -73,6 +82,15 @@ const prefetchVendors = (lat, lng) => {
             const services = sRes.data || [];
             if (window.__PREFETCHED_DATA__.vendorDetails[v._id]) {
               window.__PREFETCHED_DATA__.vendorDetails[v._id].services = services;
+            }
+          })
+          .catch(() => {}); // Silent fail — non-critical
+
+        api.get(`/memberships/vendor/${v._id}`)
+          .then(pRes => {
+            const plans = pRes.data || [];
+            if (window.__PREFETCHED_DATA__.vendorDetails[v._id]) {
+              window.__PREFETCHED_DATA__.vendorDetails[v._id].plans = plans;
             }
           })
           .catch(() => {}); // Silent fail — non-critical
