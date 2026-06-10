@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Phone, Scissors, CheckCircle2, ChevronRight, Edit3, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import dayjs from 'dayjs';
 
 const StaffCard = ({ staff, onToggle, onEdit, onDelete, onCardClick }) => {
   return (
@@ -65,7 +66,18 @@ const StaffCard = ({ staff, onToggle, onEdit, onDelete, onCardClick }) => {
              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${(staff.isActive && !staff.activeClosure) ? 'left-6' : 'left-1'}`} />
           </button>
           {staff.activeClosure && (
-            <span className="text-[7px] font-black text-amber-600 uppercase text-center tracking-tighter">On Absence</span>
+            <div className="flex flex-col items-center mt-1">
+              <span className="text-[7px] font-black text-amber-600 uppercase text-center tracking-tighter leading-none">On Absence</span>
+              <span className="text-[6px] font-black text-slate-400 dark:text-white/60 text-center tracking-tighter mt-0.5 leading-none whitespace-nowrap">
+                {(() => {
+                  const start = dayjs(staff.activeClosure.startTime);
+                  const end = dayjs(staff.activeClosure.endTime);
+                  return start.isSame(end, 'day')
+                    ? `${start.format('h:mm A')} - ${end.format('h:mm A')}`
+                    : `${start.format('DD MMM')} - ${end.format('DD MMM')}`;
+                })()}
+              </span>
+            </div>
           )}
       </div>
     </motion.div>

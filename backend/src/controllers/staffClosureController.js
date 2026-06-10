@@ -115,7 +115,7 @@ const autoReassignOrCancelStaffBookings = async (vendorId, absentStaffId, start,
     return bookingServiceIds.every(bsId => staffServiceIds.includes(bsId));
   };
 
-  // Helper: check if a staff has no conflicting booking in the slot
+  // Helper: check if a staff has no conflicting booking and no active closure in the slot
   const isFree = async (staffDoc, bookingStart, bookingEnd) => {
     const conflict = await Booking.findOne({
       staffId: staffDoc._id,
@@ -123,7 +123,16 @@ const autoReassignOrCancelStaffBookings = async (vendorId, absentStaffId, start,
       startTime: { $lt: bookingEnd.toDate() },
       endTime: { $gt: bookingStart.toDate() }
     }).lean();
-    return !conflict;
+    if (conflict) return false;
+
+    const closureConflict = await StaffClosure.findOne({
+      staffId: staffDoc._id,
+      status: 'active',
+      startTime: { $lt: bookingEnd.toDate() },
+      endTime: { $gt: bookingStart.toDate() }
+    }).lean();
+
+    return !closureConflict;
   };
 
   // 3. Process each impacted booking
