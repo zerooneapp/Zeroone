@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const membershipController = require('../controllers/membershipController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, authorize, optionalProtect } = require('../middleware/authMiddleware');
 const { isApprovedVendor } = require('../middleware/vendorMiddleware');
 
 // --- Vendor Routes ---
@@ -19,7 +19,7 @@ router.patch('/vendor/plans/:id', protect, authorize('vendor'), isApprovedVendor
 router.delete('/vendor/plans/:id', protect, authorize('vendor'), isApprovedVendor, membershipController.deletePlan);
 
 // --- Public/Shared Routes ---
-router.get('/vendor/:vendorId', membershipController.getVendorPlans);
+router.get('/vendor/:vendorId', optionalProtect, membershipController.getVendorPlans);
 
 // --- User Routes ---
 router.post('/request', protect, membershipController.requestManualPurchase);

@@ -51,9 +51,13 @@ exports.createPlan = async (req, res) => {
 exports.getVendorPlans = async (req, res) => {
   try {
     const { vendorId } = req.params;
-    // For listing, we show only active plans. 
-    // But for the vendor managing their OWN plans, they should see all (including paused).
-    const isVendorFetchingOwn = req.vendor && String(req.vendor._id) === String(vendorId);
+    
+    let vendorDoc = req.vendor;
+    if (!vendorDoc && req.user) {
+      const Vendor = require('../models/Vendor');
+      vendorDoc = await Vendor.findOne({ ownerId: req.user._id });
+    }
+    const isVendorFetchingOwn = vendorDoc && String(vendorDoc._id) === String(vendorId);
     
     // Check if membership system is globally active
     const settings = await GlobalSettings.findOne();
@@ -66,6 +70,26 @@ exports.getVendorPlans = async (req, res) => {
 
     const plans = await VendorMembershipPlan.find(filter)
       .populate('services.serviceId', 'name price');
+
+    if (isVendorFetchingOwn && vendorDoc) {
+      const counts = await UserMembership.aggregate([
+        { $match: { vendorId: vendorDoc._id, status: 'active' } },
+        { $group: { _id: '$planId', count: { $sum: 1 } } }
+      ]);
+      const countsMap = counts.reduce((acc, curr) => {
+        acc[curr._id.toString()] = curr.count;
+        return acc;
+      }, {});
+
+      const plansWithCounts = plans.map(p => {
+        const pObj = p.toObject();
+        pObj.activeMemberCount = countsMap[p._id.toString()] || 0;
+        return pObj;
+      });
+
+      return res.status(200).json(plansWithCounts);
+    }
+
     res.status(200).json(plans);
   } catch (error) {
     res.status(500).json({ message: error.message });

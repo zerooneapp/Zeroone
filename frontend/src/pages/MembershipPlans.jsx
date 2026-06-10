@@ -359,15 +359,26 @@ const MembershipPlans = () => {
                           </div>
                         </div>
 
-                        <div className="flex gap-2 pt-1">
+                        <div className="flex flex-col gap-2 pt-1 w-full">
                           <button
                             onClick={() => setShowDeleteConfirm(plan)}
-                            disabled={deletingId === plan._id}
-                            className="w-full py-2 bg-red-500/10 text-red-600 dark:text-red-400 font-black text-[9px] uppercase tracking-widest rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            disabled={deletingId === plan._id || plan.activeMemberCount > 0}
+                            className={cn(
+                              "w-full py-2 font-black text-[9px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2",
+                              plan.activeMemberCount > 0
+                                ? "bg-slate-100 dark:bg-gray-800 text-slate-400 dark:text-gray-500 cursor-not-allowed border border-slate-200/50 dark:border-gray-700/50 shadow-none"
+                                : "bg-red-500/10 text-red-600 dark:text-red-400 active:scale-95 disabled:opacity-50"
+                            )}
+                            title={plan.activeMemberCount > 0 ? "Cannot delete plan with active members" : "Delete Plan"}
                           >
                             <Trash2 size={12} strokeWidth={3} />
                             {deletingId === plan._id ? 'Deleting...' : 'Delete Plan'}
                           </button>
+                          {plan.activeMemberCount > 0 && (
+                            <span className="text-[7.5px] font-black text-amber-600 dark:text-amber-500 uppercase text-center tracking-wider leading-none mt-0.5">
+                              {plan.activeMemberCount} Active Member{plan.activeMemberCount === 1 ? '' : 's'} • Cannot Delete
+                            </span>
+                          )}
                         </div>
                       </motion.div>
                     ))}
