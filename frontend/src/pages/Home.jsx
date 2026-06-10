@@ -159,6 +159,7 @@ const Home = () => {
                   params: {
                     vendorId,
                     serviceIds: servicesList.map((service) => service._id).join(','),
+                    mode: 'browse',
                     _t: Date.now()
                   }
                 }).then(pRes => {

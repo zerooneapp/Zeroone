@@ -86,7 +86,7 @@ const buildSlotConflictError = async (message, vendorId, serviceIds, start) => {
   return error;
 };
 
-const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress) => {
+const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress, membershipId = null) => {
   const start = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
 
   // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
@@ -99,7 +99,7 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
 
   if (serviceDetails.length !== serviceIds.length) throw new Error('Services unavailable');
 
-  const pricingPreview = await calculatePricingPreview(vendorId, serviceDetails, userId);
+  const pricingPreview = await calculatePricingPreview(vendorId, serviceDetails, userId, membershipId);
   const { bookingType, resolvedServiceAddress } = resolveBookingMode(serviceDetails, serviceAddress);
   const totalPrice = pricingPreview.finalTotal;
   const totalDuration = serviceDetails.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
@@ -243,7 +243,11 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
         let updatedAny = false;
         booking.services.forEach(s => {
           if (s.isFreeViaMembership) {
-            const usageIdx = membership.usage.findIndex(u => u.serviceId.toString() === s.serviceId.toString());
+            const sId = s.serviceId?._id ? s.serviceId._id.toString() : s.serviceId?.toString();
+            const usageIdx = membership.usage.findIndex(u => {
+              const uId = u.serviceId?._id ? u.serviceId._id.toString() : u.serviceId?.toString();
+              return uId === sId;
+            });
             if (usageIdx > -1) {
               membership.usage[usageIdx].usedCount += 1;
               updatedAny = true;
@@ -635,7 +639,7 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
   
   // 🔄 RECALCULATE PRICING: Ensure latest offers are applied during reschedule
   const { getPricingPreviewForServiceIds } = require('./offerPricingService');
-  const pricingPreview = await getPricingPreviewForServiceIds(booking.vendorId._id, serviceIds, userId);
+  const pricingPreview = await getPricingPreviewForServiceIds(booking.vendorId._id, serviceIds, userId, booking.membershipId);
 
   const serviceDetails = await Service.find({
     _id: { $in: serviceIds },

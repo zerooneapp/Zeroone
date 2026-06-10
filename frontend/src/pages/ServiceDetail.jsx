@@ -277,6 +277,7 @@ const ServiceDetail = () => {
                 params: {
                   vendorId: id,
                   serviceIds: servicesRes.data.map((service) => service._id).join(','),
+                  mode: 'browse',
                   _t: Date.now()
                 }
               });
@@ -415,6 +416,7 @@ const ServiceDetail = () => {
           params: {
             vendorId: vendor._id,
             serviceIds: services.map((service) => service._id).join(','),
+            mode: 'browse',
             _t: Date.now()
           }
         });
@@ -1192,34 +1194,37 @@ const ServiceDetail = () => {
           <SectionTitle title="Available Plans" subtitle="Exclusive benefits for members" className="mb-1" />
           <div className="grid gap-4">
             {membershipPlans.map((plan) => {
-              // Check if user has ANY membership for this VENDOR
-              const vendorMembership = userMemberships.find(m => String(m.vendorId?._id || m.vendorId) === String(id));
-              
-              // Find if THIS specific plan is the one user has (for UI labeling)
-              const isThisPlan = vendorMembership?.planId?._id === plan._id || vendorMembership?.planId === plan._id;
-              
-              const isActive = vendorMembership?.status === 'active';
-              const isPending = vendorMembership?.status === 'pending';
-              const isRejected = vendorMembership?.status === 'rejected'; // Rejections are usually per request, so they can try again
-              const isExpired = vendorMembership?.status === 'expired';
+              // Find matching memberships for THIS plan under this vendor
+              const planMemberships = userMemberships.filter(
+                m => String(m.planId?._id || m.planId) === plan._id && String(m.vendorId?._id || m.vendorId) === String(id)
+              );
 
-              // User can buy if they have NO membership, or if the current one is expired/rejected
-              const canBuy = !vendorMembership || isExpired || isRejected;
+              const activeMembs = planMemberships.filter(m => m.status === 'active');
+              const pendingMemb = planMemberships.find(m => m.status === 'pending');
 
-              // If they have a membership but it's NOT this plan, we should disable the button 
-              // unless it's expired or rejected.
-              const isOtherPlanActive = vendorMembership && !isThisPlan && (isActive || isPending);
+              const hasActive = activeMembs.length > 0;
+              const hasPending = !!pendingMemb;
+
+              // Can buy if no active or pending request/membership for this specific plan
+              const canBuy = !hasActive && !hasPending;
 
               return (
                 <div 
-                  key={plan._id}
+                   key={plan._id}
                   className="bg-white dark:bg-gray-900 border border-amber-500/10 rounded-2xl p-3 shadow-sm relative overflow-hidden group"
                 >
                   <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform" />
                   
                   <div className="flex justify-between items-center relative z-10">
                     <div className="space-y-0.5">
-                      <h4 className="text-[13px] font-black text-[#0B1222] dark:text-white capitalize">{plan.name}</h4>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-[13px] font-black text-[#0B1222] dark:text-white capitalize">{plan.name}</h4>
+                        {hasActive && (
+                          <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[7px] font-bold uppercase rounded-md border border-emerald-500/20">
+                            Active
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{plan.durationDays} Days Duration</p>
                     </div>
                     <div className="w-8 h-8 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600 border border-amber-500/20">
@@ -1252,38 +1257,32 @@ const ServiceDetail = () => {
                       disabled={!canBuy || buyingPlanId === plan._id}
                       className={cn(
                         "px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg transition-all active:scale-95",
-                        isActive && isThisPlan 
-                        ? "bg-emerald-500 text-white shadow-emerald-500/20" 
-                        : isPending && isThisPlan
-                        ? "bg-amber-500 text-white shadow-amber-500/20"
-                        : isOtherPlanActive
-                        ? "bg-gray-400 text-white cursor-not-allowed opacity-50"
-                        : (isRejected || isExpired) && isThisPlan
-                        ? "bg-rose-500 text-white shadow-rose-500/20"
+                        hasActive
+                        ? "bg-emerald-500 text-white shadow-emerald-500/20 cursor-not-allowed"
+                        : hasPending
+                        ? "bg-amber-500 text-white shadow-amber-500/20 cursor-not-allowed"
                         : "bg-[#00246b] text-white shadow-[#00246b]/20"
                       )}
                     >
                       {buyingPlanId === plan._id ? <Loader2 size={11} className="animate-spin" /> : (
-                        (isActive && isThisPlan) ? "Active" : 
-                        (isPending && isThisPlan) ? "Pending Approval" : 
-                        isOtherPlanActive ? "Member (Other Plan)" :
-                        (isExpired && isThisPlan) ? "Expired (Buy Again)" :
-                        (isRejected && isThisPlan) ? "Rejected (Try Again)" :
-                        "Buy Plan"
+                        hasActive ? "Active" :
+                        hasPending ? "Pending Approval" : "Buy Plan"
                       )}
                     </button>
                   </div>
 
-                  {isActive && isThisPlan && (
-                    <div className="mt-2.5 p-2.5 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-slate-100 dark:border-gray-800 space-y-2">
-                      <p className="text-[7px] font-black text-[#00246b] dark:text-white uppercase tracking-[0.2em]">Your Current Usage</p>
+                  {activeMembs.map((activeMemb, idx) => (
+                    <div key={activeMemb._id} className="mt-2.5 p-2.5 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-slate-100 dark:border-gray-800 space-y-2">
+                      <p className="text-[7px] font-black text-[#00246b] dark:text-white uppercase tracking-[0.2em]">
+                        Your Active Membership {activeMembs.length > 1 ? `#${idx + 1}` : ""}
+                      </p>
                       <div className="space-y-1.5">
-                        {vendorMembership?.usage?.map((u) => {
+                        {activeMemb.usage?.map((u) => {
                           const percentage = Math.min((u.usedCount / u.usageLimit) * 100, 100);
                           return (
-                            <div key={u.serviceId?._id} className="space-y-0.5">
+                            <div key={u.serviceId?._id || u.serviceId} className="space-y-0.5">
                               <div className="flex justify-between items-center text-[8px] font-black text-slate-600 dark:text-slate-400 uppercase">
-                                <span>{u.serviceId?.name}</span>
+                                <span>{u.serviceId?.name || 'Service'}</span>
                                 <span className="text-[#00246b] dark:text-white">{u.usedCount} / {u.usageLimit} Used</span>
                               </div>
                               <div className="h-1 bg-slate-200 dark:bg-gray-800 rounded-full overflow-hidden">
@@ -1297,7 +1296,7 @@ const ServiceDetail = () => {
                         })}
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               );
             })}

@@ -233,18 +233,18 @@ exports.createPurchaseOrder = async (req, res) => {
     const plan = await VendorMembershipPlan.findById(planId);
     if (!plan) return res.status(404).json({ message: 'Plan not found' });
 
-    // 🛡️ RESTRICTION: Check if user already has ANY membership (active/pending) with this VENDOR
-    const existing = await UserMembership.findOne({
+    // 🛡️ RESTRICTION: Check if user already has an active or pending membership for the SAME plan
+    const existingActiveOrPending = await UserMembership.findOne({
       userId: req.user._id,
-      vendorId: plan.vendorId,
-      status: { $in: ['pending', 'active'] }
+      planId: planId,
+      status: { $in: ['active', 'pending'] },
+      endDate: { $gt: new Date() }
     });
 
-    if (existing) {
+    if (existingActiveOrPending) {
+      const statusText = existingActiveOrPending.status === 'active' ? 'active' : 'pending';
       return res.status(400).json({ 
-        message: existing.status === 'pending' 
-          ? 'You already have a pending membership request with this partner.' 
-          : 'You already have an active membership with this partner. Please wait for it to expire.' 
+        message: `You already have an ${statusText} membership for this plan.` 
       });
     }
 
@@ -355,18 +355,18 @@ exports.requestManualPurchase = async (req, res) => {
     const plan = await VendorMembershipPlan.findById(planId);
     if (!plan) return res.status(404).json({ message: 'Plan not found' });
 
-    // 🛡️ RESTRICTION: Check if user already has ANY membership (active/pending) with this VENDOR
-    const existing = await UserMembership.findOne({
+    // 🛡️ RESTRICTION: Check if user already has an active or pending membership for the SAME plan
+    const existingActiveOrPending = await UserMembership.findOne({
       userId: req.user._id,
-      vendorId: plan.vendorId,
-      status: { $in: ['pending', 'active'] }
+      planId: planId,
+      status: { $in: ['active', 'pending'] },
+      endDate: { $gt: new Date() }
     });
 
-    if (existing) {
+    if (existingActiveOrPending) {
+      const statusText = existingActiveOrPending.status === 'active' ? 'active' : 'pending';
       return res.status(400).json({ 
-        message: existing.status === 'pending' 
-          ? 'You already have a pending membership request with this partner.' 
-          : 'You already have an active membership with this partner.' 
+        message: `You already have an ${statusText} membership for this plan.` 
       });
     }
 

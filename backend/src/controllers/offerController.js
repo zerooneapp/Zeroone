@@ -76,7 +76,7 @@ const removeOffer = async (req, res) => {
 
 const previewPublicPricing = async (req, res) => {
   try {
-    const { vendorId, serviceIds } = req.query;
+    const { vendorId, serviceIds, membershipId, selectedMembershipId, mode } = req.query;
     if (!vendorId || !serviceIds) {
       return res.status(400).json({ message: 'vendorId and serviceIds are required' });
     }
@@ -92,7 +92,7 @@ const previewPublicPricing = async (req, res) => {
       return res.status(400).json({ message: 'At least one serviceId is required' });
     }
 
-    const preview = await getPricingPreviewForServiceIds(vendorId, normalizedServiceIds, req.user?._id);
+    const preview = await getPricingPreviewForServiceIds(vendorId, normalizedServiceIds, req.user?._id, membershipId || selectedMembershipId, mode);
     res.setHeader('Cache-Control', 'no-store');
     res.status(200).json(preview);
   } catch (error) {

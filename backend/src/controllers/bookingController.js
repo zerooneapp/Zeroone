@@ -84,7 +84,7 @@ const formatBookingResponse = (booking, role) => {
 
 const createBooking = async (req, res) => {
   try {
-    let { vendorId, staffId, serviceIds, startTime, serviceAddress } = req.body;
+    let { vendorId, staffId, serviceIds, startTime, serviceAddress, membershipId } = req.body;
     if (!vendorId || !serviceIds || !startTime) {
       return res.status(400).json({ message: 'Missing required booking fields' });
     }
@@ -99,7 +99,7 @@ const createBooking = async (req, res) => {
 
     if (!staffId) return res.status(400).json({ message: 'Staff selection required or slot timeout' });
 
-    const booking = await finalizeBooking(req.user._id, vendorId, staffId, serviceIds, startTime, serviceAddress);
+    const booking = await finalizeBooking(req.user._id, vendorId, staffId, serviceIds, startTime, serviceAddress, membershipId);
     // Reload to get populated staff for the response
     const populated = await Booking.findById(booking._id).populate('staffId', 'name phone');
     res.status(201).json(formatBookingResponse(populated, getActorRole(req)));

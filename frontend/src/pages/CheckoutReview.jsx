@@ -8,6 +8,8 @@ import Button from '../components/Button';
 import api from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
+import { getMyMemberships } from '../services/membershipService';
+import { cn } from '../utils/cn';
 
 const CheckoutReview = () => {
   const location = useLocation();
@@ -17,6 +19,8 @@ const CheckoutReview = () => {
   const [loading, setLoading] = React.useState(false);
   const [pricingPreview, setPricingPreview] = React.useState(bookingData?.pricingPreview ?? null);
   const [showTerms, setShowTerms] = React.useState(false);
+  const [activeMemberships, setActiveMemberships] = React.useState([]);
+  const [selectedMembershipId, setSelectedMembershipId] = React.useState('');
 
   if (!bookingData) {
     return (
@@ -35,6 +39,23 @@ const CheckoutReview = () => {
   const formatPrice = (amount) => `Rs. ${Number(amount || 0).toFixed(2).replace(/\.00$/, '')}`;
 
   React.useEffect(() => {
+    const fetchActiveMemberships = async () => {
+      try {
+        const res = await getMyMemberships();
+        const activeList = (res.data || []).filter(
+          m => String(m.vendorId?._id || m.vendorId) === String(vendor?._id) && m.status === 'active'
+        );
+        setActiveMemberships(activeList);
+      } catch (err) {
+        console.error('Failed to fetch memberships in checkout', err);
+      }
+    };
+    if (vendor?._id) {
+      fetchActiveMemberships();
+    }
+  }, [vendor?._id]);
+
+  React.useEffect(() => {
     if (!vendor?._id || !items?.length) {
       setPricingPreview(null);
       return;
@@ -42,12 +63,14 @@ const CheckoutReview = () => {
 
     const fetchPricingPreview = async () => {
       try {
-        const res = await api.get('/pricing/preview', {
-          params: {
-            vendorId: vendor._id,
-            serviceIds: items.map((item) => item._id).join(',')
-          }
-        });
+        const params = {
+          vendorId: vendor._id,
+          serviceIds: items.map((item) => item._id).join(',')
+        };
+        if (selectedMembershipId) {
+          params.membershipId = selectedMembershipId;
+        }
+        const res = await api.get('/pricing/preview', { params });
         setPricingPreview(res.data);
       } catch (err) {
         setPricingPreview(null);
@@ -55,7 +78,7 @@ const CheckoutReview = () => {
     };
 
     fetchPricingPreview();
-  }, [vendor?._id, items]);
+  }, [vendor?._id, items, selectedMembershipId]);
 
   const pricingMap = (pricingPreview?.services || []).reduce((acc, service) => {
     acc[service.serviceId] = service;
@@ -96,7 +119,8 @@ const CheckoutReview = () => {
             staffId: selectedStaff?._id,
             serviceIds: items.map((item) => item._id),
             startTime: startDateTime,
-            serviceAddress
+            serviceAddress,
+            membershipId: selectedMembershipId || undefined
           });
 
       clearCart();
@@ -168,6 +192,127 @@ const CheckoutReview = () => {
           </div>
         </motion.div>
 
+        {activeMemberships.length > 0 && (
+          <div className="bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between px-0.5">
+              <div className="flex items-center gap-1.5">
+                <Crown className="text-amber-500" size={14} />
+                <span className="text-[10px] font-black tracking-widest text-[#00246b] dark:text-amber-500 uppercase">
+                  Select Membership
+                </span>
+              </div>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                {activeMemberships.length} Active
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-1.5">
+              {/* Option 1: Auto-Apply */}
+              <button
+                type="button"
+                onClick={() => setSelectedMembershipId('')}
+                className={cn(
+                  "flex items-center justify-between p-2 rounded-xl border text-left transition-all active:scale-[0.98]",
+                  selectedMembershipId === ''
+                    ? "border-amber-500 bg-amber-500/5 dark:bg-amber-500/10 shadow-[0_0_8px_rgba(245,158,11,0.08)]"
+                    : "border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900/50 hover:bg-slate-50 dark:hover:bg-gray-900"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
+                    selectedMembershipId === ''
+                      ? "bg-amber-500 text-white border-amber-400"
+                      : "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-gray-700"
+                  )}>
+                    <Crown size={12} />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black text-slate-900 dark:text-white leading-tight">Auto-Apply Best Plan</p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 leading-none">FIFO / Earliest Expiry</p>
+                  </div>
+                </div>
+                {selectedMembershipId === '' && (
+                  <div className="w-3.5 h-3.5 rounded-full bg-amber-500 flex items-center justify-center text-white shrink-0">
+                    <ShieldCheck size={9} strokeWidth={3.5} />
+                  </div>
+                )}
+              </button>
+
+              {/* Option 2: Individual Memberships */}
+              {activeMemberships.map((memb) => (
+                <button
+                  key={memb._id}
+                  type="button"
+                  onClick={() => setSelectedMembershipId(memb._id)}
+                  className={cn(
+                    "flex items-center justify-between p-2 rounded-xl border text-left transition-all active:scale-[0.98]",
+                    selectedMembershipId === memb._id
+                      ? "border-amber-500 bg-amber-500/5 dark:bg-amber-500/10 shadow-[0_0_8px_rgba(245,158,11,0.08)]"
+                      : "border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900/50 hover:bg-slate-50 dark:hover:bg-gray-900"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
+                      selectedMembershipId === memb._id
+                        ? "bg-amber-500 text-white border-amber-400"
+                        : "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-gray-700"
+                    )}>
+                      <Crown size={12} />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-black text-slate-900 dark:text-white capitalize leading-tight">
+                        {memb.planId?.name || 'Membership'}
+                      </p>
+                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 leading-none">
+                        Expires {dayjs(memb.endDate).format('DD MMM YYYY')}
+                      </p>
+                    </div>
+                  </div>
+                  {selectedMembershipId === memb._id && (
+                    <div className="w-3.5 h-3.5 rounded-full bg-amber-500 flex items-center justify-center text-white shrink-0">
+                      <ShieldCheck size={9} strokeWidth={3.5} />
+                    </div>
+                  )}
+                </button>
+              ))}
+
+              {/* Option 3: Do Not Apply */}
+              <button
+                type="button"
+                onClick={() => setSelectedMembershipId('none_applied')}
+                className={cn(
+                  "flex items-center justify-between p-2 rounded-xl border text-left transition-all active:scale-[0.98]",
+                  selectedMembershipId === 'none_applied'
+                    ? "border-rose-500 bg-rose-500/5 dark:bg-rose-500/10 shadow-[0_0_8px_rgba(239,68,68,0.08)]"
+                    : "border-slate-100 dark:border-gray-800 bg-slate-50/50 dark:bg-gray-900/50 hover:bg-slate-50 dark:hover:bg-gray-900"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "w-7 h-7 rounded-lg flex items-center justify-center border shrink-0",
+                    selectedMembershipId === 'none_applied'
+                      ? "bg-rose-500 text-white border-rose-400"
+                      : "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-gray-700"
+                  )}>
+                    <X size={12} strokeWidth={3} />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black text-slate-900 dark:text-white leading-tight">Pay Regular Price</p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 leading-none">Do Not Apply Membership</p>
+                  </div>
+                </div>
+                {selectedMembershipId === 'none_applied' && (
+                  <div className="w-3.5 h-3.5 rounded-full bg-rose-500 flex items-center justify-center text-white shrink-0">
+                    <ShieldCheck size={9} strokeWidth={3.5} />
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {pricingPreview?.membershipApplied && (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 flex items-center gap-3">
             <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-amber-500/20">
@@ -175,7 +320,9 @@ const CheckoutReview = () => {
             </div>
             <div className="flex-1">
               <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest leading-none mb-1">Membership Applied ✨</p>
-              <p className="text-[11px] font-bold text-amber-700/70 leading-tight">Your active membership for this partner is being used. Included services are now free!</p>
+              <p className="text-[11px] font-bold text-amber-700/70 leading-tight">
+                Your active membership "{pricingPreview.membershipApplied.name}" for this partner is being used. Included services are now free!
+              </p>
             </div>
           </div>
         )}

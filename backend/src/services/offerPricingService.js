@@ -90,7 +90,7 @@ const getBestOfferForServices = (services, offers) => {
   return bestOffer;
 };
 
-const calculatePricingPreview = async (vendorId, services, userId = null) => {
+const calculatePricingPreview = async (vendorId, services, userId = null, selectedMembershipId = null, mode = null) => {
   const normalizedServices = services.map((service) => ({
     ...(service.toObject ? service.toObject() : service),
     price: Number(service.price || 0)
@@ -101,16 +101,119 @@ const calculatePricingPreview = async (vendorId, services, userId = null) => {
   const settings = await GlobalSettings.findOne();
   const isMembActive = settings?.features?.membershipActive !== false;
 
+  const entitlements = new Map();
+
   if (userId && isMembActive) {
-    activeMembership = await UserMembership.findOne({
-      userId,
-      vendorId,
-      status: 'active',
-      endDate: { $gt: new Date() }
-    }).populate('planId');
+    if (selectedMembershipId) {
+      if (selectedMembershipId !== 'none' && selectedMembershipId !== 'none_applied') {
+        activeMembership = await UserMembership.findOne({
+          _id: selectedMembershipId,
+          userId,
+          vendorId,
+          status: 'active',
+          endDate: { $gt: new Date() }
+        }).populate('planId');
+      }
+    } else if (mode === 'browse') {
+      // Fetch all active memberships to build aggregated browse entitlements
+      const activeMemberships = await UserMembership.find({
+        userId,
+        vendorId,
+        status: 'active',
+        endDate: { $gt: new Date() }
+      }).populate('planId');
+
+      const Booking = require('../models/Booking');
+      for (const memb of activeMemberships) {
+        const activeBookings = await Booking.find({
+          membershipId: memb._id,
+          status: { $in: ['pending', 'confirmed'] }
+        }).lean();
+
+        memb.planId?.services?.forEach(s => {
+          const sId = String(s.serviceId?._id || s.serviceId);
+          const usageRecord = memb.usage?.find(u => String(u.serviceId) === sId);
+          const completedCount = usageRecord ? usageRecord.usedCount : 0;
+
+          let activeReservationCount = 0;
+          activeBookings.forEach(b => {
+            const serviceInBooking = b.services.find(bs => String(bs.serviceId) === sId && bs.isFreeViaMembership);
+            if (serviceInBooking) activeReservationCount++;
+          });
+
+          const totalEffectiveUsed = completedCount + activeReservationCount;
+          const remaining = Math.max(0, s.usageLimit - totalEffectiveUsed);
+
+          if (remaining > 0) {
+            const existing = entitlements.get(sId);
+            if (existing) {
+              existing.remaining += remaining;
+              existing.limit += s.usageLimit;
+              existing.used += totalEffectiveUsed;
+            } else {
+              entitlements.set(sId, {
+                limit: s.usageLimit,
+                used: totalEffectiveUsed,
+                remaining: remaining
+              });
+            }
+          }
+        });
+
+        memb.planId?.freeServiceIds?.forEach(id => {
+          const sId = String(id);
+          if (!entitlements.has(sId)) {
+            entitlements.set(sId, { limit: Infinity, used: 0, remaining: Infinity });
+          }
+        });
+      }
+    } else {
+      // Find all active memberships sorted by expiry date (FIFO)
+      const activeMemberships = await UserMembership.find({
+        userId,
+        vendorId,
+        status: 'active',
+        endDate: { $gt: new Date() }
+      }).populate('planId').sort({ endDate: 1 });
+
+      const Booking = require('../models/Booking');
+      // Find the first membership that has remaining limits for any service in the cart
+      for (const memb of activeMemberships) {
+        const activeBookings = await Booking.find({
+          membershipId: memb._id,
+          status: { $in: ['pending', 'confirmed'] }
+        }).lean();
+
+        const hasEntitlement = normalizedServices.some(service => {
+          const sId = String(service._id || service.serviceId);
+          const planService = memb.planId?.services?.find(s => String(s.serviceId?._id || s.serviceId) === sId);
+          if (planService) {
+            const usageRecord = memb.usage?.find(u => String(u.serviceId) === sId);
+            const completedCount = usageRecord ? usageRecord.usedCount : 0;
+
+            let activeReservationCount = 0;
+            activeBookings.forEach(b => {
+              const serviceInBooking = b.services.find(bs => String(bs.serviceId) === sId && bs.isFreeViaMembership);
+              if (serviceInBooking) activeReservationCount++;
+            });
+            const totalEffectiveUsed = completedCount + activeReservationCount;
+            const remaining = Math.max(0, planService.usageLimit - totalEffectiveUsed);
+            if (remaining > 0) return true;
+          }
+          const isFree = memb.planId?.freeServiceIds?.some(id => String(id) === sId);
+          if (isFree) return true;
+
+          return false;
+        });
+
+        if (hasEntitlement) {
+          activeMembership = memb;
+          break;
+        }
+      }
+    }
   }
 
-  const entitlements = new Map();
   if (activeMembership) {
     // 🔍 Fetch all active (confirmed/pending) bookings that use this membership
     const Booking = require('../models/Booking');
@@ -221,7 +324,7 @@ const calculatePricingPreview = async (vendorId, services, userId = null) => {
   };
 };
 
-const getPricingPreviewForServiceIds = async (vendorId, serviceIds = [], userId = null) => {
+const getPricingPreviewForServiceIds = async (vendorId, serviceIds = [], userId = null, selectedMembershipId = null, mode = null) => {
   const services = await Service.find({
     vendorId,
     _id: { $in: serviceIds }
@@ -238,7 +341,7 @@ const getPricingPreviewForServiceIds = async (vendorId, serviceIds = [], userId 
     };
   }
 
-  return calculatePricingPreview(vendorId, services, userId);
+  return calculatePricingPreview(vendorId, services, userId, selectedMembershipId, mode);
 };
 
 module.exports = {
