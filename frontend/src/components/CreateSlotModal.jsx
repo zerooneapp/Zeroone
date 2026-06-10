@@ -39,8 +39,11 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
   });
 
   useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  useEffect(() => {
     if (isOpen) {
-      loadInitialData();
       resetForm();
     }
   }, [isOpen]);

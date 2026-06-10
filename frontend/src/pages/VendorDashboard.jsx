@@ -660,7 +660,7 @@ const VendorDashboard = () => {
       </AnimatePresence>
 
       {isNotificationsOpen && <NotificationDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />}
-      {isCreateSlotOpen && <CreateSlotModal isOpen={isCreateSlotOpen} onClose={() => setIsCreateSlotOpen(false)} onRefresh={() => fetchDashboard(true)} />}
+      <CreateSlotModal isOpen={isCreateSlotOpen} onClose={() => setIsCreateSlotOpen(false)} onRefresh={() => fetchDashboard(true)} />
       {isClosureModalOpen && <EmergencyClosureModal isOpen={isClosureModalOpen} onClose={() => setIsClosureModalOpen(false)} onCreated={() => fetchDashboard(true)} />}
 
       {/* Enhanced Glass Confirmation Modal */}
