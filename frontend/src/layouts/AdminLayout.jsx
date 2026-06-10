@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Store, Users, CalendarRange,
   Tag, CreditCard, Wallet, Star, Bell, Send,
   Menu, X, Sun, Moon, LogOut, ChevronRight, Settings, Shield,
-  ArrowDownLeft, Crown, Zap
+  ArrowDownLeft, Crown, Zap, HelpCircle
 } from 'lucide-react';
 import { useAdminStore } from '../store/useAdminStore';
 import { useAuthStore } from '../store/authStore';
@@ -36,6 +36,7 @@ const AdminLayout = () => {
     { name: "Promotions", path: "/admin/promotions", icon: Zap },
     { name: "Transactions", path: "/admin/transactions", icon: Wallet },
     { name: "Withdrawals", path: "/admin/withdrawals", icon: ArrowDownLeft },
+    { name: "Tickets", path: "/admin/tickets", icon: HelpCircle },
     { name: "Reviews", path: "/admin/reviews", icon: Star },
     { name: "Broadcast", path: "/admin/notifications/broadcast", icon: Send },
     ...(isSuperAdmin ? [{ name: "Admin Access", path: "/admin/access", icon: Shield }] : []),

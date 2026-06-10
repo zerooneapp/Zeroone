@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Filter, Calendar, Clock, MapPin, ChevronRight, AlertCircle, ShoppingBag, User } from 'lucide-react';
 import api from '../services/api';
 import SectionTitle from '../components/SectionTitle';
@@ -9,7 +9,13 @@ import dayjs from 'dayjs';
 
 const MyBookings = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed, cancelled
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'upcoming';
+  
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const [bookings, setBookings] = useState(() => window.__PREFETCHED_DATA__?.bookings || []);
   const [loading, setLoading] = useState(() => !window.__PREFETCHED_DATA__?.bookings);

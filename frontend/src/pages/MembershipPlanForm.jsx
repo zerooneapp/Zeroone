@@ -120,7 +120,7 @@ const MembershipPlanForm = () => {
         await api.post('/memberships/vendor/plans', submitData);
         toast.success('Membership plan created');
       }
-      navigate('/vendor/memberships');
+      navigate('/vendor/membership');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save plan');
     } finally {

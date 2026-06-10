@@ -11,6 +11,7 @@ const globalSettingsSchema = new mongoose.Schema({
     reminderAlerts: { type: Boolean, default: true }
   },
   supportWhatsApp: { type: String, default: "" },
+  supportPhone: { type: String, default: "" },
   promotionPricePerDay: { type: Number, default: 10 },
   features: {
     membershipActive: { type: Boolean, default: true },

@@ -36,6 +36,13 @@ export const useVendorStore = create((set, get) => ({
   membershipData: [],
   membershipLoading: false,
 
+  membershipMembers: [],
+  membershipRequests: [],
+  membershipMembersLoading: false,
+  membershipRequestsLoading: false,
+  membershipMembersPages: 1,
+  membershipRequestsPages: 1,
+
   closuresData: [],
   closuresLoading: false,
 
@@ -80,6 +87,8 @@ export const useVendorStore = create((set, get) => ({
       get().fetchClients();
       get().fetchReviews();
       get().fetchMemberships();
+      get().fetchMembershipMembers(1, 10, true);
+      get().fetchMembershipRequests(1, 10, true);
       
       // Pre-fetch bookings with default roster view
       get().fetchBookings({ 
@@ -251,6 +260,52 @@ export const useVendorStore = create((set, get) => ({
     }
   },
 
+  fetchMembershipMembers: async (page = 1, limit = 10, force = false) => {
+    const { membershipMembers } = get();
+    if (membershipMembers.length > 0 && !force && page === 1) {
+      silentMembershipMembersRefresh(set, page, limit);
+      return;
+    }
+    
+    if (force !== 'silent') {
+      set({ membershipMembersLoading: true });
+    }
+    try {
+      const res = await api.get(`/memberships/vendor/members?page=${page}&limit=${limit}`);
+      set({
+        membershipMembers: res.data.memberships || [],
+        membershipMembersPages: res.data.pages || 1,
+        membershipMembersLoading: false
+      });
+    } catch (err) {
+      console.error('Failed to load membership members', err);
+      set({ membershipMembersLoading: false });
+    }
+  },
+
+  fetchMembershipRequests: async (page = 1, limit = 10, force = false) => {
+    const { membershipRequests } = get();
+    if (membershipRequests.length > 0 && !force && page === 1) {
+      silentMembershipRequestsRefresh(set, page, limit);
+      return;
+    }
+    
+    if (force !== 'silent') {
+      set({ membershipRequestsLoading: true });
+    }
+    try {
+      const res = await api.get(`/memberships/vendor/requests?page=${page}&limit=${limit}`);
+      set({
+        membershipRequests: res.data.requests || [],
+        membershipRequestsPages: res.data.pages || 1,
+        membershipRequestsLoading: false
+      });
+    } catch (err) {
+      console.error('Failed to load membership requests', err);
+      set({ membershipRequestsLoading: false });
+    }
+  },
+
   fetchClosures: async (force = false) => {
     const { closuresData } = get();
     if (closuresData.length > 0 && !force) {
@@ -363,6 +418,8 @@ async function silentDashboardRefresh(set, get) {
     }
     if (get().membershipData.length > 0) {
       silentMembershipRefresh(set);
+      silentMembershipMembersRefresh(set, 1, 10);
+      silentMembershipRequestsRefresh(set, 1, 10);
     }
     if (get().bookingsData.length > 0 && get().lastBookingParams) {
       silentBookingsRefresh(set, get().lastBookingParams);
@@ -467,5 +524,29 @@ async function silentClosuresRefresh(set) {
     set({ closuresData: res.data || [] });
   } catch (err) {
     console.error('Silent closures refresh failed', err);
+  }
+}
+
+async function silentMembershipMembersRefresh(set, page, limit) {
+  try {
+    const res = await api.get(`/memberships/vendor/members?page=${page}&limit=${limit}`);
+    set({
+      membershipMembers: res.data.memberships || [],
+      membershipMembersPages: res.data.pages || 1
+    });
+  } catch (err) {
+    console.error('Silent membership members refresh failed', err);
+  }
+}
+
+async function silentMembershipRequestsRefresh(set, page, limit) {
+  try {
+    const res = await api.get(`/memberships/vendor/requests?page=${page}&limit=${limit}`);
+    set({
+      membershipRequests: res.data.requests || [],
+      membershipRequestsPages: res.data.pages || 1
+    });
+  } catch (err) {
+    console.error('Silent membership requests refresh failed', err);
   }
 }

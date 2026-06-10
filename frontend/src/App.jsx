@@ -28,6 +28,9 @@ const VendorPrivacyPolicy = lazy(() => import('./pages/VendorPrivacyPolicy'));
 const ContactSupport = lazy(() => import('./pages/ContactSupport'));
 const VendorContactSupport = lazy(() => import('./pages/VendorContactSupport'));
 const MyMemberships = lazy(() => import('./pages/MyMemberships'));
+const HelpDesk = lazy(() => import('./pages/HelpDesk'));
+const MyTickets = lazy(() => import('./pages/MyTickets'));
+const TicketManagement = lazy(() => import('./pages/admin/tickets/TicketManagement'));
 
 // Auth - Lazy Loaded
 const Login = lazy(() => import('./pages/Login'));
@@ -247,6 +250,8 @@ function App() {
             <Route path="account/security" element={<SecuritySettings />} />
             <Route path="account/preferences" element={<Preferences />} />
             <Route path="account/memberships" element={<MyMemberships />} />
+            <Route path="account/helpdesk" element={<HelpDesk />} />
+            <Route path="account/my-tickets" element={<MyTickets />} />
           </Route>
         </Route>
 
@@ -282,7 +287,7 @@ function App() {
           <Route path="wallet" element={<VendorWallet />} />
           <Route path="reviews" element={<VendorReviews />} />
           <Route path="customers" element={<LoyalCustomers />} />
-          <Route path="memberships">
+          <Route path="membership">
             <Route index element={<MembershipPlans />} />
             <Route path="add" element={<MembershipPlanForm />} />
             <Route path="edit/:id" element={<MembershipPlanForm />} />
@@ -323,6 +328,7 @@ function App() {
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="plans" element={<SubscriptionPlans />} />
           <Route path="settings" element={<PlatformSettings />} />
+          <Route path="tickets" element={<TicketManagement />} />
           <Route path="membership-settings" element={<PartnerMembership />} />
           <Route path="promotions" element={<AdminPromotions />} />
           <Route path="withdrawals" element={<WithdrawalManagement />} />

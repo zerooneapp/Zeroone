@@ -17,15 +17,20 @@ const MembershipPlans = () => {
     membershipData: storePlans, 
     membershipLoading: storeLoading, 
     fetchMemberships,
-    setMembershipData: setPlans
+    setMembershipData: setPlans,
+    membershipMembers: members,
+    membershipRequests: requests,
+    membershipMembersLoading: membersLoading,
+    membershipRequestsLoading: requestsLoading,
+    membershipMembersPages: membersPages,
+    membershipRequestsPages: requestsPages,
+    fetchMembershipMembers,
+    fetchMembershipRequests
   } = useVendorStore();
 
-  const [members, setMembers] = useState([]);
-  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('plans');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [toggleLoadingId, setToggleLoadingId] = useState(null);
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -37,7 +42,10 @@ const MembershipPlans = () => {
 
   // Derived state to use store for plans
   const plans = activeTab === 'plans' ? storePlans : [];
-  const displayLoading = activeTab === 'plans' ? storeLoading : loading;
+  const displayLoading = activeTab === 'plans' 
+    ? storeLoading 
+    : (activeTab === 'members' ? membersLoading : requestsLoading);
+  const totalPages = activeTab === 'members' ? membersPages : requestsPages;
 
 
   const [globalMembershipActive, setGlobalMembershipActive] = useState(true);
@@ -59,13 +67,9 @@ const MembershipPlans = () => {
       if (activeTab === 'plans') {
         await fetchMemberships();
       } else if (activeTab === 'members') {
-        const membersRes = await api.get(`/memberships/vendor/members?page=${page}&limit=10`);
-        setMembers(membersRes.data.memberships);
-        setTotalPages(membersRes.data.pages);
+        await fetchMembershipMembers(page, 10);
       } else {
-        const requestsRes = await api.get(`/memberships/vendor/requests?page=${page}&limit=10`);
-        setRequests(requestsRes.data.requests);
-        setTotalPages(requestsRes.data.pages);
+        await fetchMembershipRequests(page, 10);
       }
     } catch (err) {
       console.error('Fetch data error:', err);
@@ -88,33 +92,12 @@ const MembershipPlans = () => {
     }
   };
 
-  // 🚀 Background Prefetch on mount
-  useEffect(() => {
-    const prefetchData = async () => {
-      try {
-        const settingsRes = await api.get('/settings/shared');
-        const isMembActive = settingsRes.data?.features?.membershipActive !== false;
-        if (isMembActive) {
-          const [membersRes, requestsRes] = await Promise.all([
-            api.get('/memberships/vendor/members?page=1&limit=10'),
-            api.get('/memberships/vendor/requests?page=1&limit=10')
-          ]);
-          setMembers(membersRes.data.memberships || []);
-          setRequests(requestsRes.data.requests || []);
-        }
-      } catch (err) {
-        console.error('Background prefetch error:', err);
-      }
-    };
-    prefetchData();
-  }, []);
-
   useEffect(() => {
     const hasData = activeTab === 'plans'
       ? storePlans.length > 0
       : (activeTab === 'members' ? members.length > 0 : requests.length > 0);
     fetchData(!hasData);
-  }, [activeTab]);
+  }, [activeTab, page]);
 
   const handleToggle = async (id, isActive) => {
     if (toggleLoadingId === id) return;
@@ -227,7 +210,7 @@ const MembershipPlans = () => {
         </div>
         {activeTab === 'plans' && (
           <button
-            onClick={() => navigate('/vendor/memberships/add')}
+            onClick={() => navigate('/vendor/membership/add')}
             className="p-2.5 bg-[#00246b] text-white rounded-xl shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all"
           >
             <Plus size={20} />
@@ -325,7 +308,7 @@ const MembershipPlans = () => {
                       <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed max-w-[250px] mx-auto">Build a loyal customer base by offering exclusive subscription benefits.</p>
                     </div>
                     <button
-                      onClick={() => navigate('/vendor/memberships/add')}
+                      onClick={() => navigate('/vendor/membership/add')}
                       className="mt-6 px-7 py-3.5 bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl shadow-primary/20 active:scale-95 transition-all"
                     >
                       Create First Plan
@@ -584,7 +567,7 @@ const MembershipPlans = () => {
                                         animate={{ width: `${percentage}%` }}
                                         className={cn(
                                           "h-full rounded-full transition-all duration-1000",
-                                          isExhausted ? "bg-slate-300" : "bg-gradient-to-r from-primary to-primary/80"
+                                          isExhausted ? "bg-slate-300" : "bg-gradient-to-r from-[#00246b] to-[#00246b]/80"
                                         )}
                                       />
                                     </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Star, MapPin, Clock, Tag, Plus, Minus,
-  Heart, Play, Verified, ShieldCheck,
+  Heart, Play, Verified, ShieldCheck, X,
   Calendar, CheckCircle2, ChevronRight, ChevronLeft, Info, AlertCircle, Share2, Loader2, Crown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -130,8 +130,13 @@ const ServiceDetail = () => {
     }
     return ['All'];
   });
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [servicePricing, setServicePricing] = useState({});
+  const [isFavorited, setIsFavorited] = useState(() => {
+    const prefetchedFavorites = window.__PREFETCHED_DATA__?.favorites || [];
+    return prefetchedFavorites.some(v => v._id === id);
+  });
+  const [servicePricing, setServicePricing] = useState(() => {
+    return window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.servicePricing || {};
+  });
   const [cartPricing, setCartPricing] = useState(null);
   const [showChoiceModal, setShowChoiceModal] = useState(false);
   const [existingBooking, setExistingBooking] = useState(null);
@@ -215,6 +220,39 @@ const ServiceDetail = () => {
     }
   }, [lightboxImg, slides]);
 
+  // Prevent multi-image scroll in lightbox — snap one at a time
+  const isLightboxScrollingRef = React.useRef(false);
+  const handleLightboxWheel = React.useCallback((e) => {
+    if (!lightboxScrollRef.current || slides.length <= 1) return;
+    e.preventDefault();
+    if (isLightboxScrollingRef.current) return;
+    isLightboxScrollingRef.current = true;
+    const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+    setLightboxIndex(prev => {
+      const next = delta > 0
+        ? Math.min(prev + 1, slides.length - 1)
+        : Math.max(prev - 1, 0);
+      const width = lightboxScrollRef.current.offsetWidth;
+      lightboxScrollRef.current.scrollTo({ left: next * width, behavior: 'smooth' });
+      // Sync state
+      setZoomScale(1);
+      setPanOffset({ x: 0, y: 0 });
+      if (slides[next]) {
+        setLightboxImg(slides[next].url);
+        setLightboxType(slides[next].type);
+      }
+      return next;
+    });
+    setTimeout(() => { isLightboxScrollingRef.current = false; }, 400);
+  }, [slides]);
+
+  useEffect(() => {
+    const el = lightboxScrollRef.current;
+    if (!el || !lightboxImg) return;
+    el.addEventListener('wheel', handleLightboxWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleLightboxWheel);
+  }, [handleLightboxWheel, lightboxImg]);
+
   // 1. Fetch Main Data (Vendor + Services)
   useEffect(() => {
     const fetchData = async () => {
@@ -230,10 +268,34 @@ const ServiceDetail = () => {
           setVendor(vendorRes.data);
           setServices(servicesRes.data || []);
 
+          let pricingMap = window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.servicePricing || {};
+
+          // Fetch pricing preview immediately before showing the screen if not prefetched
+          if (Object.keys(pricingMap).length === 0 && servicesRes.data?.length > 0) {
+            try {
+              const pricingRes = await api.get('/pricing/preview', {
+                params: {
+                  vendorId: id,
+                  serviceIds: servicesRes.data.map((service) => service._id).join(','),
+                  _t: Date.now()
+                }
+              });
+              pricingMap = (pricingRes.data?.services || []).reduce((acc, s) => {
+                acc[s.serviceId] = s;
+                return acc;
+              }, {});
+              setServicePricing(pricingMap);
+            } catch (pricingErr) {
+              console.error('Failed to load pricing preview in main load', pricingErr);
+            }
+          }
+
           if (window.__PREFETCHED_DATA__) {
             window.__PREFETCHED_DATA__.vendorDetails[id] = {
               vendor: vendorRes.data,
-              services: servicesRes.data || []
+              services: servicesRes.data || [],
+              plans: window.__PREFETCHED_DATA__.vendorDetails[id]?.plans || [],
+              servicePricing: pricingMap
             };
           }
           
@@ -297,11 +359,20 @@ const ServiceDetail = () => {
 
   // 2. Favorite Sync
   useEffect(() => {
+    if (window.__PREFETCHED_DATA__?.favorites) {
+      const prefetchedFavorites = window.__PREFETCHED_DATA__.favorites;
+      setIsFavorited(prefetchedFavorites.some(v => v._id === id));
+      return;
+    }
+
     const checkFavorite = async () => {
       if (!isAuthenticated || !id) return;
       try {
         const res = await api.get('/users/favorites');
         const favorites = res.data || [];
+        if (window.__PREFETCHED_DATA__) {
+          window.__PREFETCHED_DATA__.favorites = favorites;
+        }
         setIsFavorited(favorites.some(v => v._id === id));
       } catch (err) {
         console.error('Favorite status sync lost');
@@ -329,6 +400,10 @@ const ServiceDetail = () => {
 
   // 3. Service Pricing Previews
   useEffect(() => {
+    if (servicePricing && Object.keys(servicePricing).length > 0) {
+      return;
+    }
+
     if (!vendor?._id || services.length === 0) {
       setServicePricing({});
       return;
@@ -362,7 +437,7 @@ const ServiceDetail = () => {
     };
 
     fetchServicePricing();
-  }, [vendor?._id, services]);
+  }, [vendor?._id, services, servicePricing]);
 
   // 4. Cart Pricing Preview (Discounts/Offers)
   useEffect(() => {
@@ -403,6 +478,20 @@ const ServiceDetail = () => {
       if (res.data.isFavorited !== newState) {
         setIsFavorited(res.data.isFavorited);
       }
+      
+      // Update local prefetch cache
+      if (window.__PREFETCHED_DATA__) {
+        let currentFavs = window.__PREFETCHED_DATA__.favorites || [];
+        if (res.data.isFavorited) {
+          if (!currentFavs.some(v => v._id === id)) {
+            currentFavs.push({ _id: id });
+          }
+        } else {
+          currentFavs = currentFavs.filter(v => v._id !== id);
+        }
+        window.__PREFETCHED_DATA__.favorites = currentFavs;
+      }
+
       toast.success(res.data.isFavorited ? 'Saved to your elite list!' : 'Removed from favorites');
     } catch (err) {
       // Rollback if the API call fails
@@ -539,6 +628,32 @@ const ServiceDetail = () => {
       });
     }
   };
+
+  // Prevent multi-image scroll on two-finger/trackpad — snap one at a time
+  const isScrollingRef = React.useRef(false);
+  const handleCarouselWheel = React.useCallback((e) => {
+    if (!scrollRef.current || slides.length <= 1) return;
+    e.preventDefault();
+    if (isScrollingRef.current) return;
+    isScrollingRef.current = true;
+    const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+    setActiveIndex(prev => {
+      const next = delta > 0
+        ? Math.min(prev + 1, slides.length - 1)
+        : Math.max(prev - 1, 0);
+      const width = scrollRef.current.offsetWidth;
+      scrollRef.current.scrollTo({ left: next * width, behavior: 'smooth' });
+      return next;
+    });
+    setTimeout(() => { isScrollingRef.current = false; }, 400);
+  }, [slides.length]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleCarouselWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleCarouselWheel);
+  }, [handleCarouselWheel]);
 
   const handleScroll = (e) => {
     const scrollLeft = e.target.scrollLeft;
@@ -882,15 +997,13 @@ const ServiceDetail = () => {
           {/* Favorite Overlay */}
           <button
             onClick={handleToggleFavorite}
-            className={cn(
-              "absolute top-4 right-3 w-[36px] h-[36px] rounded-full shadow-2xl backdrop-blur-md transition-all active:scale-90 z-30 flex items-center justify-center",
-              isFavorited ? "bg-white text-[#00246b]" : "bg-white/20 text-white border border-white/30"
-            )}
+            className="absolute top-4 right-3 w-[36px] h-[36px] rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-[#00246b] flex items-center justify-center z-30 transition-all active:scale-90 shadow-md"
           >
             <Heart
-              size={20}
+              size={18}
               fill={isFavorited ? "#00246b" : "none"}
-              strokeWidth={isFavorited ? 0 : 2}
+              className="text-[#00246b]"
+              strokeWidth={2.5}
             />
           </button>
 
@@ -1393,14 +1506,15 @@ const ServiceDetail = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center pt-[46px] px-4 select-none touch-none"
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[100] bg-black select-none touch-none"
+            style={{ WebkitUserSelect: 'none' }}
           >
-            {/* Top controls header */}
-            <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-50 pt-[46px]">
-              <span className="text-white/60 text-[9px] font-black uppercase tracking-widest leading-none">
-                Gallery Preview
-              </span>
+            {/* ── TOP CHROME ─────────────────────────────────── */}
+            <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-[52px] pb-4"
+              style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, transparent 100%)' }}>
+              {/* Close */}
               <button
                 onClick={() => {
                   if (window.location.hash === '#gallery') {
@@ -1411,24 +1525,32 @@ const ServiceDetail = () => {
                     setPanOffset({ x: 0, y: 0 });
                   }
                 }}
-                className="w-9 h-9 rounded-xl bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
-                title="Close"
+                className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-all"
+                style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.18)' }}
               >
-                <ArrowLeft size={16} strokeWidth={3} className="rotate-180" />
+                <X size={18} strokeWidth={2.5} className="text-white" />
               </button>
+
+              {/* Counter Badge */}
+              <div
+                className="px-3 py-1.5 rounded-full text-white text-[11px] font-black tracking-widest"
+                style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.18)' }}
+              >
+                {lightboxIndex + 1} / {slides.length}
+              </div>
             </div>
 
-            {/* Main Image Viewport */}
-            <div 
+            {/* ── IMAGE STRIP (edge-to-edge) ──────────────────── */}
+            <div
               ref={lightboxScrollRef}
               onScroll={handleLightboxScroll}
-              className={`w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar items-center ${zoomScale > 1 ? 'overflow-x-hidden' : ''}`}
+              className={`absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar ${zoomScale > 1 ? 'overflow-x-hidden' : ''}`}
             >
               {slides.map((slide, idx) => (
-                <div 
+                <div
                   key={idx}
                   ref={idx === lightboxIndex ? viewportRef : null}
-                  className="w-full h-full shrink-0 snap-center flex items-center justify-center p-4 relative"
+                  className="w-full h-full shrink-0 snap-center flex items-center justify-center relative"
                   onMouseDown={idx === lightboxIndex ? handleMouseDown : undefined}
                   onMouseMove={idx === lightboxIndex ? handleMouseMove : undefined}
                   onMouseUp={idx === lightboxIndex ? handleMouseUp : undefined}
@@ -1437,17 +1559,21 @@ const ServiceDetail = () => {
                   <div
                     style={idx === lightboxIndex ? {
                       transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
-                      transition: isMouseDown ? 'none' : 'transform 0.1s ease-out',
-                      cursor: zoomScale > 1 ? 'grab' : 'zoom-in'
-                    } : {}}
-                    className="max-w-full max-h-[75vh] flex items-center justify-center pointer-events-auto"
+                      transition: isMouseDown ? 'none' : 'transform 0.15s cubic-bezier(0.25,0.46,0.45,0.94)',
+                      cursor: zoomScale > 1 ? 'grabbing' : 'default',
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    } : { width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     onDoubleClick={() => {
                       if (idx === lightboxIndex) {
                         if (zoomScale > 1) {
                           setZoomScale(1);
                           setPanOffset({ x: 0, y: 0 });
                         } else {
-                          setZoomScale(2);
+                          setZoomScale(2.5);
                         }
                       }
                     }}
@@ -1458,13 +1584,16 @@ const ServiceDetail = () => {
                         controls
                         autoPlay={idx === lightboxIndex}
                         playsInline
-                        className="max-w-full max-h-[75vh] object-contain rounded-lg select-none"
+                        className="w-full h-full object-contain select-none"
+                        style={{ maxHeight: '100dvh' }}
                       />
                     ) : (
                       <img
                         src={slide.url}
                         alt={`Preview ${idx + 1}`}
-                        className="max-w-full max-h-[75vh] object-contain rounded-lg select-none pointer-events-none"
+                        className="w-full h-full object-contain select-none pointer-events-none"
+                        style={{ maxHeight: '100dvh' }}
+                        draggable={false}
                       />
                     )}
                   </div>
@@ -1472,66 +1601,42 @@ const ServiceDetail = () => {
               ))}
             </div>
 
-            {/* Navigation Arrows for Lightbox */}
-            {slides.length > 1 && (
-              <>
-                {lightboxIndex > 0 && (
-                  <button
-                    onClick={() => {
-                      if (lightboxScrollRef.current) {
-                        const width = lightboxScrollRef.current.offsetWidth;
-                        lightboxScrollRef.current.scrollTo({
-                          left: (lightboxIndex - 1) * width,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white flex items-center justify-center z-50 transition-all active:scale-90 shadow-md"
-                  >
-                    <ChevronLeft size={24} strokeWidth={3} />
-                  </button>
-                )}
-                {lightboxIndex < slides.length - 1 && (
-                  <button
-                    onClick={() => {
-                      if (lightboxScrollRef.current) {
-                        const width = lightboxScrollRef.current.offsetWidth;
-                        lightboxScrollRef.current.scrollTo({
-                          left: (lightboxIndex + 1) * width,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white flex items-center justify-center z-50 transition-all active:scale-90 shadow-md"
-                  >
-                    <ChevronRight size={24} strokeWidth={3} />
-                  </button>
-                )}
-              </>
-            )}
+            {/* ── BOTTOM CHROME ──────────────────────────────── */}
+            <div
+              className="absolute bottom-0 left-0 right-0 z-50 flex flex-col items-center gap-3 pb-10 pt-8 pointer-events-none"
+              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }}
+            >
+              {/* Dot indicators */}
+              {slides.length > 1 && (
+                <div className="flex items-center justify-center gap-[5px]">
+                  {slides.map((_, index) => (
+                    <div
+                      key={`lb-dot-${index}`}
+                      className="rounded-full transition-all duration-300"
+                      style={{
+                        width: lightboxIndex === index ? 22 : 6,
+                        height: 6,
+                        background: lightboxIndex === index
+                          ? 'rgba(255,255,255,1)'
+                          : 'rgba(255,255,255,0.32)',
+                        boxShadow: lightboxIndex === index ? '0 0 8px rgba(255,255,255,0.6)' : 'none',
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
 
-            {/* Pagination / Slide indicators */}
-            {slides.length > 1 && (
-              <div className="absolute bottom-12 flex items-center justify-center gap-1.5 z-20">
-                {slides.map((_, index) => (
-                  <div
-                    key={`lightbox-dot-${index}`}
-                    className={cn(
-                      "h-1.5 rounded-full transition-all duration-300 shadow-sm",
-                      lightboxIndex === index
-                        ? "w-6 bg-white"
-                        : "w-1.5 bg-white/40"
-                    )}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Micro Tip Indicator */}
-            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
-              <p className="text-[9px] font-black text-white/40 tracking-widest uppercase">
-                Swipe left/right to browse • Double tap to zoom
-              </p>
+              {/* Hint text */}
+              {zoomScale <= 1 && (
+                <p className="text-[9px] font-bold text-white/35 tracking-[0.2em] uppercase">
+                  {slides.length > 1 ? 'Swipe to browse  •  Double tap to zoom' : 'Double tap to zoom'}
+                </p>
+              )}
+              {zoomScale > 1 && (
+                <p className="text-[9px] font-bold text-white/50 tracking-[0.2em] uppercase">
+                  Double tap to reset zoom
+                </p>
+              )}
             </div>
           </motion.div>
         )}

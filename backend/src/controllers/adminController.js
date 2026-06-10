@@ -80,11 +80,12 @@ const getGlobalSettings = async (req, res) => {
 
 const getSharedSettings = async (req, res) => {
   try {
-    let settings = await GlobalSettings.findOne().select('supportWhatsApp discoveryRadius freeTrialDays promotionPricePerDay features');
+    let settings = await GlobalSettings.findOne().select('supportWhatsApp supportPhone discoveryRadius freeTrialDays promotionPricePerDay features');
 
     if (!settings) {
       return res.status(200).json({
         supportWhatsApp: '',
+        supportPhone: '',
         discoveryRadius: 10,
         freeTrialDays: 7,
         promotionPricePerDay: 10,

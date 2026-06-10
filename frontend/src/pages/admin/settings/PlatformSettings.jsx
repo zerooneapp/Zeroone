@@ -3,7 +3,7 @@ import {
   Settings, ShieldAlert, Wallet, BellRing,
   Save, RefreshCw, ToggleLeft, ToggleRight,
   Info, ShieldCheck, Zap, AlertCircle, MapPin, MessageCircle,
-  IndianRupee
+  IndianRupee, Phone
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../services/api';
@@ -21,7 +21,8 @@ const PlatformSettings = () => {
       walletAlerts: true,
       reminderAlerts: true
     },
-    supportWhatsApp: ""
+    supportWhatsApp: "",
+    supportPhone: ""
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -192,7 +193,7 @@ const PlatformSettings = () => {
         {/* 💬 SUPPORT INFRASTRUCTURE */}
         <div className="space-y-5 lg:col-span-2">
           <SettingsCard title="Support Infrastructure" icon={MessageCircle}>
-            <div className="max-w-md">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SettingInput
                 label="Support WhatsApp Number"
                 sub="Primary support node for partner assistance"
@@ -200,6 +201,16 @@ const PlatformSettings = () => {
                 value={settings.supportWhatsApp}
                 onChange={(val) => handleUpdate({ supportWhatsApp: val })}
                 unit="WHATSAPP"
+                isDisabled={saving}
+                type="text"
+              />
+              <SettingInput
+                label="Support Phone Number"
+                sub="Primary phone helpline for voice support"
+                icon={Phone}
+                value={settings.supportPhone}
+                onChange={(val) => handleUpdate({ supportPhone: val })}
+                unit="PHONE"
                 isDisabled={saving}
                 type="text"
               />

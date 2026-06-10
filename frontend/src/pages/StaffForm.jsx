@@ -307,7 +307,7 @@ const StaffForm = () => {
                     type="button"
                     onClick={() => toggleService(service._id)}
                     className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all border ${formData.services.includes(service._id)
-                        ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
+                        ? 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/20'
                         : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-400 shadow-sm'
                       }`}
                   >

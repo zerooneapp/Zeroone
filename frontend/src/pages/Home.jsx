@@ -101,6 +101,18 @@ const Home = () => {
       .catch(err => console.error('Failed to fetch categories'));
   }, []);
 
+  // Fetch user favorites for prefetching
+  useEffect(() => {
+    if (!user) return;
+    api.get('/users/favorites')
+      .then(res => {
+        if (window.__PREFETCHED_DATA__) {
+          window.__PREFETCHED_DATA__.favorites = res.data || [];
+        }
+      })
+      .catch(() => {});
+  }, [user]);
+
   // 3. Fetch Vendors (Nearby + Search + Filter)
   useEffect(() => {
     // Only show loading skeleton if we don't have vendors OR if the search/filters changed
@@ -137,18 +149,41 @@ const Home = () => {
               window.__PREFETCHED_DATA__.vendorDetails[v._id] = {
                 vendor: v,
                 services: v.services || [],
-                plans: window.__PREFETCHED_DATA__.vendorDetails[v._id]?.plans || []
+                plans: window.__PREFETCHED_DATA__.vendorDetails[v._id]?.plans || [],
+                servicePricing: window.__PREFETCHED_DATA__.vendorDetails[v._id]?.servicePricing || {}
               };
 
-              // Prefetch services if they are missing or empty
+              const prefetchPricing = (vendorId, servicesList) => {
+                if (!servicesList || servicesList.length === 0) return;
+                api.get('/pricing/preview', {
+                  params: {
+                    vendorId,
+                    serviceIds: servicesList.map((service) => service._id).join(','),
+                    _t: Date.now()
+                  }
+                }).then(pRes => {
+                  const pricingMap = (pRes.data?.services || []).reduce((acc, service) => {
+                    acc[service.serviceId] = service;
+                    return acc;
+                  }, {});
+                  if (window.__PREFETCHED_DATA__.vendorDetails[vendorId]) {
+                    window.__PREFETCHED_DATA__.vendorDetails[vendorId].servicePricing = pricingMap;
+                  }
+                }).catch(() => {});
+              };
+
+              // Prefetch services if they are missing or empty, then prefetch their pricing
               if (!v.services || v.services.length === 0) {
                 api.get('/services', { params: { vendorId: v._id } })
                   .then(sRes => {
                     if (window.__PREFETCHED_DATA__.vendorDetails[v._id]) {
                       window.__PREFETCHED_DATA__.vendorDetails[v._id].services = sRes.data || [];
+                      prefetchPricing(v._id, sRes.data || []);
                     }
                   })
                   .catch(() => {});
+              } else {
+                prefetchPricing(v._id, v.services);
               }
 
               // Prefetch membership plans for the vendor

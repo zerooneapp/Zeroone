@@ -712,7 +712,7 @@ const VendorProfile = () => {
                         { label: 'Basic Info', subtitle: 'Name, address & timing', icon: Store, key: 'basic', color: 'text-blue-500', bg: 'bg-blue-500/10' },
                         { label: 'Shop Media', subtitle: 'Gallery & featured images', icon: Camera, key: 'media', color: 'text-purple-500', bg: 'bg-purple-500/10' },
                         { label: 'Services', subtitle: 'Manage listings & pricing', icon: LayoutGrid, path: '/vendor/services', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                        { label: 'Membership Plan', subtitle: 'Loyalty plans for clients', icon: Crown, path: '/vendor/memberships', color: 'text-amber-500', bg: 'bg-amber-500/10', key: 'memberships' },
+                        { label: 'Membership Plan', subtitle: 'Loyalty plans for clients', icon: Crown, path: '/vendor/membership', color: 'text-amber-500', bg: 'bg-amber-500/10', key: 'memberships' },
                         { label: 'Reviews & Ratings', subtitle: 'View client feedback & stars', icon: Star, path: '/vendor/reviews', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
                         { label: 'Live Report', subtitle: 'Performance PDF report', icon: FileDown, key: 'live_report', color: 'text-blue-500', bg: 'bg-blue-500/10' }
                      ].filter(item => {
@@ -1893,7 +1893,7 @@ const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef 
                      }}
                      className={cn(
                         "w-full py-2 rounded-lg text-xs font-black transition-all",
-                        h === hour ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
+                        h === hour ? "bg-[#00246b] text-white shadow-lg shadow-[#00246b]/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
                      )}
                   >
                      {hour}
@@ -1955,7 +1955,7 @@ const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef 
             <button
                type="button"
                onClick={handleConfirm}
-               className="flex-1 py-2.5 bg-slate-900 dark:bg-primary text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+               className="flex-1 py-2.5 bg-[#00246b] dark:bg-[#00246b] text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
             >
                Set Time
             </button>

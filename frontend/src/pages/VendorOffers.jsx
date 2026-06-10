@@ -96,8 +96,8 @@ const VendorOffers = () => {
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1">
               <h1 className="text-xl font-black tracking-tighter leading-none flex items-center">
-                <span className="text-primary dark:text-white">Zero</span>
-                <span className="text-primary/30 dark:text-white">One</span>
+                <span className="text-[#00246b] dark:text-white">Zero</span>
+                <span className="text-[#00246b]/30 dark:text-white">One</span>
               </h1>
 
             </div>
@@ -111,7 +111,7 @@ const VendorOffers = () => {
           }}
           className={`p-2.5 rounded-xl shadow-xl transition-all ${!vendorData?.subscription?.isActive
               ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed'
-              : 'bg-primary text-white shadow-primary/20 active:scale-95'
+              : 'bg-[#00246b] text-white shadow-[#00246b]/20 active:scale-95'
             }`}
         >
           <Plus size={20} />
@@ -126,7 +126,7 @@ const VendorOffers = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="py-12 text-center"
             >
-              <div className="w-20 h-20 bg-primary/5 rounded-[2.5rem] flex items-center justify-center mx-auto text-primary/30 border border-primary/10">
+              <div className="w-20 h-20 bg-[#00246b]/5 rounded-[2.5rem] flex items-center justify-center mx-auto text-[#00246b]/30 border border-[#00246b]/10">
                 <Gift size={36} />
               </div>
               <div className="mt-5 space-y-1">
@@ -135,7 +135,7 @@ const VendorOffers = () => {
               </div>
               <button
                 onClick={() => navigate('/vendor/offers/add')}
-                className="mt-6 px-7 py-3.5 bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl shadow-primary/20 active:scale-95 transition-all"
+                className="mt-6 px-7 py-3.5 bg-[#00246b] text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all"
               >
                 Launch Reward
               </button>
