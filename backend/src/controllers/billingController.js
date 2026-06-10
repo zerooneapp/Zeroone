@@ -78,9 +78,23 @@ const getVendorWalletOverview = async (req, res) => {
         planExpiry: subscriptionState.isTrialActive
           ? vendor.freeTrial?.expiryDate || null
           : (subscriptionState.isMonthlyActive ? vendor.expiryDate || null : null),
-        nextDeduction: vendor.planType === 'daily'
-          ? moment().tz('Asia/Kolkata').add(1, 'day').startOf('day').toDate()
-          : null
+        nextDeduction: (() => {
+          if (vendor.planType !== 'daily') return null;
+
+          const today = moment().tz('Asia/Kolkata');
+          const didDeductToday = vendor.lastDeductionDate && 
+            moment(vendor.lastDeductionDate).tz('Asia/Kolkata').format('YYYY-MM-DD') === today.format('YYYY-MM-DD');
+
+          const deductionDay = didDeductToday ? today.clone().add(1, 'day') : today.clone();
+
+          const endTimeStr = vendor.workingHours?.end || '09:00 PM';
+          const endTime = moment.tz(endTimeStr, ['h:mm A', 'hh:mm A', 'HH:mm'], 'Asia/Kolkata');
+          if (!endTime.isValid()) {
+            return deductionDay.startOf('day').toDate();
+          }
+
+          return deductionDay.hour(endTime.hour()).minute(endTime.minute()).second(0).millisecond(0).subtract(1, 'hour').toDate();
+        })()
       },
       plans: {
         serviceLevel,

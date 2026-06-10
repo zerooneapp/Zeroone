@@ -24,6 +24,36 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
   const [preview, setPreview] = useState(null);
   const [previewing, setPreviewing] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [activeClosures, setActiveClosures] = useState([]);
+  const [loadingClosures, setLoadingClosures] = useState(false);
+
+  const fetchActiveClosures = async () => {
+    if (!staff?._id) return;
+    try {
+      setLoadingClosures(true);
+      const res = await api.get('/vendor/staff-closures');
+      const staffClosures = res.data.filter(
+        (item) => item.closure?.staffId === staff._id && item.closure?.status === 'active'
+      );
+      setActiveClosures(staffClosures);
+    } catch (err) {
+      console.error('Failed to fetch active closures', err);
+    } finally {
+      setLoadingClosures(false);
+    }
+  };
+
+  const handleEndClosure = async (closureId) => {
+    try {
+      await api.patch(`/vendor/staff-closures/${closureId}/end`);
+      toast.success('Absence ended successfully');
+      fetchActiveClosures();
+      if (preview) setPreview(null);
+      onCreated?.();
+    } catch (err) {
+      toast.error('Failed to end absence');
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -31,6 +61,7 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
       setPreview(null);
       setPreviewing(false);
       setCreating(false);
+      fetchActiveClosures();
     }
   }, [isOpen]);
 
@@ -130,6 +161,31 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
             </div>
 
             <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+              {/* Active Closures Section */}
+              {activeClosures.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[9px] font-black capitalize tracking-[0.2em] text-amber-600 dark:text-amber-400">Current Active Absences</p>
+                  <div className="space-y-2">
+                    {activeClosures.map((item) => (
+                      <div key={item.closure._id} className="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900/30 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-black text-slate-900 dark:text-white">
+                            {dayjs(item.closure.startTime).format('DD MMM, hh:mm A')} - {dayjs(item.closure.endTime).format('hh:mm A')}
+                          </p>
+                          <p className="text-[8px] font-bold text-amber-600 dark:text-amber-500 mt-0.5">{item.closure.reason || 'No reason provided'}</p>
+                        </div>
+                        <button 
+                          onClick={() => handleEndClosure(item.closure._id)}
+                          className="px-3 py-1.5 bg-amber-500 text-white text-[8px] font-black uppercase tracking-wider rounded-lg shadow-sm active:scale-95 transition-all"
+                        >
+                          End Now
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <label className="space-y-1.5">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Start Date</span>

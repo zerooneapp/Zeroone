@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Vendor = require('../models/Vendor');
 const VendorClosure = require('../models/VendorClosure');
+const StaffClosure = require('../models/StaffClosure');
 const moment = require('moment-timezone');
 
 /**
@@ -32,6 +33,27 @@ const initCronJobs = () => {
       }
     } catch (error) {
       console.error('[CRON-ERROR]', error.message);
+    }
+  });
+
+  // 1.1 Complete elapsed staff closure windows (Every minute)
+  cron.schedule('* * * * *', async () => {
+    try {
+      const indiaTime = moment().tz('Asia/Kolkata').toDate();
+
+      const endedClosures = await StaffClosure.collection.find({
+        status: 'active',
+        endTime: { $lte: indiaTime }
+      }).toArray();
+
+      for (const closure of endedClosures) {
+        await StaffClosure.updateOne(
+          { _id: closure._id, status: 'active' },
+          { $set: { status: 'completed', endedAt: indiaTime } }
+        );
+      }
+    } catch (error) {
+      console.error('[CRON-STAFF-CLOSURE-ERROR]', error.message);
     }
   });
 
