@@ -211,20 +211,20 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                     <Scissors size={12} /> Select Services
                   </label>
                 </div>
-                <div className="grid grid-cols-2 gap-2 p-1.5">
+                <div className="grid grid-cols-2 gap-1.5 p-0.5">
                   {services.map(s => (
                     <button
                       key={s._id}
                       onClick={() => toggleService(s._id)}
-                      className={`p-3 rounded-xl border transition-all flex flex-col gap-1 text-left ${formData.serviceIds.includes(s._id)
+                      className={`p-2 rounded-lg border transition-all flex flex-col gap-0.5 text-left ${formData.serviceIds.includes(s._id)
                         ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white shadow-sm'
                         : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
                         }`}
                     >
-                      <span className={`text-[10px] font-black capitalize ${formData.serviceIds.includes(s._id) ? 'text-[#00246b] dark:text-white' : 'text-gray-900 dark:text-white'}`}>
+                      <span className={`text-[10px] font-black capitalize leading-tight ${formData.serviceIds.includes(s._id) ? 'text-[#00246b] dark:text-white' : 'text-gray-900 dark:text-white'}`}>
                         {s.name}
                       </span>
-                      <p className="text-[9px] font-black text-slate-400 capitalize tracking-[0.18em] mt-1">₹{s.price} • {s.duration}m</p>
+                      <p className="text-[8px] font-black text-slate-400 capitalize tracking-[0.15em] mt-0.5">₹{s.price} • {s.duration}m</p>
                     </button>
                   ))}
                 </div>

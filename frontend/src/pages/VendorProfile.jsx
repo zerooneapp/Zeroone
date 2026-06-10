@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
    Save, Plus, X, CheckCircle2, XCircle, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
-   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone
+   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -505,6 +505,14 @@ const VendorProfile = () => {
          isSupport: true,
       },
       {
+         key: 'security',
+         label: 'Security',
+         subtitle: 'Delete Account',
+         icon: Shield,
+         iconBg: 'bg-teal-500/10',
+         iconColor: 'text-teal-500',
+      },
+      {
          key: 'logout',
          label: 'Logout',
          subtitle: 'Sign out of your account',
@@ -512,15 +520,6 @@ const VendorProfile = () => {
          iconBg: 'bg-rose-500/10',
          iconColor: 'text-rose-500',
          isLogout: true,
-      },
-      {
-         key: 'delete',
-         label: 'Delete Account',
-         subtitle: 'Permanently remove partner data',
-         icon: Trash2,
-         iconBg: 'bg-rose-500/10',
-         iconColor: 'text-rose-500',
-         isDelete: true,
       },
    ];
 
@@ -652,7 +651,7 @@ const VendorProfile = () => {
                   <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
                </button>
                <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-                  {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : 'Account Settings'}
+                  {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : 'Account Settings'}
                </h1>
             </div>
          </header>
@@ -1704,6 +1703,45 @@ const VendorProfile = () => {
                               )}
                            </button>
                         </div>
+                     </div>
+                  </motion.section>
+               )}
+
+               {activeSection === 'security' && (
+                  <motion.section
+                     key="security"
+                     initial={{ opacity: 0, x: 24 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     exit={{ opacity: 0, x: 24 }}
+                     transition={{ duration: 0.18 }}
+                     className="space-y-4"
+                  >
+                     <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-gray-800 space-y-6">
+                        <section className="space-y-4">
+                           <div className="flex items-center justify-between px-1">
+                              <label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Danger Zone</label>
+                           </div>
+                           
+                           {/* Warning Box with Red Border */}
+                           <div className="p-5 bg-red-500/5 dark:bg-red-500/5 rounded-2xl border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.02)] space-y-3">
+                              <div className="flex items-center gap-3 text-red-500">
+                                 <AlertTriangle size={20} strokeWidth={2.5} />
+                                 <h3 className="text-[14px] font-black tracking-tight leading-none">Warning</h3>
+                              </div>
+                              <p className="text-[12px] font-semibold text-red-600/80 dark:text-red-400/80 leading-relaxed">
+                                 Deleting your account will permanently remove all of your profile information, bookings, active memberships, saved addresses, and payment methods. This action is irreversible.
+                              </p>
+                           </div>
+
+                           {/* Delete Account Button */}
+                           <button
+                              onClick={() => setShowDeleteConfirm(true)}
+                              className="w-full flex items-center justify-center gap-2.5 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-red-500/30 dark:border-red-500/30 text-red-500 dark:text-red-400 font-black tracking-widest text-[12px] active:scale-95 transition-all shadow-sm"
+                           >
+                              <Trash2 size={16} strokeWidth={3} />
+                              Delete Account
+                           </button>
+                        </section>
                      </div>
                   </motion.section>
                )}
