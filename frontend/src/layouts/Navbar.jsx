@@ -9,6 +9,10 @@ const Navbar = () => {
   const { role, isInitialized } = useAuthStore();
   const [isVisible, setIsVisible] = React.useState(true);
 
+  const isIOS = React.useMemo(() => {
+    return typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }, []);
+
   React.useEffect(() => {
     let maxHeight = window.innerHeight;
 
@@ -69,7 +73,10 @@ const Navbar = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent pointer-events-none">
-      <nav className="w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-6 pointer-events-auto transition-all duration-300 pb-[env(safe-area-inset-bottom)]">
+      <nav className={cn(
+        "w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-6 pointer-events-auto transition-all duration-300 pb-[env(safe-area-inset-bottom)]",
+        isIOS && "pb-[calc(env(safe-area-inset-bottom)+12px)]"
+      )}>
         <div className="flex items-center justify-between max-w-lg mx-auto h-[44px]">
           {navItems.map((item) => (
             <NavLink

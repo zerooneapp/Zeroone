@@ -337,7 +337,7 @@ const VendorDashboard = () => {
   );
 
   return (
-    <div className="min-h-full bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar pb-6">
+    <div className="min-h-full bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar pb-16">
       <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
