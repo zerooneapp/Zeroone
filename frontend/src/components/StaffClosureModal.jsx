@@ -126,7 +126,7 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[220] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[220] flex items-center justify-center p-3 sm:p-4">
           <motion.button
             type="button"
             initial={{ opacity: 0 }}
@@ -140,27 +140,27 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            className="relative z-10 w-full max-w-lg bg-white dark:bg-gray-900 rounded-[2rem] border border-slate-200/70 dark:border-gray-800 shadow-2xl overflow-hidden"
+            className="relative z-10 w-full max-w-lg max-h-[calc(100vh-2rem)] flex flex-col bg-white dark:bg-gray-900 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200/70 dark:border-gray-800 shadow-2xl overflow-hidden"
           >
-            <div className="p-4 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-4">
+            <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-4 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20">
-                  <User size={24} />
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20">
+                  <User size={20} />
                 </div>
                 <div>
                   <p className="text-[9px] font-black capitalize tracking-[0.25em] text-indigo-500">Staff Absence Window</p>
-                  <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-1">Deactivate {staff?.name}</h2>
+                  <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight mt-1">Deactivate {staff?.name}</h2>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 flex items-center justify-center active:scale-90 transition-all"
+                className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 flex items-center justify-center active:scale-90 transition-all"
               >
-                <X size={16} className="text-slate-500 dark:text-gray-400" />
+                <X size={15} className="text-slate-500 dark:text-gray-400" />
               </button>
             </div>
 
-            <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="p-3.5 sm:p-4 space-y-3 sm:space-y-4 flex-1 overflow-y-auto no-scrollbar">
               {/* Active Closures Section */}
               {activeClosures.length > 0 && (
                 <div className="space-y-2">
@@ -186,11 +186,11 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <label className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-2.5">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Start Date</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <CalendarDays size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-2 px-2.5 py-2 sm:py-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
+                    <CalendarDays size={13} className="text-slate-400" />
                     <input
                       type="date"
                       value={form.startDate}
@@ -200,10 +200,10 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
                   </div>
                 </label>
 
-                <label className="space-y-1.5">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Start Time</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <Clock3 size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-2 px-2.5 py-2 sm:py-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
+                    <Clock3 size={13} className="text-slate-400" />
                     <input
                       type="time"
                       value={form.startTime}
@@ -213,10 +213,10 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
                   </div>
                 </label>
 
-                <label className="space-y-1.5">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">End Date</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <CalendarDays size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-2 px-2.5 py-2 sm:py-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
+                    <CalendarDays size={13} className="text-slate-400" />
                     <input
                       type="date"
                       value={form.endDate}
@@ -226,10 +226,10 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
                   </div>
                 </label>
 
-                <label className="space-y-1.5">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">End Time</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <Clock3 size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-2 px-2.5 py-2 sm:py-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
+                    <Clock3 size={13} className="text-slate-400" />
                     <input
                       type="time"
                       value={form.endTime}
@@ -246,8 +246,8 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
                   value={form.reason}
                   onChange={(e) => setForm((prev) => ({ ...prev, reason: e.target.value }))}
                   placeholder="Medical leave, family emergency, etc. Customers will see this reason if their booking is cancelled."
-                  rows={3}
-                  className="w-full px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-[11px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400 resize-none focus:outline-none"
+                  rows={2}
+                  className="w-full px-2.5 py-2 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-[11px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400 resize-none focus:outline-none"
                 />
               </label>
 
@@ -312,7 +312,7 @@ const StaffClosureModal = ({ isOpen, onClose, staff, onCreated }) => {
               )}
             </div>
 
-            <div className="p-4 border-t border-slate-100 dark:border-gray-800 flex items-center justify-end gap-2 bg-slate-50/70 dark:bg-gray-950/40">
+            <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-gray-800 flex items-center justify-end gap-2 bg-slate-50/70 dark:bg-gray-950/40 shrink-0">
               <button
                 onClick={handlePreview}
                 disabled={previewing || creating}

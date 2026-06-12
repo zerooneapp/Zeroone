@@ -25,10 +25,10 @@ const bookingSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'confirmed', 'completed', 'cancelled'], default: 'pending' },
   completedAt: { type: Date },
   cancelReason: { type: String },
-  cancelledByRole: { type: String, enum: ['customer', 'vendor', 'staff', 'admin'] },
+  cancelledByRole: { type: String, enum: ['customer', 'vendor', 'staff', 'admin', 'system'] },
   cancelledAt: { Date },
   rescheduledAt: { Date },
-  rescheduledByRole: { type: String, enum: ['customer', 'vendor', 'staff', 'admin'] },
+  rescheduledByRole: { type: String, enum: ['customer', 'vendor', 'staff', 'admin', 'system'] },
   isReviewed: { type: Boolean, default: false }
 }, { timestamps: true });
 

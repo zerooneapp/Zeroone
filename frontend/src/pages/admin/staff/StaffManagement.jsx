@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
    Search, Filter, RefreshCw, MoreVertical,
    ChevronRight, ChevronDown, User, Phone, Calendar,
-   Shield, CheckCircle, XCircle, Ban,
+   Shield, CheckCircle, XCircle,
    LayoutDashboard, History, Eye, ArrowLeft, BadgeCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,12 +18,10 @@ const StaffManagement = () => {
 
    // Filters & Pagination State
    const [filters, setFilters] = useState({
-      search: '',
-      status: ''
+      search: ''
    });
    const [page, setPage] = useState(1);
    const [totalPages, setTotalPages] = useState(1);
-   const [actionLoadingId, setActionLoadingId] = useState(null);
 
    const fetchStaff = useCallback(async () => {
       try {
@@ -53,27 +51,7 @@ const StaffManagement = () => {
       return () => clearTimeout(timer);
    }, [fetchStaff, filters.search]);
 
-   const handleToggleBlock = async (staffId) => {
-      if (actionLoadingId === staffId) return;
 
-      const previousStaff = [...staffList];
-      setActionLoadingId(staffId);
-
-      // Optimistic UI Update
-      setStaffList(staffList.map(s =>
-         s._id === staffId ? { ...s, isBlocked: !s.isBlocked } : s
-      ));
-
-      try {
-         const res = await api.patch(`/admin/staff/${staffId}/block`);
-         toast.success(res.data.message);
-      } catch (err) {
-         setStaffList(previousStaff);
-         toast.error('Failed to toggle block status');
-      } finally {
-         setActionLoadingId(null);
-      }
-   };
 
    return (
       <div className="space-y-5 pb-20 animate-in fade-in duration-500">
@@ -103,20 +81,7 @@ const StaffManagement = () => {
                      onChange={(e) => { setFilters({ ...filters, search: e.target.value }); setPage(1); }}
                   />
                </div>
-               {['status'].map((f) => (
-                  <div key={f} className="relative group min-w-[120px]">
-                     <select
-                        className="w-full px-3.5 pr-10 h-11 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[11px] font-black capitalize tracking-widest text-slate-500 focus:ring-2 ring-primary/20 outline-none appearance-none cursor-pointer group-hover:bg-slate-100 dark:group-hover:bg-gray-700 transition-all dark:text-slate-300"
-                        value={filters[f]}
-                        onChange={(e) => { setFilters({ ...filters, [f]: e.target.value }); setPage(1); }}
-                     >
-                        <option value="">{f.toUpperCase()} : ALL</option>
-                        <option value="active">ACTIVE</option>
-                        <option value="blocked">BLOCKED</option>
-                     </select>
-                     <ChevronDown size={14} strokeWidth={4} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none group-hover:text-primary transition-colors" />
-                  </div>
-               ))}
+
             </div>
          </div>
 
@@ -135,8 +100,6 @@ const StaffManagement = () => {
                         <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Partner Shop</th>
                         <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500 text-center">Bookings Done</th>
                         <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Joined Date</th>
-                        <th className="px-4 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500">Status</th>
-                        <th className="px-6 py-4 text-[10px] font-black capitalize tracking-[0.2em] text-slate-400 dark:text-slate-500 text-right">Actions</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-gray-800 relative">
@@ -164,7 +127,7 @@ const StaffManagement = () => {
                                        )}
                                     </div>
                                     <div className="leading-tight">
-                                       <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary transition-colors">
+                                       <h4 className="text-[14px] font-black text-slate-900 dark:text-white capitalize tracking-tight group-hover:text-primary dark:group-hover:text-white transition-colors">
                                           {staff.name}
                                        </h4>
                                        <p className="text-[11px] font-black text-slate-500 dark:text-slate-500 capitalize tracking-widest mt-0.5">
@@ -183,32 +146,6 @@ const StaffManagement = () => {
                               </td>
                               <td className="px-4 py-3.5 text-[12px] font-black text-slate-500 dark:text-slate-500 capitalize tracking-tighter">
                                  {new Date(staff.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                              </td>
-                              <td className="px-4 py-3.5 leading-none">
-                                 <span className={cn(
-                                    "text-[10px] font-black capitalize px-2 py-0.5 rounded-md border tracking-tighter",
-                                    staff.isBlocked ? "bg-red-50 text-red-500 border-red-100/50" : "bg-emerald-50 text-emerald-500 border-emerald-100/50"
-                                 )}>
-                                    {staff.isBlocked ? 'Blocked' : 'Active'}
-                                 </span>
-                              </td>
-                              <td className="px-6 py-3.5 text-right">
-                                 <div className="flex items-center justify-end gap-1.5">
-                                    <button
-                                       onClick={() => handleToggleBlock(staff._id)}
-                                       disabled={actionLoadingId === staff._id}
-                                       className={cn(
-                                          "w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-90 border shadow-sm",
-                                          actionLoadingId === staff._id && "opacity-80 animate-pulse",
-                                          staff.isBlocked
-                                             ? "bg-emerald-50 text-emerald-500 border-emerald-100/50"
-                                             : "bg-red-50 text-red-500 border-red-100/50"
-                                       )}
-                                       title={staff.isBlocked ? "Unblock Staff" : "Block Staff"}
-                                    >
-                                       <Ban size={18} strokeWidth={3} />
-                                    </button>
-                                 </div>
                               </td>
                            </motion.tr>
                         ))}

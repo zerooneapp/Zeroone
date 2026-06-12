@@ -1729,7 +1729,7 @@ const VendorProfile = () => {
                                  <h3 className="text-[14px] font-black tracking-tight leading-none">Warning</h3>
                               </div>
                               <p className="text-[12px] font-semibold text-red-600/80 dark:text-red-400/80 leading-relaxed">
-                                 Deleting your account will permanently remove all of your profile information, bookings, active memberships, saved addresses, and payment methods. This action is irreversible.
+                                 Deleting your account will permanently remove all of your partner profile information, shop details, services, team staff, bookings, and earnings history. This action is irreversible.
                               </p>
                            </div>
 

@@ -411,8 +411,8 @@ const CheckoutReview = () => {
       </div>
 
       <div 
-        className="fixed left-0 right-0 p-4 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-gray-800 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 54px)' }}
+        className="fixed left-0 right-0 pt-3 pb-2.5 px-4 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-gray-800 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 48px)' }}
       >
         <div className="max-w-md mx-auto">
           <button

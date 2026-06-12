@@ -164,7 +164,7 @@ const VendorWallet = () => {
     return [...scopedTransactions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   }, [filter, transactions]);
 
-  const isLowBalance = useMemo(() => wallet?.subscription?.currentPlan !== 'trial' && (wallet?.walletBalance || 0) < (wallet?.minimumWalletThreshold || 0), [wallet]);
+  const isLowBalance = useMemo(() => wallet?.subscription?.currentPlan === 'daily' && (wallet?.walletBalance || 0) < (wallet?.minimumWalletThreshold || 0), [wallet]);
   const monthlyPlan = useMemo(() => wallet?.plans?.monthly, [wallet]);
   const dailyPlan = useMemo(() => wallet?.plans?.daily, [wallet]);
   const canUseRazorpay = useMemo(() => Boolean(wallet?.razorpay?.enabled && wallet?.razorpay?.keyId), [wallet]);
