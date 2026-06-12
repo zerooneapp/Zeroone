@@ -796,7 +796,13 @@ const getLoyalCustomers = async (req, res) => {
             $cond: [
               { $ifNull: ["$userId", false] },
               "$userId",
-              "$walkInCustomerPhone"
+              {
+                $cond: [
+                  { $and: [{ $ne: ["$walkInCustomerPhone", ""] }, { $ifNull: ["$walkInCustomerPhone", false] }] },
+                  "$walkInCustomerPhone",
+                  { $ifNull: ["$walkInCustomerName", "$_id"] }
+                ]
+              }
             ]
           },
           bookingCount: { $sum: 1 },
