@@ -1416,6 +1416,14 @@ const deleteVendor = async (req, res) => {
 
     const StaffAvailability = require('../models/StaffAvailability');
     const StaffClosure = require('../models/StaffClosure');
+    const VendorAvailability = require('../models/VendorAvailability');
+    const VendorClosure = require('../models/VendorClosure');
+    const VendorMembershipPlan = require('../models/VendorMembershipPlan');
+    const VendorPromotion = require('../models/VendorPromotion');
+    const WithdrawalRequest = require('../models/WithdrawalRequest');
+    const UserMembership = require('../models/UserMembership');
+    const SlotLock = require('../models/SlotLock');
+    const Cart = require('../models/Cart');
 
     // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
     try {
@@ -1445,7 +1453,15 @@ const deleteVendor = async (req, res) => {
       Booking.deleteMany({ vendorId: req.params.id }),
       Offer.deleteMany({ vendorId: req.params.id }),
       WalletTransaction.deleteMany({ vendorId: req.params.id }),
-      Review.deleteMany({ vendorId: req.params.id })
+      Review.deleteMany({ vendorId: req.params.id }),
+      VendorAvailability.deleteMany({ vendorId: req.params.id }),
+      VendorClosure.deleteMany({ vendorId: req.params.id }),
+      VendorMembershipPlan.deleteMany({ vendorId: req.params.id }),
+      VendorPromotion.deleteMany({ vendorId: req.params.id }),
+      WithdrawalRequest.deleteMany({ vendorId: req.params.id }),
+      UserMembership.deleteMany({ vendorId: req.params.id }),
+      SlotLock.deleteMany({ vendorId: req.params.id }),
+      Cart.deleteMany({ vendorId: req.params.id })
     ]);
 
     res.status(200).json({ message: 'Partner and all associated data deleted successfully' });

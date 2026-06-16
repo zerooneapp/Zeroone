@@ -282,6 +282,8 @@ const deleteStaff = async (req, res) => {
       );
     }
 
+    const SlotLock = require('../models/SlotLock');
+
     // 🧼 Cascading Deletions (Hard Delete)
     await Promise.all([
       // 1. Delete associated User document to prevent any future login
@@ -290,7 +292,9 @@ const deleteStaff = async (req, res) => {
       StaffAvailability.deleteMany({ staffId: staff._id }),
       // 3. Delete closure history
       StaffClosure.deleteMany({ staffId: staff._id }),
-      // 4. Delete the staff profile itself
+      // 4. Delete slot locks
+      SlotLock.deleteMany({ staffId: staff._id }),
+      // 5. Delete the staff profile itself
       Staff.findByIdAndDelete(staff._id)
     ]);
 

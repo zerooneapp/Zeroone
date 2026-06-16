@@ -135,13 +135,15 @@ const updateService = async (vendorId, serviceId, updateData) => {
   return service;
 };
 
-const softDeleteService = async (vendorId, serviceId) => {
-  const service = await Service.findOneAndUpdate(
-    { _id: serviceId, vendorId },
-    { isActive: false, showOnHome: false },
-    { returnDocument: 'after' }
-  );
+const deleteService = async (vendorId, serviceId) => {
+  const service = await Service.findOneAndDelete({ _id: serviceId, vendorId });
   if (service) {
+    const Cart = require('../models/Cart');
+    const VendorMembershipPlan = require('../models/VendorMembershipPlan');
+    await Promise.all([
+      Cart.updateMany({ vendorId }, { $pull: { services: { serviceId } } }),
+      VendorMembershipPlan.updateMany({ vendorId }, { $pull: { services: { serviceId } } })
+    ]);
     await ensureVendorHomeService(vendorId);
     await invalidateSlotCache(vendorId);
   }
@@ -156,6 +158,6 @@ module.exports = {
   createService,
   getVendorServices,
   updateService,
-  softDeleteService,
+  deleteService,
   getServiceById,
 };

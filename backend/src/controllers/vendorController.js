@@ -77,6 +77,10 @@ const registerVendor = async (req, res) => {
       return res.status(400).json({ message: 'Owner name should only contain alphabets and spaces' });
     }
 
+    if (!req.user) {
+      return res.status(401).json({ message: 'User context not found. Please log in again.' });
+    }
+
     const existingVendor = await Vendor.findOne({ ownerId: req.user._id });
     if (existingVendor) return res.status(400).json({ message: 'Partner already exists' });
 
@@ -98,6 +102,10 @@ const registerVendor = async (req, res) => {
 
 const uploadDocs = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User context not found. Please log in again.' });
+    }
+
     const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('ownerId', 'name image');
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     if (!req.files) return res.status(400).json({ message: 'No files' });

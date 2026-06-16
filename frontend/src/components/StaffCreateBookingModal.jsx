@@ -227,7 +227,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                       <button
                         key={s._id}
                         onClick={() => toggleService(s._id)}
-                        className={`p-3 rounded-xl border transition-all flex flex-col gap-1 text-left active:scale-[0.97] ${
+                        className={`py-1.5 px-2.5 pr-7 rounded-xl border transition-all flex flex-col gap-0.5 text-left active:scale-[0.97] relative ${
                           formData.serviceIds.includes(s._id)
                             ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white shadow-sm'
                             : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
@@ -238,11 +238,11 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                         }`}>
                           {s.name}
                         </span>
-                        <p className="text-[9px] font-black text-slate-400 capitalize tracking-[0.18em] mt-1">
+                        <p className="text-[8.5px] font-black text-slate-400 capitalize tracking-[0.15em]">
                           ₹{s.price} · {s.duration}m
                         </p>
                         {formData.serviceIds.includes(s._id) && (
-                          <CheckCircle2 size={12} className="text-[#00246b] dark:text-white mt-0.5" />
+                          <CheckCircle2 size={11} className="absolute bottom-1.5 right-2.5 text-[#00246b] dark:text-white" />
                         )}
                       </button>
                     ))}

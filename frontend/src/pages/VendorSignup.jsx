@@ -79,6 +79,7 @@ const VendorSignup = () => {
 
       // Temporarily set token for subsequent requests without triggering GuestRoute redirect
       if (authRes.data.token) {
+        localStorage.setItem('token', authRes.data.token);
         api.defaults.headers.common['Authorization'] = `Bearer ${authRes.data.token}`;
       }
 

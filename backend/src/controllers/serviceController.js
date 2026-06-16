@@ -2,7 +2,7 @@ const {
   createService, 
   getVendorServices, 
   updateService, 
-  softDeleteService 
+  deleteService: hardDeleteService 
 } = require('../services/serviceService');
 const cloudinary = require('../config/cloudinary');
 
@@ -117,9 +117,9 @@ const patchService = async (req, res) => {
 
 const deleteService = async (req, res) => {
   try {
-    const service = await softDeleteService(req.vendor._id, req.params.id);
+    const service = await hardDeleteService(req.vendor._id, req.params.id);
     if (!service) return res.status(404).json({ message: 'Service not found' });
-    res.status(200).json({ message: 'Service deactivated successfully', service });
+    res.status(200).json({ message: 'Service deleted successfully from db', service });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

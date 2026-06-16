@@ -267,7 +267,7 @@ const StaffDashboard = () => {
 
                         {/* 🔘 FIXED ACTION BAR */}
                         <div className="fixed bottom-20 left-4 right-4 bg-white dark:bg-gray-900 p-2 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-2xl flex gap-2 z-50">
-                           {currentTask.canContact && (
+                           {currentTask.canContact && !currentTask.isWalkIn && !currentTask.walkInCustomerName && (
                               <a href={`tel:${currentTask.userId?.phone}`} className="h-12 w-12 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-white rounded-xl flex items-center justify-center shadow-sm">
                                  <Phone size={20} strokeWidth={3} />
                               </a>
