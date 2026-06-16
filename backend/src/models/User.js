@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
 // Hash password and normalize phone before saving
 userSchema.pre('save', async function () {
   // Normalize Phone
-  if (this.isModified('phone')) {
+  if (this.isModified('phone') && !this.phone.startsWith('DEL_')) {
     let val = this.phone.replace(/\D/g, '');
     if ((val.startsWith('91') || val.startsWith('0')) && val.length > 10) {
       val = val.slice(-10);

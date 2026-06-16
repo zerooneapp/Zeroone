@@ -1,20 +1,25 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const checkVendors = async () => {
+const run = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    const Vendor = require('../src/models/Vendor');
-    const vendors = await Vendor.find({}).lean();
-    console.log(`Total Vendors: ${vendors.length}`);
-    vendors.forEach((v, idx) => {
-      console.log(`[${idx}] shopName: ${v.shopName} | AadhaarFront: ${v.aadhaarFront ? "Yes" : "No"} | AadhaarBack: ${v.aadhaarBack ? "Yes" : "No"} | PAN: ${v.panCard ? "Yes" : "No"} | shopImage: ${v.shopImage ? "Yes" : "No"}`);
-    });
+    console.log('Connected to database:', mongoose.connection.name);
+    
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log('Available collections:', collections.map(c => c.name));
+
+    const vendorsCount = await mongoose.connection.db.collection('vendors').countDocuments();
+    console.log('Total documents in vendors collection:', vendorsCount);
+
+    const sample = await mongoose.connection.db.collection('vendors').find().limit(5).toArray();
+    console.log('Sample vendors:', JSON.stringify(sample, null, 2));
+
     process.exit(0);
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     process.exit(1);
   }
 };
 
-checkVendors();
+run();
