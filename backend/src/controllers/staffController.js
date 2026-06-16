@@ -285,6 +285,17 @@ const deleteStaff = async (req, res) => {
     const SlotLock = require('../models/SlotLock');
     const timestamp = Date.now();
 
+    // 📣 Emit FORCE_LOGOUT socket event to instantly log out the deleted staff member
+    try {
+      const { getIO } = require('../services/socketService');
+      const io = getIO();
+      if (io && staff.userId) {
+        io.to(String(staff.userId)).emit('FORCE_LOGOUT');
+      }
+    } catch (err) {
+      console.error('[Socket emit error in deleteStaff]', err.message);
+    }
+
     // 🧼 Cascading Soft-Deletions
     if (staff.userId) {
       const staffUser = await User.findById(staff.userId);
