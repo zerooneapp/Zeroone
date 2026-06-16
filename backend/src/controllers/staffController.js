@@ -283,22 +283,34 @@ const deleteStaff = async (req, res) => {
     }
 
     const SlotLock = require('../models/SlotLock');
+    const timestamp = Date.now();
 
-    // 🧼 Cascading Deletions (Hard Delete)
+    // 🧼 Cascading Soft-Deletions
+    if (staff.userId) {
+      const staffUser = await User.findById(staff.userId);
+      if (staffUser) {
+        staffUser.isDeleted = true;
+        staffUser.phone = `DEL_${timestamp}_${staffUser.phone}`;
+        staffUser.name = `[Deleted] ${staffUser.name || 'Staff'}`;
+        await staffUser.save();
+      }
+    }
+
+    // Update staff profile
+    staff.isActive = false;
+    staff.isDeleted = true;
+    staff.phone = `DEL_${timestamp}_${staff.phone}`;
+    staff.name = `[Deleted] ${staff.name}`;
+    await staff.save();
+
+    // Clear scheduling and lock configurations only
     await Promise.all([
-      // 1. Delete associated User document to prevent any future login
-      staff.userId ? User.findByIdAndDelete(staff.userId) : Promise.resolve(),
-      // 2. Delete availability tables
       StaffAvailability.deleteMany({ staffId: staff._id }),
-      // 3. Delete closure history
       StaffClosure.deleteMany({ staffId: staff._id }),
-      // 4. Delete slot locks
-      SlotLock.deleteMany({ staffId: staff._id }),
-      // 5. Delete the staff profile itself
-      Staff.findByIdAndDelete(staff._id)
+      SlotLock.deleteMany({ staffId: staff._id })
     ]);
 
-    res.status(200).json({ message: 'Staff permanently deleted and account removed successfully.', staffId: req.params.id });
+    res.status(200).json({ message: 'Staff deleted and account removed successfully.', staffId: req.params.id });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -132,7 +132,7 @@ const onboardStaff = async (vendorId, staffData) => {
 };
 
 const getVendorStaff = async (vendorId, includeInactive = false) => {
-  const filter = { vendorId };
+  const filter = { vendorId, isDeleted: { $ne: true } };
   if (!includeInactive) filter.isActive = true;
   return await Staff.find(filter).populate('services');
 };
