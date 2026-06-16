@@ -238,36 +238,36 @@ const VendorStaff = () => {
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="bg-white dark:bg-gray-900 rounded-[2rem] border border-slate-100 dark:border-gray-800 p-6 w-full max-w-sm shadow-2xl relative overflow-hidden"
+              className="bg-white dark:bg-gray-900 rounded-[1.5rem] border border-slate-100 dark:border-gray-800 p-5 w-full max-w-[280px] shadow-2xl relative overflow-hidden"
             >
-              <div className="text-center space-y-3">
-                <div className="w-16 h-16 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-[1.5rem] flex items-center justify-center mx-auto border border-rose-100 dark:border-rose-900/30">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 animate-pulse">
+              <div className="text-center space-y-2.5">
+                <div className="w-12 h-12 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-xl flex items-center justify-center mx-auto border border-rose-100 dark:border-rose-900/30">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 animate-pulse">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                   </svg>
                 </div>
                 
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Delete Roster Staff</h3>
-                  <p className="text-[11px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-widest">Permanent Action</p>
+                <div className="space-y-0.5">
+                  <h3 className="text-base font-black text-slate-800 dark:text-white leading-tight">Delete Roster Staff</h3>
+                  <p className="text-[9px] font-bold text-slate-400 dark:text-gray-400 uppercase tracking-widest">Permanent Action</p>
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-gray-300 leading-relaxed">
-                  Are you sure you want to permanently delete <span className="font-extrabold text-slate-800 dark:text-white">{deleteConfirmStaff.name}</span>? This will wipe their login profile and reassign all their upcoming bookings to you.
+                <p className="text-[11px] font-bold text-slate-500 dark:text-gray-400 leading-relaxed px-1">
+                  Are you sure you want to delete <span className="font-extrabold text-slate-800 dark:text-white">{deleteConfirmStaff.name}</span>? This will wipe their login profile and reassign all their upcoming bookings to you.
                 </p>
 
-                <div className="pt-4 flex gap-3">
+                <div className="pt-3 flex gap-2.5">
                   <button
                     disabled={isDeleting}
                     onClick={() => setDeleteConfirmStaff(null)}
-                    className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 hover:bg-slate-100 dark:hover:bg-gray-700/80 text-slate-500 dark:text-gray-300 text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 disabled:opacity-50"
+                    className="flex-1 py-2.5 bg-slate-50 dark:bg-gray-800 hover:bg-slate-100 dark:hover:bg-gray-700/80 text-slate-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     disabled={isDeleting}
                     onClick={handleDeleteSubmit}
-                    className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-lg shadow-rose-500/20 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-lg shadow-rose-500/20 disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     {isDeleting ? 'Deleting...' : 'Delete'}
                   </button>
