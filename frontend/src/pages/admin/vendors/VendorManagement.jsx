@@ -482,7 +482,6 @@ const VendorManagement = () => {
                         <Stat label="Orders" value={vendorInsights?.allTime?.totalBookings ?? selectedVendor.totalBookings ?? '0'} />
                         <Stat label="Revenue" value={`Rs ${vendorInsights?.allTime?.totalEarnings ?? selectedVendor.totalEarnings ?? '0'}`} />
                         <Stat label="Reach" value={selectedVendor.engagement?.profileViews || selectedVendor.profileViews || '0'} icon={Eye} />
-                        <Stat label="CTR" value={selectedVendor.engagement?.serviceClicks || selectedVendor.serviceClicks || '0'} icon={MousePointer2} />
                       </div>
                     </Section>
                   </div>
@@ -639,7 +638,7 @@ const VendorManagement = () => {
                           No bookings in range
                         </div>
                       ) : (
-                        vendorInsights.bookings.slice(0, 6).map((booking) => (
+                        vendorInsights.bookings.map((booking) => (
                           <div key={booking._id} className="p-3 rounded-xl bg-white dark:bg-gray-950 border border-slate-100 dark:border-gray-800">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
@@ -674,7 +673,7 @@ const VendorManagement = () => {
                           No revenue in range
                         </div>
                       ) : (
-                        vendorInsights.revenue.slice(0, 6).map((entry) => (
+                        vendorInsights.revenue.map((entry) => (
                           <div key={entry._id} className="p-3 rounded-xl bg-white dark:bg-gray-950 border border-slate-100 dark:border-gray-800 flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">{entry.description}</p>

@@ -148,7 +148,7 @@ const CategoryManagement = () => {
                   cat.isActive ? "bg-emerald-500 shadow-lg shadow-emerald-500/20" : "bg-slate-200"
                 )} />
 
-                <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4 text-slate-500 group-hover:text-primary dark:group-hover:text-white group-hover:bg-slate-900 dark:group-hover:bg-gray-800 transition-all border border-slate-100 dark:border-gray-800 shadow-inner">
+                <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4 text-slate-500 group-hover:text-primary dark:group-hover:text-white group-hover:bg-slate-200 dark:group-hover:bg-gray-700 transition-all border border-slate-100 dark:border-gray-800 shadow-inner">
                   <ImageWithFallback src={cat.image} alt={cat.name} />
                 </div>
 

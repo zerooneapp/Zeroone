@@ -1581,6 +1581,8 @@ const ServiceDetail = () => {
                       <video
                         src={slide.url}
                         controls
+                        controlsList="nodownload noplaybackrate"
+                        disablePictureInPicture
                         autoPlay={idx === lightboxIndex}
                         playsInline
                         className="w-full h-full object-contain select-none"

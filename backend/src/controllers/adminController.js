@@ -20,6 +20,8 @@ const redis = require('../config/redis');
 const Review = require('../models/Review');
 const WalletTransaction = require('../models/WalletTransaction');
 const mongoose = require('mongoose');
+const UserMembership = require('../models/UserMembership');
+const VendorMembershipPlan = require('../models/VendorMembershipPlan');
 
 const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin']);
 const getStaffNotificationTarget = (staff) => staff?._id || null;
@@ -992,16 +994,27 @@ const getVendors = async (req, res) => {
     ]);
     const totalWalletBalance = walletAggregation[0]?.totalWallet || 0;
 
+    const WalletTransaction = require('../models/WalletTransaction');
     const hydratedVendors = await Promise.all(vendors.map(async (v) => {
       const subscriptionState = await getVendorSubscriptionState(v);
-      const bookingStats = await Booking.aggregate([
-        { $match: { vendorId: v._id, status: 'completed' } },
-        { $group: { _id: null, totalBookings: { $sum: 1 }, totalEarnings: { $sum: '$totalPrice' } } }
+      const [bookingStats, membershipStats] = await Promise.all([
+        Booking.aggregate([
+          { $match: { vendorId: v._id, status: 'completed' } },
+          { $group: { _id: null, totalBookings: { $sum: 1 }, totalEarnings: { $sum: '$totalPrice' } } }
+        ]),
+        WalletTransaction.aggregate([
+          { $match: { vendorId: v._id, category: 'membership_revenue', status: 'completed' } },
+          { $group: { _id: null, totalMembershipEarnings: { $sum: '$amount' } } }
+        ])
       ]);
+
+      const totalBookings = bookingStats[0]?.totalBookings || 0;
+      const totalEarnings = (bookingStats[0]?.totalEarnings || 0) + (membershipStats[0]?.totalMembershipEarnings || 0);
+
       return {
         ...v._doc,
-        totalBookings: bookingStats[0]?.totalBookings || 0,
-        totalEarnings: bookingStats[0]?.totalEarnings || 0,
+        totalBookings,
+        totalEarnings,
         subscription: {
           type: subscriptionState.currentPlan,
           isActive: subscriptionState.isActive
@@ -1179,7 +1192,8 @@ const getVendorInsights = async (req, res) => {
       ? moment.tz(to, 'YYYY-MM-DD', 'Asia/Kolkata').endOf('day')
       : now.clone().endOf('day');
 
-    const [bookings, completedBookingsData, allTimeBookings] = await Promise.all([
+    const UserMembership = require('../models/UserMembership');
+    const [bookings, completedBookingsData, allTimeBookings, membershipData, allTimeMembership] = await Promise.all([
       Booking.find({
         vendorId: vendor._id,
         startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
@@ -1193,20 +1207,76 @@ const getVendorInsights = async (req, res) => {
         vendorId: vendor._id,
         status: 'completed',
         startTime: { $gte: startDate.toDate(), $lte: endDate.toDate() }
-      }).select('totalPrice'),
+      }).select('totalPrice startTime'),
       Booking.aggregate([
         { $match: { vendorId: vendor._id, status: 'completed' } },
         { $group: { _id: null, count: { $sum: 1 }, totalRevenue: { $sum: '$totalPrice' } } }
+      ]),
+      UserMembership.find({
+        vendorId: vendor._id,
+        status: { $in: ['active', 'expired'] },
+        startDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+      })
+        .populate('userId', 'name')
+        .populate('planId', 'name price')
+        .lean(),
+      WalletTransaction.aggregate([
+        { $match: { vendorId: vendor._id, category: 'membership_revenue', status: 'completed' } },
+        { $group: { _id: null, totalMembershipRevenue: { $sum: '$amount' } } }
       ])
     ]);
 
-    const totalRevenue = completedBookingsData.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+    const totalServiceRevenue = completedBookingsData.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+    const totalMembershipRevenue = membershipData.reduce((sum, item) => sum + (item.planId?.price || 0), 0);
+    const totalRevenue = totalServiceRevenue + totalMembershipRevenue;
+
     const totalBookings = bookings.length;
     const completedBookings = bookings.filter((booking) => booking.status === 'completed').length;
     const cancelledBookings = bookings.filter((booking) => booking.status === 'cancelled').length;
 
     const allTimeBookingsCount = await Booking.countDocuments({ vendorId: vendor._id });
-    const allTimeEarnings = allTimeBookings.length > 0 ? allTimeBookings[0].totalRevenue : 0;
+    const allTimeEarnings = (allTimeBookings.length > 0 ? allTimeBookings[0].totalRevenue : 0) + (allTimeMembership.length > 0 ? allTimeMembership[0].totalMembershipRevenue : 0);
+
+    const serviceBookings = bookings.map((booking) => ({
+      _id: booking._id,
+      customerName: booking.walkInCustomerName || booking.userId?.name || 'Customer',
+      staffName: booking.staffId?.name || 'Owner',
+      status: booking.status,
+      totalPrice: booking.totalPrice,
+      startTime: booking.startTime,
+      services: booking.services || []
+    }));
+
+    const membershipBookings = membershipData.map((m) => ({
+      _id: m._id,
+      customerName: m.userId?.name || 'Customer',
+      staffName: 'System',
+      status: m.status === 'active' ? 'completed' : m.status,
+      totalPrice: m.planId?.price || 0,
+      startTime: m.startDate,
+      services: [{ name: `Membership: ${m.planId?.name || 'Plan'}` }]
+    }));
+
+    const combinedBookings = [...serviceBookings, ...membershipBookings]
+      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+      .slice(0, 20);
+
+    const serviceRevenueItems = completedBookingsData.map((item) => ({
+      _id: item._id,
+      amount: item.totalPrice || 0,
+      description: 'Service completed',
+      timestamp: item.startTime
+    }));
+    const membershipRevenueItems = membershipData.map((item) => ({
+      _id: item._id,
+      amount: item.planId?.price || 0,
+      description: `Membership purchased: "${item.planId?.name || 'Plan'}"`,
+      timestamp: item.startDate
+    }));
+
+    const combinedRevenueItems = [...serviceRevenueItems, ...membershipRevenueItems]
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 20);
 
     res.status(200).json({
       vendor: {
@@ -1228,21 +1298,8 @@ const getVendorInsights = async (req, res) => {
         cancelledBookings,
         totalRevenue
       },
-      bookings: bookings.map((booking) => ({
-        _id: booking._id,
-        customerName: booking.walkInCustomerName || booking.userId?.name || 'Customer',
-        staffName: booking.staffId?.name || 'Owner',
-        status: booking.status,
-        totalPrice: booking.totalPrice,
-        startTime: booking.startTime,
-        services: booking.services || []
-      })),
-      revenue: completedBookingsData.slice(0, 20).map((item) => ({
-        _id: item._id,
-        amount: item.totalPrice || 0,
-        description: 'Service completed',
-        timestamp: item.startTime
-      }))
+      bookings: combinedBookings,
+      revenue: combinedRevenueItems
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

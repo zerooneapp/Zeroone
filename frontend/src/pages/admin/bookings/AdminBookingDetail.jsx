@@ -126,7 +126,6 @@ const AdminBookingDetail = () => {
                <Section title="Audit Metadata" icon={ShieldAlert}>
                   <div className="space-y-3.5">
                      <InfoItem label="Internal ID" value={`#${booking._id.slice(-8)}`} />
-                     <InfoItem label="Reference Code" value={booking.bookingId ? `#${booking.bookingId}` : 'NONE'} />
                      <InfoItem label="Creation Timestamp" value={new Date(booking.createdAt).toLocaleString()} />
                   </div>
                   <div className="mt-2 p-3.5 bg-slate-50 dark:bg-gray-800/40 rounded-xl border border-slate-100 dark:border-gray-800">

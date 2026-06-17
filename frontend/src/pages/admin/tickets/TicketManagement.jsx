@@ -133,13 +133,32 @@ const TicketManagement = () => {
 
                 <div className="pt-2 border-t border-slate-50 dark:border-gray-800/50 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">
                   <span className="text-slate-400 dark:text-slate-500">Raised by:</span>
-                  <span>{ticket.userId?.name || 'Purged User'}</span>
-                  <span>•</span>
-                  <span>{ticket.userId?.email || ''}</span>
-                  <span>•</span>
-                  <span>{ticket.userId?.phone || ''}</span>
-                  <span>•</span>
-                  <span className="lowercase bg-blue-500/10 text-[#00246b] dark:text-blue-300 px-1.5 py-0.5 rounded text-[8px] tracking-normal">{ticket.userId?.role}</span>
+                  {(() => {
+                    const items = [];
+                    items.push(<span key="name">{ticket.userId?.name || 'Purged User'}</span>);
+                    if (ticket.userId?.email) {
+                      items.push(<span key="email">{ticket.userId.email}</span>);
+                    }
+                    if (ticket.userId?.phone) {
+                      items.push(<span key="phone">{ticket.userId.phone}</span>);
+                    }
+                    if (ticket.userId?.role) {
+                      items.push(
+                        <span key="role" className="lowercase bg-blue-500/10 text-[#00246b] dark:text-blue-300 px-1.5 py-0.5 rounded text-[8px] tracking-normal">
+                          {ticket.userId.role}
+                        </span>
+                      );
+                    }
+                    
+                    const rendered = [];
+                    items.forEach((item, idx) => {
+                      rendered.push(item);
+                      if (idx < items.length - 1) {
+                        rendered.push(<span key={`sep-${idx}`}>•</span>);
+                      }
+                    });
+                    return rendered;
+                  })()}
                 </div>
               </div>
 
