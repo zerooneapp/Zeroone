@@ -90,7 +90,7 @@ const VendorLayout = () => {
   return (
     <div className={cn(
       "min-h-screen w-full bg-slate-50 dark:bg-gray-950 font-sans flex flex-col sm:pb-0",
-      isIOS ? "pb-[62px]" : "pb-[calc(58px+env(safe-area-inset-bottom))]"
+      isIOS ? "pb-[50px]" : "pb-[calc(58px+env(safe-area-inset-bottom))]"
     )}>
       <div 
         ref={scrollRef}
@@ -105,7 +105,7 @@ const VendorLayout = () => {
         <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
           <nav className={cn(
             "w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-5px_15px_rgba(0,0,0,0.01)] px-6",
-            isIOS ? "pb-1" : "pb-[env(safe-area-inset-bottom)]"
+            isIOS ? "-mb-2 pb-0" : "pb-[env(safe-area-inset-bottom)]"
           )}>
             <div className="flex items-center justify-between max-w-4xl mx-auto h-[50px]">
               {menuItems.map((item) => {
