@@ -21,7 +21,7 @@ const VendorSignup = () => {
   const setCredentials = useAuthStore(state => state.setCredentials);
 
   const { formData, setFormData, step, setStep, files, setFile, reset } = useSignupStore();
-  
+
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
 
@@ -436,25 +436,25 @@ const VendorSignup = () => {
 
               <div className="space-y-3">
                 {formData.serviceMode === 'shop' && (
-                <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Facade Image</p>
-                  <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      {files.shopImage ? (
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
-                          <img src={URL.createObjectURL(files.shopImage)} alt="Shop" className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                          <Camera className="text-gray-300" size={18} />
-                        </div>
-                      )}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{files.shopImage ? 'SHOP IMAGE READY' : 'ADD FRONT PHOTO'}</p>
-                    </div>
-                    <ArrowRight size={14} className="text-gray-300" />
-                    <input type="file" className="hidden" onChange={(e) => setFile('shopImage', e.target.files[0])} accept=".jpg,.jpeg,.png" />
-                  </label>
-                </div>
+                  <div className="space-y-1.5">
+                    <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Facade Image</p>
+                    <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        {files.shopImage ? (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
+                            <img src={URL.createObjectURL(files.shopImage)} alt="Shop" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                            <Camera className="text-gray-300" size={18} />
+                          </div>
+                        )}
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{files.shopImage ? 'SHOP IMAGE READY' : 'ADD FRONT PHOTO'}</p>
+                      </div>
+                      <ArrowRight size={14} className="text-gray-300" />
+                      <input type="file" className="hidden" onChange={(e) => setFile('shopImage', e.target.files[0])} accept=".jpg,.jpeg,.png" />
+                    </label>
+                  </div>
                 )}
 
                 <div className="space-y-1.5">

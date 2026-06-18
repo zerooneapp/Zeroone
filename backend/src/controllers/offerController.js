@@ -15,8 +15,14 @@ const addOffer = async (req, res) => {
     if (discountType === 'percentage' && value > 100) {
       return res.status(400).json({ message: 'Percentage discount cannot exceed 100%' });
     }
-    if (new Date(expiryDate) < new Date()) {
-      return res.status(400).json({ message: 'Expiry date must be in the future' });
+    let parsedExpiry = null;
+    if (expiryDate) {
+      parsedExpiry = new Date(expiryDate);
+      parsedExpiry.setHours(23, 59, 59, 999);
+      
+      if (parsedExpiry < new Date()) {
+        return res.status(400).json({ message: 'Expiry date must be in the future' });
+      }
     }
 
     const offer = await createOffer(req.vendor._id, {
@@ -24,7 +30,7 @@ const addOffer = async (req, res) => {
       discountType,
       value,
       serviceIds,
-      expiryDate,
+      expiryDate: parsedExpiry,
       minPurchaseAmount,
       maxDiscountLimit
     });

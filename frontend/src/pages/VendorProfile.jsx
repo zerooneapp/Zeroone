@@ -1721,7 +1721,7 @@ const VendorProfile = () => {
                            <div className="flex items-center justify-between px-1">
                               <label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Danger Zone</label>
                            </div>
-                           
+
                            {/* Warning Box with Red Border */}
                            <div className="p-5 bg-red-500/5 dark:bg-red-500/5 rounded-2xl border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.02)] space-y-3">
                               <div className="flex items-center gap-3 text-red-500">
@@ -1856,7 +1856,7 @@ const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef 
    } else if (type === 'close') {
       hours = p === 'AM' ? ['12'] : ['06', '07', '08', '09', '10', '11'];
    }
-   
+
    const minutes = (p === 'AM' && h === '12') ? ['00'] : allMinutes;
 
    const handleConfirm = () => {
