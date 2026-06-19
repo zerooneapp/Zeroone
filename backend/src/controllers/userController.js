@@ -178,9 +178,15 @@ const toggleFavorite = async (req, res) => {
 
 const getFavorites = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('favoriteVendors', 'shopName address shopImage rating totalReviews');
+    const user = await User.findById(req.user._id).populate({
+      path: 'favoriteVendors',
+      select: 'shopName address shopImage rating totalReviews isDeleted status'
+    });
     if (!user) return res.status(200).json([]);
-    res.status(200).json(user.favoriteVendors || []);
+    const activeFavorites = (user.favoriteVendors || []).filter(
+      vendor => vendor && !vendor.isDeleted && vendor.status !== 'deleted'
+    );
+    res.status(200).json(activeFavorites);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
