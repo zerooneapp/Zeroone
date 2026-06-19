@@ -406,7 +406,7 @@ const ServiceDetail = () => {
     }
 
     if (!vendor?._id || services.length === 0) {
-      setServicePricing({});
+      setServicePricing(prev => Object.keys(prev).length === 0 ? prev : {});
       return;
     }
 
