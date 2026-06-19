@@ -83,7 +83,7 @@ const MyBookings = () => {
   };
 
   if (loading) return (
-    <div className="p-5 space-y-6 pt-[64px]">
+    <div className="p-5 space-y-6 pt-[112px]">
       <div className="h-10 w-48 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />
       <div className="flex gap-2">
         {[1, 2, 3].map(i => <div key={i} className="h-10 w-24 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />)}

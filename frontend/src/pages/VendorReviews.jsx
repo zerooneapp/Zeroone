@@ -74,7 +74,7 @@ const VendorReviews = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 p-4 pt-5 space-y-3">
+      <div className="min-h-screen bg-white dark:bg-gray-950 p-4 pt-[112px] space-y-3">
         <div className="h-8 w-36 rounded-xl bg-slate-100 dark:bg-gray-900 animate-pulse" />
         <div className="h-16 rounded-2xl bg-slate-100 dark:bg-gray-900 animate-pulse" />
         {[1, 2, 3].map((item) => (
