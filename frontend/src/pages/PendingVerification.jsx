@@ -30,7 +30,7 @@ const PendingVerification = () => {
 
                 const vendorStatus = res.data?.status;
 
-                if (['active', 'approved', 'inactive'].includes(vendorStatus)) {
+                if (['active', 'approved'].includes(vendorStatus)) {
                     active = false;
                     if (intervalId) clearInterval(intervalId);
 

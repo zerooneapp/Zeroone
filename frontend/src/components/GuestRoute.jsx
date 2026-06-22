@@ -11,7 +11,7 @@ const GuestRoute = ({ children }) => {
     const dashboardMap = {
       admin: '/admin/dashboard',
       super_admin: '/admin/dashboard',
-      vendor: (user?.status === 'approved' || user?.status === 'active') ? '/vendor/dashboard' : '/vendor-pending',
+      vendor: (user?.status === 'approved' || user?.status === 'active' || user?.status === 'inactive') ? '/vendor/dashboard' : '/vendor-pending',
       staff: '/staff',
       customer: '/'
     };
