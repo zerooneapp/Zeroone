@@ -17,7 +17,8 @@ const VendorSignup = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { phone: statePhone } = location.state || {};
-  const phone = statePhone || sessionStorage.getItem('pendingPhone');
+  const { user } = useAuthStore();
+  const phone = statePhone || sessionStorage.getItem('pendingPhone') || user?.phone;
   const setCredentials = useAuthStore(state => state.setCredentials);
 
   const { formData, setFormData, step, setStep, files, setFile, reset } = useSignupStore();
@@ -26,6 +27,7 @@ const VendorSignup = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
+    reset();
     if (!phone) {
       navigate('/vendor-login');
       return;
@@ -39,7 +41,7 @@ const VendorSignup = () => {
       }
     };
     fetchCategories();
-  }, [phone, navigate]);
+  }, [phone, navigate, reset]);
 
   const handleNext = () => {
     if (step === 1 && (!formData.shopName || !formData.ownerName || !formData.category || !formData.serviceMode)) {
@@ -64,7 +66,10 @@ const VendorSignup = () => {
       return toast.error('Please upload shop facade image');
     }
     if (!formData.address) return toast.error('Please enter shop address');
-    if (!formData.location) return toast.error('Please lock your GPS location');
+    if (!formData.location) {
+      // Fallback: If address is entered manually without GPS detection, assign default Indore coordinates to prevent blocking submission.
+      formData.location = { type: 'Point', coordinates: [75.8577, 22.7196] };
+    }
     if (!files.vendorPhoto) return toast.error('Please upload partner profile photo');
 
     setLoading(true);
@@ -84,7 +89,8 @@ const VendorSignup = () => {
       }
 
       // 2. Register Vendor Record
-      await api.post('/vendor/register', formData);
+      const vendorRes = await api.post('/vendor/register', formData);
+      const newVendorId = vendorRes.data?._id;
 
       // 3. Upload Media
       const mediaData = new FormData();
@@ -97,7 +103,10 @@ const VendorSignup = () => {
       if (files.aadhaarBack) mediaData.append('aadhaarBack', files.aadhaarBack);
 
       await api.post('/vendor/upload-docs', mediaData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'x-vendor-id': newVendorId 
+        }
       });
 
       // 🚀 CRITICAL: Update Auth Store only AFTER all API calls succeed

@@ -35,7 +35,8 @@ const userSchema = new mongoose.Schema({
     region: { type: String, default: 'India' }
   },
   otp: { type: String },
-  otpExpires: { type: Date }
+  otpExpires: { type: Date },
+  lastActiveVendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', default: null }
 }, { timestamps: true });
 
 // Hash password and normalize phone before saving

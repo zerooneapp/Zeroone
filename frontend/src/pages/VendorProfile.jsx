@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
-   Save, Plus, X, CheckCircle2, XCircle, ChevronRight, LayoutGrid, Sun, Moon, LogOut,
+   Save, Plus, X, CheckCircle2, XCircle, ChevronRight, ChevronDown, LayoutGrid, Sun, Moon, LogOut,
    History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,7 +19,11 @@ const VendorProfile = () => {
    const navigate = useNavigate();
    const [searchParams, setSearchParams] = useSearchParams();
    const activeSection = searchParams.get('section'); // null | 'basic' | 'media' etc
-   const { logout } = useAuthStore();
+   const { user, logout } = useAuthStore();
+   const [isSwitchBottomSheetOpen, setIsSwitchBottomSheetOpen] = useState(false);
+   const currentShopId = localStorage.getItem('activeVendorId') || user?.lastActiveVendorId;
+   const currentShop = user?.shops?.find(s => s._id === currentShopId) || user?.shops?.[0];
+   const currentShopName = currentShop?.shopName;
    const [loading, setLoading] = useState(false);
    const [pickerOpen, setPickerOpen] = useState(null); // null | 'start' | 'end'
    const pickerRef = useRef(null);
@@ -650,9 +654,19 @@ const VendorProfile = () => {
                >
                   <ArrowLeft size={20} className="text-slate-700 dark:text-white" />
                </button>
-               <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-                  {activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : 'Account Settings'}
-               </h1>
+               {!activeSection ? (
+                   <button
+                      onClick={() => setIsSwitchBottomSheetOpen(true)}
+                      className="flex items-center gap-1 text-base font-black text-gray-900 dark:text-white tracking-tight active:opacity-75 transition-opacity"
+                   >
+                      <span>{currentShopName || 'Account Settings'}</span>
+                      <ChevronDown size={16} strokeWidth={3} className="text-slate-400 mt-0.5" />
+                   </button>
+                ) : (
+                   <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
+                      {activeSection === 'switch_shop' ? 'Switch Shop' : activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : 'Account Settings'}
+                   </h1>
+                )}
             </div>
          </header>
 
@@ -1834,6 +1848,109 @@ const VendorProfile = () => {
                   </motion.div>
                </div>
             )}
+
+             {/* Instagram-style Switch Account Bottom Sheet */}
+             {isSwitchBottomSheetOpen && (
+                <div className="fixed inset-0 z-[200] flex items-end justify-center">
+                   {/* Backdrop */}
+                   <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setIsSwitchBottomSheetOpen(false)}
+                      className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                   />
+                   
+                   {/* Bottom Sheet Panel */}
+                   <motion.div
+                      initial={{ y: '100%' }}
+                      animate={{ y: 0 }}
+                      exit={{ y: '100%' }}
+                      transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+                      className="w-full max-w-md bg-white dark:bg-gray-900 rounded-t-[30px] overflow-hidden shadow-2xl relative z-[210] border-t border-slate-100 dark:border-gray-800 pb-[env(safe-area-inset-bottom)]"
+                   >
+                      {/* Drag Indicator Handle */}
+                      <div className="w-12 h-1 bg-slate-200 dark:bg-gray-800 rounded-full mx-auto my-3.5" />
+                      
+                      <div className="px-6 pb-6 pt-2 space-y-4">
+                         <div className="flex items-center justify-between pb-3 border-b border-slate-50 dark:border-gray-800/50">
+                            <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.15em]">Switch Account</h3>
+                            <button 
+                               onClick={() => setIsSwitchBottomSheetOpen(false)}
+                               className="text-[10px] font-black text-[#00246b] dark:text-white uppercase tracking-wider hover:opacity-75 transition-opacity"
+                            >
+                               Close
+                            </button>
+                         </div>
+                         
+                         {/* Shop list */}
+                         <div className="space-y-1.5 max-h-80 overflow-y-auto no-scrollbar">
+                            {user?.shops?.map((shop) => {
+                               const isSelected = shop._id === currentShopId;
+                               return (
+                                  <button
+                                     key={shop._id}
+                                     onClick={async () => {
+                                        try {
+                                           await api.patch('/auth/switch-shop', { vendorId: shop._id });
+                                           localStorage.setItem('activeVendorId', shop._id);
+                                           const updatedUser = { ...user, lastActiveVendorId: shop._id };
+                                           useAuthStore.getState().updateUser(updatedUser);
+                                           toast.success('Switched successfully');
+                                           setIsSwitchBottomSheetOpen(false);
+                                           window.location.reload();
+                                        } catch (err) {
+                                           toast.error('Failed to switch shop');
+                                        }
+                                     }}
+                                     className={cn(
+                                        "w-full flex items-center justify-between p-3.5 rounded-2xl transition-all active:scale-[0.98]",
+                                        isSelected 
+                                           ? "bg-slate-50 dark:bg-white/5" 
+                                           : "hover:bg-slate-50/50 dark:hover:bg-white/5/50"
+                                     )}
+                                  >
+                                     <div className="flex items-center gap-3.5">
+                                        <div className="w-11 h-11 rounded-full bg-[#00246b]/5 dark:bg-white/5 border border-slate-100 dark:border-gray-800 overflow-hidden flex items-center justify-center shrink-0">
+                                           {shop.featuredImage || shop.shopImage ? (
+                                              <img src={shop.featuredImage || shop.shopImage} alt={shop.shopName} className="w-full h-full object-cover" />
+                                           ) : (
+                                              <Store className="text-slate-400" size={16} />
+                                           )}
+                                        </div>
+                                        <span className="text-[12px] font-black uppercase tracking-wider text-slate-800 dark:text-white leading-none">
+                                           {shop.shopName}
+                                        </span>
+                                     </div>
+                                     {isSelected && (
+                                        <div className="w-5 h-5 bg-[#00246b] dark:bg-white rounded-full flex items-center justify-center">
+                                           <CheckCircle2 size={12} className="text-white dark:text-gray-950" />
+                                        </div>
+                                     )}
+                                  </button>
+                               );
+                            })}
+                         </div>
+                         
+                         {/* Add Account Option */}
+                         <button
+                            onClick={() => {
+                               setIsSwitchBottomSheetOpen(false);
+                               navigate('/vendor-signup');
+                            }}
+                            className="w-full flex items-center gap-3.5 p-3.5 hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all border border-dashed border-slate-200 dark:border-gray-800 mt-2"
+                         >
+                            <div className="w-11 h-11 rounded-full bg-slate-50 dark:bg-gray-850 flex items-center justify-center text-slate-400 dark:text-slate-500 shrink-0">
+                               <Plus size={20} />
+                            </div>
+                            <span className="text-[12px] font-black uppercase tracking-wider text-[#00246b] dark:text-blue-400">
+                               Add New Shop
+                            </span>
+                         </button>
+                      </div>
+                   </motion.div>
+                </div>
+             )}
          </AnimatePresence>
       </div>
    );

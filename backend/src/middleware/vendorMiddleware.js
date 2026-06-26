@@ -6,10 +6,29 @@ const isActiveVendor = async (req, res, next) => {
     if (!req.user) {
       return res.status(403).json({ message: 'Merchant access required. Staff are restricted from this module.' });
     }
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
     
+    let activeVendorId = req.headers['x-vendor-id'];
+    if (!activeVendorId) {
+      activeVendorId = req.user.lastActiveVendorId;
+    }
+    
+    // Fallback: If still not found, fetch the first shop owned by this user
+    if (!activeVendorId) {
+      const fallbackVendor = await Vendor.findOne({ ownerId: req.user._id, isDeleted: false });
+      if (fallbackVendor) {
+        activeVendorId = fallbackVendor._id;
+        req.user.lastActiveVendorId = activeVendorId;
+        await req.user.save();
+      }
+    }
+
+    if (!activeVendorId) {
+      return res.status(400).json({ message: 'x-vendor-id header is required for merchant context' });
+    }
+
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) {
-      return res.status(404).json({ message: 'Vendor profile not found' });
+      return res.status(403).json({ message: 'Vendor profile not found or access denied' });
     }
 
     // Real-time status re-evaluation (Fallbacks for mid-day expiry/balance drops)
@@ -26,6 +45,7 @@ const isActiveVendor = async (req, res, next) => {
       });
     }
 
+    req.activeVendorId = vendor._id;
     req.vendor = vendor;
     next();
   } catch (error) {
@@ -38,10 +58,29 @@ const isApprovedVendor = async (req, res, next) => {
     if (!req.user) {
       return res.status(403).json({ message: 'Merchant access required.' });
     }
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
     
+    let activeVendorId = req.headers['x-vendor-id'];
+    if (!activeVendorId) {
+      activeVendorId = req.user.lastActiveVendorId;
+    }
+    
+    // Fallback: If still not found, fetch the first shop owned by this user
+    if (!activeVendorId) {
+      const fallbackVendor = await Vendor.findOne({ ownerId: req.user._id, isDeleted: false });
+      if (fallbackVendor) {
+        activeVendorId = fallbackVendor._id;
+        req.user.lastActiveVendorId = activeVendorId;
+        await req.user.save();
+      }
+    }
+
+    if (!activeVendorId) {
+      return res.status(400).json({ message: 'x-vendor-id header is required for merchant context' });
+    }
+
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) {
-      return res.status(404).json({ message: 'Vendor profile not found' });
+      return res.status(403).json({ message: 'Vendor profile not found or access denied' });
     }
 
     if (vendor.status === 'pending') {
@@ -52,6 +91,7 @@ const isApprovedVendor = async (req, res, next) => {
       return res.status(403).json({ message: `Vendor access restricted. Current status: ${vendor.status}` });
     }
 
+    req.activeVendorId = vendor._id;
     req.vendor = vendor;
     next();
   } catch (error) {

@@ -10,8 +10,9 @@ const {
   getImpactedBookings
 } = require('../services/staffClosureService');
 
-const getVendorContext = async (userId) => {
-  const vendor = await Vendor.findOne({ ownerId: userId });
+const getVendorContext = async (req) => {
+  const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+  const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id }) || await Vendor.findOne({ ownerId: req.user._id });
   if (!vendor) {
     throw new Error('Vendor not found');
   }
@@ -40,7 +41,7 @@ const mapClosureResponse = async (closure, vendor) => {
 
 const previewStaffClosure = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const { staffId, startTime, endTime, reason } = req.body;
     
     const staff = await Staff.findOne({ _id: staffId, vendorId: vendor._id });
@@ -220,7 +221,7 @@ const autoReassignOrCancelStaffBookings = async (vendorId, absentStaffId, start,
 
 const createStaffClosure = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const { staffId, startTime, endTime, reason } = req.body;
     
     const staff = await Staff.findOne({ _id: staffId, vendorId: vendor._id });
@@ -273,7 +274,7 @@ const createStaffClosure = async (req, res) => {
 
 const listStaffClosures = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const now = new Date();
     const closures = await StaffClosure.find({
       vendorId: vendor._id,
@@ -293,7 +294,7 @@ const listStaffClosures = async (req, res) => {
 
 const endStaffClosure = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const closure = await StaffClosure.findOne({
       _id: req.params.id,
       vendorId: vendor._id,

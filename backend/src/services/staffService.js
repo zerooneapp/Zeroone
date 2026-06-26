@@ -64,8 +64,6 @@ const ensureOwnerStaff = async (vendorId) => {
   if ((!canonicalOwner.services || canonicalOwner.services.length === 0) && currentServices.length > 0) {
     canonicalOwner.services = currentServices;
   }
-  await canonicalOwner.save();
-
   const duplicateIds = ownerCandidates
     .filter((staff) => staff._id.toString() !== canonicalOwner._id.toString())
     .map((staff) => staff._id);
@@ -81,6 +79,8 @@ const ensureOwnerStaff = async (vendorId) => {
       }
     );
   }
+
+  await canonicalOwner.save();
 
   await invalidateSlotCache(vendorId);
   return canonicalOwner;

@@ -98,6 +98,9 @@ export const useAuthStore = create(
               user: needsRegistration ? null : res.data
             });
             localStorage.setItem('token', token);
+            if (res.data.lastActiveVendorId) {
+              localStorage.setItem('activeVendorId', res.data.lastActiveVendorId);
+            }
             if (role === 'vendor' && !needsRegistration) await get().syncVendorStatus();
           }
 
@@ -139,6 +142,22 @@ export const useAuthStore = create(
 
       syncVendorStatus: async () => {
         try {
+          const userObj = get().user;
+          const activeVendorId = localStorage.getItem('activeVendorId') || userObj?.lastActiveVendorId;
+          const activeShop = userObj?.shops?.find(s => s._id === activeVendorId) || userObj?.shops?.[0];
+          
+          if (activeShop && ['pending', 'rejected', 'blocked', 'inactive'].includes(activeShop.status)) {
+            set({
+              vendorStatus: {
+                isActive: false,
+                currentPlan: null,
+                wallet: 0,
+                serviceLevel: activeShop.serviceLevel || 'standard'
+              }
+            });
+            return;
+          }
+
           const res = await api.get('/vendor/dashboard');
           const { subscription, walletBalance } = res.data;
           set({
@@ -197,7 +216,10 @@ export const useAuthStore = create(
             isAuthenticated: true
           });
 
-          if (res.data.role === 'vendor' && res.data.status !== undefined) {
+          if (res.data.role === 'vendor') {
+            if (res.data.lastActiveVendorId) {
+              localStorage.setItem('activeVendorId', res.data.lastActiveVendorId);
+            }
             get().syncVendorStatus();
           }
         } catch (err) {

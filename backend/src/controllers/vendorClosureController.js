@@ -8,8 +8,9 @@ const {
   autoReassignOrCancelImpactedBookings
 } = require('../services/vendorClosureService');
 
-const getVendorContext = async (userId) => {
-  const vendor = await Vendor.findOne({ ownerId: userId });
+const getVendorContext = async (req) => {
+  const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+  const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id }) || await Vendor.findOne({ ownerId: req.user._id });
   if (!vendor) {
     throw new Error('Vendor not found');
   }
@@ -36,7 +37,7 @@ const mapClosureResponse = async (closure, vendor) => {
 
 const previewClosure = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const { startTime, endTime, reason } = req.body;
     const { start, end } = normalizeClosureWindow(startTime, endTime);
     const overlappingClosures = await getOverlappingClosures(vendor._id, start, end);
@@ -64,7 +65,7 @@ const previewClosure = async (req, res) => {
 
 const createClosure = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const { startTime, endTime, reason } = req.body;
     const { start, end } = normalizeClosureWindow(startTime, endTime);
     const overlappingClosures = await getOverlappingClosures(vendor._id, start, end);
@@ -110,7 +111,7 @@ const createClosure = async (req, res) => {
 
 const listActiveClosures = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const now = new Date();
     const closures = await VendorClosure.find({
       vendorId: vendor._id,
@@ -131,7 +132,7 @@ const listActiveClosures = async (req, res) => {
 
 const endClosure = async (req, res) => {
   try {
-    const vendor = await getVendorContext(req.user._id);
+    const vendor = await getVendorContext(req);
     const closure = await VendorClosure.findOne({
       _id: req.params.id,
       vendorId: vendor._id,

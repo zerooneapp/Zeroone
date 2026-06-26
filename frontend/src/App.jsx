@@ -221,8 +221,8 @@ function App() {
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/vendor-login" element={<VendorLogin />} />
-          <Route path="/vendor-signup" element={<VendorSignup />} />
         </Route>
+        <Route path="/vendor-signup" element={<VendorSignup />} />
         <Route path="/vendor-verification" element={<VendorVerification />} />
         <Route path="/vendor-pending" element={<PendingVerification />} />
 

@@ -55,7 +55,8 @@ exports.getVendorPlans = async (req, res) => {
     let vendorDoc = req.vendor;
     if (!vendorDoc && req.user) {
       const Vendor = require('../models/Vendor');
-      vendorDoc = await Vendor.findOne({ ownerId: req.user._id });
+      const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+      vendorDoc = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id }) || await Vendor.findOne({ ownerId: req.user._id });
     }
     const isVendorFetchingOwn = vendorDoc && String(vendorDoc._id) === String(vendorId);
     
@@ -436,7 +437,8 @@ exports.updateMembershipStatus = async (req, res) => {
     if (!membership) return res.status(404).json({ message: 'Request not found' });
 
     // Verify vendor ownership
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor || membership.vendorId.toString() !== vendor._id.toString()) {
       return res.status(403).json({ message: 'Unauthorized to manage this request' });
     }

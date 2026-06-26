@@ -81,8 +81,8 @@ const registerVendor = async (req, res) => {
       return res.status(401).json({ message: 'User context not found. Please log in again.' });
     }
 
-    const existingVendor = await Vendor.findOne({ ownerId: req.user._id });
-    if (existingVendor) return res.status(400).json({ message: 'Partner already exists' });
+    const existingShop = await Vendor.findOne({ ownerId: req.user._id, shopName });
+    if (existingShop) return res.status(400).json({ message: 'A shop with this name already exists under your account' });
 
     console.log('[DEBUG] Registering Vendor for user:', req.user._id);
     const vendor = await Vendor.create({
@@ -106,7 +106,13 @@ const uploadDocs = async (req, res) => {
       return res.status(401).json({ message: 'User context not found. Please log in again.' });
     }
 
-    const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('ownerId', 'name image');
+    const activeVendorId = req.headers['x-vendor-id'] || req.user.lastActiveVendorId;
+    let query = { ownerId: req.user._id };
+    if (activeVendorId) {
+      query._id = activeVendorId;
+    }
+
+    const vendor = await Vendor.findOne(query).populate('ownerId', 'name image');
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     if (!req.files) return res.status(400).json({ message: 'No files' });
 
@@ -195,7 +201,13 @@ const uploadDocs = async (req, res) => {
 
 const getVendorProfile = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('category', 'name');
+    const activeVendorId = req.activeVendorId || req.user?.lastActiveVendorId;
+    let vendor = null;
+    if (activeVendorId) {
+      vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id }).populate('category', 'name');
+    } else {
+      vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('category', 'name');
+    }
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     res.status(200).json(vendor);
   } catch (error) { res.status(500).json({ message: error.message }); }
@@ -366,7 +378,7 @@ const getNearbyVendors = async (req, res) => {
 const updateShopStatus = async (req, res) => {
   try {
     const { isShopOpen, isClosedToday, closedDates } = req.body;
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     if (isShopOpen !== undefined) vendor.isShopOpen = isShopOpen;
@@ -380,7 +392,7 @@ const updateShopStatus = async (req, res) => {
 
 const createOffer = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     const offer = await Offer.create({ ...req.body, vendorId: vendor._id });
     res.status(201).json(offer);
   } catch (error) { res.status(400).json({ message: error.message }); }
@@ -388,7 +400,7 @@ const createOffer = async (req, res) => {
 
 const getOffers = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     const offers = await Offer.find({ vendorId: vendor._id }).lean();
     res.status(200).json(offers);
   } catch (error) { res.status(500).json({ message: error.message }); }
@@ -396,7 +408,7 @@ const getOffers = async (req, res) => {
 
 const updateOffer = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     const offer = await Offer.findOneAndUpdate({ _id: req.params.id, vendorId: vendor._id }, req.body, { returnDocument: 'after' });
     res.status(200).json(offer);
   } catch (error) { res.status(400).json({ message: error.message }); }
@@ -404,7 +416,7 @@ const updateOffer = async (req, res) => {
 
 const getVendorBookings = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     const { from, to, status } = req.query;
     const filter = { vendorId: vendor._id };
 
@@ -469,7 +481,9 @@ const getVendorBookings = async (req, res) => {
 
 const getVendorDashboard = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id }).populate('ownerId', 'name image phone');
+    const activeVendorId = req.activeVendorId || req.user?.lastActiveVendorId;
+    if (!activeVendorId) return res.status(400).json({ message: 'No active vendor context' });
+    const vendor = await Vendor.findById(activeVendorId).populate('ownerId', 'name image phone');
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const todayStart = moment().tz('Asia/Kolkata').startOf('day').toDate();
@@ -629,7 +643,7 @@ const getVendorDashboard = async (req, res) => {
 
 const getVendorTransactions = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const { from, to } = req.query;
@@ -673,7 +687,7 @@ const getVendorDetail = async (req, res) => {
 const updateShopProfile = async (req, res) => {
   try {
     const { workingHours, shopName, address, location, featuredImage } = req.body;
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     if (workingHours) {
@@ -691,7 +705,7 @@ const updateShopProfile = async (req, res) => {
 
 const createWalkIn = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const { name, phone, staffId, services, startTime, totalPrice, totalDuration } = req.body;
@@ -734,7 +748,7 @@ const createWalkIn = async (req, res) => {
 const createManualBooking = async (req, res) => {
   try {
     const { name, phone, serviceIds, staffId, startTime, type } = req.body;
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     const vendorId = vendor._id;
 
@@ -793,7 +807,7 @@ const createManualBooking = async (req, res) => {
 
 const getLoyalCustomers = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const loyalCustomers = await Booking.aggregate([
@@ -846,7 +860,7 @@ const getLoyalCustomers = async (req, res) => {
 const deleteGalleryImage = async (req, res) => {
   try {
     const { imageUrl } = req.body;
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     vendor.galleryImages = (vendor.galleryImages || []).filter(img => img !== imageUrl);
@@ -865,7 +879,7 @@ const replaceGalleryImage = async (req, res) => {
     const { oldImageUrl } = req.body;
     if (!req.file) return res.status(400).json({ message: 'New image required' });
 
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const uploadToCloudinary = (fileBuffer) => {
@@ -892,7 +906,7 @@ const updateSingleMedia = async (req, res) => {
     const { field } = req.body;
     if (!req.file) return res.status(400).json({ message: 'Media required' });
 
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const uploadToCloudinary = (fileBuffer) => {
@@ -917,7 +931,7 @@ const updateSingleMedia = async (req, res) => {
 const deleteSingleMedia = async (req, res) => {
   try {
     const { field } = req.body;
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const deletedUrl = vendor[field];
@@ -936,7 +950,7 @@ const deleteSingleMedia = async (req, res) => {
 
 const deleteVideo = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     vendor.shopVideo = '';
     await vendor.save();
@@ -948,7 +962,7 @@ const deleteVideo = async (req, res) => {
 
 const getLiveReport = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const { from, to } = req.query;
@@ -1029,8 +1043,11 @@ const getLiveReport = async (req, res) => {
 
 const getVendorDashboardBundle = async (req, res) => {
   try {
-    // Always fetch FRESH vendor data to avoid stale balance/stats
-    const vendor = await Vendor.findOne({ ownerId: req.user._id }).lean();
+    // Always fetch FRESH vendor data using activeVendorId context
+    const activeVendorId = req.activeVendorId || req.user?.lastActiveVendorId;
+    if (!activeVendorId) return res.status(400).json({ message: 'No active vendor context' });
+    
+    const vendor = await Vendor.findById(activeVendorId).lean();
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     const todayStart = moment().tz('Asia/Kolkata').startOf('day').toDate();
     const todayEnd = moment().tz('Asia/Kolkata').endOf('day').toDate();

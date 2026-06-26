@@ -153,7 +153,8 @@ exports.createOrder = async (req, res) => {
     const pricePerDay = settings.promotionPricePerDay || 10;
     const totalAmount = days * pricePerDay;
 
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
     // Check if any promotion is active or pending
@@ -207,7 +208,8 @@ exports.verifyPayment = async (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-      const vendor = await Vendor.findOne({ ownerId: req.user._id });
+      const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+      const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
       if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
       // Check again to prevent race conditions
@@ -270,7 +272,8 @@ exports.verifyPayment = async (req, res) => {
 
 exports.getVendorPromotions = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
     const promotions = await VendorPromotion.find({ vendorId: vendor._id })
@@ -286,7 +289,8 @@ exports.purchasePromotion = async (req, res) => {
   // Legacy or simplified flow - could be deprecated
   try {
     const { planId, paymentId } = req.body;
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
     const plan = await PromotionPlan.findById(planId);
@@ -332,7 +336,8 @@ exports.getPromotionTransactions = async (req, res) => {
 
 exports.getVendorPromotionTransactions = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
     const transactions = await WalletTransaction.find({

@@ -331,8 +331,13 @@ const VendorManagement = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-3.5 text-[13px] font-black text-slate-900 dark:text-white capitalize tracking-tight opacity-80 w-[15%]">
-                    {vendor.ownerName || vendor.ownerId?.name || 'N/A'}
+                  <td className="px-3 py-3.5 text-[13px] leading-tight font-black text-slate-900 dark:text-white capitalize tracking-tight opacity-80 w-[15%]">
+                    <div>{vendor.ownerName || vendor.ownerId?.name || 'N/A'}</div>
+                    {vendor.ownerId?.phone && (
+                      <div className="text-[10px] text-slate-400 font-bold tracking-tight lowercase mt-0.5">
+                        Franchise: {vendor.ownerId.phone}
+                      </div>
+                    )}
                   </td>
                   <td className="px-3 py-3.5 leading-none w-[15%]">
                     <div className="flex flex-col gap-1.5">

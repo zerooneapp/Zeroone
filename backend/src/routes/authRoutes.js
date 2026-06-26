@@ -1,5 +1,5 @@
 const express = require('express');
-const { adminLogin, login, register, me, sendOTP, verifyOTP } = require('../controllers/authController');
+const { adminLogin, login, register, me, sendOTP, verifyOTP, switchShop } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -10,5 +10,6 @@ router.post('/register', register);
 router.post('/send-otp', sendOTP);
 router.post('/verify-otp', verifyOTP);
 router.get('/me', protect, me);
+router.patch('/switch-shop', protect, switchShop);
 
 module.exports = router;

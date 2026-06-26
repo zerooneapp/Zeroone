@@ -80,6 +80,25 @@ const VendorDashboard = () => {
   const { role, user } = useAuthStore();
   const socket = useSocket(user?._id);
 
+  const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  const currentShopId = localStorage.getItem('activeVendorId') || user?.lastActiveVendorId;
+  const currentShop = user?.shops?.find(s => s._id === currentShopId) || user?.shops?.[0];
+  const otherShops = user?.shops?.filter(s => s._id !== currentShop?._id) || [];
+
+  const handleSwitchShop = async (shopId) => {
+    try {
+      await api.patch('/auth/switch-shop', { vendorId: shopId });
+      localStorage.setItem('activeVendorId', shopId);
+      const updatedUser = { ...user, lastActiveVendorId: shopId };
+      useAuthStore.getState().updateUser(updatedUser);
+      setIsShopDropdownOpen(false);
+      toast.success('Shop switched successfully');
+      window.location.reload();
+    } catch (err) {
+      toast.error('Failed to switch shop');
+    }
+  };
+
   useEffect(() => {
     handleFetch();
 
@@ -340,13 +359,19 @@ const VendorDashboard = () => {
     <div className="min-h-full bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar pb-16">
       <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-1">
-            <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center mr-1">
               <span className="text-[#00246b] dark:text-white">Zero</span>
               <span className="text-[#00246b]/30 dark:text-white">One</span>
             </h1>
+            
+            {/* Active Shop Name */}
+            {user?.shops && user.shops.length > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00246b]/5 dark:bg-white/5 rounded-full text-[11px] font-black uppercase tracking-tight text-[#00246b] dark:text-white border border-[#00246b]/10 dark:border-white/10">
+                <span className="truncate max-w-[120px]">{currentShop?.shopName || 'Select Shop'}</span>
+              </div>
+            )}
           </div>
-
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">

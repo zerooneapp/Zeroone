@@ -331,7 +331,7 @@ const deleteReview = async (req, res) => {
 
 const getMyVendorReviews = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
     const reviews = await Review.find({

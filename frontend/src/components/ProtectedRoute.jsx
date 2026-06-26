@@ -41,7 +41,10 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   // 🛡️ HARD BLOCK LOGIC FOR VENDORS (Strict Verification Lock)
   if (role === 'vendor' && location.pathname.startsWith('/vendor')) {
     const allowedStatuses = ['approved', 'active', 'inactive'];
-    if (location.pathname !== '/vendor-pending' && !allowedStatuses.includes(user?.status)) {
+    const activeVendorId = localStorage.getItem('activeVendorId') || user?.lastActiveVendorId;
+    const activeShop = user?.shops?.find(s => s._id === activeVendorId) || user?.shops?.[0];
+    const currentStatus = activeShop ? activeShop.status : user?.status;
+    if (location.pathname !== '/vendor-pending' && !allowedStatuses.includes(currentStatus)) {
       return <Navigate to="/vendor-pending" replace />;
     }
   }

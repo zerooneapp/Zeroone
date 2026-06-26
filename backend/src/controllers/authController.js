@@ -160,11 +160,24 @@ const register = async (req, res) => {
     }
 
     let status = undefined;
+    let shops = [];
+    let lastActiveVendorId = undefined;
     if (requestedRole === 'vendor') {
       const Vendor = require('../models/Vendor');
-      const vendor = await Vendor.findOne({ ownerId: user._id });
-      if (vendor) status = vendor.status;
-      else status = 'pending'; // Default for new vendors
+      shops = await Vendor.find({ ownerId: user._id, isDeleted: false });
+      if (shops.length > 0) {
+        if (user.lastActiveVendorId) {
+          lastActiveVendorId = user.lastActiveVendorId;
+        } else {
+          lastActiveVendorId = shops[0]._id;
+          user.lastActiveVendorId = lastActiveVendorId;
+          await user.save();
+        }
+        const activeShop = shops.find(s => s._id.toString() === lastActiveVendorId.toString()) || shops[0];
+        status = activeShop.status;
+      } else {
+        status = 'pending';
+      }
     }
 
     res.status(201).json({
@@ -175,6 +188,8 @@ const register = async (req, res) => {
       role: user.role,
       status,
       token: generateToken(user._id),
+      shops,
+      lastActiveVendorId
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -210,9 +225,17 @@ const me = async (req, res) => {
 
     if (responseData.role === 'vendor') {
       const Vendor = require('../models/Vendor');
-      const vendor = await Vendor.findOne({ ownerId: user._id });
-      if (vendor) {
-        responseData.status = vendor.status;
+      const shops = await Vendor.find({ ownerId: user._id, isDeleted: false });
+      responseData.shops = shops;
+      responseData.lastActiveVendorId = user.lastActiveVendorId;
+      if (shops.length > 0) {
+        if (!user.lastActiveVendorId) {
+          user.lastActiveVendorId = shops[0]._id;
+          await user.save();
+          responseData.lastActiveVendorId = shops[0]._id;
+        }
+        const activeShop = shops.find(s => s._id.toString() === responseData.lastActiveVendorId.toString()) || shops[0];
+        responseData.status = activeShop.status;
       }
     }
 
@@ -351,11 +374,23 @@ const verifyOTP = async (req, res) => {
     const needsRegistration = isRegularStaff ? false : (!finalAccount.name && (!staff || staff.isOwner));
 
     let status = undefined;
+    let shops = [];
+    let lastActiveVendorId = undefined;
     const resolvedRole = isRegularStaff ? 'staff' : (user ? user.role : (staff ? 'staff' : 'customer'));
     if (resolvedRole === 'vendor') {
       const Vendor = require('../models/Vendor');
-      const vendor = await Vendor.findOne({ ownerId: finalAccount._id });
-      if (vendor) status = vendor.status;
+      shops = await Vendor.find({ ownerId: finalAccount._id, isDeleted: false });
+      if (shops.length > 0) {
+        if (finalAccount.lastActiveVendorId) {
+          lastActiveVendorId = finalAccount.lastActiveVendorId;
+        } else {
+          lastActiveVendorId = shops[0]._id;
+          finalAccount.lastActiveVendorId = lastActiveVendorId;
+          await finalAccount.save();
+        }
+        const activeShop = shops.find(s => s._id.toString() === lastActiveVendorId.toString()) || shops[0];
+        status = activeShop.status;
+      }
     }
 
     res.status(200).json({
@@ -367,7 +402,32 @@ const verifyOTP = async (req, res) => {
       status,
       token: generateToken(finalAccount._id),
       needsRegistration,
-      isFirstLogin: isRegularStaff ? finalAccount.isFirstLogin : (staff ? finalAccount.isFirstLogin : undefined)
+      isFirstLogin: isRegularStaff ? finalAccount.isFirstLogin : (staff ? finalAccount.isFirstLogin : undefined),
+      shops,
+      lastActiveVendorId
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const switchShop = async (req, res) => {
+  try {
+    const { vendorId } = req.body;
+    if (!vendorId) return res.status(400).json({ message: 'vendorId is required' });
+
+    const Vendor = require('../models/Vendor');
+    const shop = await Vendor.findOne({ _id: vendorId, ownerId: req.user._id, isDeleted: false });
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found or not owned by you' });
+    }
+
+    req.user.lastActiveVendorId = vendorId;
+    await req.user.save();
+
+    res.status(200).json({
+      message: 'Shop context switched successfully',
+      lastActiveVendorId: vendorId
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -380,5 +440,6 @@ module.exports = {
   register,
   me,
   sendOTP,
-  verifyOTP
+  verifyOTP,
+  switchShop
 };
