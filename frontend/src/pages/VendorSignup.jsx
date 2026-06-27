@@ -91,6 +91,9 @@ const VendorSignup = () => {
       // 2. Register Vendor Record
       const vendorRes = await api.post('/vendor/register', formData);
       const newVendorId = vendorRes.data?._id;
+      if (newVendorId) {
+        localStorage.setItem('activeVendorId', newVendorId);
+      }
 
       // 3. Upload Media
       const mediaData = new FormData();

@@ -1466,6 +1466,12 @@ const deleteVendor = async (req, res) => {
 
     const ownerId = vendor.ownerId;
 
+    // Count how many shops this vendor owner has
+    let totalShops = 0;
+    if (ownerId) {
+      totalShops = await Vendor.countDocuments({ ownerId });
+    }
+
     // Find all staff members for this vendor to delete their User accounts and other data
     const staffMembers = await Staff.find({ vendorId: req.params.id }).select('_id userId');
     const staffIds = staffMembers.map(s => s._id);
@@ -1482,7 +1488,7 @@ const deleteVendor = async (req, res) => {
     const SlotLock = require('../models/SlotLock');
     const Cart = require('../models/Cart');
 
-    // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
+    // Emit FORCE_LOGOUT socket events to all deleted staff users and owner (only if owner account is being deleted)
     try {
       const { getIO } = require('../services/socketService');
       const io = getIO();
@@ -1490,7 +1496,7 @@ const deleteVendor = async (req, res) => {
         staffUserIds.forEach(id => {
           io.to(String(id)).emit('FORCE_LOGOUT');
         });
-        if (ownerId) {
+        if (ownerId && totalShops <= 1) {
           io.to(String(ownerId)).emit('FORCE_LOGOUT');
         }
       }
@@ -1498,10 +1504,19 @@ const deleteVendor = async (req, res) => {
       console.error('[Socket emit error in deleteVendor]', err.message);
     }
 
+    // If owner has multiple shops, update their lastActiveVendorId if it matches the deleted shop
+    if (ownerId && totalShops > 1) {
+      const ownerUser = await User.findById(ownerId);
+      if (ownerUser && String(ownerUser.lastActiveVendorId) === String(req.params.id)) {
+        const nextVendor = await Vendor.findOne({ ownerId, _id: { $ne: req.params.id } });
+        ownerUser.lastActiveVendorId = nextVendor ? nextVendor._id : null;
+        await ownerUser.save();
+      }
+    }
+
     // Perform Cleanup (Delete all associated records)
-    await Promise.all([
+    const cleanupPromises = [
       Vendor.findByIdAndDelete(req.params.id),
-      User.findByIdAndDelete(ownerId),
       User.deleteMany({ _id: { $in: staffUserIds } }),
       Staff.deleteMany({ vendorId: req.params.id }),
       StaffAvailability.deleteMany({ staffId: { $in: staffIds } }),
@@ -1519,7 +1534,13 @@ const deleteVendor = async (req, res) => {
       UserMembership.deleteMany({ vendorId: req.params.id }),
       SlotLock.deleteMany({ vendorId: req.params.id }),
       Cart.deleteMany({ vendorId: req.params.id })
-    ]);
+    ];
+
+    if (totalShops <= 1 && ownerId) {
+      cleanupPromises.push(User.findByIdAndDelete(ownerId));
+    }
+
+    await Promise.all(cleanupPromises);
 
     res.status(200).json({ message: 'Partner and all associated data deleted successfully' });
   } catch (error) {

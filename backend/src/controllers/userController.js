@@ -72,16 +72,22 @@ const deleteAccount = async (req, res) => {
     const UserMembership = require('../models/UserMembership');
 
     const timestamp = Date.now();
+    const targetVendorId = req.body?.vendorId || req.query?.vendorId;
 
     if (user.role === 'vendor') {
-      const vendor = await Vendor.findOne({ ownerId: userId });
-      if (vendor) {
+      const activeShops = await Vendor.find({ ownerId: userId, isDeleted: { $ne: true }, status: { $ne: 'deleted' } });
+      
+      if (targetVendorId && activeShops.length > 1) {
+        // Multi-shop flow: Soft delete ONLY the requested shop
+        const vendor = activeShops.find(v => String(v._id) === String(targetVendorId));
+        if (!vendor) return res.status(404).json({ message: 'Shop/Franchise not found or already deleted' });
+
         // Find all staff members for this vendor to update their User accounts and Staff profiles
         const staffMembers = await Staff.find({ vendorId: vendor._id });
         const staffIds = staffMembers.map(s => s._id);
         const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
 
-        // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
+        // Emit FORCE_LOGOUT socket events to all deleted staff users only
         try {
           const { getIO } = require('../services/socketService');
           const io = getIO();
@@ -89,9 +95,6 @@ const deleteAccount = async (req, res) => {
             staffUserIds.forEach(id => {
               io.to(String(id)).emit('FORCE_LOGOUT');
             });
-            if (userId) {
-              io.to(String(userId)).emit('FORCE_LOGOUT');
-            }
           }
         } catch (err) {
           console.error('[Socket emit error in deleteAccount]', err.message);
@@ -104,7 +107,7 @@ const deleteAccount = async (req, res) => {
         vendor.shopName = `[Deleted] ${vendor.shopName}`;
         await vendor.save();
 
-        // 2. Soft delete all Staff user accounts & profiles
+        // 2. Soft delete all Staff user accounts & profiles for this vendor
         for (const staff of staffMembers) {
           staff.isActive = false;
           staff.phone = `DEL_${timestamp}_${staff.phone}`;
@@ -131,7 +134,76 @@ const deleteAccount = async (req, res) => {
           SlotLock.deleteMany({ vendorId: vendor._id }),
           Cart.deleteMany({ vendorId: vendor._id })
         ]);
-        console.log(`[Cleanup] Vendor and staff profiles soft-deleted. Schedulers cleared for user ${userId}`);
+
+        // Update owner's lastActiveVendorId if it matches the deleted vendor
+        if (String(user.lastActiveVendorId) === String(targetVendorId)) {
+          const nextVendor = activeShops.find(v => String(v._id) !== String(targetVendorId));
+          user.lastActiveVendorId = nextVendor ? nextVendor._id : null;
+          await user.save();
+        }
+
+        console.log(`[Cleanup] Shop/Franchise ${targetVendorId} soft-deleted. Schedulers cleared.`);
+        return res.status(200).json({ message: 'Shop/Franchise deleted successfully' });
+      } else {
+        // Single shop flow OR Deleting entire account (all shops)
+        const vendorsToDelete = targetVendorId ? activeShops.filter(v => String(v._id) === String(targetVendorId)) : activeShops;
+
+        for (const vendor of vendorsToDelete) {
+          const staffMembers = await Staff.find({ vendorId: vendor._id });
+          const staffIds = staffMembers.map(s => s._id);
+          const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
+
+          // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
+          try {
+            const { getIO } = require('../services/socketService');
+            const io = getIO();
+            if (io) {
+              staffUserIds.forEach(id => {
+                io.to(String(id)).emit('FORCE_LOGOUT');
+              });
+              if (userId) {
+                io.to(String(userId)).emit('FORCE_LOGOUT');
+              }
+            }
+          } catch (err) {
+            console.error('[Socket emit error in deleteAccount]', err.message);
+          }
+
+          // 1. Soft delete Vendor profile
+          vendor.status = 'deleted';
+          vendor.isActive = false;
+          vendor.isDeleted = true;
+          vendor.shopName = `[Deleted] ${vendor.shopName}`;
+          await vendor.save();
+
+          // 2. Soft delete all Staff user accounts & profiles
+          for (const staff of staffMembers) {
+            staff.isActive = false;
+            staff.phone = `DEL_${timestamp}_${staff.phone}`;
+            staff.name = `[Deleted] ${staff.name}`;
+            await staff.save();
+
+            if (staff.userId) {
+              const staffUser = await User.findById(staff.userId);
+              if (staffUser) {
+                staffUser.isDeleted = true;
+                staffUser.phone = `DEL_${timestamp}_${staffUser.phone}`;
+                staffUser.name = `[Deleted] ${staffUser.name || 'Staff'}`;
+                await staffUser.save();
+              }
+            }
+          }
+
+          // 3. Clean up operational/scheduling collections only
+          await Promise.all([
+            StaffAvailability.deleteMany({ staffId: { $in: staffIds } }),
+            StaffClosure.deleteMany({ staffId: { $in: staffIds } }),
+            VendorAvailability.deleteMany({ vendorId: vendor._id }),
+            VendorClosure.deleteMany({ vendorId: vendor._id }),
+            SlotLock.deleteMany({ vendorId: vendor._id }),
+            Cart.deleteMany({ vendorId: vendor._id })
+          ]);
+        }
       }
     }
 

@@ -620,7 +620,7 @@ const VendorProfile = () => {
    const handleDeleteAccount = async () => {
       try {
          setDeleting(true);
-         await api.delete('/users/profile');
+         await api.delete(`/users/profile?vendorId=${currentShopId}`);
          toast.success('Shop deleted successfully');
          logout();
          navigate('/vendor-login', { replace: true });
@@ -1967,14 +1967,8 @@ const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef 
    const allHours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
    const allMinutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
 
-   let hours = allHours;
-   if (type === 'open') {
-      hours = p === 'AM' ? ['06', '07', '08', '09', '10', '11', '12'] : allHours;
-   } else if (type === 'close') {
-      hours = p === 'AM' ? ['12'] : ['06', '07', '08', '09', '10', '11'];
-   }
-
-   const minutes = (p === 'AM' && h === '12') ? ['00'] : allMinutes;
+   const hours = allHours;
+   const minutes = allMinutes;
 
    const handleConfirm = () => {
       onChange(`${h}:${m} ${p}`);
@@ -2001,10 +1995,7 @@ const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef 
                   <button
                      key={hour}
                      type="button"
-                     onClick={() => {
-                        setH(hour);
-                        if (p === 'AM' && hour === '12') setM('00');
-                     }}
+                     onClick={() => setH(hour)}
                      className={cn(
                         "w-full py-2 rounded-lg text-xs font-black transition-all",
                         h === hour ? "bg-[#00246b] text-white shadow-lg shadow-[#00246b]/20 scale-105" : "text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
@@ -2038,22 +2029,7 @@ const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef 
                   <button
                      key={period}
                      type="button"
-                     onClick={() => {
-                        setP(period);
-                        if (type === 'open') {
-                           if (period === 'AM') {
-                              if (!['06', '07', '08', '09', '10', '11', '12'].includes(h)) setH('06');
-                              if (h === '12') setM('00');
-                           }
-                        } else if (type === 'close') {
-                           if (period === 'AM') {
-                              setH('12');
-                              setM('00');
-                           } else if (period === 'PM') {
-                              if (!['06', '07', '08', '09', '10', '11'].includes(h)) setH('06');
-                           }
-                        }
-                     }}
+                     onClick={() => setP(period)}
                      className={cn(
                         "w-full py-4 rounded-xl text-[10px] font-black transition-all",
                         p === period ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-105" : "text-gray-400 bg-slate-50 dark:bg-gray-800"

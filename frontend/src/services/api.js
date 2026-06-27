@@ -41,7 +41,11 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   const activeVendorId = localStorage.getItem('activeVendorId');
-  if (activeVendorId && !config.headers['x-vendor-id']) {
+  const hasVendorId = config.headers['x-vendor-id'] || 
+                      config.headers['X-Vendor-Id'] || 
+                      (config.headers.has && config.headers.has('x-vendor-id')) ||
+                      (config.headers.get && config.headers.get('x-vendor-id'));
+  if (activeVendorId && !hasVendorId) {
     config.headers['x-vendor-id'] = activeVendorId;
   }
   return config;
