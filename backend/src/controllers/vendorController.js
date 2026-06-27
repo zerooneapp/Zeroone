@@ -26,9 +26,6 @@ const getOperationalShopOpen = async (vendor) => (
 );
 
 const buildPublicVendorResponse = (vendor, extra = {}) => {
-  const { isShopCurrentlyOpen } = require('../utils/shopStatus');
-  const dynamicIsShopOpen = isShopCurrentlyOpen(vendor.workingHours);
-
   return {
     _id: vendor._id,
     shopName: vendor.shopName,
@@ -45,7 +42,7 @@ const buildPublicVendorResponse = (vendor, extra = {}) => {
     totalReviews: vendor.totalReviews,
     serviceLevel: vendor.serviceLevel,
     serviceMode: vendor.serviceMode || 'shop',
-    isShopOpen: vendor.isShopOpen && dynamicIsShopOpen,
+    isShopOpen: vendor.isShopOpen,
     isClosedToday: vendor.isClosedToday,
     offers: vendor.offers || [],
     createdAt: vendor.createdAt,

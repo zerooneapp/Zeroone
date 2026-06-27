@@ -364,13 +364,7 @@ const VendorDashboard = () => {
               <span className="text-[#00246b] dark:text-white">Zero</span>
               <span className="text-[#00246b]/30 dark:text-white">One</span>
             </h1>
-            
-            {/* Active Shop Name */}
-            {user?.shops && user.shops.length > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00246b]/5 dark:bg-white/5 rounded-full text-[11px] font-black uppercase tracking-tight text-[#00246b] dark:text-white border border-[#00246b]/10 dark:border-white/10">
-                <span className="truncate max-w-[120px]">{currentShop?.shopName || 'Select Shop'}</span>
-              </div>
-            )}
+
           </div>
         </div>
 
