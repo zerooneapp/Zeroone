@@ -179,7 +179,8 @@ const getEligibleStaffMembers = async (vendorId, serviceIds) => {
     }).lean();
   }
 
-  return staffMembers;
+  // Prioritize non-owners by sorting isOwner: false first
+  return staffMembers.sort((a, b) => (a.isOwner === b.isOwner ? 0 : a.isOwner ? 1 : -1));
 };
 
 const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookingId = null, includeUnavailable = false) => {

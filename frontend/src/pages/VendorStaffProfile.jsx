@@ -148,6 +148,12 @@ const VendorStaffProfile = () => {
                     <span>+91 {staff.phone}</span>
                   </a>
                 )}
+                {staff?.createdAt && (
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-gray-400">
+                    <Calendar size={10} className="text-slate-400" />
+                    <span>Onboarded: {dayjs(staff.createdAt).format('DD MMM YYYY')}</span>
+                  </div>
+                )}
                 {staff?.isOwner && (
                   <div className="inline-flex items-center gap-1 text-[8px] font-black text-amber-600 uppercase tracking-widest mt-0.5">
                     <ShieldCheck size={10} className="text-amber-500" />
