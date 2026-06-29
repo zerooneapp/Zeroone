@@ -32,6 +32,12 @@ const VendorSignup = () => {
       navigate('/vendor-login');
       return;
     }
+    
+    // Pre-populate owner name from active session user if available
+    if (user?.name) {
+      setFormData({ ...formData, ownerName: user.name });
+    }
+
     const fetchCategories = async () => {
       try {
         const res = await api.get('/categories');
@@ -41,10 +47,11 @@ const VendorSignup = () => {
       }
     };
     fetchCategories();
-  }, [phone, navigate, reset]);
+  }, [phone, navigate, reset, user]);
 
   const handleNext = () => {
-    if (step === 1 && (!formData.shopName || !formData.ownerName || !formData.category || !formData.serviceMode)) {
+    const activeOwnerName = user?.name || formData.ownerName;
+    if (step === 1 && (!formData.shopName || !activeOwnerName || !formData.category || !formData.serviceMode)) {
       return toast.error('Please fill personal and business details');
     }
     if (step === 2 && (!files.panCard || !files.aadhaarFront || !files.aadhaarBack)) {
@@ -75,9 +82,10 @@ const VendorSignup = () => {
     setLoading(true);
     try {
       // 1. Register User Record & Get Token
+      const activeOwnerName = user?.name || formData.ownerName;
       const authRes = await api.post('/auth/register', {
         phone,
-        name: formData.ownerName,
+        name: activeOwnerName,
         role: 'vendor',
         forceUpdate: true
       });
@@ -89,7 +97,8 @@ const VendorSignup = () => {
       }
 
       // 2. Register Vendor Record
-      const vendorRes = await api.post('/vendor/register', formData);
+      const vendorPayload = { ...formData, ownerName: activeOwnerName };
+      const vendorRes = await api.post('/vendor/register', vendorPayload);
       const newVendorId = vendorRes.data?._id;
       if (newVendorId) {
         localStorage.setItem('activeVendorId', newVendorId);
@@ -111,6 +120,13 @@ const VendorSignup = () => {
           'x-vendor-id': newVendorId 
         }
       });
+
+      // Switch shop context to the new franchise so that status verification is bound to it
+      try {
+        await api.patch('/auth/switch-shop', { vendorId: newVendorId });
+      } catch (switchErr) {
+        console.warn('Switch shop failed on signup:', switchErr.message);
+      }
 
       // 🚀 CRITICAL: Update Auth Store only AFTER all API calls succeed
       if (authRes.data.token) {
@@ -173,8 +189,10 @@ const VendorSignup = () => {
                 autoFocus
                 placeholder="Owner Full Name"
                 className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 h-12 rounded-xl font-bold shadow-sm text-sm"
-                value={formData.ownerName}
+                value={user?.name || formData.ownerName}
+                readOnly={!!user?.name}
                 onChange={(e) => {
+                  if (user?.name) return; // Prevent edits if name is locked
                   const value = e.target.value;
                   const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
                   setFormData({ ...formData, ownerName: filteredValue });

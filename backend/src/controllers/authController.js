@@ -128,7 +128,7 @@ const register = async (req, res) => {
       if (user.name && !req.body.forceUpdate && user.role !== 'vendor') return res.status(400).json({ message: 'User already exists' });
 
       // Update all provided fields
-      if (name) user.name = name;
+      if (name && !user.name) user.name = name;
       if (email) user.email = email;
       if (gender) user.gender = gender;
       if (dob) user.dob = dob;
@@ -276,7 +276,7 @@ const sendOTP = async (req, res) => {
     }
 
     // 🛡️ TESTING BYPASS: Fix OTP to 123456 for test numbers
-    const isTestNumber = ['9999999999', '7987588804', '8856666666'].includes(phone);
+    const isTestNumber = ['9999999999', '7987588804', '8856666666', '8817921168', '9669002380'].includes(phone);
     const otp = isTestNumber ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins for test buffer
 
@@ -360,7 +360,7 @@ const verifyOTP = async (req, res) => {
     }
 
     // Check OTP
-    const isDefaultAuth = ['1234567890', '7987588804', '8856666666'].includes(phone) && otp === '123456';
+    const isDefaultAuth = ['1234567890', '7987588804', '8856666666', '8817921168', '9669002380'].includes(phone) && otp === '123456';
     if (!isDefaultAuth && (finalAccount.otp !== otp || new Date() > finalAccount.otpExpires)) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }

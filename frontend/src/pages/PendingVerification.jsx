@@ -124,7 +124,7 @@ const PendingVerification = () => {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 10 }}
-                                        className="absolute left-1/2 -translate-x-1/2 mt-2 w-52 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 overflow-hidden"
+                                        className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 overflow-hidden"
                                     >
                                         <div className="py-1.5 max-h-60 overflow-y-auto">
                                             <div className="px-3 py-1 text-[9px] font-black uppercase tracking-wider text-slate-400">

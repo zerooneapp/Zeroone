@@ -78,11 +78,27 @@ const registerVendor = async (req, res) => {
       return res.status(401).json({ message: 'User context not found. Please log in again.' });
     }
 
-    const existingShop = await Vendor.findOne({ ownerId: req.user._id, shopName });
-    if (existingShop) return res.status(400).json({ message: 'A shop with this name already exists under your account' });
+    let vendor = await Vendor.findOne({ ownerId: req.user._id, shopName });
+
+    if (vendor) {
+      // If the shop was registered but documents weren't uploaded (incomplete), update and reuse it.
+      if (!vendor.isProfileComplete) {
+        console.log('[DEBUG] Reusing incomplete vendor profile:', vendor._id);
+        vendor.ownerName = ownerName;
+        vendor.category = category;
+        vendor.address = address;
+        vendor.location = location;
+        vendor.serviceLevel = serviceLevel || 'standard';
+        vendor.serviceMode = serviceMode === 'home' ? 'home' : 'shop';
+        await vendor.save();
+        return res.status(200).json(vendor);
+      } else {
+        return res.status(400).json({ message: 'A shop with this name already exists under your account' });
+      }
+    }
 
     console.log('[DEBUG] Registering Vendor for user:', req.user._id);
-    const vendor = await Vendor.create({
+    vendor = await Vendor.create({
       shopName,
       ownerName,
       category,
