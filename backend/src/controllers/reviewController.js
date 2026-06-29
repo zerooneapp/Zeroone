@@ -162,7 +162,8 @@ const submitReview = async (req, res) => {
         type: 'NEW_REVIEW',
         title: 'New Review Submitted',
         message: `A new ${rating}-star review was submitted for ${vendor.shopName || 'your shop'} and is now live on your profile.`,
-        data: { bookingId: booking._id, rating },
+        data: { bookingId: booking._id, rating, vendorId: booking.vendorId },
+        vendorId: booking.vendorId,
         referenceId: `REVIEW_SUBMITTED_VENDOR_${booking._id}`
       }) : null,
       staffUserId ? NotificationService.sendNotification({

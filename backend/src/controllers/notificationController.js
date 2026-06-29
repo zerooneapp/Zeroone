@@ -25,6 +25,14 @@ const getNotifications = async (req, res) => {
       query.role = userRole === 'super_admin' ? 'admin' : userRole;
     }
 
+    // Apply vendor specific filtering if role is vendor
+    if (userRole === 'vendor') {
+      const activeVendorId = req.headers['x-vendor-id'] || req.query.vendorId || (req.user ? req.user.lastActiveVendorId : null);
+      if (activeVendorId) {
+        query.vendorId = activeVendorId;
+      }
+    }
+
     const notifications = await Notification.find(query)
       .sort({ createdAt: -1 })
       .limit(50);
@@ -44,6 +52,14 @@ const markAsRead = async (req, res) => {
     const roleFilter = {};
     if (userRole && userRole !== 'super_admin') {
        roleFilter.role = userRole === 'super_admin' ? 'admin' : userRole;
+    }
+
+    // Apply vendor specific filtering if role is vendor
+    if (userRole === 'vendor') {
+      const activeVendorId = req.headers['x-vendor-id'] || req.query.vendorId || (req.user ? req.user.lastActiveVendorId : null);
+      if (activeVendorId) {
+        roleFilter.vendorId = activeVendorId;
+      }
     }
 
     if (req.params.id === 'all') {
@@ -80,6 +96,14 @@ const getUnreadCount = async (req, res) => {
 
     if (userRole && userRole !== 'super_admin') {
        query.role = userRole === 'super_admin' ? 'admin' : userRole;
+    }
+
+    // Apply vendor specific filtering if role is vendor
+    if (userRole === 'vendor') {
+      const activeVendorId = req.headers['x-vendor-id'] || req.query.vendorId || (req.user ? req.user.lastActiveVendorId : null);
+      if (activeVendorId) {
+        query.vendorId = activeVendorId;
+      }
     }
 
     const count = await Notification.countDocuments(query);

@@ -223,7 +223,8 @@ class NotificationService {
     message,
     data = {},
     referenceId = '',
-    isSilent = false
+    isSilent = false,
+    vendorId = null
   }) {
     let resolvedRecipients = [];
 
@@ -254,20 +255,37 @@ class NotificationService {
       return true;
     });
 
+    // Try to auto-resolve vendorId from data payload if not passed directly
+    let finalVendorId = vendorId || data.vendorId || data.vendor?._id || data.vendor?.id || null;
+
+    // Prepend shopName to title for vendor roles on push notifications
+    let pushTitle = title;
+    if (role === 'vendor' && finalVendorId) {
+      try {
+        const Vendor = require('../models/Vendor');
+        const shop = await Vendor.findById(finalVendorId).select('shopName');
+        if (shop && shop.shopName) {
+          pushTitle = `${shop.shopName}: ${title}`;
+        }
+      } catch (err) {
+        console.error('[NotificationService] Failed to resolve shop name:', err.message);
+      }
+    }
+
     const notifications = [];
     for (const recipient of resolvedRecipients) {
       try {
         const payloadData = {
           ...data,
           type: data.type || type,
-          id: data.id || referenceId || Date.now()
+          id: data.id || referenceId || Date.now(),
+          vendorId: finalVendorId
         };
 
         // 🏠 1. Create In-App Notifications (MongoDB) - Use upsert for idempotency
         let notif;
         if (referenceId) {
           // If referenceId exists, try to find existing or create new (upsert)
-          // This prevents duplicates even if the create call is retried or concurrent
           const result = await Notification.findOneAndUpdate(
             { userId: recipient.userId, type, referenceId },
             { 
@@ -276,6 +294,7 @@ class NotificationService {
                 title,
                 message,
                 data: payloadData,
+                vendorId: finalVendorId,
                 isSilent,
                 createdAt: new Date()
               } 
@@ -290,9 +309,10 @@ class NotificationService {
           }
           notif = result.value || result;
         } else {
-          // Fallback for notifications without referenceId (still subject to unique index {userId, type, undefined})
+          // Fallback for notifications without referenceId
           notif = await Notification.create({
             userId: recipient.userId,
+            vendorId: finalVendorId,
             role: recipient.role,
             type,
             title,
@@ -311,7 +331,7 @@ class NotificationService {
         // 📲 3. Dispatch Push (Async/Non-blocking)
         if (!isSilent) {
           this._dispatchPush(recipient.userId, {
-            title,
+            title: pushTitle,
             message,
             data: payloadData,
             role: recipient.role // Pass role to distinguish target app

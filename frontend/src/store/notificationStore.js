@@ -9,7 +9,10 @@ const useNotificationStore = create((set, get) => ({
   fetchNotifications: async () => {
     try {
       set({ loading: true });
-      const { data } = await api.get('/notifications');
+      const activeVendorId = localStorage.getItem('activeVendorId');
+      const params = activeVendorId ? { vendorId: activeVendorId } : {};
+      
+      const { data } = await api.get('/notifications', { params });
       const unreadCount = data.filter(n => !n.isRead).length;
       set({ notifications: data, unreadCount, loading: false });
     } catch (error) {
@@ -22,6 +25,12 @@ const useNotificationStore = create((set, get) => ({
 
   addNotification: (notification) => {
     set((state) => {
+      // If we are filtering by vendor, check if notification belongs to this vendor
+      const activeVendorId = localStorage.getItem('activeVendorId');
+      if (activeVendorId && notification.vendorId && String(notification.vendorId) !== String(activeVendorId)) {
+        return state; // Suppress socket updates that belong to another shop
+      }
+
       const exists = state.notifications.find(n => n._id === notification._id);
       if (exists) return state;
 
@@ -34,7 +43,9 @@ const useNotificationStore = create((set, get) => ({
 
   markAsRead: async (notificationId) => {
     try {
-      await api.patch(`/notifications/${notificationId}/read`);
+      const activeVendorId = localStorage.getItem('activeVendorId');
+      const params = activeVendorId ? { vendorId: activeVendorId } : {};
+      await api.patch(`/notifications/${notificationId}/read`, null, { params });
       set((state) => ({
         notifications: state.notifications.map(n => 
           n._id === notificationId ? { ...n, isRead: true } : n
@@ -48,7 +59,9 @@ const useNotificationStore = create((set, get) => ({
 
   markAllAsRead: async () => {
     try {
-      await api.patch('/notifications/all/read');
+      const activeVendorId = localStorage.getItem('activeVendorId');
+      const params = activeVendorId ? { vendorId: activeVendorId } : {};
+      await api.patch('/notifications/all/read', null, { params });
       set((state) => ({
         notifications: state.notifications.map(n => ({ ...n, isRead: true })),
         unreadCount: 0

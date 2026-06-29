@@ -174,7 +174,8 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
     type: 'NEW_BOOKING',
     title: 'New Booking!',
     message: `New booking received for ${start.format('D MMMM YYYY, h:mm A')}.`,
-    data: { bookingId: booking._id },
+    data: { bookingId: booking._id, vendorId: vendor._id },
+    vendorId: vendor._id,
     referenceId: `${booking._id}_BOOKING_EVENT`
   });
 
