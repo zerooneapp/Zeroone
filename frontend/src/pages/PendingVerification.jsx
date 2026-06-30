@@ -19,7 +19,7 @@ const PendingVerification = () => {
     const currentShop = user?.shops?.find(s => s._id === currentShopId) || user?.shops?.[0];
 
     useEffect(() => {
-        if (currentShop && ['active', 'approved'].includes(currentShop.status)) {
+        if (currentShop && ['active', 'approved', 'inactive'].includes(currentShop.status)) {
             navigate('/vendor/dashboard', { replace: true });
         }
     }, [currentShop, navigate]);
@@ -56,7 +56,7 @@ const PendingVerification = () => {
 
                 const vendorStatus = res.data?.status;
 
-                if (['active', 'approved'].includes(vendorStatus)) {
+                if (['active', 'approved', 'inactive'].includes(vendorStatus)) {
                     active = false;
                     if (intervalId) clearInterval(intervalId);
 
