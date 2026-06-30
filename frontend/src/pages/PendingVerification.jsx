@@ -106,7 +106,7 @@ const PendingVerification = () => {
             
             {/* Header Switcher for Pending Screen */}
             {user?.shops && user.shops.length > 1 && (
-                <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
+                <header className="fixed top-0 left-0 right-0 z-50 px-6 pt-10 pb-4 flex items-center justify-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-black uppercase tracking-wider text-slate-400">Manage:</span>
                         <div className="relative">
