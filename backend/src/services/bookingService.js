@@ -133,6 +133,7 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
         price: preview ? preview.finalPrice : service.price,
         originalPrice: service.price,
         duration: service.duration,
+        bufferTime: service.bufferTime || 0,
         isFreeViaMembership: preview?.isFreeViaMembership || false
       };
     }),

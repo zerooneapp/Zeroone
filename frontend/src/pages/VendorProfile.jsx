@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
    Save, Plus, X, CheckCircle2, XCircle, ChevronRight, ChevronDown, LayoutGrid, Sun, Moon, LogOut,
-   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone
+   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone, Ticket
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -482,13 +482,13 @@ const VendorProfile = () => {
          iconColor: 'text-emerald-500',
       },
       {
-         key: 'customers',
-         label: 'Loyal Customers',
-         subtitle: 'Track repeat clients & growth',
-         icon: Heart,
-         iconBg: 'bg-rose-500/10',
-         iconColor: 'text-rose-500',
-         path: '/vendor/customers',
+         key: 'offers',
+         label: 'Offers',
+         subtitle: 'Manage discounts & promotions',
+         icon: Ticket,
+         iconBg: 'bg-violet-500/10',
+         iconColor: 'text-violet-500',
+         path: '/vendor/offers',
       },
       {
          key: 'promotions',

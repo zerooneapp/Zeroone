@@ -17,7 +17,7 @@ import {
   Briefcase,
   Percent,
   Users,
-  Ticket,
+  Heart,
   Phone,
   Lock,
   Crown,
@@ -267,7 +267,7 @@ const VendorDashboard = () => {
 
   const actionTiles = useMemo(() => [
     { label: 'New Booking', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
-    { label: 'Offers', icon: Ticket, path: '/vendor/offers' },
+    { label: 'Loyal Customers', icon: Heart, path: '/vendor/customers' },
     data?.serviceMode === 'home'
       ? { label: 'Staff', icon: Lock, locked: true }
       : { label: 'Staff', icon: Users, path: '/vendor/staff' },

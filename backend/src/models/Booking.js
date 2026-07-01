@@ -12,6 +12,7 @@ const bookingSchema = new mongoose.Schema({
     name: { type: String },
     price: { type: Number },
     duration: { type: Number },
+    bufferTime: { type: Number, default: 0 },
     isFreeViaMembership: { type: Boolean, default: false },
     originalPrice: { type: Number }
   }],

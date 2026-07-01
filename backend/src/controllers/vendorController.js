@@ -790,7 +790,7 @@ const createManualBooking = async (req, res) => {
       isWalkIn: true,
       walkInCustomerName: name,
       walkInCustomerPhone: phone,
-      services: services.map(s => ({ serviceId: s._id, name: s.name, price: s.price, duration: s.duration })),
+      services: services.map(s => ({ serviceId: s._id, name: s.name, price: s.price, duration: s.duration, bufferTime: s.bufferTime || 0 })),
       totalPrice,
       totalDuration,
       startTime: new Date(startTime),
