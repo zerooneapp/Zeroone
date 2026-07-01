@@ -157,14 +157,35 @@ const LoyalCustomers = () => {
                         <h3 className="font-extrabold text-sm text-[#00246b] dark:text-white tracking-tight">
                           {toPascalCase(customer.name)}
                         </h3>
+                        <p className="text-[10px] text-slate-400 font-bold dark:text-gray-400">{customer.phone}</p>
                       </div>
                     </div>
-                    {customer.bookingCount >= 2 && (
-                      <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                        <Star size={8} fill="currentColor" />
-                        <span className="text-[7.5px] font-black uppercase tracking-tighter">Loyal</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {customer.bookingCount >= 2 && (
+                        <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                          <Star size={8} fill="currentColor" />
+                          <span className="text-[7.5px] font-black uppercase tracking-tighter">Loyal</span>
+                        </div>
+                      )}
+                      {/* Call Action */}
+                      <a 
+                        href={`tel:${customer.phone}`}
+                        className="p-2 bg-slate-50 dark:bg-gray-800 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-xl text-slate-600 dark:text-gray-300 transition-all border border-slate-100 dark:border-gray-800/60"
+                        title="Call Customer"
+                      >
+                        <Phone size={13} />
+                      </a>
+                      {/* WhatsApp Chat Action */}
+                      <a 
+                        href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-2 bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 transition-all border border-emerald-100 dark:border-emerald-900/30"
+                        title="WhatsApp Chat"
+                      >
+                        <MessageSquare size={13} />
+                      </a>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 pt-1.5 border-t border-slate-100 dark:border-gray-800">
