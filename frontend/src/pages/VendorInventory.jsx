@@ -198,7 +198,7 @@ const VendorInventory = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 font-sans pb-24 text-slate-800 dark:text-white">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 max-w-4xl mx-auto flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -222,7 +222,7 @@ const VendorInventory = () => {
         </button>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 mt-6 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 pt-[100px] space-y-6">
         {/* KPI Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3">
