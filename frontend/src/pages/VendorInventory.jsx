@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Plus,
@@ -23,6 +23,7 @@ import { cn } from '../utils/cn';
 
 const VendorInventory = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,8 +84,22 @@ const VendorInventory = () => {
     }
   };
 
+  // Sync searchParams with historyItem on mount/change
+  useEffect(() => {
+    const itemId = searchParams.get('item');
+    if (itemId) {
+      const foundItem = items.find(i => i._id === itemId);
+      if (foundItem) {
+        setHistoryItem(foundItem);
+        fetchHistoryLogs(itemId, 1, logDateFilters);
+      }
+    } else {
+      setHistoryItem(null);
+    }
+  }, [searchParams, items]);
+
   const handleOpenHistory = (item) => {
-    setHistoryItem(item);
+    setSearchParams({ item: item._id });
     setHistoryLogs([]);
     setLogDateFilters({ from: '', to: '' });
     setLogsPage(1);
@@ -288,7 +303,7 @@ const VendorInventory = () => {
         <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setHistoryItem(null)}
+              onClick={() => setSearchParams({})}
               className="p-2 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-xl transition-all"
             >
               <ArrowLeft size={18} />
