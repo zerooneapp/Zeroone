@@ -482,13 +482,13 @@ const VendorProfile = () => {
          iconColor: 'text-emerald-500',
       },
       {
-         key: 'offers',
-         label: 'Offers',
-         subtitle: 'Manage discounts & promotions',
-         icon: Ticket,
-         iconBg: 'bg-violet-500/10',
-         iconColor: 'text-violet-500',
-         path: '/vendor/offers',
+         key: 'reviews',
+         label: 'Reviews & Ratings',
+         subtitle: 'View client feedback & stars',
+         icon: Star,
+         iconBg: 'bg-yellow-500/10',
+         iconColor: 'text-yellow-500',
+         path: '/vendor/reviews',
       },
       {
          key: 'promotions',
@@ -727,7 +727,7 @@ const VendorProfile = () => {
                         { label: 'Services', subtitle: 'Manage listings & pricing', icon: LayoutGrid, path: '/vendor/services', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
                         { label: 'Inventory Management', subtitle: 'Stock control & catalog metrics', icon: ClipboardList, path: '/vendor/inventory', color: 'text-rose-500', bg: 'bg-rose-500/10' },
                         { label: 'Membership Plan', subtitle: 'Loyalty plans for clients', icon: Crown, path: '/vendor/membership', color: 'text-amber-500', bg: 'bg-amber-500/10', key: 'memberships' },
-                        { label: 'Reviews & Ratings', subtitle: 'View client feedback & stars', icon: Star, path: '/vendor/reviews', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+                        { label: 'Offers', subtitle: 'Manage discounts & promotions', icon: Ticket, path: '/vendor/offers', color: 'text-violet-500', bg: 'bg-violet-500/10' },
                         { label: 'Live Report', subtitle: 'Performance PDF report', icon: FileDown, key: 'live_report', color: 'text-blue-500', bg: 'bg-blue-500/10' }
                      ].filter(item => {
                         if (item.key === 'memberships') return globalFeatures.membershipActive;
@@ -744,7 +744,7 @@ const VendorProfile = () => {
                               </div>
                               <div className="text-left">
                                  <h3 className="text-sm font-black text-slate-800 dark:text-white leading-none">{item.label}</h3>
-                                 <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tight">{item.subtitle}</p>
+                                 <p className="text-[10px] font-bold text-slate-400 mt-1 tracking-tight">{item.subtitle}</p>
                               </div>
                            </div>
                            <ChevronRight size={18} className="text-slate-300 group-active:translate-x-1 transition-transform" />

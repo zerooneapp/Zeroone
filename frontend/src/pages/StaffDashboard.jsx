@@ -3,7 +3,7 @@ import {
    ClipboardList, CheckCircle, Clock,
    ShieldCheck, User, CheckCircle2,
    RefreshCw, Phone, Sun, Moon, Bell,
-   Lock, Play, LogOut, MapPin, CalendarPlus
+   Lock, Play, LogOut, MapPin, CalendarPlus, Package
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -180,6 +180,23 @@ const StaffDashboard = () => {
                </div>
                <div className="w-6 h-6 bg-white/10 rounded-lg flex items-center justify-center">
                   <span className="text-white text-base leading-none">+</span>
+               </div>
+            </button>
+
+            {/* 📦 STOCK MANAGEMENT TILE */}
+            <button
+               onClick={() => navigate('/staff/inventory')}
+               className="w-full flex items-center gap-3 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-2xl px-4 py-3.5 shadow-sm active:scale-[0.98] transition-all group"
+            >
+               <div className="w-9 h-9 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0 group-active:scale-90 transition-transform">
+                  <Package size={18} strokeWidth={2.5} className="text-blue-500" />
+               </div>
+               <div className="flex-1 text-left">
+                  <p className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-tight leading-none">Stock Management</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Manage inventory stock</p>
+               </div>
+               <div className="w-6 h-6 bg-slate-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                  <span className="text-slate-400 text-sm leading-none">›</span>
                </div>
             </button>
 
