@@ -22,6 +22,7 @@ const fcmRoutes = require('./routes/fcmRoutes');
 const promotionRoutes = require('./routes/promotionRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use('/api/fcm-tokens', fcmRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/inventory', inventoryRoutes);
 app.use('/api', publicRoutes);
 
 // Error Handling

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
    Save, Plus, X, CheckCircle2, XCircle, ChevronRight, ChevronDown, LayoutGrid, Sun, Moon, LogOut,
-   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone, Ticket
+   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone, Ticket, ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -725,6 +725,7 @@ const VendorProfile = () => {
                         { label: 'Basic Info', subtitle: 'Name, address & timing', icon: Store, key: 'basic', color: 'text-blue-500', bg: 'bg-blue-500/10' },
                         { label: 'Shop Media', subtitle: 'Gallery & featured images', icon: Camera, key: 'media', color: 'text-purple-500', bg: 'bg-purple-500/10' },
                         { label: 'Services', subtitle: 'Manage listings & pricing', icon: LayoutGrid, path: '/vendor/services', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                        { label: 'Inventory Management', subtitle: 'Stock control & catalog metrics', icon: ClipboardList, path: '/vendor/inventory', color: 'text-rose-500', bg: 'bg-rose-500/10' },
                         { label: 'Membership Plan', subtitle: 'Loyalty plans for clients', icon: Crown, path: '/vendor/membership', color: 'text-amber-500', bg: 'bg-amber-500/10', key: 'memberships' },
                         { label: 'Reviews & Ratings', subtitle: 'View client feedback & stars', icon: Star, path: '/vendor/reviews', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
                         { label: 'Live Report', subtitle: 'Performance PDF report', icon: FileDown, key: 'live_report', color: 'text-blue-500', bg: 'bg-blue-500/10' }

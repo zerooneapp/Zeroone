@@ -57,6 +57,7 @@ const PendingVerification = lazy(() => import('./pages/PendingVerification'));
 const LoyalCustomers = lazy(() => import('./pages/LoyalCustomers'));
 const MembershipPlans = lazy(() => import('./pages/MembershipPlans'));
 const MembershipPlanForm = lazy(() => import('./pages/MembershipPlanForm'));
+const VendorInventory = lazy(() => import('./pages/VendorInventory'));
 
 // Admin Pages - Lazy Loaded
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -287,6 +288,7 @@ function App() {
           <Route path="wallet" element={<VendorWallet />} />
           <Route path="reviews" element={<VendorReviews />} />
           <Route path="customers" element={<LoyalCustomers />} />
+          <Route path="inventory" element={<VendorInventory />} />
           <Route path="membership">
             <Route index element={<MembershipPlans />} />
             <Route path="add" element={<MembershipPlanForm />} />
