@@ -61,6 +61,10 @@ const VendorInventory = () => {
   const [logsPage, setLogsPage] = useState(1);
   const [logsTotalPages, setLogsTotalPages] = useState(1);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   const fetchHistoryLogs = async (itemId, page = 1, filters = logDateFilters) => {
     try {
       setLogsLoading(true);
@@ -152,6 +156,7 @@ const VendorInventory = () => {
 
   // Filtered Inventory List
   const filteredItems = useMemo(() => {
+    setCurrentPage(1); // reset page on filter change
     return items.filter((item) => {
       const matchesSearch =
         item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -165,6 +170,13 @@ const VendorInventory = () => {
       return matchesSearch && matchesCategory && matchesLowStock;
     });
   }, [items, searchQuery, selectedCategory, showLowStockOnly]);
+
+  // Paginated slice
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const paginatedItems = filteredItems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   // Unique Categories
   const categories = useMemo(() => {
@@ -543,104 +555,105 @@ const VendorInventory = () => {
             <p className="text-[10px] font-black capitalize tracking-widest text-slate-400">No items found</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredItems.map((item) => {
+          <div className="space-y-2">
+            {paginatedItems.map((item) => {
               const isLowStock = item.stock <= item.minStockLevel;
               return (
                 <div
                   key={item._id}
                   onClick={() => handleOpenHistory(item)}
                   className={cn(
-                    "p-3 bg-white dark:bg-gray-900 border rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-all relative overflow-hidden group shadow-sm cursor-pointer active:scale-[0.98]",
-                    isLowStock ? 'border-rose-500/20 bg-rose-500/[0.01]' : 'border-slate-100 dark:border-gray-800'
+                    "px-3 py-2.5 bg-white dark:bg-gray-900 border rounded-xl flex items-center justify-between gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-sm",
+                    isLowStock ? 'border-rose-500/20' : 'border-slate-100 dark:border-gray-800'
                   )}
                 >
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-[12px] sm:text-[13px] font-black text-slate-800 dark:text-white capitalize leading-tight">
+                  {/* Left: Name + badges + price */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="text-[12px] font-black text-slate-800 dark:text-white capitalize leading-none">
                         {item.itemName}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                        {item.sku && (
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-gray-800 text-[6.5px] font-black text-slate-400 uppercase tracking-widest">
-                            {item.sku}
-                          </span>
-                        )}
-                        {item.category && (
-                          <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[6.5px] font-black text-blue-500 uppercase tracking-widest">
-                            {item.category}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-[9px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide">
-                      <div>
-                        Cost: <span className="text-slate-800 dark:text-white font-black">₹{item.purchasePrice || 0}</span>
-                      </div>
-                      <div>
-                        Retail: <span className="text-slate-800 dark:text-white font-black">₹{item.price || 0}</span>
-                      </div>
-                      {item.supplierName && (
-                        <div className="hidden sm:block truncate max-w-[150px]">
-                          Supplier: <span className="text-slate-800 dark:text-white font-black">{item.supplierName}</span>
-                        </div>
+                      {item.category && (
+                        <span className="px-1 py-0.5 rounded bg-blue-500/10 text-[6px] font-black text-blue-500 uppercase tracking-widest">
+                          {item.category}
+                        </span>
+                      )}
+                      {isLowStock && (
+                        <span className="px-1 py-0.5 rounded bg-rose-500/10 text-[6px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-0.5">
+                          <AlertTriangle size={6} /> Low
+                        </span>
                       )}
                     </div>
-
-                    {isLowStock && (
-                      <p className="text-[7px] font-black text-rose-500 uppercase tracking-widest mt-1.5 flex items-center gap-1">
-                        <AlertTriangle size={8} />
-                        Low stock warning! Threshold: {item.minStockLevel}
-                      </p>
-                    )}
+                    <p className="text-[8px] font-bold text-slate-400 mt-0.5">
+                      ₹{item.purchasePrice || 0} cost · ₹{item.price || 0} retail
+                      {item.sku && <span className="ml-1 opacity-60">· {item.sku}</span>}
+                    </p>
                   </div>
 
-                  {/* Stock Controls & Actions */}
-                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-gray-800 w-full sm:w-auto">
-                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800 p-1 rounded-xl border border-slate-100 dark:border-gray-700">
+                  {/* Right: stock controls + actions */}
+                  <div
+                    className="flex items-center gap-1.5 shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center gap-1 bg-slate-50 dark:bg-gray-800 px-1.5 py-1 rounded-lg border border-slate-100 dark:border-gray-700">
                       <button
                         onClick={(e) => { e.stopPropagation(); triggerAdjustStock(item, -1); }}
-                        className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-1"
-                        title="Reduce stock by 1"
+                        className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-0.5"
                       >
-                        <MinusCircle size={15} />
+                        <MinusCircle size={13} />
                       </button>
                       <span className={cn(
-                        "text-[11px] font-black w-8 text-center",
+                        "text-[11px] font-black w-7 text-center",
                         isLowStock ? "text-rose-500" : "text-slate-800 dark:text-white"
                       )}>
                         {item.stock}
                       </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); triggerAdjustStock(item, 1); }}
-                        className="text-slate-400 hover:text-emerald-500 active:scale-90 transition-all p-1"
-                        title="Increase stock by 1"
+                        className="text-slate-400 hover:text-emerald-500 active:scale-90 transition-all p-0.5"
                       >
-                        <PlusCircle size={15} />
+                        <PlusCircle size={13} />
                       </button>
                     </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleOpenEdit(item); }}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-400 dark:text-gray-500 hover:text-[#00246b] dark:hover:text-white rounded-xl transition-all"
-                        title="Edit Item"
-                      >
-                        <Edit2 size={13} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDelete(item._id); }}
-                        className="p-2 hover:bg-rose-500/10 text-slate-400 dark:text-gray-500 hover:text-rose-500 rounded-xl transition-all"
-                        title="Delete Item"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleOpenEdit(item); }}
+                      className="p-1.5 hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-400 hover:text-[#00246b] dark:hover:text-white rounded-lg transition-all"
+                    >
+                      <Edit2 size={12} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(item._id); }}
+                      className="p-1.5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 rounded-lg transition-all"
+                    >
+                      <Trash2 size={12} />
+                    </button>
                   </div>
                 </div>
               );
             })}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-3">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="px-3 py-1.5 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-lg text-[9px] font-black uppercase tracking-wider text-slate-500 disabled:opacity-40 active:scale-95 transition-all shadow-sm"
+                >
+                  Prev
+                </button>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                  {currentPage} / {totalPages} · {filteredItems.length} items
+                </span>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="px-3 py-1.5 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-lg text-[9px] font-black uppercase tracking-wider text-slate-500 disabled:opacity-40 active:scale-95 transition-all shadow-sm"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
