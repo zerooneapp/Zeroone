@@ -41,7 +41,8 @@ const StaffInventory = () => {
   const [adjustmentDelta, setAdjustmentDelta] = useState(0);
   const [adjustFormData, setAdjustFormData] = useState({
     customerName: '',
-    customerContact: ''
+    customerContact: '',
+    quantity: 1
   });
   const [adjustLoading, setAdjustLoading] = useState(false);
 
@@ -117,12 +118,18 @@ const StaffInventory = () => {
     e.stopPropagation();
     setAdjustingItem(item);
     setAdjustmentDelta(delta);
-    setAdjustFormData({ customerName: '', customerContact: '' });
+    setAdjustFormData({ customerName: '', customerContact: '', quantity: 1 });
   };
 
   const handleAdjustSubmit = async (e) => {
     e.preventDefault();
     if (!adjustingItem) return;
+
+    const qty = parseInt(adjustFormData.quantity, 10);
+    if (isNaN(qty) || qty <= 0) {
+      return toast.error('Please enter a valid quantity');
+    }
+    const finalDelta = adjustmentDelta > 0 ? qty : -qty;
 
     const contact = adjustFormData.customerContact.trim();
     if (contact && !/^[6-9]\d{9}$/.test(contact)) {
@@ -132,7 +139,7 @@ const StaffInventory = () => {
     try {
       setAdjustLoading(true);
       const res = await api.post(`/inventory/staff/${adjustingItem._id}/adjust`, {
-        change: adjustmentDelta,
+        change: finalDelta,
         customerName: adjustFormData.customerName,
         customerContact: contact
       });
@@ -572,10 +579,25 @@ const StaffInventory = () => {
               <form onSubmit={handleAdjustSubmit} className="p-4 space-y-4">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                   Adjusting <span className="text-slate-800 dark:text-white font-black">{adjustingItem.itemName}</span> by{' '}
-                  <span className={adjustmentDelta > 0 ? 'text-emerald-500' : 'text-rose-500'}>
-                    {adjustmentDelta > 0 ? `+${adjustmentDelta}` : adjustmentDelta}
-                  </span>
+                  <span className={adjustmentDelta > 0 ? 'text-emerald-500 font-black' : 'text-rose-500 font-black'}>
+                    {adjustmentDelta > 0 ? 'increasing' : 'decreasing'} stock
+                  </span>.
                 </p>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={adjustFormData.quantity}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value, 10) || 1);
+                      setAdjustFormData({ ...adjustFormData, quantity: val });
+                    }}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20"
+                    placeholder="Enter quantity"
+                  />
+                </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Customer Name (Optional)</label>
                   <input type="text" value={adjustFormData.customerName}

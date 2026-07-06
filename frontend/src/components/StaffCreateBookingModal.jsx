@@ -116,6 +116,10 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
       return toast.error('Please fill all required fields');
     }
 
+    if (formData.phone && !/^[6-9]\d{9}$/.test(formData.phone)) {
+      return toast.error('Please enter a valid 10-digit contact number');
+    }
+
     const startTime = dayjs(`${formData.date} ${formData.time}`).toISOString();
 
     try {
@@ -207,6 +211,24 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                   onChange={(e) => {
                     const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
                     setFormData({ ...formData, name: val });
+                  }}
+                  className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all caret-[#00246b] dark:caret-white placeholder:text-slate-400/70 dark:placeholder:text-gray-500/70"
+                />
+              </div>
+
+              {/* Customer Phone (Optional) */}
+              <div className="space-y-2">
+                <label className="text-[9px] font-black capitalize text-gray-400 tracking-widest px-1 flex items-center gap-1.5">
+                  <Phone size={12} /> Contact Number (Optional)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="e.g. 9876543210"
+                  maxLength={10}
+                  value={formData.phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, ''); // only allow digits
+                    setFormData({ ...formData, phone: val });
                   }}
                   className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all caret-[#00246b] dark:caret-white placeholder:text-slate-400/70 dark:placeholder:text-gray-500/70"
                 />

@@ -138,7 +138,7 @@ const adjustStock = async (req, res) => {
     const vendorId = isStaffAdjust ? req.staff.vendorId : req.vendor._id;
 
     const { id } = req.params;
-    const { change, customerName, customerContact } = req.body;
+    const { change, customerName, customerContact, staffName } = req.body;
 
     if (change === undefined || typeof change !== 'number') {
       return res.status(400).json({ message: 'Stock change value is required' });
@@ -170,6 +170,8 @@ const adjustStock = async (req, res) => {
     if (isStaffAdjust) {
       logEntry.staffId = req.staff._id;
       logEntry.staffName = req.staff.name || '';
+    } else if (staffName) {
+      logEntry.staffName = staffName;
     }
 
     await InventoryLog.create(logEntry);

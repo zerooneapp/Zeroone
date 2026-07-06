@@ -3,7 +3,7 @@ import {
   User, ShieldCheck, Calendar, Phone,
   LogOut, Briefcase, Award,
   CheckCircle, TrendingUp, IndianRupee, ArrowRight,
-  ChevronLeft, Star
+  ChevronLeft, Star, Package
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -225,8 +225,24 @@ const StaffAccount = () => {
           </div>
 
           <button
-            onClick={() => navigate('/staff/history')}
+            onClick={() => navigate('/staff/inventory')}
             className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 active:scale-[0.98] transition-all shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-500">
+                <Package size={18} strokeWidth={2.5} />
+              </div>
+              <div className="text-left">
+                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Stock Management</h4>
+                <p className="text-[10px] font-bold text-slate-400">Manage inventory stock</p>
+              </div>
+            </div>
+            <ArrowRight size={16} className="text-slate-300" />
+          </button>
+
+          <button
+            onClick={() => navigate('/staff/history')}
+            className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 active:scale-[0.98] transition-all shadow-sm mt-3"
           >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-500">

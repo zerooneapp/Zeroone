@@ -51,7 +51,9 @@ const VendorInventory = () => {
   const [adjustmentDelta, setAdjustmentDelta] = useState(0);
   const [adjustFormData, setAdjustFormData] = useState({
     customerName: '',
-    customerContact: ''
+    customerContact: '',
+    staffName: '',
+    quantity: 1
   });
 
   // Stock History Logs State
@@ -140,12 +142,18 @@ const VendorInventory = () => {
   const triggerAdjustStock = (item, delta) => {
     setAdjustingItem(item);
     setAdjustmentDelta(delta);
-    setAdjustFormData({ customerName: '', customerContact: '' });
+    setAdjustFormData({ customerName: '', customerContact: '', staffName: '', quantity: 1 });
   };
 
   const handleAdjustStockSubmit = async (e) => {
     e.preventDefault();
     if (!adjustingItem) return;
+
+    const qty = parseInt(adjustFormData.quantity, 10);
+    if (isNaN(qty) || qty <= 0) {
+      return toast.error('Please enter a valid quantity');
+    }
+    const finalDelta = adjustmentDelta > 0 ? qty : -qty;
 
     const contact = adjustFormData.customerContact.trim();
     if (contact && !/^[6-9]\d{9}$/.test(contact)) {
@@ -155,9 +163,10 @@ const VendorInventory = () => {
     try {
       setLoading(true);
       const res = await api.post(`/inventory/${adjustingItem._id}/adjust`, {
-        change: adjustmentDelta,
+        change: finalDelta,
         customerName: adjustFormData.customerName,
-        customerContact: contact
+        customerContact: contact,
+        staffName: adjustFormData.staffName
       });
       setItems(items.map((item) => (item._id === adjustingItem._id ? res.data : item)));
       toast.success('Stock adjusted successfully');
@@ -377,9 +386,9 @@ const VendorInventory = () => {
                           </p>
 
                           {/* Who adjusted */}
-                          {log.adjustedBy === 'staff' ? (
+                          {log.staffName ? (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-500/10 text-purple-500 rounded text-[7.5px] font-black uppercase tracking-wider">
-                              👤 Staff: {log.staffName || 'Unknown'}
+                              👤 Staff: {log.staffName}
                             </span>
                           ) : null}
 
@@ -857,8 +866,27 @@ const VendorInventory = () => {
 
               <form onSubmit={handleAdjustStockSubmit} className="p-4 space-y-4">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                  Adjusting stock for <span className="text-slate-800 dark:text-white font-black">{adjustingItem.itemName}</span> by {adjustmentDelta > 0 ? `+${adjustmentDelta}` : adjustmentDelta}.
+                  Adjusting stock for <span className="text-slate-800 dark:text-white font-black">{adjustingItem.itemName}</span> by{' '}
+                  <span className={adjustmentDelta > 0 ? 'text-emerald-500 font-black' : 'text-rose-500 font-black'}>
+                    {adjustmentDelta > 0 ? 'increasing' : 'decreasing'} stock
+                  </span>.
                 </p>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={adjustFormData.quantity}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value, 10) || 1);
+                      setAdjustFormData({ ...adjustFormData, quantity: val });
+                    }}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20"
+                    placeholder="Enter quantity"
+                  />
+                </div>
 
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Customer Name (Optional)</label>
@@ -883,6 +911,17 @@ const VendorInventory = () => {
                     }}
                     className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20"
                     placeholder="Enter 10-digit number"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Staff Name (Optional)</label>
+                  <input
+                    type="text"
+                    value={adjustFormData.staffName}
+                    onChange={(e) => setAdjustFormData({ ...adjustFormData, staffName: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20"
+                    placeholder="Enter staff name"
                   />
                 </div>
 
