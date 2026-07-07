@@ -1128,16 +1128,10 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="bg-white dark:bg-gray-900 rounded-xl p-3 sm:p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
                   >
-                     <div className="flex items-center gap-2.5">
-                        <div className="p-2 bg-amber-500/10 text-amber-500 rounded-lg">
-                           <History size={16} />
-                        </div>
-                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Booking History</h2>
-                     </div>
+
 
                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
-                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-2.5">
                            <input
                               type="date"
                               value={historyFilters.from}
@@ -1149,8 +1143,7 @@ const VendorProfile = () => {
                         <div className="text-slate-300 dark:text-gray-700 font-black text-[10px] sm:text-xs shrink-0 flex justify-center">
                            -
                         </div>
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
-                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-2.5">
                            <input
                               type="date"
                               value={historyFilters.to}
@@ -1253,16 +1246,10 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="bg-white dark:bg-gray-900 rounded-xl p-3 sm:p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
                   >
-                     <div className="flex items-center gap-2.5">
-                        <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
-                           <Wallet size={16} />
-                        </div>
-                        <h2 className="text-[10px] font-black capitalize tracking-widest text-gray-400">Transactions</h2>
-                     </div>
+
 
                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
-                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">Start Date</label>
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-2.5">
                            <input
                               type="date"
                               value={transactionFilters.from}
@@ -1274,8 +1261,7 @@ const VendorProfile = () => {
                         <div className="text-slate-300 dark:text-gray-700 font-black text-[10px] sm:text-xs shrink-0 flex justify-center">
                            -
                         </div>
-                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-1.5">
-                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-0.5">End Date</label>
+                        <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-2.5">
                            <input
                               type="date"
                               value={transactionFilters.to}

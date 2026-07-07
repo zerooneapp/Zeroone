@@ -195,9 +195,8 @@ const VendorBookings = () => {
 
           {/* 📅 PREMIUM COMPACT DATE FILTER */}
           <div className="mt-3 flex items-center gap-1.5 bg-slate-50/50 dark:bg-gray-800/20 p-1 rounded-2xl border border-slate-100 dark:border-gray-800">
-            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
-              <label className="text-[10px] font-semibold text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">Start date</label>
-              <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
+            <div className="flex-1 flex flex-col px-3 py-2.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
+              <div className="relative flex items-center justify-between pointer-events-none z-10">
                 <span className="text-[10px] font-bold text-gray-900 dark:text-white tracking-widest">
                   {fromDate ? dayjs(fromDate).format('DD-MM-YYYY') : 'Select Date'}
                 </span>
@@ -215,9 +214,8 @@ const VendorBookings = () => {
             <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20 text-slate-400 text-[10px] font-bold shrink-0">
               -
             </div>
-            <div className="flex-1 flex flex-col px-3 py-1.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
-              <label className="text-[10px] font-semibold text-gray-400 tracking-[0.2em] mb-0.5 pointer-events-none relative z-10">End date</label>
-              <div className="relative flex items-center justify-between pointer-events-none z-10 mt-0.5">
+            <div className="flex-1 flex flex-col px-3 py-2.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
+              <div className="relative flex items-center justify-between pointer-events-none z-10">
                 <span className="text-[10px] font-bold text-gray-900 dark:text-white tracking-widest">
                   {toDate ? dayjs(toDate).format('DD-MM-YYYY') : 'Select Date'}
                 </span>

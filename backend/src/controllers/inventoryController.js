@@ -144,6 +144,10 @@ const adjustStock = async (req, res) => {
       return res.status(400).json({ message: 'Stock change value is required' });
     }
 
+    if (isStaffAdjust && change > 0) {
+      return res.status(403).json({ message: 'Staff is not authorized to increase stock quantity. Only the store owner can add stock.' });
+    }
+
     const item = await InventoryItem.findOne({ _id: id, vendorId });
     if (!item) {
       return res.status(404).json({ message: 'Inventory item not found' });

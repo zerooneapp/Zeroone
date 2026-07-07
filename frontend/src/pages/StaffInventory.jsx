@@ -211,12 +211,6 @@ const StaffInventory = () => {
             )}>
               {historyItem.stock}
             </span>
-            <button
-              onClick={(e) => triggerAdjust(e, historyItem, 1)}
-              className="text-slate-400 hover:text-emerald-500 active:scale-90 transition-all p-1"
-            >
-              <PlusCircle size={16} />
-            </button>
           </div>
         </header>
 
@@ -542,13 +536,6 @@ const StaffInventory = () => {
                       )}>
                         {item.stock}
                       </span>
-                      <button
-                        onClick={(e) => triggerAdjust(e, item, 1)}
-                        className="text-slate-400 hover:text-emerald-500 active:scale-90 transition-all p-1"
-                        title="Increase stock"
-                      >
-                        <PlusCircle size={17} />
-                      </button>
                     </div>
                   </div>
                 </div>

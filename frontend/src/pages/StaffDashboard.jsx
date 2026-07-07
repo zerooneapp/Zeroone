@@ -195,29 +195,29 @@ const StaffDashboard = () => {
                         <motion.div
                            initial={{ opacity: 0, scale: 0.98 }}
                            animate={{ opacity: 1, scale: 1 }}
-                           className="bg-white dark:bg-gray-900 p-3 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all"
+                           className="bg-white dark:bg-gray-900 p-2.5 px-3 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all"
                         >
-                           <div className="flex items-center justify-between mb-2.5">
-                              <div className="flex items-center gap-2.5">
-                                 <div className="w-9 h-9 bg-slate-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-slate-400 dark:text-gray-300 overflow-hidden border border-slate-100 dark:border-gray-700/60">
+                           <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                 <div className="w-7 h-7 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-400 dark:text-gray-300 overflow-hidden border border-slate-100 dark:border-gray-700/60">
                                     {currentTask.userId?.image ? (
                                        <img src={currentTask.userId.image} className="w-full h-full object-cover" alt="Client" />
                                     ) : (
-                                       <User size={16} strokeWidth={3} />
+                                       <User size={13} strokeWidth={3} />
                                     )}
                                  </div>
                                  <div>
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                       <h3 className="text-[13px] font-black text-slate-900 dark:text-white leading-none">
+                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                       <h3 className="text-[12px] font-black text-slate-900 dark:text-white leading-none">
                                           {currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client'}
                                        </h3>
-                                       <span className="text-[7.5px] font-black bg-primary/5 dark:bg-white/10 text-primary dark:text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                                       <span className="text-[7px] font-black bg-primary/5 dark:bg-white/10 text-primary dark:text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider">
                                           Active
                                        </span>
                                     </div>
-                                    <div className="text-[9px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight leading-none flex items-center gap-2">
+                                    <div className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight leading-none flex items-center gap-1.5">
                                        <span className="flex items-center gap-0.5 text-primary/75 dark:text-white/60">
-                                          <Clock size={11} strokeWidth={3} /> {formatTime(currentTask.startTime)}
+                                          <Clock size={9} strokeWidth={3} /> {formatTime(currentTask.startTime)}
                                        </span>
                                        <span className="w-1 h-1 bg-slate-200 dark:bg-gray-700 rounded-full" />
                                        <span>
@@ -228,19 +228,19 @@ const StaffDashboard = () => {
                               </div>
                            </div>
 
-                           <div className="flex flex-wrap gap-x-3 mb-2.5 px-0.5">
+                           <div className="flex flex-wrap gap-x-2 mb-2 px-0.5">
                               {currentTask.services?.map((s, idx) => (
-                                 <div key={idx} className="text-[9px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-1.5 tracking-tight">
+                                 <div key={idx} className="text-[8px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-1 tracking-tight">
                                     <div className="w-1 h-1 bg-primary/40 dark:bg-white/30 rounded-full" />
                                     {s.name || s.serviceId?.name || 'Service Task'}
                                  </div>
                               ))}
                            </div>
 
-                           <div className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-gray-800/60 mt-2 px-0.5">
-                              <div className="flex items-center gap-1.5">
-                                 <MapPin size={11} className="text-gray-400 shrink-0" />
-                                 <p className="text-[9px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[120px]">
+                           <div className="flex items-center justify-between py-1.5 border-t border-slate-100 dark:border-gray-800/60 px-0.5">
+                              <div className="flex items-center gap-1">
+                                 <MapPin size={9} className="text-gray-400 shrink-0" />
+                                 <p className="text-[8px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[120px]">
                                     {canNavigateToCustomer ? currentTask.serviceAddress : 'Shop Service'}
                                  </p>
                                  {canNavigateToCustomer && (
@@ -248,16 +248,16 @@ const StaffDashboard = () => {
                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
                                        target="_blank"
                                        rel="noopener noreferrer"
-                                       className="text-[8px] font-black text-primary uppercase tracking-widest underline decoration-dotted ml-1"
+                                       className="text-[7px] font-black text-primary uppercase tracking-widest underline decoration-dotted ml-1"
                                     >
                                        Nav
                                     </a>
                                  )}
                               </div>
-                              <p className="text-[13px] font-black text-slate-900 dark:text-white tracking-tighter leading-none flex items-center gap-1">
+                              <p className="text-[12px] font-black text-slate-900 dark:text-white tracking-tighter leading-none flex items-center gap-1">
                                  {currentTask.originalTotalPrice > 0 && currentTask.originalTotalPrice !== currentTask.totalPrice ? (
                                     <>
-                                       <span className="line-through text-[10px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{currentTask.originalTotalPrice}</span>
+                                       <span className="line-through text-[9px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{currentTask.originalTotalPrice}</span>
                                        <span>₹{currentTask.totalPrice}</span>
                                     </>
                                  ) : (

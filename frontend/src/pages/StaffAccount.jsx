@@ -96,28 +96,27 @@ const StaffAccount = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-[46px] pb-3 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm flex items-center justify-between shrink-0">
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-[46px] pb-3 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm flex items-center justify-between shrink-0 max-w-md mx-auto">
         <h1 className="text-xl font-black text-[#00246b] dark:text-white tracking-tight leading-none">
           Profile
         </h1>
       </header>
 
-      <div className="relative px-4 pt-[110px] pb-4 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-2xl shadow-xl shadow-slate-200/50 dark:shadow-none">
-        <div className="flex flex-col items-center text-center space-y-2.5 pt-0">
-          <div className="relative">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-gray-900 rounded-2xl border-2 border-white dark:border-gray-950 shadow-xl overflow-hidden flex items-center justify-center">
-              {profile?.image ? <img src={profile.image} className="w-full h-full object-cover" alt={profile?.name || 'Staff'} /> : <User size={28} className="text-slate-300" />}
+      <div className="max-w-md mx-auto">
+        <div className="relative px-4 pt-[110px] pb-4 bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800 rounded-b-2xl shadow-xl shadow-slate-200/50 dark:shadow-none">
+          <div className="flex flex-col items-center text-center space-y-2.5 pt-0">
+            <div className="relative">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-gray-900 rounded-2xl border-2 border-white dark:border-gray-950 shadow-xl overflow-hidden flex items-center justify-center">
+                {profile?.image ? <img src={profile.image} className="w-full h-full object-cover" alt={profile?.name || 'Staff'} /> : <User size={28} className="text-slate-300" />}
+              </div>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center border-2 border-white dark:border-gray-950 shadow-md text-white">
-              <CheckCircle size={10} strokeWidth={3} />
-            </div>
-          </div>
-          <div className="space-y-0.5">
-            <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{profile?.name}</h1>
-            <div className="flex items-center justify-center gap-1.5">
-              <span className="text-[8px] font-black text-slate-400 capitalize tracking-[0.2em]">Professional Partner</span>
-              <div className="w-1 h-1 bg-primary rounded-full" />
-              <span className="text-[8px] font-black text-primary dark:text-white capitalize tracking-[0.2em]">{profile?.vendorId?.shopName || 'Market'}</span>
+            <div className="space-y-0.5 mt-2">
+              <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-tight text-center">{profile?.name}</h1>
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="text-[8px] font-black text-slate-400 capitalize tracking-[0.2em]">Professional Partner</span>
+                <div className="w-1 h-1 bg-primary rounded-full" />
+                <span className="text-[8px] font-black text-primary dark:text-white capitalize tracking-[0.2em]">{profile?.vendorId?.shopName || 'Market'}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -137,22 +136,8 @@ const StaffAccount = () => {
           </div>
         </div>
 
-        <button
-          onClick={() => navigate('/vendor-privacy-policy')}
-          className="mt-3.5 w-full flex items-center justify-between p-2.5 px-3.5 bg-slate-50/50 dark:bg-gray-900/50 rounded-xl border border-white dark:border-gray-800 active:scale-[0.98] transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-              <ShieldCheck size={16} className="text-indigo-500" />
-            </div>
-            <div className="text-left">
-              <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight">Privacy & Conduct</h4>
-              <p className="text-[8px] font-bold text-slate-400">View Staff Guidelines</p>
-            </div>
-          </div>
-          <ArrowRight size={14} className="text-slate-300" />
-        </button>
-      </div>
+
+
 
       <div className="px-3 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
         <div className="space-y-4">
@@ -189,6 +174,23 @@ const StaffAccount = () => {
                 </div>
               </div>
             </div>
+
+            {/* 🛡️ PRIVACY & CONDUCT CARD SHIFTED HERE */}
+            <button
+              onClick={() => navigate('/vendor-privacy-policy')}
+              className="w-full flex items-center justify-between relative z-10 text-left active:scale-[0.99] transition-all"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 rounded-xl flex items-center justify-center shadow-sm">
+                  <ShieldCheck size={18} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Privacy & Conduct</p>
+                  <p className="text-xs font-black text-slate-900 dark:text-white mt-1 tracking-tight">View Staff Guidelines</p>
+                </div>
+              </div>
+              <ArrowRight size={16} className="text-slate-300" />
+            </button>
           </div>
         </div>
 
@@ -327,6 +329,8 @@ const StaffAccount = () => {
           </div>
         )}
       </AnimatePresence>
+
+      </div>
 
       <Navbar />
     </div>

@@ -134,8 +134,7 @@ const StaffBookings = () => {
         <div className="space-y-3">
           {/* Row 1: Range Filter */}
           <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-gray-100 dark:border-gray-800/50">
-            <div className="flex-1 space-y-1">
-              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
+            <div className="flex-1">
               <div className="relative group">
                 <input
                   type="date"
@@ -147,12 +146,11 @@ const StaffBookings = () => {
               </div>
             </div>
 
-            <div className="pt-3 text-gray-300">
+            <div className="text-gray-300 flex items-center justify-center">
               <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
             </div>
 
-            <div className="flex-1 space-y-1">
-              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
+            <div className="flex-1">
               <div className="relative group">
                 <input
                   type="date"
@@ -198,46 +196,46 @@ const StaffBookings = () => {
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
                   key={booking._id}
-                  className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden active:bg-gray-50 dark:active:bg-gray-800 transition-colors"
+                  className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden active:bg-gray-50 dark:active:bg-gray-800 transition-colors"
                 >
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-300 overflow-hidden">
-                        {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={20} />}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 overflow-hidden">
+                        {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={16} />}
                       </div>
                       <div>
-                        <h3 className="text-sm font-black text-slate-900 dark:text-white leading-none">
+                        <h3 className="text-xs font-black text-slate-900 dark:text-white leading-none">
                           {booking.walkInCustomerName || booking.userId?.name || 'Client'}
                         </h3>
-                        <div className="text-[10px] font-black text-primary dark:text-white uppercase tracking-tighter mt-2 flex items-center gap-3">
-                          <div className="flex items-center gap-1">
-                            <Clock size={11} strokeWidth={3} /> {formatTime(booking.startTime)}
+                        <div className="text-[9px] font-black text-primary dark:text-white uppercase tracking-tighter mt-1 flex items-center gap-2.5">
+                          <div className="flex items-center gap-0.5">
+                            <Clock size={10} strokeWidth={3} /> {formatTime(booking.startTime)}
                           </div>
-                          <div className="flex items-center gap-2 opacity-70">
-                            <Calendar size={11} strokeWidth={3} /> {dayjs(booking.startTime).format('DD-MM-YYYY')}
+                          <div className="flex items-center gap-1.5 opacity-70">
+                            <Calendar size={10} strokeWidth={3} /> {dayjs(booking.startTime).format('DD-MM-YYYY')}
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-3 mb-2.5 px-1">
-                    <div className="space-y-1.5">
+                  <div className="space-y-2 mb-2 px-1">
+                    <div className="space-y-0.5">
                       {booking.services?.map((s, idx) => (
-                        <div key={idx} className="text-[10px] font-bold text-slate-500 dark:text-white flex items-center gap-2 tracking-tight">
-                          <div className="w-1.5 h-1.5 bg-primary/30 rounded-full" />
+                        <div key={idx} className="text-[9px] font-bold text-slate-500 dark:text-white flex items-center gap-1.5 tracking-tight">
+                          <div className="w-1 h-1 bg-primary/30 rounded-full" />
                           {s.name || s.serviceId?.name || 'Service Task'}
                         </div>
                       ))}
                     </div>
 
-                    <div className="flex items-center gap-5 py-1.5 border-y border-slate-50 dark:border-gray-800/40 my-1">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight leading-none">Price</span>
-                        <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1">
+                    <div className="flex items-center gap-4 py-1 border-y border-slate-50 dark:border-gray-800/40 my-0.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-tight leading-none">Price</span>
+                        <span className="text-[11px] font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1">
                           {booking.originalTotalPrice > 0 && booking.originalTotalPrice !== booking.totalPrice ? (
                             <>
-                              <span className="line-through text-[10px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{booking.originalTotalPrice}</span>
+                              <span className="line-through text-[9px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{booking.originalTotalPrice}</span>
                               <span>₹{booking.totalPrice}</span>
                             </>
                           ) : (
@@ -245,10 +243,10 @@ const StaffBookings = () => {
                           )}
                         </span>
                       </div>
-                      <div className="w-px h-6 bg-slate-100 dark:bg-gray-800" />
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight leading-none">Estimate</span>
-                        <span className="text-xs font-black text-slate-600 dark:text-gray-400 uppercase tracking-tight leading-none">{booking.totalDuration} Mins</span>
+                      <div className="w-px h-5 bg-slate-100 dark:bg-gray-800" />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-tight leading-none">Estimate</span>
+                        <span className="text-[11px] font-black text-slate-600 dark:text-gray-400 uppercase tracking-tight leading-none">{booking.totalDuration} Mins</span>
                       </div>
                     </div>
 
@@ -259,7 +257,7 @@ const StaffBookings = () => {
                       {booking.canCancel && (
                         <button
                           onClick={() => handleStatusUpdate(booking._id, 'cancel')}
-                          className="px-6 h-8 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest active:scale-95 transition-transform"
+                          className="px-5 h-9 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center font-black text-[10.5px] uppercase tracking-wider active:scale-95 transition-transform"
                         >
                           Cancel
                         </button>
@@ -269,9 +267,9 @@ const StaffBookings = () => {
                           setSelectedBookingId(booking._id);
                           setIsCompleteModalOpen(true);
                         }}
-                        className="flex-1 h-8 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-tight shadow-xl active:scale-95 transition-transform"
+                        className="flex-1 h-9 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10.5px] uppercase tracking-tight shadow-md active:scale-95 transition-transform"
                       >
-                        <CheckCircle size={18} />
+                        <CheckCircle size={16} />
                         Complete
                       </button>
                     </div>

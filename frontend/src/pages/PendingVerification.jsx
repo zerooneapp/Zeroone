@@ -193,7 +193,7 @@ const PendingVerification = () => {
                         <div className="space-y-4">
                             <h1 className="text-3xl font-black tracking-tighter leading-tight text-[#00246b] dark:text-white">Verification in Progress</h1>
                             <p className="text-[#00246b]/60 dark:text-gray-400 font-bold leading-relaxed">
-                                Thank you for choosing <span className="text-primary font-black">ZeroOne</span>. Your documents have been received and are currently under review by our compliance team.
+                                Thank you for choosing <span className="text-primary dark:text-white font-black">ZeroOne</span>. Your documents have been received and are currently under review by our compliance team.
                             </p>
                         </div>
 
@@ -207,7 +207,7 @@ const PendingVerification = () => {
                                     <p className="text-sm font-black text-[#00246b] dark:text-white">Application Received</p>
                                 </div>
                             </div>
-                            <div className="w-full h-px bg-gray-100 dark:bg-gray-800 ml-14" />
+                            <div className="h-px bg-gray-100 dark:bg-gray-800 ml-14" />
                             <div className="flex items-center gap-4 text-left">
                                 <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white animate-pulse">
                                     <Loader2 size={20} className="animate-spin" />
