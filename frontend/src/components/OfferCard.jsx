@@ -1,9 +1,9 @@
 import React from 'react';
-import { Tag, Calendar, Scissors, Edit3, Trash2, IndianRupee, Percent } from 'lucide-react';
+import { Tag, Calendar, Scissors, Edit3, Trash2, IndianRupee, Percent, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
-const OfferCard = ({ offer, onToggle, onEdit, onDelete }) => {
+const OfferCard = ({ offer, onToggle, onEdit, onDelete, onShare }) => {
   const isExpired = new Date(offer.expiryDate) < new Date();
   
   return (
@@ -26,6 +26,13 @@ const OfferCard = ({ offer, onToggle, onEdit, onDelete }) => {
          </div>
          
          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onShare && onShare(offer)}
+              className="p-2 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg active:scale-90 transition-all"
+              title="Share via WhatsApp"
+            >
+               <Share2 size={15} />
+            </button>
             <button 
               onClick={() => onDelete(offer._id)}
               className="p-2 bg-gray-50 dark:bg-gray-800 text-red-500 rounded-lg hover:bg-red-500/10 hover:text-red-600 transition-all active:scale-90"

@@ -17,6 +17,8 @@ const {
   getVendorSubscriptionState
 } = require('../services/walletService');
 const Staff = require('../models/Staff');
+const VendorClosure = require('../models/VendorClosure');
+const VendorAvailability = require('../models/VendorAvailability');
 const { hasLegacyShopOfflineClosure } = require('../services/vendorClosureService');
 
 const getStaffNotificationTarget = (staff) => staff?._id || null;
@@ -1034,76 +1036,147 @@ const getLiveReport = async (req, res) => {
       return res.status(400).json({ message: 'From and To dates are required' });
     }
 
-    const start = moment(from).startOf('day').toDate();
-    const end = moment(to).endOf('day').toDate();
+    const start = moment(from).tz('Asia/Kolkata').startOf('day').toDate();
+    const end = moment(to).tz('Asia/Kolkata').endOf('day').toDate();
 
-    const report = await Booking.aggregate([
-      {
-        $match: {
-          vendorId: vendor._id,
-          startTime: { $gte: start, $lte: end }
-        }
-      },
-      {
-        $group: {
-          _id: '$staffId',
-          totalBookings: { $sum: 1 },
-          totalEarning: {
-            $sum: {
-              $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
-            }
-          },
-          cancelledByStaff: {
-            $sum: {
-              $cond: [
-                { 
-                  $and: [
-                    { $eq: ['$status', 'cancelled'] }, 
-                    { $eq: ['$cancelledByRole', 'staff'] }
-                  ] 
-                }, 
-                1, 
-                0
-              ]
-            }
-          },
-          activeDays: {
-            $addToSet: {
-              $dateToString: { format: "%Y-%m-%d", date: "$startTime", timezone: "Asia/Kolkata" }
+    // Fetch vendor availability (weekly schedule) and closures in range
+    const [report, availability, closures] = await Promise.all([
+      Booking.aggregate([
+        {
+          $match: {
+            vendorId: vendor._id,
+            startTime: { $gte: start, $lte: end }
+          }
+        },
+        {
+          $group: {
+            _id: '$staffId',
+            totalBookings: { $sum: 1 },
+            totalEarning: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
+              }
+            },
+            cancelledByStaff: {
+              $sum: {
+                $cond: [
+                  { 
+                    $and: [
+                      { $eq: ['$status', 'cancelled'] }, 
+                      { $eq: ['$cancelledByRole', 'staff'] }
+                    ] 
+                  }, 
+                  1, 
+                  0
+                ]
+              }
+            },
+            activeDays: {
+              $addToSet: {
+                $dateToString: { format: "%Y-%m-%d", date: "$startTime", timezone: "Asia/Kolkata" }
+              }
             }
           }
-        }
-      },
-      {
-        $lookup: {
-          from: 'staffs',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'staffInfo'
-        }
-      },
-      { $unwind: { path: '$staffInfo', preserveNullAndEmptyArrays: false } },
-      {
-        $project: {
-          staffName: '$staffInfo.name',
-          totalBookings: 1,
-          totalEarning: 1,
-          cancelledByStaff: 1,
-          attendance: { $size: '$activeDays' }
-        }
-      },
-      { $sort: { staffName: 1 } }
+        },
+        {
+          $lookup: {
+            from: 'staffs',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'staffInfo'
+          }
+        },
+        { $unwind: { path: '$staffInfo', preserveNullAndEmptyArrays: false } },
+        {
+          $project: {
+            staffName: '$staffInfo.name',
+            totalBookings: 1,
+            totalEarning: 1,
+            cancelledByStaff: 1,
+            activeDays: 1,
+            attendance: { $size: '$activeDays' }
+          }
+        },
+        { $sort: { staffName: 1 } }
+      ]),
+      VendorAvailability.find({ vendorId: vendor._id }).lean(),
+      VendorClosure.find({
+        vendorId: vendor._id,
+        status: 'active',
+        startTime: { $lt: end },
+        endTime: { $gt: start }
+      }).lean()
     ]);
+
+    // Build availability map: day abbreviation -> { openTime, closeTime }
+    const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const availMap = {};
+    availability.forEach(a => { availMap[a.day] = a; });
+
+    // For each staff row, compute halfDays using closures
+    const enriched = report.map(item => {
+      let fullDays = 0;
+      let halfDays = 0;
+
+      (item.activeDays || []).forEach(dateStr => {
+        const dayMoment = moment.tz(dateStr, 'YYYY-MM-DD', 'Asia/Kolkata');
+        const dayAbbr = DAY_ABBR[dayMoment.day()];
+        const avail = availMap[dayAbbr];
+
+        // Default working hours: 9am–9pm (720 mins) if no availability record
+        let workStart, workEnd;
+        if (avail && avail.isOpen) {
+          const [openH, openM] = (avail.openTime || '09:00').split(':').map(Number);
+          const [closeH, closeM] = (avail.closeTime || '21:00').split(':').map(Number);
+          workStart = dayMoment.clone().hours(openH).minutes(openM).seconds(0);
+          workEnd = dayMoment.clone().hours(closeH).minutes(closeM).seconds(0);
+        } else {
+          workStart = dayMoment.clone().hours(9).minutes(0).seconds(0);
+          workEnd = dayMoment.clone().hours(21).minutes(0).seconds(0);
+        }
+        const totalWorkMins = workEnd.diff(workStart, 'minutes');
+        if (totalWorkMins <= 0) { fullDays++; return; }
+
+        // Sum closure minutes that overlap this working day
+        let closedMins = 0;
+        closures.forEach(c => {
+          const cStart = moment(c.startTime).tz('Asia/Kolkata');
+          const cEnd = moment(c.endTime).tz('Asia/Kolkata');
+          const overlapStart = moment.max(cStart, workStart);
+          const overlapEnd = moment.min(cEnd, workEnd);
+          if (overlapEnd.isAfter(overlapStart)) {
+            closedMins += overlapEnd.diff(overlapStart, 'minutes');
+          }
+        });
+
+        const closedRatio = closedMins / totalWorkMins;
+        if (closedRatio >= 0.5) {
+          halfDays++;  // shop was closed for half or more of the working day
+        } else {
+          fullDays++;
+        }
+      });
+
+      return {
+        staffName: item.staffName,
+        totalBookings: item.totalBookings,
+        totalEarning: item.totalEarning,
+        cancelledByStaff: item.cancelledByStaff,
+        attendance: fullDays,
+        halfDays
+      };
+    });
 
     res.status(200).json({
       shopName: vendor.shopName,
       range: { from, to },
-      data: report
+      data: enriched
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const getVendorDashboardBundle = async (req, res) => {
   try {

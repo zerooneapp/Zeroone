@@ -23,7 +23,8 @@ const staffSchema = new mongoose.Schema({
   fcmTokens: [String], // For Web
   fcmTokenMobile: [String], // For Android/iOS
   otp: { type: String },
-  otpExpires: { type: Date }
+  otpExpires: { type: Date },
+  note: { type: String, default: '' }
 }, { timestamps: true });
 
 // Hash password and normalize phone before saving

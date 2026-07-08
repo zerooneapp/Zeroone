@@ -261,16 +261,26 @@ const ServiceForm = () => {
                      </div>
                      {/* Duration */}
                      <div className="space-y-1.5">
-                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Duration (Min)</label>
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Duration</label>
                         <div className="relative">
                            <select
                               value={formData.duration}
                               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
                               className="w-full py-3 px-4 pr-10 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none appearance-none focus:ring-2 focus:ring-primary/10"
                            >
-                              {Array.from({ length: 16 }, (_, i) => (i + 1) * 15).map(m => (
-                                 <option key={m} value={m} className="font-bold">{m} Min</option>
-                              ))}
+                              {Array.from({ length: 16 }, (_, i) => (i + 1) * 15).map(m => {
+                                 let label = '';
+                                 if (m < 60) {
+                                    label = `${m} Min`;
+                                 } else {
+                                    const hrs = Math.floor(m / 60);
+                                    const mins = m % 60;
+                                    label = `${hrs} hr${hrs > 1 ? 's' : ''}${mins > 0 ? ` ${mins} min` : ''}`;
+                                 }
+                                 return (
+                                    <option key={m} value={m} className="font-bold">{label}</option>
+                                 );
+                              })}
                            </select>
                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                               <Clock size={16} />

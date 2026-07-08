@@ -34,11 +34,8 @@ const StaffCard = ({ staff, onToggle, onEdit, onDelete, onCardClick }) => {
               <p className="flex items-center gap-1.5 text-[9px] font-bold text-gray-400 dark:text-white/60 opacity-60">
                  <Phone size={10} /> {staff.phone}
               </p>
-              <div className="flex items-center gap-1.5 text-[9px] font-black text-[#00246b] dark:text-white uppercase overflow-hidden">
-                 <Scissors size={10} /> 
-                 <span className="truncate flex-1">
-                    {staff.services?.map(s => s.name).join(', ') || 'No skills assigned'}
-                 </span>
+              <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase">
+                 <span>Earnings: ₹{(staff.totalEarnings || 0).toLocaleString()}</span>
               </div>
            </div>
         </div>

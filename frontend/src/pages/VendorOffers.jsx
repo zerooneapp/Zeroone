@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Tag, Search, Gift, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Tag, Search, Gift, Trash2, Share2, X, Users, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import OfferCard from '../components/OfferCard';
@@ -15,11 +15,15 @@ const VendorOffers = () => {
     dashboardData: vendorData,
     fetchPromotions,
     fetchDashboard,
-    setPromotionsData: setOffers
+    setPromotionsData: setOffers,
+    clientsData,
+    fetchClients
   } = useVendorStore();
 
   const [toggleLoadingId, setToggleLoadingId] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [sharingOffer, setSharingOffer] = useState(null);
+  const [shareSearch, setShareSearch] = useState('');
 
   const handleFetch = async (force = false) => {
     try {
@@ -73,6 +77,36 @@ const VendorOffers = () => {
   };
 
   const memoizedOffers = useMemo(() => offers, [offers]);
+
+  const handleShareOffer = (offer) => {
+    setSharingOffer(offer);
+    setShareSearch('');
+    fetchClients();
+  };
+
+  const shareOnWhatsApp = (client, offer) => {
+    const discount = offer.discountType === 'percentage'
+      ? `${offer.value}% OFF`
+      : `₹${offer.value} OFF`;
+
+    const services = offer.serviceIds?.length > 0
+      ? `Applicable to ${offer.serviceIds.length} service(s)`
+      : 'Applicable to ALL services';
+
+    const expiry = new Date(offer.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    const message =
+      `🎁 *Exclusive Offer: ${offer.title}*\n\n` +
+      `💸 *Discount:* ${discount}\n` +
+      `📅 *Valid till:* ${expiry}\n` +
+      `✂️ *${services}*\n\n` +
+      `Don't miss out! Book now and save big. 🔥`;
+
+    const raw = (client.phone || '').replace(/\D/g, '');
+    const phone = raw.startsWith('91') ? raw : `91${raw}`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    setSharingOffer(null);
+  };
 
   if (loading) return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark p-6 space-y-6 pt-[64px] animate-pulse">
@@ -149,6 +183,7 @@ const VendorOffers = () => {
                   onToggle={handleToggle}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onShare={handleShareOffer}
                 />
               ))}
             </div>
@@ -204,6 +239,111 @@ const VendorOffers = () => {
                 >
                   Delete
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 📤 SHARE OFFER — CLIENT PICKER BOTTOM SHEET */}
+      <AnimatePresence>
+        {sharingOffer && (
+          <div className="fixed inset-0 z-[300] flex flex-col justify-end">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSharingOffer(null)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="relative z-10 bg-white dark:bg-gray-900 rounded-t-[2rem] max-h-[80vh] flex flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100 dark:border-gray-800">
+                <div>
+                  <h3 className="text-sm font-black text-slate-800 dark:text-white tracking-tight">Share via WhatsApp</h3>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{sharingOffer.title}</p>
+                </div>
+                <button
+                  onClick={() => setSharingOffer(null)}
+                  className="w-8 h-8 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-500 active:scale-90 transition-all"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="px-4 py-3">
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl px-3 py-2">
+                  <Search size={14} className="text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search client by name or phone..."
+                    value={shareSearch}
+                    onChange={e => setShareSearch(e.target.value)}
+                    className="flex-1 bg-transparent text-[11px] font-medium text-slate-700 dark:text-white placeholder-slate-400 outline-none"
+                    autoFocus
+                  />
+                  {shareSearch && (
+                    <button onClick={() => setShareSearch('')} className="text-slate-400">
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Client List */}
+              <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-2">
+                {(() => {
+                  const q = shareSearch.trim().toLowerCase();
+                  const filtered = clientsData.filter(c =>
+                    !q ||
+                    c.name?.toLowerCase().includes(q) ||
+                    c.phone?.includes(q)
+                  );
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="py-12 text-center">
+                        <Users size={32} className="mx-auto text-slate-300 dark:text-gray-600 mb-3" />
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          {shareSearch ? 'No client found' : 'No clients yet'}
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return filtered.map(client => (
+                    <button
+                      key={client._id || client.phone}
+                      onClick={() => shareOnWhatsApp(client, sharingOffer)}
+                      className="w-full flex items-center gap-3 p-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 active:scale-95 transition-all text-left"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-[#00246b]/10 dark:bg-white/10 flex items-center justify-center shrink-0 overflow-hidden border border-slate-200 dark:border-gray-700">
+                        {client.image
+                          ? <img src={client.image} alt="" className="w-full h-full object-cover" />
+                          : <span className="text-[11px] font-black text-[#00246b] dark:text-white">{(client.name || 'C')[0].toUpperCase()}</span>
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black text-slate-800 dark:text-white truncate capitalize">{client.name}</p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Phone size={9} className="text-slate-400" />
+                          <span className="text-[9px] font-bold text-slate-400">{client.phone}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 px-2 py-1 bg-green-500/10 rounded-lg shrink-0">
+                        <Share2 size={10} className="text-green-600 dark:text-green-400" />
+                        <span className="text-[8px] font-black text-green-600 dark:text-green-400 uppercase tracking-wider">Send</span>
+                      </div>
+                    </button>
+                  ));
+                })()}
               </div>
             </motion.div>
           </div>

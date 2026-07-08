@@ -19,24 +19,42 @@ const VendorStaffProfile = () => {
   }, [staffData, id]);
 
   const [staff, setStaff] = useState(storeStaff || null);
-  const [filterPeriod, setFilterPeriod] = useState('lifetime'); // lifetime, custom
-  const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [filterPeriod] = useState('custom'); // Locked to custom as requested
+  const [startDate, setStartDate] = useState(dayjs().subtract(7, 'day').format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [noteText, setNoteText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
 
   // Sync state if store gets updated
   useEffect(() => {
     if (storeStaff) {
       setStaff(storeStaff);
+      setNoteText(storeStaff.note || '');
     }
   }, [storeStaff]);
 
   const fetchStaffDetails = async () => {
     try {
-      const params = filterPeriod === 'custom' ? { startDate, endDate } : {};
+      const params = { startDate, endDate };
       const res = await api.get(`/staff/${id}`, { params });
       setStaff(res.data);
+      setNoteText(res.data.note || '');
     } catch (err) {
       toast.error('Failed to load staff details');
+    }
+  };
+
+  const handleSaveNote = async () => {
+    try {
+      setSavingNote(true);
+      await api.patch(`/staff/${id}`, { note: noteText });
+      toast.success('Note saved successfully 📝');
+      // Refresh details
+      fetchStaffDetails();
+    } catch (err) {
+      toast.error('Failed to save note');
+    } finally {
+      setSavingNote(false);
     }
   };
 
@@ -57,84 +75,61 @@ const VendorStaffProfile = () => {
 
   useEffect(() => {
     fetchStaffDetails();
-  }, [id, filterPeriod, startDate, endDate]);
+  }, [id, startDate, endDate]);
 
   const totalEarnings = staff?.totalEarnings || 0;
-  const isActive = staff ? (staff.isActive && !staff.activeClosure) : false;
-  const activeClosure = staff?.activeClosure;
-  
-  const handleEdit = () => {
-    if (!staff) return;
-    if (dashboardData && !dashboardData.subscription?.isActive) {
-      return toast.error('Account inactive. Recharge to edit staff.', { id: 'account-inactive', duration: 2000 });
-    }
-    navigate(`/vendor/staff/edit/${staff._id}`);
-  };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3">
+      <header className="px-4 pt-[48px] pb-3 fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-slate-50/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate('/vendor/staff')} 
-            className="p-2 active:scale-90 transition-all text-slate-700 dark:text-white"
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold shrink-0"
           >
-            <ArrowLeft size={20} strokeWidth={3} />
+            <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
           </button>
-          <div className="min-w-0">
-            <h1 className="text-[18px] font-black text-[#0B1222] dark:text-white tracking-tight truncate">
+          <div className="flex flex-col gap-0.5">
+            <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none">
               Staff Profile
             </h1>
-            <p className="text-[10px] font-black text-[#0B1222]/35 dark:text-gray-400 tracking-widest uppercase truncate">
-              {staff?.name || 'Loading...'}
+            <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80 leading-none mt-1">
+              {staff?.name || 'Staff Member'}
             </p>
           </div>
         </div>
+        <button
+          onClick={() => navigate(`/vendor/staff/edit/${id}`)}
+          className="p-2.5 bg-[#00246b] text-white rounded-xl shadow-xl shadow-[#00246b]/20 active:scale-95 transition-all font-bold"
+        >
+          <Edit3 size={18} />
+        </button>
       </header>
 
-      {/* Main Container */}
-      <main className="px-4 pt-[112px] space-y-4 max-w-4xl mx-auto">
-        
-        <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3.5 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#00246b]/5 to-transparent rounded-bl-full pointer-events-none" />
-          
-          {staff && (
-            <button 
-              onClick={handleEdit}
-              className="absolute top-3.5 right-3.5 p-2 bg-slate-50 dark:bg-gray-800 text-gray-500 rounded-xl hover:bg-primary/10 hover:text-primary transition-all active:scale-90 z-20 shadow-sm border border-slate-100 dark:border-gray-700"
-              title="Edit Staff Profile"
-            >
-              <Edit3 size={16} />
-            </button>
-          )}
-          
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 flex-shrink-0 flex items-center justify-center shadow-inner">
+      <main className="max-w-md mx-auto px-4 pt-[102px] space-y-3">
+        {/* Profile Card */}
+        <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-3xl p-4 shadow-sm relative overflow-hidden">
+          <div className="flex gap-4 items-center">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-50 dark:bg-gray-800 flex-shrink-0 border border-slate-100 dark:border-gray-700 shadow-inner">
               {staff?.image ? (
                 <img src={staff.image} alt={staff.name} className="w-full h-full object-cover" />
               ) : (
-                <User size={24} className="text-slate-300 dark:text-gray-600" />
+                <div className="w-full h-full flex items-center justify-center text-[#00246b] dark:text-white font-black text-lg bg-[#00246b]/10 dark:bg-white/10">
+                  {staff?.name?.[0]?.toUpperCase() || <User size={24} />}
+                </div>
               )}
             </div>
-
-            {/* Info */}
-            <div className="flex-1 text-left min-w-0">
+            
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-black text-slate-800 dark:text-white truncate tracking-tight">
-                  {staff?.name || '...'}
+                <h2 className="text-base font-black text-slate-800 dark:text-white truncate">
+                  {staff?.name}
                 </h2>
-                {staff && (
-                  <div className="inline-flex">
-                    {isActive ? (
-                      <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tight">Active</span>
-                    ) : activeClosure ? (
-                      <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tight">Absent</span>
-                    ) : (
-                      <span className="bg-rose-500/10 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tight">Inactive</span>
-                    )}
-                  </div>
+                {staff?.isActive ? (
+                  <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[7px] font-black uppercase tracking-widest border border-emerald-500/20">Active</span>
+                ) : (
+                  <span className="px-2 py-0.5 bg-red-500/10 text-red-500 rounded-full text-[7px] font-black uppercase tracking-widest border border-red-500/20">Inactive</span>
                 )}
               </div>
               <p className="text-[10px] font-bold text-[#00246b] dark:text-slate-300 uppercase tracking-wider">
@@ -148,81 +143,74 @@ const VendorStaffProfile = () => {
                     <span>+91 {staff.phone}</span>
                   </a>
                 )}
-                {staff?.createdAt && (
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-gray-400">
-                    <Calendar size={10} className="text-slate-400" />
-                    <span>Onboarded: {dayjs(staff.createdAt).format('DD MMM YYYY')}</span>
-                  </div>
-                )}
-                {staff?.isOwner && (
-                  <div className="inline-flex items-center gap-1 text-[8px] font-black text-amber-600 uppercase tracking-widest mt-0.5">
-                    <ShieldCheck size={10} className="text-amber-500" />
-                    <span>Shop Owner</span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </section>
+
+        {/* Note Section */}
+        <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-2">
+          <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest pl-1">Staff Note</h3>
+          <div className="space-y-2">
+            <textarea
+              placeholder="Write a private note about this staff member..."
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              className="w-full h-16 p-2 bg-slate-50 dark:bg-gray-800 text-[11px] font-bold text-slate-700 dark:text-white rounded-xl border border-slate-100 dark:border-gray-700 outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-slate-400 resize-none"
+            />
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleSaveNote}
+                disabled={savingNote}
+                className="px-4 py-1.5 bg-[#00246b] text-white font-black text-[9px] uppercase tracking-widest rounded-lg active:scale-95 disabled:opacity-50 transition-all"
+              >
+                {savingNote ? 'Saving...' : 'Save Note'}
+              </button>
+            </div>
+          </div>
+        </section>
+
         {/* Earnings Filter */}
         <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest pl-1">Earnings Filter</h3>
-            <div className="flex gap-1.5">
-              {[
-                { id: 'lifetime', label: 'Lifetime' },
-                { id: 'custom', label: 'Custom' }
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setFilterPeriod(item.id)}
-                  className={`px-2.5 py-1 rounded-lg text-[9px] font-black capitalize tracking-widest border transition-all ${
-                    filterPeriod === item.id
-                      ? 'bg-[#00246b] text-white border-[#00246b]'
-                      : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 border-slate-100 dark:border-gray-700'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+            <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2 py-0.5 bg-slate-50 dark:bg-gray-800 rounded-md">Custom</span>
           </div>
 
-          {filterPeriod === 'custom' && (
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-slate-100 dark:border-gray-800/50 mt-1">
-              <div className="flex-1 space-y-1 text-left">
-                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
-                <div className="relative group">
-                  <input
-                    type="date"
-                    value={startDate}
-                    max={dayjs().format('YYYY-MM-DD')}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 text-gray-300">
-                <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
-              </div>
-
-              <div className="flex-1 space-y-1 text-left">
-                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
-                <div className="relative group">
-                  <input
-                    type="date"
-                    value={endDate}
-                    max={dayjs().format('YYYY-MM-DD')}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
-                  />
-                </div>
+          <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-slate-100 dark:border-gray-800/50 mt-1">
+            <div className="flex-1 space-y-1 text-left">
+              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={startDate}
+                  max={dayjs().format('YYYY-MM-DD')}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                  className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
+                />
               </div>
             </div>
-          )}
+
+            <div className="pt-3 text-gray-300">
+              <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
+            </div>
+
+            <div className="flex-1 space-y-1 text-left">
+              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={endDate}
+                  max={dayjs().format('YYYY-MM-DD')}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                  className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Stats Grid */}

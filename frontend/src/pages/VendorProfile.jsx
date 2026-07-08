@@ -557,6 +557,7 @@ const VendorProfile = () => {
          const tableData = data.data.map(item => [
             item.staffName,
             item.attendance,
+            item.halfDays || 0,
             item.totalBookings,
             item.cancelledByStaff,
             `Rs.${item.totalEarning}`
@@ -564,7 +565,7 @@ const VendorProfile = () => {
 
          autoTable(doc, {
             startY: 50,
-            head: [['Staff Name', 'Attendance (Days)', 'Total Bookings', 'Cancelled By Staff', 'Total Earnings']],
+            head: [['Staff Name', 'Full Days', 'Half Days', 'Total Bookings', 'Cancelled By Staff', 'Total Earnings']],
             body: tableData,
             theme: 'grid',
             headStyles: { fillColor: [0, 36, 107], textColor: [255, 255, 255], fontStyle: 'bold' },
@@ -576,6 +577,7 @@ const VendorProfile = () => {
          const finalY = doc.lastAutoTable.finalY + 15;
          const totalEarning = data.data.reduce((sum, item) => sum + item.totalEarning, 0);
          const totalBookings = data.data.reduce((sum, item) => sum + item.totalBookings, 0);
+         const totalHalfDays = data.data.reduce((sum, item) => sum + (item.halfDays || 0), 0);
 
          doc.setFontSize(12);
          doc.setTextColor(0, 36, 107);
@@ -584,7 +586,8 @@ const VendorProfile = () => {
          doc.setFontSize(10);
          doc.setTextColor(50, 50, 50);
          doc.text(`Total Shop Bookings: ${totalBookings}`, 14, finalY + 8);
-         doc.text(`Total Shop Earnings: Rs.${totalEarning}`, 14, finalY + 16);
+         doc.text(`Total Half Days (across staff): ${totalHalfDays}`, 14, finalY + 16);
+         doc.text(`Total Shop Earnings: Rs.${totalEarning}`, 14, finalY + 24);
 
          // Footer
          const pageCount = doc.internal.getNumberOfPages();
@@ -664,7 +667,7 @@ const VendorProfile = () => {
                    </button>
                 ) : (
                    <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-                      {activeSection === 'switch_shop' ? 'Switch Shop' : activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : 'Account Settings'}
+                      {activeSection === 'switch_shop' ? 'Switch Shop' : activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : activeSection === 'live_report' ? 'Live Report' : 'Account Settings'}
                    </h1>
                 )}
             </div>
@@ -1644,61 +1647,61 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="space-y-4"
                   >
-                     <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-gray-800 space-y-6">
-                        <div className="flex items-center gap-3">
-                           <div className="p-3 bg-[#00246b]/10 text-[#00246b] rounded-2xl">
-                              <FileDown size={24} />
+                     <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                           <div className="p-2 bg-[#00246b]/10 text-[#00246b] rounded-xl">
+                              <FileDown size={18} />
                            </div>
                            <div>
-                              <h2 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Live Report</h2>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Download performance PDF</p>
+                              <h2 className="text-sm font-black text-slate-800 dark:text-white leading-tight">Live Report</h2>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Download performance PDF</p>
                            </div>
                         </div>
 
-                        <div className="space-y-4 pt-2">
-                           <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5">
-                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">From Date</label>
+                        <div className="space-y-3">
+                           <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">From Date</label>
                                  <input
                                     type="date"
                                     value={reportRange.from}
                                     max={dayjs().format('YYYY-MM-DD')}
                                     onChange={(e) => setReportRange(prev => ({ ...prev, from: e.target.value }))}
-                                    className="w-full p-3.5 bg-slate-50 dark:bg-gray-800 rounded-2xl border border-slate-100 dark:border-gray-700 text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all"
+                                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all"
                                  />
                               </div>
-                              <div className="space-y-1.5">
-                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">To Date</label>
+                              <div className="space-y-1">
+                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">To Date</label>
                                  <input
                                     type="date"
                                     value={reportRange.to}
                                     max={dayjs().format('YYYY-MM-DD')}
                                     onChange={(e) => setReportRange(prev => ({ ...prev, to: e.target.value }))}
-                                    className="w-full p-3.5 bg-slate-50 dark:bg-gray-800 rounded-2xl border border-slate-100 dark:border-gray-700 text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all"
+                                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-[#00246b]/20 transition-all"
                                  />
                               </div>
                            </div>
 
-                           <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex gap-3">
-                              <Info className="text-amber-500 shrink-0" size={16} />
-                              <p className="text-[9px] font-bold text-amber-700/80 leading-relaxed uppercase tracking-tight">
-                                 This report includes staff attendance, total bookings, cancelled sessions, and earnings for the selected period.
+                           <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl flex gap-2">
+                              <Info className="text-amber-500 shrink-0 mt-0.5" size={13} />
+                              <p className="text-[8.5px] font-bold text-amber-700/80 leading-relaxed uppercase tracking-tight">
+                                 Includes staff attendance, bookings, cancelled sessions & earnings for selected period.
                               </p>
                            </div>
 
                            <button
                               onClick={handleDownloadReport}
                               disabled={downloadingReport}
-                              className="w-full py-4 bg-[#00246b] hover:bg-[#001b50] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-[#00246b]/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale"
+                              className="w-full py-3 bg-[#00246b] hover:bg-[#001b50] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-[#00246b]/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:grayscale"
                            >
                               {downloadingReport ? (
                                  <>
-                                    <Loader2 className="animate-spin" size={18} />
+                                    <Loader2 className="animate-spin" size={15} />
                                     <span>Generating...</span>
                                  </>
                               ) : (
                                  <>
-                                    <FileDown size={18} />
+                                    <FileDown size={15} />
                                     <span>Download PDF Report</span>
                                  </>
                               )}

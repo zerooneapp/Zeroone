@@ -267,7 +267,7 @@ const VendorDashboard = () => {
   };
 
   const actionTiles = useMemo(() => [
-    { label: 'New Booking', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
+    { label: '+Entry', icon: CalendarPlus, onClick: () => setIsCreateSlotOpen(true) },
     { label: "Client's", icon: Heart, path: '/vendor/customers' },
     data?.serviceMode === 'home'
       ? { label: 'Staff', icon: Lock, locked: true }

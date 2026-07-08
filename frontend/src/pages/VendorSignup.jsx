@@ -54,18 +54,15 @@ const VendorSignup = () => {
     if (step === 1 && (!formData.shopName || !activeOwnerName || !formData.category || !formData.serviceMode)) {
       return toast.error('Please fill personal and business details');
     }
-    if (step === 2 && (!files.panCard || !files.aadhaarFront || !files.aadhaarBack)) {
+    if (step === 2 && (!files.aadhaarFront || !files.aadhaarBack)) {
       return toast.error('Please upload all identity documents');
-    }
-    if (step === 3 && formData.serviceMode === 'shop' && !files.shopImage) {
-      return toast.error('Please upload shop facade image');
     }
     setStep(step + 1);
   };
 
   const handleSubmit = async () => {
     // 🛡️ RE-VALIDATE STATE TO PREVENT DATA LOSS ON REFRESH
-    if (!files.panCard || !files.aadhaarFront || !files.aadhaarBack) {
+    if (!files.aadhaarFront || !files.aadhaarBack) {
       setStep(2);
       return toast.error('Identity documents were lost due to page reload. Please upload them again.');
     }
@@ -108,9 +105,6 @@ const VendorSignup = () => {
       const mediaData = new FormData();
       if (files.shopImage && formData.serviceMode === 'shop') mediaData.append('shopImage', files.shopImage);
       if (files.vendorPhoto) mediaData.append('vendorPhoto', files.vendorPhoto);
-      if (files.panCard) mediaData.append('panCard', files.panCard);
-      if (files.gstCertificate) mediaData.append('gstCertificate', files.gstCertificate);
-      if (files.shopRegistration) mediaData.append('shopRegistration', files.shopRegistration);
       if (files.aadhaarFront) mediaData.append('aadhaarFront', files.aadhaarFront);
       if (files.aadhaarBack) mediaData.append('aadhaarBack', files.aadhaarBack);
 
@@ -170,7 +164,7 @@ const VendorSignup = () => {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <p className="text-[10px] font-black text-[#00246b] dark:text-white uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
+          <p className="text-[10px] font-black text-[#00246b] dark:text-white uppercase tracking-widest leading-none mb-1">Step {step} of 2</p>
           <h1 className="text-2xl font-black tracking-tight leading-none">Partner Application</h1>
         </div>
       </div>
@@ -315,95 +309,8 @@ const VendorSignup = () => {
                   <input type="file" className="hidden" onChange={(e) => setFile('aadhaarBack', e.target.files[0])} accept=".jpg,.jpeg,.png" />
                 </label>
               </div>
-
-              <div className="space-y-1.5">
-                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">PAN Card</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {files.panCard ? (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
-                        <img src={URL.createObjectURL(files.panCard)} alt="PAN" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                        <FileText className="text-gray-300" size={18} />
-                      </div>
-                    )}
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{files.panCard ? files.panCard.name : 'ADD PAN CARD'}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {files.panCard && <CheckCircle2 className="text-green-500" size={16} />}
-                    <ArrowRight size={14} className="text-gray-300" />
-                  </div>
-                  <input type="file" className="hidden" onChange={(e) => setFile('panCard', e.target.files[0])} accept=".jpg,.jpeg,.png" />
-                </label>
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Registration (Optional)</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {files.shopRegistration ? (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
-                        <img src={URL.createObjectURL(files.shopRegistration)} alt="Registration" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                        <FileText className="text-gray-300" size={18} />
-                      </div>
-                    )}
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{files.shopRegistration ? files.shopRegistration.name : 'ADD SHOP REGISTRY (OPTIONAL)'}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {files.shopRegistration && <CheckCircle2 className="text-green-500" size={16} />}
-                    <ArrowRight size={14} className="text-gray-300" />
-                  </div>
-                  <input type="file" className="hidden" onChange={(e) => setFile('shopRegistration', e.target.files[0])} accept=".jpg,.jpeg,.png" />
-                </label>
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">GST Certificate (Optional)</p>
-                <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {files.gstCertificate ? (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shrink-0">
-                        <img src={URL.createObjectURL(files.gstCertificate)} alt="GST" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                        <FileText className="text-gray-300" size={18} />
-                      </div>
-                    )}
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{files.gstCertificate ? files.gstCertificate.name : 'ADD GST CERTIFICATE (OPTIONAL)'}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {files.gstCertificate && <CheckCircle2 className="text-green-500" size={16} />}
-                    <ArrowRight size={14} className="text-gray-300" />
-                  </div>
-                  <input type="file" className="hidden" onChange={(e) => setFile('gstCertificate', e.target.files[0])} accept=".jpg,.jpeg,.png" />
-                </label>
-              </div>
-            </div>
-
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30 flex items-center gap-2">
-              <Info className="text-amber-500 shrink-0" size={14} />
-              <p className="text-[8px] font-bold text-amber-600/70 dark:text-amber-500/50 uppercase leading-tight font-mono">
-                Stored securely for verification only.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-4 relative z-10">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-black leading-tight">Media & Map</h2>
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-[8px]">Your shop's digital identity</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
+              {/* Geolocation */}
+              <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between px-1">
                   <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Business Geolocation</p>
                   <button
@@ -464,7 +371,8 @@ const VendorSignup = () => {
                 )}
               </div>
 
-              <div className="space-y-3">
+              {/* Photos */}
+              <div className="space-y-3 pt-2">
                 {formData.serviceMode === 'shop' && (
                   <div className="space-y-1.5">
                     <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Shop Facade Image</p>
@@ -508,6 +416,13 @@ const VendorSignup = () => {
                 </div>
               </div>
             </div>
+
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30 flex items-center gap-2">
+              <Info className="text-amber-500 shrink-0" size={14} />
+              <p className="text-[8px] font-bold text-amber-600/70 dark:text-amber-500/50 uppercase leading-tight font-mono">
+                Stored securely for verification only.
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -517,10 +432,10 @@ const VendorSignup = () => {
         <Button
           size="lg"
           className="w-full h-12 rounded-xl shadow-lg shadow-[#00246b]/10 gap-2 text-sm font-black uppercase tracking-widest text-white bg-[#00246b] dark:bg-[#00246b] active:scale-95 transition-all"
-          onClick={step < 3 ? handleNext : handleSubmit}
+          onClick={step < 2 ? handleNext : handleSubmit}
           loading={loading}
         >
-          {step < 3 ? 'Continue' : 'Submit Application'}
+          {step < 2 ? 'Continue' : 'Submit Application'}
           <ArrowRight size={18} strokeWidth={3} />
         </Button>
         <div className="mt-4 text-center">
