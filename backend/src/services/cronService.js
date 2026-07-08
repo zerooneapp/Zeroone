@@ -130,29 +130,6 @@ const initCronJobs = () => {
     }
   });
 
-  // 3. Auto-cancel expired confirmed bookings (Every minute)
-  cron.schedule('* * * * *', async () => {
-    try {
-      const Booking = require('../models/Booking');
-      const indiaTime = moment().tz('Asia/Kolkata').toDate();
-
-      const expiredBookings = await Booking.find({
-        status: 'confirmed',
-        endTime: { $lt: indiaTime }
-      });
-
-      for (const booking of expiredBookings) {
-        booking.status = 'cancelled';
-        booking.cancelReason = 'System auto-cancelled: Appointment time elapsed';
-        booking.cancelledByRole = 'system';
-        booking.cancelledAt = indiaTime;
-        await booking.save();
-      }
-    } catch (error) {
-      console.error('[CRON-AUTO-CANCEL-ERROR]', error.message);
-    }
-  });
-
   // 4. Pre-booking 30-min reminder (Every minute)
   cron.schedule('* * * * *', async () => {
     try {
