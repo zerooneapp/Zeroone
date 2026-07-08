@@ -147,10 +147,107 @@ const initCronJobs = () => {
         booking.cancelledByRole = 'system';
         booking.cancelledAt = indiaTime;
         await booking.save();
-        console.log(`[CRON-BOOKING-AUTO-CANCEL] Auto-cancelled past booking: ${booking._id}`);
+    }
+  });
+
+  // 4. Pre-booking 30-min reminder (Every minute)
+  cron.schedule('* * * * *', async () => {
+    try {
+      const Booking = require('../models/Booking');
+      const NotificationService = require('./notificationService');
+      const NotificationLog = require('../models/NotificationLog');
+
+      const now = moment().tz('Asia/Kolkata');
+      const windowStart = now.clone().add(25, 'minutes').toDate();
+      const windowEnd = now.clone().add(30, 'minutes').toDate();
+
+      // Find confirmed bookings starting in the next 25-30 minutes
+      const upcomingBookings = await Booking.find({
+        status: 'confirmed',
+        startTime: { $gte: windowStart, $lte: windowEnd },
+        userId: { $ne: null }
+      });
+
+      for (const booking of upcomingBookings) {
+        const referenceId = `${booking._id}_30MIN_REMINDER`;
+        
+        // Ensure reminder is not sent twice
+        const alreadySent = await NotificationLog.exists({ referenceId });
+        if (alreadySent) continue;
+
+        await NotificationService.sendNotification({
+          userIds: booking.userId,
+          role: 'customer',
+          type: 'BOOKING_REMINDER',
+          title: 'Upcoming Service Reminder ⏰',
+          message: `Reminder: Your service is scheduled in 30 minutes. See you soon!`,
+          data: { bookingId: booking._id, isActionable: false },
+          referenceId
+        });
+        console.log(`[CRON-REMINDER] Sent 30-min reminder for booking: ${booking._id}`);
       }
     } catch (error) {
-      console.error('[CRON-BOOKING-AUTO-CANCEL-ERROR]', error.message);
+      console.error('[CRON-REMINDER-ERROR]', error.message);
+    }
+  });
+
+  // 5. Post-service 15-day inactivity re-engagement reminder (Every day at 10:00 AM)
+  cron.schedule('0 10 * * *', async () => {
+    try {
+      const Booking = require('../models/Booking');
+      const User = require('../models/User');
+      const NotificationService = require('./notificationService');
+      const NotificationLog = require('../models/NotificationLog');
+
+      const todayStr = moment().tz('Asia/Kolkata').format('YYYY-MM-DD');
+      const fifteenDaysAgo = moment().tz('Asia/Kolkata').subtract(15, 'days').endOf('day').toDate();
+
+      // Find all customer users
+      const users = await User.find({ role: 'customer' });
+
+      for (const user of users) {
+        const referenceId = `${user._id}_15DAY_RE_ENGAGE_${todayStr}`;
+
+        // Ensure we haven't already reminded this user today
+        const alreadyRemindedToday = await NotificationLog.exists({ referenceId });
+        if (alreadyRemindedToday) continue;
+
+        // Get user's latest completed booking
+        const latestBooking = await Booking.findOne({
+          userId: user._id,
+          status: 'completed'
+        }).sort({ endTime: -1 });
+
+        if (latestBooking) {
+          const completedAt = latestBooking.completedAt || latestBooking.endTime;
+          const diffDays = moment().tz('Asia/Kolkata').diff(moment(completedAt).tz('Asia/Kolkata'), 'days');
+
+          // If the last service was 15 or more days ago
+          if (diffDays >= 15) {
+            // Check if there is any upcoming booking confirmed
+            const hasUpcoming = await Booking.exists({
+              userId: user._id,
+              status: 'confirmed',
+              startTime: { $gt: new Date() }
+            });
+
+            if (!hasUpcoming) {
+              await NotificationService.sendNotification({
+                userIds: user._id,
+                role: 'customer',
+                type: 'INACTIVITY_RE_ENGAGE',
+                title: 'We miss you! 💖',
+                message: `It has been ${diffDays} days since your last service. Book your next appointment now to stay fresh!`,
+                data: { isActionable: false },
+                referenceId
+              });
+              console.log(`[CRON-RE-ENGAGE] Dispatched 15-day follow-up reminder to user: ${user._id}`);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[CRON-RE-ENGAGE-ERROR]', error.message);
     }
   });
 
