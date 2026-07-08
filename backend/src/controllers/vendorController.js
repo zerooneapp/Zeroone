@@ -703,7 +703,7 @@ const getVendorDetail = async (req, res) => {
 
 const updateShopProfile = async (req, res) => {
   try {
-    const { workingHours, shopName, address, location, featuredImage } = req.body;
+    const { workingHours, shopName, address, location, featuredImage, weeklyOff } = req.body;
     const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
@@ -714,6 +714,7 @@ const updateShopProfile = async (req, res) => {
     if (address) vendor.address = address;
     if (location) vendor.location = location;
     if (featuredImage !== undefined) vendor.featuredImage = featuredImage;
+    if (weeklyOff !== undefined) vendor.weeklyOff = weeklyOff;
 
     await vendor.save();
     res.status(200).json(vendor);

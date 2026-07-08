@@ -55,7 +55,8 @@ const vendorSchema = new mongoose.Schema({
   isPromoted: { type: Boolean, default: false },
   promotionExpiry: { type: Date },
   todayOpenDurationMs: { type: Number, default: 0 },
-  lastOpenedAt: { type: Date }
+  lastOpenedAt: { type: Date },
+  weeklyOff: [{ type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] }]
 }, { timestamps: true });
 
 vendorSchema.pre('save', async function () {

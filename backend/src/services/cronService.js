@@ -147,6 +147,9 @@ const initCronJobs = () => {
         booking.cancelledByRole = 'system';
         booking.cancelledAt = indiaTime;
         await booking.save();
+      }
+    } catch (error) {
+      console.error('[CRON-AUTO-CANCEL-ERROR]', error.message);
     }
   });
 

@@ -45,6 +45,7 @@ const Cart = () => {
   });
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [pricingPreview, setPricingPreview] = useState(null);
+  const [isWeeklyOff, setIsWeeklyOff] = useState(false);
   const [rescheduleHydrating, setRescheduleHydrating] = useState(false);
   const [reschedulePrefill, setReschedulePrefill] = useState(null);
   const [prefillApplied, setPrefillApplied] = useState(false);
@@ -155,6 +156,7 @@ const Cart = () => {
         ]);
 
         setSlots(slotsRes.data?.availableSlots || []);
+        setIsWeeklyOff(slotsRes.data?.isWeeklyOff === true);
         setAllStaff(staffRes.data || []);
       } catch (err) {
         console.error('Failed to fetch booking data');
@@ -524,12 +526,24 @@ const Cart = () => {
                   {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-9 bg-slate-50 dark:bg-gray-800 rounded-lg animate-pulse border border-slate-100 dark:border-gray-800" />)}
                 </div>
               ) : displaySlots.length === 0 ? (
+                isWeeklyOff ? (
+                  <div className="p-4 text-center bg-yellow-500/10 rounded-xl border border-yellow-500/20 mt-2">
+                    <span className="text-2xl block mb-1">📴</span>
+                    <p className="text-[8px] text-yellow-500 dark:text-yellow-400 font-black uppercase tracking-widest">
+                      Weekly Off
+                    </p>
+                    <p className="text-[7px] text-yellow-500/70 font-semibold mt-0.5 tracking-wide">
+                      Shop is closed today. Try another day.
+                    </p>
+                  </div>
+                ) : (
                 <div className="p-4 text-center bg-red-500/5 rounded-xl border border-red-500/10 mt-2">
                   <AlertCircle className="mx-auto text-red-500 mb-1" size={16} strokeWidth={3} />
                   <p className="text-[8px] text-red-600 dark:text-red-400 font-black uppercase tracking-widest">
                     Full House. Try another day.
                   </p>
                 </div>
+                )
               ) : (
                 <div className="grid grid-cols-3 gap-2 p-1.5">
                   {displaySlots.map((slot) => (

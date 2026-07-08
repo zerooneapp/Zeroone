@@ -63,6 +63,7 @@ const VendorProfile = () => {
       address: '',
       serviceMode: 'shop',
       workingHours: { start: '09:00 AM', end: '09:00 PM' },
+      weeklyOff: [],
       location: null,
       featuredImage: ''
    });
@@ -118,6 +119,7 @@ const VendorProfile = () => {
                address: res.data.address,
                serviceMode: res.data.serviceMode || 'shop',
                workingHours: res.data.workingHours || { start: '09:00 AM', end: '09:00 PM' },
+               weeklyOff: res.data.weeklyOff || [],
                location: res.data.location
             });
             setCurrentMedia(res.data);
@@ -806,6 +808,43 @@ const VendorProfile = () => {
                               className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-[#00246b]/10 min-h-[60px]"
                               placeholder="Street, City, ZIP"
                            />
+                        </div>
+
+                        {/* ── WEEKLY OFF ── */}
+                        <div className="space-y-2">
+                           <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest flex items-center gap-1.5">
+                              <span>📴</span> Weekly Off Days
+                           </label>
+                           <div className="flex flex-wrap gap-2">
+                              {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => {
+                                 const isOff = data.weeklyOff.includes(day);
+                                 return (
+                                    <button
+                                       key={day}
+                                       type="button"
+                                       onClick={() => {
+                                          const next = isOff
+                                             ? data.weeklyOff.filter(d => d !== day)
+                                             : [...data.weeklyOff, day];
+                                          setData({ ...data, weeklyOff: next });
+                                       }}
+                                       className={cn(
+                                          "px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest border transition-all active:scale-95",
+                                          isOff
+                                             ? "bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-200"
+                                             : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-slate-200 dark:border-gray-700 hover:border-rose-300"
+                                       )}
+                                    >
+                                       {day}
+                                    </button>
+                                 );
+                              })}
+                           </div>
+                           {data.weeklyOff.length > 0 && (
+                              <p className="text-[9px] text-rose-400 font-semibold ml-1">
+                                 🔴 Shop closed on: {data.weeklyOff.join(', ')}
+                              </p>
+                           )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">

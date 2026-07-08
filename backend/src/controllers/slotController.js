@@ -4,6 +4,7 @@ const {
   findFirstAvailableStaff 
 } = require('../services/slotService');
 const SlotLock = require('../models/SlotLock');
+const Vendor = require('../models/Vendor');
 const moment = require('moment-timezone');
 
 // Simple In-memory Cache (Should use Redis for production scaling)
@@ -23,17 +24,14 @@ const getAvailableSlots = async (req, res) => {
     // Cache Key: vendorId:date:serviceIds_hash
     const cacheKey = `${vendorId}:${date}:${services.sort().join(',')}`;
     
-    // Clear cache if needed (for development/new format)
-    // slotCache.delete(cacheKey); 
-    // CACHE DISABLED TEMPORARILY FOR LOGIC UPDATES
-    /*
-    if (slotCache.has(cacheKey)) {
-      const cached = slotCache.get(cacheKey);
-      if (Date.now() - cached.timestamp < 300000) { // 5-minute TTL
-        return res.status(200).json(cached.data);
-      }
+    // Check if the selected date is a weekly off day
+    const vendor = await Vendor.findById(vendorId).select('weeklyOff').lean();
+    const dayOfWeek = moment.tz(date, 'Asia/Kolkata').format('ddd'); // e.g. 'Sun', 'Sat'
+    const isWeeklyOff = Array.isArray(vendor?.weeklyOff) && vendor.weeklyOff.includes(dayOfWeek);
+
+    if (isWeeklyOff) {
+      return res.status(200).json({ availableSlots: [], isWeeklyOff: true });
     }
-    */
 
     const slots = await calculateAvailableSlots(
       vendorId, 
@@ -46,7 +44,7 @@ const getAvailableSlots = async (req, res) => {
     // Store in Cache
     slotCache.set(cacheKey, { data: slots, timestamp: Date.now() });
 
-    res.status(200).json({ availableSlots: slots });
+    res.status(200).json({ availableSlots: slots, isWeeklyOff: false });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

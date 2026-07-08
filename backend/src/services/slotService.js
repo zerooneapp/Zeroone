@@ -85,6 +85,9 @@ const getVendorDayAvailability = async (vendorId, targetDate, existingVendor = n
   const isClosedDay = vendor.closedDates?.some((d) => moment(d).tz('Asia/Kolkata').isSame(targetDate, 'day'));
   if (isClosedDay) return null;
 
+  const isWeeklyOff = vendor.weeklyOff?.includes(targetDate.format('ddd'));
+  if (isWeeklyOff) return null;
+
   const availability = await VendorAvailability.findOne({
     vendorId,
     day: targetDate.format('ddd'),
