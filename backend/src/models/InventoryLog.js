@@ -12,7 +12,8 @@ const inventoryLogSchema = new mongoose.Schema({
   // Staff who made the adjustment (null if vendor did it directly)
   staffId: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff', default: null },
   staffName: { type: String, default: '' },
-  adjustedBy: { type: String, enum: ['vendor', 'staff'], default: 'vendor' }
+  adjustedBy: { type: String, enum: ['vendor', 'staff'], default: 'vendor' },
+  isReturn: { type: Boolean, default: false }
 }, { timestamps: true });
 
 inventoryLogSchema.index({ vendorId: 1 });

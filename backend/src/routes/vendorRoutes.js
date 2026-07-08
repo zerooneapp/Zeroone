@@ -2,7 +2,7 @@ const express = require('express');
 const {
   registerVendor, uploadDocs, getVendorProfile, getNearbyVendors,
   updateShopStatus, createOffer, getOffers, updateOffer, getVendorBookings,
-  getVendorDashboard, getVendorDashboardBundle, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers,
+  getVendorDashboard, getVendorDashboardBundle, getVendorDetail, updateShopProfile, createWalkIn, createManualBooking, getLoyalCustomers, getCustomerBookingHistory,
   deleteGalleryImage, updateSingleMedia, replaceGalleryImage, deleteSingleMedia, deleteVideo, getLiveReport
 } = require('../controllers/vendorController');
 const {
@@ -74,6 +74,7 @@ router.get('/bookings', protect, isApprovedVendor, getVendorBookings);
 router.patch('/bookings/:id/emergency-cancel', protect, isApprovedVendor, vendorEmergencyCancel);
 router.post('/walk-in', protect, isApprovedVendor, createWalkIn);
 router.get('/loyal-customers', protect, isApprovedVendor, getLoyalCustomers);
+router.get('/customer-history', protect, isApprovedVendor, getCustomerBookingHistory);
 router.post('/manual-booking', protect, isApprovedVendor, createManualBooking);
 router.get('/live-report', protect, isApprovedVendor, getLiveReport);
 

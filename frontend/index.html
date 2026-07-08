@@ -14,14 +14,16 @@
           var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           if (isDark) {
             document.documentElement.classList.add('dark');
+            document.documentElement.style.backgroundColor = '#0f172a';
           } else {
             document.documentElement.classList.remove('dark');
+            document.documentElement.style.backgroundColor = '#f5f6f8';
           }
         } catch (e) {}
       })();
     </script>
   </head>
-  <body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans transition-colors duration-300">
+  <body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans">
     <div id="root"></div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="module" src="/src/main.jsx"></script>

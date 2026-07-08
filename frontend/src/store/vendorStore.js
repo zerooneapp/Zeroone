@@ -214,6 +214,18 @@ export const useVendorStore = create((set, get) => ({
     }
   },
 
+  fetchCustomerBookingHistory: async (customerId, isWalkIn, name, phone) => {
+    try {
+      const res = await api.get('/vendor/customer-history', {
+        params: { customerId, isWalkIn, name, phone }
+      });
+      return res.data;
+    } catch (err) {
+      console.error('Failed to fetch customer history', err);
+      throw err;
+    }
+  },
+
   fetchReviews: async (force = false) => {
     const { reviewsData } = get();
     if (reviewsData.reviews.length > 0 && !force) {

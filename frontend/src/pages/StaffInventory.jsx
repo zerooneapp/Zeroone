@@ -12,7 +12,8 @@ import {
   Layers,
   ShieldAlert,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Coins
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -45,6 +46,60 @@ const StaffInventory = () => {
     quantity: 1
   });
   const [adjustLoading, setAdjustLoading] = useState(false);
+
+  const [isGlobalReturnOpen, setIsGlobalReturnOpen] = useState(false);
+  const [globalReturnItemId, setGlobalReturnItemId] = useState('');
+  const [globalReturnFormData, setGlobalReturnFormData] = useState({
+    customerName: '',
+    customerContact: '',
+    quantity: 1
+  });
+
+  const triggerGlobalReturn = () => {
+    setIsGlobalReturnOpen(true);
+    setGlobalReturnItemId('');
+    setGlobalReturnFormData({ customerName: '', customerContact: '', quantity: 1 });
+  };
+
+  const handleGlobalReturnSubmit = async (e) => {
+    e.preventDefault();
+    if (!globalReturnItemId) {
+      return toast.error('Please select a product');
+    }
+
+    const qty = parseInt(globalReturnFormData.quantity, 10);
+    if (isNaN(qty) || qty <= 0) {
+      return toast.error('Please enter a valid quantity');
+    }
+
+    const contact = globalReturnFormData.customerContact.trim();
+    if (contact && !/^[6-9]\d{9}$/.test(contact)) {
+      return toast.error('Please enter a valid 10-digit contact number');
+    }
+
+    try {
+      setAdjustLoading(true);
+      const res = await api.post(`/inventory/staff/${globalReturnItemId}/adjust`, {
+        change: qty,
+        customerName: globalReturnFormData.customerName,
+        customerContact: contact,
+        isReturn: true
+      });
+
+      setItems(items.map((item) =>
+        item._id === globalReturnItemId ? { ...item, stock: res.data.stock } : item
+      ));
+
+      toast.success('Return processed and stock increased successfully');
+      setIsGlobalReturnOpen(false);
+      setGlobalReturnItemId('');
+      setGlobalReturnFormData({ customerName: '', customerContact: '', quantity: 1 });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to process return');
+    } finally {
+      setAdjustLoading(false);
+    }
+  };
 
   const fetchInventory = async () => {
     try {
@@ -141,7 +196,8 @@ const StaffInventory = () => {
       const res = await api.post(`/inventory/staff/${adjustingItem._id}/adjust`, {
         change: finalDelta,
         customerName: adjustFormData.customerName,
-        customerContact: contact
+        customerContact: contact,
+        isReturn: adjustmentDelta > 0
       });
       setItems(items.map((item) =>
         item._id === adjustingItem._id ? { ...item, stock: res.data.stock } : item
@@ -177,7 +233,8 @@ const StaffInventory = () => {
   const metrics = useMemo(() => {
     const totalStock = items.reduce((sum, i) => sum + i.stock, 0);
     const lowStockCount = items.filter((i) => i.stock <= i.minStockLevel).length;
-    return { totalItems: items.length, totalStock, lowStockCount };
+    const totalValue = items.reduce((sum, i) => sum + (i.price || 0) * i.stock, 0);
+    return { totalItems: items.length, totalStock, lowStockCount, totalValue };
   }, [items]);
 
   // ── History Page View ──
@@ -193,15 +250,16 @@ const StaffInventory = () => {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h1 className="text-md font-semibold leading-none capitalize">{historyItem.itemName}</h1>
+              <h1 className="text-md font-normal leading-none capitalize">{historyItem.itemName}</h1>
               <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Stock History</p>
             </div>
           </div>
-          {/* Inline +/- on history header */}
+          {/* Inline - on history header */}
           <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800 p-1.5 rounded-xl border border-slate-100 dark:border-gray-700">
             <button
               onClick={(e) => triggerAdjust(e, historyItem, -1)}
               className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-1"
+              title="Reduce stock"
             >
               <MinusCircle size={16} />
             </button>
@@ -214,7 +272,7 @@ const StaffInventory = () => {
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto px-4 pt-[120px] space-y-6">
+        <main className="max-w-4xl mx-auto px-4 pt-[126px] space-y-3">
           {/* Date Filters */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 space-y-3 shadow-sm">
             <div className="grid grid-cols-2 gap-3">
@@ -291,9 +349,9 @@ const StaffInventory = () => {
                         <div className="flex flex-col items-end gap-1 shrink-0">
                           <span className={cn(
                             "px-2 py-0.5 rounded-full text-[8px] font-black tracking-wider uppercase flex items-center gap-0.5",
-                            isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
+                            log.isReturn ? "bg-cyan-500/10 text-cyan-500" : (isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500")
                           )}>
-                            {isPositive ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
+                            {log.isReturn ? 'Return' : (isPositive ? <TrendingUp size={9} /> : <TrendingDown size={9} />)}
                             {isPositive ? `+${log.change}` : log.change}
                           </span>
                           <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider">
@@ -410,39 +468,52 @@ const StaffInventory = () => {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="text-md font-semibold leading-none">Stock Management</h1>
-            <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Tap a card to view history · +/− to adjust</p>
+            <h1 className="text-md font-normal leading-none">Stock Management</h1>
+            <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Tap a card to view history · - to adjust</p>
           </div>
         </div>
+        <button
+          onClick={() => triggerGlobalReturn()}
+          className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-lg text-[8px] font-black uppercase tracking-wider shadow-sm transition-all active:scale-95 flex items-center gap-1"
+        >
+          Return Product
+        </button>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-[120px] space-y-6">
+      <main className="max-w-4xl mx-auto px-4 pt-[126px] space-y-3">
         {/* KPI Cards */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-2">
-            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-xl shrink-0"><Package size={14} /></div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
+            <div className="p-1.5 bg-blue-500/10 text-blue-500 rounded-lg shrink-0"><Package size={12} /></div>
             <div>
-              <p className="text-[9px] font-semibold text-slate-400 leading-none">Items</p>
-              <h3 className="text-sm font-black mt-0.5">{metrics.totalItems}</h3>
+              <p className="text-[8px] font-semibold text-slate-400 leading-none">Items</p>
+              <h3 className="text-xs font-black mt-0.5">{metrics.totalItems}</h3>
             </div>
           </div>
-          <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-2">
-            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl shrink-0"><Layers size={14} /></div>
+          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
+            <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0"><Layers size={12} /></div>
             <div>
-              <p className="text-[9px] font-semibold text-slate-400 leading-none">Total Stock</p>
-              <h3 className="text-sm font-black mt-0.5">{metrics.totalStock}</h3>
+              <p className="text-[8px] font-semibold text-slate-400 leading-none">Total Stock</p>
+              <h3 className="text-xs font-black mt-0.5">{metrics.totalStock}</h3>
+            </div>
+          </div>
+          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
+            <div className="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg shrink-0"><Coins size={12} /></div>
+            <div>
+              <p className="text-[8px] font-semibold text-slate-400 leading-none">Stock Earning</p>
+              <h3 className="text-xs font-black mt-0.5">₹{metrics.totalValue}</h3>
             </div>
           </div>
           <div className={cn(
-            "p-3 border rounded-2xl shadow-sm flex items-center gap-2 transition-colors",
+            "p-2 border rounded-xl shadow-sm flex items-center gap-1.5 transition-colors",
             metrics.lowStockCount > 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800"
           )}>
-            <div className={cn("p-2 rounded-xl shrink-0", metrics.lowStockCount > 0 ? "bg-rose-500/20 text-rose-500" : "bg-slate-500/10 text-slate-400")}>
-              <ShieldAlert size={14} />
+            <div className={cn("p-1.5 rounded-lg shrink-0", metrics.lowStockCount > 0 ? "bg-rose-500/20 text-rose-500" : "bg-slate-500/10 text-slate-400")}>
+              <ShieldAlert size={12} />
             </div>
             <div>
-              <p className="text-[9px] font-semibold text-slate-400 leading-none">Low Stock</p>
-              <h3 className="text-sm font-black mt-0.5">{metrics.lowStockCount}</h3>
+              <p className="text-[8px] font-semibold text-slate-400 leading-none">Low Stock</p>
+              <h3 className="text-xs font-black mt-0.5">{metrics.lowStockCount}</h3>
             </div>
           </div>
         </div>
@@ -482,7 +553,7 @@ const StaffInventory = () => {
             <p className="text-[10px] font-semibold text-slate-400">No items found</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filteredItems.map((item) => {
               const isLowStock = item.stock <= item.minStockLevel;
               return (
@@ -490,29 +561,32 @@ const StaffInventory = () => {
                   key={item._id}
                   onClick={() => handleOpenHistory(item)}
                   className={cn(
-                    "p-4 bg-white dark:bg-gray-900 border rounded-2xl shadow-sm transition-all cursor-pointer active:scale-[0.98]",
+                    "p-2.5 bg-white dark:bg-gray-900 border rounded-xl shadow-sm transition-all cursor-pointer active:scale-[0.98]",
                     isLowStock ? 'border-rose-500/20 bg-rose-500/[0.01]' : 'border-slate-100 dark:border-gray-800'
                   )}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <h3 className="text-[13px] font-black text-slate-800 dark:text-white capitalize leading-tight">
+                  <div className="flex items-center justify-between gap-2.5">
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <h3 className="text-xs font-black text-slate-800 dark:text-white capitalize leading-tight">
                         {item.itemName}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1">
                         {item.sku && (
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-gray-800 text-[7px] font-black text-slate-400 uppercase tracking-widest">
+                          <span className="px-1 py-0.5 rounded bg-slate-100 dark:bg-gray-800 text-[6.5px] font-black text-slate-400 uppercase tracking-widest">
                             {item.sku}
                           </span>
                         )}
                         {item.category && (
-                          <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[7px] font-black text-blue-500 uppercase tracking-widest">
+                          <span className="px-1 py-0.5 rounded bg-blue-500/10 text-[6.5px] font-black text-blue-500 uppercase tracking-widest">
                             {item.category}
                           </span>
                         )}
+                        <span className="px-1 py-0.5 rounded bg-emerald-500/10 text-[6.5px] font-black text-emerald-500 uppercase tracking-widest">
+                          Price: ₹{item.price || 0}
+                        </span>
                         {isLowStock && (
-                          <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-[7px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-0.5">
-                            <AlertTriangle size={7} /> Low Stock
+                          <span className="px-1 py-0.5 rounded bg-rose-500/10 text-[6.5px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-0.5">
+                            <AlertTriangle size={6.5} /> Low Stock
                           </span>
                         )}
                       </div>
@@ -520,18 +594,18 @@ const StaffInventory = () => {
 
                     {/* Stock controls — stopPropagation so card click doesn't fire */}
                     <div
-                      className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800 p-1.5 rounded-xl border border-slate-100 dark:border-gray-700 shrink-0"
+                      className="flex items-center gap-1 bg-slate-50 dark:bg-gray-800 p-1 rounded-lg border border-slate-100 dark:border-gray-700 shrink-0"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
                         onClick={(e) => triggerAdjust(e, item, -1)}
-                        className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-1"
+                        className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-0.5"
                         title="Reduce stock"
                       >
-                        <MinusCircle size={17} />
+                        <MinusCircle size={15} />
                       </button>
                       <span className={cn(
-                        "text-[13px] font-black w-9 text-center",
+                        "text-xs font-black w-7 text-center",
                         isLowStock ? "text-rose-500" : "text-slate-800 dark:text-white"
                       )}>
                         {item.stock}
@@ -607,6 +681,86 @@ const StaffInventory = () => {
                   <button type="submit" disabled={adjustLoading}
                     className="flex-1 py-3 bg-[#00246b] dark:bg-white text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-[9px] shadow-lg disabled:opacity-50">
                     {adjustLoading ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Global Return Modal */}
+      <AnimatePresence>
+        {isGlobalReturnOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsGlobalReturnOpen(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl relative z-10"
+            >
+              <div className="p-4 border-b border-slate-100 dark:border-gray-800">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white">Product Return Form</h3>
+              </div>
+              <form onSubmit={handleGlobalReturnSubmit} className="p-4 space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Select Product</label>
+                  <select
+                    required
+                    value={globalReturnItemId}
+                    onChange={(e) => setGlobalReturnItemId(e.target.value)}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20 text-slate-800 dark:text-white"
+                  >
+                    <option value="">-- Choose Product --</option>
+                    {items.map((item) => (
+                      <option key={item._id} value={item._id} className="text-slate-850 dark:text-white">
+                        {item.itemName} (Price: ₹{item.price})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Return Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={globalReturnFormData.quantity}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value, 10) || 1);
+                      setGlobalReturnFormData({ ...globalReturnFormData, quantity: val });
+                    }}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20"
+                    placeholder="Enter quantity"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Customer Name (Optional)</label>
+                  <input type="text" value={globalReturnFormData.customerName}
+                    onChange={(e) => setGlobalReturnFormData({ ...globalReturnFormData, customerName: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20"
+                    placeholder="Enter customer name" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Contact Number (Optional)</label>
+                  <input type="tel" maxLength={10} value={globalReturnFormData.customerContact}
+                    onChange={(e) => setGlobalReturnFormData({ ...globalReturnFormData, customerContact: e.target.value.replace(/\D/g, '') })}
+                    className="w-full p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 font-bold text-xs outline-none focus:ring-2 focus:ring-[#00246b]/20"
+                    placeholder="Enter 10-digit number" />
+                </div>
+                <div className="flex gap-2.5 pt-1">
+                  <button type="button" onClick={() => setIsGlobalReturnOpen(false)}
+                    className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 text-slate-400 rounded-xl font-black uppercase tracking-widest text-[9px]">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={adjustLoading}
+                    className="flex-1 py-3 bg-emerald-500 text-white rounded-xl font-black uppercase tracking-widest text-[9px] shadow-lg disabled:opacity-50">
+                    {adjustLoading ? 'Processing...' : 'Confirm Return'}
                   </button>
                 </div>
               </form>

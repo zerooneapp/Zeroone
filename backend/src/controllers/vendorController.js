@@ -640,6 +640,8 @@ const getVendorDashboard = async (req, res) => {
       schedule: todayBookings.map(b => ({
         id: b._id,
         time: moment(b.startTime).tz('Asia/Kolkata').format('hh:mm A'),
+        totalDuration: b.totalDuration,
+        endTime: b.endTime,
         customerName: b.userId?.name || 'Customer',
         customerImage: b.userId?.image || '',
         customerPhone: b.userId?.phone || '',
@@ -865,6 +867,55 @@ const getLoyalCustomers = async (req, res) => {
     }));
 
     res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getCustomerBookingHistory = async (req, res) => {
+  try {
+    const vendor = req.vendor;
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    const { customerId, isWalkIn, phone, name } = req.query;
+
+    let matchQuery = {
+      vendorId: vendor._id,
+      status: { $in: ['confirmed', 'completed'] }
+    };
+
+    if (isWalkIn === 'false') {
+      if (mongoose.Types.ObjectId.isValid(customerId)) {
+        matchQuery.userId = new mongoose.Types.ObjectId(customerId);
+      } else {
+        return res.status(400).json({ message: 'Invalid user ID' });
+      }
+    } else {
+      // Walk-in customer: match by phone or name
+      const conditions = [];
+      if (phone && phone !== 'Unknown' && phone !== '') {
+        conditions.push({ walkInCustomerPhone: phone });
+      }
+      if (name && name !== 'Unknown' && name !== '') {
+        conditions.push({ walkInCustomerName: name });
+      }
+      // Fallback to match by booking id if customerId is a valid ObjectId
+      if (mongoose.Types.ObjectId.isValid(customerId)) {
+        conditions.push({ _id: new mongoose.Types.ObjectId(customerId) });
+      }
+      
+      if (conditions.length > 0) {
+        matchQuery.$or = conditions;
+      } else {
+        return res.status(400).json({ message: 'Invalid customer identifier' });
+      }
+    }
+
+    const bookings = await Booking.find(matchQuery)
+      .select('startTime endTime totalDuration services totalPrice status')
+      .sort({ startTime: -1 });
+
+    res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -1125,7 +1176,7 @@ const getVendorDashboardBundle = async (req, res) => {
         vendorId: new mongoose.Types.ObjectId(vendor._id), 
         startTime: { $gte: todayStart, $lt: todayEnd } 
       })
-        .select('startTime userId staffId services status totalPrice walkInCustomerName walkInCustomerPhone')
+        .select('startTime endTime totalDuration userId staffId services status totalPrice walkInCustomerName walkInCustomerPhone')
         .populate('userId', 'name image phone')
         .populate('staffId', 'name isOwner')
         .sort({ startTime: 1 })
@@ -1233,6 +1284,8 @@ const getVendorDashboardBundle = async (req, res) => {
         schedule: todayBookings.map(b => ({
           id: b._id,
           time: moment(b.startTime).tz('Asia/Kolkata').format('hh:mm A'),
+          totalDuration: b.totalDuration,
+          endTime: b.endTime,
           customerName: b.userId?.name || b.walkInCustomerName || 'Customer',
           customerImage: b.userId?.image || '',
           customerPhone: b.userId?.phone || b.walkInCustomerPhone || '',
@@ -1283,6 +1336,7 @@ module.exports = {
   createWalkIn,
   createManualBooking,
   getLoyalCustomers,
+  getCustomerBookingHistory,
   deleteGalleryImage,
   replaceGalleryImage,
   updateSingleMedia,

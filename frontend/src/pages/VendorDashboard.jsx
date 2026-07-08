@@ -21,7 +21,8 @@ import {
   Phone,
   Lock,
   Crown,
-  IndianRupee
+  IndianRupee,
+  Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -323,7 +324,8 @@ const VendorDashboard = () => {
           </div>
           <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[#00246b] dark:text-white uppercase">{item.time}</span>
+              <Clock size={8} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+              <span className="text-[#00246b] dark:text-white uppercase">{item.time} {item.totalDuration ? `(${item.totalDuration} min)` : ''}</span>
               <span className="opacity-20">&bull;</span>
               <span className="truncate max-w-[150px]">{item.service}</span>
             </div>
@@ -412,7 +414,7 @@ const VendorDashboard = () => {
                   <Crown size={16} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Profile Active</h3>
+                  <h3 className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Profile Inactive</h3>
                   <p className="text-[9px] font-bold text-rose-500/70 uppercase tracking-tighter">Services hidden from marketplace</p>
                 </div>
               </div>
@@ -586,7 +588,8 @@ const VendorDashboard = () => {
                       </div>
                       <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[#00246b] dark:text-white uppercase">{item.time}</span>
+                          <Clock size={8} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+                          <span className="text-[#00246b] dark:text-white uppercase">{item.time} {item.totalDuration ? `(${item.totalDuration} min)` : ''}</span>
                           <span className="opacity-20">&bull;</span>
                           <span className="truncate max-w-[150px]">{item.service}</span>
                         </div>

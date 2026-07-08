@@ -75,13 +75,21 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
          </div>
 
          {/* Info Grid - More Compact */}
-         <div className="grid grid-cols-2 gap-x-4 gap-y-2 py-2 mt-2 border-t border-slate-50 dark:border-gray-800/50 relative z-10">
+         <div className="grid grid-cols-3 gap-x-2 gap-y-2 py-2 mt-2 border-t border-slate-50 dark:border-gray-800/50 relative z-10">
             <div className="flex flex-col">
                <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-0.5">
                   <Calendar size={8} strokeWidth={3} /> Schedule
                </p>
-               <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-1">
+               <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-tight">
                   {dayjs(booking.startTime).format('DD MMM')} <span className="text-[#00246b] dark:text-blue-400">•</span> {dayjs(booking.startTime).format('hh:mm A')}
+               </p>
+            </div>
+            <div className="flex flex-col">
+               <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-0.5">
+                  <Clock size={8} strokeWidth={3} /> Duration
+               </p>
+               <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                  {booking.totalDuration ? `${booking.totalDuration} min` : '30 min'}
                </p>
             </div>
             <div className="flex flex-col text-right items-end">

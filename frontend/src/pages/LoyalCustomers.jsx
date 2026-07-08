@@ -10,11 +10,13 @@ import {
   MessageSquare,
   Filter,
   Users,
-  UserX
+  UserX,
+  Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import { useVendorStore } from '../store/vendorStore';
+import toast from 'react-hot-toast';
 
 const toPascalCase = (str = '') =>
   str
@@ -29,13 +31,38 @@ const LoyalCustomers = () => {
   const {
     clientsData: customers,
     clientsLoading: loading,
-    fetchClients
+    fetchClients,
+    fetchCustomerBookingHistory
   } = useVendorStore();
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // all, repeat, high-spender
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [historyBookings, setHistoryBookings] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  const handleViewHistory = async (customer) => {
+    setSelectedCustomer(customer);
+    setIsHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const data = await fetchCustomerBookingHistory(
+        customer._id,
+        customer.isWalkIn,
+        customer.name,
+        customer.phone
+      );
+      setHistoryBookings(data || []);
+    } catch (err) {
+      toast.error('Failed to fetch booking history');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   const handleFetch = async (force = false) => {
     try {
@@ -136,13 +163,14 @@ const LoyalCustomers = () => {
             </div>
           ) : (
             <>
-              {paginatedCustomers.map((customer, idx) => (
+               {paginatedCustomers.map((customer, idx) => (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   key={customer._id}
-                  className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-2"
+                  onClick={() => handleViewHistory(customer)}
+                  className="bg-white dark:bg-gray-900 p-2.5 rounded-xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-2 cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -170,6 +198,7 @@ const LoyalCustomers = () => {
                       {/* Call Action */}
                       <a 
                         href={`tel:${customer.phone}`}
+                        onClick={(e) => e.stopPropagation()}
                         className="p-2 bg-slate-50 dark:bg-gray-800 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-xl text-slate-600 dark:text-gray-300 transition-all border border-slate-100 dark:border-gray-800/60"
                         title="Call Customer"
                       >
@@ -178,6 +207,7 @@ const LoyalCustomers = () => {
                       {/* WhatsApp Chat Action */}
                       <a 
                         href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`} 
+                        onClick={(e) => e.stopPropagation()}
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="p-2 bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 transition-all border border-emerald-100 dark:border-emerald-900/30"
@@ -239,6 +269,96 @@ const LoyalCustomers = () => {
           )}
         </div>
       </main>
+
+      <AnimatePresence>
+        {isHistoryOpen && selectedCustomer && (
+          <motion.div 
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+            className="fixed inset-0 z-50 bg-slate-50 dark:bg-gray-950 flex flex-col"
+          >
+            <div className="w-full max-w-4xl mx-auto h-full flex flex-col bg-white dark:bg-gray-900">
+              {/* Modal Header */}
+              <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
+                <button 
+                  onClick={() => setIsHistoryOpen(false)}
+                  className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
+                >
+                  <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-100 dark:border-gray-700">
+                    <img 
+                      src={selectedCustomer.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCustomer.name)}&background=E2E8F0&color=1C2C4E&bold=true`} 
+                      alt={selectedCustomer.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h1 className="text-sm font-extrabold text-[#00246b] dark:text-white tracking-tight">
+                      {toPascalCase(selectedCustomer.name)}
+                    </h1>
+                    <p className="text-[9px] text-slate-400 font-bold dark:text-gray-400">
+                      Booking History
+                    </p>
+                  </div>
+                </div>
+              </header>
+
+              {/* Modal Body */}
+              <main className="p-4 overflow-y-auto no-scrollbar flex-1 space-y-4">
+                {historyLoading ? (
+                  <div className="py-24 flex flex-col items-center justify-center gap-3">
+                    <div className="w-8 h-8 border-4 border-t-[#00246b] border-slate-200 dark:border-gray-800 rounded-full animate-spin"></div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Loading history...</p>
+                  </div>
+                ) : historyBookings.length === 0 ? (
+                  <div className="py-24 text-center space-y-2">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-slate-500 dark:text-gray-500">No completed visits found</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {historyBookings.map((booking) => (
+                      <div 
+                        key={booking._id} 
+                        className="p-3.5 bg-slate-50 dark:bg-gray-950 rounded-2xl border border-slate-100 dark:border-gray-900/60 flex flex-col gap-2"
+                      >
+                        <div className="flex items-center justify-between gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-black text-[#00246b] dark:text-gray-300 bg-[#00246b]/5 dark:bg-gray-900 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                            {dayjs(booking.startTime).format('ddd, DD MMM YYYY')}
+                          </span>
+                          <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-gray-400 bg-slate-100/50 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
+                            <Clock size={10} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+                            <span>{dayjs(booking.startTime).format('hh:mm A')} {booking.totalDuration ? `(${booking.totalDuration} min)` : ''}</span>
+                          </div>
+                          <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                            ₹{booking.totalPrice}
+                          </span>
+                        </div>
+                        <div className="pl-1 space-y-1">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Services Taken</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {booking.services.map((svc, sIdx) => (
+                              <span 
+                                key={sIdx} 
+                                className="text-[10px] font-bold text-slate-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 px-2 py-0.5 rounded-md"
+                              >
+                                {svc.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </main>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

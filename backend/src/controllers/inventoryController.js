@@ -52,7 +52,7 @@ const getInventoryForStaff = async (req, res) => {
 
     // Staff only sees name, sku, category, stock, minStockLevel — no prices
     const items = await InventoryItem.find(query)
-      .select('itemName sku category stock minStockLevel')
+      .select('itemName sku category stock minStockLevel price')
       .sort({ itemName: 1 });
 
     res.status(200).json(items);
@@ -138,13 +138,13 @@ const adjustStock = async (req, res) => {
     const vendorId = isStaffAdjust ? req.staff.vendorId : req.vendor._id;
 
     const { id } = req.params;
-    const { change, customerName, customerContact, staffName } = req.body;
+    const { change, customerName, customerContact, staffName, isReturn } = req.body;
 
     if (change === undefined || typeof change !== 'number') {
       return res.status(400).json({ message: 'Stock change value is required' });
     }
 
-    if (isStaffAdjust && change > 0) {
+    if (isStaffAdjust && change > 0 && !isReturn) {
       return res.status(403).json({ message: 'Staff is not authorized to increase stock quantity. Only the store owner can add stock.' });
     }
 
@@ -168,7 +168,8 @@ const adjustStock = async (req, res) => {
       change,
       customerName: customerName || '',
       customerContact: customerContact || '',
-      adjustedBy: isStaffAdjust ? 'staff' : 'vendor'
+      adjustedBy: isStaffAdjust ? 'staff' : 'vendor',
+      isReturn: !!isReturn
     };
 
     if (isStaffAdjust) {

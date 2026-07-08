@@ -8,8 +8,10 @@ const getSystemDark = () =>
 const applyTheme = (isDark) => {
   if (isDark) {
     document.documentElement.classList.add('dark');
+    document.documentElement.style.backgroundColor = '#0f172a';
   } else {
     document.documentElement.classList.remove('dark');
+    document.documentElement.style.backgroundColor = '#f5f6f8';
   }
 };
 
