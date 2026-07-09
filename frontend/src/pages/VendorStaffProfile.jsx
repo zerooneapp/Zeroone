@@ -21,9 +21,10 @@ const VendorStaffProfile = () => {
   const [staff, setStaff] = useState(storeStaff || null);
   const [filterPeriod] = useState('custom'); // Locked to custom as requested
   const [startDate, setStartDate] = useState(dayjs().subtract(7, 'day').format('YYYY-MM-DD'));
-  const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [endDate, setEndDate] = useState(dayjs().add(30, 'day').format('YYYY-MM-DD'));
   const [noteText, setNoteText] = useState('');
   const [savingNote, setSavingNote] = useState(false);
+  const [activeTab, setActiveTab] = useState('custom');
 
   // Sync state if store gets updated
   useEffect(() => {
@@ -148,119 +149,151 @@ const VendorStaffProfile = () => {
           </div>
         </section>
 
-        {/* Note Section */}
-        <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-2">
-          <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest pl-1">Staff Note</h3>
-          <div className="space-y-2">
-            <textarea
-              placeholder="Write a private note about this staff member..."
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              className="w-full h-16 p-2 bg-slate-50 dark:bg-gray-800 text-[11px] font-bold text-slate-700 dark:text-white rounded-xl border border-slate-100 dark:border-gray-700 outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-slate-400 resize-none"
-            />
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={handleSaveNote}
-                disabled={savingNote}
-                className="px-4 py-1.5 bg-[#00246b] text-white font-black text-[9px] uppercase tracking-widest rounded-lg active:scale-95 disabled:opacity-50 transition-all"
-              >
-                {savingNote ? 'Saving...' : 'Save Note'}
-              </button>
-            </div>
-          </div>
-        </section>
+        {/* Tab Toggle */}
+        <div className="flex bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-1 rounded-2xl shadow-sm gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab('custom')}
+            className={`flex-1 py-2 text-center text-[10px] font-black uppercase tracking-wider rounded-xl transition-all ${
+              activeTab === 'custom'
+                ? 'bg-[#00246b] text-white shadow-sm'
+                : 'text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
+          >
+            Custom
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('note')}
+            className={`flex-1 py-2 text-center text-[10px] font-black uppercase tracking-wider rounded-xl transition-all ${
+              activeTab === 'note'
+                ? 'bg-[#00246b] text-white shadow-sm'
+                : 'text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
+          >
+            Note
+          </button>
+        </div>
 
-        {/* Earnings Filter */}
-        <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest pl-1">Earnings Filter</h3>
-            <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2 py-0.5 bg-slate-50 dark:bg-gray-800 rounded-md">Custom</span>
-          </div>
-
-          <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-slate-100 dark:border-gray-800/50 mt-1">
-            <div className="flex-1 space-y-1 text-left">
-              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
-              <div className="relative group">
-                <input
-                  type="date"
-                  value={startDate}
-                  max={dayjs().format('YYYY-MM-DD')}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                  className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
-                />
+        {activeTab === 'note' && (
+          /* Note Section */
+          <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-2">
+            <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest pl-1">Staff Note</h3>
+            <div className="space-y-2">
+              <textarea
+                placeholder="Write a private note about this staff member..."
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                className="w-full h-16 p-2 bg-slate-50 dark:bg-gray-800 text-[11px] font-bold text-slate-700 dark:text-white rounded-xl border border-slate-100 dark:border-gray-700 outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-slate-400 resize-none"
+              />
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveNote}
+                  disabled={savingNote}
+                  className="px-4 py-1.5 bg-[#00246b] text-white font-black text-[9px] uppercase tracking-widest rounded-lg active:scale-95 disabled:opacity-50 transition-all"
+                >
+                  {savingNote ? 'Saving...' : 'Save Note'}
+                </button>
               </div>
             </div>
+          </section>
+        )}
 
-            <div className="pt-3 text-gray-300">
-              <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
+        {activeTab === 'custom' && (
+          /* Earnings Filter */
+          <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest pl-1">Earnings Filter</h3>
+              <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2 py-0.5 bg-slate-50 dark:bg-gray-800 rounded-md">Custom</span>
             </div>
 
-            <div className="flex-1 space-y-1 text-left">
-              <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
-              <div className="relative group">
-                <input
-                  type="date"
-                  value={endDate}
-                  max={dayjs().format('YYYY-MM-DD')}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                  className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
-                />
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-slate-100 dark:border-gray-800/50 mt-1">
+              <div className="flex-1 space-y-1 text-left">
+                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
+                <div className="relative group">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 text-gray-300">
+                <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
+              </div>
+
+              <div className="flex-1 space-y-1 text-left">
+                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
+                <div className="relative group">
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* Stats Grid */}
-        <section className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl p-3 shadow-sm">
-            <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">
-              {filterPeriod === 'custom' ? 'Filtered Earnings' : 'Total Earnings'}
-            </p>
-            <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">₹{totalEarnings.toLocaleString()}</p>
-          </div>
-          <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl p-3 shadow-sm">
-            <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Assigned Skills</p>
-            <p className="text-lg font-black text-[#00246b] dark:text-white mt-0.5">{staff?.services?.length || 0}</p>
-          </div>
-        </section>
+        {activeTab === 'custom' && (
+          <>
+            {/* Stats Grid */}
+            <section className="grid grid-cols-2 gap-3">
+              <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl p-3 shadow-sm">
+                <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">
+                  {filterPeriod === 'custom' ? 'Filtered Earnings' : 'Total Earnings'}
+                </p>
+                <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">₹{totalEarnings.toLocaleString()}</p>
+              </div>
+              <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl p-3 shadow-sm">
+                <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Assigned Skills</p>
+                <p className="text-lg font-black text-[#00246b] dark:text-white mt-0.5">{staff?.services?.length || 0}</p>
+              </div>
+            </section>
 
-        {/* Assigned Services / Skills */}
-        <section className="space-y-1.5">
-          <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-wider pl-1">Skills & Services</h3>
-          <div className="grid gap-2">
-            {staff?.services && staff.services.length > 0 ? (
-              staff.services.map((service) => (
-                <div key={service._id} className="p-2.5 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl flex items-center justify-between gap-3 shadow-sm">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-gray-850 flex-shrink-0 flex items-center justify-center border border-slate-100 dark:border-gray-800">
-                      {service.image ? (
-                        <img src={service.image} alt={service.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Scissors size={14} className="text-slate-300 dark:text-gray-650" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-black text-slate-800 dark:text-white truncate">{service.name}</p>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{service.duration} mins</span>
+            {/* Assigned Services / Skills */}
+            <section className="space-y-1.5">
+              <h3 className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-wider pl-1">Skills & Services</h3>
+              <div className="grid gap-2">
+                {staff?.services && staff.services.length > 0 ? (
+                  staff.services.map((service) => (
+                    <div key={service._id} className="p-2.5 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl flex items-center justify-between gap-3 shadow-sm">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-gray-850 flex-shrink-0 flex items-center justify-center border border-slate-100 dark:border-gray-800">
+                          {service.image ? (
+                            <img src={service.image} alt={service.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Scissors size={14} className="text-slate-300 dark:text-gray-650" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-black text-slate-800 dark:text-white truncate">{service.name}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{service.duration} mins</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-[#00246b] dark:text-white">₹{service.price}</p>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="p-3 text-center bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl text-slate-400 text-[9px] font-bold uppercase tracking-wider">
+                    {staff ? 'No skills or services assigned' : 'Loading skills...'}
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-black text-[#00246b] dark:text-white">₹{service.price}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-3 text-center bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl text-slate-400 text-[9px] font-bold uppercase tracking-wider">
-                {staff ? 'No skills or services assigned' : 'Loading skills...'}
+                )}
               </div>
-            )}
-          </div>
-        </section>
+            </section>
+          </>
+        )}
 
       </main>
     </div>

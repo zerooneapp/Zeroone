@@ -93,12 +93,28 @@ const listStaff = async (req, res) => {
 
     const staffIds = staff.map(s => s._id);
 
+    const moment = require('moment-timezone');
+    const todayStart = moment().tz('Asia/Kolkata').startOf('day').toDate();
+    const todayEnd = moment().tz('Asia/Kolkata').endOf('day').toDate();
+
     // 1. Bulk fetch earnings stats for all staff
-    const stats = await Booking.aggregate([
-      { $match: { staffId: { $in: staffIds }, status: { $in: ['confirmed', 'completed'] } } },
-      { $group: { _id: '$staffId', total: { $sum: '$totalPrice' } } }
+    const [stats, todayStats] = await Promise.all([
+      Booking.aggregate([
+        { $match: { staffId: { $in: staffIds }, status: { $in: ['confirmed', 'completed'] } } },
+        { $group: { _id: '$staffId', total: { $sum: '$totalPrice' } } }
+      ]),
+      Booking.aggregate([
+        { $match: { staffId: { $in: staffIds }, status: { $in: ['confirmed', 'completed'] }, startTime: { $gte: todayStart, $lt: todayEnd } } },
+        { $group: { _id: '$staffId', total: { $sum: '$totalPrice' } } }
+      ])
     ]);
+
     const statsMap = stats.reduce((acc, curr) => {
+      acc[curr._id.toString()] = curr.total;
+      return acc;
+    }, {});
+
+    const todayStatsMap = todayStats.reduce((acc, curr) => {
       acc[curr._id.toString()] = curr.total;
       return acc;
     }, {});
@@ -145,6 +161,7 @@ const listStaff = async (req, res) => {
       return {
         ...sObj,
         totalEarnings: statsMap[sId] || 0,
+        todayEarnings: todayStatsMap[sId] || 0,
         isOffDay: !!availabilityMap[sId],
         activeClosure: closureMap[sId] || null
       };

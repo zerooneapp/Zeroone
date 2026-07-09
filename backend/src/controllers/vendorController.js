@@ -448,9 +448,13 @@ const getVendorBookings = async (req, res) => {
         $lte: endDate
       };
     }
-    const allowedStatus = ['confirmed', 'completed', 'cancelled'];
+    const allowedStatus = ['confirmed', 'completed', 'cancelled', 'pending_completion'];
     if (status && allowedStatus.includes(status)) {
-      filter.status = status;
+      if (status === 'confirmed') {
+        filter.status = { $in: ['confirmed', 'pending_completion'] };
+      } else {
+        filter.status = status;
+      }
     }
 
     const bookings = await Booking.find(filter)

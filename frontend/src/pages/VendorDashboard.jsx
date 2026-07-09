@@ -276,7 +276,7 @@ const VendorDashboard = () => {
   ], [data?.serviceMode]);
 
   const activeSchedule = useMemo(() =>
-    (data?.schedule || []).filter(item => ['pending', 'confirmed', 'assigned'].includes(item.status)),
+    (data?.schedule || []).filter(item => ['pending', 'confirmed', 'assigned', 'pending_completion'].includes(item.status)),
     [data?.schedule]
   );
 
@@ -497,7 +497,7 @@ const VendorDashboard = () => {
                 <div className="h-4 w-8 bg-slate-100 dark:bg-gray-800 rounded-pulse animate-pulse" />
               ) : (
                 <p className="text-[16px] font-black text-[#00246b] dark:text-white leading-none truncate">
-                  {data?.schedule?.filter((item) => ['pending', 'confirmed', 'assigned'].includes(item.status)).length || 0}
+                  {data?.schedule?.filter((item) => ['pending', 'confirmed', 'assigned', 'pending_completion'].includes(item.status)).length || 0}
                 </p>
               )}
             </div>

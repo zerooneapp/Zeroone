@@ -223,8 +223,8 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
 
   if (!isOwner && !isStaff) throw new Error('Unauthorized: You do not have permission to complete this booking');
 
-  if (booking.status !== 'confirmed' && booking.status !== 'pending') {
-    throw new Error(`Only confirmed or pending bookings can be completed (Current: ${booking.status})`);
+  if (booking.status !== 'confirmed' && booking.status !== 'pending' && booking.status !== 'pending_completion') {
+    throw new Error(`Only confirmed, pending, or pending_completion bookings can be completed (Current: ${booking.status})`);
   }
 
   // 1. Atomic Status Update
@@ -371,7 +371,7 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
   const booking = await Booking.findOne(query).populate('vendorId staffId');
   if (!booking) throw new Error('Booking not found');
 
-  if (booking.status !== 'confirmed' && booking.status !== 'pending') {
+  if (booking.status !== 'confirmed' && booking.status !== 'pending' && booking.status !== 'pending_completion') {
     throw new Error(`Only active bookings can be cancelled (Current: ${booking.status})`);
   }
 
@@ -750,10 +750,146 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
   return booking;
 };
 
+const systemCompleteBooking = async (bookingId) => {
+  const Booking = require('../models/Booking');
+  const booking = await Booking.findById(bookingId).populate('vendorId staffId');
+  if (!booking) return;
+  if (booking.status !== 'pending_completion') return;
+
+  const completionTime = new Date();
+  booking.status = 'completed';
+  booking.completedAt = completionTime;
+  await booking.save();
+
+  // 📈 TRACK MEMBERSHIP USAGE ON COMPLETION: Increment counts only now
+  if (booking.membershipId) {
+    try {
+      const UserMembership = require('../models/UserMembership');
+      const membership = await UserMembership.findById(booking.membershipId);
+      if (membership) {
+        let updatedAny = false;
+        booking.services.forEach(s => {
+          if (s.isFreeViaMembership) {
+            const sId = s.serviceId?._id ? s.serviceId._id.toString() : s.serviceId?.toString();
+            const usageIdx = membership.usage.findIndex(u => {
+              const uId = u.serviceId?._id ? u.serviceId._id.toString() : u.serviceId?.toString();
+              return uId === sId;
+            });
+            if (usageIdx > -1) {
+              membership.usage[usageIdx].usedCount += 1;
+              updatedAny = true;
+            }
+          }
+        });
+
+        if (updatedAny) {
+          await membership.save();
+          console.log(`[MEMBERSHIP-TRACK] Counts incremented for completed booking ${booking._id}`);
+
+          // 🔄 AUTO-EXPIRE CHECK:
+          const fullMembership = await UserMembership.findById(membership._id).populate('planId');
+          if (fullMembership && fullMembership.status === 'active') {
+            const allUsed = fullMembership.planId.services.every(planService => {
+              const usageRecord = fullMembership.usage.find(u => u.serviceId.toString() === planService.serviceId.toString());
+              return (usageRecord?.usedCount || 0) >= planService.usageLimit;
+            });
+
+            if (allUsed) {
+              fullMembership.status = 'expired';
+              await fullMembership.save();
+              
+              const NotificationService = require('./notificationService');
+              NotificationService.sendNotification({
+                userIds: booking.userId,
+                role: 'customer',
+                type: 'MEMBERSHIP_EXPIRED',
+                title: 'Membership Completed! 🏁',
+                message: `You have successfully used all services in your "${fullMembership.planId.name}" membership.`,
+                data: { membershipId: fullMembership._id }
+              });
+            }
+          }
+        }
+      }
+    } catch (trackError) {
+      console.error(`[MEMBERSHIP-TRACK-ERROR] Failed to update counts for booking ${booking._id}:`, trackError);
+    }
+  }
+
+  const NotificationService = require('./notificationService');
+  const vendorOwnerId = booking.vendorId?.ownerId;
+  const staffName = booking.staffId?.name || 'Professional';
+  const customerName = booking.userId?.name || booking.walkInCustomerName || 'Customer';
+
+  const notificationPayloads = [];
+
+  // 1. Customer Notification (Only if not a walk-in)
+  if (booking.userId) {
+    notificationPayloads.push({
+      userIds: booking.userId,
+      role: 'customer',
+      type: 'BOOKING_COMPLETED',
+      title: 'Booking Completed!',
+      message: `We hope you enjoyed your service at ${booking.vendorId?.shopName || 'ZeroOne'}. Please leave a review!`,
+      data: { bookingId: booking._id },
+      referenceId: `${booking._id}_COMPLETE`
+    });
+  }
+
+  // 2. Vendor Owner Notification
+  if (vendorOwnerId) {
+    notificationPayloads.push({
+      userIds: vendorOwnerId,
+      role: 'vendor',
+      type: 'BOOKING_COMPLETED_REPORT',
+      title: 'Service Completed',
+      message: `Staff ${staffName} has completed the service for ${customerName}.`,
+      data: { bookingId: booking._id },
+      referenceId: `${booking._id}_COMPLETE_V`
+    });
+  }
+
+  // 3. Staff Notification
+  const staffTargetId = getStaffNotificationTarget(booking.staffId);
+  if (staffTargetId) {
+    notificationPayloads.push({
+      userIds: staffTargetId,
+      role: 'staff',
+      type: 'BOOKING_COMPLETED',
+      title: 'Job Completed!',
+      message: `Great job! You have completed the service for ${customerName}.`,
+      data: { bookingId: booking._id },
+      referenceId: `${booking._id}_COMPLETE_S`
+    });
+  }
+
+  if (notificationPayloads.length > 0) {
+    const finalNotifications = new Map();
+    notificationPayloads.forEach(notif => {
+      const uid = notif.userIds.toString();
+      if (!finalNotifications.has(uid) || notif.role === 'staff') {
+        finalNotifications.set(uid, notif);
+      }
+    });
+    
+    const sendRoleNotifications = async (payloads) => {
+      for (const p of payloads) {
+        try {
+          await NotificationService.sendNotification(p);
+        } catch (err) {
+          console.error('[BOOKING-COMPLETE-NOTIF-ERROR]', err);
+        }
+      }
+    };
+    await sendRoleNotifications(Array.from(finalNotifications.values()));
+  }
+};
+
 module.exports = {
   finalizeBooking,
   cancelBooking,
   emergencyCancelBooking,
   markBookingComplete,
-  rescheduleBooking
+  rescheduleBooking,
+  systemCompleteBooking
 };

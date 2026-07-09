@@ -231,6 +231,81 @@ const initCronJobs = () => {
     }
   });
 
+  // 6. Expired Bookings to pending_completion (Runs every minute)
+  cron.schedule('* * * * *', async () => {
+    try {
+      const Booking = require('../models/Booking');
+      const Vendor = require('../models/Vendor');
+      const NotificationService = require('./notificationService');
+      const now = moment().tz('Asia/Kolkata').toDate();
+
+      // Find confirmed bookings whose endTime is in the past
+      const expiredBookings = await Booking.find({
+        status: 'confirmed',
+        endTime: { $lte: now }
+      });
+
+      if (expiredBookings.length > 0) {
+        const vendorIdsToNotify = new Set();
+
+        for (const booking of expiredBookings) {
+          booking.status = 'pending_completion';
+          await booking.save();
+          if (booking.vendorId) {
+            vendorIdsToNotify.add(booking.vendorId.toString());
+          }
+        }
+
+        // Notify vendors who have bookings pending completion
+        for (const vendorId of vendorIdsToNotify) {
+          const vendor = await Vendor.findById(vendorId);
+          if (!vendor || !vendor.ownerId) continue;
+
+          const pendingCount = await Booking.countDocuments({
+            vendorId: vendor._id,
+            status: 'pending_completion'
+          });
+
+          if (pendingCount > 0) {
+            await NotificationService.sendNotification({
+              userIds: vendor.ownerId,
+              role: 'vendor',
+              type: 'BOOKING_ATTENTION',
+              title: 'Bookings Need Attention ⚠️',
+              message: `${pendingCount} booking${pendingCount > 1 ? 's' : ''} need${pendingCount === 1 ? 's' : ''} your attention. Please complete or mark them.`,
+              data: { isActionable: true }
+            });
+            console.log(`[CRON-EXPIRED] Notified vendor ${vendor.shopName} (${vendor._id}) about ${pendingCount} pending attention bookings`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[CRON-EXPIRED-ERROR]', error.message);
+    }
+  });
+
+  // 7. Auto-complete stale pending_completion bookings (Runs every minute)
+  cron.schedule('* * * * *', async () => {
+    try {
+      const Booking = require('../models/Booking');
+      const { systemCompleteBooking } = require('./bookingService');
+      const cutoffTime = moment().tz('Asia/Kolkata').subtract(24, 'hours').toDate();
+
+      // Find bookings pending completion that expired more than 24 hours ago
+      const staleBookings = await Booking.find({
+        status: 'pending_completion',
+        endTime: { $lte: cutoffTime }
+      });
+
+      for (const booking of staleBookings) {
+        console.log(`[CRON-AUTO-COMPLETE] Auto-completing booking ${booking._id}`);
+        await systemCompleteBooking(booking._id);
+      }
+    } catch (error) {
+      console.error('[CRON-AUTO-COMPLETE-ERROR]', error.message);
+    }
+  });
+
   console.log('[CRON-SERVICE] All system tasks initialized.');
 };
 

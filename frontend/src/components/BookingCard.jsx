@@ -11,6 +11,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
    const getStatusStyles = (status) => {
       switch (status) {
          case 'confirmed': return 'bg-[#00246b]/10 text-[#00246b] border-[#00246b]/20 dark:bg-gray-800/80 dark:text-blue-400 dark:border-blue-900/30';
+         case 'pending_completion': return 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/10 dark:text-amber-400 dark:border-amber-900/30';
          case 'completed': return 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/30';
          case 'cancelled': return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/10 dark:text-rose-400 dark:border-rose-900/30';
          default: return 'bg-gray-100 text-gray-500';
@@ -42,7 +43,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                   {booking.isWalkIn && (
                      <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#00246b] text-white rounded-full flex items-center justify-center border border-white dark:border-gray-900 shadow-sm">
                         <ShoppingBag size={7} />
-                     </div>
+                      </div>
                   )}
                </div>
                <div className="min-w-0">
@@ -70,7 +71,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                </div>
             </div>
             <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase border tracking-[0.15em] leading-none shrink-0 ${getStatusStyles(booking.status)}`}>
-               {booking.status}
+               {booking.status === 'pending_completion' ? 'attention' : booking.status}
             </span>
          </div>
 
@@ -118,10 +119,10 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                 </span>
             </div>
 
-            {booking.status === 'confirmed' && (
+            {(booking.status === 'confirmed' || booking.status === 'pending_completion') && (
                <div className="flex gap-1.5">
                   <button
-                     disabled={!booking.canCancel || isActionLoading}
+                     disabled={(booking.status === 'confirmed' ? !booking.canCancel : false) || isActionLoading}
                      onClick={(e) => { e.stopPropagation(); onCancel(booking._id); }}
                      className="h-8 w-8 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-lg flex items-center justify-center active:scale-95 transition-all border border-slate-100 dark:border-gray-700/50 disabled:opacity-30"
                   >

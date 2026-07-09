@@ -77,14 +77,14 @@ const Navbar = () => {
         "w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-4 pointer-events-auto transition-all duration-300",
         isIOS ? "-mb-[88px] pb-0" : "pb-[env(safe-area-inset-bottom)]"
       )}>
-        <div className="flex items-center justify-between max-w-lg mx-auto h-[38px]">
+        <div className="flex items-center justify-between max-w-lg mx-auto h-[44px]">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               end
               className={({ isActive }) => cn(
-                'flex flex-col items-center justify-center gap-0 min-w-[70px] h-full transition-all relative',
+                'flex flex-col items-center justify-center gap-0.5 min-w-[70px] h-full transition-all relative',
                 'opacity-100'
               )}
             >
@@ -100,7 +100,7 @@ const Navbar = () => {
                   )}
 
                    <item.icon
-                    size={16}
+                    size={18}
                     className={cn(
                       "transition-all duration-300",
                       isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400"
@@ -109,7 +109,7 @@ const Navbar = () => {
                   />
 
                   <span className={cn(
-                    "text-[7.5px] font-black uppercase tracking-wider transition-all",
+                    "text-[8px] font-black uppercase tracking-wider transition-all",
                     isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400"
                     )}>
                     {item.label}
