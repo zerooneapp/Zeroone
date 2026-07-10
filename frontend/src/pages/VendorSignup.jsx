@@ -164,7 +164,7 @@ const VendorSignup = () => {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <p className="text-[10px] font-black text-[#00246b] dark:text-white uppercase tracking-widest leading-none mb-1">Step {step} of 2</p>
+          <p className="text-[10px] font-black text-[#00246b] dark:text-white uppercase tracking-widest leading-none mb-1">Step {step} of 3</p>
           <h1 className="text-2xl font-black tracking-tight leading-none">Partner Application</h1>
         </div>
       </div>
@@ -260,7 +260,7 @@ const VendorSignup = () => {
           <div className="space-y-4 relative z-10">
             <div className="space-y-1">
               <h2 className="text-2xl font-black leading-tight">Identity Docs</h2>
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-[8px]">Verify your business legality</p>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-[8px]">Verify your identity</p>
             </div>
 
             <div className="space-y-3">
@@ -309,6 +309,25 @@ const VendorSignup = () => {
                   <input type="file" className="hidden" onChange={(e) => setFile('aadhaarBack', e.target.files[0])} accept=".jpg,.jpeg,.png" />
                 </label>
               </div>
+            </div>
+
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30 flex items-center gap-2">
+              <Info className="text-amber-500 shrink-0" size={14} />
+              <p className="text-[8px] font-bold text-amber-600/70 dark:text-amber-500/50 uppercase leading-tight font-mono">
+                Stored securely for verification only.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-4 relative z-10">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-black leading-tight">Additional Details</h2>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-[8px]">Provide location and photos</p>
+            </div>
+
+            <div className="space-y-3">
               {/* Geolocation */}
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between px-1">
@@ -416,13 +435,6 @@ const VendorSignup = () => {
                 </div>
               </div>
             </div>
-
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30 flex items-center gap-2">
-              <Info className="text-amber-500 shrink-0" size={14} />
-              <p className="text-[8px] font-bold text-amber-600/70 dark:text-amber-500/50 uppercase leading-tight font-mono">
-                Stored securely for verification only.
-              </p>
-            </div>
           </div>
         )}
       </div>
@@ -432,10 +444,10 @@ const VendorSignup = () => {
         <Button
           size="lg"
           className="w-full h-12 rounded-xl shadow-lg shadow-[#00246b]/10 gap-2 text-sm font-black uppercase tracking-widest text-white bg-[#00246b] dark:bg-[#00246b] active:scale-95 transition-all"
-          onClick={step < 2 ? handleNext : handleSubmit}
+          onClick={step < 3 ? handleNext : handleSubmit}
           loading={loading}
         >
-          {step < 2 ? 'Continue' : 'Submit Application'}
+          {step < 3 ? 'Continue' : 'Submit Application'}
           <ArrowRight size={18} strokeWidth={3} />
         </Button>
         <div className="mt-4 text-center">

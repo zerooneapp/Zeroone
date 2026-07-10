@@ -182,7 +182,6 @@ const uploadDocs = async (req, res) => {
     const hasRequiredMedia = 
       vendor.aadhaarFront && 
       vendor.aadhaarBack && 
-      vendor.panCard && 
       vendor.vendorPhoto && 
       (!requiresShopImage || vendor.shopImage);
 

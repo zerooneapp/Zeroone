@@ -213,7 +213,6 @@ const approveVendor = async (req, res) => {
       const missing = [];
       if (!vendor.aadhaarFront) missing.push('aadhaarFront');
       if (!vendor.aadhaarBack) missing.push('aadhaarBack');
-      if (!vendor.panCard) missing.push('panCard');
       if ((vendor.serviceMode || 'shop') === 'shop' && !vendor.shopImage) missing.push('shopImage');
       if (!vendor.vendorPhoto) missing.push('vendorPhoto');
       console.log('[DEBUG] Approval FAILED. isProfileComplete is FALSE. Missing:', missing.join(', '));

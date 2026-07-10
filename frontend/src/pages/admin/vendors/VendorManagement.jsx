@@ -588,9 +588,9 @@ const VendorManagement = () => {
 
                 <Section title="Elite Registry Vault" icon={Shield}>
                   <div className="grid grid-cols-2 gap-3.5">
-                    <DocumentTile title="PAN Card" src={selectedVendor.panCard} />
-                    <DocumentTile title="GST Certificate" src={selectedVendor.gstCertificate} />
-                    <DocumentTile title="Shop Registration" src={selectedVendor.shopRegistration} />
+                    {selectedVendor.panCard && <DocumentTile title="PAN Card" src={selectedVendor.panCard} />}
+                    {selectedVendor.gstCertificate && <DocumentTile title="GST Certificate" src={selectedVendor.gstCertificate} />}
+                    {selectedVendor.shopRegistration && <DocumentTile title="Shop Registration" src={selectedVendor.shopRegistration} />}
                     <DocumentTile title="Aadhaar Front" src={selectedVendor.aadhaarFront} />
                     <DocumentTile title="Aadhaar Back" src={selectedVendor.aadhaarBack} />
                   </div>
