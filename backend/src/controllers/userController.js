@@ -74,86 +74,84 @@ const deleteAccount = async (req, res) => {
     const timestamp = Date.now();
     const targetVendorId = req.body?.vendorId || req.query?.vendorId;
 
-    if (user.role === 'vendor') {
-      const activeShops = await Vendor.find({ ownerId: userId, isDeleted: { $ne: true }, status: { $ne: 'deleted' } });
-      
-      if (targetVendorId && activeShops.length > 1) {
-        // Multi-shop flow: Soft delete ONLY the requested shop
-        const vendor = activeShops.find(v => String(v._id) === String(targetVendorId));
-        if (!vendor) return res.status(404).json({ message: 'Shop/Franchise not found or already deleted' });
+    if (user.role === 'vendor' && targetVendorId) {
+      // Flow 1: Soft delete ONLY the requested shop (regardless of activeShops count)
+      const vendor = await Vendor.findOne({ _id: targetVendorId, ownerId: userId, isDeleted: { $ne: true } });
+      if (!vendor) return res.status(404).json({ message: 'Shop/Franchise not found or already deleted' });
 
-        // Find all staff members for this vendor to update their User accounts and Staff profiles
-        const staffMembers = await Staff.find({ vendorId: vendor._id });
-        const staffIds = staffMembers.map(s => s._id);
-        const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
+      // Find all staff members for this vendor to update their User accounts and Staff profiles
+      const staffMembers = await Staff.find({ vendorId: vendor._id });
+      const staffIds = staffMembers.map(s => s._id);
+      const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
 
-        // Emit FORCE_LOGOUT socket events to all deleted staff users only
-        try {
-          const { getIO } = require('../services/socketService');
-          const io = getIO();
-          if (io) {
-            staffUserIds.forEach(id => {
-              io.to(String(id)).emit('FORCE_LOGOUT');
-            });
-          }
-        } catch (err) {
-          console.error('[Socket emit error in deleteAccount]', err.message);
+      // Emit FORCE_LOGOUT socket events to all deleted staff users only
+      try {
+        const { getIO } = require('../services/socketService');
+        const io = getIO();
+        if (io) {
+          staffUserIds.forEach(id => {
+            io.to(String(id)).emit('FORCE_LOGOUT');
+          });
         }
+      } catch (err) {
+        console.error('[Socket emit error in deleteAccount]', err.message);
+      }
 
-        // 1. Soft delete Vendor profile
-        vendor.status = 'deleted';
-        vendor.isActive = false;
-        vendor.isDeleted = true;
-        vendor.shopName = `[Deleted] ${vendor.shopName}`;
-        await vendor.save();
+      // 1. Soft delete Vendor profile
+      vendor.status = 'deleted';
+      vendor.isActive = false;
+      vendor.isDeleted = true;
+      vendor.shopName = `[Deleted] ${vendor.shopName}`;
+      await vendor.save();
 
-        // 2. Soft delete all Staff user accounts & profiles for this vendor
-        for (const staff of staffMembers) {
-          staff.isActive = false;
-          staff.phone = `DEL_${timestamp}_${staff.phone}`;
-          staff.name = `[Deleted] ${staff.name}`;
-          await staff.save();
+      // 2. Soft delete all Staff user accounts & profiles for this vendor
+      // NOTE: Skip soft-deleting the User account if it belongs to the franchise owner
+      //       (owner is also registered as a staff member in their own shop)
+      for (const staff of staffMembers) {
+        staff.isActive = false;
+        staff.phone = `DEL_${timestamp}_${staff.phone}`;
+        staff.name = `[Deleted] ${staff.name}`;
+        await staff.save();
 
-          if (staff.userId) {
-            const staffUser = await User.findById(staff.userId);
-            if (staffUser) {
-              staffUser.isDeleted = true;
-              staffUser.phone = `DEL_${timestamp}_${staffUser.phone}`;
-              staffUser.name = `[Deleted] ${staffUser.name || 'Staff'}`;
-              await staffUser.save();
-            }
+        if (staff.userId && String(staff.userId) !== String(userId)) {
+          const staffUser = await User.findById(staff.userId);
+          if (staffUser) {
+            staffUser.isDeleted = true;
+            staffUser.phone = `DEL_${timestamp}_${staffUser.phone}`;
+            staffUser.name = `[Deleted] ${staffUser.name || 'Staff'}`;
+            await staffUser.save();
           }
         }
+      }
 
-        // 3. Clean up operational/scheduling collections only
-        await Promise.all([
-          StaffAvailability.deleteMany({ staffId: { $in: staffIds } }),
-          StaffClosure.deleteMany({ staffId: { $in: staffIds } }),
-          VendorAvailability.deleteMany({ vendorId: vendor._id }),
-          VendorClosure.deleteMany({ vendorId: vendor._id }),
-          SlotLock.deleteMany({ vendorId: vendor._id }),
-          Cart.deleteMany({ vendorId: vendor._id })
-        ]);
+      // 3. Clean up operational/scheduling collections only
+      await Promise.all([
+        StaffAvailability.deleteMany({ staffId: { $in: staffIds } }),
+        StaffClosure.deleteMany({ staffId: { $in: staffIds } }),
+        VendorAvailability.deleteMany({ vendorId: vendor._id }),
+        VendorClosure.deleteMany({ vendorId: vendor._id }),
+        SlotLock.deleteMany({ vendorId: vendor._id }),
+        Cart.deleteMany({ vendorId: vendor._id })
+      ]);
 
-        // Update owner's lastActiveVendorId if it matches the deleted vendor
-        if (String(user.lastActiveVendorId) === String(targetVendorId)) {
-          const nextVendor = activeShops.find(v => String(v._id) !== String(targetVendorId));
-          user.lastActiveVendorId = nextVendor ? nextVendor._id : null;
-          await user.save();
-        }
+      // Update owner's lastActiveVendorId if it matches the deleted vendor
+      if (String(user.lastActiveVendorId) === String(targetVendorId)) {
+        const remainingShops = await Vendor.find({ ownerId: userId, isDeleted: { $ne: true }, status: { $ne: 'deleted' } });
+        user.lastActiveVendorId = remainingShops.length > 0 ? remainingShops[0]._id : null;
+        await user.save();
+      }
 
-        console.log(`[Cleanup] Shop/Franchise ${targetVendorId} soft-deleted. Schedulers cleared.`);
-        return res.status(200).json({ message: 'Shop/Franchise deleted successfully' });
-      } else {
-        // Single shop flow OR Deleting entire account (all shops)
-        const vendorsToDelete = targetVendorId ? activeShops.filter(v => String(v._id) === String(targetVendorId)) : activeShops;
-
-        for (const vendor of vendorsToDelete) {
+      console.log(`[Cleanup] Shop/Franchise ${targetVendorId} soft-deleted. Schedulers cleared.`);
+      return res.status(200).json({ message: 'Shop/Franchise deleted successfully' });
+    } else {
+      // Flow 2: Full Account Deletion (delete the User account and ALL their active shops)
+      if (user.role === 'vendor') {
+        const activeShops = await Vendor.find({ ownerId: userId, isDeleted: { $ne: true }, status: { $ne: 'deleted' } });
+        for (const vendor of activeShops) {
           const staffMembers = await Staff.find({ vendorId: vendor._id });
           const staffIds = staffMembers.map(s => s._id);
           const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
 
-          // Emit FORCE_LOGOUT socket events to all deleted staff users and owner
           try {
             const { getIO } = require('../services/socketService');
             const io = getIO();
@@ -177,13 +175,15 @@ const deleteAccount = async (req, res) => {
           await vendor.save();
 
           // 2. Soft delete all Staff user accounts & profiles
+          // NOTE: Skip soft-deleting the User account if it belongs to the franchise owner
+          //       The owner's User account is handled separately in step 4 below
           for (const staff of staffMembers) {
             staff.isActive = false;
             staff.phone = `DEL_${timestamp}_${staff.phone}`;
             staff.name = `[Deleted] ${staff.name}`;
             await staff.save();
 
-            if (staff.userId) {
+            if (staff.userId && String(staff.userId) !== String(userId)) {
               const staffUser = await User.findById(staff.userId);
               if (staffUser) {
                 staffUser.isDeleted = true;
@@ -205,23 +205,23 @@ const deleteAccount = async (req, res) => {
           ]);
         }
       }
+
+      // 4. Soft delete the user account
+      user.isDeleted = true;
+      user.phone = `DEL_${timestamp}_${user.phone}`;
+      user.name = `[Deleted] ${user.name || 'User'}`;
+      await user.save();
+
+      // 5. Clean up customer operational data only
+      await Promise.all([
+        Cart.deleteMany({ userId }),
+        SlotLock.deleteMany({ userId }),
+        Notification.deleteMany({ userId })
+      ]);
+
+      console.log(`[Cleanup] User ${userId} successfully soft-deleted.`);
+      res.status(200).json({ message: 'Account and all associated data deleted successfully' });
     }
-
-    // 4. Soft delete the user account
-    user.isDeleted = true;
-    user.phone = `DEL_${timestamp}_${user.phone}`;
-    user.name = `[Deleted] ${user.name || 'User'}`;
-    await user.save();
-
-    // 5. Clean up customer operational data only
-    await Promise.all([
-      Cart.deleteMany({ userId }),
-      SlotLock.deleteMany({ userId }),
-      Notification.deleteMany({ userId })
-    ]);
-
-    console.log(`[Cleanup] User ${userId} successfully soft-deleted.`);
-    res.status(200).json({ message: 'Account and all associated data deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
