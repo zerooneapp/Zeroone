@@ -337,9 +337,8 @@ const VendorOffers = () => {
                           <span className="text-[9px] font-bold text-slate-400">{client.phone}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-green-500/10 rounded-lg shrink-0">
-                        <Share2 size={10} className="text-green-600 dark:text-green-400" />
-                        <span className="text-[8px] font-black text-green-600 dark:text-green-400 uppercase tracking-wider">Send</span>
+                      <div className="flex items-center px-2.5 py-1 bg-green-500/10 rounded-lg shrink-0">
+                        <span className="text-[8px] font-black text-green-600 dark:text-green-400 uppercase tracking-wider">SHARE</span>
                       </div>
                     </button>
                   ));

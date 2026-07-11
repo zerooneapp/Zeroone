@@ -26,13 +26,6 @@ const OfferCard = ({ offer, onToggle, onEdit, onDelete, onShare }) => {
          </div>
          
          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onShare && onShare(offer)}
-              className="p-2 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg active:scale-90 transition-all"
-              title="Share via WhatsApp"
-            >
-               <Share2 size={15} />
-            </button>
             <button 
               onClick={() => onDelete(offer._id)}
               className="p-2 bg-gray-50 dark:bg-gray-800 text-red-500 rounded-lg hover:bg-red-500/10 hover:text-red-600 transition-all active:scale-90"
@@ -67,17 +60,25 @@ const OfferCard = ({ offer, onToggle, onEdit, onDelete, onShare }) => {
          </div>
       </div>
 
-      <div className="flex items-center gap-2 pt-1.5 border-t border-gray-50 dark:border-gray-800">
-         <Scissors size={10} className="text-gray-400" />
-         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">
-            {offer.serviceIds?.length > 0 
-              ? `Applicable to ${offer.serviceIds.length} services`
-              : 'Applicable to ALL services'}
-         </p>
+      <div className="flex items-center justify-between pt-1.5 border-t border-gray-50 dark:border-gray-800">
+         <div className="flex items-center gap-2 min-w-0">
+            <Scissors size={10} className="text-gray-400" />
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">
+               {offer.serviceIds?.length > 0 
+                 ? `Applicable to ${offer.serviceIds.length} services`
+                 : 'Applicable to ALL services'}
+            </p>
+         </div>
+         <button
+           onClick={() => onShare && onShare(offer)}
+           className="relative z-10 text-[10px] font-black text-green-600 dark:text-green-400 uppercase tracking-widest active:scale-95 transition-all shrink-0 hover:underline cursor-pointer"
+         >
+           SHARE
+         </button>
       </div>
 
       {/* Glassy Background Icon */}
-      <Tag className="absolute -right-3 -bottom-3 text-gray-50 dark:text-gray-800/10 -rotate-12 w-16 h-16 -z-1" />
+      <Tag className="absolute -right-3 -bottom-3 text-gray-50 dark:text-gray-800/10 -rotate-12 w-16 h-16 pointer-events-none" style={{ zIndex: 0 }} />
     </motion.div>
   );
 };

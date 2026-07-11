@@ -363,13 +363,6 @@ const MembershipPlans = () => {
                             <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-tight line-clamp-2">{plan.description || 'No description provided'}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleSharePlan(plan); }}
-                              className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 active:scale-90 transition-all"
-                              title="Share via WhatsApp"
-                            >
-                              <Share2 size={14} />
-                            </button>
                             <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-600">
                               <Crown size={16} />
                             </div>
@@ -398,12 +391,12 @@ const MembershipPlans = () => {
                           </div>
                         </div>
 
-                        <div className="flex flex-col gap-2 pt-1 w-full">
+                        <div className="flex gap-2 pt-1 w-full">
                           <button
                             onClick={() => setShowDeleteConfirm(plan)}
                             disabled={deletingId === plan._id || plan.activeMemberCount > 0}
                             className={cn(
-                              "w-full py-2 font-black text-[9px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2",
+                              "flex-1 py-2 font-black text-[9px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2",
                               plan.activeMemberCount > 0
                                 ? "bg-slate-100 dark:bg-gray-800 text-slate-400 dark:text-gray-500 cursor-not-allowed border border-slate-200/50 dark:border-gray-700/50 shadow-none"
                                 : "bg-red-500/10 text-red-600 dark:text-red-400 active:scale-95 disabled:opacity-50"
@@ -413,12 +406,22 @@ const MembershipPlans = () => {
                             <Trash2 size={12} strokeWidth={3} />
                             {deletingId === plan._id ? 'Deleting...' : 'Delete Plan'}
                           </button>
-                          {plan.activeMemberCount > 0 && (
-                            <span className="text-[7.5px] font-black text-amber-600 dark:text-amber-500 uppercase text-center tracking-wider leading-none mt-0.5">
+                          
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleSharePlan(plan); }}
+                            className="flex-1 py-2 bg-green-500/10 text-green-600 dark:text-green-400 font-black text-[9px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+                          >
+                            <Share2 size={12} strokeWidth={3} />
+                            SHARE
+                          </button>
+                        </div>
+                        {plan.activeMemberCount > 0 && (
+                          <div className="text-center w-full">
+                            <span className="text-[7.5px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-wider leading-none mt-0.5 inline-block">
                               {plan.activeMemberCount} Active Member{plan.activeMemberCount === 1 ? '' : 's'} • Cannot Delete
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </motion.div>
                     ))}
                   </div>
@@ -858,9 +861,8 @@ const MembershipPlans = () => {
                           <span className="text-[9px] font-bold text-slate-400">{client.phone}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-green-500/10 rounded-lg shrink-0">
-                        <Share2 size={10} className="text-green-600 dark:text-green-400" />
-                        <span className="text-[8px] font-black text-green-600 dark:text-green-400 uppercase tracking-wider">Send</span>
+                      <div className="flex items-center px-2.5 py-1 bg-green-500/10 rounded-lg shrink-0">
+                        <span className="text-[8px] font-black text-green-600 dark:text-green-400 uppercase tracking-wider">SHARE</span>
                       </div>
                     </button>
                   ));

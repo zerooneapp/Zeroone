@@ -144,6 +144,12 @@ const VendorStaffProfile = () => {
                     <span>+91 {staff.phone}</span>
                   </a>
                 )}
+                {staff?.createdAt && (
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-gray-500">
+                    <Calendar size={10} />
+                    <span>Joined {dayjs(staff.createdAt).format('DD MMM YYYY')}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

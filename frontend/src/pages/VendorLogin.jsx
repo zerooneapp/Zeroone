@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
-import logo from '../assests/logo.jpeg';
+import logo from '../assests/logo_partner.png';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';

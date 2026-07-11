@@ -284,11 +284,10 @@ const initCronJobs = () => {
     }
   });
 
-  // 7. Auto-complete stale pending_completion bookings (Runs every minute)
+  // 7. Auto-cancel stale pending_completion bookings (Runs every minute)
   cron.schedule('* * * * *', async () => {
     try {
       const Booking = require('../models/Booking');
-      const { systemCompleteBooking } = require('./bookingService');
       const cutoffTime = moment().tz('Asia/Kolkata').subtract(24, 'hours').toDate();
 
       // Find bookings pending completion that expired more than 24 hours ago
@@ -298,11 +297,15 @@ const initCronJobs = () => {
       });
 
       for (const booking of staleBookings) {
-        console.log(`[CRON-AUTO-COMPLETE] Auto-completing booking ${booking._id}`);
-        await systemCompleteBooking(booking._id);
+        console.log(`[CRON-AUTO-CANCEL] Auto-cancelling stale booking ${booking._id}`);
+        booking.status = 'cancelled';
+        booking.cancelledAt = new Date();
+        booking.cancellationReason = 'auto_cancel';
+        await booking.save();
+        console.log(`[CRON-AUTO-CANCEL] Booking ${booking._id} auto-cancelled.`);
       }
     } catch (error) {
-      console.error('[CRON-AUTO-COMPLETE-ERROR]', error.message);
+      console.error('[CRON-AUTO-CANCEL-ERROR]', error.message);
     }
   });
 
