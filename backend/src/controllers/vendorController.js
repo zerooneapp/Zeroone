@@ -20,6 +20,8 @@ const Staff = require('../models/Staff');
 const VendorClosure = require('../models/VendorClosure');
 const VendorAvailability = require('../models/VendorAvailability');
 const { hasLegacyShopOfflineClosure } = require('../services/vendorClosureService');
+const InventoryLog = require('../models/InventoryLog');
+const InventoryItem = require('../models/InventoryItem');
 
 const getStaffNotificationTarget = (staff) => staff?._id || null;
 
@@ -523,12 +525,12 @@ const getVendorDashboard = async (req, res) => {
     const weekBookings = await Booking.find({
       vendorId: vendor._id,
       startTime: { $gte: weekStart, $lt: todayEnd },
-      status: { $in: ['confirmed', 'completed'] }
+      status: 'completed'
     });
     const weekEarnings = weekBookings.reduce((sum, b) => sum + b.totalPrice, 0);
 
     const totalEarningsResult = await Booking.aggregate([
-      { $match: { vendorId: vendor._id, status: { $in: ['confirmed', 'completed'] } } },
+      { $match: { vendorId: vendor._id, status: 'completed' } },
       { $group: { _id: null, total: { $sum: '$totalPrice' } } }
     ]);
     const totalEarnings = totalEarningsResult[0]?.total || 0;
@@ -614,7 +616,7 @@ const getVendorDashboard = async (req, res) => {
             $match: {
               vendorId: vendor._id,
               startTime: { $gte: sevenDaysAgo },
-              status: { $in: ['confirmed', 'completed'] }
+              status: 'completed'
             }
           },
           {
@@ -644,12 +646,15 @@ const getVendorDashboard = async (req, res) => {
       hasRegisteredStaff: activeStaffMembers.length > 0,
       schedule: todayBookings.map(b => ({
         id: b._id,
+        startTime: b.startTime,
         time: moment(b.startTime).tz('Asia/Kolkata').format('hh:mm A'),
         totalDuration: b.totalDuration,
         endTime: b.endTime,
-        customerName: b.userId?.name || 'Customer',
+        customerId: b.userId?._id?.toString() || null,
+        isWalkIn: b.isWalkIn || false,
+        customerName: b.userId?.name || b.walkInCustomerName || 'Customer',
         customerImage: b.userId?.image || '',
-        customerPhone: b.userId?.phone || '',
+        customerPhone: b.userId?.phone || b.walkInCustomerPhone || '',
         service: b.services.map(s => s.name).join(', '),
         totalPrice: b.totalPrice || 0,
         status: b.status,
@@ -1290,13 +1295,71 @@ const getVendorDashboardBundle = async (req, res) => {
     const todayMembershipRevenue = (todayMembershipTransactions || [])
       .reduce((acc, t) => acc + (t.amount || 0), 0);
 
-    console.log(`[DASHBOARD-STATS] Vendor: ${vendor.shopName}, TodayServices: ₹${todayServiceRevenue}, TodayMemberships: ₹${todayMembershipRevenue}`);
+    // All-time membership revenue from WalletTransactions
+    const allTimeMembershipResult = await WalletTransaction.aggregate([
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendor._id),
+          $or: [{ category: 'membership_revenue' }, { reason: 'membership_purchase' }],
+          status: 'completed'
+        }
+      },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const totalMembershipEarnings = allTimeMembershipResult[0]?.total || 0;
+
+    // Fetch product sales logs to calculate Product Earning stats dynamically
+    const productLogs = await InventoryLog.find({
+      vendorId: new mongoose.Types.ObjectId(vendor._id),
+      change: { $lt: 0 },
+      isReturn: false
+    }).lean();
+
+    // Map logs to retail price
+    const itemIds = [...new Set(productLogs.map(l => l.itemId.toString()))];
+    const itemsList = await InventoryItem.find({ _id: { $in: itemIds } }).select('price').lean();
+    const priceMap = itemsList.reduce((acc, item) => {
+      acc[item._id.toString()] = item.price || 0;
+      return acc;
+    }, {});
+
+    let todayProductEarnings = 0;
+    let totalProductEarnings = 0;
+
+    productLogs.forEach(log => {
+      const price = priceMap[log.itemId.toString()] || 0;
+      const amount = Math.abs(log.change) * price;
+      totalProductEarnings += amount;
+
+      // Check if logged today
+      const logTime = moment(log.createdAt);
+      if (logTime.isSameOrAfter(moment(todayStart)) && logTime.isBefore(moment(todayEnd))) {
+        todayProductEarnings += amount;
+      }
+    });
+
+    // Separate service-only and membership earnings
+    const todayServiceOnlyEarnings = todayServiceRevenue;
+    const todayServiceEarnings = todayServiceRevenue + todayMembershipRevenue;
+    const totalServiceOnlyEarnings = totalEarnings - totalMembershipEarnings;
+    const totalServiceEarnings = totalEarnings;
+
+    console.log(`[DASHBOARD-STATS] Vendor: ${vendor.shopName}, TodayServices: ₹${todayServiceRevenue}, TodayMemberships: ₹${todayMembershipRevenue}, TodayProducts: ₹${todayProductEarnings}`);
 
     const stats = {
       todayBookings: todayBookings.filter(b => b.status !== 'cancelled').length,
-      todayEarnings: todayServiceRevenue + todayMembershipRevenue,
-      weekEarnings: statsData[0]?.weekEarnings || 0,
-      totalEarnings
+      todayEarnings: todayServiceEarnings + todayProductEarnings,
+      weekEarnings: (statsData[0]?.weekEarnings || 0) + todayProductEarnings,
+      totalEarnings: totalServiceEarnings + totalProductEarnings,
+      // Granular split for breakdown modal
+      todayServiceEarnings,
+      todayServiceOnlyEarnings,
+      todayMembershipEarnings: todayMembershipRevenue,
+      todayProductEarnings,
+      totalServiceEarnings,
+      totalServiceOnlyEarnings,
+      totalMembershipEarnings,
+      totalProductEarnings
     };
     
     const StaffClosure = require('../models/StaffClosure');
@@ -1349,7 +1412,16 @@ const getVendorDashboardBundle = async (req, res) => {
           weekEarnings: stats.weekEarnings,
           totalEarnings: stats.totalEarnings,
           activeStaff: activeStaffMembers.length,
-          avgRating: vendor.rating
+          avgRating: vendor.rating,
+          // Granular breakdown for Revenue Breakdown Modal
+          todayServiceEarnings: stats.todayServiceEarnings,
+          todayServiceOnlyEarnings: stats.todayServiceOnlyEarnings,
+          todayMembershipEarnings: stats.todayMembershipEarnings,
+          todayProductEarnings: stats.todayProductEarnings,
+          totalServiceEarnings: stats.totalServiceEarnings,
+          totalServiceOnlyEarnings: stats.totalServiceOnlyEarnings,
+          totalMembershipEarnings: stats.totalMembershipEarnings,
+          totalProductEarnings: stats.totalProductEarnings
         },
         engagement: {
           profileViews: vendor.profileViews || 0,

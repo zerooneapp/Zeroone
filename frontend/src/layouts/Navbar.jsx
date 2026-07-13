@@ -105,7 +105,7 @@ const Navbar = () => {
                       "transition-all duration-300",
                       isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400"
                     )}
-                    strokeWidth={isActive ? 3 : 2.5}
+                    strokeWidth={isActive ? 3.5 : 3.2}
                   />
 
                   <span className={cn(

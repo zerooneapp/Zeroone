@@ -101,11 +101,34 @@ const StaffInventory = () => {
     }
   };
 
+  const [totalEarnings, setTotalEarnings] = useState(0);
+
   const fetchInventory = async () => {
     try {
       setLoading(true);
       const res = await api.get('/inventory/staff');
-      setItems(res.data || []);
+      const inventoryItems = res.data || [];
+      setItems(inventoryItems);
+
+      // Dynamically calculate actual product sales earnings from historical logs
+      let calculatedEarnings = 0;
+      await Promise.all(
+        inventoryItems.map(async (item) => {
+          try {
+            const logsRes = await api.get(`/inventory/staff/${item._id}/logs?limit=100`);
+            const logs = logsRes.data.logs || [];
+            // Sum up sales where change is negative (meaning product was sold/used)
+            logs.forEach(log => {
+              if (log.change < 0 && !log.isReturn) {
+                calculatedEarnings += Math.abs(log.change) * (item.price || 0);
+              }
+            });
+          } catch (e) {
+            console.error('Failed to calculate earnings for item', item._id);
+          }
+        })
+      );
+      setTotalEarnings(calculatedEarnings);
     } catch (err) {
       toast.error('Failed to load inventory');
     } finally {
@@ -482,7 +505,7 @@ const StaffInventory = () => {
 
       <main className="max-w-4xl mx-auto px-4 pt-[126px] space-y-3">
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="grid grid-cols-3 gap-2">
           <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
             <div className="p-1.5 bg-blue-500/10 text-blue-500 rounded-lg shrink-0"><Package size={12} /></div>
             <div>
@@ -500,12 +523,19 @@ const StaffInventory = () => {
           <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
             <div className="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg shrink-0"><Coins size={12} /></div>
             <div>
-              <p className="text-[8px] font-semibold text-slate-400 leading-none">Stock Earning</p>
+              <p className="text-[8px] font-semibold text-slate-400 leading-none">Stock Value</p>
               <h3 className="text-xs font-black mt-0.5">₹{metrics.totalValue}</h3>
             </div>
           </div>
+          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
+            <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0"><TrendingUp size={12} /></div>
+            <div>
+              <p className="text-[8px] font-semibold text-slate-400 leading-none">Product Earning</p>
+              <h3 className="text-xs font-black mt-0.5 text-emerald-500">₹{totalEarnings}</h3>
+            </div>
+          </div>
           <div className={cn(
-            "p-2 border rounded-xl shadow-sm flex items-center gap-1.5 transition-colors",
+            "p-2 border rounded-xl shadow-sm flex items-center gap-1.5 transition-colors grid-col-span-2",
             metrics.lowStockCount > 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800"
           )}>
             <div className={cn("p-1.5 rounded-lg shrink-0", metrics.lowStockCount > 0 ? "bg-rose-500/20 text-rose-500" : "bg-slate-500/10 text-slate-400")}>

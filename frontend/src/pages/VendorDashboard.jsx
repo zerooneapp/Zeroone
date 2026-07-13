@@ -7,6 +7,7 @@ import {
   Wallet,
   Power,
   Calendar,
+  ChevronLeft,
   ChevronRight,
   ChevronDown,
   MapPin,
@@ -49,6 +50,14 @@ import { cn } from '../utils/cn';
 const prettifyTransactionLabel = (value = '') =>
   value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 
+const toPascalCase = (str = '') =>
+  str
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
 const VendorDashboard = () => {
   const navigate = useNavigate();
   const {
@@ -58,6 +67,7 @@ const VendorDashboard = () => {
     dashboardUnreadCount: unreadCount,
     dashboardGlobalFeatures: globalFeatures,
     fetchDashboard,
+    fetchCustomerBookingHistory,
     setDashboardData: setData
   } = useVendorStore();
 
@@ -69,6 +79,32 @@ const VendorDashboard = () => {
   const [showWalletValue, setShowWalletValue] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState('all');
   const [completeBookingModal, setCompleteBookingModal] = useState({ isOpen: false, bookingId: null });
+
+  // Client History States
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [historyBookings, setHistoryBookings] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isRevenueBreakdownOpen, setIsRevenueBreakdownOpen] = useState(false);
+
+  const handleViewHistory = async (customer) => {
+    setSelectedCustomer(customer);
+    setIsHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const histData = await fetchCustomerBookingHistory(
+        customer.customerId,
+        customer.isWalkIn,
+        customer.customerName,
+        customer.customerPhone
+      );
+      setHistoryBookings(histData || []);
+    } catch (err) {
+      toast.error('Failed to fetch booking history');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   const handleFetch = async (force = false) => {
     try {
@@ -465,7 +501,10 @@ return (
 
       <section className="px-0.5">
         <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1 pb-0">
-          <div className="bg-[#00246b] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col items-center justify-center text-center overflow-hidden">
+          <div 
+            onClick={() => setIsRevenueBreakdownOpen(true)}
+            className="bg-[#00246b] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:bg-[#00246b]/90 active:scale-[0.98] transition-all"
+          >
             <p className="text-[8px] font-black text-white/90 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
             {loading ? (
               <div className="h-4 w-12 bg-white/20 rounded animate-pulse" />
@@ -570,7 +609,8 @@ return (
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center justify-between group"
+                onClick={() => item.customerPhone && navigate(`/vendor/customers?phone=${item.customerPhone}`)}
+                className="bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center justify-between group cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
@@ -606,34 +646,31 @@ return (
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
+                       <div className="flex items-center gap-2">
                   {item.customerPhone && (
                     <a
                       href={`tel:${item.customerPhone}`}
+                      onClick={(e) => e.stopPropagation()}
                       className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
                       title="Call Customer"
                     >
                       <Phone size={12} strokeWidth={2.5} />
                     </a>
                   )}
-                  {item.status === 'confirmed' ? (
-                    <button
-                      onClick={() => handleCompleteBooking(item.id)}
-                      className="px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#00246b]/10 transition-all font-bold"
-                    >
-                      Done
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => navigate('/vendor/bookings')}
-                      className="bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[10px] font-bold flex items-center gap-1"
-                    >
-                      Details
-                      <ChevronRight size={10} className="text-[#00246b]" />
-                    </button>
-                  )}
-                </div>
+                  {item.status === 'confirmed' && (() => {
+                    const isTimeOver = dayjs(item.startTime).add(item.totalDuration || 30, 'minute').isBefore(dayjs());
+                    return (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCompleteBooking(item.id); }}
+                        className={`px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#00246b]/10 transition-all font-bold ${
+                          isTimeOver ? 'border-2 border-rose-600' : ''
+                        }`}
+                      >
+                        Done
+                      </button>
+                    );
+                  })()}
+                </div>            </div>
               </motion.div>
             ))
           )}
@@ -691,6 +728,143 @@ return (
     <CreateSlotModal isOpen={isCreateSlotOpen} onClose={() => setIsCreateSlotOpen(false)} onRefresh={() => fetchDashboard(true)} />
     {isClosureModalOpen && <EmergencyClosureModal isOpen={isClosureModalOpen} onClose={() => setIsClosureModalOpen(false)} onCreated={() => fetchDashboard(true)} />}
 
+    {/* Revenue Breakdown Modal */}
+    <AnimatePresence>
+      {isRevenueBreakdownOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsRevenueBreakdownOpen(false)}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl relative z-10 border border-slate-100 dark:border-gray-800"
+          >
+            <div className="p-4 border-b border-slate-100 dark:border-gray-800 flex justify-between items-center bg-slate-50 dark:bg-gray-900">
+              <h3 className="text-xs font-black uppercase tracking-widest text-[#00246b] dark:text-white">
+                Revenue Breakdown
+              </h3>
+              <button 
+                onClick={() => setIsRevenueBreakdownOpen(false)}
+                className="w-7 h-7 bg-slate-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-500 hover:text-rose-500 transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-5">
+              {/* Today Section */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-baseline">
+                  <p className="text-[10px] font-black uppercase text-slate-400 dark:text-gray-500 tracking-wider">Today's Revenue</p>
+                  <p className="text-lg font-black text-[#00246b] dark:text-white">₹{(data?.stats?.todayEarnings || 0).toLocaleString()}</p>
+                </div>
+
+                <div className="space-y-2 bg-slate-50 dark:bg-gray-800/40 p-3 rounded-xl border border-slate-100 dark:border-gray-800/40">
+                  <div className="flex justify-between items-center text-[10px]">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-gray-400">
+                      <div className="w-2.5 h-2.5 rounded bg-blue-500" />
+                      <span>Services</span>
+                    </div>
+                    <span className="font-black text-slate-800 dark:text-gray-200">₹{(data?.stats?.todayServiceOnlyEarnings || 0).toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px]">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-gray-400">
+                      <div className="w-2.5 h-2.5 rounded bg-violet-500" />
+                      <span>Memberships</span>
+                    </div>
+                    <span className="font-black text-violet-500 dark:text-violet-400">₹{(data?.stats?.todayMembershipEarnings || 0).toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px]">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-gray-400">
+                      <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
+                      <span>Product Sales</span>
+                    </div>
+                    <span className="font-black text-emerald-500 dark:text-emerald-400">₹{(data?.stats?.todayProductEarnings || 0).toLocaleString()}</span>
+                  </div>
+
+                  {/* Progress Split Bar - 3 colors */}
+                  <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-gray-700 overflow-hidden flex mt-2">
+                    <div
+                      className="bg-blue-500 h-full transition-all"
+                      style={{ width: `${(data?.stats?.todayEarnings > 0 ? (data?.stats?.todayServiceOnlyEarnings / data?.stats?.todayEarnings) * 100 : 34)}%` }}
+                    />
+                    <div
+                      className="bg-violet-500 h-full transition-all"
+                      style={{ width: `${(data?.stats?.todayEarnings > 0 ? (data?.stats?.todayMembershipEarnings / data?.stats?.todayEarnings) * 100 : 33)}%` }}
+                    />
+                    <div
+                      className="bg-emerald-500 h-full transition-all"
+                      style={{ width: `${(data?.stats?.todayEarnings > 0 ? (data?.stats?.todayProductEarnings / data?.stats?.todayEarnings) * 100 : 33)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px bg-slate-100 dark:bg-gray-800" />
+
+              {/* All time Section */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-baseline">
+                  <p className="text-[10px] font-black uppercase text-slate-400 dark:text-gray-500 tracking-wider">All-Time Revenue</p>
+                  <p className="text-lg font-black text-green-500 dark:text-emerald-400">₹{(data?.stats?.totalEarnings || 0).toLocaleString()}</p>
+                </div>
+
+                <div className="space-y-2 bg-slate-50 dark:bg-gray-800/40 p-3 rounded-xl border border-slate-100 dark:border-gray-800/40">
+                  <div className="flex justify-between items-center text-[10px]">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-gray-400">
+                      <div className="w-2.5 h-2.5 rounded bg-blue-500" />
+                      <span>Services</span>
+                    </div>
+                    <span className="font-black text-slate-800 dark:text-gray-200">₹{(data?.stats?.totalServiceOnlyEarnings || 0).toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px]">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-gray-400">
+                      <div className="w-2.5 h-2.5 rounded bg-violet-500" />
+                      <span>Memberships</span>
+                    </div>
+                    <span className="font-black text-violet-500 dark:text-violet-400">₹{(data?.stats?.totalMembershipEarnings || 0).toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px]">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-gray-400">
+                      <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
+                      <span>Product Sales</span>
+                    </div>
+                    <span className="font-black text-emerald-500 dark:text-emerald-400">₹{(data?.stats?.totalProductEarnings || 0).toLocaleString()}</span>
+                  </div>
+
+                  {/* Progress Split Bar - 3 colors */}
+                  <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-gray-700 overflow-hidden flex mt-2">
+                    <div
+                      className="bg-blue-500 h-full transition-all"
+                      style={{ width: `${(data?.stats?.totalEarnings > 0 ? (data?.stats?.totalServiceOnlyEarnings / data?.stats?.totalEarnings) * 100 : 34)}%` }}
+                    />
+                    <div
+                      className="bg-violet-500 h-full transition-all"
+                      style={{ width: `${(data?.stats?.totalEarnings > 0 ? (data?.stats?.totalMembershipEarnings / data?.stats?.totalEarnings) * 100 : 33)}%` }}
+                    />
+                    <div
+                      className="bg-emerald-500 h-full transition-all"
+                      style={{ width: `${(data?.stats?.totalEarnings > 0 ? (data?.stats?.totalProductEarnings / data?.stats?.totalEarnings) * 100 : 33)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+
     {/* Enhanced Glass Confirmation Modal */}
     {completeBookingModal.isOpen && (
       <GlassConfirmationModal
@@ -703,6 +877,97 @@ return (
         cancelText="Not Yet"
       />
     )}
+
+    {/* Client History Overlay Modal */}
+    <AnimatePresence>
+      {isHistoryOpen && selectedCustomer && (
+        <motion.div 
+          initial={{ opacity: 0, x: '100%' }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+          className="fixed inset-0 z-[150] bg-slate-50 dark:bg-gray-950 flex flex-col"
+        >
+          <div className="w-full max-w-4xl mx-auto h-full flex flex-col bg-white dark:bg-gray-900">
+            {/* Modal Header */}
+            <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
+              <button 
+                onClick={() => setIsHistoryOpen(false)}
+                className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
+              >
+                <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-100 dark:border-gray-700">
+                  <img 
+                    src={selectedCustomer.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCustomer.customerName)}&background=E2E8F0&color=1C2C4E&bold=true`} 
+                    alt={selectedCustomer.customerName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-sm font-extrabold text-[#00246b] dark:text-white tracking-tight">
+                    {toPascalCase(selectedCustomer.customerName)}
+                  </h1>
+                  <p className="text-[9px] text-slate-400 font-bold dark:text-gray-400">
+                    Booking History
+                  </p>
+                </div>
+              </div>
+            </header>
+
+            {/* Modal Body */}
+            <main className="p-4 overflow-y-auto no-scrollbar flex-1 space-y-4">
+              {historyLoading ? (
+                <div className="py-24 flex flex-col items-center justify-center gap-3">
+                  <div className="w-8 h-8 border-4 border-t-[#00246b] border-slate-200 dark:border-gray-800 rounded-full animate-spin"></div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Loading history...</p>
+                </div>
+              ) : historyBookings.length === 0 ? (
+                <div className="py-24 text-center space-y-2">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-slate-500 dark:text-gray-500">No completed visits found</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {historyBookings.map((booking) => (
+                    <div 
+                      key={booking._id} 
+                      className="p-3.5 bg-slate-50 dark:bg-gray-950 rounded-2xl border border-slate-100 dark:border-gray-900/60 flex flex-col gap-2"
+                    >
+                      <div className="flex items-center justify-between gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-black text-[#00246b] dark:text-gray-300 bg-[#00246b]/5 dark:bg-gray-900 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                          {dayjs(booking.startTime).format('ddd, DD MMM YYYY')}
+                        </span>
+                        <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-gray-400 bg-slate-100/50 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
+                          <Clock size={10} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+                          <span>{dayjs(booking.startTime).format('hh:mm A')} {booking.totalDuration ? `(${booking.totalDuration} min)` : ''}</span>
+                        </div>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                          ₹{booking.totalPrice}
+                        </span>
+                      </div>
+                      <div className="pl-1 space-y-1">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Services Taken</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {booking.services.map((svc, sIdx) => (
+                            <span 
+                              key={sIdx} 
+                              className="text-[10px] font-bold text-slate-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 px-2 py-0.5 rounded-md"
+                            >
+                              {svc.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </main>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   </div>
 );
 };

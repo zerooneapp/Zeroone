@@ -309,6 +309,47 @@ const initCronJobs = () => {
     }
   });
 
+  // 8. Auto-cancel uncompleted bookings at midnight (12:00 AM)
+  cron.schedule('0 0 * * *', async () => {
+    try {
+      const Booking = require('../models/Booking');
+      const NotificationService = require('./notificationService');
+      const todayStart = moment().tz('Asia/Kolkata').startOf('day').toDate();
+
+      // Find all bookings before today (midnight) that are not completed or cancelled
+      const uncompletedBookings = await Booking.find({
+        status: { $in: ['confirmed', 'pending_completion', 'pending'] },
+        startTime: { $lt: todayStart }
+      }).populate('vendorId');
+
+      console.log(`[CRON-MIDNIGHT-CANCEL] Found ${uncompletedBookings.length} uncompleted bookings to auto-cancel.`);
+
+      for (const booking of uncompletedBookings) {
+        booking.status = 'cancelled';
+        booking.cancelReason = 'Auto-cancelled: Booking was not completed by midnight.';
+        booking.cancelledByRole = 'system';
+        booking.cancelledAt = new Date();
+        await booking.save();
+
+        console.log(`[CRON-MIDNIGHT-CANCEL] Booking ${booking._id} auto-cancelled at midnight.`);
+
+        // Optionally send a notification to vendor
+        if (booking.vendorId?.ownerId) {
+          await NotificationService.sendNotification({
+            userIds: booking.vendorId.ownerId,
+            role: 'vendor',
+            type: 'BOOKING_CANCELLED_INFO',
+            title: 'Booking Auto-Cancelled',
+            message: `Booking for ${moment(booking.startTime).tz('Asia/Kolkata').format('hh:mm A')} was auto-cancelled as it was not marked complete by midnight.`,
+            data: { bookingId: booking._id, isActionable: false }
+          }).catch(err => console.error('[CRON-MIDNIGHT-CANCEL-NOTIFY-ERROR]', err.message));
+        }
+      }
+    } catch (error) {
+      console.error('[CRON-MIDNIGHT-CANCEL-ERROR]', error.message);
+    }
+  });
+
   console.log('[CRON-SERVICE] All system tasks initialized.');
 };
 

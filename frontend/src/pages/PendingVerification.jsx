@@ -217,6 +217,16 @@ const PendingVerification = () => {
                                     <p className="text-sm font-black text-[#00246b] dark:text-white">Reviewing Documents</p>
                                 </div>
                             </div>
+                            <div className="h-px bg-gray-100 dark:bg-gray-800 ml-14" />
+                            <div className="flex items-center gap-4 text-left">
+                                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800/80 flex items-center justify-center text-gray-400">
+                                    <Clock size={20} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Step 3</p>
+                                    <p className="text-sm font-black text-[#00246b] dark:text-white">Account Activation</p>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="pt-4 flex flex-col items-center gap-4">

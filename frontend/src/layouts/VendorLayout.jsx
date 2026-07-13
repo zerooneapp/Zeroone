@@ -125,7 +125,7 @@ const VendorLayout = () => {
 
                     <item.icon
                       size={22}
-                      className="text-[#00246b] dark:text-white"
+                      className="text-[#00246b] dark:text-white stroke-[0.8] dark:stroke-white stroke-[#00246b]"
                     />
 
                     <span className="text-[10px] font-black uppercase tracking-tight text-[#00246b] dark:text-white">

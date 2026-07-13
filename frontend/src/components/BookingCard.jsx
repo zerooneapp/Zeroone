@@ -19,13 +19,15 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
    };
 
    const isToday = dayjs(booking.startTime).isSame(dayjs(), 'day');
+   const phoneNum = booking.userId?.phone || booking.walkInCustomerPhone || '';
 
    return (
       <motion.div
          initial={{ opacity: 0, scale: 0.98 }}
          animate={{ opacity: 1, scale: 1 }}
          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-         className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm transition-all group relative overflow-hidden"
+         onClick={() => phoneNum && navigate(`/vendor/customers?phone=${phoneNum}`)}
+         className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm transition-all group relative overflow-hidden cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80"
       >
          {/* Top Header Section */}
          <div className="flex justify-between items-start relative z-10 gap-3">
@@ -40,6 +42,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                   ) : (
                      <User size={18} className="text-slate-400 dark:text-gray-500" />
                   )}
+
                   {booking.isWalkIn && (
                      <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#00246b] text-white rounded-full flex items-center justify-center border border-white dark:border-gray-900 shadow-sm">
                         <ShoppingBag size={7} />
@@ -70,9 +73,31 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                   </div>
                </div>
             </div>
-            <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase border tracking-[0.15em] leading-none shrink-0 ${getStatusStyles(booking.status)}`}>
-               {booking.status === 'pending_completion' ? 'attention' : booking.status}
-            </span>
+            <div className="flex flex-col items-end gap-1.5 shrink-0">
+               <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase border tracking-[0.15em] leading-none ${getStatusStyles(booking.status)}`}>
+                  {booking.status === 'pending_completion' ? 'attention' : booking.status}
+               </span>
+               {(booking.status === 'confirmed' || booking.status === 'pending_completion') && (
+                  <button
+                     onClick={(e) => {
+                        e.stopPropagation();
+                        const name = booking.walkInCustomerName || booking.userId?.name || 'Customer';
+                        const contact = booking.walkInCustomerPhone || booking.userId?.phone || '';
+                        navigate('/vendor/inventory', {
+                           state: {
+                              prefillCustomer: {
+                                 customerName: name,
+                                 customerContact: contact
+                              }
+                           }
+                        });
+                      }}
+                      className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline active:scale-95 transition-all"
+                  >
+                     + Product
+                  </button>
+               )}
+            </div>
          </div>
 
          {/* Info Grid - More Compact */}
@@ -81,14 +106,14 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-0.5">
                   <Calendar size={8} strokeWidth={3} /> Schedule
                </p>
-               <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-1.5 flex-wrap">
-                  <span>{dayjs(booking.startTime).format('DD MMM')}</span>
-                  <span className="text-[#00246b] dark:text-blue-400">&bull;</span>
-                  <span>{dayjs(booking.startTime).format('hh:mm A')}</span>
-                  <span className="text-[#00246b] dark:text-blue-400">&bull;</span>
-                  <Clock size={9} strokeWidth={3} className="text-[#00246b] dark:text-blue-400 shrink-0" />
-                  <span>{booking.totalDuration ? `${booking.totalDuration} MIN` : '30 MIN'}</span>
-               </p>
+                <div className="text-[9px] font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-1 whitespace-nowrap">
+                   <span>{dayjs(booking.startTime).format('DD MMM')}</span>
+                   <span className="text-[#00246b] dark:text-blue-400">&bull;</span>
+                   <span>{dayjs(booking.startTime).format('hh:mm A')}</span>
+                   <span className="text-[#00246b] dark:text-blue-400">&bull;</span>
+                   <Clock size={9} strokeWidth={3} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+                   <span>{booking.totalDuration ? `${booking.totalDuration} MIN` : '30 MIN'}</span>
+                </div>
             </div>
             <div className="flex flex-col text-right items-end">
                <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-0.5">

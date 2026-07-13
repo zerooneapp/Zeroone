@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
   Plus,
@@ -135,14 +135,39 @@ const VendorInventory = () => {
     }
   };
 
+  const location = useLocation();
+
   useEffect(() => {
     fetchInventory();
   }, []);
 
+  // Auto-open adjust stock modal with customer details if navigated with state
+  useEffect(() => {
+    if (items.length > 0 && location.state?.prefillCustomer) {
+      const { customerName, customerContact } = location.state.prefillCustomer;
+      // Auto-open adjust stock modal. Let's pick a default product, or show the list for them to select, but prefill is ready.
+      // Alternatively, if they requested "particular card me ek add product button dena h" we can pre-select the product or let them choose.
+      // Let's set the prefilled customer details in the adjust modal template.
+      setAdjustFormData(prev => ({
+        ...prev,
+        customerName: customerName || '',
+        customerContact: customerContact || ''
+      }));
+      // Clear state after reading to prevent repeating on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+      toast.success(`Prefilled details for ${customerName}`);
+    }
+  }, [items, location.state]);
+
   const triggerAdjustStock = (item, delta) => {
     setAdjustingItem(item);
     setAdjustmentDelta(delta);
-    setAdjustFormData({ customerName: '', customerContact: '', staffName: '', quantity: 1 });
+    setAdjustFormData(prev => ({
+      customerName: prev.customerName || '',
+      customerContact: prev.customerContact || '',
+      staffName: '',
+      quantity: 1
+    }));
   };
 
   const handleAdjustStockSubmit = async (e) => {
@@ -585,7 +610,14 @@ const VendorInventory = () => {
               return (
                 <div
                   key={item._id}
-                  onClick={() => handleOpenHistory(item)}
+                  onClick={() => {
+                    const hasPrefill = adjustFormData.customerName || adjustFormData.customerContact;
+                    if (hasPrefill) {
+                      triggerAdjustStock(item, -1);
+                    } else {
+                      handleOpenHistory(item);
+                    }
+                  }}
                   className={cn(
                     "px-3 py-2.5 bg-white dark:bg-gray-900 border rounded-xl flex items-center justify-between gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-sm",
                     isLowStock ? 'border-rose-500/20' : 'border-slate-100 dark:border-gray-800'

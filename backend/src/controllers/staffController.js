@@ -100,11 +100,11 @@ const listStaff = async (req, res) => {
     // 1. Bulk fetch earnings stats for all staff
     const [stats, todayStats] = await Promise.all([
       Booking.aggregate([
-        { $match: { staffId: { $in: staffIds }, status: { $in: ['confirmed', 'completed'] } } },
+        { $match: { staffId: { $in: staffIds }, status: 'completed' } },
         { $group: { _id: '$staffId', total: { $sum: '$totalPrice' } } }
       ]),
       Booking.aggregate([
-        { $match: { staffId: { $in: staffIds }, status: { $in: ['confirmed', 'completed'] }, startTime: { $gte: todayStart, $lt: todayEnd } } },
+        { $match: { staffId: { $in: staffIds }, status: 'completed', startTime: { $gte: todayStart, $lt: todayEnd } } },
         { $group: { _id: '$staffId', total: { $sum: '$totalPrice' } } }
       ])
     ]);
@@ -238,7 +238,7 @@ const getStaffById = async (req, res) => {
     }
 
     // Calculate earnings for this staff member
-    const matchQuery = { staffId: staff._id, status: { $in: ['confirmed', 'completed'] } };
+    const matchQuery = { staffId: staff._id, status: 'completed' };
     const { startDate, endDate } = req.query;
     if (startDate && endDate) {
       const moment = require('moment-timezone');

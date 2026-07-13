@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   ChevronLeft, 
   Search, 
@@ -28,6 +28,7 @@ const toPascalCase = (str = '') =>
 
 const LoyalCustomers = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     clientsData: customers,
     clientsLoading: loading,
@@ -49,6 +50,8 @@ const LoyalCustomers = () => {
     setSelectedCustomer(customer);
     setIsHistoryOpen(true);
     setHistoryLoading(true);
+    // Change the route query parameter to reflect the active customer history view
+    navigate(`/vendor/customers?phone=${customer.phone}`, { replace: true });
     try {
       const data = await fetchCustomerBookingHistory(
         customer._id,
@@ -76,21 +79,34 @@ const LoyalCustomers = () => {
     handleFetch();
   }, []);
 
+  // Auto-open history if customer phone is passed in URL query parameters
+  useEffect(() => {
+    const queryPhone = new URLSearchParams(location.search).get('phone');
+    if (customers.length > 0 && queryPhone) {
+      const matchingCustomer = customers.find(c => c.phone === queryPhone);
+      if (matchingCustomer && (!selectedCustomer || selectedCustomer.phone !== queryPhone)) {
+        handleViewHistory(matchingCustomer);
+      }
+    }
+  }, [customers, location.search, selectedCustomer]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [search, filter]);
 
-  const filteredCustomers = customers.filter(c => {
-    const trimmedSearch = search.trim().toLowerCase();
-    const matchesSearch = !trimmedSearch ||
-      c.name.toLowerCase().includes(trimmedSearch) || 
-      c.phone.includes(trimmedSearch);
-    
-    if (filter === 'repeat') return matchesSearch && c.bookingCount >= 2;
-    if (filter === 'high-spender') return matchesSearch && c.totalSpent > 1000;
-    if (filter === 'inactive') return matchesSearch && dayjs().diff(dayjs(c.lastBooking), 'day') >= 30;
-    return matchesSearch;
-  });
+  const filteredCustomers = customers
+    .filter(c => {
+      const trimmedSearch = search.trim().toLowerCase();
+      const matchesSearch = !trimmedSearch ||
+        c.name.toLowerCase().includes(trimmedSearch) || 
+        c.phone.includes(trimmedSearch);
+      
+      if (filter === 'repeat') return matchesSearch && c.bookingCount >= 2;
+      if (filter === 'high-spender') return matchesSearch && c.totalSpent > 1000;
+      if (filter === 'inactive') return matchesSearch && dayjs().diff(dayjs(c.lastBooking), 'day') >= 30;
+      return matchesSearch;
+    })
+    .sort((a, b) => new Date(b.lastBooking) - new Date(a.lastBooking));
 
   const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -101,7 +117,7 @@ const LoyalCustomers = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/vendor/dashboard')}
           className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
         >
           <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
@@ -284,10 +300,13 @@ const LoyalCustomers = () => {
             className="fixed inset-0 z-50 bg-slate-50 dark:bg-gray-950 flex flex-col"
           >
             <div className="w-full max-w-4xl mx-auto h-full flex flex-col bg-white dark:bg-gray-900">
-              {/* Modal Header */}
               <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
                 <button 
-                  onClick={() => setIsHistoryOpen(false)}
+                  onClick={() => {
+                    setIsHistoryOpen(false);
+                    // Reset route query parameters
+                    navigate('/vendor/customers', { replace: true });
+                  }}
                   className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
                 >
                   <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
@@ -312,7 +331,7 @@ const LoyalCustomers = () => {
               </header>
 
               {/* Modal Body */}
-              <main className="p-4 overflow-y-auto no-scrollbar flex-1 space-y-4">
+              <main className="p-4 overflow-y-auto flex-1 space-y-4 pb-24">
                 {historyLoading ? (
                   <div className="py-24 flex flex-col items-center justify-center gap-3">
                     <div className="w-8 h-8 border-4 border-t-[#00246b] border-slate-200 dark:border-gray-800 rounded-full animate-spin"></div>

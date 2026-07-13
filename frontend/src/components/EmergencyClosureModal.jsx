@@ -127,36 +127,36 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             className="relative z-10 w-full max-w-lg bg-white dark:bg-gray-900 rounded-[2rem] border border-slate-200/70 dark:border-gray-800 shadow-2xl overflow-hidden"
           >
-            <div className="p-4 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-4">
+            <div className="p-3 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-3">
               <div>
                 <p className="text-[9px] font-black capitalize tracking-[0.25em] text-amber-500">Emergency Window</p>
-                <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-1">Emergency Booking Window</h2>
+                <h2 className="text-md font-black text-slate-900 dark:text-white tracking-tight mt-0.5">Emergency Booking Window</h2>
               </div>
               <button
                 onClick={onClose}
-                className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 flex items-center justify-center active:scale-90 transition-all"
+                className="w-8 h-8 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-700 flex items-center justify-center active:scale-90 transition-all shrink-0"
               >
-                <X size={16} className="text-slate-500 dark:text-gray-400" />
+                <X size={14} className="text-slate-500 dark:text-gray-400" />
               </button>
             </div>
 
-            <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="p-3 space-y-3 max-h-[52vh] overflow-y-auto no-scrollbar">
               {/* Active Closures Section */}
               {activeClosures.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-[9px] font-black capitalize tracking-[0.2em] text-amber-600 dark:text-amber-400">Current Active Closures</p>
-                  <div className="space-y-2">
+                <div className="space-y-1">
+                  <p className="text-[8px] font-black capitalize tracking-[0.2em] text-amber-600 dark:text-amber-400">Current Active Closures</p>
+                  <div className="space-y-1.5">
                     {activeClosures.map((item) => (
-                      <div key={item.closure._id} className="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900/30 flex items-center justify-between gap-3">
+                      <div key={item.closure._id} className="p-2.5 rounded-lg bg-amber-50/50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900/30 flex items-center justify-between gap-2.5">
                         <div>
-                          <p className="text-[10px] font-black text-slate-900 dark:text-white">
+                          <p className="text-[9px] font-black text-slate-900 dark:text-white">
                             {dayjs(item.closure.startTime).format('DD MMM, hh:mm A')} - {dayjs(item.closure.endTime).format('hh:mm A')}
                           </p>
                           <p className="text-[8px] font-bold text-amber-600 dark:text-amber-500 mt-0.5">{item.closure.reason || 'No reason provided'}</p>
                         </div>
                         <button 
                           onClick={() => handleEndClosure(item.closure._id)}
-                          className="px-3 py-1.5 bg-amber-500 text-white text-[8px] font-black uppercase tracking-wider rounded-lg shadow-sm active:scale-95 transition-all"
+                          className="px-2 py-1 bg-amber-500 text-white text-[8px] font-black uppercase tracking-wider rounded-md shadow-sm active:scale-95 transition-all"
                         >
                           End Now
                         </button>
@@ -166,68 +166,68 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <label className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-2">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Start Date</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <CalendarDays size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-1.5 px-2.5 py-2.5 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-700">
+                    <CalendarDays size={12} className="text-slate-400" />
                     <input
                       type="date"
                       value={form.startDate}
                       onChange={(e) => handleFormChange({ startDate: e.target.value })}
-                      className="w-full bg-transparent text-[11px] font-black text-slate-900 dark:text-white focus:outline-none"
+                      className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-white focus:outline-none"
                     />
                   </div>
                 </label>
 
-                <label className="space-y-1.5">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Start Time</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <Clock3 size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-1.5 px-2.5 py-2.5 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-700">
+                    <Clock3 size={12} className="text-slate-400" />
                     <input
                       type="time"
                       value={form.startTime}
                       onChange={(e) => handleFormChange({ startTime: e.target.value })}
-                      className="w-full bg-transparent text-[11px] font-black text-slate-900 dark:text-white focus:outline-none"
+                      className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-white focus:outline-none"
                     />
                   </div>
                 </label>
 
-                <label className="space-y-1.5">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">End Date</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <CalendarDays size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-1.5 px-2.5 py-2.5 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-700">
+                    <CalendarDays size={12} className="text-slate-400" />
                     <input
                       type="date"
                       value={form.endDate}
                       onChange={(e) => handleFormChange({ endDate: e.target.value })}
-                      className="w-full bg-transparent text-[11px] font-black text-slate-900 dark:text-white focus:outline-none"
+                      className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-white focus:outline-none"
                     />
                   </div>
                 </label>
 
-                <label className="space-y-1.5">
+                <label className="space-y-1">
                   <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">End Time</span>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                    <Clock3 size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-1.5 px-2.5 py-2.5 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-700">
+                    <Clock3 size={12} className="text-slate-400" />
                     <input
                       type="time"
                       value={form.endTime}
                       onChange={(e) => handleFormChange({ endTime: e.target.value })}
-                      className="w-full bg-transparent text-[11px] font-black text-slate-900 dark:text-white focus:outline-none"
+                      className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-white focus:outline-none"
                     />
                   </div>
                 </label>
               </div>
 
-              <label className="space-y-1.5 block">
+              <label className="space-y-1 block">
                 <span className="text-[8px] font-black capitalize tracking-[0.2em] text-slate-400">Reason</span>
                 <textarea
                   value={form.reason}
                   onChange={(e) => handleFormChange({ reason: e.target.value })}
                   placeholder="Optional note for your team and customers"
-                  rows={3}
-                  className="w-full px-3 py-3 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 text-[11px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400 resize-none focus:outline-none"
+                  rows={2}
+                  className="w-full px-2.5 py-2.5 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-700 text-[10px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400 resize-none focus:outline-none"
                 />
               </label>
 

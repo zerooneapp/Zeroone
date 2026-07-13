@@ -287,7 +287,6 @@ const VendorOffers = () => {
                     value={shareSearch}
                     onChange={e => setShareSearch(e.target.value)}
                     className="flex-1 bg-transparent text-[11px] font-medium text-slate-700 dark:text-white placeholder-slate-400 outline-none"
-                    autoFocus
                   />
                   {shareSearch && (
                     <button onClick={() => setShareSearch('')} className="text-slate-400">
