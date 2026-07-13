@@ -76,27 +76,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
             <div className="flex flex-col items-end gap-1.5 shrink-0">
                <span className={`px-2 py-0.5 rounded-md text-[7px] font-black uppercase border tracking-[0.15em] leading-none ${getStatusStyles(booking.status)}`}>
                   {booking.status === 'pending_completion' ? 'attention' : booking.status}
-               </span>
-               {(booking.status === 'confirmed' || booking.status === 'pending_completion') && (
-                  <button
-                     onClick={(e) => {
-                        e.stopPropagation();
-                        const name = booking.walkInCustomerName || booking.userId?.name || 'Customer';
-                        const contact = booking.walkInCustomerPhone || booking.userId?.phone || '';
-                        navigate('/vendor/inventory', {
-                           state: {
-                              prefillCustomer: {
-                                 customerName: name,
-                                 customerContact: contact
-                              }
-                           }
-                        });
-                      }}
-                      className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline active:scale-95 transition-all"
-                  >
-                     + Product
-                  </button>
-               )}
+                </span>
             </div>
          </div>
 
@@ -159,6 +139,27 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                      Complete
                   </button>
                </div>
+            )}
+
+            {(booking.status === 'completed' || booking.status === 'cancelled') && (
+               <button
+                  onClick={(e) => {
+                     e.stopPropagation();
+                     const name = booking.walkInCustomerName || booking.userId?.name || 'Customer';
+                     const contact = booking.walkInCustomerPhone || booking.userId?.phone || '';
+                     navigate('/vendor/inventory', {
+                        state: {
+                           prefillCustomer: {
+                              customerName: name,
+                              customerContact: contact
+                           }
+                        }
+                     });
+                  }}
+                  className="h-7 px-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 rounded-lg text-[8px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1"
+               >
+                  + Product
+               </button>
             )}
          </div>
       </motion.div>
