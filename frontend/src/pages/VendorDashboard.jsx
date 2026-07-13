@@ -610,17 +610,61 @@ return (
                 transition={{ delay: idx * 0.05 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => item.customerPhone && navigate(`/vendor/customers?phone=${item.customerPhone}`)}
-                className="bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center justify-between group cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80 transition-colors"
+                className="relative bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80 transition-colors"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all">
+                {/* Top-right: Call + Done buttons */}
+                <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                  {item.customerPhone && (
+                    <a
+                      href={`tel:${item.customerPhone}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
+                      title="Call Customer"
+                    >
+                      <Phone size={12} strokeWidth={2.5} />
+                    </a>
+                  )}
+                  {!['completed', 'cancelled'].includes(item.status) && (() => {
+                    // Use endTime if available, else startTime + duration, else item.time for today
+                    let isTimeOver = false;
+                    if (item.endTime) {
+                      isTimeOver = new Date(item.endTime).getTime() < Date.now();
+                    } else if (item.startTime) {
+                      isTimeOver = new Date(item.startTime).getTime() + (item.totalDuration || 30) * 60000 < Date.now();
+                    } else if (item.time) {
+                      // item.time is like "02:00 PM", parse against today
+                      const [timePart, ampm] = item.time.split(' ');
+                      let [h, m] = timePart.split(':').map(Number);
+                      if (ampm === 'PM' && h !== 12) h += 12;
+                      if (ampm === 'AM' && h === 12) h = 0;
+                      const apptEnd = new Date();
+                      apptEnd.setHours(h, m + (item.totalDuration || 30), 0, 0);
+                      isTimeOver = apptEnd.getTime() < Date.now();
+                    }
+                    return (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCompleteBooking(item.id); }}
+                        className={`px-3 py-1.5 text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg transition-all ${
+                          isTimeOver
+                            ? 'bg-[#00246b] border-2 border-rose-500 shadow-rose-500/20'
+                            : 'bg-[#00246b] shadow-[#00246b]/10'
+                        }`}
+                      >
+                        Done
+                      </button>
+                    );
+                  })()}
+                </div>
+
+                <div className="flex items-center gap-2.5 pr-20">
+                  <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all shrink-0">
                     <img
                       src={item.customerImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.customerName || 'Customer')}&background=00246b&color=ffffff&bold=true`}
                       alt={item.customerName || 'Customer'}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="space-y-0">
+                  <div className="space-y-0 min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-tight tracking-tight">
                         {item.customerName}
@@ -646,31 +690,7 @@ return (
                       </div>
                     </div>
                   </div>
-                       <div className="flex items-center gap-2">
-                  {item.customerPhone && (
-                    <a
-                      href={`tel:${item.customerPhone}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
-                      title="Call Customer"
-                    >
-                      <Phone size={12} strokeWidth={2.5} />
-                    </a>
-                  )}
-                  {item.status === 'confirmed' && (() => {
-                    const isTimeOver = dayjs(item.startTime).add(item.totalDuration || 30, 'minute').isBefore(dayjs());
-                    return (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleCompleteBooking(item.id); }}
-                        className={`px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white rounded-lg text-[8px] font-black tracking-widest active:scale-90 shadow-lg shadow-[#00246b]/10 transition-all font-bold ${
-                          isTimeOver ? 'border-2 border-rose-600' : ''
-                        }`}
-                      >
-                        Done
-                      </button>
-                    );
-                  })()}
-                </div>            </div>
+                </div>
               </motion.div>
             ))
           )}
