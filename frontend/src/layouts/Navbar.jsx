@@ -13,6 +13,19 @@ const Navbar = () => {
     return typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
   }, []);
 
+  // Detect Android version — Android < 10 doesn't support env(safe-area-inset-bottom)
+  const isOldAndroid = React.useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent;
+    if (isIOS) return false;
+    const match = ua.match(/Android (\d+)/);
+    if (match) {
+      const version = parseInt(match[1], 10);
+      return version < 10;
+    }
+    return false;
+  }, [isIOS]);
+
   React.useEffect(() => {
     let maxHeight = window.innerHeight;
 
@@ -73,10 +86,19 @@ const Navbar = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent pointer-events-none">
-      <nav className={cn(
-        "w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-4 pointer-events-auto transition-all duration-300",
-        isIOS ? "-mb-[88px] pb-0" : "pb-[env(safe-area-inset-bottom)]"
-      )}>
+      <nav
+        className={cn(
+          "w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-4 pointer-events-auto transition-all duration-300",
+          // iOS: handled separately with negative margin trick
+          // Android >= 10 & modern: use env() CSS variable
+          // Android < 10: env() returns 0, so add explicit fallback padding
+          isIOS
+            ? "-mb-[88px] pb-0"
+            : isOldAndroid
+              ? "pb-5"   // 20px fixed fallback for Android < 10 system nav bar
+              : "pb-[env(safe-area-inset-bottom,0px)]"
+        )}
+      >
         <div className="flex items-center justify-between max-w-lg mx-auto h-[44px]">
           {navItems.map((item) => (
             <NavLink

@@ -35,7 +35,7 @@ const MainLayout = () => {
       {!shouldHideHeader && (
         <Header onOpenNotifications={() => setShowNotifications(true)} />
       )}
-      <main className={`max-w-4xl mx-auto ${!shouldHideHeader ? 'pt-[112px]' : ''}`}>
+      <main className={`max-w-4xl mx-auto pb-20 ${!shouldHideHeader ? 'pt-[112px]' : ''}`}>
         <Suspense fallback={null}>
           <Outlet />
         </Suspense>
