@@ -131,8 +131,8 @@ const Navbar = () => {
                   />
 
                   <span className={cn(
-                    "text-[8px] font-bold uppercase tracking-wider transition-all",
-                    isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400"
+                    "text-[10px] font-black uppercase tracking-wider transition-all",
+                    isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b]/70 dark:text-gray-400"
                     )}>
                     {item.label}
                   </span>
