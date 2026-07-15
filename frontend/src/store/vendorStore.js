@@ -215,10 +215,19 @@ export const useVendorStore = create((set, get) => ({
   },
 
   fetchCustomerBookingHistory: async (customerId, isWalkIn, name, phone) => {
+    if (phone && window.__PREFETCHED_DATA__?.customerHistories?.[phone]) {
+      return window.__PREFETCHED_DATA__.customerHistories[phone];
+    }
     try {
       const res = await api.get('/vendor/customer-history', {
         params: { customerId, isWalkIn, name, phone }
       });
+      if (phone) {
+        if (!window.__PREFETCHED_DATA__.customerHistories) {
+          window.__PREFETCHED_DATA__.customerHistories = {};
+        }
+        window.__PREFETCHED_DATA__.customerHistories[phone] = res.data;
+      }
       return res.data;
     } catch (err) {
       console.error('Failed to fetch customer history', err);

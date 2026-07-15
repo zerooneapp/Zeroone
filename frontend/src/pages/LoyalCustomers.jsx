@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   ChevronLeft, 
@@ -105,6 +105,8 @@ const LoyalCustomers = () => {
     }
   };
 
+  const openedPhoneRef = useRef(null);
+
   useEffect(() => {
     handleFetch();
   }, []);
@@ -114,11 +116,14 @@ const LoyalCustomers = () => {
     const queryPhone = new URLSearchParams(location.search).get('phone');
     if (customers.length > 0 && queryPhone) {
       const matchingCustomer = customers.find(c => c.phone === queryPhone);
-      if (matchingCustomer && (!selectedCustomer || selectedCustomer.phone !== queryPhone)) {
+      if (matchingCustomer && openedPhoneRef.current !== queryPhone) {
+        openedPhoneRef.current = queryPhone;
         handleViewHistory(matchingCustomer);
       }
+    } else if (!queryPhone) {
+      openedPhoneRef.current = null;
     }
-  }, [customers, location.search, selectedCustomer]);
+  }, [customers, location.search]);
 
   useEffect(() => {
     setCurrentPage(1);

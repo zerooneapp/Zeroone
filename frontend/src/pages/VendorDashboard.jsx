@@ -107,7 +107,18 @@ const VendorDashboard = () => {
 
   const handleFetch = async (force = false) => {
     try {
-      await fetchDashboard(force);
+      const res = await fetchDashboard(force);
+      const schedule = res?.todaySchedule || [];
+      schedule.forEach((item) => {
+        if (item.customerPhone) {
+          fetchCustomerBookingHistory(
+            item.customerId,
+            item.isWalkIn,
+            item.customerName,
+            item.customerPhone
+          ).catch(() => {});
+        }
+      });
     } catch (err) {
       toast.error('Failed to load dashboard data');
     }

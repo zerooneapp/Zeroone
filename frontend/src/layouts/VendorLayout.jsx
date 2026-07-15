@@ -7,11 +7,19 @@ import { IoPersonCircleSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
 import VendorLoader from '../components/VendorLoader';
 import { cn } from '../utils/cn';
+import { useVendorStore } from '../store/vendorStore';
 
 import useSocket from '../hooks/useSocket';
 
 const VendorLayout = () => {
   const { role, user, isInitialized } = useAuthStore();
+  const fetchClients = useVendorStore((state) => state.fetchClients);
+
+  useEffect(() => {
+    if (role === 'vendor') {
+      fetchClients().catch(() => {});
+    }
+  }, [role, fetchClients]);
   useSocket(user?._id);
   const location = useLocation();
   const navigate = useNavigate();

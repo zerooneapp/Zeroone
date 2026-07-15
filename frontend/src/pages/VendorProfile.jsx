@@ -831,8 +831,8 @@ const VendorProfile = () => {
                                        className={cn(
                                           "px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest border transition-all active:scale-95",
                                           isOff
-                                             ? "bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-200"
-                                             : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-slate-200 dark:border-gray-700 hover:border-rose-300"
+                                             ? "bg-[#00246b] text-white border-[#00246b] shadow-sm shadow-[#00246b]/20"
+                                             : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-slate-200 dark:border-gray-700 hover:border-[#00246b]"
                                        )}
                                     >
                                        {day}
@@ -841,8 +841,8 @@ const VendorProfile = () => {
                               })}
                            </div>
                            {data.weeklyOff.length > 0 && (
-                              <p className="text-[9px] text-rose-400 font-semibold ml-1">
-                                 🔴 Shop closed on: {data.weeklyOff.join(', ')}
+                              <p className="text-[9px] text-[#00246b] dark:text-blue-400 font-semibold ml-1">
+                                 ℹ️ Shop closed on: {data.weeklyOff.join(', ')}
                               </p>
                            )}
                         </div>
