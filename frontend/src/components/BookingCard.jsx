@@ -156,9 +156,9 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProdu
                         }
                      });
                   }}
-                  className="h-7 px-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 rounded-lg text-[8px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1"
+                  className="h-8 px-3 bg-[#00246b] text-white rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center justify-center gap-1.5"
                >
-                  + Product
+                  Add Product
                </button>
             )}
          </div>

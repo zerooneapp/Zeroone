@@ -18,16 +18,16 @@ const VendorBookings = () => {
   const [fromDate, setFromDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [toDate, setToDate] = useState(dayjs().add(7, 'day').format('YYYY-MM-DD'));
 
-  const { 
-    bookingsData: bookings, 
-    bookingsLoading: loading, 
+  const {
+    bookingsData: bookings,
+    bookingsLoading: loading,
     fetchBookings,
     lastBookingParams,
     fetchDashboard,
     fetchClosures,
     closuresData: closures,
     closuresLoading,
-    setBookingsData: setBookings 
+    setBookingsData: setBookings
   } = useVendorStore();
 
 
@@ -44,7 +44,7 @@ const VendorBookings = () => {
     api.get('/inventory').then(res => {
       const items = res.data || [];
       setHasInStockProducts(items.some(item => item.stock > 0));
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const handleFetch = async (force = false) => {
@@ -86,6 +86,7 @@ const VendorBookings = () => {
       setCancelBookingModal({ isOpen: true, bookingId: id });
       return;
     }
+
 
     if (action === 'complete') {
       setCompleteBookingModal({ isOpen: true, bookingId: id });
