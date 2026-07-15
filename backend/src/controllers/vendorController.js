@@ -926,7 +926,22 @@ const getCustomerBookingHistory = async (req, res) => {
       .select('startTime endTime totalDuration services totalPrice status')
       .sort({ startTime: -1 });
 
-    res.status(200).json(bookings);
+    let productPurchases = [];
+    const productConditions = [];
+    if (phone && phone !== 'Unknown' && phone !== '') {
+      productConditions.push({ customerContact: phone });
+    }
+    if (name && name !== 'Unknown' && name !== '') {
+      productConditions.push({ customerName: name });
+    }
+    if (productConditions.length > 0) {
+      productPurchases = await InventoryLog.find({
+        vendorId: vendor._id,
+        $or: productConditions
+      }).populate('itemId').sort({ createdAt: -1 });
+    }
+
+    res.status(200).json({ bookings, products: productPurchases });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -1214,7 +1229,7 @@ const getVendorDashboardBundle = async (req, res) => {
       Notification.countDocuments({ userId: new mongoose.Types.ObjectId(vendor.ownerId), isRead: false, role: 'vendor' }),
       
       Booking.aggregate([
-        { $match: { vendorId: new mongoose.Types.ObjectId(vendor._id), status: { $in: ['confirmed', 'completed'] } } },
+        { $match: { vendorId: new mongoose.Types.ObjectId(vendor._id), status: 'completed' } },
         { $group: { _id: null, total: { $sum: '$totalPrice' } } }
       ]),
 
@@ -1237,7 +1252,7 @@ const getVendorDashboardBundle = async (req, res) => {
               $sum: { $cond: [{ $and: [{ $eq: ['$status', 'completed'] }, { $gte: ['$startTime', todayStart] }, { $lt: ['$startTime', todayEnd] }] }, '$totalPrice', 0] }
             },
             weekEarnings: {
-              $sum: { $cond: [{ $in: ['$status', ['confirmed', 'completed']] }, '$totalPrice', 0] }
+              $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0] }
             }
           }
         }

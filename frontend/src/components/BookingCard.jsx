@@ -4,7 +4,7 @@ import { User, Clock, Calendar, ChevronRight, CheckCircle2, XCircle, AlertCircle
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
-const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
+const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProducts }) => {
    const navigate = useNavigate();
    const isActionLoading = loadingId === booking._id;
 
@@ -141,7 +141,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId }) => {
                </div>
             )}
 
-            {(booking.status === 'completed' || booking.status === 'cancelled') && (
+            {(booking.status === 'completed' || booking.status === 'cancelled') && hasInStockProducts && (
                <button
                   onClick={(e) => {
                      e.stopPropagation();

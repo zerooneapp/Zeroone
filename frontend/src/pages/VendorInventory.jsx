@@ -14,12 +14,14 @@ import {
   Layers,
   Coins,
   ShieldAlert,
-  ClipboardList
+  ClipboardList,
+  TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { cn } from '../utils/cn';
+import dayjs from 'dayjs';
 
 const VendorInventory = () => {
   const navigate = useNavigate();
@@ -30,7 +32,9 @@ const VendorInventory = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
 
-  // Form State
+  const [isAddProductFlow, setIsAddProductFlow] = useState(false);
+  const [totalProductRevenue, setTotalProductRevenue] = useState(0);
+  const [todayProductRevenue, setTodayProductRevenue] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({
@@ -127,7 +131,32 @@ const VendorInventory = () => {
     try {
       setLoading(true);
       const res = await api.get('/inventory');
-      setItems(res.data || []);
+      const fetchedItems = res.data || [];
+      setItems(fetchedItems);
+
+      // Compute total + today product revenue from all sale logs
+      let revenue = 0;
+      let todayRevenue = 0;
+      const todayStr = dayjs().format('YYYY-MM-DD');
+      await Promise.all(
+        fetchedItems.map(async (item) => {
+          try {
+            const logRes = await api.get(`/inventory/${item._id}/logs`, { params: { limit: 1000 } });
+            const logs = logRes.data?.logs || [];
+            logs.forEach(log => {
+              if (log.change < 0 && !log.isReturn) {
+                const amount = Math.abs(log.change) * (item.price || 0);
+                revenue += amount;
+                if (dayjs(log.createdAt).format('YYYY-MM-DD') === todayStr) {
+                  todayRevenue += amount;
+                }
+              }
+            });
+          } catch {}
+        })
+      );
+      setTotalProductRevenue(revenue);
+      setTodayProductRevenue(todayRevenue);
     } catch (err) {
       toast.error('Failed to load inventory data');
     } finally {
@@ -143,6 +172,9 @@ const VendorInventory = () => {
 
   // Auto-open adjust stock modal with customer details if navigated with state
   useEffect(() => {
+    if (location.state?.prefillCustomer) {
+      setIsAddProductFlow(true);
+    }
     if (items.length > 0 && location.state?.prefillCustomer) {
       const { customerName, customerContact } = location.state.prefillCustomer;
       // Auto-open adjust stock modal. Let's pick a default product, or show the list for them to select, but prefill is ready.
@@ -488,66 +520,109 @@ const VendorInventory = () => {
             <h1 className="text-md font-semibold leading-none">Inventory Management</h1>
           </div>
         </div>
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center gap-1 px-2.5 py-1.5 bg-[#00246b] dark:bg-white text-white dark:text-slate-900 rounded-lg text-[8px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-md"
-        >
-          <Plus size={10} strokeWidth={3} />
-          Add Item
-        </button>
+        {!isAddProductFlow && (
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-[#00246b] dark:bg-white text-white dark:text-slate-900 rounded-lg text-[8px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-md"
+          >
+            <Plus size={10} strokeWidth={3} />
+            Add Item
+          </button>
+        )}
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-[120px] space-y-6">
+      <main className={cn(
+        "max-w-4xl mx-auto px-4",
+        isAddProductFlow ? "pt-[112px] space-y-3" : "pt-[120px] space-y-6"
+      )}>
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3">
-            <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-xl">
-              <Package size={16} />
-            </div>
-            <div>
-              <p className="text-[9px] font-semibold text-slate-400 leading-none">Total Items</p>
-              <h3 className="text-sm font-black mt-1">{metrics.totalItems}</h3>
-            </div>
-          </div>
+        {!isAddProductFlow && (
+          <div className="space-y-3">
+            {/* Earnings Cards - Today + Total */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Today Earnings */}
+              <div className="p-3 bg-[#00246b] dark:bg-[#00246b] rounded-xl shadow-md flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute -right-3 -top-3 w-14 h-14 bg-white/5 rounded-full" />
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="p-1 bg-white/15 rounded-md">
+                    <TrendingUp size={10} className="text-white" />
+                  </div>
+                  <p className="text-[7px] font-black text-white/70 uppercase tracking-widest leading-none">Today</p>
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-black text-white leading-none">₹{todayProductRevenue.toLocaleString('en-IN')}</h3>
+                  <p className="text-[6.5px] font-bold text-white/50 mt-0.5 uppercase tracking-wider">Product Sales</p>
+                </div>
+              </div>
 
-          <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl">
-              <Layers size={16} />
+              {/* Total Earnings */}
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-md flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute -right-3 -top-3 w-14 h-14 bg-white/10 rounded-full" />
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="p-1 bg-white/20 rounded-md">
+                    <Coins size={10} className="text-white" />
+                  </div>
+                  <p className="text-[7px] font-black text-white/80 uppercase tracking-widest leading-none">All Time</p>
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-black text-white leading-none">₹{totalProductRevenue.toLocaleString('en-IN')}</h3>
+                  <p className="text-[6.5px] font-bold text-white/60 mt-0.5 uppercase tracking-wider">Total Earnings</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[9px] font-semibold text-slate-400 leading-none">Total Stock</p>
-              <h3 className="text-sm font-black mt-1">{metrics.totalStock}</h3>
-            </div>
-          </div>
 
-          <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3">
-            <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl">
-              <Coins size={16} />
-            </div>
-            <div>
-              <p className="text-[9px] font-semibold text-slate-400 leading-none">Valuation (Cost)</p>
-              <h3 className="text-sm font-black mt-1">₹{metrics.totalStockValue.toLocaleString('en-IN')}</h3>
-            </div>
-          </div>
+            {/* 4 metric cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3">
+                <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-xl">
+                  <Package size={16} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold text-slate-400 leading-none">Total Items</p>
+                  <h3 className="text-sm font-black mt-1">{metrics.totalItems}</h3>
+                </div>
+              </div>
 
-          <div className={cn(
-            "p-3 border rounded-2xl shadow-sm flex items-center gap-3 transition-colors",
-            metrics.lowStockCount > 0
-              ? "bg-rose-500/5 border-rose-500/20 text-rose-500"
-              : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800"
-          )}>
-            <div className={cn(
-              "p-2.5 rounded-xl",
-              metrics.lowStockCount > 0 ? "bg-rose-500/20 text-rose-500" : "bg-slate-500/10 text-slate-400"
-            )}>
-              <ShieldAlert size={16} />
-            </div>
-            <div>
-              <p className="text-[9px] font-semibold text-slate-400 leading-none">Low Stock Alerts</p>
-              <h3 className="text-sm font-black mt-1">{metrics.lowStockCount}</h3>
+              <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3">
+                <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                  <Layers size={16} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold text-slate-400 leading-none">Total Stock</p>
+                  <h3 className="text-sm font-black mt-1">{metrics.totalStock}</h3>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-sm flex items-center gap-3">
+                <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl">
+                  <Coins size={16} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold text-slate-400 leading-none">Valuation (Cost)</p>
+                  <h3 className="text-sm font-black mt-1">₹{metrics.totalStockValue.toLocaleString('en-IN')}</h3>
+                </div>
+              </div>
+
+              <div className={cn(
+                "p-3 border rounded-2xl shadow-sm flex items-center gap-3 transition-colors",
+                metrics.lowStockCount > 0
+                  ? "bg-rose-500/5 border-rose-500/20 text-rose-500"
+                  : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800"
+              )}>
+                <div className={cn(
+                  "p-2.5 rounded-xl",
+                  metrics.lowStockCount > 0 ? "bg-rose-500/20 text-rose-500" : "bg-slate-500/10 text-slate-400"
+                )}>
+                  <ShieldAlert size={16} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold text-slate-400 leading-none">Low Stock Alerts</p>
+                  <h3 className="text-sm font-black mt-1">{metrics.lowStockCount}</h3>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Filters and Search */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 space-y-3 shadow-sm">

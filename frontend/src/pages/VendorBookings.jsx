@@ -37,9 +37,15 @@ const VendorBookings = () => {
   const [isClosureModalOpen, setIsClosureModalOpen] = useState(false);
   const [completeBookingModal, setCompleteBookingModal] = useState({ isOpen: false, bookingId: null });
   const [cancelBookingModal, setCancelBookingModal] = useState({ isOpen: false, bookingId: null });
+  const [hasInStockProducts, setHasInStockProducts] = useState(false);
 
-
-
+  // Fetch inventory once to check if any in-stock products exist
+  useEffect(() => {
+    api.get('/inventory').then(res => {
+      const items = res.data || [];
+      setHasInStockProducts(items.some(item => item.stock > 0));
+    }).catch(() => {});
+  }, []);
 
   const handleFetch = async (force = false) => {
     if (dayjs(fromDate).isAfter(toDate)) {
@@ -367,6 +373,7 @@ const VendorBookings = () => {
                   loadingId={actionLoadingId}
                   onComplete={(id) => handleAction(id, 'complete')}
                   onCancel={(id) => handleAction(id, 'cancel')}
+                  hasInStockProducts={hasInStockProducts}
                 />
               ))}
 
