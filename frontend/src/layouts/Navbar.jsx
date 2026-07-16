@@ -1,6 +1,9 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Calendar, User } from 'lucide-react';
+import { BiSolidHome } from 'react-icons/bi';
+import { RiTeamFill } from 'react-icons/ri';
+import { IoPersonCircleSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
 import { useAuthStore } from '../store/authStore';
@@ -8,6 +11,7 @@ import { useAuthStore } from '../store/authStore';
 const Navbar = () => {
   const { role, isInitialized } = useAuthStore();
   const [isVisible, setIsVisible] = React.useState(true);
+  const location = useLocation();
 
   const isIOS = React.useMemo(() => {
     return typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -72,11 +76,13 @@ const Navbar = () => {
 
   if (!isVisible) return null;
 
-  const navItems = role === 'staff'
+  const isStaff = role === 'staff';
+
+  const navItems = isStaff
     ? [
-      { icon: Home, label: 'Home', path: '/staff' },
-      { icon: Calendar, label: 'Bookings', path: '/staff/bookings' },
-      { icon: User, label: 'Account', path: '/staff/account' },
+      { icon: BiSolidHome, label: 'Home', path: '/staff' },
+      { icon: RiTeamFill, label: 'Bookings', path: '/staff/bookings' },
+      { icon: IoPersonCircleSharp, label: 'Account', path: '/staff/account' },
     ]
     : [
       { icon: Home, label: 'Home', path: '/' },
@@ -89,6 +95,7 @@ const Navbar = () => {
       <nav
         className={cn(
           "w-full bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-gray-800 shadow-[0_-8px_20px_rgba(0,0,0,0.04)] px-4 pointer-events-auto transition-all duration-300",
+          isStaff ? "px-6 shadow-[0_-5px_15px_rgba(0,0,0,0.01)]" : "px-4",
           // iOS: handled separately with negative margin trick
           // Android >= 10 & modern: use env() CSS variable
           // Android < 10: env() returns 0, so add explicit fallback padding
@@ -99,7 +106,7 @@ const Navbar = () => {
               : "pb-[env(safe-area-inset-bottom,0px)]"
         )}
       >
-        <div className="flex items-center justify-between max-w-lg mx-auto h-[44px]">
+        <div className={cn("flex items-center justify-between max-w-lg mx-auto", isStaff ? "h-[50px] max-w-4xl" : "h-[44px]")}>
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -107,6 +114,7 @@ const Navbar = () => {
               end
               className={({ isActive }) => cn(
                 'flex flex-col items-center justify-center gap-0.5 min-w-[70px] h-full transition-all relative',
+                isStaff ? 'gap-1 min-w-[90px]' : 'gap-0.5 min-w-[70px]',
                 'opacity-100'
               )}
             >
@@ -115,24 +123,34 @@ const Navbar = () => {
                   {/* Top Active Line Indicator */}
                   {isActive && (
                     <motion.div
-                      layoutId="active-nav-line"
-                      className="absolute top-0 w-6 h-[2px] bg-[#00246b] dark:bg-white rounded-b-full"
+                      layoutId={isStaff ? "active-nav-line-partner" : "active-nav-line"}
+                      className={cn(
+                        "absolute top-0 bg-[#00246b] dark:bg-white rounded-b-full",
+                        isStaff ? "w-8 h-[3px]" : "w-8 h-[3px]"
+                      )}
                       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                     />
                   )}
 
                    <item.icon
-                    size={18}
+                    size={isStaff ? 22 : 18}
                     className={cn(
                       "transition-all duration-300",
-                      isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400"
+                      isStaff
+                        ? "text-[#00246b] dark:text-white stroke-[0.8] dark:stroke-white stroke-[#00246b]"
+                        : (isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b] dark:text-gray-400")
                     )}
-                    strokeWidth={isActive ? 3.5 : 3.2}
+                    strokeWidth={isStaff ? undefined : (isActive ? 3.5 : 3.2)}
                   />
 
                   <span className={cn(
-                    "text-[10px] font-black uppercase tracking-wider transition-all",
-                    isActive ? "text-[#00246b] dark:text-white" : "text-[#00246b]/70 dark:text-gray-400"
+                    "text-[10px] font-black uppercase transition-all",
+                    isStaff 
+                      ? "tracking-tight text-[#00246b] dark:text-white"
+                      : (isActive 
+                          ? "tracking-wider text-[#00246b] dark:text-white" 
+                          : "tracking-wider text-[#00246b]/70 dark:text-gray-400"
+                        )
                     )}>
                     {item.label}
                   </span>
