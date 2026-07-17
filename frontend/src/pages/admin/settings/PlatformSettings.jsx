@@ -161,37 +161,8 @@ const PlatformSettings = () => {
           </SettingsCard>
         </div>
 
-        {/* 🔔 NOTIFICATION PREFERENCES */}
-        <div className="space-y-5">
-          <SettingsCard title="Intelligence Alerts" icon={BellRing}>
-            <div className="space-y-3.5">
-              <ToggleItem
-                label="Booking Activity"
-                sub="Real-time global transaction alerts"
-                isActive={settings.notifications?.bookingAlerts}
-                onToggle={() => handleToggle('bookingAlerts')}
-                isDisabled={saving}
-              />
-              <ToggleItem
-                label="Financial Yield Alerts"
-                sub="Low balance and recursive billing notes"
-                isActive={settings.notifications?.walletAlerts}
-                onToggle={() => handleToggle('walletAlerts')}
-                isDisabled={saving}
-              />
-              <ToggleItem
-                label="Partner Retention"
-                sub="Reminders for profile & asset compliance"
-                isActive={settings.notifications?.reminderAlerts}
-                onToggle={() => handleToggle('reminderAlerts')}
-                isDisabled={saving}
-              />
-            </div>
-          </SettingsCard>
-        </div>
-
         {/* 💬 SUPPORT INFRASTRUCTURE */}
-        <div className="space-y-5 lg:col-span-2">
+        <div className="space-y-5">
           <SettingsCard title="Support Infrastructure" icon={MessageCircle}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SettingInput
@@ -262,7 +233,7 @@ const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisable
         type={type || "text"}
         inputMode={type === "text" ? undefined : "numeric"}
         className="w-full pl-5 pr-12 h-12 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[18px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all tracking-tighter shadow-inner"
-        value={value}
+        value={value || ''}
         onChange={(e) => {
           if (type === "text") {
             onChange(e.target.value);

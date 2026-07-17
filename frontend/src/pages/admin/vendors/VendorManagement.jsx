@@ -211,7 +211,7 @@ const VendorManagement = () => {
           </div>
           <div className="flex items-center gap-3">
             <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-xl px-4 py-2 flex flex-col items-end justify-center min-w-[120px]">
-              <span className="text-[10px] font-black text-primary/70 dark:text-primary/80 uppercase tracking-widest">Total Wallet</span>
+              <span className="text-[10px] font-black text-primary/70 dark:text-slate-400 uppercase tracking-widest">Total Wallet</span>
               <span className="text-[15px] font-black text-primary dark:text-white leading-none mt-0.5">Rs {totalWalletBalance?.toFixed(2) || '0.00'}</span>
             </div>
             <button onClick={() => fetchVendors(true)} className="p-2.5 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-500 border border-slate-100 dark:border-gray-700 active:scale-90 transition-all hover:text-primary dark:hover:text-white h-full">

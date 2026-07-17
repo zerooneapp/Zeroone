@@ -377,7 +377,7 @@ const AdminDashboard = () => {
               New Partner Requests
               <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-[11px]">{data.pendingPartners}</span>
             </h2>
-            <button onClick={() => navigate('/admin/vendors')} className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">See All</button>
+            <button onClick={() => navigate('/admin/vendors')} className="text-[11px] font-black text-primary dark:text-blue-400 capitalize tracking-widest border-b border-primary/30 dark:border-blue-400/30">See All</button>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
             {data.recentVendors.map((vendor) => (
@@ -433,7 +433,7 @@ const AdminDashboard = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">Platform Users</h2>
-            <button onClick={() => navigate('/admin/users')} className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Manage All</button>
+            <button onClick={() => navigate('/admin/users')} className="text-[11px] font-black text-primary dark:text-blue-400 capitalize tracking-widest border-b border-primary/30 dark:border-blue-400/30">Manage All</button>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
             {data.recentUsers.map((user) => (
@@ -467,7 +467,7 @@ const AdminDashboard = () => {
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-[16px] font-black text-slate-900 dark:text-white capitalize tracking-tight">Quality Control</h2>
-          <button onClick={() => navigate('/admin/reviews')} className="text-[11px] font-black text-primary capitalize tracking-widest border-b border-primary/30">Full Audit</button>
+          <button onClick={() => navigate('/admin/reviews')} className="text-[11px] font-black text-primary dark:text-blue-400 capitalize tracking-widest border-b border-primary/30 dark:border-blue-400/30">Full Audit</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.recentReviews.map((review) => (
