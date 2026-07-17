@@ -696,7 +696,9 @@ const VendorProfile = () => {
                               if (item.isDelete) { setShowDeleteConfirm(true); return; }
                               if (item.isSupport) {
                                  if (!supportNumber) return toast.error('Support is temporarily unavailable');
-                                 window.open(`https://wa.me/${supportNumber.replace(/\D/g, '')}`, '_blank');
+                                 const cleanedNum = supportNumber.replace(/\D/g, '');
+                                 const formattedNum = cleanedNum.length === 10 ? `91${cleanedNum}` : cleanedNum;
+                                 window.open(`https://wa.me/${formattedNum}`, '_blank');
                                  return;
                               }
                               setSearchParams({ section: item.key });

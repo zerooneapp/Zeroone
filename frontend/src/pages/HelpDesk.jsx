@@ -41,6 +41,11 @@ const HelpDesk = () => {
     fetchData();
   }, []);
 
+  const getWhatsAppLink = () => {
+    const cleaned = supportSettings.supportWhatsApp.replace(/\D/g, '');
+    return `https://wa.me/${cleaned.length === 10 ? '91' + cleaned : cleaned}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!subject.trim() || !description.trim()) {
@@ -120,7 +125,7 @@ const HelpDesk = () => {
           )}
           {supportSettings.supportWhatsApp && (
             <a
-              href={`https://wa.me/${supportSettings.supportWhatsApp.replace(/\D/g, '')}`}
+              href={getWhatsAppLink()}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 p-3.5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm active:scale-95 transition-all"

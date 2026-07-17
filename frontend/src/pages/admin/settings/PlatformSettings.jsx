@@ -218,21 +218,19 @@ const SettingsCard = ({ title, icon: Icon, children }) => (
 );
 
 const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisabled, type }) => (
-  <div className="space-y-3 group">
-    <div className="flex justify-between items-start px-1">
-      <div className="space-y-1.5">
-        <h4 className="text-[11px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-90">{label}</h4>
-        <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">{sub}</p>
-      </div>
-      <div className="text-primary dark:text-white opacity-80 group-hover:opacity-100 transition-opacity">
-        <Icon size={18} strokeWidth={3} />
-      </div>
+  <div className="space-y-3.5 group">
+    <div className="px-1 space-y-1">
+      <h4 className="text-[11px] font-black text-slate-500 dark:text-gray-500 capitalize tracking-[0.2em] opacity-90">{label}</h4>
+      <p className="text-[12px] font-black text-slate-900 dark:text-white capitalize tracking-tighter">{sub}</p>
     </div>
     <div className="relative">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary dark:text-white opacity-50 group-hover:opacity-80 transition-opacity">
+        <Icon size={16} strokeWidth={2.5} />
+      </div>
       <input
         type={type || "text"}
         inputMode={type === "text" ? undefined : "numeric"}
-        className="w-full pl-5 pr-12 h-12 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[18px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all tracking-tighter shadow-inner"
+        className="w-full pl-10 pr-24 h-12 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl text-[16px] font-black text-slate-900 dark:text-white focus:ring-2 ring-primary/20 outline-none transition-all tracking-tighter shadow-inner"
         value={value || ''}
         onChange={(e) => {
           if (type === "text") {
@@ -258,7 +256,7 @@ const SettingInput = ({ label, sub, icon: Icon, value, onChange, unit, isDisable
         }}
         disabled={isDisabled}
       />
-      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[11px] font-black text-primary dark:text-gray-400 capitalize tracking-widest">
+      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary dark:text-gray-300 bg-primary/10 dark:bg-white/10 px-2 py-1.5 rounded-lg capitalize tracking-widest leading-none">
         {unit}
       </div>
     </div>
