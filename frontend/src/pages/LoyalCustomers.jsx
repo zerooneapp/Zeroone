@@ -158,7 +158,7 @@ const LoyalCustomers = () => {
           <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
         </button>
         <h1 className="text-md font-black text-[#00246b] dark:text-white tracking-tight">
-          Loyal Customers
+          Client's
         </h1>
       </header>
 
@@ -180,8 +180,8 @@ const LoyalCustomers = () => {
             {[
               { id: 'all', label: 'All Clients', icon: Users },
               { id: 'repeat', label: 'Repeat (2+)', icon: Star },
-              { id: 'high-spender', label: 'Top Spenders', icon: Wallet },
-              { id: 'inactive', label: 'Inactive (30d+)', icon: UserX }
+              { id: 'inactive', label: 'Inactive (30d+)', icon: UserX },
+              { id: 'high-spender', label: 'Top Spenders', icon: Wallet }
             ].map((btn) => (
               <button
                 key={btn.id}

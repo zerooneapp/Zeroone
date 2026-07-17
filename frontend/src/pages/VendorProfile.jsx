@@ -2061,7 +2061,7 @@ const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef 
                      onClick={() => setP(period)}
                      className={cn(
                         "w-full py-4 rounded-xl text-[10px] font-black transition-all",
-                        p === period ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 scale-105" : "text-gray-400 bg-slate-50 dark:bg-gray-800"
+                        p === period ? "bg-[#00246b] text-white shadow-lg shadow-[#00246b]/20 scale-105" : "text-gray-400 bg-slate-50 dark:bg-gray-800"
                      )}
                   >
                      {period}

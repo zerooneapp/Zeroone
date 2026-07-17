@@ -512,13 +512,13 @@ return (
       <section className="px-0.5">
         <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1 pb-0">
           <div 
-            className="bg-[#00246b] dark:bg-gray-900 py-2 px-2 rounded-lg shadow-lg border border-white/10 flex flex-col items-center justify-center text-center overflow-hidden"
+            className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden"
           >
-            <p className="text-[8px] font-black text-white/90 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
+            <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today revenue</p>
             {loading ? (
-              <div className="h-4 w-12 bg-white/20 rounded animate-pulse" />
+              <div className="h-4 w-12 bg-slate-100 dark:bg-gray-800 rounded animate-pulse" />
             ) : (
-              <p className="text-[16px] font-black text-white leading-none truncate">&#8377;{data?.stats?.todayEarnings?.toLocaleString() || '0'}</p>
+              <p className="text-[16px] font-black text-[#00246b] dark:text-white leading-none truncate">&#8377;{data?.stats?.todayEarnings?.toLocaleString() || '0'}</p>
             )}
           </div>
           <div className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden">

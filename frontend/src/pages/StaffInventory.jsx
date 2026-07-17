@@ -674,6 +674,18 @@ const StaffInventory = () => {
                     {adjustmentDelta > 0 ? 'increasing' : 'decreasing'} stock
                   </span>.
                 </p>
+
+                {adjustmentDelta > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Adjustment Type</label>
+                    <div className="flex p-1 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
+                      <div className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center bg-white dark:bg-gray-700 text-[#00246b] dark:text-white shadow-sm">
+                        Customer Return
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Quantity</label>
                   <input

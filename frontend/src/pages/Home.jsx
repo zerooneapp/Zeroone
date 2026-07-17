@@ -263,8 +263,8 @@ const Home = () => {
                   key={cat._id}
                   onClick={() => toggleCategory(cat._id)}
                   className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 outline-none border ${isActive
-                    ? 'bg-white dark:bg-gray-900 border-[#00246b] text-gray-900 dark:text-blue-400 shadow-[0_10px_25px_-4px_rgba(28,44,78,0.15)] scale-105'
-                    : 'bg-white dark:bg-gray-900/50 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-700 shadow-sm'
+                    ? 'bg-white dark:bg-gray-900 border-[#00246b] text-gray-600 dark:text-blue-400 shadow-[0_10px_25px_-4px_rgba(28,44,78,0.15)] scale-105'
+                    : 'bg-white dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 shadow-sm'
                     }`}
                 >
                   <span className="relative z-10">{cat.name}</span>

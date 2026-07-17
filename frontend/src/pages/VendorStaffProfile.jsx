@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Phone, Scissors, Calendar, ShieldCheck, Clock, CheckCircle2, AlertCircle, Sparkles, ChevronLeft, Edit3 } from 'lucide-react';
+import { ArrowLeft, User, Phone, Scissors, Calendar, ShieldCheck, Clock, CheckCircle2, AlertCircle, Sparkles, ChevronLeft, Edit3, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import { useVendorStore } from '../store/vendorStore';
@@ -205,7 +205,6 @@ const VendorStaffProfile = () => {
             </div>
           </section>
         )}
-
         {activeTab === 'custom' && (
           /* Earnings Filter */
           <section className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm space-y-3">
@@ -214,35 +213,31 @@ const VendorStaffProfile = () => {
               <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2 py-0.5 bg-slate-50 dark:bg-gray-800 rounded-md">Custom</span>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-slate-100 dark:border-gray-800/50 mt-1">
-              <div className="flex-1 space-y-1 text-left">
-                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">Start Date</p>
-                <div className="relative group">
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
-                  />
-                </div>
+            <div className="flex items-center gap-1 bg-slate-50 dark:bg-gray-800/50 p-1.5 rounded-xl border border-slate-100 dark:border-gray-800/50 mt-1">
+              <div className="flex-1 text-left relative flex items-center min-w-0">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                  className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg pl-1.5 pr-4 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer appearance-none truncate"
+                />
+                <ChevronDown className="absolute right-1 text-slate-400 pointer-events-none" size={8} strokeWidth={3} />
               </div>
 
-              <div className="pt-3 text-gray-300">
-                <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
+              <div className="text-gray-300 shrink-0">
+                <ChevronLeft className="rotate-180 opacity-20" size={10} strokeWidth={3} />
               </div>
 
-              <div className="flex-1 space-y-1 text-left">
-                <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest pl-1">End Date</p>
-                <div className="relative group">
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                    className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer"
-                  />
-                </div>
+              <div className="flex-1 text-left relative flex items-center min-w-0">
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                  className="w-full h-8 bg-white dark:bg-gray-900 border-none rounded-lg pl-1.5 pr-4 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 [color-scheme:dark] cursor-pointer appearance-none truncate"
+                />
+                <ChevronDown className="absolute right-1 text-slate-400 pointer-events-none" size={8} strokeWidth={3} />
               </div>
             </div>
           </section>

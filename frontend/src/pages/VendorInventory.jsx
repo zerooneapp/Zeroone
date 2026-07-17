@@ -198,7 +198,8 @@ const VendorInventory = () => {
       customerName: prev.customerName || '',
       customerContact: prev.customerContact || '',
       staffName: '',
-      quantity: 1
+      quantity: 1,
+      isReturn: delta > 0 ? true : false
     }));
   };
 
@@ -223,7 +224,8 @@ const VendorInventory = () => {
         change: finalDelta,
         customerName: adjustFormData.customerName,
         customerContact: contact,
-        staffName: adjustFormData.staffName
+        staffName: adjustFormData.staffName,
+        isReturn: adjustmentDelta > 0 ? !!adjustFormData.isReturn : false
       });
       setItems(items.map((item) => (item._id === adjustingItem._id ? res.data : item)));
       toast.success('Stock adjusted successfully');
@@ -556,17 +558,17 @@ const VendorInventory = () => {
               </div>
 
               {/* Total Earnings */}
-              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-md flex flex-col justify-between relative overflow-hidden">
-                <div className="absolute -right-3 -top-3 w-14 h-14 bg-white/10 rounded-full" />
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <div className="p-1 bg-white/20 rounded-md">
-                    <Coins size={10} className="text-white" />
+              <div className="p-3 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute -right-3 -top-3 w-14 h-14 bg-slate-50 dark:bg-gray-800 rounded-full" />
+                <div className="flex items-center gap-1.5 mb-1.5 relative z-10">
+                  <div className="p-1 bg-amber-500/10 text-amber-500 rounded-md">
+                    <Coins size={10} />
                   </div>
-                  <p className="text-[7px] font-black text-white/80 uppercase tracking-widest leading-none">All Time</p>
+                  <p className="text-[7px] font-black text-slate-400 dark:text-gray-400 uppercase tracking-widest leading-none">All Time</p>
                 </div>
-                <div>
-                  <h3 className="text-[15px] font-black text-white leading-none">₹{totalProductRevenue.toLocaleString('en-IN')}</h3>
-                  <p className="text-[6.5px] font-bold text-white/60 mt-0.5 uppercase tracking-wider">Total Earnings</p>
+                <div className="relative z-10">
+                  <h3 className="text-[15px] font-black text-slate-800 dark:text-white leading-none">₹{totalProductRevenue.toLocaleString('en-IN')}</h3>
+                  <p className="text-[6.5px] font-bold text-slate-400 dark:text-gray-500 mt-0.5 uppercase tracking-wider">Total Earnings</p>
                 </div>
               </div>
             </div>
@@ -694,7 +696,7 @@ const VendorInventory = () => {
                     }
                   }}
                   className={cn(
-                    "px-3 py-2.5 bg-white dark:bg-gray-900 border rounded-xl flex items-center justify-between gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-sm",
+                    "px-3 py-1.5 bg-white dark:bg-gray-900 border rounded-xl flex items-center justify-between gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-sm",
                     isLowStock ? 'border-rose-500/20' : 'border-slate-100 dark:border-gray-800'
                   )}
                 >
@@ -726,26 +728,18 @@ const VendorInventory = () => {
                     className="flex items-center gap-1.5 shrink-0"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="flex items-center gap-1 bg-slate-50 dark:bg-gray-800 px-1.5 py-1 rounded-lg border border-slate-100 dark:border-gray-700">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); triggerAdjustStock(item, -1); }}
-                        className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-0.5"
-                      >
-                        <MinusCircle size={13} />
-                      </button>
-                      <span className={cn(
-                        "text-[11px] font-black w-7 text-center",
-                        isLowStock ? "text-rose-500" : "text-slate-800 dark:text-white"
-                      )}>
-                        {item.stock}
-                      </span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); triggerAdjustStock(item, 1); }}
-                        className="text-slate-400 hover:text-emerald-500 active:scale-90 transition-all p-0.5"
-                      >
-                        <PlusCircle size={13} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); triggerAdjustStock(item, -1); }}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-rose-500 bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/10 rounded-lg transition-all active:scale-95 shadow-sm"
+                    >
+                      Sell
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); triggerAdjustStock(item, 1); }}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-blue-500 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/10 rounded-lg transition-all active:scale-95 shadow-sm"
+                    >
+                      Return
+                    </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleOpenEdit(item); }}
                       className="p-1.5 hover:bg-slate-100 dark:hover:bg-gray-800 text-slate-400 hover:text-[#00246b] dark:hover:text-white rounded-lg transition-all"
@@ -967,7 +961,7 @@ const VendorInventory = () => {
             >
               <div className="p-4 border-b border-slate-100 dark:border-gray-800 flex items-center justify-between">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white">
-                  Stock Adjustment
+                  {adjustmentDelta > 0 ? 'Return Item' : 'Sell Item'}
                 </h3>
               </div>
 
@@ -975,9 +969,10 @@ const VendorInventory = () => {
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                   Adjusting stock for <span className="text-slate-800 dark:text-white font-black">{adjustingItem.itemName}</span> by{' '}
                   <span className={adjustmentDelta > 0 ? 'text-emerald-500 font-black' : 'text-rose-500 font-black'}>
-                    {adjustmentDelta > 0 ? 'increasing' : 'decreasing'} stock
+                    {adjustmentDelta > 0 ? 'returning' : 'selling'} stock
                   </span>.
                 </p>
+
 
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Quantity</label>
@@ -1045,7 +1040,7 @@ const VendorInventory = () => {
                     disabled={loading}
                     className="flex-1 py-3 bg-[#00246b] dark:bg-white text-white dark:text-slate-900 rounded-xl font-black uppercase tracking-widest text-[9px] shadow-lg disabled:opacity-50"
                   >
-                    {loading ? 'Saving...' : 'Save'}
+                    {loading ? 'Saving...' : (adjustmentDelta > 0 ? 'Confirm Return' : 'Confirm Sale')}
                   </button>
                 </div>
               </form>

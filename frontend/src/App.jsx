@@ -356,18 +356,7 @@ function App() {
         }}
         toastOptions={{
           style: toastStyle,
-          success: {
-            iconTheme: {
-              primary: isDarkMode ? '#10B981' : '#00246b',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#EF4444',
-              secondary: '#fff',
-            },
-          },
+          icon: null,
         }}
       />
     </Router>
