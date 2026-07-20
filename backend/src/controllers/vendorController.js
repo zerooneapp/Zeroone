@@ -22,6 +22,7 @@ const VendorAvailability = require('../models/VendorAvailability');
 const { hasLegacyShopOfflineClosure } = require('../services/vendorClosureService');
 const InventoryLog = require('../models/InventoryLog');
 const InventoryItem = require('../models/InventoryItem');
+const { getPricingPreviewForServiceIds } = require('../services/offerPricingService');
 
 const getStaffNotificationTarget = (staff) => staff?._id || null;
 
@@ -786,7 +787,6 @@ const createManualBooking = async (req, res) => {
     if (services.length === 0) return res.status(404).json({ message: 'Services not found' });
 
     const totalDuration = services.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
-    const totalPrice = services.reduce((acc, s) => acc + (s.price || 0), 0);
     const endTime = moment(startTime).add(totalDuration, 'minutes').toDate();
 
     const existing = await Booking.findOne({
@@ -797,13 +797,27 @@ const createManualBooking = async (req, res) => {
     });
     if (existing) return res.status(400).json({ message: 'Staff is busy at this time' });
 
+    // Calculate discounted prices based on active offers
+    const pricing = await getPricingPreviewForServiceIds(vendorId, serviceIds);
+    const bookingServices = services.map(s => {
+      const pricingService = pricing?.services?.find(ps => String(ps.serviceId) === String(s._id));
+      return {
+        serviceId: s._id,
+        name: s.name,
+        price: pricingService ? pricingService.price : s.price,
+        duration: s.duration,
+        bufferTime: s.bufferTime || 0
+      };
+    });
+    const totalPrice = pricing ? pricing.finalTotal : services.reduce((acc, s) => acc + (s.price || 0), 0);
+
     const booking = await Booking.create({
       vendorId,
       staffId,
       isWalkIn: true,
       walkInCustomerName: name,
       walkInCustomerPhone: phone,
-      services: services.map(s => ({ serviceId: s._id, name: s.name, price: s.price, duration: s.duration, bufferTime: s.bufferTime || 0 })),
+      services: bookingServices,
       totalPrice,
       totalDuration,
       startTime: new Date(startTime),

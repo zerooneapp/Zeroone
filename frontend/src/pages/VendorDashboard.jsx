@@ -419,12 +419,6 @@ return (
 
       <div className="flex items-center gap-1.5 shrink-0">
         <button
-          onClick={() => navigate('/vendor/support')}
-          className="relative w-8 h-8 flex items-center justify-center transition-transform active:scale-90"
-        >
-          <HelpCircle size={18} className="text-slate-700 dark:text-gray-400" />
-        </button>
-        <button
           onClick={() => setIsNotificationsOpen(true)}
           className="relative w-8 h-8 flex items-center justify-center transition-transform active:scale-90"
         >

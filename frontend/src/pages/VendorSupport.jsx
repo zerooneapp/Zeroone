@@ -141,7 +141,7 @@ const VendorSupport = () => {
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {showDeleteConfirm && (
-          <div className="fixed inset-0 z-[200] flex items-end justify-center p-0">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -151,56 +151,56 @@ const VendorSupport = () => {
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
 
-            {/* Bottom Sheet */}
+            {/* Centered Compact Modal */}
             <motion.div
-              initial={{ opacity: 0, y: 80 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 80 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-t-3xl p-6 space-y-5 z-10 pb-10"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="relative w-full max-w-[290px] bg-white dark:bg-gray-900 rounded-[2rem] p-4 space-y-3 z-10 shadow-2xl border border-slate-100 dark:border-gray-800"
             >
               {/* Close */}
               <button
                 onClick={() => !deleting && setShowDeleteConfirm(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center active:scale-90 transition-all"
+                className="absolute top-3 right-3 w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center active:scale-90 transition-all"
               >
-                <X size={14} className="text-slate-600 dark:text-gray-300" />
+                <X size={10} className="text-slate-600 dark:text-gray-300" />
               </button>
 
               {/* Warning Icon */}
-              <div className="flex flex-col items-center text-center gap-3 pt-2">
-                <div className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center">
-                  <AlertTriangle size={28} className="text-red-500" strokeWidth={2} />
+              <div className="flex flex-col items-center text-center gap-2 pt-1">
+                <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
+                  <AlertTriangle size={20} className="text-red-500" strokeWidth={2} />
                 </div>
                 <div>
-                  <h2 className="text-[16px] font-black text-gray-900 dark:text-white tracking-tight">Delete Account?</h2>
-                  <p className="text-[11px] font-medium text-slate-400 mt-1 leading-relaxed max-w-[260px]">
-                    This will permanently remove your partner profile, shop details, services, staff, bookings & earnings. This action is irreversible.
+                  <h2 className="text-[13px] font-black text-gray-900 dark:text-white tracking-tight">Delete Account?</h2>
+                  <p className="text-[9px] font-medium text-slate-400 mt-0.5 leading-relaxed max-w-[210px] mx-auto">
+                    This will permanently remove your profile, shop details, services, staff, bookings & earnings.
                   </p>
                 </div>
               </div>
 
               {/* Warning Box */}
-              <div className="p-3.5 bg-red-500/5 rounded-2xl border border-red-500/20 flex items-start gap-2.5">
-                <AlertTriangle size={14} className="text-red-500 shrink-0 mt-0.5" />
-                <p className="text-[10px] font-bold text-red-500/80 leading-relaxed">
+              <div className="p-2.5 bg-red-500/5 rounded-xl border border-red-500/15 flex items-start gap-1.5">
+                <AlertTriangle size={10} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[8.5px] font-bold text-red-500/80 leading-relaxed text-left">
                   All data will be permanently deleted. You cannot undo this action.
                 </p>
               </div>
 
               {/* Buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
                   disabled={deleting}
-                  className="py-3.5 rounded-2xl bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-white text-[11px] font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                  className="py-2.5 rounded-lg bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-white text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleting}
-                  className="py-3.5 rounded-2xl bg-red-500 text-white text-[11px] font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="py-2.5 rounded-lg bg-red-500 text-white text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1"
                 >
                   {deleting ? (
                     <>
@@ -209,7 +209,7 @@ const VendorSupport = () => {
                     </>
                   ) : (
                     <>
-                      <Trash2 size={13} strokeWidth={2.5} />
+                      <Trash2 size={10} strokeWidth={2.5} />
                       Delete
                     </>
                   )}

@@ -15,6 +15,7 @@ const Booking = require('../models/Booking');
 const WalletTransaction = require('../models/WalletTransaction');
 const moment = require('moment-timezone');
 const NotificationService = require('../services/notificationService');
+const { getPricingPreviewForServiceIds } = require('../services/offerPricingService');
 
 const getStaffNotificationTarget = (staff) => staff?._id || null;
 
@@ -675,7 +676,6 @@ const createStaffManualBooking = async (req, res) => {
     }
 
     const totalDuration = services.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
-    const totalPrice = services.reduce((acc, s) => acc + (s.price || 0), 0);
     const endTime = moment(startTime).add(totalDuration, 'minutes').toDate();
 
     // Conflict check
@@ -689,13 +689,27 @@ const createStaffManualBooking = async (req, res) => {
       return res.status(400).json({ message: 'You already have a booking at this time' });
     }
 
+    // Calculate discounted prices based on active offers
+    const pricing = await getPricingPreviewForServiceIds(vendorId, validIds);
+    const bookingServices = services.map(s => {
+      const pricingService = pricing?.services?.find(ps => String(ps.serviceId) === String(s._id));
+      return {
+        serviceId: s._id,
+        name: s.name,
+        price: pricingService ? pricingService.price : s.price,
+        duration: s.duration,
+        bufferTime: s.bufferTime || 0
+      };
+    });
+    const totalPrice = pricing ? pricing.finalTotal : services.reduce((acc, s) => acc + (s.price || 0), 0);
+
     const booking = await Booking.create({
       vendorId,
       staffId: staff._id,
       isWalkIn: true,
       walkInCustomerName: name,
       walkInCustomerPhone: phone || '',
-      services: services.map(s => ({ serviceId: s._id, name: s.name, price: s.price, duration: s.duration, bufferTime: s.bufferTime || 0 })),
+      services: bookingServices,
       totalPrice,
       totalDuration,
       startTime: new Date(startTime),

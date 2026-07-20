@@ -27,6 +27,8 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
   const [staff, setStaff] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [servicePricing, setServicePricing] = useState({});
+  const [pricingPreview, setPricingPreview] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -55,9 +57,33 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
     }
   }, [formData.date, formData.serviceIds]);
 
+  // Fetch selected pricing preview
+  useEffect(() => {
+    if (formData.serviceIds.length > 0 && services.length > 0) {
+      const getPricing = async () => {
+        try {
+          const res = await api.get('/pricing/preview', {
+            params: {
+              vendorId: services[0].vendorId,
+              serviceIds: formData.serviceIds.join(',')
+            }
+          });
+          setPricingPreview(res.data);
+        } catch (err) {
+          console.error('Pricing preview fetch failed:', err);
+          setPricingPreview(null);
+        }
+      };
+      getPricing();
+    } else {
+      setPricingPreview(null);
+    }
+  }, [formData.serviceIds, services]);
+
   const resetForm = () => {
     setStep(1);
     setAvailableSlots([]);
+    setPricingPreview(null);
     setFormData({
       name: '',
       phone: '',
@@ -76,6 +102,20 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
       ]);
       setServices(servicesRes.data);
       setStaff(staffRes.data);
+
+      if (servicesRes.data.length > 0) {
+        const pricingRes = await api.get('/pricing/preview', {
+          params: {
+            vendorId: servicesRes.data[0].vendorId,
+            serviceIds: servicesRes.data.map(s => s._id).join(',')
+          }
+        });
+        const pricingMap = (pricingRes.data?.services || []).reduce((acc, s) => {
+          acc[String(s.serviceId)] = s;
+          return acc;
+        }, {});
+        setServicePricing(pricingMap);
+      }
     } catch (err) {
       toast.error('Failed to load shop data');
     }
@@ -145,7 +185,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
     .filter(s => formData.serviceIds.includes(s._id))
     .reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
 
-  const totalPrice = services
+  const totalPrice = pricingPreview ? pricingPreview.finalTotal : services
     .filter(s => formData.serviceIds.includes(s._id))
     .reduce((acc, s) => acc + (s.price || 0), 0);
   const selectedSlot = availableSlots.find((slot) => slot.time === formData.time);
@@ -248,7 +288,17 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                       <span className={`text-[10px] font-black capitalize leading-tight ${formData.serviceIds.includes(s._id) ? 'text-[#00246b] dark:text-white' : 'text-gray-900 dark:text-white'}`}>
                         {s.name}
                       </span>
-                      <p className="text-[8px] font-black text-slate-400 capitalize tracking-[0.15em] mt-0.5">₹{s.price} • {s.duration}m</p>
+                      <p className="text-[8px] font-black text-slate-400 capitalize tracking-[0.15em] mt-0.5">
+                        {servicePricing[String(s._id)]?.hasOffer ? (
+                          <>
+                            <span className="line-through mr-1 text-red-500 opacity-70">₹{s.price}</span>
+                            <span className="text-emerald-500 dark:text-emerald-400 font-extrabold">₹{servicePricing[String(s._id)].finalPrice}</span>
+                          </>
+                        ) : (
+                          `₹${s.price}`
+                        )}
+                        {` • ${s.duration}m`}
+                      </p>
                     </button>
                   ))}
                 </div>

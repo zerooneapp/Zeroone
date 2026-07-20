@@ -28,6 +28,8 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
   const [services, setServices] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [servicePricing, setServicePricing] = useState({});
+  const [pricingPreview, setPricingPreview] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -53,9 +55,34 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
     }
   }, [formData.date, formData.serviceIds]);
 
+  // Fetch selected pricing preview
+  useEffect(() => {
+    const vendorId = staffProfile?.vendorId?._id || staffProfile?.vendorId;
+    if (formData.serviceIds.length > 0 && vendorId) {
+      const getPricing = async () => {
+        try {
+          const res = await api.get('/pricing/preview', {
+            params: {
+              vendorId,
+              serviceIds: formData.serviceIds.join(',')
+            }
+          });
+          setPricingPreview(res.data);
+        } catch (err) {
+          console.error('Pricing preview fetch failed:', err);
+          setPricingPreview(null);
+        }
+      };
+      getPricing();
+    } else {
+      setPricingPreview(null);
+    }
+  }, [formData.serviceIds, staffProfile]);
+
   const resetForm = () => {
     setStep(1);
     setAvailableSlots([]);
+    setPricingPreview(null);
     setFormData({
       name: '',
       phone: '',
@@ -68,11 +95,28 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
   const loadServices = async () => {
     try {
       // Use services from the staff profile already in store, or re-fetch
+      let servicesList = [];
       if (staffProfile?.services?.length > 0) {
-        setServices(staffProfile.services);
+        servicesList = staffProfile.services;
       } else {
         const res = await api.get('/staff/profile');
-        setServices(res.data?.services || []);
+        servicesList = res.data?.services || [];
+      }
+      setServices(servicesList);
+
+      const vendorId = staffProfile?.vendorId?._id || staffProfile?.vendorId;
+      if (servicesList.length > 0 && vendorId) {
+        const pricingRes = await api.get('/pricing/preview', {
+          params: {
+            vendorId,
+            serviceIds: servicesList.map(s => s._id).join(',')
+          }
+        });
+        const pricingMap = (pricingRes.data?.services || []).reduce((acc, s) => {
+          acc[String(s.serviceId)] = s;
+          return acc;
+        }, {});
+        setServicePricing(pricingMap);
       }
     } catch (err) {
       toast.error('Failed to load your assigned services');
@@ -146,7 +190,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
     .filter(s => formData.serviceIds.includes(s._id))
     .reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
 
-  const totalPrice = services
+  const totalPrice = pricingPreview ? pricingPreview.finalTotal : services
     .filter(s => formData.serviceIds.includes(s._id))
     .reduce((acc, s) => acc + (s.price || 0), 0);
 
@@ -261,7 +305,15 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                           {s.name}
                         </span>
                         <p className="text-[8.5px] font-black text-slate-400 capitalize tracking-[0.15em]">
-                          ₹{s.price} · {s.duration}m
+                          {servicePricing[String(s._id)]?.hasOffer ? (
+                            <>
+                              <span className="line-through mr-1 text-red-500 opacity-70">₹{s.price}</span>
+                              <span className="text-emerald-500 dark:text-emerald-400 font-extrabold">₹{servicePricing[String(s._id)].finalPrice}</span>
+                            </>
+                          ) : (
+                            `₹${s.price}`
+                          )}
+                          {` · ${s.duration}m`}
                         </p>
                         {formData.serviceIds.includes(s._id) && (
                           <CheckCircle2 size={11} className="absolute bottom-1.5 right-2.5 text-[#00246b] dark:text-white" />
