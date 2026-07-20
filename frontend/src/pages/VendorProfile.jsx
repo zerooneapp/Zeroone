@@ -501,15 +501,6 @@ const VendorProfile = () => {
          iconColor: 'text-indigo-500',
       },
       {
-         key: 'delete_account',
-         label: 'Delete Account',
-         subtitle: 'Permanently remove your account',
-         icon: Trash2,
-         iconBg: 'bg-red-500/10',
-         iconColor: 'text-red-500',
-         isDelete: true,
-      },
-      {
          key: 'logout',
          label: 'Logout',
          subtitle: 'Sign out of your account',
