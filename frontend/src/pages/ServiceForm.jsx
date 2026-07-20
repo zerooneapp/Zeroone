@@ -314,17 +314,7 @@ const ServiceForm = () => {
                      </div>
                   </div>
 
-                  {/* Description */}
-                  <div className="space-y-1.5">
-                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1">Description (Optional)</label>
-                     <textarea
-                        rows="3"
-                        placeholder="Describe your premium service..."
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full py-3 px-4 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none focus:ring-2 focus:ring-primary/10 transition-all resize-none placeholder:text-slate-300"
-                     />
-                  </div>
+
                </div>
 
                <div className="p-3.5 bg-[#00246b]/5 dark:bg-[#00246b]/20 rounded-xl border border-[#00246b]/10 dark:border-[#00246b]/30 flex items-start gap-2.5">

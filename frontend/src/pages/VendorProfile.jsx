@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
    Save, Plus, X, CheckCircle2, XCircle, ChevronRight, ChevronDown, LayoutGrid, Sun, Moon, LogOut,
-   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone, Ticket, ClipboardList
+   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, HelpCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone, Ticket, ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -504,10 +504,10 @@ const VendorProfile = () => {
       {
          key: 'support',
          label: 'Quick Support',
-         subtitle: 'Direct help via WhatsApp',
-         icon: MessageCircle,
-         iconBg: 'bg-emerald-500/10',
-         iconColor: 'text-emerald-500',
+         subtitle: 'Get help & support options',
+         icon: HelpCircle,
+         iconBg: 'bg-indigo-500/10',
+         iconColor: 'text-indigo-500',
          isSupport: true,
       },
       {
@@ -672,6 +672,12 @@ const VendorProfile = () => {
                       {activeSection === 'switch_shop' ? 'Switch Shop' : activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : activeSection === 'live_report' ? 'Live Report' : 'Account Settings'}
                    </h1>
                 )}
+               <button
+                  onClick={() => navigate('/vendor/support')}
+                  className="ml-auto p-2 rounded-xl active:scale-90 transition-all"
+               >
+                  <HelpCircle size={20} className="text-slate-500 dark:text-gray-400" />
+               </button>
             </div>
          </header>
 
@@ -695,10 +701,7 @@ const VendorProfile = () => {
                               if (item.path) { navigate(item.path); return; }
                               if (item.isDelete) { setShowDeleteConfirm(true); return; }
                               if (item.isSupport) {
-                                 if (!supportNumber) return toast.error('Support is temporarily unavailable');
-                                 const cleanedNum = supportNumber.replace(/\D/g, '');
-                                 const formattedNum = cleanedNum.length === 10 ? `91${cleanedNum}` : cleanedNum;
-                                 window.open(`https://wa.me/${formattedNum}`, '_blank');
+                                 navigate('/vendor/support');
                                  return;
                               }
                               setSearchParams({ section: item.key });

@@ -241,7 +241,7 @@ const VendorBookings = () => {
         </div>
       </header>
 
-      <main className="px-4 pt-[233px] max-w-4xl mx-auto space-y-3">
+      <main className="px-4 pt-[233px] max-w-4xl mx-auto space-y-3 min-h-screen">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (
@@ -345,7 +345,7 @@ const VendorBookings = () => {
               key="empty"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="py-8 text-center space-y-4"
+              className="flex flex-col items-center justify-center text-center space-y-4 min-h-[45vh]"
             >
               <div className="relative w-20 h-20 mx-auto">
                 <div className="absolute inset-0 bg-[#00246b]/10 rounded-[2.5rem] animate-pulse" />

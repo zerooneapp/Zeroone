@@ -50,6 +50,7 @@ const StaffReviews = lazy(() => import('./pages/StaffReviews'));
 const VendorOffers = lazy(() => import('./pages/VendorOffers'));
 const VendorWallet = lazy(() => import('./pages/VendorWallet'));
 const VendorProfile = lazy(() => import('./pages/VendorProfile'));
+const VendorSupport = lazy(() => import('./pages/VendorSupport'));
 const ServiceForm = lazy(() => import('./pages/ServiceForm'));
 const StaffForm = lazy(() => import('./pages/StaffForm'));
 const OfferForm = lazy(() => import('./pages/OfferForm'));
@@ -290,6 +291,7 @@ function App() {
           <Route path="reviews" element={<VendorReviews />} />
           <Route path="customers" element={<LoyalCustomers />} />
           <Route path="inventory" element={<VendorInventory />} />
+          <Route path="support" element={<VendorSupport />} />
           <Route path="membership">
             <Route index element={<MembershipPlans />} />
             <Route path="add" element={<MembershipPlanForm />} />
