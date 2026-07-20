@@ -98,7 +98,7 @@ const VendorDashboard = () => {
         customer.customerName,
         customer.customerPhone
       );
-      setHistoryBookings(histData || []);
+      setHistoryBookings(histData?.bookings || []);
     } catch (err) {
       toast.error('Failed to fetch booking history');
     } finally {
@@ -618,8 +618,7 @@ return (
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => item.customerPhone && navigate(`/vendor/customers?phone=${item.customerPhone}`)}
+                onClick={() => handleViewHistory(item)}
                 className="relative bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80 transition-colors"
               >
                 {/* Vertically Centered: Call + Done buttons */}
