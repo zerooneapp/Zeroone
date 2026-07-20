@@ -501,6 +501,24 @@ const VendorProfile = () => {
          iconColor: 'text-indigo-500',
       },
       {
+         key: 'memberships',
+         label: 'Membership Plan',
+         subtitle: 'Loyalty plans for clients',
+         icon: Crown,
+         iconBg: 'bg-amber-500/10',
+         iconColor: 'text-amber-500',
+         path: '/vendor/membership',
+      },
+      {
+         key: 'offers',
+         label: 'Offers',
+         subtitle: 'Manage discounts & promotions',
+         icon: Ticket,
+         iconBg: 'bg-violet-500/10',
+         iconColor: 'text-violet-500',
+         path: '/vendor/offers',
+      },
+      {
          key: 'logout',
          label: 'Logout',
          subtitle: 'Sign out of your account',
@@ -675,7 +693,10 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="space-y-2"
                   >
-                     {menuItems.map((item) => (
+                     {menuItems.filter(item => {
+                        if (item.key === 'memberships') return globalFeatures.membershipActive;
+                        return true;
+                     }).map((item) => (
                         <button
                            key={item.key}
                            onClick={() => {
@@ -718,8 +739,6 @@ const VendorProfile = () => {
                         { label: 'Shop Media', subtitle: 'Gallery & featured images', icon: Camera, key: 'media', color: 'text-purple-500', bg: 'bg-purple-500/10' },
                         { label: 'Services', subtitle: 'Manage listings & pricing', icon: LayoutGrid, path: '/vendor/services', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
                         { label: 'Inventory Management', subtitle: 'Stock control & catalog metrics', icon: ClipboardList, path: '/vendor/inventory', color: 'text-rose-500', bg: 'bg-rose-500/10' },
-                        { label: 'Membership Plan', subtitle: 'Loyalty plans for clients', icon: Crown, path: '/vendor/membership', color: 'text-amber-500', bg: 'bg-amber-500/10', key: 'memberships' },
-                        { label: 'Offers', subtitle: 'Manage discounts & promotions', icon: Ticket, path: '/vendor/offers', color: 'text-violet-500', bg: 'bg-violet-500/10' },
                         { label: 'Live Report', subtitle: 'Performance PDF report', icon: FileDown, key: 'live_report', color: 'text-blue-500', bg: 'bg-blue-500/10' }
                      ].filter(item => {
                         if (item.key === 'memberships') return globalFeatures.membershipActive;
