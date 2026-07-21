@@ -147,6 +147,33 @@ const LoyalCustomers = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
 
+  const queryPhone = new URLSearchParams(location.search).get('phone');
+  if (queryPhone && !selectedCustomer) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/vendor/customers', { replace: true })}
+            className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
+          >
+            <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
+          </button>
+          <div className="flex items-center gap-3 animate-pulse">
+            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-gray-700" />
+            <div>
+              <div className="h-3 w-24 bg-slate-250 dark:bg-gray-700 rounded-md mb-1" />
+              <div className="h-2 w-16 bg-slate-200 dark:bg-gray-850 rounded-md" />
+            </div>
+          </div>
+        </header>
+        <main className="p-4 flex-1 flex flex-col items-center justify-center gap-3">
+          <div className="w-8 h-8 border-4 border-t-[#00246b] border-slate-200 dark:border-gray-800 rounded-full animate-spin"></div>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Loading history...</p>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20">
       {/* Header */}
