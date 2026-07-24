@@ -15,10 +15,16 @@ const sendOtpSms = async (phone, otp) => {
   const cleanPhone = String(phone).replace(/\D/g, '');
   const formattedMobile = (cleanPhone.length === 12 && cleanPhone.startsWith('91')) ? cleanPhone : `91${cleanPhone.slice(-10)}`;
 
-  // Build message from template
-  let template = process.env.SMSINDIAHUB_OTP_TEMPLATE || 'Welcome to the ZeroOne powered by SMSINDIAHUB. Your OTP for registration is ${otp}';
+  const appName = process.env.APP_NAME || process.env.SMSINDIAHUB_APP_NAME || 'Zeroone';
+  let template = process.env.SMSINDIAHUB_OTP_TEMPLATE || 'Welcome to the ${appname} powered by Appzeto.Your OTP for registration is ${otp}.BGADEC';
   template = template.replace(/^["']|["']$/g, "");
-  const message = template.replace(/\${otp}/g, otp);
+  
+  let message = template;
+  if (message.includes('##var##')) {
+    message = message.replace('##var##', appName).replace('##var##', otp);
+  } else {
+    message = message.replace(/\${appname}/gi, appName).replace(/\${otp}/gi, otp);
+  }
 
   // If credentials missing, log simulated send
   if (!apiKey || !senderId) {
@@ -36,6 +42,8 @@ const sendOtpSms = async (phone, otp) => {
   try {
     // Log attempt
     console.log(`[SMSINDIAHUB] Attempting to send SMS to ${formattedMobile}...`);
+    console.log(`[SMSINDIAHUB] Message Body: "${message}"`);
+    console.log(`[SMSINDIAHUB] Template ID: ${process.env.SMSINDIAHUB_TEMPLATE_ID}, PEID: ${process.env.SMSINDIAHUB_ENTITY_ID}`);
 
     // Transactional API URL
     const url = `http://cloud.smsindiahub.in/vendorsms/pushsms.aspx`;
@@ -52,8 +60,14 @@ const sendOtpSms = async (phone, otp) => {
     };
 
     // Add DLT parameters if available
-    if (process.env.SMSINDIAHUB_ENTITY_ID) params.peid = process.env.SMSINDIAHUB_ENTITY_ID;
-    if (process.env.SMSINDIAHUB_TEMPLATE_ID) params.tempid = process.env.SMSINDIAHUB_TEMPLATE_ID;
+    if (process.env.SMSINDIAHUB_ENTITY_ID) {
+      params.peid = process.env.SMSINDIAHUB_ENTITY_ID;
+      params.PEID = process.env.SMSINDIAHUB_ENTITY_ID;
+    }
+    if (process.env.SMSINDIAHUB_TEMPLATE_ID) {
+      params.tempid = process.env.SMSINDIAHUB_TEMPLATE_ID;
+      params.templateid = process.env.SMSINDIAHUB_TEMPLATE_ID;
+    }
 
     const response = await axios.get(url, { params });
 
