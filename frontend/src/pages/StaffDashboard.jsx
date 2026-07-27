@@ -175,7 +175,7 @@ const StaffDashboard = () => {
                   <CalendarPlus size={18} strokeWidth={2.5} className="text-white" />
                </div>
                <div className="flex-1 text-left">
-                  <p className="text-[11px] font-black text-white uppercase tracking-tight leading-none">New Booking</p>
+                  <p className="text-[11px] font-black text-white uppercase tracking-tight leading-none">New Entry</p>
                   <p className="text-[8px] font-bold text-white/60 uppercase tracking-widest mt-0.5">Schedule an appointment</p>
                </div>
                <div className="w-6 h-6 bg-white/10 rounded-lg flex items-center justify-center">
@@ -191,109 +191,103 @@ const StaffDashboard = () => {
                   {loading ? (
                      <div className="h-40 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl animate-pulse" />
                   ) : currentTask ? (
-                     <>
-                        <motion.div
-                           initial={{ opacity: 0, scale: 0.98 }}
-                           animate={{ opacity: 1, scale: 1 }}
-                           className="bg-white dark:bg-gray-900 p-2.5 px-3 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all"
-                        >
-                           <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                 <div className="w-7 h-7 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-400 dark:text-gray-300 overflow-hidden border border-slate-100 dark:border-gray-700/60">
-                                    {currentTask.userId?.image ? (
-                                       <img src={currentTask.userId.image} className="w-full h-full object-cover" alt="Client" />
-                                    ) : (
-                                       <User size={13} strokeWidth={3} />
-                                    )}
-                                 </div>
-                                 <div>
-                                    <div className="flex items-center gap-1.5 mb-0.5">
-                                       <h3 className="text-[12px] font-black text-slate-900 dark:text-white leading-none">
-                                          {currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client'}
-                                       </h3>
-                                       <span className="text-[7px] font-black bg-primary/5 dark:bg-white/10 text-primary dark:text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                                          Active
-                                       </span>
+                     <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        onClick={() => {
+                           const phone = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
+                           const name = currentTask.walkInCustomerName || currentTask.userId?.name || '';
+                           const customerId = currentTask.userId?._id || currentTask._id;
+                           navigate(`/staff/customers?phone=${phone}&customerId=${customerId}&name=${encodeURIComponent(name)}`);
+                        }}
+                        className="bg-white dark:bg-gray-900 p-2.5 px-3 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all cursor-pointer"
+                     >
+                        {(() => {
+                           const phoneNum = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
+                           return (
+                              <div className="flex items-center justify-between mb-2 gap-2">
+                                 <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <div className="w-7 h-7 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-400 dark:text-gray-300 overflow-hidden border border-slate-100 dark:border-gray-700/60 shrink-0">
+                                       {currentTask.userId?.image ? (
+                                          <img src={currentTask.userId.image} className="w-full h-full object-cover" alt="Client" />
+                                       ) : (
+                                          <User size={13} strokeWidth={3} />
+                                       )}
                                     </div>
-                                    <div className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight leading-none flex items-center gap-1.5">
-                                       <span className="flex items-center gap-0.5 text-primary/75 dark:text-white/60">
-                                          <Clock size={9} strokeWidth={3} /> {formatTime(currentTask.startTime)}
-                                       </span>
-                                       <span className="w-1 h-1 bg-slate-200 dark:bg-gray-700 rounded-full" />
-                                       <span>
-                                          Estimate: {currentTask.totalDuration} Mins
-                                       </span>
+                                    <div className="min-w-0">
+                                       <div className="flex items-center gap-1.5 mb-0.5">
+                                          <h3 className="text-[12px] font-black text-slate-900 dark:text-white leading-none truncate">
+                                             {currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client'}
+                                          </h3>
+                                          <span className="text-[7px] font-black bg-primary/5 dark:bg-white/10 text-primary dark:text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                                             Active
+                                          </span>
+                                       </div>
+                                       <div className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight leading-none flex items-center gap-1.5">
+                                          <span className="flex items-center gap-0.5 text-primary/75 dark:text-white/60">
+                                             <Clock size={9} strokeWidth={3} /> {formatTime(currentTask.startTime)}
+                                          </span>
+                                          <span className="w-1 h-1 bg-slate-200 dark:bg-gray-700 rounded-full" />
+                                          <span>
+                                             Estimate: {currentTask.totalDuration} Mins
+                                          </span>
+                                       </div>
                                     </div>
                                  </div>
+                                  {phoneNum ? (
+                                     <a
+                                        href={`tel:${phoneNum}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="px-2.5 py-1.5 bg-[#00246b] hover:bg-[#001a52] dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all flex items-center gap-1 shrink-0"
+                                        title="Call Customer"
+                                     >
+                                        <Phone size={11} strokeWidth={3} /> Call
+                                     </a>
+                                  ) : null}
+                               </div>
+                           );
+                        })()}
+
+                        <div className="flex flex-wrap gap-x-2 px-0.5">
+                           {currentTask.services?.map((s, idx) => (
+                              <div key={idx} className="text-[8px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-1 tracking-tight">
+                                 <div className="w-1 h-1 bg-primary/40 dark:bg-white/30 rounded-full" />
+                                 {s.name || s.serviceId?.name || 'Service Task'}
                               </div>
-                           </div>
-
-                           <div className="flex flex-wrap gap-x-2 mb-2 px-0.5">
-                              {currentTask.services?.map((s, idx) => (
-                                 <div key={idx} className="text-[8px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-1 tracking-tight">
-                                    <div className="w-1 h-1 bg-primary/40 dark:bg-white/30 rounded-full" />
-                                    {s.name || s.serviceId?.name || 'Service Task'}
-                                 </div>
-                              ))}
-                           </div>
-
-                           <div className="flex items-center justify-between py-1.5 border-t border-slate-100 dark:border-gray-800/60 px-0.5">
-                              <div className="flex items-center gap-1">
-                                 <MapPin size={9} className="text-gray-400 shrink-0" />
-                                 <p className="text-[8px] font-bold text-gray-400 dark:text-gray-600 truncate max-w-[120px]">
-                                    {canNavigateToCustomer ? currentTask.serviceAddress : 'Shop Service'}
-                                 </p>
-                                 {canNavigateToCustomer && (
-                                    <a
-                                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
-                                       target="_blank"
-                                       rel="noopener noreferrer"
-                                       className="text-[7px] font-black text-primary uppercase tracking-widest underline decoration-dotted ml-1"
-                                    >
-                                       Nav
-                                    </a>
-                                 )}
-                              </div>
-                              <p className="text-[12px] font-black text-slate-900 dark:text-white tracking-tighter leading-none flex items-center gap-1">
-                                 {currentTask.originalTotalPrice > 0 && currentTask.originalTotalPrice !== currentTask.totalPrice ? (
-                                    <>
-                                       <span className="line-through text-[9px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{currentTask.originalTotalPrice}</span>
-                                       <span>₹{currentTask.totalPrice}</span>
-                                    </>
-                                 ) : (
-                                    `₹${currentTask.totalPrice}`
-                                 )}
-                              </p>
-                           </div>
-                        </motion.div>
-
-                        {/* 🔘 FIXED ACTION BAR */}
-                        <div className="fixed bottom-20 left-4 right-4 bg-white dark:bg-gray-900 p-2 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-2xl flex gap-2 z-50">
-                           {currentTask.canContact && !currentTask.isWalkIn && !currentTask.walkInCustomerName && (
-                              <a href={`tel:${currentTask.userId?.phone}`} className="h-12 w-12 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-white rounded-xl flex items-center justify-center shadow-sm">
-                                 <Phone size={20} strokeWidth={3} />
-                              </a>
-                           )}
-                           {canNavigateToCustomer && (
-                              <a 
-                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="h-12 w-12 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg"
-                              >
-                                 <MapPin size={20} strokeWidth={3} />
-                              </a>
-                           )}
-                           <button
-                              onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
-                              className="flex-1 h-12 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[10px] uppercase tracking-widest shadow-xl"
-                           >
-                              <CheckCircle size={18} strokeWidth={3} />
-                              Complete Job
-                           </button>
+                           ))}
                         </div>
-                     </>
-                  ) : (
+                     </motion.div>
+                  ) : null}
+
+                  {/* 🔘 FIXED ACTION BAR */}
+                  {currentTask && (
+                     <div className="fixed bottom-20 left-4 right-4 bg-white dark:bg-gray-900 p-2 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-2xl flex gap-2 z-50">
+                        {currentTask.canContact && !currentTask.isWalkIn && !currentTask.walkInCustomerName && (
+                           <a href={`tel:${currentTask.userId?.phone}`} className="h-12 w-12 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-white rounded-xl flex items-center justify-center shadow-sm">
+                              <Phone size={20} strokeWidth={3} />
+                           </a>
+                        )}
+                        {canNavigateToCustomer && (
+                           <a 
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="h-12 w-12 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg"
+                           >
+                              <MapPin size={20} strokeWidth={3} />
+                           </a>
+                        )}
+                        <button
+                           onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
+                           className="flex-1 h-12 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[10px] uppercase tracking-widest shadow-xl"
+                        >
+                           <CheckCircle size={18} strokeWidth={3} />
+                           Complete Job
+                        </button>
+                     </div>
+                  )}
+
+                  {!currentTask && (
                      <div className="py-20 text-center space-y-6 bg-white dark:bg-gray-900/50 rounded-2xl border border-dashed border-slate-200/60 dark:border-gray-800 shadow-sm">
                         <div className="w-20 h-20 bg-slate-50 dark:bg-gray-800 rounded-2xl shadow-inner flex items-center justify-center mx-auto border border-slate-100 dark:border-gray-700">
                            <ClipboardList size={32} className="text-slate-200 dark:text-gray-700" />

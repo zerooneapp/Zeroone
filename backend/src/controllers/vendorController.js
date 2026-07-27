@@ -891,7 +891,60 @@ const getLoyalCustomers = async (req, res) => {
       return item;
     }));
 
-    res.status(200).json(result);
+    // Smart Merge: Merge entries that share the same phone OR case-insensitive name
+    const mergedMap = new Map();
+    const mergedList = [];
+
+    for (const item of result) {
+      const cleanPhone = (item.phone && item.phone !== 'Unknown') ? String(item.phone).trim() : null;
+      const cleanName = (item.name && item.name !== 'Unknown') ? String(item.name).trim().toLowerCase() : null;
+
+      let existingIndex = -1;
+
+      for (let i = 0; i < mergedList.length; i++) {
+        const existing = mergedList[i];
+        const existingCleanPhone = (existing.phone && existing.phone !== 'Unknown') ? String(existing.phone).trim() : null;
+        const existingCleanName = (existing.name && existing.name !== 'Unknown') ? String(existing.name).trim().toLowerCase() : null;
+
+        const phoneMatch = cleanPhone && existingCleanPhone && cleanPhone === existingCleanPhone;
+        const nameMatch = cleanName && existingCleanName && cleanName === existingCleanName;
+
+        if (phoneMatch || nameMatch) {
+          existingIndex = i;
+          break;
+        }
+      }
+
+      if (existingIndex > -1) {
+        const existing = mergedList[existingIndex];
+        existing.bookingCount += item.bookingCount;
+        existing.totalSpent += item.totalSpent;
+        
+        if (new Date(item.lastBooking) > new Date(existing.lastBooking)) {
+          existing.lastBooking = item.lastBooking;
+        }
+
+        if ((!existing.phone || existing.phone === 'Unknown') && cleanPhone) {
+          existing.phone = item.phone;
+        }
+
+        if ((!existing.name || existing.name === 'Unknown') && item.name && item.name !== 'Unknown') {
+          existing.name = item.name;
+        }
+
+        if (!item.isWalkIn) {
+          existing.isWalkIn = false;
+          existing._id = item._id;
+          if (item.image) existing.image = item.image;
+        }
+      } else {
+        mergedList.push({ ...item });
+      }
+    }
+
+    mergedList.sort((a, b) => b.bookingCount - a.bookingCount);
+
+    res.status(200).json(mergedList);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -909,31 +962,29 @@ const getCustomerBookingHistory = async (req, res) => {
       status: { $in: ['confirmed', 'completed'] }
     };
 
-    if (isWalkIn === 'false') {
-      if (mongoose.Types.ObjectId.isValid(customerId)) {
-        matchQuery.userId = new mongoose.Types.ObjectId(customerId);
-      } else {
-        return res.status(400).json({ message: 'Invalid user ID' });
-      }
+    const conditions = [];
+
+    if (isWalkIn === 'false' && mongoose.Types.ObjectId.isValid(customerId)) {
+      conditions.push({ userId: new mongoose.Types.ObjectId(customerId) });
+    }
+
+    if (phone && phone !== 'Unknown' && phone !== '') {
+      conditions.push({ walkInCustomerPhone: phone });
+    }
+
+    if (name && name !== 'Unknown' && name !== '') {
+      const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      conditions.push({ walkInCustomerName: new RegExp(`^${escapedName}$`, 'i') });
+    }
+
+    if (mongoose.Types.ObjectId.isValid(customerId)) {
+      conditions.push({ _id: new mongoose.Types.ObjectId(customerId) });
+    }
+
+    if (conditions.length > 0) {
+      matchQuery.$or = conditions;
     } else {
-      // Walk-in customer: match by phone or name
-      const conditions = [];
-      if (phone && phone !== 'Unknown' && phone !== '') {
-        conditions.push({ walkInCustomerPhone: phone });
-      }
-      if (name && name !== 'Unknown' && name !== '') {
-        conditions.push({ walkInCustomerName: name });
-      }
-      // Fallback to match by booking id if customerId is a valid ObjectId
-      if (mongoose.Types.ObjectId.isValid(customerId)) {
-        conditions.push({ _id: new mongoose.Types.ObjectId(customerId) });
-      }
-      
-      if (conditions.length > 0) {
-        matchQuery.$or = conditions;
-      } else {
-        return res.status(400).json({ message: 'Invalid customer identifier' });
-      }
+      return res.status(400).json({ message: 'Invalid customer identifier' });
     }
 
     const bookings = await Booking.find(matchQuery)

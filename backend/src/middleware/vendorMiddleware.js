@@ -55,6 +55,16 @@ const isActiveVendor = async (req, res, next) => {
 
 const isApprovedVendor = async (req, res, next) => {
   try {
+    if (!req.user && req.staff) {
+      const vendor = await Vendor.findById(req.staff.vendorId);
+      if (!vendor) {
+        return res.status(403).json({ message: 'Vendor profile not found for staff.' });
+      }
+      req.activeVendorId = vendor._id;
+      req.vendor = vendor;
+      return next();
+    }
+
     if (!req.user) {
       return res.status(403).json({ message: 'Merchant access required.' });
     }

@@ -121,110 +121,39 @@ const StaffAccount = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mt-4">
-          <div className="py-2 px-1 bg-[#00246b]/5 dark:bg-gray-900/40 rounded-xl text-center border border-[#00246b]/10 dark:border-gray-800/50">
-            <Award size={14} strokeWidth={2.5} className="text-[#00246b] dark:text-white mx-auto mb-0.5 opacity-80" />
-            <p className="text-[9px] font-black text-[#00246b] dark:text-white capitalize tracking-tight">{stats.skills} Skills</p>
-          </div>
-          <div className="py-2 px-1 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl text-center border border-emerald-100/50 dark:border-emerald-900/30">
-            <CheckCircle size={14} strokeWidth={2.5} className="text-emerald-500 mx-auto mb-0.5" />
-            <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 capitalize tracking-tight">Verified</p>
-          </div>
-          <div className="py-2 px-1 bg-[#00246b]/5 dark:bg-gray-900/40 rounded-xl text-center border border-[#00246b]/10 dark:border-gray-800/50">
-            <TrendingUp size={14} strokeWidth={2.5} className="text-[#00246b] dark:text-white mx-auto mb-0.5" />
-            <p className="text-[9px] font-black text-[#00246b] dark:text-white capitalize tracking-tight">{stats.completed}+ Done</p>
+      <div className="px-3 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
+        {/* Onboarding Date */}
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
+          <div className="flex items-start gap-4 relative z-10">
+            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl flex items-center justify-center shadow-sm">
+              <Calendar size={18} strokeWidth={2.5} />
+            </div>
+            <div>
+              <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Onboarding Date</p>
+              <p className="text-xs font-black text-slate-900 dark:text-white mt-1 capitalize tracking-tight">{formatDate(profile?.createdAt)}</p>
+            </div>
           </div>
         </div>
 
-
-
-
-      <div className="px-3 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Work Identity</h2>
-            <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
-          </div>
-
-          <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 space-y-5 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-blue-500/10 transition-all duration-500" />
-
-            <div className="flex items-start gap-4 relative z-10">
-              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl flex items-center justify-center shadow-sm">
-                <Calendar size={18} strokeWidth={2.5} />
+        {/* Primary Branch */}
+        <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary dark:text-white rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50">
+                <Briefcase size={20} strokeWidth={2.5} className="opacity-80" />
               </div>
               <div>
-                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Onboarding Date</p>
-                <p className="text-xs font-black text-slate-900 dark:text-white mt-1 capitalize tracking-tight">{formatDate(profile?.createdAt)}</p>
+                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none mb-1">Primary Branch</p>
+                <h3 className="text-xs font-black text-slate-900 dark:text-white tracking-tight">{profile?.vendorId?.shopName || 'Partner Hub'}</h3>
               </div>
             </div>
-
-            <div className="flex items-start gap-4 relative z-10">
-              <div className="w-10 h-10 bg-primary/5 dark:bg-primary/20 text-primary rounded-xl flex items-center justify-center shadow-sm">
-                <ShieldCheck size={18} strokeWidth={2.5} />
-              </div>
-              <div className="flex-1">
-                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Service Authorization</p>
-                <div className="flex flex-wrap gap-1 mt-1.5">
-                  {profile?.services?.map((service) => (
-                    <span key={service._id} className="text-[7.5px] font-black bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-lg text-slate-500 dark:text-gray-400 border border-slate-100 dark:border-gray-700/50 capitalize tracking-widest leading-none">
-                      {service.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 🛡️ PRIVACY & CONDUCT CARD SHIFTED HERE */}
-            <button
-              onClick={() => navigate('/vendor-privacy-policy')}
-              className="w-full flex items-center justify-between relative z-10 text-left active:scale-[0.99] transition-all"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 rounded-xl flex items-center justify-center shadow-sm">
-                  <ShieldCheck size={18} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Privacy & Conduct</p>
-                  <p className="text-xs font-black text-slate-900 dark:text-white mt-1 tracking-tight">View Staff Guidelines</p>
-                </div>
-              </div>
-              <ArrowRight size={16} className="text-slate-300" />
-            </button>
+            {profile?.vendorId?.ownerId?.phone && (
+              <a href={`tel:${profile.vendorId.ownerId.phone}`} className="w-9 h-9 bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all outline-none">
+                <Phone size={16} strokeWidth={3} />
+              </a>
+            )}
           </div>
         </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Employment & Support</h2>
-            <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
-          </div>
-
-          <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary dark:text-white rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50">
-                  <Briefcase size={20} strokeWidth={2.5} className="opacity-80" />
-                </div>
-                <div>
-                  <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none mb-1">Primary Branch</p>
-                  <h3 className="text-xs font-black text-slate-900 dark:text-white tracking-tight">{profile?.vendorId?.shopName || 'Partner Hub'}</h3>
-                </div>
-              </div>
-              {profile?.vendorId?.ownerId?.phone && (
-                <a href={`tel:${profile.vendorId.ownerId.phone}`} className="w-9 h-9 bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all outline-none">
-                  <Phone size={16} strokeWidth={3} />
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 capitalize tracking-[0.2em]">Work History</h2>
-            <div className="h-[1px] flex-1 bg-slate-100 dark:bg-gray-800 ml-4 opacity-50" />
-          </div>
 
           <button
             onClick={() => navigate('/staff/inventory')}
@@ -329,8 +258,6 @@ const StaffAccount = () => {
           </div>
         )}
       </AnimatePresence>
-
-      </div>
 
       <Navbar />
     </div>

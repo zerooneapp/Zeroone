@@ -29,6 +29,8 @@ const toPascalCase = (str = '') =>
 const LoyalCustomers = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // Detect if running under /staff or /vendor context
+  const basePath = location.pathname.startsWith('/staff') ? '/staff' : '/vendor';
   const {
     clientsData: customers,
     clientsLoading: loading,
@@ -80,7 +82,7 @@ const LoyalCustomers = () => {
     setHistoryBookingsPage(1);
     setHistoryProductsPage(1);
     // Change the route query parameter to reflect the active customer history view
-    navigate(`/vendor/customers?phone=${customer.phone}`, { replace: true });
+    navigate(`${basePath}/customers?phone=${customer.phone}`);
     try {
       const data = await fetchCustomerBookingHistory(
         customer._id,
@@ -111,19 +113,50 @@ const LoyalCustomers = () => {
     handleFetch();
   }, []);
 
-  // Auto-open history if customer phone is passed in URL query parameters
+  // Auto-open history if customer phone/id is passed in URL query parameters
   useEffect(() => {
-    const queryPhone = new URLSearchParams(location.search).get('phone');
-    if (customers.length > 0 && queryPhone) {
-      const matchingCustomer = customers.find(c => c.phone === queryPhone);
-      if (matchingCustomer && openedPhoneRef.current !== queryPhone) {
-        openedPhoneRef.current = queryPhone;
-        handleViewHistory(matchingCustomer);
+    const searchParams = new URLSearchParams(location.search);
+    const queryPhone = searchParams.get('phone');
+    const queryName = searchParams.get('name');
+    const queryCustomerId = searchParams.get('customerId');
+
+    const targetKey = queryPhone || queryCustomerId;
+
+    if (targetKey) {
+      if (openedPhoneRef.current !== targetKey) {
+        let matchingCustomer = null;
+        if (customers.length > 0) {
+          const cleanQuery = queryPhone ? String(queryPhone).replace(/\D/g, '').slice(-10) : '';
+          matchingCustomer = customers.find(c => {
+            if (queryCustomerId && String(c._id) === String(queryCustomerId)) return true;
+            if (cleanQuery) {
+              const cClean = String(c.phone || '').replace(/\D/g, '').slice(-10);
+              return cClean && cClean === cleanQuery;
+            }
+            return false;
+          });
+        }
+
+        if (matchingCustomer) {
+          openedPhoneRef.current = targetKey;
+          handleViewHistory(matchingCustomer);
+        } else if (!loading) {
+          // If customer fetch completed but not matched in loyal list, open history with fallback info
+          openedPhoneRef.current = targetKey;
+          handleViewHistory({
+            _id: queryCustomerId || queryPhone,
+            name: queryName || 'Customer',
+            phone: queryPhone || '',
+            isWalkIn: true
+          });
+        }
       }
-    } else if (!queryPhone) {
+    } else {
       openedPhoneRef.current = null;
+      setSelectedCustomer(null);
+      setIsHistoryOpen(false);
     }
-  }, [customers, location.search]);
+  }, [customers, location.search, loading]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -148,12 +181,13 @@ const LoyalCustomers = () => {
   const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
 
   const queryPhone = new URLSearchParams(location.search).get('phone');
-  if (queryPhone && !selectedCustomer) {
+  const queryCustomerId = new URLSearchParams(location.search).get('customerId');
+  if ((queryPhone || queryCustomerId) && !selectedCustomer && loading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
           <button 
-            onClick={() => navigate('/vendor/customers', { replace: true })}
+            onClick={() => navigate(`${basePath}/customers`, { replace: true })}
             className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
           >
             <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
@@ -342,11 +376,8 @@ const LoyalCustomers = () => {
                   <button 
                     onClick={() => {
                       setIsHistoryOpen(false);
-                      if (openedFromList) {
-                        navigate('/vendor/customers', { replace: true });
-                      } else {
-                        navigate(-1);
-                      }
+                      setSelectedCustomer(null);
+                      navigate(`${basePath}/customers`);
                     }}
                     className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
                   >

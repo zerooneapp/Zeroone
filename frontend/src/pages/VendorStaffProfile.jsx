@@ -19,6 +19,7 @@ const VendorStaffProfile = () => {
   }, [staffData, id]);
 
   const [staff, setStaff] = useState(storeStaff || null);
+  const [detailsLoading, setDetailsLoading] = useState(true);
   const [filterPeriod] = useState('custom'); // Locked to custom as requested
   const [startDate, setStartDate] = useState(dayjs().subtract(7, 'day').format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(dayjs().add(30, 'day').format('YYYY-MM-DD'));
@@ -26,15 +27,16 @@ const VendorStaffProfile = () => {
   const [savingNote, setSavingNote] = useState(false);
   const [activeTab, setActiveTab] = useState('custom');
 
-  // Sync state if store gets updated
+  // Set initial staff state from store if not already fetched
   useEffect(() => {
-    if (storeStaff) {
+    if (!staff && storeStaff) {
       setStaff(storeStaff);
       setNoteText(storeStaff.note || '');
     }
-  }, [storeStaff]);
+  }, [storeStaff, staff]);
 
   const fetchStaffDetails = async () => {
+    setDetailsLoading(true);
     try {
       const params = { startDate, endDate };
       const res = await api.get(`/staff/${id}`, { params });
@@ -42,6 +44,8 @@ const VendorStaffProfile = () => {
       setNoteText(res.data.note || '');
     } catch (err) {
       toast.error('Failed to load staff details');
+    } finally {
+      setDetailsLoading(false);
     }
   };
 
@@ -251,7 +255,9 @@ const VendorStaffProfile = () => {
                 <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">
                   {filterPeriod === 'custom' ? 'Filtered Earnings' : 'Total Earnings'}
                 </p>
-                <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">₹{totalEarnings.toLocaleString()}</p>
+                <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  {detailsLoading ? '...' : `₹${totalEarnings.toLocaleString()}`}
+                </p>
               </div>
               <div className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl p-3 shadow-sm">
                 <p className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Assigned Skills</p>

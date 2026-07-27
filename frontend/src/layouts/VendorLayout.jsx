@@ -15,16 +15,37 @@ const VendorLayout = () => {
   const { role, user, isInitialized } = useAuthStore();
   const fetchClients = useVendorStore((state) => state.fetchClients);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const scrollRef = useRef(null);
+  const [isNavVisible, setIsNavVisible] = React.useState(true);
+
+  useSocket(user?._id);
+
   useEffect(() => {
     if (role === 'vendor') {
       fetchClients().catch(() => {});
     }
   }, [role, fetchClients]);
-  useSocket(user?._id);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const scrollRef = useRef(null);
-  const [isNavVisible, setIsNavVisible] = React.useState(true);
+
+  // Handle hardware back button — navigate to Home instead of Exit App
+  useEffect(() => {
+    const handlePopState = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.has('phone')) {
+        return;
+      }
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/vendor/dashboard' && currentPath.startsWith('/vendor')) {
+        navigate('/vendor/dashboard', { replace: true });
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigate]);
 
   const isIOS = React.useMemo(() => {
     return typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);

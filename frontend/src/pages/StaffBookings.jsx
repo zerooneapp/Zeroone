@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Calendar, Clock, User, Phone, CheckCircle,
-  ChevronLeft, Filter, Search, ClipboardList,
-  Lock, ArrowLeft, MapPin
+  ChevronLeft, ClipboardList, ArrowLeft
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import Navbar from '../layouts/Navbar';
 import CancellationModal from '../components/CancellationModal';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import BookingCard from '../components/BookingCard';
 
 const StaffBookings = () => {
    const { user, myBookings, fetchMyBookings } = useAuthStore();
@@ -35,6 +34,16 @@ const StaffBookings = () => {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [hasInStockProducts, setHasInStockProducts] = useState(false);
+
+  // Check inventory for Add Product button (staff-specific endpoint)
+  useEffect(() => {
+    api.get('/inventory/staff').then(res => {
+      const items = res.data || [];
+      setHasInStockProducts(items.some(item => item.stock > 0));
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (myBookings) {
@@ -76,19 +85,19 @@ const StaffBookings = () => {
     return () => window.removeEventListener('new-socket-notification', handleGlobalEvent);
   }, []);
   const filteredBookings = bookings.filter(b => {
-    const isCorrectStatus = activeTab === 'upcoming'
-      ? (b.status === 'confirmed' || b.status === 'assigned')
-      : b.status === 'completed';
+    let isCorrectStatus = false;
+    if (activeTab === 'upcoming') {
+      isCorrectStatus = b.status === 'confirmed' || b.status === 'assigned' || b.status === 'pending';
+    } else if (activeTab === 'completed') {
+      isCorrectStatus = b.status === 'completed';
+    } else if (activeTab === 'cancelled') {
+      isCorrectStatus = b.status === 'cancelled';
+    }
     const bookingDate = dayjs(b.startTime).format('YYYY-MM-DD');
     const isWithinRange = bookingDate >= startDate && bookingDate <= endDate;
     return isCorrectStatus && isWithinRange;
   });
 
-  const formatTime = (isoString) => {
-    return new Date(isoString).toLocaleTimeString('en-IN', {
-      hour: '2-digit', minute: '2-digit', hour12: true
-    });
-  };
 
   const handleStatusUpdate = async (bookingId, action, reason = '') => {
     if (action === 'cancel' && !reason) {
@@ -97,12 +106,24 @@ const StaffBookings = () => {
       return;
     }
     try {
+      setActionLoadingId(bookingId);
       await api.patch(`/bookings/${bookingId}/status`, { action, reason });
       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
       fetchBookings();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');
+    } finally {
+      setActionLoadingId(null);
     }
+  };
+
+  const handleComplete = (bookingId) => {
+    setSelectedBookingId(bookingId);
+    setIsCompleteModalOpen(true);
+  };
+
+  const handleCancel = (bookingId) => {
+    handleStatusUpdate(bookingId, 'cancel');
   };
 
   const handleTabChange = (tab) => {
@@ -165,7 +186,7 @@ const StaffBookings = () => {
 
           {/* Row 2: Status Tabs */}
           <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-100 dark:border-gray-800/50">
-            {['upcoming', 'completed'].map(tab => (
+            {['upcoming', 'completed', 'cancelled'].map(tab => (
               <button
                 key={tab}
                 onClick={() => handleTabChange(tab)}
@@ -191,90 +212,16 @@ const StaffBookings = () => {
           ) : filteredBookings.length > 0 ? (
             <div className="space-y-3">
               {filteredBookings.map((booking) => (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                <BookingCard
                   key={booking._id}
-                  className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden active:bg-gray-50 dark:active:bg-gray-800 transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 overflow-hidden">
-                        {booking.userId?.image ? <img src={booking.userId.image} className="w-full h-full object-cover" alt={booking.userId?.name || 'Customer'} /> : <User size={16} />}
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-black text-slate-900 dark:text-white leading-none">
-                          {booking.walkInCustomerName || booking.userId?.name || 'Client'}
-                        </h3>
-                        <div className="text-[9px] font-black text-primary dark:text-white uppercase tracking-tighter mt-1 flex items-center gap-2.5">
-                          <div className="flex items-center gap-0.5">
-                            <Clock size={10} strokeWidth={3} /> {formatTime(booking.startTime)}
-                          </div>
-                          <div className="flex items-center gap-1.5 opacity-70">
-                            <Calendar size={10} strokeWidth={3} /> {dayjs(booking.startTime).format('DD-MM-YYYY')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 mb-2 px-1">
-                    <div className="space-y-0.5">
-                      {booking.services?.map((s, idx) => (
-                        <div key={idx} className="text-[9px] font-bold text-slate-500 dark:text-white flex items-center gap-1.5 tracking-tight">
-                          <div className="w-1 h-1 bg-primary/30 rounded-full" />
-                          {s.name || s.serviceId?.name || 'Service Task'}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-4 py-1 border-y border-slate-50 dark:border-gray-800/40 my-0.5">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-tight leading-none">Price</span>
-                        <span className="text-[11px] font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1">
-                          {booking.originalTotalPrice > 0 && booking.originalTotalPrice !== booking.totalPrice ? (
-                            <>
-                              <span className="line-through text-[9px] font-bold text-slate-400 dark:text-gray-500 mr-0.5">₹{booking.originalTotalPrice}</span>
-                              <span>₹{booking.totalPrice}</span>
-                            </>
-                          ) : (
-                            `₹${booking.totalPrice}`
-                          )}
-                        </span>
-                      </div>
-                      <div className="w-px h-5 bg-slate-100 dark:bg-gray-800" />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-tight leading-none">Estimate</span>
-                        <span className="text-[11px] font-black text-slate-600 dark:text-gray-400 uppercase tracking-tight leading-none">{booking.totalDuration} Mins</span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  {activeTab === 'upcoming' && (
-                    <div className="flex gap-2">
-                      {booking.canCancel && (
-                        <button
-                          onClick={() => handleStatusUpdate(booking._id, 'cancel')}
-                          className="px-5 h-9 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center font-black text-[10.5px] uppercase tracking-wider active:scale-95 transition-transform"
-                        >
-                          Cancel
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          setSelectedBookingId(booking._id);
-                          setIsCompleteModalOpen(true);
-                        }}
-                        className="flex-1 h-9 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2 font-black text-[10.5px] uppercase tracking-tight shadow-md active:scale-95 transition-transform"
-                      >
-                        <CheckCircle size={16} />
-                        Complete
-                      </button>
-                    </div>
-                  )}
-                </motion.div>
+                  booking={booking}
+                  onComplete={handleComplete}
+                  onCancel={handleCancel}
+                  loadingId={actionLoadingId}
+                  hasInStockProducts={hasInStockProducts}
+                  inventoryPath="/staff/inventory"
+                  customersBasePath="/staff"
+                />
               ))}
             </div>
           ) : (

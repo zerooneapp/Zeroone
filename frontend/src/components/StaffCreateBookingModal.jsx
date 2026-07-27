@@ -218,7 +218,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
               <Calendar className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <h2 className="text-base font-black text-gray-900 dark:text-white leading-tight">New Appointment</h2>
+              <h2 className="text-base font-black text-gray-900 dark:text-white leading-tight">New Entry</h2>
               <p className="text-[9px] font-bold text-gray-400 capitalize tracking-widest leading-none">
                 Step {step} of 2 · {step === 1 ? 'Customer & Services' : 'Date & Time'}
               </p>

@@ -1,19 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
   Search,
   AlertTriangle,
   Loader2,
-  Package,
-  PlusCircle,
-  MinusCircle,
   ClipboardList,
-  Layers,
-  ShieldAlert,
-  TrendingUp,
-  TrendingDown,
-  Coins
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -55,9 +47,9 @@ const StaffInventory = () => {
     quantity: 1
   });
 
-  const triggerGlobalReturn = () => {
+  const triggerGlobalReturn = (item = null) => {
     setIsGlobalReturnOpen(true);
-    setGlobalReturnItemId('');
+    setGlobalReturnItemId(item ? item._id : '');
     setGlobalReturnFormData({ customerName: '', customerContact: '', quantity: 1 });
   };
 
@@ -140,6 +132,22 @@ const StaffInventory = () => {
     fetchInventory();
   }, []);
 
+  // Auto-prefill customer details if navigated from Add Product button
+  const location = useLocation();
+  useEffect(() => {
+    if (items.length > 0 && location.state?.prefillCustomer) {
+      const { customerName, customerContact } = location.state.prefillCustomer;
+      setAdjustFormData(prev => ({
+        ...prev,
+        customerName: customerName || '',
+        customerContact: customerContact || ''
+      }));
+      // Clear state so refresh doesn't re-trigger
+      navigate(location.pathname, { replace: true, state: {} });
+      toast.success(`Details prefilled for ${customerName}`);
+    }
+  }, [items, location.state]);
+
   // ── History ──
   const fetchLogs = async (item, page = 1, filters = logDateFilters) => {
     if (!item) return;
@@ -196,7 +204,11 @@ const StaffInventory = () => {
     e.stopPropagation();
     setAdjustingItem(item);
     setAdjustmentDelta(delta);
-    setAdjustFormData({ customerName: '', customerContact: '', quantity: 1 });
+    setAdjustFormData(prev => ({
+      customerName: prev.customerName || '',
+      customerContact: prev.customerContact || '',
+      quantity: 1
+    }));
   };
 
   const handleAdjustSubmit = async (e) => {
@@ -495,58 +507,9 @@ const StaffInventory = () => {
             <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Tap a card to view history · - to adjust</p>
           </div>
         </div>
-        <button
-          onClick={() => triggerGlobalReturn()}
-          className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-lg text-[8px] font-black uppercase tracking-wider shadow-sm transition-all active:scale-95 flex items-center gap-1"
-        >
-          Return Product
-        </button>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 pt-[126px] space-y-3">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
-            <div className="p-1.5 bg-blue-500/10 text-blue-500 rounded-lg shrink-0"><Package size={12} /></div>
-            <div>
-              <p className="text-[8px] font-semibold text-slate-400 leading-none">Items</p>
-              <h3 className="text-xs font-black mt-0.5">{metrics.totalItems}</h3>
-            </div>
-          </div>
-          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
-            <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0"><Layers size={12} /></div>
-            <div>
-              <p className="text-[8px] font-semibold text-slate-400 leading-none">Total Stock</p>
-              <h3 className="text-xs font-black mt-0.5">{metrics.totalStock}</h3>
-            </div>
-          </div>
-          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
-            <div className="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg shrink-0"><Coins size={12} /></div>
-            <div>
-              <p className="text-[8px] font-semibold text-slate-400 leading-none">Stock Value</p>
-              <h3 className="text-xs font-black mt-0.5">₹{metrics.totalValue}</h3>
-            </div>
-          </div>
-          <div className="p-2 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-xl shadow-sm flex items-center gap-1.5">
-            <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0"><TrendingUp size={12} /></div>
-            <div>
-              <p className="text-[8px] font-semibold text-slate-400 leading-none">Product Earning</p>
-              <h3 className="text-xs font-black mt-0.5 text-emerald-500">₹{totalEarnings}</h3>
-            </div>
-          </div>
-          <div className={cn(
-            "p-2 border rounded-xl shadow-sm flex items-center gap-1.5 transition-colors grid-col-span-2",
-            metrics.lowStockCount > 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-white dark:bg-gray-900 border-slate-100 dark:border-gray-800"
-          )}>
-            <div className={cn("p-1.5 rounded-lg shrink-0", metrics.lowStockCount > 0 ? "bg-rose-500/20 text-rose-500" : "bg-slate-500/10 text-slate-400")}>
-              <ShieldAlert size={12} />
-            </div>
-            <div>
-              <p className="text-[8px] font-semibold text-slate-400 leading-none">Low Stock</p>
-              <h3 className="text-xs font-black mt-0.5">{metrics.lowStockCount}</h3>
-            </div>
-          </div>
-        </div>
 
         {/* Search & Filter */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 space-y-3 shadow-sm">
@@ -622,20 +585,27 @@ const StaffInventory = () => {
                       </div>
                     </div>
 
-                    {/* Stock controls — stopPropagation so card click doesn't fire */}
+                    {/* SELL / RETURN buttons — vendor style */}
                     <div
-                      className="flex items-center gap-1 bg-slate-50 dark:bg-gray-800 p-1 rounded-lg border border-slate-100 dark:border-gray-700 shrink-0"
+                      className="flex items-center gap-1.5 shrink-0"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
                         onClick={(e) => triggerAdjust(e, item, -1)}
-                        className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-0.5"
-                        title="Reduce stock"
+                        className="px-2.5 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-[8px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-sm"
+                        title="Sell stock"
                       >
-                        <MinusCircle size={15} />
+                        Sell
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); triggerGlobalReturn(item); }}
+                        className="px-2.5 py-1.5 rounded-lg bg-[#00246b] hover:bg-[#001a52] dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-[8px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-sm"
+                        title="Return stock"
+                      >
+                        Return
                       </button>
                       <span className={cn(
-                        "text-xs font-black w-7 text-center",
+                        "text-xs font-black w-6 text-center",
                         isLowStock ? "text-rose-500" : "text-slate-800 dark:text-white"
                       )}>
                         {item.stock}
@@ -675,16 +645,6 @@ const StaffInventory = () => {
                   </span>.
                 </p>
 
-                {adjustmentDelta > 0 && (
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Adjustment Type</label>
-                    <div className="flex p-1 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700">
-                      <div className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center bg-white dark:bg-gray-700 text-[#00246b] dark:text-white shadow-sm">
-                        Customer Return
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 <div className="space-y-1">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider">Quantity</label>

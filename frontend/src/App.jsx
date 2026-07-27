@@ -308,6 +308,7 @@ function App() {
           <Route path="history" element={<StaffHistory />} />
           <Route path="reviews" element={<StaffReviews />} />
           <Route path="inventory" element={<StaffInventory />} />
+          <Route path="customers" element={<LoyalCustomers />} />
         </Route>
 
         {/* ADMIN PANEL (WITH ADMIN LAYOUT) */}

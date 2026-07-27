@@ -4,7 +4,7 @@ import { User, Clock, Calendar, ChevronRight, CheckCircle2, XCircle, AlertCircle
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
-const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProducts }) => {
+const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProducts, inventoryPath = '/vendor/inventory', customersBasePath = '/vendor' }) => {
    const navigate = useNavigate();
    const isActionLoading = loadingId === booking._id;
 
@@ -26,7 +26,11 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProdu
          initial={{ opacity: 0, scale: 0.98 }}
          animate={{ opacity: 1, scale: 1 }}
          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-         onClick={() => phoneNum && navigate(`/vendor/customers?phone=${phoneNum}`)}
+         onClick={() => {
+            const name = booking.walkInCustomerName || booking.userId?.name || '';
+            const customerId = booking.userId?._id || booking._id;
+            navigate(`${customersBasePath}/customers?phone=${phoneNum}&customerId=${customerId}&name=${encodeURIComponent(name)}`);
+         }}
          className="bg-white dark:bg-gray-900 p-2.5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm transition-all group relative overflow-hidden cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80"
       >
          {/* Top Header Section */}
@@ -105,7 +109,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProdu
             </div>
          </div>
 
-         {/* Footer - Final Cleanup */}
+         {/* Footer */}
          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-50 dark:border-gray-800/50 relative z-10">
             <div className="flex items-baseline gap-1">
                <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Total</span>
@@ -121,6 +125,7 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProdu
                 </span>
             </div>
 
+            {/* Action buttons for active bookings */}
             {(booking.status === 'confirmed' || booking.status === 'pending_completion') && (
                <div className="flex gap-1.5">
                   <button
@@ -141,13 +146,14 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProdu
                </div>
             )}
 
+            {/* Add Product button for completed/cancelled bookings */}
             {(booking.status === 'completed' || booking.status === 'cancelled') && hasInStockProducts && (
                <button
                   onClick={(e) => {
                      e.stopPropagation();
                      const name = booking.walkInCustomerName || booking.userId?.name || 'Customer';
                      const contact = booking.walkInCustomerPhone || booking.userId?.phone || '';
-                     navigate('/vendor/inventory', {
+                     navigate(inventoryPath, {
                         state: {
                            prefillCustomer: {
                               customerName: name,
