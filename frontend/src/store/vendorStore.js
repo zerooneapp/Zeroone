@@ -92,9 +92,7 @@ export const useVendorStore = create((set, get) => ({
       
       // Pre-fetch bookings with default roster view
       get().fetchBookings({ 
-        status: 'confirmed', 
-        from: dayjs().format('YYYY-MM-DD'), 
-        to: dayjs().add(7, 'day').format('YYYY-MM-DD') 
+        status: 'confirmed' 
       });
       get().fetchClosures();
 

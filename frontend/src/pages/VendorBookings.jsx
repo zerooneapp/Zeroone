@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, AlertTriangle, Clock3, ChevronDown, User } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, ChevronLeft, AlertTriangle, Clock3, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import BookingCard from '../components/BookingCard';
@@ -15,8 +15,7 @@ import CancellationModal from '../components/CancellationModal';
 const VendorBookings = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState('confirmed');
-  const [fromDate, setFromDate] = useState(dayjs().format('YYYY-MM-DD'));
-  const [toDate, setToDate] = useState(dayjs().add(7, 'day').format('YYYY-MM-DD'));
+  const [currentPage, setCurrentPage] = useState(1);
 
   const {
     bookingsData: bookings,
@@ -29,7 +28,6 @@ const VendorBookings = () => {
     closuresLoading,
     setBookingsData: setBookings
   } = useVendorStore();
-
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
@@ -48,13 +46,8 @@ const VendorBookings = () => {
   }, []);
 
   const handleFetch = async (force = false) => {
-    if (dayjs(fromDate).isAfter(toDate)) {
-      toast.error("Invalid date range");
-      return;
-    }
-
     try {
-      const params = { status, from: fromDate, to: toDate };
+      const params = { status };
       let finalForce = force;
       if (!force && lastBookingParams) {
         const isParamsEqual = JSON.stringify(params) === JSON.stringify(lastBookingParams);
@@ -69,8 +62,9 @@ const VendorBookings = () => {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
     handleFetch();
-  }, [status, fromDate, toDate]);
+  }, [status]);
 
   useEffect(() => {
     // Closures are prefetched from store — only fetch if not already loaded
@@ -131,7 +125,7 @@ const VendorBookings = () => {
     setIsRefreshing(true);
     try {
       await Promise.all([
-        fetchBookings({ status, from: fromDate, to: toDate }, true),
+        fetchBookings({ status }, true),
         fetchClosures(true)
       ]);
     } catch (err) {
@@ -166,6 +160,17 @@ const VendorBookings = () => {
     return [...bookings].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   }, [bookings]);
 
+  const ITEMS_PER_PAGE = 30;
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(displayBookings.length / ITEMS_PER_PAGE) || 1;
+  }, [displayBookings]);
+
+  const paginatedBookings = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return displayBookings.slice(start, start + ITEMS_PER_PAGE);
+  }, [displayBookings, currentPage]);
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-gray-950 pb-24">
       <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[48px] pb-3 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm">
@@ -190,49 +195,10 @@ const VendorBookings = () => {
           </div>
 
           <StatusTabs activeTab={status} onTabChange={setStatus} />
-
-          {/* 📅 PREMIUM COMPACT DATE FILTER */}
-          <div className="mt-3 flex items-center gap-1.5 bg-slate-50/50 dark:bg-gray-800/20 p-1 rounded-2xl border border-slate-100 dark:border-gray-800">
-            <div className="flex-1 flex flex-col px-3 py-2.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
-              <div className="relative flex items-center justify-between pointer-events-none z-10">
-                <span className="text-[10px] font-bold text-gray-900 dark:text-white tracking-widest">
-                  {fromDate ? dayjs(fromDate).format('DD-MM-YYYY') : 'Select Date'}
-                </span>
-                <ChevronDown size={12} className="text-gray-400" />
-              </div>
-              <input
-                type="date"
-                value={fromDate}
-                min={status === 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
-                max={status !== 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-              />
-            </div>
-            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center border border-slate-200/20 text-slate-400 text-[10px] font-bold shrink-0">
-              -
-            </div>
-            <div className="flex-1 flex flex-col px-3 py-2.5 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700/50 relative overflow-hidden">
-              <div className="relative flex items-center justify-between pointer-events-none z-10">
-                <span className="text-[10px] font-bold text-gray-900 dark:text-white tracking-widest">
-                  {toDate ? dayjs(toDate).format('DD-MM-YYYY') : 'Select Date'}
-                </span>
-                <ChevronDown size={12} className="text-gray-400" />
-              </div>
-              <input
-                type="date"
-                value={toDate}
-                min={status === 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
-                max={status !== 'confirmed' ? dayjs().format('YYYY-MM-DD') : undefined}
-                onChange={(e) => setToDate(e.target.value)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-              />
-            </div>
-          </div>
         </div>
       </header>
 
-      <main className="px-4 pt-[233px] max-w-4xl mx-auto space-y-3 min-h-screen">
+      <main className="px-4 pt-[165px] max-w-4xl mx-auto space-y-3 min-h-screen">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (
@@ -347,7 +313,7 @@ const VendorBookings = () => {
               <div className="space-y-1">
                 <h2 className="text-base font-black text-gray-900 dark:text-white uppercase tracking-tight">No Appointments</h2>
                 <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest max-w-[180px] mx-auto leading-tight opacity-70">
-                  Your schedule for this range is completely clear.
+                  No bookings found for this status.
                 </p>
               </div>
             </motion.div>
@@ -358,7 +324,7 @@ const VendorBookings = () => {
               animate={{ opacity: 1 }}
               className="space-y-2.5"
             >
-              {displayBookings.map((booking) => (
+              {paginatedBookings.map((booking) => (
                 <BookingCard
                   key={booking._id}
                   booking={booking}
@@ -369,9 +335,41 @@ const VendorBookings = () => {
                 />
               ))}
 
-              <div className="pt-8 text-center pb-12">
-                <p className="text-[8px] font-black uppercase text-gray-300 dark:text-gray-700 tracking-[0.3em]">End of Roster</p>
-              </div>
+              {totalPages > 1 ? (
+                <div className="flex items-center justify-between pt-4 pb-6 px-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage(p => Math.max(1, p - 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                  >
+                    <ChevronLeft size={14} />
+                    <span>PREV</span>
+                  </button>
+
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500">
+                    Page <span className="text-slate-900 dark:text-white font-black">{currentPage}</span> of {totalPages}
+                  </span>
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage(p => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                  >
+                    <span>NEXT</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-8 text-center pb-12">
+                  <p className="text-[8px] font-black uppercase text-gray-300 dark:text-gray-700 tracking-[0.3em]">End of Roster</p>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

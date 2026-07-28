@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  ChevronLeft, ClipboardList, ArrowLeft
+  ChevronLeft, ChevronRight, ClipboardList, ArrowLeft
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -21,16 +21,7 @@ const StaffBookings = () => {
   const [bookings, setBookings] = useState(myBookings || []);
   const [loading, setLoading] = useState(!myBookings);
   const [activeTab, setActiveTab] = useState(initialTab); // upcoming, completed
-  const [startDate, setStartDate] = useState(
-    initialTab === 'completed'
-      ? dayjs().subtract(30, 'day').format('YYYY-MM-DD')
-      : dayjs().format('YYYY-MM-DD')
-  );
-  const [endDate, setEndDate] = useState(
-    initialTab === 'completed'
-      ? dayjs().format('YYYY-MM-DD')
-      : dayjs().add(30, 'day').format('YYYY-MM-DD')
-  );
+  const [currentPage, setCurrentPage] = useState(1);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
@@ -84,19 +75,30 @@ const StaffBookings = () => {
     window.addEventListener('new-socket-notification', handleGlobalEvent);
     return () => window.removeEventListener('new-socket-notification', handleGlobalEvent);
   }, []);
-  const filteredBookings = bookings.filter(b => {
-    let isCorrectStatus = false;
-    if (activeTab === 'upcoming') {
-      isCorrectStatus = b.status === 'confirmed' || b.status === 'assigned' || b.status === 'pending' || b.status === 'pending_completion';
-    } else if (activeTab === 'completed') {
-      isCorrectStatus = b.status === 'completed';
-    } else if (activeTab === 'cancelled') {
-      isCorrectStatus = b.status === 'cancelled';
-    }
-    const bookingDate = dayjs(b.startTime).format('YYYY-MM-DD');
-    const isWithinRange = bookingDate >= startDate && bookingDate <= endDate;
-    return isCorrectStatus && isWithinRange;
-  });
+
+  const filteredBookings = useMemo(() => {
+    return bookings.filter(b => {
+      if (activeTab === 'upcoming') {
+        return b.status === 'confirmed' || b.status === 'assigned' || b.status === 'pending' || b.status === 'pending_completion';
+      } else if (activeTab === 'completed') {
+        return b.status === 'completed';
+      } else if (activeTab === 'cancelled') {
+        return b.status === 'cancelled';
+      }
+      return false;
+    });
+  }, [bookings, activeTab]);
+
+  const ITEMS_PER_PAGE = 30;
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredBookings.length / ITEMS_PER_PAGE) || 1;
+  }, [filteredBookings]);
+
+  const paginatedBookings = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredBookings.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredBookings, currentPage]);
 
 
   const handleStatusUpdate = async (bookingId, action, reason = '') => {
@@ -128,13 +130,7 @@ const StaffBookings = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    if (tab === 'upcoming') {
-      setStartDate(dayjs().format('YYYY-MM-DD'));
-      setEndDate(dayjs().add(30, 'day').format('YYYY-MM-DD'));
-    } else {
-      setStartDate(dayjs().subtract(30, 'day').format('YYYY-MM-DD'));
-      setEndDate(dayjs().format('YYYY-MM-DD'));
-    }
+    setCurrentPage(1);
   };
 
   return (
@@ -152,39 +148,8 @@ const StaffBookings = () => {
           <div className="w-8"></div>
         </div>
 
-        <div className="space-y-3">
-          {/* Row 1: Range Filter */}
-          <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-2xl border border-gray-100 dark:border-gray-800/50">
-            <div className="flex-1">
-              <div className="relative group">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 cursor-pointer"
-                />
-              </div>
-            </div>
-
-            <div className="text-gray-300 flex items-center justify-center">
-              <ChevronLeft className="rotate-180 opacity-20" size={14} strokeWidth={3} />
-            </div>
-
-            <div className="flex-1">
-              <div className="relative group">
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                  className="w-full h-8 bg-white dark:bg-gray-800 border-none rounded-lg px-2 text-[9px] font-black text-gray-900 dark:text-white focus:ring-1 ring-primary/20 cursor-pointer"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Row 2: Status Tabs */}
+        <div className="mb-2">
+          {/* Status Tabs */}
           <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-100 dark:border-gray-800/50">
             {['upcoming', 'completed', 'cancelled'].map(tab => (
               <button
@@ -203,7 +168,7 @@ const StaffBookings = () => {
       </div>
 
       {/* Assignments List Area */}
-      <div className="p-4 pt-[212px] space-y-3">
+      <div className="p-4 pt-[160px] space-y-3">
         <AnimatePresence mode="wait">
           {loading ? (
             <div className="space-y-3 px-1">
@@ -211,7 +176,7 @@ const StaffBookings = () => {
             </div>
           ) : filteredBookings.length > 0 ? (
             <div className="space-y-3">
-              {filteredBookings.map((booking) => (
+              {paginatedBookings.map((booking) => (
                 <BookingCard
                   key={booking._id}
                   booking={booking}
@@ -223,6 +188,38 @@ const StaffBookings = () => {
                   customersBasePath="/staff"
                 />
               ))}
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 pb-6 px-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage(p => Math.max(1, p - 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                  >
+                    <ChevronLeft size={14} />
+                    <span>PREV</span>
+                  </button>
+
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500">
+                    Page <span className="text-slate-900 dark:text-white font-black">{currentPage}</span> of {totalPages}
+                  </span>
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage(p => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                  >
+                    <span>NEXT</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="py-24 text-center space-y-6">
