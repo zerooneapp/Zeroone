@@ -87,7 +87,7 @@ const StaffBookings = () => {
   const filteredBookings = bookings.filter(b => {
     let isCorrectStatus = false;
     if (activeTab === 'upcoming') {
-      isCorrectStatus = b.status === 'confirmed' || b.status === 'assigned' || b.status === 'pending';
+      isCorrectStatus = b.status === 'confirmed' || b.status === 'assigned' || b.status === 'pending' || b.status === 'pending_completion';
     } else if (activeTab === 'completed') {
       isCorrectStatus = b.status === 'completed';
     } else if (activeTab === 'cancelled') {
@@ -203,7 +203,7 @@ const StaffBookings = () => {
       </div>
 
       {/* Assignments List Area */}
-      <div className="p-4 pt-[238px] space-y-3">
+      <div className="p-4 pt-[212px] space-y-3">
         <AnimatePresence mode="wait">
           {loading ? (
             <div className="space-y-3 px-1">

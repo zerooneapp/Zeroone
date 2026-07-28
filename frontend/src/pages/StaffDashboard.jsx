@@ -30,7 +30,7 @@ const StaffDashboard = () => {
    const [confirmModal, setConfirmModal] = useState({ isOpen: false, bookingId: null });
    const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
    const activeBookings = bookings.filter(
-      (booking) => booking.status === 'confirmed' || booking.status === 'assigned' || booking.status === 'pending'
+      (booking) => booking.status === 'confirmed' || booking.status === 'assigned' || booking.status === 'pending' || booking.status === 'pending_completion'
    );
    const upcomingBookings = activeBookings.slice(1, 4);
 
@@ -107,10 +107,13 @@ const StaffDashboard = () => {
    const canNavigateToCustomer = currentTask?.type === 'home' && Boolean(currentTask?.serviceAddress);
 
    const todayStr = dayjs().format('YYYY-MM-DD');
-   const todayCompleted = bookings.filter(b =>
-      b.status === 'completed' &&
-      dayjs(b.startTime).format('YYYY-MM-DD') === todayStr
-   ).length;
+   const todayBookings = bookings.filter(b => dayjs(b.startTime).format('YYYY-MM-DD') === todayStr);
+   const todayCompletedBookings = todayBookings.filter(b => b.status === 'completed');
+   
+   const todayRevenue = todayCompletedBookings.reduce((sum, b) => sum + (Number(b.totalPrice) || 0), 0);
+   const todayClients = todayBookings.length;
+   const servicesDone = todayCompletedBookings.length;
+   const upcomingCount = activeBookings.length;
 
    const formatTime = (isoString) => {
       return new Date(isoString).toLocaleTimeString('en-IN', {
@@ -142,27 +145,35 @@ const StaffDashboard = () => {
          </div>
 
          <main className="p-4 space-y-3.5 pt-[100px]">
-            {/* 📊 COMPACT STATS GRID */}
-            <div className="grid grid-cols-2 gap-2.5">
+            {/* 📊 4 STAT CARDS GRID (MATCHING VENDOR SIDE) */}
+            <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1.5">
+               <div 
+                  onClick={() => navigate('/staff/history')}
+                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+               >
+                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
+                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">₹{todayRevenue}</p>
+               </div>
                <div 
                   onClick={() => navigate('/staff/bookings', { state: { tab: 'completed' } })}
-                  className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
-                  <p className="text-[16px] font-black text-slate-900 dark:text-white leading-none">{todayCompleted}</p>
-                  <div className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
-                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Today Done
-                  </div>
+                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Today clients</p>
+                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">{todayClients}</p>
+               </div>
+               <div 
+                  onClick={() => navigate('/staff/bookings', { state: { tab: 'completed' } })}
+                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+               >
+                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Services done</p>
+                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">{servicesDone}</p>
                </div>
                <div 
                   onClick={() => navigate('/staff/bookings', { state: { tab: 'upcoming' } })}
-                  className="bg-white dark:bg-gray-900 p-3.5 px-4 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
-                  <p className="text-[16px] font-black text-slate-900 dark:text-white leading-none">
-                     {activeBookings.length}
-                  </p>
-                  <div className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-1.5 opacity-60">
-                     <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Reminder
-                  </div>
+                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Upcoming</p>
+                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">{upcomingCount}</p>
                </div>
             </div>
 
@@ -189,116 +200,89 @@ const StaffDashboard = () => {
             <div className="space-y-3.5">
                <AnimatePresence mode="wait">
                   {loading ? (
-                     <div className="h-40 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl animate-pulse" />
+                     <motion.div key="loading" className="h-40 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl animate-pulse" />
                   ) : currentTask ? (
                      <motion.div
+                        key={currentTask._id || 'task'}
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
                         onClick={() => {
                            const phone = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
                            const name = currentTask.walkInCustomerName || currentTask.userId?.name || '';
                            const customerId = currentTask.userId?._id || currentTask._id;
                            navigate(`/staff/customers?phone=${phone}&customerId=${customerId}&name=${encodeURIComponent(name)}`);
                         }}
-                        className="bg-white dark:bg-gray-900 p-2.5 px-3 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all cursor-pointer"
+                        className="bg-white dark:bg-gray-900 p-3 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between gap-2"
                      >
                         {(() => {
                            const phoneNum = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
+                           const customerName = currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client';
+                           const serviceNames = currentTask.services?.map(s => s.name || s.serviceId?.name).filter(Boolean).join(', ') || 'Service Task';
+                           const staffName = user?.name || 'Staff';
+
                            return (
-                              <div className="flex items-center justify-between mb-2 gap-2">
-                                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                                    <div className="w-7 h-7 bg-slate-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-slate-400 dark:text-gray-300 overflow-hidden border border-slate-100 dark:border-gray-700/60 shrink-0">
+                              <>
+                                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                    <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-700/60 shrink-0 flex items-center justify-center">
                                        {currentTask.userId?.image ? (
                                           <img src={currentTask.userId.image} className="w-full h-full object-cover" alt="Client" />
                                        ) : (
-                                          <User size={13} strokeWidth={3} />
+                                          <img 
+                                             src={`https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=00246b&color=ffffff&bold=true`}
+                                             className="w-full h-full object-cover"
+                                             alt={customerName}
+                                          />
                                        )}
                                     </div>
-                                    <div className="min-w-0">
-                                       <div className="flex items-center gap-1.5 mb-0.5">
-                                          <h3 className="text-[12px] font-black text-slate-900 dark:text-white leading-none truncate">
-                                             {currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client'}
-                                          </h3>
-                                          <span className="text-[7px] font-black bg-primary/5 dark:bg-white/10 text-primary dark:text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0">
-                                             Active
-                                          </span>
-                                       </div>
-                                       <div className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight leading-none flex items-center gap-1.5">
-                                          <span className="flex items-center gap-0.5 text-primary/75 dark:text-white/60">
-                                             <Clock size={9} strokeWidth={3} /> {formatTime(currentTask.startTime)}
-                                          </span>
-                                          <span className="w-1 h-1 bg-slate-200 dark:bg-gray-700 rounded-full" />
-                                          <span>
-                                             Estimate: {currentTask.totalDuration} Mins
-                                          </span>
+                                    <div className="min-w-0 space-y-0.5">
+                                       <h3 className="text-[13px] font-black text-slate-900 dark:text-white leading-tight truncate">
+                                          {customerName}
+                                       </h3>
+                                       <p className="text-[10px] font-bold text-slate-700 dark:text-gray-200 leading-tight">
+                                          {serviceNames}
+                                       </p>
+                                       <div className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight flex items-center gap-1 flex-wrap">
+                                          <span className="text-[#00246b] dark:text-blue-400 font-black">{formatTime(currentTask.startTime)}</span>
+                                          <span className="opacity-40">&bull;</span>
+                                          <Clock size={8} className="text-slate-400 shrink-0" />
+                                          <span>{currentTask.totalDuration || 30} MIN</span>
                                        </div>
                                     </div>
                                  </div>
-                                  {phoneNum ? (
-                                     <a
-                                        href={`tel:${phoneNum}`}
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="px-2.5 py-1.5 bg-[#00246b] hover:bg-[#001a52] dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all flex items-center gap-1 shrink-0"
-                                        title="Call Customer"
-                                     >
-                                        <Phone size={11} strokeWidth={3} /> Call
-                                     </a>
-                                  ) : null}
-                               </div>
+
+                                 {/* Right Side: Phone Icon & Done Button */}
+                                 <div className="flex items-center gap-1.5 shrink-0 z-10">
+                                    {phoneNum ? (
+                                       <a
+                                          href={`tel:${phoneNum}`}
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-700 text-[#00246b] dark:text-white flex items-center justify-center active:scale-95 transition-all shadow-sm"
+                                          title="Call Customer"
+                                       >
+                                          <Phone size={12} strokeWidth={2.5} />
+                                       </a>
+                                    ) : null}
+                                    <button
+                                       onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleStatusUpdate(currentTask._id, 'complete');
+                                       }}
+                                       className="px-3 py-1.5 bg-[#00246b] hover:bg-[#001a52] text-white rounded-lg text-[8px] font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all"
+                                    >
+                                       Done
+                                    </button>
+                                 </div>
+                              </>
                            );
                         })()}
-
-                        <div className="flex flex-wrap gap-x-2 px-0.5">
-                           {currentTask.services?.map((s, idx) => (
-                              <div key={idx} className="text-[8px] font-bold text-slate-500 dark:text-gray-400 flex items-center gap-1 tracking-tight">
-                                 <div className="w-1 h-1 bg-primary/40 dark:bg-white/30 rounded-full" />
-                                 {s.name || s.serviceId?.name || 'Service Task'}
-                              </div>
-                           ))}
-                        </div>
                      </motion.div>
-                  ) : null}
-
-                  {/* 🔘 FIXED ACTION BAR */}
-                  {currentTask && (
-                     <div className="fixed bottom-20 left-4 right-4 bg-white dark:bg-gray-900 p-2 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-2xl flex gap-2 z-50">
-                        {currentTask.canContact && !currentTask.isWalkIn && !currentTask.walkInCustomerName && (
-                           <a href={`tel:${currentTask.userId?.phone}`} className="h-12 w-12 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-white rounded-xl flex items-center justify-center shadow-sm">
-                              <Phone size={20} strokeWidth={3} />
-                           </a>
-                        )}
-                        {canNavigateToCustomer && (
-                           <a 
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentTask.serviceAddress)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="h-12 w-12 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg"
-                           >
-                              <MapPin size={20} strokeWidth={3} />
-                           </a>
-                        )}
-                        <button
-                           onClick={() => handleStatusUpdate(currentTask._id, 'complete')}
-                           className="flex-1 h-12 bg-[#00246b] text-white rounded-xl flex items-center justify-center gap-2.5 font-black text-[10px] uppercase tracking-widest shadow-xl"
-                        >
-                           <CheckCircle size={18} strokeWidth={3} />
-                           Complete Job
-                        </button>
-                     </div>
-                  )}
-
-                  {!currentTask && (
-                     <div className="py-20 text-center space-y-6 bg-white dark:bg-gray-900/50 rounded-2xl border border-dashed border-slate-200/60 dark:border-gray-800 shadow-sm">
+                  ) : (
+                     <motion.div key="empty" className="py-20 text-center space-y-6 bg-white dark:bg-gray-900/50 rounded-2xl border border-dashed border-slate-200/60 dark:border-gray-800 shadow-sm">
                         <div className="w-20 h-20 bg-slate-50 dark:bg-gray-800 rounded-2xl shadow-inner flex items-center justify-center mx-auto border border-slate-100 dark:border-gray-700">
                            <ClipboardList size={32} className="text-slate-200 dark:text-gray-700" />
                         </div>
-                        <div className="space-y-1.5 opacity-60">
-                           <h2 className="text-[13px] font-black text-slate-900 dark:text-white uppercase tracking-tight">Queue Clear</h2>
-                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] max-w-[180px] mx-auto leading-relaxed italic">
-                              Standing by for the next <br /> elite assignment.
-                           </p>
-                        </div>
-                     </div>
+                     </motion.div>
                   )}
                </AnimatePresence>
 

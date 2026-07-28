@@ -123,14 +123,14 @@ const StaffAccount = () => {
 
       <div className="px-3 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
         {/* Onboarding Date */}
-        <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
-          <div className="flex items-start gap-4 relative z-10">
-            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl flex items-center justify-center shadow-sm">
+        <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl flex items-center justify-center shadow-sm shrink-0">
               <Calendar size={18} strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none">Onboarding Date</p>
-              <p className="text-xs font-black text-slate-900 dark:text-white mt-1 capitalize tracking-tight">{formatDate(profile?.createdAt)}</p>
+              <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none mb-1">Onboarding Date</p>
+              <h3 className="text-xs font-black text-slate-900 dark:text-white tracking-tight">{formatDate(profile?.createdAt)}</h3>
             </div>
           </div>
         </div>
@@ -139,7 +139,7 @@ const StaffAccount = () => {
         <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary dark:text-white rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50">
+              <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary dark:text-white rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50 shrink-0">
                 <Briefcase size={20} strokeWidth={2.5} className="opacity-80" />
               </div>
               <div>

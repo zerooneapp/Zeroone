@@ -96,7 +96,7 @@ const StaffHistory = () => {
 
       <div className="px-3 pt-[108px] py-4 space-y-4">
         <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm space-y-4">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex bg-slate-50 dark:bg-gray-800/50 p-1 rounded-2xl border border-slate-100 dark:border-gray-700/50">
             {[
               { id: 'week', label: 'Week' },
               { id: 'month', label: 'Month' },
@@ -105,10 +105,10 @@ const StaffHistory = () => {
               <button
                 key={item.id}
                 onClick={() => setHistoryPeriod(item.id)}
-                className={`px-3 py-2 rounded-xl text-[9px] font-black capitalize tracking-widest border transition-all ${
+                className={`flex-1 py-2 rounded-xl text-[9px] font-black capitalize tracking-widest text-center transition-all ${
                   historyPeriod === item.id
-                    ? 'bg-[#00246b] text-white border-[#00246b]'
-                    : 'bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 border-slate-100 dark:border-gray-700'
+                    ? 'bg-[#00246b] text-white shadow-sm'
+                    : 'text-slate-400 dark:text-gray-400'
                 }`}
               >
                 {item.label}
@@ -208,14 +208,16 @@ const StaffHistory = () => {
                         {formatDate(booking.startTime)} • {formatTime(booking.startTime)}
                       </p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-[7px] font-black capitalize tracking-widest px-2 py-1 rounded-lg border ${
+                        <span className={`text-[7px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border ${
                           booking.status === 'completed'
                             ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/30'
                             : booking.status === 'cancelled'
                               ? 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/10 dark:text-rose-400 dark:border-rose-900/30'
-                              : 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/10 dark:text-blue-400 dark:border-blue-900/30'
+                              : booking.status === 'pending_completion'
+                                ? 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/10 dark:text-amber-400 dark:border-amber-900/30'
+                                : 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/10 dark:text-blue-400 dark:border-blue-900/30'
                         }`}>
-                          {booking.status}
+                          {booking.status === 'pending_completion' ? 'attention' : booking.status}
                         </span>
                       </div>
                     </div>

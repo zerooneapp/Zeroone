@@ -171,24 +171,15 @@ const VendorBookings = () => {
       <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[48px] pb-3 bg-background-light/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/vendor/dashboard')}
-                className="w-10 h-10 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 flex items-center justify-center active:scale-90 transition-all font-bold"
-              >
-                <ArrowLeft size={18} className="text-gray-900 dark:text-white" />
-              </button>
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-1">
-                  <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
-                    <span className="text-[#00246b] dark:text-white ">Zero</span>
-                    <span className="text-[#00246b]/30 dark:text-white">One</span>
-                  </h1>
+            <button
+              onClick={() => navigate('/vendor/dashboard')}
+              className="p-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
+            >
+              <ArrowLeft size={18} />
+            </button>
 
-                </div>
-                <p className="text-[9px] font-black text-slate-400 dark:text-white/60 uppercase tracking-[0.2em] opacity-80">Bookings Roster</p>
-              </div>
-            </div>
+            <h1 className="text-[15px] font-black text-gray-900 dark:text-white tracking-tight uppercase">Schedule</h1>
+
             <button
               type="button"
               onClick={refreshAll}

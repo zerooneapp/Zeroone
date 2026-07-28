@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { 
   ChevronLeft, 
   Search, 
@@ -29,8 +29,9 @@ const toPascalCase = (str = '') =>
 const LoyalCustomers = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  // Detect if running under /staff or /vendor context
-  const basePath = location.pathname.startsWith('/staff') ? '/staff' : '/vendor';
+  const isStaff = location.pathname.startsWith('/staff');
+  const basePath = isStaff ? '/staff' : '/vendor';
+
   const {
     clientsData: customers,
     clientsLoading: loading,
@@ -39,14 +40,14 @@ const LoyalCustomers = () => {
   } = useVendorStore();
 
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all'); // all, repeat, high-spender
+  const [filter, setFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 30;
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [historyBookings, setHistoryBookings] = useState([]);
   const [historyProducts, setHistoryProducts] = useState([]);
-  const [activeHistoryTab, setActiveHistoryTab] = useState('services'); // 'services' or 'products'
+  const [activeHistoryTab, setActiveHistoryTab] = useState('services');
   const [historyLoading, setHistoryLoading] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [openedFromList, setOpenedFromList] = useState(false);
@@ -55,6 +56,11 @@ const LoyalCustomers = () => {
   const [historyBookingsPage, setHistoryBookingsPage] = useState(1);
   const [historyProductsPage, setHistoryProductsPage] = useState(1);
   const HISTORY_ITEMS_PER_PAGE = 30;
+
+  const searchParams = new URLSearchParams(location.search);
+  const queryPhone = searchParams.get('phone');
+  const queryName = searchParams.get('name');
+  const queryCustomerId = searchParams.get('customerId');
 
   const paginatedHistoryBookings = useMemo(() => {
     return historyBookings.slice(
@@ -73,6 +79,36 @@ const LoyalCustomers = () => {
   const historyBookingsTotalPages = Math.ceil(historyBookings.length / HISTORY_ITEMS_PER_PAGE);
   const historyProductsTotalPages = Math.ceil(historyProducts.length / HISTORY_ITEMS_PER_PAGE);
 
+  // Staff-specific history fetch effect
+  useEffect(() => {
+    if (isStaff && (queryPhone || queryCustomerId)) {
+      const fetchHistoryDirect = async () => {
+        setHistoryLoading(true);
+        setSelectedCustomer({
+          _id: queryCustomerId || queryPhone,
+          name: queryName || 'Customer',
+          phone: queryPhone || '',
+          isWalkIn: true
+        });
+        try {
+          const data = await fetchCustomerBookingHistory(
+            queryCustomerId || queryPhone,
+            true,
+            queryName || 'Customer',
+            queryPhone || ''
+          );
+          setHistoryBookings(data?.bookings || []);
+          setHistoryProducts(data?.products || []);
+        } catch (err) {
+          toast.error('Failed to fetch booking history');
+        } finally {
+          setHistoryLoading(false);
+        }
+      };
+      fetchHistoryDirect();
+    }
+  }, [isStaff, queryPhone, queryCustomerId, queryName]);
+
   const handleViewHistory = async (customer, fromList = false) => {
     setOpenedFromList(fromList);
     setSelectedCustomer(customer);
@@ -81,7 +117,6 @@ const LoyalCustomers = () => {
     setActiveHistoryTab('services');
     setHistoryBookingsPage(1);
     setHistoryProductsPage(1);
-    // Change the route query parameter to reflect the active customer history view
     navigate(`${basePath}/customers?phone=${customer.phone}`);
     try {
       const data = await fetchCustomerBookingHistory(
@@ -100,6 +135,7 @@ const LoyalCustomers = () => {
   };
 
   const handleFetch = async (force = false) => {
+    if (isStaff) return; // Staff does not fetch vendor's full loyal customers list
     try {
       await fetchClients(force);
     } catch (err) {
@@ -110,16 +146,14 @@ const LoyalCustomers = () => {
   const openedPhoneRef = useRef(null);
 
   useEffect(() => {
-    handleFetch();
-  }, []);
+    if (!isStaff) {
+      handleFetch();
+    }
+  }, [isStaff]);
 
-  // Auto-open history if customer phone/id is passed in URL query parameters
+  // Auto-open history for Vendor mode if query params are provided
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const queryPhone = searchParams.get('phone');
-    const queryName = searchParams.get('name');
-    const queryCustomerId = searchParams.get('customerId');
-
+    if (isStaff) return;
     const targetKey = queryPhone || queryCustomerId;
 
     if (targetKey) {
@@ -141,7 +175,6 @@ const LoyalCustomers = () => {
           openedPhoneRef.current = targetKey;
           handleViewHistory(matchingCustomer);
         } else if (!loading) {
-          // If customer fetch completed but not matched in loyal list, open history with fallback info
           openedPhoneRef.current = targetKey;
           handleViewHistory({
             _id: queryCustomerId || queryPhone,
@@ -156,12 +189,253 @@ const LoyalCustomers = () => {
       setSelectedCustomer(null);
       setIsHistoryOpen(false);
     }
-  }, [customers, location.search, loading]);
+  }, [customers, location.search, loading, isStaff]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [search, filter]);
 
+  // ----------------------------------------------------
+  // STAFF VIEW MODE (NO CLIENT LIST ACCESS AT ALL)
+  // ----------------------------------------------------
+  if (isStaff) {
+    if (!queryPhone && !queryCustomerId) {
+      return <Navigate to="/staff" replace />;
+    }
+
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col">
+        {/* Dedicated Full-screen Header for Staff */}
+        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
+            >
+              <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
+            </button>
+            {selectedCustomer && (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-100 dark:border-gray-700">
+                  <img 
+                    src={selectedCustomer.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCustomer.name || 'Customer')}&background=E2E8F0&color=1C2C4E&bold=true`} 
+                    alt={selectedCustomer.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-sm font-extrabold text-[#00246b] dark:text-white tracking-tight">
+                    {toPascalCase(selectedCustomer.name)}
+                  </h1>
+                  <p className="text-[9px] text-slate-400 font-bold dark:text-gray-400">
+                    Booking History
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Actions: Call & WhatsApp */}
+          {selectedCustomer?.phone && (
+            <div className="flex items-center gap-2">
+              <a 
+                href={`tel:${selectedCustomer.phone}`}
+                className="p-2 bg-slate-50 dark:bg-gray-800 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-xl text-slate-600 dark:text-gray-300 transition-all border border-slate-100 dark:border-gray-800/60"
+                title="Call Customer"
+              >
+                <Phone size={13} />
+              </a>
+              <a 
+                href={`https://wa.me/${selectedCustomer.phone.replace(/\D/g, '')}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 transition-all border border-emerald-100 dark:border-emerald-900/30"
+                title="WhatsApp Chat"
+              >
+                <MessageSquare size={13} />
+              </a>
+            </div>
+          )}
+        </header>
+
+        {/* Toggle/Filter Tabs */}
+        {historyProducts.length > 0 && (
+          <div className="pt-[96px] px-4 py-2 border-b border-slate-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <div className="flex bg-slate-100 dark:bg-gray-950 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveHistoryTab('services')}
+                className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                  activeHistoryTab === 'services'
+                    ? 'bg-white dark:bg-gray-900 text-[#00246b] dark:text-white shadow-sm'
+                    : 'text-slate-400 dark:text-gray-500'
+                }`}
+              >
+                Services ({historyBookings.length})
+              </button>
+              <button
+                onClick={() => setActiveHistoryTab('products')}
+                className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                  activeHistoryTab === 'products'
+                    ? 'bg-white dark:bg-gray-900 text-[#00246b] dark:text-white shadow-sm'
+                    : 'text-slate-400 dark:text-gray-500'
+                }`}
+              >
+                Products ({historyProducts.length})
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Main Body */}
+        <main className={`p-4 overflow-y-auto flex-1 space-y-4 pb-24 ${historyProducts.length > 0 ? 'pt-4' : 'pt-[104px]'}`}>
+          {historyLoading ? (
+            <div className="py-24 flex flex-col items-center justify-center gap-3">
+              <div className="w-8 h-8 border-4 border-t-[#00246b] border-slate-200 dark:border-gray-800 rounded-full animate-spin"></div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Loading history...</p>
+            </div>
+          ) : activeHistoryTab === 'services' ? (
+            historyBookings.length === 0 ? (
+              <div className="py-24 text-center space-y-2">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-slate-500 dark:text-gray-500">No completed visits found</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {paginatedHistoryBookings.map((booking) => (
+                  <div 
+                    key={booking._id} 
+                    className="p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 flex flex-col gap-2 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-black text-[#00246b] dark:text-gray-300 bg-[#00246b]/5 dark:bg-gray-800 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                        {dayjs(booking.startTime).format('ddd, DD MMM YYYY')}
+                      </span>
+                      <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-gray-400 bg-slate-100/50 dark:bg-gray-800/50 px-2 py-1 rounded-lg">
+                        <Clock size={10} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+                        <span>{dayjs(booking.startTime).format('hh:mm A')} {booking.totalDuration ? `(${booking.totalDuration} min)` : ''}</span>
+                      </div>
+                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                        ₹{booking.totalPrice}
+                      </span>
+                    </div>
+                    <div className="pl-1 space-y-1">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Services Taken</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {booking.services.map((svc, sIdx) => (
+                          <span 
+                            key={sIdx} 
+                            className="text-[10px] font-bold text-slate-700 dark:text-gray-300 bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-700 px-2 py-0.5 rounded-md"
+                          >
+                            {svc.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {historyBookingsTotalPages > 1 && (
+                  <div className="flex items-center justify-between pt-4 pb-2 px-2">
+                    <button
+                      disabled={historyBookingsPage === 1}
+                      onClick={() => setHistoryBookingsPage(prev => Math.max(prev - 1, 1))}
+                      className="px-4 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#00246b] dark:text-gray-300 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                    >
+                      Prev
+                    </button>
+                    <span className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">
+                      Page {historyBookingsPage} of {historyBookingsTotalPages}
+                    </span>
+                    <button
+                      disabled={historyBookingsPage === historyBookingsTotalPages}
+                      onClick={() => setHistoryBookingsPage(prev => Math.min(prev + 1, historyBookingsTotalPages))}
+                      className="px-4 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#00246b] dark:text-gray-300 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          ) : (
+            historyProducts.length === 0 ? (
+              <div className="py-24 text-center space-y-2">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider text-slate-500 dark:text-gray-500">No products purchased</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {paginatedHistoryProducts.map((product) => (
+                  <div 
+                    key={product._id} 
+                    className="p-2.5 bg-white dark:bg-gray-900 rounded-xl border border-slate-100 dark:border-gray-800 flex items-center justify-between gap-3 shadow-sm"
+                  >
+                    <div className="min-w-0 flex items-center gap-2.5">
+                      <div className={`w-1 h-8 rounded-full shrink-0 ${product.isReturn ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="text-[11px] font-black text-gray-900 dark:text-white truncate">{product.itemName}</h4>
+                          {product.isReturn ? (
+                            <span className="text-[7px] font-black uppercase px-1 py-0.2 bg-rose-500/10 text-rose-600 border border-rose-500/20 rounded">
+                              Returned
+                            </span>
+                          ) : (
+                            <span className="text-[7px] font-black uppercase px-1 py-0.2 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded">
+                              Sold
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-[8px] font-bold text-slate-400 dark:text-gray-500 uppercase mt-0.5">
+                          <span>{dayjs(product.createdAt).format('DD MMM YYYY')}</span>
+                          <span>&bull;</span>
+                          <span>{dayjs(product.createdAt).format('hh:mm A')}</span>
+                          <span>&bull;</span>
+                          <span>Qty: {Math.abs(product.change)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className={`text-[11px] font-black tracking-tight ${product.isReturn ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        {product.isReturn ? '-' : ''}₹{Math.abs(product.change) * (product.itemId?.price || 0)}
+                      </span>
+                      <p className="text-[7px] font-bold text-slate-400 dark:text-gray-500 uppercase mt-0.5">
+                        ₹{product.itemId?.price || 0} each
+                      </p>
+                    </div>
+                  </div>
+                ))}
+
+                {historyProductsTotalPages > 1 && (
+                  <div className="flex items-center justify-between pt-4 pb-2 px-2">
+                    <button
+                      disabled={historyProductsPage === 1}
+                      onClick={() => setHistoryProductsPage(prev => Math.max(prev - 1, 1))}
+                      className="px-4 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#00246b] dark:text-gray-300 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                    >
+                      Prev
+                    </button>
+                    <span className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">
+                      Page {historyProductsPage} of {historyProductsTotalPages}
+                    </span>
+                    <button
+                      disabled={historyProductsPage === historyProductsTotalPages}
+                      onClick={() => setHistoryProductsPage(prev => Math.min(prev + 1, historyProductsTotalPages))}
+                      className="px-4 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#00246b] dark:text-gray-300 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          )}
+        </main>
+      </div>
+    );
+  }
+
+  // ----------------------------------------------------
+  // VENDOR VIEW MODE (FULL LOYAL CUSTOMERS LIST & MODAL)
+  // ----------------------------------------------------
   const filteredCustomers = customers
     .filter(c => {
       const trimmedSearch = search.trim().toLowerCase();
@@ -180,14 +454,18 @@ const LoyalCustomers = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
 
-  const queryPhone = new URLSearchParams(location.search).get('phone');
-  const queryCustomerId = new URLSearchParams(location.search).get('customerId');
   if ((queryPhone || queryCustomerId) && !selectedCustomer && loading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
           <button 
-            onClick={() => navigate(`${basePath}/customers`, { replace: true })}
+            onClick={() => {
+              if (openedFromList) {
+                navigate(`${basePath}/customers`, { replace: true });
+              } else {
+                navigate(-1);
+              }
+            }}
             className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
           >
             <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
@@ -213,7 +491,7 @@ const LoyalCustomers = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
         <button 
-          onClick={() => navigate('/vendor/dashboard')}
+          onClick={() => navigate(-1)}
           className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
         >
           <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
@@ -377,7 +655,11 @@ const LoyalCustomers = () => {
                     onClick={() => {
                       setIsHistoryOpen(false);
                       setSelectedCustomer(null);
-                      navigate(`${basePath}/customers`);
+                      if (openedFromList) {
+                        navigate(`${basePath}/customers`);
+                      } else {
+                        navigate(-1);
+                      }
                     }}
                     className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
                   >

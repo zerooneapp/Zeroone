@@ -509,7 +509,7 @@ const StaffInventory = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-[126px] space-y-3">
+      <main className="max-w-4xl mx-auto px-4 pt-[108px] space-y-3">
 
         {/* Search & Filter */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 space-y-3 shadow-sm">

@@ -81,7 +81,7 @@ const Navbar = () => {
   const navItems = isStaff
     ? [
       { icon: BiSolidHome, label: 'Home', path: '/staff' },
-      { icon: RiTeamFill, label: 'Bookings', path: '/staff/bookings' },
+      { icon: RiTeamFill, label: 'Clients', path: '/staff/bookings' },
       { icon: IoPersonCircleSharp, label: 'Account', path: '/staff/account' },
     ]
     : [
