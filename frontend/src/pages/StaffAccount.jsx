@@ -3,7 +3,7 @@ import {
   User, ShieldCheck, Calendar, Phone,
   LogOut, Briefcase, Award,
   CheckCircle, TrendingUp, IndianRupee, ArrowRight,
-  ChevronLeft, Star, Package
+  ChevronLeft, ChevronRight, Star, Package
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -121,96 +121,90 @@ const StaffAccount = () => {
           </div>
         </div>
 
-      <div className="px-3 py-4 space-y-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="px-4 mt-4 space-y-1.5 animate-in fade-in slide-in-from-bottom-5 duration-700">
         {/* Onboarding Date */}
-        <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl flex items-center justify-center shadow-sm shrink-0">
-              <Calendar size={18} strokeWidth={2.5} />
-            </div>
-            <div>
-              <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none mb-1">Onboarding Date</p>
-              <h3 className="text-xs font-black text-slate-900 dark:text-white tracking-tight">{formatDate(profile?.createdAt)}</h3>
-            </div>
+        <div className="bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-[10px] bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+            <Calendar size={18} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1 leading-none">
+            <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight leading-none mb-1">Onboarding Date</p>
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">{formatDate(profile?.createdAt)}</p>
           </div>
         </div>
 
         {/* Primary Branch */}
-        <div className="bg-white dark:bg-gray-900 px-5 py-4 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 text-primary dark:text-white rounded-xl flex items-center justify-center border border-slate-100 dark:border-gray-700/50 shrink-0">
-                <Briefcase size={20} strokeWidth={2.5} className="opacity-80" />
-              </div>
-              <div>
-                <p className="text-[8px] font-black text-slate-400 capitalize tracking-widest leading-none mb-1">Primary Branch</p>
-                <h3 className="text-xs font-black text-slate-900 dark:text-white tracking-tight">{profile?.vendorId?.shopName || 'Partner Hub'}</h3>
-              </div>
-            </div>
-            {profile?.vendorId?.ownerId?.phone && (
-              <a href={`tel:${profile.vendorId.ownerId.phone}`} className="w-9 h-9 bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all outline-none">
-                <Phone size={16} strokeWidth={3} />
-              </a>
-            )}
+        <div className="bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-[10px] bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+            <Briefcase size={18} strokeWidth={2.5} />
           </div>
+          <div className="flex-1 leading-none">
+            <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight leading-none mb-1">Primary Branch</p>
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">{profile?.vendorId?.shopName || 'Partner Hub'}</p>
+          </div>
+          {profile?.vendorId?.ownerId?.phone && (
+            <a href={`tel:${profile.vendorId.ownerId.phone}`} className="w-9 h-9 bg-[#00246b] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all outline-none">
+              <Phone size={16} strokeWidth={3} />
+            </a>
+          )}
         </div>
 
-          <button
-            onClick={() => navigate('/staff/inventory')}
-            className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 active:scale-[0.98] transition-all shadow-sm"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-500">
-                <Package size={18} strokeWidth={2.5} />
-              </div>
-              <div className="text-left">
-                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Stock Management</h4>
-                <p className="text-[10px] font-bold text-slate-400">Manage inventory stock</p>
-              </div>
-            </div>
-            <ArrowRight size={16} className="text-slate-300" />
-          </button>
-
-          <button
-            onClick={() => navigate('/staff/history')}
-            className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 active:scale-[0.98] transition-all shadow-sm mt-3"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-500">
-                <Calendar size={18} strokeWidth={2.5} />
-              </div>
-              <div className="text-left">
-                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">History</h4>
-                <p className="text-[10px] font-bold text-slate-400">View bookings & earnings history</p>
-              </div>
-            </div>
-            <ArrowRight size={16} className="text-slate-300" />
-          </button>
-
-          <button
-            onClick={() => navigate('/staff/reviews')}
-            className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 active:scale-[0.98] transition-all shadow-sm mt-3"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl text-yellow-500">
-                <Star size={18} strokeWidth={2.5} />
-              </div>
-              <div className="text-left">
-                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Reviews</h4>
-                <p className="text-[10px] font-bold text-slate-400">View customer feedback & ratings</p>
-              </div>
-            </div>
-            <ArrowRight size={16} className="text-slate-300" />
-          </button>
-        </div>
-
-        <button
-          onClick={() => setShowLogoutConfirm(true)}
-          className="w-full h-11 bg-slate-50 dark:bg-gray-900 text-rose-500 rounded-[2.2rem] flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-[0.2em] border border-slate-200/50 dark:border-gray-800 active:scale-95 transition-all shadow-sm group"
+        {/* Stock Management */}
+        <div
+          onClick={() => navigate('/staff/inventory')}
+          className="group bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3.5 active:scale-[0.98] transition-all shadow-sm cursor-pointer"
         >
-          <LogOut size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-          Sign Out
-        </button>
+          <div className="w-10 h-10 rounded-[10px] bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+            <Package size={18} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1 leading-none">
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">STOCK MANAGEMENT</p>
+            <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none">Manage inventory stock</p>
+          </div>
+          <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
+        </div>
+
+        {/* History */}
+        <div
+          onClick={() => navigate('/staff/history')}
+          className="group bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3.5 active:scale-[0.98] transition-all shadow-sm cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-[10px] bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+            <Calendar size={18} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1 leading-none">
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">HISTORY</p>
+            <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none">View bookings & earnings history</p>
+          </div>
+          <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
+        </div>
+
+        {/* Reviews */}
+        <div
+          onClick={() => navigate('/staff/reviews')}
+          className="group bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3.5 active:scale-[0.98] transition-all shadow-sm cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-[10px] bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+            <Star size={18} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1 leading-none">
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">REVIEWS</p>
+            <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none">View customer feedback & ratings</p>
+          </div>
+          <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
+        </div>
+
+        {/* Sign Out */}
+        <div className="pt-2">
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-red-500/30 dark:border-red-500/30 text-red-500 dark:text-red-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
+          >
+            <LogOut size={16} strokeWidth={3} />
+            SIGN OUT
+          </button>
+        </div>
+      </div>
       </div>
 
       <AnimatePresence>

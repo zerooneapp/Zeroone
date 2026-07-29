@@ -204,60 +204,38 @@ const StaffDashboard = () => {
                   ) : currentTask ? (
                      <motion.div
                         key={currentTask._id || 'task'}
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
                         onClick={() => {
                            const phone = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
                            const name = currentTask.walkInCustomerName || currentTask.userId?.name || '';
                            const customerId = currentTask.userId?._id || currentTask._id;
                            navigate(`/staff/customers?phone=${phone}&customerId=${customerId}&name=${encodeURIComponent(name)}`);
                         }}
-                        className="bg-white dark:bg-gray-900 p-3 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between gap-2"
+                        className="relative bg-white dark:bg-gray-900 p-2 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group cursor-pointer"
                      >
                         {(() => {
                            const phoneNum = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
                            const customerName = currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client';
                            const serviceNames = currentTask.services?.map(s => s.name || s.serviceId?.name).filter(Boolean).join(', ') || 'Service Task';
-                           const staffName = user?.name || 'Staff';
+                           
+                           let isTimeOver = false;
+                           if (currentTask.endTime) {
+                              isTimeOver = new Date(currentTask.endTime).getTime() < Date.now();
+                           } else if (currentTask.startTime) {
+                              isTimeOver = new Date(currentTask.startTime).getTime() + (currentTask.totalDuration || 30) * 60000 < Date.now();
+                           }
 
                            return (
                               <>
-                                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                    <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-700/60 shrink-0 flex items-center justify-center">
-                                       {currentTask.userId?.image ? (
-                                          <img src={currentTask.userId.image} className="w-full h-full object-cover" alt="Client" />
-                                       ) : (
-                                          <img 
-                                             src={`https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=00246b&color=ffffff&bold=true`}
-                                             className="w-full h-full object-cover"
-                                             alt={customerName}
-                                          />
-                                       )}
-                                    </div>
-                                    <div className="min-w-0 space-y-0.5">
-                                       <h3 className="text-[13px] font-black text-slate-900 dark:text-white leading-tight truncate">
-                                          {customerName}
-                                       </h3>
-                                       <p className="text-[10px] font-bold text-slate-700 dark:text-gray-200 leading-tight">
-                                          {serviceNames}
-                                       </p>
-                                       <div className="text-[8px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-tight flex items-center gap-1 flex-wrap">
-                                          <span className="text-[#00246b] dark:text-blue-400 font-black">{formatTime(currentTask.startTime)}</span>
-                                          <span className="opacity-40">&bull;</span>
-                                          <Clock size={8} className="text-slate-400 shrink-0" />
-                                          <span>{currentTask.totalDuration || 30} MIN</span>
-                                       </div>
-                                    </div>
-                                 </div>
-
-                                 {/* Right Side: Phone Icon & Done Button */}
-                                 <div className="flex items-center gap-1.5 shrink-0 z-10">
+                                 {/* Right side: Phone + Done */}
+                                 <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1.5 z-10">
                                     {phoneNum ? (
                                        <a
                                           href={`tel:${phoneNum}`}
                                           onClick={(e) => e.stopPropagation()}
-                                          className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-gray-800 border border-slate-200/60 dark:border-gray-700 text-[#00246b] dark:text-white flex items-center justify-center active:scale-95 transition-all shadow-sm"
+                                          className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
                                           title="Call Customer"
                                        >
                                           <Phone size={12} strokeWidth={2.5} />
@@ -268,10 +246,47 @@ const StaffDashboard = () => {
                                           e.stopPropagation();
                                           handleStatusUpdate(currentTask._id, 'complete');
                                        }}
-                                       className="px-3 py-1.5 bg-[#00246b] hover:bg-[#001a52] text-white rounded-lg text-[8px] font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all"
+                                       className={`px-3 py-1.5 rounded-lg text-[8px] font-black tracking-widest active:scale-90 transition-all ${
+                                          isTimeOver
+                                             ? 'bg-rose-500/10 border border-rose-500/30 text-rose-500'
+                                             : 'text-white bg-[#00246b] shadow-[#00246b]/10 shadow-lg'
+                                       }`}
                                     >
                                        Done
                                     </button>
+                                 </div>
+
+                                 {/* Left: Avatar + Info */}
+                                 <div className="flex items-center gap-2.5 pr-24">
+                                    <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 shrink-0">
+                                       <img
+                                          src={currentTask.userId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=00246b&color=ffffff&bold=true`}
+                                          alt={customerName}
+                                          className="w-full h-full object-cover"
+                                       />
+                                    </div>
+                                    <div className="space-y-0 min-w-0">
+                                       <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight truncate">
+                                          {customerName}
+                                       </h4>
+                                       <div className="flex flex-col gap-0.5 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
+                                          <div className="flex items-center gap-1.5">
+                                             <Clock size={8} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+                                             <span className="text-[#00246b] dark:text-white uppercase">{formatTime(currentTask.startTime)}</span>
+                                             <span className="opacity-20">&bull;</span>
+                                             <span className="truncate max-w-[120px]">{serviceNames}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1.5">
+                                             <span className="uppercase">{currentTask.type === 'home' ? 'Home' : 'Shop'}</span>
+                                             {currentTask.totalDuration && (
+                                                <>
+                                                   <span className="opacity-20">&bull;</span>
+                                                   <span>{currentTask.totalDuration} min</span>
+                                                </>
+                                             )}
+                                          </div>
+                                       </div>
+                                    </div>
                                  </div>
                               </>
                            );
@@ -286,34 +301,87 @@ const StaffDashboard = () => {
                   )}
                </AnimatePresence>
 
-               {/* 📋 UPCOMING CLIENTS — Separate Section */}
+               {/* 📋 UPCOMING CLIENTS — Vendor-style cards */}
                {upcomingBookings.length > 0 && (
-                  <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-gray-800 shadow-sm overflow-hidden">
-                     <div className="px-4 pt-4 pb-2">
-                        <h3 className="text-[10px] font-black text-slate-800 dark:text-white tracking-tight opacity-80 uppercase">
-                           Upcoming Clients
-                        </h3>
-                     </div>
-                     <div className="px-3 pb-3 space-y-2">
-                        {upcomingBookings.map((booking) => (
-                           <div
+                  <div className="space-y-1">
+                     {upcomingBookings.map((booking, idx) => {
+                        const customerName = booking.walkInCustomerName || booking.userId?.name || 'Client';
+                        const phoneNum = booking.userId?.phone || booking.walkInCustomerPhone || '';
+                        const serviceNames = booking.services?.map(s => s.name || s.serviceId?.name).filter(Boolean).join(', ') || 'Service';
+                        const isTimeOver = booking.endTime
+                           ? new Date(booking.endTime).getTime() < Date.now()
+                           : new Date(booking.startTime).getTime() + (booking.totalDuration || 30) * 60000 < Date.now();
+
+                        return (
+                           <motion.div
                               key={booking._id}
-                              className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/80 px-2.5 py-2 dark:border-gray-800 dark:bg-gray-800/60"
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              className="relative bg-white dark:bg-gray-900 p-2 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group"
                            >
-                              <div className="min-w-0">
-                                 <p className="truncate text-[10px] font-black uppercase tracking-tight text-slate-900 dark:text-white">
-                                    {booking.userId?.name || booking.walkInCustomerName || 'Client'}
-                                 </p>
-                                 <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">
-                                    {formatTime(booking.startTime)} • {booking.type === 'home' ? 'Home' : 'Shop'}
-                                 </p>
+                              {/* Right side: Phone + Done */}
+                              <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1.5 z-10">
+                                 {phoneNum && (
+                                    <a
+                                       href={`tel:${phoneNum}`}
+                                       onClick={(e) => e.stopPropagation()}
+                                       className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
+                                       title="Call Customer"
+                                    >
+                                       <Phone size={12} strokeWidth={2.5} />
+                                    </a>
+                                 )}
+                                 <button
+                                    onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleStatusUpdate(booking._id, 'complete');
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-[8px] font-black tracking-widest active:scale-90 transition-all ${
+                                       isTimeOver
+                                          ? 'bg-rose-500/10 border border-rose-500/30 text-rose-500'
+                                          : 'text-white bg-[#00246b] shadow-[#00246b]/10 shadow-lg'
+                                    }`}
+                                 >
+                                    Done
+                                 </button>
                               </div>
-                              <p className="ml-3 max-w-[110px] truncate text-right text-[8px] font-black uppercase tracking-tight text-primary dark:text-white">
-                                 {booking.services?.map((service) => service.name || service.serviceId?.name).filter(Boolean).join(', ') || 'Service'}
-                              </p>
-                           </div>
-                        ))}
-                     </div>
+
+                              {/* Left: Avatar + Info */}
+                              <div className="flex items-center gap-2.5 pr-24">
+                                 <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 shrink-0">
+                                    <img
+                                       src={booking.userId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=00246b&color=ffffff&bold=true`}
+                                       alt={customerName}
+                                       className="w-full h-full object-cover"
+                                    />
+                                 </div>
+                                 <div className="space-y-0 min-w-0">
+                                    <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight truncate">
+                                       {customerName}
+                                    </h4>
+                                    <div className="flex flex-col gap-0.5 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
+                                       <div className="flex items-center gap-1.5">
+                                          <Clock size={8} className="text-[#00246b] dark:text-blue-400 shrink-0" />
+                                          <span className="text-[#00246b] dark:text-white uppercase">{formatTime(booking.startTime)}</span>
+                                          <span className="opacity-20">&bull;</span>
+                                          <span className="truncate max-w-[120px]">{serviceNames}</span>
+                                       </div>
+                                       <div className="flex items-center gap-1.5">
+                                          <span className="uppercase">{booking.type === 'home' ? 'Home' : 'Shop'}</span>
+                                          {booking.totalDuration && (
+                                             <>
+                                                <span className="opacity-20">&bull;</span>
+                                                <span>{booking.totalDuration} min</span>
+                                             </>
+                                          )}
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </motion.div>
+                        );
+                     })}
                   </div>
                )}
 

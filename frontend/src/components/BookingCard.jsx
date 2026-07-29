@@ -126,25 +126,34 @@ const BookingCard = ({ booking, onComplete, onCancel, loadingId, hasInStockProdu
             </div>
 
             {/* Action buttons for active bookings */}
-            {(booking.status === 'confirmed' || booking.status === 'pending_completion') && (
-               <div className="flex gap-1.5">
-                  <button
-                     disabled={(booking.status === 'confirmed' ? !booking.canCancel : false) || isActionLoading}
-                     onClick={(e) => { e.stopPropagation(); onCancel(booking._id); }}
-                     className="h-8 w-8 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-lg flex items-center justify-center active:scale-95 transition-all border border-slate-100 dark:border-gray-700/50 disabled:opacity-30"
-                  >
-                     <XCircle size={14} />
-                  </button>
-                  <button
-                     disabled={isActionLoading}
-                     onClick={(e) => { e.stopPropagation(); onComplete(booking._id); }}
-                     className="h-8 px-3 bg-[#00246b] dark:bg-[#00246b] text-white rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                     {isActionLoading ? <div className="w-2.5 h-2.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle2 size={12} />}
-                     Complete
-                  </button>
-               </div>
-            )}
+             {(booking.status === 'confirmed' || booking.status === 'pending_completion') && (() => {
+                const isTimeOver = booking.endTime
+                   ? new Date(booking.endTime).getTime() < Date.now()
+                   : new Date(booking.startTime).getTime() + (booking.totalDuration || 30) * 60000 < Date.now();
+                return (
+                   <div className="flex gap-1.5">
+                      <button
+                         disabled={(booking.status === 'confirmed' ? !booking.canCancel : false) || isActionLoading}
+                         onClick={(e) => { e.stopPropagation(); onCancel(booking._id); }}
+                         className="h-8 w-8 bg-slate-50 dark:bg-gray-800 text-rose-500 rounded-lg flex items-center justify-center active:scale-95 transition-all border border-slate-100 dark:border-gray-700/50 disabled:opacity-30"
+                      >
+                         <XCircle size={14} />
+                      </button>
+                      <button
+                         disabled={isActionLoading}
+                         onClick={(e) => { e.stopPropagation(); onComplete(booking._id); }}
+                         className={`h-8 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-50 ${
+                            isTimeOver
+                               ? 'bg-rose-500/10 border border-rose-500/30 text-rose-500'
+                               : 'bg-[#00246b] dark:bg-[#00246b] text-white'
+                         }`}
+                      >
+                         {isActionLoading ? <div className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <CheckCircle2 size={12} />}
+                         Complete
+                      </button>
+                   </div>
+                );
+             })()}
 
             {/* Add Product button for completed/cancelled bookings */}
             {(booking.status === 'completed' || booking.status === 'cancelled') && hasInStockProducts && (
