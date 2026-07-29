@@ -145,35 +145,34 @@ const StaffDashboard = () => {
          </div>
 
          <main className="p-4 space-y-3.5 pt-[100px]">
-            {/* 📊 4 STAT CARDS GRID (MATCHING VENDOR SIDE) */}
             <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1.5">
                <div 
                   onClick={() => navigate('/staff/history')}
                   className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
-                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Today revenue</p>
-                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">₹{todayRevenue}</p>
+                  <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today revenue</p>
+                  <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">₹{todayRevenue}</p>
                </div>
                <div 
                   onClick={() => navigate('/staff/bookings', { state: { tab: 'completed' } })}
                   className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
-                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Today clients</p>
-                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">{todayClients}</p>
+                  <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today clients</p>
+                  <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">{todayClients}</p>
                </div>
                <div 
                   onClick={() => navigate('/staff/bookings', { state: { tab: 'completed' } })}
                   className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
-                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Services done</p>
-                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">{servicesDone}</p>
+                  <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
+                  <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">{servicesDone}</p>
                </div>
                <div 
                   onClick={() => navigate('/staff/bookings', { state: { tab: 'upcoming' } })}
                   className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
-                  <p className="text-[8px] font-black text-slate-400 dark:text-gray-400 tracking-tighter leading-none mb-2 truncate">Upcoming</p>
-                  <p className="text-[13px] font-black text-slate-900 dark:text-white leading-none">{upcomingCount}</p>
+                  <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
+                  <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">{upcomingCount}</p>
                </div>
             </div>
 
