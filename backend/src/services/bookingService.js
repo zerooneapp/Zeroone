@@ -91,7 +91,9 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
 
   // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
   const vendor = await Vendor.findById(vendorId);
-  if (!vendor || vendor.status !== 'active' || vendor.isActive === false) {
+  const { getUpdatedStatus } = require('./walletService');
+  const liveStatus = vendor ? await getUpdatedStatus(vendor) : 'inactive';
+  if (!vendor || liveStatus !== 'active' || vendor.isActive === false) {
     throw new Error('Partner is currently not accepting new bookings (Account Inactive)');
   }
 

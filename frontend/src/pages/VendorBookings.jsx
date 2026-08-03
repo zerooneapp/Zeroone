@@ -198,7 +198,7 @@ const VendorBookings = () => {
         </div>
       </header>
 
-      <main className="px-4 pt-[165px] pb-24 max-w-4xl mx-auto space-y-3 min-h-[calc(100vh-20px)] flex flex-col">
+      <main className="px-4 pt-[165px] pb-2 max-w-4xl mx-auto space-y-3">
         {!closuresLoading && closures.length > 0 && (
           <section className="space-y-3">
             {closures.map(({ closure, impactedBookings, vendor }) => (
@@ -302,7 +302,8 @@ const VendorBookings = () => {
               key="empty"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex-1 flex flex-col items-center justify-center text-center space-y-4 my-auto py-12 min-h-[50vh]"
+              className="fixed inset-x-0 flex flex-col items-center justify-center text-center space-y-4 pointer-events-none"
+              style={{ top: '128px', bottom: '58px' }}
             >
               <div className="relative w-20 h-20 mx-auto">
                 <div className="absolute inset-0 bg-[#00246b]/10 rounded-[2.5rem] animate-pulse" />
@@ -318,61 +319,61 @@ const VendorBookings = () => {
               </div>
             </motion.div>
           ) : (
-            <motion.div
-              key="list"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-2.5"
-            >
-              {paginatedBookings.map((booking) => (
-                <BookingCard
-                  key={booking._id}
-                  booking={booking}
-                  loadingId={actionLoadingId}
-                  onComplete={(id) => handleAction(id, 'complete')}
-                  onCancel={(id) => handleAction(id, 'cancel')}
-                  hasInStockProducts={hasInStockProducts}
-                />
-              ))}
+              <motion.div
+                key="list"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-2.5 overflow-y-auto"
+              >
+                {paginatedBookings.map((booking) => (
+                  <BookingCard
+                    key={booking._id}
+                    booking={booking}
+                    loadingId={actionLoadingId}
+                    onComplete={(id) => handleAction(id, 'complete')}
+                    onCancel={(id) => handleAction(id, 'cancel')}
+                    hasInStockProducts={hasInStockProducts}
+                  />
+                ))}
 
-              {totalPages > 1 ? (
-                <div className="flex items-center justify-between pt-4 pb-6 px-2">
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => {
-                      setCurrentPage(p => Math.max(1, p - 1));
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
-                  >
-                    <ChevronLeft size={14} />
-                    <span>PREV</span>
-                  </button>
+                {totalPages > 1 ? (
+                  <div className="flex items-center justify-between pt-4 pb-6 px-2">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => {
+                        setCurrentPage(p => Math.max(1, p - 1));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                    >
+                      <ChevronLeft size={14} />
+                      <span>PREV</span>
+                    </button>
 
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500">
-                    Page <span className="text-slate-900 dark:text-white font-black">{currentPage}</span> of {totalPages}
-                  </span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500">
+                      Page <span className="text-slate-900 dark:text-white font-black">{currentPage}</span> of {totalPages}
+                    </span>
 
-                  <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => {
-                      setCurrentPage(p => Math.min(totalPages, p + 1));
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
-                  >
-                    <span>NEXT</span>
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
-              ) : (
-                <div className="pt-8 text-center pb-12">
-                  <p className="text-[8px] font-black uppercase text-gray-300 dark:text-gray-700 tracking-[0.3em]">End of Roster</p>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => {
+                        setCurrentPage(p => Math.min(totalPages, p + 1));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl text-[10px] font-black text-slate-700 dark:text-gray-200 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all shadow-sm"
+                    >
+                      <span>NEXT</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pt-8 text-center pb-12">
+                    <p className="text-[8px] font-black uppercase text-gray-300 dark:text-gray-700 tracking-[0.3em]">End of Roster</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
       </main>
 
       {isClosureModalOpen && (

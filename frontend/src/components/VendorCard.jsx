@@ -23,16 +23,18 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
       )}
       onClick={() => navigate(`/service/${vendor._id}`)}
     >
-      {/* Top: Image HUB (Balanced Visual) */}
+      {/* Top: Image HUB */}
       <div className="relative w-full aspect-[16/5.2] min-h-[110px] overflow-hidden">
-        <img
-          src={vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage || 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'}
-          alt={vendor.shopName}
-          className="w-full h-full object-cover bg-gray-100 opacity-90 transition-transform duration-700"
-          onError={(e) => {
-            e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200';
-          }}
-        />
+        {(vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage) ? (
+          <img
+            src={vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage}
+            alt={vendor.shopName}
+            className="w-full h-full object-cover opacity-90 transition-transform duration-700"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
+        )}
         {!vendor.isShopOpen && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
             <span className="bg-white text-[#00246b] px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg">Closed</span>

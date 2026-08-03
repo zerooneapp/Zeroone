@@ -110,7 +110,7 @@ const LoyalCustomers = () => {
     }
   }, [isStaff, queryPhone, queryCustomerId, queryName]);
 
-  const handleViewHistory = async (customer, fromList = false) => {
+  const handleViewHistory = async (customer, fromList = false, skipNavigate = false) => {
     setOpenedFromList(fromList);
     setSelectedCustomer(customer);
     setIsHistoryOpen(true);
@@ -118,7 +118,9 @@ const LoyalCustomers = () => {
     setActiveHistoryTab('services');
     setHistoryBookingsPage(1);
     setHistoryProductsPage(1);
-    navigate(`${basePath}/customers?phone=${customer.phone}`);
+    if (!skipNavigate) {
+      navigate(`${basePath}/customers?phone=${customer.phone}`);
+    }
     try {
       const data = await fetchCustomerBookingHistory(
         customer._id,
@@ -174,7 +176,7 @@ const LoyalCustomers = () => {
 
         if (matchingCustomer) {
           openedPhoneRef.current = targetKey;
-          handleViewHistory(matchingCustomer);
+          handleViewHistory(matchingCustomer, false, true);
         } else if (!loading) {
           openedPhoneRef.current = targetKey;
           handleViewHistory({
@@ -182,7 +184,7 @@ const LoyalCustomers = () => {
             name: queryName || 'Customer',
             phone: queryPhone || '',
             isWalkIn: true
-          });
+          }, false, true);
         }
       }
     } else {
@@ -461,10 +463,10 @@ const LoyalCustomers = () => {
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
           <button 
             onClick={() => {
-              if (openedFromList) {
-                navigate(`${basePath}/customers`, { replace: true });
-              } else {
+              if (queryCustomerId) {
                 navigate(-1);
+              } else {
+                navigate(`${basePath}/customers`, { replace: true });
               }
             }}
             className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
@@ -492,7 +494,7 @@ const LoyalCustomers = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`${basePath}/dashboard`)}
           className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
         >
           <ChevronLeft size={18} className="text-slate-600 dark:text-gray-300" />
@@ -656,10 +658,10 @@ const LoyalCustomers = () => {
                     onClick={() => {
                       setIsHistoryOpen(false);
                       setSelectedCustomer(null);
-                      if (openedFromList) {
-                        navigate(`${basePath}/customers`);
-                      } else {
+                      if (queryCustomerId) {
                         navigate(-1);
+                      } else {
+                        navigate(`${basePath}/customers`);
                       }
                     }}
                     className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"

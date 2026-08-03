@@ -298,7 +298,14 @@ const getNearbyVendors = async (req, res) => {
 
     const vendors = await Vendor.aggregate(pipeline);
 
-    const enrichedVendors = await Promise.all(vendors.map(async (v) => {
+    const { getUpdatedStatus } = require('../services/walletService');
+
+    const enrichedVendorsWithNulls = await Promise.all(vendors.map(async (v) => {
+      const vendorDoc = await Vendor.findById(v._id);
+      if (!vendorDoc) return null;
+      const liveStatus = await getUpdatedStatus(vendorDoc);
+      if (liveStatus !== 'active' || vendorDoc.isActive === false) return null;
+
       const operationalShopOpen = await getOperationalShopOpen(v);
       const allServices = await Service.find({ vendorId: v._id, isActive: true })
         .select('_id name price image images duration showOnHome type category')
@@ -353,6 +360,8 @@ const getNearbyVendors = async (req, res) => {
         services: allServices
       });
     }));
+
+    const enrichedVendors = enrichedVendorsWithNulls.filter(Boolean);
 
     const modeFilteredVendors = normalizedServiceType === 'all'
       ? enrichedVendors

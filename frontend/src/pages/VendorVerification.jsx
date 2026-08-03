@@ -1,23 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Clock, CheckCircle2, ArrowRight, Loader2, FileSearch } from 'lucide-react';
+import { ShieldCheck, Clock, CheckCircle2, ArrowRight, Loader2, FileSearch, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import confetti from 'canvas-confetti';
+import toast from 'react-hot-toast';
+import { cn } from '../utils/cn';
 
 const VendorVerification = () => {
-  const { logout, restoreSession } = useAuthStore();
+  const { logout, restoreSession, user } = useAuthStore();
   const navigate = useNavigate();
   const [status, setStatus] = useState('pending');
   const [loading, setLoading] = useState(true);
+
+  const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  const currentShopId = localStorage.getItem('activeVendorId') || user?.lastActiveVendorId;
+  const currentShop = user?.shops?.find(s => s._id === currentShopId) || user?.shops?.[0];
+
+  const handleSwitchShop = async (shopId) => {
+    try {
+      await api.patch('/auth/switch-shop', { vendorId: shopId });
+      localStorage.setItem('activeVendorId', shopId);
+      const updatedUser = { ...user, lastActiveVendorId: shopId };
+      useAuthStore.getState().updateUser(updatedUser);
+      setIsShopDropdownOpen(false);
+      toast.success('Shop switched successfully');
+      window.location.reload();
+    } catch (err) {
+      toast.error('Failed to switch shop');
+    }
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/vendor-login');
   };
 
+  const currentShopStatus = currentShop?.status;
+
   useEffect(() => {
+    if (currentShopStatus && ['active', 'approved', 'inactive'].includes(currentShopStatus)) {
+      navigate('/vendor/dashboard', { replace: true });
+      return;
+    }
+
     let active = true;
     let intervalId = null;
 
@@ -30,24 +57,11 @@ const VendorVerification = () => {
         setStatus(currentStatus);
         setLoading(false);
 
-        if (currentStatus === 'approved' || currentStatus === 'active') {
+        if (['approved', 'active', 'inactive'].includes(currentStatus)) {
           active = false;
           if (intervalId) clearInterval(intervalId);
-
-          // 🔄 CRITICAL: Re-hydrate auth store so ProtectedRoute knows status is active!
           await restoreSession();
-
-          // Success!
-          confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#00246b', '#10B981', '#F59E0B']
-          });
-          
-          setTimeout(() => {
-            navigate('/vendor/dashboard', { replace: true });
-          }, 3000);
+          navigate('/vendor/dashboard', { replace: true });
         }
       } catch (err) {
         console.error('Status check failed', err);
@@ -66,10 +80,68 @@ const VendorVerification = () => {
       active = false;
       if (intervalId) clearInterval(intervalId);
     };
-  }, [navigate, restoreSession]);
+  }, [navigate, restoreSession, currentShopStatus]);
 
   return (
-    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 text-[#00246b] dark:text-white flex flex-col items-center justify-center p-4 xs:p-6 text-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 text-[#00246b] dark:text-white flex flex-col items-center justify-center p-4 xs:p-6 text-center relative overflow-hidden pt-20">
+      {/* Header Switcher for Verification Screen */}
+      {user?.shops && user.shops.length > 1 && (
+        <header className="fixed top-0 left-0 right-0 z-50 px-6 pt-[48px] pb-3 flex items-center justify-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400">Manage:</span>
+            <div className="relative">
+              <button
+                onClick={() => setIsShopDropdownOpen(!isShopDropdownOpen)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00246b]/5 dark:bg-white/5 hover:bg-[#00246b]/10 rounded-full transition-all text-[11px] font-black uppercase tracking-tight text-[#00246b] dark:text-white border border-[#00246b]/10 dark:border-white/10"
+              >
+                <span className="truncate max-w-[120px]">{currentShop?.shopName || 'Select Shop'}</span>
+                <ChevronDown size={12} className={cn("transition-transform duration-200", isShopDropdownOpen && "rotate-180")} />
+              </button>
+
+              <AnimatePresence>
+                {isShopDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 overflow-hidden"
+                  >
+                    <div className="py-1.5 max-h-60 overflow-y-auto">
+                      <div className="px-3 py-1 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                        Your Shops
+                      </div>
+                      {user.shops.map((shop) => {
+                        const isSelected = shop._id === currentShop?._id;
+                        return (
+                          <button
+                            key={shop._id}
+                            onClick={() => handleSwitchShop(shop._id)}
+                            className={cn(
+                              "w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-between",
+                              isSelected 
+                                ? "text-[#00246b] bg-[#00246b]/5 dark:text-white dark:bg-white/5" 
+                                : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            )}
+                          >
+                            <span className="truncate">{shop.shopName}</span>
+                            <span className={cn(
+                              "text-[8px] px-1.5 py-0.5 rounded uppercase font-bold",
+                              shop.status === 'active' || shop.status === 'approved' ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
+                            )}>
+                              {shop.status}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </header>
+      )}
+
       {/* Decorative Gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
