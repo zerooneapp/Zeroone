@@ -109,6 +109,13 @@ export const removeFCMToken = async () => {
         const messaging = await getMessagingInstance();
         if (!messaging) return false;
         
+        const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY }).catch(() => null);
+        if (currentToken) {
+            import('../services/api').then(({ default: api }) => {
+                api.delete('/fcm/remove', { data: { token: currentToken } }).catch(() => {});
+            });
+        }
+
         const deleted = await deleteToken(messaging);
         if (deleted) {
             console.log('[FCM] Token deleted successfully');

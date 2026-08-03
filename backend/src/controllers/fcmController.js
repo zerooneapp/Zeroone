@@ -51,18 +51,24 @@ const removeFcmToken = async (req, res) => {
         const { token } = req.body;
         if (!token) return res.status(400).json({ message: 'Token is required' });
 
-        const actor = req.user || req.staff;
-        let entity = await User.findById(actor?._id);
-        if (!entity && req.staff) entity = await Staff.findById(actor?._id);
+        console.log('[FCM-DEBUG] Received remove token request for token:', token.slice(0, 15) + '...');
 
-        if (!entity) return res.status(404).json({ message: 'Entity not found' });
+        // Unlink token globally across User and Staff collections
+        await Promise.all([
+            User.updateMany(
+                { $or: [{ fcmTokens: token }, { fcmTokenMobile: token }] },
+                { $pull: { fcmTokens: token, fcmTokenMobile: token } }
+            ),
+            Staff.updateMany(
+                { $or: [{ fcmTokens: token }, { fcmTokenMobile: token }] },
+                { $pull: { fcmTokens: token, fcmTokenMobile: token } }
+            )
+        ]);
 
-        if (entity.fcmTokens) entity.fcmTokens = entity.fcmTokens.filter(t => t !== token);
-        if (entity.fcmTokenMobile) entity.fcmTokenMobile = entity.fcmTokenMobile.filter(t => t !== token);
-
-        await entity.save();
+        console.log('[FCM-DEBUG] Token unlinked successfully from all accounts');
         res.status(200).json({ message: 'Token removed successfully' });
     } catch (error) {
+        console.error('[FCM-DEBUG-ERROR] Token removal failed:', error.message);
         res.status(500).json({ message: error.message });
     }
 };
