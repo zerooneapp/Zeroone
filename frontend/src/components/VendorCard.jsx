@@ -24,7 +24,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
       onClick={() => navigate(`/service/${vendor._id}`)}
     >
       {/* Top: Image HUB */}
-      <div className="relative w-full aspect-[16/5.2] min-h-[110px] overflow-hidden">
+      <div className="relative w-full aspect-[16/5.2] min-h-[110px] overflow-hidden bg-slate-100 dark:bg-gray-800/80 flex items-center justify-center">
         {(vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage) ? (
           <img
             src={vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage}
@@ -33,7 +33,9 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
             onError={(e) => { e.target.style.display = 'none'; }}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
+          <div className="flex flex-col items-center justify-center text-slate-400 dark:text-gray-500 gap-1">
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">No Image Available</span>
+          </div>
         )}
         {!vendor.isShopOpen && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center">

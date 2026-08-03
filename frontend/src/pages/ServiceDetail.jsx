@@ -947,26 +947,15 @@ const ServiceDetail = () => {
                         src={slide.url}
                         className="w-full h-full object-cover"
                         alt={`${vendor.shopName} gallery ${idx + 1}`}
-                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200'; }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     </div>
                   )}
                 </div>
               ))
             ) : (
-              <div
-                className="w-full h-full snap-center cursor-pointer"
-                onClick={() => {
-                  setLightboxImg("https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200");
-                  setLightboxType('image');
-                  setZoomScale(1);
-                }}
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&q=80&w=1200"
-                  className="w-full h-full object-cover"
-                  alt="placeholder"
-                />
+              <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-400 gap-1">
+                <span className="text-xs font-black uppercase tracking-widest opacity-60">No Image Available</span>
               </div>
             )}
 
