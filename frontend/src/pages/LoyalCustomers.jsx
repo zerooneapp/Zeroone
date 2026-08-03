@@ -83,6 +83,7 @@ const LoyalCustomers = () => {
   useEffect(() => {
     if (isStaff && (queryPhone || queryCustomerId)) {
       const fetchHistoryDirect = async () => {
+        setIsHistoryOpen(true);
         setHistoryLoading(true);
         setSelectedCustomer({
           _id: queryCustomerId || queryPhone,

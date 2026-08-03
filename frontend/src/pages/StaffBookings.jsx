@@ -168,7 +168,7 @@ const StaffBookings = () => {
       </div>
 
       {/* Assignments List Area */}
-      <div className="p-4 pt-[160px] space-y-3">
+      <div className="p-4 pt-[160px] pb-24 space-y-3 min-h-[calc(100vh-20px)] flex flex-col">
         <AnimatePresence mode="wait">
           {loading ? (
             <div className="space-y-3 px-1">
@@ -222,7 +222,7 @@ const StaffBookings = () => {
               )}
             </div>
           ) : (
-            <div className="py-24 text-center space-y-6">
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 my-auto py-12 min-h-[50vh]">
               <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mx-auto text-gray-200">
                 <ClipboardList size={40} />
               </div>

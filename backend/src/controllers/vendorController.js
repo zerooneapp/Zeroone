@@ -970,6 +970,10 @@ const getCustomerBookingHistory = async (req, res) => {
 
     if (phone && phone !== 'Unknown' && phone !== '') {
       conditions.push({ walkInCustomerPhone: phone });
+      const user = await User.findOne({ phone }).select('_id');
+      if (user) {
+        conditions.push({ userId: user._id });
+      }
     }
 
     if (name && name !== 'Unknown' && name !== '') {

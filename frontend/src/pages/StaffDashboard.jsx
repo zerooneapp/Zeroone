@@ -196,7 +196,7 @@ const StaffDashboard = () => {
 
 
             {/* 📟 THE SINGLE ACTIVE ASSIGNMENT QUEUE */}
-            <div className="space-y-3.5">
+            <div className="space-y-2">
                <AnimatePresence mode="wait">
                   {loading ? (
                      <motion.div key="loading" className="h-40 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl animate-pulse" />
@@ -302,7 +302,7 @@ const StaffDashboard = () => {
 
                {/* 📋 UPCOMING CLIENTS — Vendor-style cards */}
                {upcomingBookings.length > 0 && (
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                      {upcomingBookings.map((booking, idx) => {
                         const customerName = booking.walkInCustomerName || booking.userId?.name || 'Client';
                         const phoneNum = booking.userId?.phone || booking.walkInCustomerPhone || '';
@@ -317,7 +317,13 @@ const StaffDashboard = () => {
                               initial={{ opacity: 0, y: 8 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: idx * 0.05 }}
-                              className="relative bg-white dark:bg-gray-900 p-2 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group"
+                              onClick={() => {
+                                 const phone = booking.userId?.phone || booking.walkInCustomerPhone || booking.customerPhone || booking.phone || '';
+                                 const name = booking.walkInCustomerName || booking.userId?.name || '';
+                                 const customerId = booking.userId?._id || booking._id;
+                                 navigate(`/staff/customers?phone=${phone}&customerId=${customerId}&name=${encodeURIComponent(name)}`);
+                              }}
+                              className="relative bg-white dark:bg-gray-900 p-2 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group cursor-pointer"
                            >
                               {/* Right side: Phone + Done */}
                               <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1.5 z-10">

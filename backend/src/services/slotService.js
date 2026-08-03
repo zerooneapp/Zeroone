@@ -186,7 +186,7 @@ const getEligibleStaffMembers = async (vendorId, serviceIds) => {
   return staffMembers.sort((a, b) => (a.isOwner === b.isOwner ? 0 : a.isOwner ? 1 : -1));
 };
 
-const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookingId = null, includeUnavailable = false) => {
+const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookingId = null, includeUnavailable = false, staffId = null) => {
   const now = moment().tz('Asia/Kolkata');
   const targetDate = moment.tz(date, 'Asia/Kolkata').startOf('day');
   const vendorAvailability = await getVendorDayAvailability(vendorId, targetDate);
@@ -208,7 +208,10 @@ const calculateAvailableSlots = async (vendorId, serviceIds, date, excludeBookin
 
   await ensureOwnerStaff(vendorId);
 
-  const staffMembers = await getEligibleStaffMembers(vendorId, serviceIds);
+  let staffMembers = await getEligibleStaffMembers(vendorId, serviceIds);
+  if (staffId) {
+    staffMembers = staffMembers.filter((staff) => staff._id.toString() === staffId.toString());
+  }
   if (staffMembers.length === 0) return [];
 
   const staffIds = staffMembers.map((staff) => staff._id);

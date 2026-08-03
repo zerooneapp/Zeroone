@@ -12,7 +12,7 @@ const slotCache = new Map();
 
 const getAvailableSlots = async (req, res) => {
   try {
-    const { vendorId, serviceIds, date, excludeBookingId, includeUnavailable } = req.query;
+    const { vendorId, serviceIds, date, excludeBookingId, includeUnavailable, staffId } = req.query;
     if (!vendorId || !serviceIds || !date) {
       return res.status(400).json({ message: 'vendorId, serviceIds, and date are required' });
     }
@@ -21,8 +21,8 @@ const getAvailableSlots = async (req, res) => {
       ? serviceIds 
       : (typeof serviceIds === 'string' ? serviceIds.split(',').map(id => id.trim()) : [serviceIds]);
     
-    // Cache Key: vendorId:date:serviceIds_hash
-    const cacheKey = `${vendorId}:${date}:${services.sort().join(',')}`;
+    // Cache Key: vendorId:date:staffId:serviceIds_hash
+    const cacheKey = `${vendorId}:${date}:${staffId || 'all'}:${services.sort().join(',')}`;
     
     // Check if the selected date is a weekly off day
     const vendor = await Vendor.findById(vendorId).select('weeklyOff').lean();
@@ -38,7 +38,8 @@ const getAvailableSlots = async (req, res) => {
       services, 
       date, 
       excludeBookingId, 
-      includeUnavailable === 'true'
+      includeUnavailable === 'true',
+      staffId
     );
     
     // Store in Cache

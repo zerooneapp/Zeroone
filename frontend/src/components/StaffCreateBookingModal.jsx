@@ -125,6 +125,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
 
   const fetchSlots = async () => {
     const vendorId = staffProfile?.vendorId?._id || staffProfile?.vendorId;
+    const staffId = staffProfile?._id || staffProfile?.id;
     if (!vendorId) return;
 
     try {
@@ -135,6 +136,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
           serviceIds: formData.serviceIds.join(','),
           date: formData.date,
           includeUnavailable: true,
+          staffId: staffId || undefined,
         }
       });
       setAvailableSlots(res.data?.availableSlots || []);
