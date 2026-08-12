@@ -29,6 +29,31 @@ const getMessagingInstance = async () => {
     return messagingInstance;
 };
 
+// Wait until a Service Worker registration has an active worker
+const waitForServiceWorkerActive = (registration) => {
+    return new Promise((resolve) => {
+        // Already active — return immediately
+        if (registration.active) {
+            resolve(registration);
+            return;
+        }
+
+        // SW is installing/waiting — listen for state change
+        const sw = registration.installing || registration.waiting;
+        if (sw) {
+            sw.addEventListener('statechange', function handler() {
+                if (this.state === 'activated') {
+                    sw.removeEventListener('statechange', handler);
+                    resolve(registration);
+                }
+            });
+        } else {
+            // Fallback: wait for navigator.serviceWorker.ready
+            navigator.serviceWorker.ready.then(() => resolve(registration));
+        }
+    });
+};
+
 const registerMessagingServiceWorker = async () => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
         console.log('[FCM] Service worker is not supported in this browser.');
@@ -36,19 +61,24 @@ const registerMessagingServiceWorker = async () => {
     }
 
     try {
-        const existingRegistration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
-        if (existingRegistration) {
-            return existingRegistration;
+        let registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+
+        if (!registration) {
+            registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            console.log('[FCM] Service worker registered for messaging.');
         }
 
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        console.log('[FCM] Service worker registered for messaging.');
+        // ✅ FIX: Wait for SW to be fully active before returning
+        // Firebase getToken() requires an ACTIVE service worker, not just registered
+        await waitForServiceWorkerActive(registration);
+        console.log('[FCM] Service worker is active and ready.');
         return registration;
     } catch (err) {
         console.log('[FCM] Failed to register messaging service worker:', err);
         return null;
     }
 };
+
 
 export const requestForToken = async () => {
     try {
@@ -87,22 +117,24 @@ export const requestForToken = async () => {
     }
 };
 
-export const onMessageListener = () =>
-    new Promise(async (resolve, reject) => {
-        try {
-            const messaging = await getMessagingInstance();
-            if (!messaging) {
-                resolve(null);
-                return;
-            }
+// ✅ FIX: Persistent listener — registers a callback that fires for EVERY notification
+// Old Promise-based approach only worked for the FIRST notification, then died
+export const onMessageListener = (callback) => {
+    let unsubscribe = () => {};
 
-            onMessage(messaging, (payload) => {
-                resolve(payload);
-            });
-        } catch (error) {
-            reject(error);
-        }
+    getMessagingInstance().then((messaging) => {
+        if (!messaging) return;
+        // onMessage returns an unsubscribe function
+        unsubscribe = onMessage(messaging, (payload) => {
+            if (callback) callback(payload);
+        });
+    }).catch((err) => {
+        console.log('[FCM] onMessageListener setup failed:', err);
     });
+
+    // Return cleanup function for useEffect
+    return () => unsubscribe();
+};
 
 export const removeFCMToken = async () => {
     try {
@@ -117,7 +149,8 @@ export const removeFCMToken = async () => {
         if (currentToken) {
             try {
                 const { default: api } = await import('../services/api');
-                await api.delete('/fcm/remove', { data: { token: currentToken } });
+                // ✅ FIX: Correct route URL — was '/fcm/remove', should be '/fcm-tokens/remove'
+                await api.delete('/fcm-tokens/remove', { data: { token: currentToken } });
                 console.log('[FCM] Token removed from backend successfully');
             } catch (apiErr) {
                 console.log('[FCM] Backend token removal failed (non-critical):', apiErr?.message);

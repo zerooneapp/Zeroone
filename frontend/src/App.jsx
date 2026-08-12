@@ -122,25 +122,26 @@ function App() {
   // Global socket listener for authenticated users
   useSocket(user?._id);
 
-  // Foreground Notification Listener
+  // Foreground Notification Listener (persistent — works for every notification)
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      onMessageListener()
-        .then((payload) => {
-          if (!payload?.notification) return;
-          console.log('[App.jsx] Foreground notification:', payload);
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
 
-          // Only show Toast in foreground to avoid double notifications (system + toast)
-          toast.success(
-            <div>
-              <b>{payload.notification.title}</b>
-              <p className="text-sm">{payload.notification.body}</p>
-            </div>,
-            { duration: 5000 }
-          );
-        })
-        .catch((err) => console.log('failed: ', err));
-    }
+    // ✅ FIX: onMessageListener now takes a callback and returns a cleanup fn
+    // Old .then() approach only fired for the FIRST notification, then stopped
+    const unsubscribe = onMessageListener((payload) => {
+      if (!payload?.notification) return;
+      console.log('[App.jsx] Foreground notification:', payload);
+
+      toast.success(
+        <div>
+          <b>{payload.notification.title}</b>
+          <p className="text-sm">{payload.notification.body}</p>
+        </div>,
+        { duration: 5000 }
+      );
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
   }, []);
 
   // Restore Session on Mount

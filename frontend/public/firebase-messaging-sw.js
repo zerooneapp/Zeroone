@@ -30,9 +30,13 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: '/logo.png', // Assuming there's a logo.png in public
+        icon: '/logo.jpeg',
         data: payload.data
     };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    // ✅ FIX: return the promise so the SW doesn't get terminated before the
+    // notification actually gets shown, and log any failure instead of failing silently.
+    return self.registration.showNotification(notificationTitle, notificationOptions)
+        .then(() => console.log('[firebase-messaging-sw.js] Notification shown:', notificationTitle))
+        .catch((err) => console.error('[firebase-messaging-sw.js] showNotification failed:', err));
 });
