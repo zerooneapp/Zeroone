@@ -112,7 +112,19 @@ export const useAuthStore = create(
         }
       },
 
-      logout: () => {
+      logout: async () => {
+        // ✅ FIX STEP 1: Remove FCM token from backend FIRST (auth token still valid in localStorage)
+        // This ensures the API call succeeds before we wipe the session
+        try {
+          const { removeFCMToken } = await import('../config/firebase');
+          if (removeFCMToken) {
+            await removeFCMToken();
+          }
+        } catch (e) {
+          console.log('[Auth] FCM token removal during logout failed (non-critical):', e?.message);
+        }
+
+        // ✅ FIX STEP 2: NOW clear the session (after FCM token is safely removed)
         set({
           user: null,
           token: null,
@@ -127,16 +139,10 @@ export const useAuthStore = create(
         });
         localStorage.removeItem('token');
         localStorage.removeItem('auth-storage');
-        
-        // Also clear notifications & Firebase push token
+
+        // Clear notifications
         import('./notificationStore').then((module) => {
           module.default.getState().clearNotifications();
-        }).catch(() => {});
-        
-        import('../config/firebase').then((module) => {
-          if (module.removeFCMToken) {
-            module.removeFCMToken();
-          }
         }).catch(() => {});
       },
 

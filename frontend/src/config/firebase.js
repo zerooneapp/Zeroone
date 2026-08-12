@@ -108,19 +108,28 @@ export const removeFCMToken = async () => {
     try {
         const messaging = await getMessagingInstance();
         if (!messaging) return false;
-        
+
+        // Get the current token BEFORE deleting it locally
         const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY }).catch(() => null);
+
+        // ✅ FIX: Properly await the backend API call so token is removed from DB
+        // while the auth token is still valid (before localStorage.removeItem('token'))
         if (currentToken) {
-            import('../services/api').then(({ default: api }) => {
-                api.delete('/fcm/remove', { data: { token: currentToken } }).catch(() => {});
-            });
+            try {
+                const { default: api } = await import('../services/api');
+                await api.delete('/fcm/remove', { data: { token: currentToken } });
+                console.log('[FCM] Token removed from backend successfully');
+            } catch (apiErr) {
+                console.log('[FCM] Backend token removal failed (non-critical):', apiErr?.message);
+            }
         }
 
+        // Now delete the token from Firebase locally
         const deleted = await deleteToken(messaging);
         if (deleted) {
-            console.log('[FCM] Token deleted successfully');
+            console.log('[FCM] Token deleted from Firebase successfully');
         } else {
-            console.log('[FCM] Failed to delete token');
+            console.log('[FCM] Failed to delete token from Firebase');
         }
         return deleted;
     } catch (err) {
