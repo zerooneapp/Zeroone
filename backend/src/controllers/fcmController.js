@@ -22,6 +22,19 @@ const saveFcmToken = async (req, res) => {
             return res.status(404).json({ message: 'User/Staff not found' });
         }
 
+        // 🛡️ SECURITY SWEEP: Remove this token from ALL other accounts to prevent cross-contamination
+        // This heals the database if tokens were entangled during the old logout bug.
+        await Promise.all([
+            User.updateMany(
+                { $or: [{ fcmTokens: token }, { fcmTokenMobile: token }] },
+                { $pull: { fcmTokens: token, fcmTokenMobile: token } }
+            ),
+            Staff.updateMany(
+                { $or: [{ fcmTokens: token }, { fcmTokenMobile: token }] },
+                { $pull: { fcmTokens: token, fcmTokenMobile: token } }
+            )
+        ]);
+
         if (platform === 'mobile' || platform === 'app') {
             if (!entity.fcmTokenMobile) entity.fcmTokenMobile = [];
             if (!entity.fcmTokenMobile.includes(token)) {
