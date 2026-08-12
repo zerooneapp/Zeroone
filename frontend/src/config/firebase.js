@@ -106,6 +106,8 @@ export const requestForToken = async () => {
         });
         if (currentToken) {
             console.log('[FCM] Current FCM Token:', currentToken);
+            // ✅ FIX: Cache the token so we can safely delete it during logout without relying on Firebase
+            localStorage.setItem('fcm_token', currentToken);
             return currentToken;
         } else {
             console.log('[FCM] No registration token available.');
@@ -141,20 +143,23 @@ export const removeFCMToken = async () => {
         const messaging = await getMessagingInstance();
         if (!messaging) return false;
 
-        // Get the current token BEFORE deleting it locally
-        const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY }).catch(() => null);
+        // ✅ FIX: Retrieve the cached token from localStorage instead of relying on getToken()
+        // getToken() often fails during logout if the Service Worker isn't immediately available,
+        // causing the backend API call to be skipped and leaving ghost tokens in the DB.
+        const currentToken = localStorage.getItem('fcm_token');
 
-        // ✅ FIX: Properly await the backend API call so token is removed from DB
+        // Properly await the backend API call so token is removed from DB
         // while the auth token is still valid (before localStorage.removeItem('token'))
         if (currentToken) {
             try {
                 const { default: api } = await import('../services/api');
-                // ✅ FIX: Correct route URL — was '/fcm/remove', should be '/fcm-tokens/remove'
                 await api.delete('/fcm-tokens/remove', { data: { token: currentToken } });
                 console.log('[FCM] Token removed from backend successfully');
             } catch (apiErr) {
                 console.log('[FCM] Backend token removal failed (non-critical):', apiErr?.message);
             }
+        } else {
+            console.log('[FCM] No cached token found to remove from backend.');
         }
 
         // Now delete the token from Firebase locally
@@ -164,6 +169,9 @@ export const removeFCMToken = async () => {
         } else {
             console.log('[FCM] Failed to delete token from Firebase');
         }
+
+        // Clean up the cache
+        localStorage.removeItem('fcm_token');
         return deleted;
     } catch (err) {
         console.log('[FCM] Error deleting token:', err);
