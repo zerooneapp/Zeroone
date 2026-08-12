@@ -180,13 +180,19 @@ class NotificationService {
       }
 
       // 📝 6. Log Transaction for Persistence
-      await NotificationLog.create({
-        notificationId,
-        userId,
-        tokens,
-        successCount: response.successCount,
-        failureCount: response.failureCount
-      });
+      await NotificationLog.updateOne(
+        { notificationId },
+        {
+          $set: {
+            userId,
+            tokens,
+            successCount: response.successCount,
+            failureCount: response.failureCount,
+            createdAt: new Date()
+          }
+        },
+        { upsert: true }
+      );
 
       // 🧹 7. Token Cleanup on failures
       const invalidTokens = [];
