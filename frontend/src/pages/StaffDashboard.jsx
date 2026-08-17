@@ -16,6 +16,8 @@ import useSocket from '../hooks/useSocket';
 import Navbar from '../layouts/Navbar';
 import NotificationDrawer from '../components/NotificationDrawer';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentModal';
+import RevenueBreakdownModal from '../components/RevenueBreakdownModal';
 import StaffCreateBookingModal from '../components/StaffCreateBookingModal';
 
 const StaffDashboard = () => {
@@ -28,6 +30,7 @@ const StaffDashboard = () => {
    const [loading, setLoading] = useState(myBookings.length === 0 && !user);
    const [showNotifications, setShowNotifications] = useState(false);
    const [confirmModal, setConfirmModal] = useState({ isOpen: false, bookingId: null });
+   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
    const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
    const activeBookings = bookings.filter(
       (booking) => booking.status === 'confirmed' || booking.status === 'assigned' || booking.status === 'pending' || booking.status === 'pending_completion'
@@ -42,9 +45,9 @@ const StaffDashboard = () => {
       await executeStatusUpdate(bookingId, action);
    };
 
-   const executeStatusUpdate = async (bookingId, action) => {
+   const executeStatusUpdate = async (bookingId, action, paymentType = null) => {
       try {
-         await api.patch(`/bookings/${bookingId}/status`, { action });
+         await api.patch(`/bookings/${bookingId}/status`, { action, paymentType });
          toast.success(`Booking updated successfully!`, {
             icon: action === 'complete' ? '✅' : '🚀',
             style: {
@@ -111,6 +114,8 @@ const StaffDashboard = () => {
    const todayCompletedBookings = todayBookings.filter(b => b.status === 'completed');
    
    const todayRevenue = todayCompletedBookings.reduce((sum, b) => sum + (Number(b.totalPrice) || 0), 0);
+   const todayOnlineRevenue = todayCompletedBookings.filter(b => b.paymentType === 'online').reduce((sum, b) => sum + (Number(b.totalPrice) || 0), 0);
+   const todayOfflineRevenue = todayCompletedBookings.filter(b => b.paymentType !== 'online').reduce((sum, b) => sum + (Number(b.totalPrice) || 0), 0);
    const todayClients = todayBookings.length;
    const servicesDone = todayCompletedBookings.length;
    const upcomingCount = activeBookings.length;
@@ -147,7 +152,7 @@ const StaffDashboard = () => {
          <main className="p-4 space-y-3.5 pt-[100px]">
             <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1.5">
                <div 
-                  onClick={() => navigate('/staff/history')}
+                  onClick={() => setIsRevenueModalOpen(true)}
                   className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                >
                   <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today revenue</p>
@@ -396,15 +401,23 @@ const StaffDashboard = () => {
          <Navbar />
          <NotificationDrawer isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
 
-         <GlassConfirmationModal
+         <CompleteBookingPaymentModal
             isOpen={confirmModal.isOpen}
             onClose={() => setConfirmModal({ isOpen: false, bookingId: null })}
-            onConfirm={() => executeStatusUpdate(confirmModal.bookingId, 'complete')}
-            title="Job Completed"
-            message="Are you sure the service is fully completed? This will release the revenue."
-            confirmText="Yes, Done"
-            cancelText="Not Yet"
+            onConfirm={(paymentType) => executeStatusUpdate(confirmModal.bookingId, 'complete', paymentType)}
+            title="Complete Booking"
+            message="Are you sure this booking is fully completed? Please select the payment method:"
          />
+
+         {isRevenueModalOpen && (
+            <RevenueBreakdownModal
+               isOpen={isRevenueModalOpen}
+               onClose={() => setIsRevenueModalOpen(false)}
+               onlineAmount={todayOnlineRevenue}
+               offlineAmount={todayOfflineRevenue}
+               totalAmount={todayRevenue}
+            />
+         )}
 
          {isNewBookingOpen && (
             <StaffCreateBookingModal

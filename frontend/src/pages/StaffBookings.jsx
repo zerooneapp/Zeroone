@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import Navbar from '../layouts/Navbar';
 import CancellationModal from '../components/CancellationModal';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentModal';
 import BookingCard from '../components/BookingCard';
 
 const StaffBookings = () => {
@@ -101,7 +102,7 @@ const StaffBookings = () => {
   }, [filteredBookings, currentPage]);
 
 
-  const handleStatusUpdate = async (bookingId, action, reason = '') => {
+  const handleStatusUpdate = async (bookingId, action, reason = '', paymentType = null) => {
     if (action === 'cancel' && !reason) {
       setSelectedBookingId(bookingId);
       setIsCancelModalOpen(true);
@@ -109,7 +110,7 @@ const StaffBookings = () => {
     }
     try {
       setActionLoadingId(bookingId);
-      await api.patch(`/bookings/${bookingId}/status`, { action, reason });
+      await api.patch(`/bookings/${bookingId}/status`, { action, reason, paymentType });
       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
       fetchBookings();
     } catch (err) {
@@ -246,20 +247,18 @@ const StaffBookings = () => {
         onConfirm={(reason) => handleStatusUpdate(selectedBookingId, 'cancel', reason)}
       />
 
-      <GlassConfirmationModal
+      <CompleteBookingPaymentModal
         isOpen={isCompleteModalOpen}
         onClose={() => {
           setIsCompleteModalOpen(false);
           setSelectedBookingId(null);
         }}
-        onConfirm={() => {
-          handleStatusUpdate(selectedBookingId, 'complete');
+        onConfirm={(paymentType) => {
+          handleStatusUpdate(selectedBookingId, 'complete', '', paymentType);
           setIsCompleteModalOpen(false);
         }}
         title="Complete Booking"
-        message="Are you sure this booking is fully completed? This will finalize the revenue."
-        confirmText="Yes, Complete"
-        cancelText="Not Yet"
+        message="Are you sure this booking is fully completed? Please select the payment method:"
       />
     </div>
   );

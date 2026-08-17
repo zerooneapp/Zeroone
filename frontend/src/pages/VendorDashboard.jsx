@@ -46,6 +46,8 @@ import NotificationDrawer from '../components/NotificationDrawer';
 import CreateSlotModal from '../components/CreateSlotModal';
 import EmergencyClosureModal from '../components/EmergencyClosureModal';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentModal';
+import RevenueBreakdownModal from '../components/RevenueBreakdownModal';
 import { cn } from '../utils/cn';
 
 const prettifyTransactionLabel = (value = '') =>
@@ -80,6 +82,7 @@ const VendorDashboard = () => {
   const [showWalletValue, setShowWalletValue] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState('all');
   const [completeBookingModal, setCompleteBookingModal] = useState({ isOpen: false, bookingId: null });
+  const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
 
   // Client History States
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -298,14 +301,14 @@ const VendorDashboard = () => {
     setCompleteBookingModal({ isOpen: true, bookingId: id });
   };
 
-  const executeCompleteBooking = async () => {
+  const executeCompleteBooking = async (paymentType = null) => {
     const id = completeBookingModal.bookingId;
     if (!id) return;
 
     try {
-      await api.patch(`/bookings/${id}/status`, { action: 'complete' });
+      await api.patch(`/bookings/${id}/status`, { action: 'complete', paymentType });
       toast.success('Booking marked as completed', {
-        icon: '\u2705'
+        icon: '✅'
       });
       fetchDashboard(true);
     } catch (err) {
@@ -513,7 +516,8 @@ return (
       <section className="px-0.5">
         <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1 pb-0">
           <div 
-            className="bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden"
+            onClick={() => setIsRevenueModalOpen(true)}
+            className="cursor-pointer bg-white dark:bg-gray-900 py-2 px-2 rounded-lg border border-[#00246b]/10 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today revenue</p>
             {loading ? (
@@ -761,14 +765,22 @@ return (
 
     {/* Enhanced Glass Confirmation Modal */}
     {completeBookingModal.isOpen && (
-      <GlassConfirmationModal
+      <CompleteBookingPaymentModal
         isOpen={completeBookingModal.isOpen}
         onClose={() => setCompleteBookingModal({ isOpen: false, bookingId: null })}
-        onConfirm={executeCompleteBooking}
+        onConfirm={(paymentType) => executeCompleteBooking(paymentType)}
         title="Complete Booking"
-        message="Are you sure this booking is fully completed? This will finalize the revenue."
-        confirmText="Yes, Complete"
-        cancelText="Not Yet"
+        message="Are you sure this booking is fully completed? Please select the payment method:"
+      />
+    )}
+
+    {isRevenueModalOpen && (
+      <RevenueBreakdownModal
+        isOpen={isRevenueModalOpen}
+        onClose={() => setIsRevenueModalOpen(false)}
+        onlineAmount={data?.stats?.todayOnlineEarnings || 0}
+        offlineAmount={data?.stats?.todayOfflineEarnings || 0}
+        totalAmount={data?.stats?.todayEarnings || 0}
       />
     )}
 

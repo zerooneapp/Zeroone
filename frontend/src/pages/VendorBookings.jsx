@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import EmergencyClosureModal from '../components/EmergencyClosureModal';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import CancellationModal from '../components/CancellationModal';
+import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentModal';
 
 const VendorBookings = () => {
   const navigate = useNavigate();
@@ -90,7 +91,7 @@ const VendorBookings = () => {
     await executeAction(id, action, reason);
   };
 
-  const executeAction = async (id, action, reason = '') => {
+  const executeAction = async (id, action, reason = '', paymentType = null) => {
     const originalBookings = [...bookings];
     setBookings(prev => prev.map(b =>
       b._id === id
@@ -100,7 +101,7 @@ const VendorBookings = () => {
 
     try {
       setActionLoadingId(id);
-      await api.patch(`/bookings/${id}/status`, { action, reason });
+      await api.patch(`/bookings/${id}/status`, { action, reason, paymentType });
       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`, {
         icon: action === 'complete' ? '✅' : '❌',
         style: {
@@ -385,14 +386,12 @@ const VendorBookings = () => {
       )}
 
       {completeBookingModal.isOpen && (
-        <GlassConfirmationModal
+        <CompleteBookingPaymentModal
           isOpen={completeBookingModal.isOpen}
           onClose={() => setCompleteBookingModal({ isOpen: false, bookingId: null })}
-          onConfirm={() => executeAction(completeBookingModal.bookingId, 'complete')}
+          onConfirm={(paymentType) => executeAction(completeBookingModal.bookingId, 'complete', '', paymentType)}
           title="Complete Booking"
-          message="Are you sure this booking is fully completed? This will finalize the revenue."
-          confirmText="Yes, Complete"
-          cancelText="Not Yet"
+          message="Are you sure this booking is fully completed? Please select the payment method:"
         />
       )}
 

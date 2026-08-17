@@ -1351,7 +1351,7 @@ const getVendorDashboardBundle = async (req, res) => {
         vendorId: new mongoose.Types.ObjectId(vendor._id), 
         startTime: { $gte: todayStart, $lt: todayEnd } 
       })
-        .select('startTime endTime totalDuration userId staffId services status totalPrice walkInCustomerName walkInCustomerPhone')
+        .select('startTime endTime totalDuration userId staffId services status totalPrice walkInCustomerName walkInCustomerPhone paymentType')
         .populate('userId', 'name image phone')
         .populate('staffId', 'name isOwner')
         .sort({ startTime: 1 })
@@ -1437,13 +1437,23 @@ const getVendorDashboardBundle = async (req, res) => {
     const totalServiceOnlyEarnings = totalEarnings - totalMembershipEarnings;
     const totalServiceEarnings = totalEarnings;
 
-    console.log(`[DASHBOARD-STATS] Vendor: ${vendor.shopName}, TodayServices: ₹${todayServiceRevenue}, TodayMemberships: ₹${todayMembershipRevenue}, TodayProducts: ₹${todayProductEarnings}`);
+    const todayOnlineEarnings = todayBookings
+      .filter(b => b.status === 'completed' && b.paymentType === 'online')
+      .reduce((acc, b) => acc + (b.totalPrice || 0), 0);
+
+    const todayOfflineEarnings = todayBookings
+      .filter(b => b.status === 'completed' && b.paymentType !== 'online')
+      .reduce((acc, b) => acc + (b.totalPrice || 0), 0);
+
+    console.log(`[DASHBOARD-STATS] Vendor: ${vendor.shopName}, TodayServices: ₹${todayServiceRevenue}, TodayMemberships: ₹${todayMembershipRevenue}, TodayProducts: ₹${todayProductEarnings}, TodayOnline: ₹${todayOnlineEarnings}, TodayOffline: ₹${todayOfflineEarnings}`);
 
     const stats = {
       todayBookings: todayBookings.filter(b => b.status !== 'cancelled').length,
       todayEarnings: todayServiceEarnings + todayProductEarnings,
       weekEarnings: (statsData[0]?.weekEarnings || 0) + todayProductEarnings,
       totalEarnings: totalServiceEarnings + totalProductEarnings,
+      todayOnlineEarnings,
+      todayOfflineEarnings,
       // Granular split for breakdown modal
       todayServiceEarnings,
       todayServiceOnlyEarnings,
@@ -1502,6 +1512,8 @@ const getVendorDashboardBundle = async (req, res) => {
         stats: {
           todayBookings: stats.todayBookings,
           todayEarnings: stats.todayEarnings,
+          todayOnlineEarnings: stats.todayOnlineEarnings,
+          todayOfflineEarnings: stats.todayOfflineEarnings,
           weekEarnings: stats.weekEarnings,
           totalEarnings: stats.totalEarnings,
           activeStaff: activeStaffMembers.length,

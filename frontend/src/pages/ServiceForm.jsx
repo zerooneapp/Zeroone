@@ -298,7 +298,7 @@ const ServiceForm = () => {
                         </span>
                      </div>
                      <div className="flex gap-2 lg:gap-3 overflow-x-auto no-scrollbar py-1">
-                        {[0, 5, 10, 15, 30].map(m => (
+                        {[0, 15, 30].map(m => (
                            <button
                               key={m}
                               type="button"

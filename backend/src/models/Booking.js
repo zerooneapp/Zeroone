@@ -24,6 +24,7 @@ const bookingSchema = new mongoose.Schema({
   type: { type: String, enum: ['shop', 'home'], default: 'shop' },
   serviceAddress: { type: String },
   status: { type: String, enum: ['pending', 'confirmed', 'completed', 'cancelled', 'pending_completion'], default: 'pending' },
+  paymentType: { type: String, enum: ['online', 'offline'] },
   completedAt: { type: Date },
   cancelReason: { type: String },
   cancelledByRole: { type: String, enum: ['customer', 'vendor', 'staff', 'admin', 'system'] },

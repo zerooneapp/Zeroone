@@ -209,7 +209,7 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
   return booking;
 };
 
-const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
+const markBookingComplete = async (userId, bookingId, actorStaffId = null, paymentType = null) => {
   const booking = await Booking.findById(bookingId).populate('vendorId staffId');
   if (!booking) throw new Error('Booking not found');
 
@@ -233,6 +233,9 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null) => {
   const completionTime = new Date();
   booking.status = 'completed';
   booking.completedAt = completionTime;
+  if (paymentType) {
+    booking.paymentType = paymentType;
+  }
   if (booking.endTime && completionTime < booking.endTime) {
     booking.endTime = completionTime;
   }
