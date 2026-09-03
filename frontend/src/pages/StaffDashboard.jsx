@@ -282,9 +282,12 @@ const StaffDashboard = () => {
                                           </div>
                                           <div className="flex items-center gap-1.5">
                                              <span className="uppercase">{currentTask.type === 'home' ? 'Home' : 'Shop'}</span>
+                                             <span className="opacity-20">&bull;</span>
+                                             <span className="truncate max-w-[60px]">{user?.name || 'Staff'}</span>
                                              {currentTask.totalDuration && (
                                                 <>
                                                    <span className="opacity-20">&bull;</span>
+                                                   <Clock size={8} className="text-slate-400 shrink-0" />
                                                    <span>{currentTask.totalDuration} min</span>
                                                 </>
                                              )}
@@ -379,9 +382,12 @@ const StaffDashboard = () => {
                                        </div>
                                        <div className="flex items-center gap-1.5">
                                           <span className="uppercase">{booking.type === 'home' ? 'Home' : 'Shop'}</span>
+                                          <span className="opacity-20">&bull;</span>
+                                          <span className="truncate max-w-[60px]">{user?.name || 'Staff'}</span>
                                           {booking.totalDuration && (
                                              <>
                                                 <span className="opacity-20">&bull;</span>
+                                                <Clock size={8} className="text-slate-400 shrink-0" />
                                                 <span>{booking.totalDuration} min</span>
                                              </>
                                           )}
