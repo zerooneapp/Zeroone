@@ -155,11 +155,18 @@ const VendorBookings = () => {
 
 
 
-  // Sort bookings chronologically by their start time
+  // Sort bookings: Completed and Cancelled showing newest (today's) first, Upcoming showing chronological
   const displayBookings = useMemo(() => {
     if (!bookings) return [];
-    return [...bookings].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-  }, [bookings]);
+    return [...bookings].sort((a, b) => {
+      const timeA = new Date(a.startTime).getTime();
+      const timeB = new Date(b.startTime).getTime();
+      if (status === 'completed' || status === 'cancelled') {
+        return timeB - timeA; // Newest / today's bookings first
+      }
+      return timeA - timeB; // Chronological order for upcoming
+    });
+  }, [bookings, status]);
 
   const ITEMS_PER_PAGE = 30;
 

@@ -11,8 +11,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/Button';
 
 const Account = () => {
-  const { user, logout } = useAuthStore();
+  const { user, role, logout } = useAuthStore();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (role === 'staff') {
+      navigate('/staff/account', { replace: true });
+    }
+  }, [role, navigate]);
 
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
