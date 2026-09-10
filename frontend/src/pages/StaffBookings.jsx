@@ -78,7 +78,7 @@ const StaffBookings = () => {
   }, []);
 
   const filteredBookings = useMemo(() => {
-    return bookings.filter(b => {
+    const list = bookings.filter(b => {
       if (activeTab === 'upcoming') {
         return b.status === 'confirmed' || b.status === 'assigned' || b.status === 'pending' || b.status === 'pending_completion';
       } else if (activeTab === 'completed') {
@@ -87,6 +87,15 @@ const StaffBookings = () => {
         return b.status === 'cancelled';
       }
       return false;
+    });
+
+    return list.sort((a, b) => {
+      const timeA = new Date(a.startTime).getTime();
+      const timeB = new Date(b.startTime).getTime();
+      if (activeTab === 'completed' || activeTab === 'cancelled') {
+        return timeB - timeA; // Newest / today's bookings first
+      }
+      return timeA - timeB; // Chronological order for upcoming
     });
   }, [bookings, activeTab]);
 

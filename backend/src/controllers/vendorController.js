@@ -1141,66 +1141,50 @@ const getLiveReport = async (req, res) => {
     const start = moment(from).tz('Asia/Kolkata').startOf('day').toDate();
     const end = moment(to).tz('Asia/Kolkata').endOf('day').toDate();
 
-    // Fetch vendor availability (weekly schedule) and closures in range
-    const [report, availability, closures] = await Promise.all([
-      Booking.aggregate([
-        {
-          $match: {
-            vendorId: vendor._id,
-            startTime: { $gte: start, $lte: end }
-          }
-        },
-        {
-          $group: {
-            _id: '$staffId',
-            totalBookings: { $sum: 1 },
-            totalEarning: {
-              $sum: {
-                $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
-              }
-            },
-            cancelledByStaff: {
-              $sum: {
-                $cond: [
-                  { 
-                    $and: [
-                      { $eq: ['$status', 'cancelled'] }, 
-                      { $eq: ['$cancelledByRole', 'staff'] }
-                    ] 
-                  }, 
-                  1, 
-                  0
-                ]
-              }
-            },
-            activeDays: {
-              $addToSet: {
-                $dateToString: { format: "%Y-%m-%d", date: "$startTime", timezone: "Asia/Kolkata" }
-              }
+    // Fetch all active non-deleted staff members for this vendor
+    const allStaff = await Staff.find({ vendorId: vendor._id, isDeleted: false }).lean();
+
+    // Aggregate booking stats per staff in date range
+    const bookingStatsMap = {};
+    const bookingAggregate = await Booking.aggregate([
+      {
+        $match: {
+          vendorId: vendor._id,
+          startTime: { $gte: start, $lte: end }
+        }
+      },
+      {
+        $group: {
+          _id: '$staffId',
+          totalBookings: { $sum: 1 },
+          totalEarning: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0]
+            }
+          },
+          cancelledByStaff: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ['$status', 'cancelled'] },
+                    { $eq: ['$cancelledByRole', 'staff'] }
+                  ]
+                },
+                1,
+                0
+              ]
             }
           }
-        },
-        {
-          $lookup: {
-            from: 'staffs',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'staffInfo'
-          }
-        },
-        { $unwind: { path: '$staffInfo', preserveNullAndEmptyArrays: false } },
-        {
-          $project: {
-            staffName: '$staffInfo.name',
-            totalBookings: 1,
-            totalEarning: 1,
-            cancelledByStaff: 1,
-            activeDays: 1,
-            attendance: { $size: '$activeDays' }
-          }
-        },
-        { $sort: { staffName: 1 } }
-      ]),
+        }
+      }
+    ]);
+
+    bookingAggregate.forEach(b => {
+      if (b._id) bookingStatsMap[b._id.toString()] = b;
+    });
+
+    const [availability, closures] = await Promise.all([
       VendorAvailability.find({ vendorId: vendor._id }).lean(),
       VendorClosure.find({
         vendorId: vendor._id,
@@ -1210,20 +1194,35 @@ const getLiveReport = async (req, res) => {
       }).lean()
     ]);
 
-    // Build availability map: day abbreviation -> { openTime, closeTime }
+    // Build availability map: day abbreviation -> { openTime, closeTime, isOpen }
     const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const availMap = {};
     availability.forEach(a => { availMap[a.day] = a; });
 
-    // For each staff row, compute halfDays using closures
-    const enriched = report.map(item => {
+    // Generate list of all calendar days in range [start, end]
+    const daysInRange = [];
+    let curr = moment(start).tz('Asia/Kolkata').startOf('day');
+    const lastDay = moment(end).tz('Asia/Kolkata').startOf('day');
+    while (curr.isSameOrBefore(lastDay)) {
+      daysInRange.push(curr.clone());
+      curr.add(1, 'day');
+    }
+
+    const enriched = allStaff.map(staffMember => {
+      const staffIdStr = staffMember._id.toString();
+      const bStats = bookingStatsMap[staffIdStr] || { totalBookings: 0, totalEarning: 0, cancelledByStaff: 0 };
+
       let fullDays = 0;
       let halfDays = 0;
 
-      (item.activeDays || []).forEach(dateStr => {
-        const dayMoment = moment.tz(dateStr, 'YYYY-MM-DD', 'Asia/Kolkata');
+      daysInRange.forEach(dayMoment => {
         const dayAbbr = DAY_ABBR[dayMoment.day()];
         const avail = availMap[dayAbbr];
+
+        // Check if shop is normally closed on this weekday
+        if (avail && avail.isOpen === false) {
+          return; // Shop off day
+        }
 
         // Default working hours: 9am–9pm (720 mins) if no availability record
         let workStart, workEnd;
@@ -1237,9 +1236,9 @@ const getLiveReport = async (req, res) => {
           workEnd = dayMoment.clone().hours(21).minutes(0).seconds(0);
         }
         const totalWorkMins = workEnd.diff(workStart, 'minutes');
-        if (totalWorkMins <= 0) { fullDays++; return; }
+        if (totalWorkMins <= 0) return;
 
-        // Sum closure minutes that overlap this working day
+        // Sum closure minutes (emergency closures / toggles off) overlapping this day
         let closedMins = 0;
         closures.forEach(c => {
           const cStart = moment(c.startTime).tz('Asia/Kolkata');
@@ -1252,18 +1251,22 @@ const getLiveReport = async (req, res) => {
         });
 
         const closedRatio = closedMins / totalWorkMins;
-        if (closedRatio >= 0.5) {
-          halfDays++;  // shop was closed for half or more of the working day
+        if (closedRatio >= 0.99) {
+          // Toggled off for full day (Emergency closure for entire day) -> not counted as full or half working day
+          return;
+        } else if (closedRatio >= 0.5) {
+          // Toggled off for half day or more
+          halfDays++;
         } else {
           fullDays++;
         }
       });
 
       return {
-        staffName: item.staffName,
-        totalBookings: item.totalBookings,
-        totalEarning: item.totalEarning,
-        cancelledByStaff: item.cancelledByStaff,
+        staffName: staffMember.name,
+        totalBookings: bStats.totalBookings,
+        totalEarning: bStats.totalEarning,
+        cancelledByStaff: bStats.cancelledByStaff,
         attendance: fullDays,
         halfDays
       };
