@@ -3,7 +3,7 @@ import {
    ClipboardList, CheckCircle, Clock,
    ShieldCheck, User, CheckCircle2,
    RefreshCw, Phone, Sun, Moon, Bell,
-   Lock, Play, LogOut, MapPin, CalendarPlus, Package
+   Lock, Play, LogOut, MapPin, CalendarPlus, Calendar, Package
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -159,22 +159,19 @@ const StaffDashboard = () => {
                   <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">₹{todayRevenue}</p>
                </div>
                <div 
-                  onClick={() => navigate('/staff/bookings', { state: { tab: 'completed' } })}
-                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden"
                >
                   <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Today clients</p>
                   <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">{todayClients}</p>
                </div>
                <div 
-                  onClick={() => navigate('/staff/bookings', { state: { tab: 'completed' } })}
-                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden"
                >
                   <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Services done</p>
                   <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">{servicesDone}</p>
                </div>
                <div 
-                  onClick={() => navigate('/staff/bookings', { state: { tab: 'upcoming' } })}
-                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-white dark:bg-gray-900 py-3 px-1 rounded-lg border border-slate-200/60 dark:border-gray-800 shadow-sm flex flex-col items-center justify-center text-center overflow-hidden"
                >
                   <p className="text-[8px] font-black text-[#00246b] dark:text-white tracking-tighter leading-none mb-2 truncate">Upcoming</p>
                   <p className="text-[13px] font-black text-[#00246b] dark:text-white leading-none">{upcomingCount}</p>
@@ -200,208 +197,117 @@ const StaffDashboard = () => {
 
 
 
-            {/* 📟 THE SINGLE ACTIVE ASSIGNMENT QUEUE */}
-            <div className="space-y-2">
-               <AnimatePresence mode="wait">
-                  {loading ? (
-                     <motion.div key="loading" className="h-40 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 rounded-2xl animate-pulse" />
-                  ) : currentTask ? (
-                     <motion.div
-                        key={currentTask._id || 'task'}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        onClick={() => {
-                           const phone = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
-                           const name = currentTask.walkInCustomerName || currentTask.userId?.name || '';
-                           const customerId = currentTask.userId?._id || currentTask._id;
-                           navigate(`/staff/customers?phone=${phone}&customerId=${customerId}&name=${encodeURIComponent(name)}`);
-                        }}
-                        className="relative bg-white dark:bg-gray-900 p-2 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group cursor-pointer"
-                     >
-                        {(() => {
-                           const phoneNum = currentTask.userId?.phone || currentTask.walkInCustomerPhone || currentTask.customerPhone || currentTask.phone || '';
-                           const customerName = currentTask.walkInCustomerName || currentTask.userId?.name || 'Walk-in Client';
-                           const serviceNames = currentTask.services?.map(s => s.name || s.serviceId?.name).filter(Boolean).join(', ') || 'Service Task';
-                           
-                           let isTimeOver = false;
-                           if (currentTask.endTime) {
-                              isTimeOver = new Date(currentTask.endTime).getTime() < Date.now();
-                           } else if (currentTask.startTime) {
-                              isTimeOver = new Date(currentTask.startTime).getTime() + (currentTask.totalDuration || 30) * 60000 < Date.now();
-                           }
+        <div className="px-0.5">
+          <h2 className="text-[10px] font-black text-[#00246b] dark:text-white tracking-tight opacity-80 uppercase">
+            Today's clients
+          </h2>
+        </div>
 
-                           return (
-                              <>
-                                 {/* Right side: Phone + Done */}
-                                 <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1.5 z-10">
-                                    {phoneNum ? (
-                                       <a
-                                          href={`tel:${phoneNum}`}
-                                          onClick={(e) => e.stopPropagation()}
-                                          className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
-                                          title="Call Customer"
-                                       >
-                                          <Phone size={12} strokeWidth={2.5} />
-                                       </a>
-                                    ) : null}
-                                    <button
-                                       onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleStatusUpdate(currentTask._id, 'complete');
-                                       }}
-                                       className={`px-3 py-1.5 rounded-lg text-[8px] font-black tracking-widest active:scale-90 transition-all ${
-                                          isTimeOver
-                                             ? 'bg-rose-500/10 border border-rose-500/30 text-rose-500'
-                                             : 'text-white bg-[#00246b] shadow-[#00246b]/10 shadow-lg'
-                                       }`}
-                                    >
-                                       Done
-                                    </button>
-                                 </div>
-
-                                 {/* Left: Avatar + Info */}
-                                 <div className="flex items-center gap-2.5 pr-24">
-                                    <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 shrink-0">
-                                       <img
-                                          src={currentTask.userId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=00246b&color=ffffff&bold=true`}
-                                          alt={customerName}
-                                          className="w-full h-full object-cover"
-                                       />
-                                    </div>
-                                    <div className="space-y-0 min-w-0">
-                                       <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight truncate">
-                                          {customerName}
-                                       </h4>
-                                       <div className="flex flex-col gap-0.5 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
-                                          <div className="flex items-center gap-1.5">
-                                             <Clock size={8} className="text-[#00246b] dark:text-blue-400 shrink-0" />
-                                             <span className="text-[#00246b] dark:text-white uppercase">{formatTime(currentTask.startTime)}</span>
-                                             <span className="opacity-20">&bull;</span>
-                                             <span className="truncate max-w-[120px]">{serviceNames}</span>
-                                          </div>
-                                          <div className="flex items-center gap-1.5">
-                                             <span className="uppercase">{currentTask.type === 'home' ? 'Home' : 'Shop'}</span>
-                                             <span className="opacity-20">&bull;</span>
-                                             <span className="truncate max-w-[60px]">{user?.name || 'Staff'}</span>
-                                             {currentTask.totalDuration && (
-                                                <>
-                                                   <span className="opacity-20">&bull;</span>
-                                                   <Clock size={8} className="text-slate-400 shrink-0" />
-                                                   <span>{currentTask.totalDuration} min</span>
-                                                </>
-                                             )}
-                                          </div>
-                                       </div>
-                                    </div>
-                                 </div>
-                              </>
-                           );
-                        })()}
-                     </motion.div>
-                  ) : (
-                     <motion.div key="empty" className="py-20 text-center space-y-6 bg-white dark:bg-gray-900/50 rounded-2xl border border-dashed border-slate-200/60 dark:border-gray-800 shadow-sm">
-                        <div className="w-20 h-20 bg-slate-50 dark:bg-gray-800 rounded-2xl shadow-inner flex items-center justify-center mx-auto border border-slate-100 dark:border-gray-700">
-                           <ClipboardList size={32} className="text-slate-200 dark:text-gray-700" />
-                        </div>
-                     </motion.div>
-                  )}
-               </AnimatePresence>
-
-               {/* 📋 UPCOMING CLIENTS — Vendor-style cards */}
-               {upcomingBookings.length > 0 && (
-                  <div className="space-y-2">
-                     {upcomingBookings.map((booking, idx) => {
-                        const customerName = booking.walkInCustomerName || booking.userId?.name || 'Client';
-                        const phoneNum = booking.userId?.phone || booking.walkInCustomerPhone || '';
-                        const serviceNames = booking.services?.map(s => s.name || s.serviceId?.name).filter(Boolean).join(', ') || 'Service';
-                        const isTimeOver = booking.endTime
-                           ? new Date(booking.endTime).getTime() < Date.now()
-                           : new Date(booking.startTime).getTime() + (booking.totalDuration || 30) * 60000 < Date.now();
-
-                        return (
-                           <motion.div
-                              key={booking._id}
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.05 }}
-                              onClick={() => {
-                                 const phone = booking.userId?.phone || booking.walkInCustomerPhone || booking.customerPhone || booking.phone || '';
-                                 const name = booking.walkInCustomerName || booking.userId?.name || '';
-                                 const customerId = booking.userId?._id || booking._id;
-                                 navigate(`/staff/customers?phone=${phone}&customerId=${customerId}&name=${encodeURIComponent(name)}`);
-                              }}
-                              className="relative bg-white dark:bg-gray-900 p-2 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group cursor-pointer"
-                           >
-                              {/* Right side: Phone + Done */}
-                              <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1.5 z-10">
-                                 {phoneNum && (
-                                    <a
-                                       href={`tel:${phoneNum}`}
-                                       onClick={(e) => e.stopPropagation()}
-                                       className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
-                                       title="Call Customer"
-                                    >
-                                       <Phone size={12} strokeWidth={2.5} />
-                                    </a>
-                                 )}
-                                 <button
-                                    onClick={(e) => {
-                                       e.stopPropagation();
-                                       handleStatusUpdate(booking._id, 'complete');
-                                    }}
-                                    className={`px-3 py-1.5 rounded-lg text-[8px] font-black tracking-widest active:scale-90 transition-all ${
-                                       isTimeOver
-                                          ? 'bg-rose-500/10 border border-rose-500/30 text-rose-500'
-                                          : 'text-white bg-[#00246b] shadow-[#00246b]/10 shadow-lg'
-                                    }`}
-                                 >
-                                    Done
-                                 </button>
-                              </div>
-
-                              {/* Left: Avatar + Info */}
-                              <div className="flex items-center gap-2.5 pr-24">
-                                 <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 shrink-0">
-                                    <img
-                                       src={booking.userId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=00246b&color=ffffff&bold=true`}
-                                       alt={customerName}
-                                       className="w-full h-full object-cover"
-                                    />
-                                 </div>
-                                 <div className="space-y-0 min-w-0">
-                                    <h4 className="text-[12px] font-black text-slate-800 dark:text-white leading-tight tracking-tight truncate">
-                                       {customerName}
-                                    </h4>
-                                    <div className="flex flex-col gap-0.5 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
-                                       <div className="flex items-center gap-1.5">
-                                          <Clock size={8} className="text-[#00246b] dark:text-blue-400 shrink-0" />
-                                          <span className="text-[#00246b] dark:text-white uppercase">{formatTime(booking.startTime)}</span>
-                                          <span className="opacity-20">&bull;</span>
-                                          <span className="truncate max-w-[120px]">{serviceNames}</span>
-                                       </div>
-                                       <div className="flex items-center gap-1.5">
-                                          <span className="uppercase">{booking.type === 'home' ? 'Home' : 'Shop'}</span>
-                                          <span className="opacity-20">&bull;</span>
-                                          <span className="truncate max-w-[60px]">{user?.name || 'Staff'}</span>
-                                          {booking.totalDuration && (
-                                             <>
-                                                <span className="opacity-20">&bull;</span>
-                                                <Clock size={8} className="text-slate-400 shrink-0" />
-                                                <span>{booking.totalDuration} min</span>
-                                             </>
-                                          )}
-                                       </div>
-                                    </div>
-                                 </div>
-                              </div>
-                           </motion.div>
-                        );
-                     })}
-                  </div>
-               )}
-
+        <div className="space-y-1">
+          {loading ? (
+            [1, 2, 3].map(i => (
+              <div key={i} className="h-16 bg-white dark:bg-gray-900 mx-0.5 rounded-lg animate-pulse border border-slate-100 dark:border-gray-800" />
+            ))
+          ) : activeBookings.length === 0 ? (
+            <div className="py-12 bg-white dark:bg-gray-900 rounded-lg border border-dashed border-slate-200 dark:border-gray-800 flex flex-col items-center justify-center gap-2 group shadow-sm mx-0.5">
+              <div className="w-10 h-10 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-slate-300 group-hover:text-[#00246b] transition-colors">
+                <Calendar size={18} />
+              </div>
+              <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">No appointments found</p>
             </div>
+          ) : (
+            activeBookings.map((item, idx) => {
+              const phoneNum = item.userId?.phone || item.walkInCustomerPhone || item.customerPhone || item.phone || '';
+              const customerName = item.walkInCustomerName || item.userId?.name || 'Client';
+              const customerId = item.userId?._id || item._id;
+              const serviceNames = item.services?.map(s => s.name || s.serviceId?.name).filter(Boolean).join(', ') || 'Service';
+              const totalDuration = item.totalDuration || item.services?.reduce((acc, s) => acc + (s.duration || s.serviceId?.duration || 0), 0) || 30;
+
+              let isTimeOver = false;
+              if (item.endTime) {
+                isTimeOver = new Date(item.endTime).getTime() < Date.now();
+              } else if (item.startTime) {
+                isTimeOver = new Date(item.startTime).getTime() + (item.totalDuration || 30) * 60000 < Date.now();
+              }
+
+              return (
+                <motion.div
+                  key={item._id || idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => {
+                    navigate(`/staff/customers?phone=${phoneNum}&customerId=${customerId}&name=${encodeURIComponent(customerName)}`);
+                  }}
+                  className="relative bg-white dark:bg-gray-900 p-2 mx-0.5 rounded-lg shadow-sm border border-[#00246b]/10 dark:border-gray-800 flex items-center group cursor-pointer hover:border-slate-300 dark:hover:border-gray-700/80 transition-colors"
+                >
+                  {/* Vertically Centered: Call + Done buttons */}
+                  <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1.5 z-10">
+                    {phoneNum && (
+                      <a
+                        href={`tel:${phoneNum}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 shadow-sm active:scale-95 transition-all text-[#00246b] dark:text-blue-400"
+                        title="Call Customer"
+                      >
+                        <Phone size={12} strokeWidth={2.5} />
+                      </a>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusUpdate(item._id, 'complete');
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-[8px] font-black tracking-widest active:scale-90 transition-all ${
+                        isTimeOver
+                          ? 'bg-rose-500/10 border border-rose-500/30 text-rose-500'
+                          : 'text-white bg-[#00246b] shadow-[#00246b]/10 shadow-lg'
+                      }`}
+                    >
+                      Done
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 pr-20">
+                    <div className="w-9 h-9 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-gray-800 group-hover:shadow-md transition-all shrink-0">
+                      <img
+                        src={item.userId?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(customerName)}&background=00246b&color=ffffff&bold=true`}
+                        alt={customerName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="space-y-0 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-[12px] font-black text-[#00246b] dark:text-white leading-tight tracking-tight truncate">
+                          {customerName}
+                        </h4>
+                      </div>
+                      <div className="flex flex-col gap-1 text-[8px] font-bold text-slate-400 tracking-tight mt-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[#00246b] dark:text-white uppercase">{formatTime(item.startTime)}</span>
+                          <span className="opacity-20">&bull;</span>
+                          <span className="truncate max-w-[150px]">{serviceNames}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="uppercase">{item.type === 'home' ? 'Home' : (item.staffType === 'owner' ? 'Owner' : 'Staff')}</span>
+                          <span className="opacity-20">&bull;</span>
+                          <span className="truncate max-w-[80px]">{item.staffName || user?.name || 'Staff'}</span>
+                          {totalDuration && (
+                            <>
+                              <span className="opacity-20">&bull;</span>
+                              <Clock size={8} className="text-slate-400 shrink-0" />
+                              <span>{totalDuration} min</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
          </main>
 
          <Navbar />
