@@ -1215,7 +1215,17 @@ const getLiveReport = async (req, res) => {
       let fullDays = 0;
       let halfDays = 0;
 
+      // Staff joining date in IST (days before joining date are not counted)
+      const staffJoiningDate = (staffMember.joiningDate || staffMember.createdAt)
+        ? moment(staffMember.joiningDate || staffMember.createdAt).tz('Asia/Kolkata').startOf('day')
+        : null;
+
       daysInRange.forEach(dayMoment => {
+        // If the date is before the staff joined the shop, do not count attendance
+        if (staffJoiningDate && dayMoment.isBefore(staffJoiningDate)) {
+          return;
+        }
+
         const dayAbbr = DAY_ABBR[dayMoment.day()];
         const avail = availMap[dayAbbr];
 

@@ -129,7 +129,7 @@ const StaffDashboard = () => {
    return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-32">
          {/* 🏙️ CLEAN MINIMAL HEADER (NO ITALIC) */}
-         <div className="px-4 pt-[48px] pb-3 bg-white/80 dark:bg-gray-900/80 fixed top-0 left-0 right-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
+         <div className="px-4 pt-[48px] md:pt-3 pb-3 bg-white/80 dark:bg-gray-900/80 fixed top-0 left-0 right-0 z-40 backdrop-blur-3xl border-b border-slate-200/60 dark:border-gray-800">
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-1">
                   <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center">
@@ -149,7 +149,7 @@ const StaffDashboard = () => {
             </div>
          </div>
 
-         <main className="p-4 space-y-3.5 pt-[100px]">
+         <main className="p-4 space-y-3.5 pt-[100px] md:pt-[70px]">
             <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-1.5">
                <div 
                   onClick={() => setIsRevenueModalOpen(true)}

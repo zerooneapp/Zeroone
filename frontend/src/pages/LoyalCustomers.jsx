@@ -209,7 +209,7 @@ const LoyalCustomers = () => {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col">
         {/* Dedicated Full-screen Header for Staff */}
-        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center justify-between gap-4">
+        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] md:pt-3 pb-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate(-1)}
@@ -290,7 +290,7 @@ const LoyalCustomers = () => {
         )}
 
         {/* Main Body */}
-        <main className={`p-4 overflow-y-auto flex-1 space-y-4 pb-24 ${historyProducts.length > 0 ? 'pt-4' : 'pt-[104px]'}`}>
+        <main className={`p-4 overflow-y-auto flex-1 space-y-4 pb-24 ${historyProducts.length > 0 ? 'pt-4' : 'pt-[104px] md:pt-[70px]'}`}>
           {historyLoading ? (
             <div className="py-24 flex flex-col items-center justify-center gap-3">
               <div className="w-8 h-8 border-4 border-t-[#00246b] border-slate-200 dark:border-gray-800 rounded-full animate-spin"></div>
@@ -460,7 +460,7 @@ const LoyalCustomers = () => {
   if ((queryPhone || queryCustomerId) && !selectedCustomer && loading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
-        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
+        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] md:pt-3 pb-3 flex items-center gap-4">
           <button 
             onClick={() => {
               if (queryCustomerId) {
@@ -492,7 +492,7 @@ const LoyalCustomers = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] md:pt-3 pb-3 flex items-center gap-4">
         <button 
           onClick={() => navigate(`${basePath}/dashboard`)}
           className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
@@ -504,7 +504,7 @@ const LoyalCustomers = () => {
         </h1>
       </header>
 
-      <main className="pt-[104px] px-4 space-y-4">
+      <main className="pt-[104px] md:pt-[70px] px-4 space-y-4">
         {/* Search & Filter */}
         <div className="space-y-3">
           <div className="relative">
@@ -652,7 +652,7 @@ const LoyalCustomers = () => {
             className="fixed inset-0 z-50 bg-slate-50 dark:bg-gray-950 flex flex-col"
           >
             <div className="w-full max-w-4xl mx-auto h-full flex flex-col bg-white dark:bg-gray-900">
-              <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center justify-between gap-4">
+              <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] md:pt-3 pb-3 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={() => {

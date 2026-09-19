@@ -84,7 +84,7 @@ const Signup = () => {
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
 
       {/* Header Overlay */}
-      <div className="absolute top-0 left-0 right-0 p-6 pt-16 z-20">
+      <div className="absolute top-0 left-0 right-0 p-6 pt-16 md:pt-6 z-20">
         <button
           onClick={() => navigate('/login', { state: { step: 'phone', phone } })}
           className="p-2.5 text-[#00246b] dark:text-white/70 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 active:scale-95 transition-all"

@@ -276,7 +276,7 @@ const StaffInventory = () => {
   if (historyItem) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 font-sans pb-24 text-slate-800 dark:text-white">
-        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] md:pt-3 pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSearchParams({})}
@@ -293,21 +293,18 @@ const StaffInventory = () => {
           <div className="flex items-center gap-2 bg-slate-50 dark:bg-gray-800 p-1.5 rounded-xl border border-slate-100 dark:border-gray-700">
             <button
               onClick={(e) => triggerAdjust(e, historyItem, -1)}
-              className="text-slate-400 hover:text-rose-500 active:scale-90 transition-all p-1"
-              title="Reduce stock"
+              className="w-7 h-7 flex items-center justify-center bg-white dark:bg-gray-700 rounded-lg text-slate-600 dark:text-white shadow-xs active:scale-90 border border-slate-200/60 dark:border-gray-600 transition-all font-bold"
+              title="Consume Stock (-1)"
             >
-              <MinusCircle size={16} />
+              <Minus size={13} strokeWidth={3} />
             </button>
-            <span className={cn(
-              "text-[13px] font-black w-8 text-center",
-              historyItem.stock <= historyItem.minStockLevel ? "text-rose-500" : "text-slate-800 dark:text-white"
-            )}>
+            <span className="text-[12px] font-black text-slate-800 dark:text-white px-1">
               {historyItem.stock}
             </span>
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto px-4 pt-[126px] space-y-3">
+        <main className="max-w-4xl mx-auto px-4 pt-[126px] md:pt-[76px] space-y-3">
           {/* Date Filters */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 space-y-3 shadow-sm">
             <div className="grid grid-cols-2 gap-3">
@@ -497,7 +494,7 @@ const StaffInventory = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 font-sans pb-24 text-slate-800 dark:text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] md:pt-3 pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-xl transition-all">
             <ArrowLeft size={18} />
@@ -509,7 +506,7 @@ const StaffInventory = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-[108px] space-y-3">
+      <main className="max-w-4xl mx-auto px-4 pt-[108px] md:pt-[70px] space-y-3">
 
         {/* Search & Filter */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 space-y-3 shadow-sm">

@@ -368,7 +368,7 @@ const VendorInventory = () => {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 font-sans pb-24 text-slate-800 dark:text-white">
         {/* Header */}
-        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] md:pt-3 pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSearchParams({})}
@@ -385,7 +385,7 @@ const VendorInventory = () => {
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto px-4 pt-[120px] space-y-6">
+        <main className="max-w-4xl mx-auto px-4 pt-[120px] md:pt-[76px] space-y-6">
           {/* Date Filters */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 p-4 space-y-3 shadow-sm">
             <div className="grid grid-cols-2 gap-3">
@@ -510,7 +510,7 @@ const VendorInventory = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 font-sans pb-24 text-slate-800 dark:text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] md:pt-3 pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -535,7 +535,7 @@ const VendorInventory = () => {
 
       <main className={cn(
         "max-w-4xl mx-auto px-4",
-        isAddProductFlow ? "pt-[112px] space-y-3" : "pt-[120px] space-y-6"
+        isAddProductFlow ? "pt-[112px] md:pt-[70px] space-y-3" : "pt-[120px] md:pt-[76px] space-y-6"
       )}>
         {/* KPI Cards */}
         {!isAddProductFlow && (

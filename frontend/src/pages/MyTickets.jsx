@@ -53,7 +53,7 @@ const MyTickets = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-24 animate-in fade-in duration-300">
       {/* Header */}
-      <header className="px-4 pt-[46px] pb-3 flex items-center gap-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <header className="px-4 pt-[46px] md:pt-3 pb-3 flex items-center gap-3 sticky top-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-50 border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <button
           onClick={() => navigate(-1)}
           className="p-2 bg-slate-50 dark:bg-gray-900 rounded-xl border border-slate-100 dark:border-gray-800 active:scale-95 transition-all"

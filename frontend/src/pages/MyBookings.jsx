@@ -94,7 +94,7 @@ const MyBookings = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background-light dark:bg-gray-950 overflow-hidden">
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-[46px] pb-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm shrink-0">
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-[46px] md:pt-3 pb-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
@@ -114,11 +114,15 @@ const MyBookings = () => {
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
-                 className={`flex-1 py-2.5 rounded-xl text-[13px] font-black capitalize tracking-tight border ${isActive
-                    ? 'bg-[#00246b] border-[#00246b] text-white shadow-lg shadow-[#00246b]/10'
-                    : 'bg-white dark:bg-gray-900 border-[#00246b]/10 dark:border-gray-800 text-slate-400 shadow-sm hover:text-[#00246b]'
-                  } transition-all active:scale-95`}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setCurrentPage(1);
+                }}
+                className={`flex-1 py-2 rounded-xl text-xs font-black tracking-wider capitalize transition-all border ${
+                  isActive
+                    ? 'bg-[#00246b] text-white border-[#00246b] shadow-md shadow-[#00246b]/20 scale-[1.02]'
+                    : 'bg-slate-50 dark:bg-gray-900 text-slate-400 border-slate-200/60 dark:border-gray-800 hover:text-slate-600'
+                }`}
               >
                 {tab}
               </button>
@@ -127,7 +131,7 @@ const MyBookings = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto no-scrollbar scroll-smooth px-4 pt-[150px] pb-24">
+      <main className="flex-1 overflow-y-auto no-scrollbar scroll-smooth px-4 pt-[150px] md:pt-[115px] pb-24">
         {paginatedBookings.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-slate-300 mb-4 border border-slate-100 dark:border-gray-700">

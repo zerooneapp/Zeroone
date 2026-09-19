@@ -409,7 +409,7 @@ const VendorDashboard = () => {
 
 return (
   <div className="min-h-full bg-slate-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden no-scrollbar pb-16">
-    <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
+    <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-[100] px-4 pt-[48px] md:pt-3 pb-3 flex items-center justify-between bg-white/90 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm transition-all">
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center gap-1.5">
           <h1 className="text-2xl font-black tracking-tighter leading-none flex items-center mr-1">
@@ -452,7 +452,7 @@ return (
       </div>
     </header>
 
-    <main className="px-2.5 space-y-2 pt-[100px]">
+    <main className="px-2.5 space-y-2 pt-[100px] md:pt-[70px]">
       {data && !data.subscription?.isActive && (
         <section className="px-0.5 mb-2">
           <div
@@ -796,7 +796,7 @@ return (
         >
           <div className="w-full max-w-4xl mx-auto h-full flex flex-col bg-white dark:bg-gray-900">
             {/* Modal Header */}
-            <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] pb-3 flex items-center gap-4">
+            <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-gray-800 px-4 pt-[48px] md:pt-3 pb-3 flex items-center gap-4">
               <button 
                 onClick={() => setIsHistoryOpen(false)}
                 className="p-1.5 bg-slate-100 dark:bg-gray-800 rounded-xl active:scale-90 transition-all"
