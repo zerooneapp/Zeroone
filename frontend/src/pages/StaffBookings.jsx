@@ -146,7 +146,7 @@ const StaffBookings = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
       {/* 📱 OPTIMIZED MOBILE HEADER */}
-      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[48px] md:pt-3 px-5 pb-2 transform-gpu">
+      <div className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 pt-[var(--safe-header-top)] px-5 pb-2 transform-gpu">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/staff')}
@@ -178,7 +178,7 @@ const StaffBookings = () => {
       </div>
 
       {/* Assignments List Area */}
-      <div className="p-4 pt-[160px] md:pt-[120px] pb-24 space-y-3 min-h-[calc(100vh-20px)] flex flex-col">
+      <div className="p-4 pt-[calc(var(--safe-header-top)+104px)] pb-24 space-y-3 min-h-[calc(100vh-20px)] flex flex-col">
         <AnimatePresence mode="wait">
           {loading ? (
             <div className="space-y-3 px-1">

@@ -156,7 +156,7 @@ const VendorSignup = () => {
       </div>
 
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 pt-12 md:pt-4 pb-4 px-4 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl flex items-center gap-3 border-b border-gray-100/10 dark:border-gray-800/50">
+      <div className="fixed top-0 left-0 right-0 z-50 pt-[var(--safe-header-top)] pb-3 px-4 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl flex items-center gap-3 border-b border-gray-100/10 dark:border-gray-800/50">
         <button
           onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}
           className="p-3 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm active:scale-90 transition-all text-gray-900 dark:text-white shrink-0"
@@ -169,7 +169,7 @@ const VendorSignup = () => {
         </div>
       </div>
 
-      <div className="space-y-4 pt-[110px] md:pt-[76px]">
+      <div className="space-y-4 pt-[var(--safe-main-top)]">
         {step === 1 && (
           <div className="space-y-4 relative z-10">
             <div className="space-y-1">

@@ -83,10 +83,10 @@ const VendorVerification = () => {
   }, [navigate, restoreSession, currentShopStatus]);
 
   return (
-    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 text-[#00246b] dark:text-white flex flex-col items-center justify-center p-4 xs:p-6 text-center relative overflow-hidden pt-20">
+    <div className="min-h-screen bg-[#F3F2F7] dark:bg-gray-950 text-[#00246b] dark:text-white flex flex-col items-center justify-center p-4 xs:p-6 text-center relative overflow-hidden pt-[var(--safe-main-top)]">
       {/* Header Switcher for Verification Screen */}
       {user?.shops && user.shops.length > 1 && (
-        <header className="fixed top-0 left-0 right-0 z-50 px-6 pt-[48px] md:pt-3 pb-3 flex items-center justify-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
+        <header className="fixed top-0 left-0 right-0 z-50 px-6 pt-[var(--safe-header-top)] pb-3 flex items-center justify-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-slate-100 dark:border-gray-800 shadow-sm">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-slate-400">Manage:</span>
             <div className="relative">

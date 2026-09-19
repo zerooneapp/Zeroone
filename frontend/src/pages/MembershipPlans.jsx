@@ -225,7 +225,7 @@ const MembershipPlans = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[40px] md:pt-3 pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-4 pt-[var(--safe-header-top)] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800/60 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -248,7 +248,7 @@ const MembershipPlans = () => {
         )}
       </header>
 
-      <main className="px-4 pt-[106px] md:pt-[70px]">
+      <main className="px-4 pt-[var(--safe-main-top)]">
         {/* Tab Switcher */}
         <div className="flex p-1 bg-slate-100 dark:bg-gray-900 rounded-2xl mb-6">
           <button

@@ -865,7 +865,7 @@ const ServiceDetail = () => {
   const hasHomeService = services.some((service) => service.type === 'home' || service.type === 'both');
 
   if (loading && !vendor) return (
-    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen pt-[112px]">
+    <div className="p-5 space-y-6 bg-white dark:bg-gray-950 min-h-screen pt-[var(--safe-main-top)]">
       <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse" />
       <div className="grid grid-cols-2 gap-4">
         <div className="h-10 bg-gray-50 dark:bg-gray-900 rounded-xl animate-pulse" />
@@ -890,7 +890,7 @@ const ServiceDetail = () => {
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">
       {/* Redesigned Secondary Navbar (Fixed) */}
-      <div className="bg-white text-[#00246b] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[46px] md:pt-3 pb-2 md:pb-2.5">
+      <div className="bg-white text-[#00246b] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[var(--safe-header-top)] pb-2 md:pb-2.5">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
@@ -906,7 +906,7 @@ const ServiceDetail = () => {
         </div>
       </div>
 
-      <div className="pt-[88px] md:pt-[56px] relative bg-white dark:bg-gray-950 overflow-hidden">
+      <div className="pt-[calc(var(--safe-header-top)+44px)] relative bg-white dark:bg-gray-950 overflow-hidden">
         <div className="relative group">
           {/* Elite Swipeable Carousel */}
           <div

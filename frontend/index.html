@@ -19,6 +19,33 @@
             document.documentElement.classList.remove('dark');
             document.documentElement.style.backgroundColor = '#f5f6f8';
           }
+
+          // Detect Mobile App vs Web Browser
+          var params = new URLSearchParams(window.location.search);
+          var platform = params.get('platform') || params.get('app');
+          if (platform === 'app' || platform === 'true') {
+            sessionStorage.setItem('zeroone_is_app', 'true');
+          } else if (platform === 'web') {
+            sessionStorage.removeItem('zeroone_is_app');
+          }
+
+          var isApp = sessionStorage.getItem('zeroone_is_app') === 'true' ||
+            window.Capacitor !== undefined ||
+            window.cordova !== undefined ||
+            window.ReactNativeWebView !== undefined ||
+            window.flutter_inappwebview !== undefined ||
+            window.Android !== undefined ||
+            window.AndroidInterface !== undefined ||
+            window.isNativeApp === true ||
+            window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true ||
+            /ZeroOneApp|wv|Android.*Version\/[0-9.]+/i.test(navigator.userAgent || '');
+
+          if (isApp) {
+            document.documentElement.classList.add('is-app');
+          } else {
+            document.documentElement.classList.remove('is-app');
+          }
         } catch (e) {}
       })();
     </script>

@@ -61,7 +61,7 @@ const VendorSupport = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 pb-24 animate-in fade-in duration-300">
       {/* Header */}
-      <header className="px-4 pt-[46px] md:pt-3 pb-3 flex items-center gap-3 fixed top-0 left-0 right-0 max-w-4xl mx-auto z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm">
+      <header className="px-4 pt-[var(--safe-header-top)] pb-3 flex items-center gap-3 fixed top-0 left-0 right-0 max-w-4xl mx-auto z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-slate-100 dark:border-gray-800 shadow-sm">
         <button
           onClick={() => navigate(-1)}
           className="p-2 bg-slate-50 dark:bg-gray-900 rounded-xl border border-slate-100 dark:border-gray-800 active:scale-95 transition-all"
@@ -73,7 +73,7 @@ const VendorSupport = () => {
         </h1>
       </header>
 
-      <div className="pt-[102px] px-4 pb-4 max-w-lg mx-auto space-y-5">
+      <div className="pt-[var(--safe-main-top)] px-4 pb-4 max-w-lg mx-auto space-y-5">
         {/* 3 Support Cards */}
         <div className="grid grid-cols-3 gap-2">
 

@@ -127,7 +127,7 @@ const OfferForm = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark pb-32">
-        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[40px] md:pt-3 pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800/50 flex items-center justify-between">
+        <header className="fixed top-0 left-0 right-0 max-w-4xl w-full mx-auto z-50 px-5 pt-[var(--safe-header-top)] pb-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
              <button 
                onClick={() => navigate(-1)}
@@ -148,7 +148,7 @@ const OfferForm = () => {
           </button>
        </header>
 
-       <main className="px-5 pt-[104px] md:pt-[70px]">
+       <main className="px-5 pt-[var(--safe-main-top)]">
           <form id="offer-form" onSubmit={handleSubmit} className="space-y-4 pb-8">
              <div className="space-y-4">
                 {/* Title */}

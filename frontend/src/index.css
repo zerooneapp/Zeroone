@@ -61,10 +61,24 @@
 
   html {
     color-scheme: light;
+    --safe-header-top: 12px;
+    --safe-main-top: calc(56px + var(--safe-header-top));
   }
 
   html.dark {
     color-scheme: dark;
+  }
+
+  @supports (padding-top: env(safe-area-inset-top)) {
+    html {
+      --safe-header-top: max(12px, env(safe-area-inset-top, 0px));
+      --safe-main-top: calc(56px + var(--safe-header-top));
+    }
+  }
+
+  html.is-app {
+    --safe-header-top: max(46px, env(safe-area-inset-top, 46px));
+    --safe-main-top: calc(58px + var(--safe-header-top));
   }
 }
 
