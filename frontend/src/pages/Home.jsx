@@ -230,7 +230,7 @@ const Home = () => {
   return (
     <div className="pb-24 bg-transparent min-h-screen">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
-      <div className="px-4 pt-0 pb-0.5 mb-0.5">
+      <div className="px-4 pt-2.5 pb-2.5">
         <div className="relative group w-full mx-auto">
           {/* Multi-layered Soft Glow */}
           <div className="absolute -inset-1 bg-gradient-to-r from-[#00246b]/10 via-blue-500/5 to-[#00246b]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
@@ -255,7 +255,7 @@ const Home = () => {
 
       <div className="px-0 mb-1">
         <div className="overflow-x-auto no-scrollbar scroll-smooth">
-          <div className="flex gap-2.5 items-center min-w-max pt-0.5 pb-1.5 px-4">
+          <div className="flex gap-2.5 items-center min-w-max pt-0 pb-1.5 px-4">
             {categories.map((cat) => {
               const isActive = selectedCats.includes(cat._id);
               return (
