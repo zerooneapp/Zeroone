@@ -708,6 +708,20 @@ const getVendorDetail = async (req, res) => {
       isActive: true
     }).populate('category', 'name').lean();
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+
+    // 🚀 ENGAGEMENT TRACKING: Increment serviceClicks (Service detail visits) (Throttled)
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress;
+    const cacheKey = `click:${ip}:${vendor._id}`;
+
+    if (!global.clickThrottle) global.clickThrottle = new Map();
+    const lastClicked = global.clickThrottle.get(cacheKey);
+    const THIRTY_MINS = 30 * 60 * 1000;
+
+    if (!lastClicked || (Date.now() - lastClicked > THIRTY_MINS)) {
+      await Vendor.findByIdAndUpdate(vendor._id, { $inc: { serviceClicks: 1 } });
+      global.clickThrottle.set(cacheKey, Date.now());
+    }
+
     const activeOffers = await Offer.find({ 
       vendorId: vendor._id, 
       isActive: true,

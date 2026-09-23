@@ -93,7 +93,10 @@ const VendorWallet = () => {
 
   const fetchData = async (background = false) => {
     try {
-      await fetchWallet(background);
+      await Promise.all([
+        fetchWallet(background),
+        fetchDashboard('silent')
+      ]);
     } catch (error) {
       toast.error('Failed to load wallet data');
     }
