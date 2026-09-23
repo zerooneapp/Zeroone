@@ -70,6 +70,22 @@ const listServices = async (req, res) => {
     const vendorId = req.query.vendorId || req.vendor?._id;
     if (!vendorId) return res.status(400).json({ message: 'VendorId required' });
     
+    // 🚀 ENGAGEMENT TRACKING: Increment serviceClicks on public query (Throttled)
+    if (req.query.vendorId && !req.vendor) {
+      const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress;
+      const cacheKey = `click:${ip}:${vendorId}`;
+
+      if (!global.clickThrottle) global.clickThrottle = new Map();
+      const lastClicked = global.clickThrottle.get(cacheKey);
+      const THIRTY_MINS = 30 * 60 * 1000;
+
+      if (!lastClicked || (Date.now() - lastClicked > THIRTY_MINS)) {
+        const Vendor = require('../models/Vendor');
+        await Vendor.findByIdAndUpdate(vendorId, { $inc: { serviceClicks: 1 } });
+        global.clickThrottle.set(cacheKey, Date.now());
+      }
+    }
+
     const services = await getVendorServices(vendorId, req.query.includeInactive === 'true');
     res.status(200).json(services);
   } catch (error) {
