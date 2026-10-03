@@ -230,7 +230,7 @@ const Home = () => {
   return (
     <div className="pb-24 bg-transparent min-h-screen">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
-      <div className="px-4 pt-2.5 pb-2.5">
+      <div className="px-4 py-1.5">
         <div className="relative group w-full mx-auto">
           {/* Multi-layered Soft Glow */}
           <div className="absolute -inset-1 bg-gradient-to-r from-[#00246b]/10 via-blue-500/5 to-[#00246b]/10 rounded-[16px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
