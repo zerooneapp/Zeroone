@@ -152,10 +152,16 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
 
   const notificationTargets = new Map();
   const addTarget = (uid, payload) => {
-    const existing = notificationTargets.get(uid.toString());
-    // Priority: Staff > Vendor > Customer
-    if (!existing || payload.role === 'staff' || (payload.role === 'vendor' && existing.role === 'customer')) {
-      notificationTargets.set(uid.toString(), payload);
+    if (!uid) return;
+
+    const key = uid.toString();
+    const existing = notificationTargets.get(key);
+    // A vendor owner can also have an owner-staff record with the same user ID.
+    // Keep the vendor notification in that case; the partner portal filters by
+    // role: vendor and would otherwise hide the replacement staff notification.
+    const priority = { customer: 1, staff: 2, vendor: 3, admin: 4 };
+    if (!existing || (priority[payload.role] || 0) > (priority[existing.role] || 0)) {
+      notificationTargets.set(key, payload);
     }
   };
 

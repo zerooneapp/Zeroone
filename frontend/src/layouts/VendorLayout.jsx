@@ -5,20 +5,25 @@ import { RiTeamFill } from 'react-icons/ri';
 import { BiSolidHome } from 'react-icons/bi';
 import { IoPersonCircleSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
+import { Bell } from 'lucide-react';
 import VendorLoader from '../components/VendorLoader';
+import NotificationDrawer from '../components/NotificationDrawer';
 import { cn } from '../utils/cn';
 import { useVendorStore } from '../store/vendorStore';
+import useNotificationStore from '../store/notificationStore';
 
 import useSocket from '../hooks/useSocket';
 
 const VendorLayout = () => {
   const { role, user, isInitialized } = useAuthStore();
   const fetchClients = useVendorStore((state) => state.fetchClients);
+  const { unreadCount, fetchNotifications } = useNotificationStore();
 
   const location = useLocation();
   const navigate = useNavigate();
   const scrollRef = useRef(null);
   const [isNavVisible, setIsNavVisible] = React.useState(true);
+  const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
 
   useSocket(user?._id);
 
@@ -27,6 +32,14 @@ const VendorLayout = () => {
       fetchClients().catch(() => {});
     }
   }, [role, fetchClients]);
+
+  useEffect(() => {
+    if (!user || role !== 'vendor') return undefined;
+
+    fetchNotifications();
+    const refreshTimer = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(refreshTimer);
+  }, [user, role, fetchNotifications]);
 
   // Handle hardware back button — navigate to Home instead of Exit App
   useEffect(() => {
@@ -116,6 +129,16 @@ const VendorLayout = () => {
     { label: 'Account', icon: IoPersonCircleSharp, path: '/vendor/profile' },
   ];
 
+  const showGlobalNotificationButton = location.pathname !== '/vendor/dashboard';
+  const globalNotificationButton = showGlobalNotificationButton
+    ? React.createElement('button', {
+        type: 'button',
+        onClick: function () { setIsNotificationsOpen(true); },
+        'aria-label': 'Open notifications',
+        className: 'fixed right-4 top-4 z-40 w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#00246b]'
+      }, React.createElement(Bell, { size: 19 }))
+    : null;
+
   return (
     <div className={cn(
       "min-h-screen w-full bg-slate-50 dark:bg-gray-950 font-sans flex flex-col sm:pb-0",
@@ -129,6 +152,13 @@ const VendorLayout = () => {
           <Outlet />
         </Suspense>
       </div>
+
+      {globalNotificationButton}
+      {/* Global partner notification drawer */}
+      <NotificationDrawer
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+      />
 
       {isNavVisible && (
         <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">

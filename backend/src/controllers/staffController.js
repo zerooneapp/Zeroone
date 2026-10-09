@@ -728,7 +728,8 @@ const createStaffManualBooking = async (req, res) => {
         type: 'NEW_BOOKING',
         title: 'New Appointment Booked',
         message: `${staff.name} scheduled a new appointment for ${name}. Services: ${services.map(s => s.name).join(', ')}.`,
-        data: { bookingId: booking._id },
+        data: { bookingId: booking._id, vendorId: vendor._id },
+        vendorId: vendor._id,
         referenceId: `${booking._id}_STAFF_MANUAL`
       });
     }
