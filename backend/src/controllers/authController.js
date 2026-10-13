@@ -276,7 +276,7 @@ const sendOTP = async (req, res) => {
     }
 
     // 🛡️ TESTING BYPASS: Fix OTP to 123456 for test numbers
-    const isTestNumber = ['9999999999', '7987588804', '8856666666', '8817921168', '9669002380'].includes(phone);
+    const isTestNumber = ['1234567890', '9999999999', '7987588804', '8856666666', '8817921168', '9669002380'].includes(phone);
     const otp = isTestNumber ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins for test buffer
 
