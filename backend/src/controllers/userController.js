@@ -71,8 +71,10 @@ const deleteAccount = async (req, res) => {
     const WithdrawalRequest = require('../models/WithdrawalRequest');
     const UserMembership = require('../models/UserMembership');
 
+    const mongoose = require('mongoose');
     const timestamp = Date.now();
-    const targetVendorId = req.body?.vendorId || req.query?.vendorId;
+    const rawVendorId = req.body?.vendorId || req.query?.vendorId;
+    const targetVendorId = (rawVendorId && rawVendorId !== 'undefined' && rawVendorId !== 'null' && mongoose.Types.ObjectId.isValid(rawVendorId)) ? rawVendorId : null;
 
     if (user.role === 'vendor' && targetVendorId) {
       // Flow 1: Soft delete ONLY the requested shop (regardless of activeShops count)
@@ -83,19 +85,6 @@ const deleteAccount = async (req, res) => {
       const staffMembers = await Staff.find({ vendorId: vendor._id });
       const staffIds = staffMembers.map(s => s._id);
       const staffUserIds = staffMembers.map(s => s.userId).filter(Boolean);
-
-      // Emit FORCE_LOGOUT socket events to all deleted staff users only
-      try {
-        const { getIO } = require('../services/socketService');
-        const io = getIO();
-        if (io) {
-          staffUserIds.forEach(id => {
-            io.to(String(id)).emit('FORCE_LOGOUT');
-          });
-        }
-      } catch (err) {
-        console.error('[Socket emit error in deleteAccount]', err.message);
-      }
 
       // 1. Soft delete Vendor profile
       vendor.status = 'deleted';
@@ -134,15 +123,42 @@ const deleteAccount = async (req, res) => {
         Cart.deleteMany({ vendorId: vendor._id })
       ]);
 
-      // Update owner's lastActiveVendorId if it matches the deleted vendor
-      if (String(user.lastActiveVendorId) === String(targetVendorId)) {
-        const remainingShops = await Vendor.find({ ownerId: userId, isDeleted: { $ne: true }, status: { $ne: 'deleted' } });
-        user.lastActiveVendorId = remainingShops.length > 0 ? remainingShops[0]._id : null;
-        await user.save();
+      // Update owner's lastActiveVendorId and check remaining shops
+      const remainingShops = await Vendor.find({ ownerId: userId, isDeleted: { $ne: true }, status: { $ne: 'deleted' } });
+      user.lastActiveVendorId = remainingShops.length > 0 ? remainingShops[0]._id : null;
+      if (remainingShops.length === 0) {
+        user.isDeleted = true;
+        user.phone = `DEL_${timestamp}_${user.phone}`;
+        user.name = `[Deleted] ${user.name || 'Vendor'}`;
+        await Promise.all([
+          Cart.deleteMany({ userId }),
+          SlotLock.deleteMany({ userId }),
+          Notification.deleteMany({ userId })
+        ]);
+      }
+      await user.save();
+
+      // Emit FORCE_LOGOUT socket events to all deleted staff users and owner if all shops deleted
+      try {
+        const { getIO } = require('../services/socketService');
+        const io = getIO();
+        if (io) {
+          staffUserIds.forEach(id => {
+            io.to(String(id)).emit('FORCE_LOGOUT');
+          });
+          if (remainingShops.length === 0) {
+            io.to(String(userId)).emit('FORCE_LOGOUT');
+          }
+        }
+      } catch (err) {
+        console.error('[Socket emit error in deleteAccount]', err.message);
       }
 
       console.log(`[Cleanup] Shop/Franchise ${targetVendorId} soft-deleted. Schedulers cleared.`);
-      return res.status(200).json({ message: 'Shop/Franchise deleted successfully' });
+      return res.status(200).json({
+        message: remainingShops.length > 0 ? 'Shop deleted successfully' : 'Partner account deleted successfully',
+        remainingShops: remainingShops.length
+      });
     } else {
       // Flow 2: Full Account Deletion (delete the User account and ALL their active shops)
       if (user.role === 'vendor') {

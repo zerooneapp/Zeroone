@@ -527,6 +527,15 @@ const VendorProfile = () => {
          iconColor: 'text-rose-500',
          isLogout: true,
       },
+      {
+         key: 'delete_account',
+         label: 'Delete Account',
+         subtitle: 'Permanently remove partner account',
+         icon: Trash2,
+         iconBg: 'bg-red-500/10',
+         iconColor: 'text-red-500',
+         isDelete: true,
+      },
    ];
 
    const [reportRange, setReportRange] = useState({
@@ -625,12 +634,31 @@ const VendorProfile = () => {
    const handleDeleteAccount = async () => {
       try {
          setDeleting(true);
-         await api.delete(`/users/profile?vendorId=${currentShopId}`);
-         toast.success('Shop deleted successfully');
-         logout();
-         navigate('/vendor-login', { replace: true });
+         const targetId = currentShopId || currentShop?._id;
+         const endpoint = targetId ? `/users/profile?vendorId=${targetId}` : '/users/profile';
+         const res = await api.delete(endpoint);
+
+         const remainingShops = (user?.shops || []).filter(s => s._id !== targetId);
+         if (remainingShops.length > 0) {
+            const nextShopId = remainingShops[0]._id;
+            localStorage.setItem('activeVendorId', nextShopId);
+            const updatedUser = {
+               ...user,
+               shops: remainingShops,
+               lastActiveVendorId: nextShopId
+            };
+            useAuthStore.getState().updateUser(updatedUser);
+            toast.success(res.data?.message || 'Shop deleted successfully');
+            setShowDeleteConfirm(false);
+            window.location.reload();
+         } else {
+            toast.success('Partner account deleted successfully');
+            setShowDeleteConfirm(false);
+            logout();
+            navigate('/vendor-login', { replace: true });
+         }
       } catch (err) {
-         toast.error('Deletion failed');
+         toast.error(err.response?.data?.message || 'Failed to delete account');
       } finally {
          setDeleting(false);
       }
@@ -715,10 +743,10 @@ const VendorProfile = () => {
                               <item.icon size={18} />
                            </div>
                            <div className="flex-1 text-left">
-                              <p className="text-sm font-black text-slate-800 dark:text-white leading-tight">{item.label}</p>
+                              <p className={cn("text-sm font-black leading-tight", item.isDelete ? "text-red-500 dark:text-red-400" : "text-slate-800 dark:text-white")}>{item.label}</p>
                               <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-0.5">{item.subtitle}</p>
                            </div>
-                           <ChevronRight size={16} className="text-slate-300 dark:text-gray-600 group-active:translate-x-0.5 transition-transform" />
+                           <ChevronRight size={16} className={cn("group-active:translate-x-0.5 transition-transform", item.isDelete ? "text-red-300 dark:text-red-800" : "text-slate-300 dark:text-gray-600")} />
                         </button>
                      ))}
                   </motion.div>
@@ -1855,29 +1883,36 @@ const VendorProfile = () => {
                      initial={{ scale: 0.9, opacity: 0, y: 20 }}
                      animate={{ scale: 1, opacity: 1, y: 0 }}
                      exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                     className="w-full max-w-[280px] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl relative z-10 p-5 text-center"
+                     className="w-full max-w-[290px] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl relative z-10 p-5 text-center"
                   >
-                     <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                     <div className="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center mx-auto mb-4">
                         <AlertTriangle size={24} />
                      </div>
                      <h3 className="text-base font-black text-slate-800 dark:text-white leading-tight">Delete Partner Account?</h3>
-                     <p className="text-[10px] font-medium text-slate-400 dark:text-gray-500 mt-2 capitalize tracking-widest leading-relaxed px-2">
-                        This will permanently remove your partner account, staff, and earnings history. This action cannot be undone.
+                     <p className="text-[11px] font-medium text-slate-500 dark:text-gray-400 mt-2 leading-relaxed px-1">
+                        This will permanently remove your partner account, shop details, team staff, bookings and earnings history. This action cannot be undone.
                      </p>
                      <div className="flex gap-2 mt-6">
                         <button
                            disabled={deleting}
                            onClick={() => setShowDeleteConfirm(false)}
-                           className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-500 rounded-xl font-bold text-xs disabled:opacity-50"
+                           className="flex-1 py-3 bg-slate-50 dark:bg-gray-800 text-slate-500 dark:text-gray-400 rounded-xl font-bold text-xs disabled:opacity-50 active:scale-95 transition-all"
                         >
                            Cancel
                         </button>
                         <button
                            disabled={deleting}
                            onClick={handleDeleteAccount}
-                           className="flex-1 py-3 bg-red-500 text-white rounded-xl font-black text-xs shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center"
+                           className="flex-1 py-3 bg-red-500 text-white rounded-xl font-black text-xs shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-1.5"
                         >
-                           {deleting ? 'Wait...' : 'Confirm'}
+                           {deleting ? (
+                              <>
+                                 <Loader2 size={14} className="animate-spin" />
+                                 <span>Deleting...</span>
+                              </>
+                           ) : (
+                              'Confirm'
+                           )}
                         </button>
                      </div>
                   </motion.div>
