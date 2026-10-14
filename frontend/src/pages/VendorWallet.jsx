@@ -170,14 +170,18 @@ const VendorWallet = () => {
   const isLowBalance = useMemo(() => wallet?.subscription?.currentPlan === 'daily' && (wallet?.walletBalance || 0) < (wallet?.minimumWalletThreshold || 0), [wallet]);
   const monthlyPlan = useMemo(() => wallet?.plans?.monthly, [wallet]);
   const dailyPlan = useMemo(() => wallet?.plans?.daily, [wallet]);
-  const canUseRazorpay = useMemo(() => Boolean(wallet?.razorpay?.enabled && wallet?.razorpay?.keyId), [wallet]);
+  // --- TEMPORARILY COMMENTED: Razorpay disabled on Vendor Wallet ---
+  // const canUseRazorpay = useMemo(() => Boolean(wallet?.razorpay?.enabled && wallet?.razorpay?.keyId), [wallet]);
+  const canUseRazorpay = false;
   const requiredBalanceToday = useMemo(() => wallet?.requiredBalanceToday || ((wallet?.minimumWalletThreshold || 0) + (dailyPlan?.price || 0)), [wallet, dailyPlan]);
   const shortfallToResume = useMemo(() => wallet?.shortfallToResume || Math.max(requiredBalanceToday - (wallet?.walletBalance || 0), 0), [wallet, requiredBalanceToday]);
   const recommendedTopup = useMemo(() => wallet?.recommendedTopup || (shortfallToResume > 0 ? shortfallToResume : (dailyPlan?.price || 0)), [wallet, shortfallToResume, dailyPlan]);
   const needsWalletAction = useMemo(() => wallet?.subscription?.currentPlan === 'daily' && shortfallToResume > 0, [wallet, shortfallToResume]);
   const engagement = useMemo(() => dashboard?.engagement || {}, [dashboard]);
 
+  // --- TEMPORARILY COMMENTED: Razorpay Payment Flow ---
   const startPaymentFlow = async ({ orderResponse, verifyPath, successMessage, description }) => {
+    /*
     try {
       if (!canUseRazorpay) {
         setSubmitting(false);
@@ -222,9 +226,13 @@ const VendorWallet = () => {
       setSubmitting(false);
       toast.error(error.message || 'Unable to start Razorpay');
     }
+    */
+    setSubmitting(false);
+    toast.error('Razorpay payment gateway is temporarily disabled');
   };
 
   const handleTopup = async () => {
+    /*
     const amount = Number(topupAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
       toast.error('Enter a valid top-up amount');
@@ -244,9 +252,12 @@ const VendorWallet = () => {
       setSubmitting(false);
       toast.error(error.response?.data?.message || 'Unable to create top-up order');
     }
+    */
+    toast.error('Razorpay wallet top-up is temporarily disabled');
   };
 
   const handleMonthlyPurchase = async () => {
+    /*
     try {
       setSubmitting(true);
       const { data } = await api.post('/vendor/wallet/subscription/order');
@@ -260,6 +271,8 @@ const VendorWallet = () => {
       setSubmitting(false);
       toast.error(error.response?.data?.message || 'Unable to start monthly subscription');
     }
+    */
+    toast.error('Razorpay subscription purchase is temporarily disabled');
   };
 
   const openRecommendedTopup = () => {

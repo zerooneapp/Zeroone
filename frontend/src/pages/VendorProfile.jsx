@@ -399,6 +399,8 @@ const VendorProfile = () => {
       }
    };
 
+   // --- TEMPORARILY COMMENTED: Razorpay integration for Promotions ---
+   /*
    const handlePurchasePromotion = async () => {
       if (!promoDays || promoDays < 1) return toast.error('Minimum 1 day required');
 
@@ -457,6 +459,7 @@ const VendorProfile = () => {
          setLoading(false);
       }
    };
+   */
 
    const menuItems = [
       {
@@ -492,6 +495,7 @@ const VendorProfile = () => {
          iconColor: 'text-yellow-500',
          path: '/vendor/reviews',
       },
+      /* TEMPORARILY COMMENTED - PROMOTIONS & MEMBERSHIP (RAZORPAY)
       {
          key: 'promotions',
          label: 'Promotions',
@@ -509,6 +513,7 @@ const VendorProfile = () => {
          iconColor: 'text-amber-500',
          path: '/vendor/membership',
       },
+      */
       {
          key: 'offers',
          label: 'Offers',
@@ -589,6 +594,7 @@ const VendorProfile = () => {
          const totalEarning = data.data.reduce((sum, item) => sum + item.totalEarning, 0);
          const totalBookings = data.data.reduce((sum, item) => sum + item.totalBookings, 0);
          const totalHalfDays = data.data.reduce((sum, item) => sum + (item.halfDays || 0), 0);
+
 
          doc.setFontSize(12);
          doc.setTextColor(0, 36, 107);
@@ -1449,7 +1455,8 @@ const VendorProfile = () => {
                   </motion.section>
                )}
 
-               {activeSection === 'promotions' && (
+               {/* --- TEMPORARILY DISABLED: Promotions Section (Uses Razorpay) --- */}
+               {false && activeSection === 'promotions' && (
                   <motion.section
                      key="promotions"
                      initial={{ opacity: 0, x: 24 }}
