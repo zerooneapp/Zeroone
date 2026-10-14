@@ -5,7 +5,7 @@ import { RiTeamFill } from 'react-icons/ri';
 import { BiSolidHome } from 'react-icons/bi';
 import { IoPersonCircleSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
-import { Bell } from 'lucide-react';
+
 import VendorLoader from '../components/VendorLoader';
 import NotificationDrawer from '../components/NotificationDrawer';
 import { cn } from '../utils/cn';
@@ -129,15 +129,7 @@ const VendorLayout = () => {
     { label: 'Account', icon: IoPersonCircleSharp, path: '/vendor/profile' },
   ];
 
-  const showGlobalNotificationButton = location.pathname !== '/vendor/dashboard';
-  const globalNotificationButton = showGlobalNotificationButton
-    ? React.createElement('button', {
-        type: 'button',
-        onClick: function () { setIsNotificationsOpen(true); },
-        'aria-label': 'Open notifications',
-        className: 'fixed right-4 top-4 z-40 w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#00246b]'
-      }, React.createElement(Bell, { size: 19 }))
-    : null;
+
 
   return (
     <div className={cn(
@@ -153,7 +145,7 @@ const VendorLayout = () => {
         </Suspense>
       </div>
 
-      {globalNotificationButton}
+
       {/* Global partner notification drawer */}
       <NotificationDrawer
         isOpen={isNotificationsOpen}
