@@ -94,8 +94,7 @@ const VendorAuth = () => {
       // 🔒 ROLE SECURITY: Prevent cross-portal entry
       if (role === 'customer') {
         toast.error(`You are already registered as a Customer. Please use another number for Partner account.`, {
-          duration: 6000,
-          icon: '⛔'
+          duration: 6000
         });
         return;
       }

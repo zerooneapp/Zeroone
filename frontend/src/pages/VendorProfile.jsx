@@ -263,7 +263,6 @@ const VendorProfile = () => {
       // 🛑 Validation: Opening and Closing time cannot be same
       if (data.workingHours.start === data.workingHours.end) {
          return toast.error('Opening and Closing time cannot be the same', {
-            icon: '⏰',
             id: 'time-validation'
          });
       }

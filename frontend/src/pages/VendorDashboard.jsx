@@ -171,7 +171,6 @@ const VendorDashboard = () => {
         if (data.isShopOpen !== undefined) {
           useVendorStore.getState().setShopStatus(data.isShopOpen);
           toast(data.isShopOpen ? 'Shop is now ONLINE' : 'Shop is now OFFLINE', {
-            icon: data.isShopOpen ? '🟢' : '🔴',
             id: 'shop-status-sync'
           });
         }
@@ -227,7 +226,7 @@ const VendorDashboard = () => {
 
     if (!data.subscription.isActive) {
       console.log('[TOGGLE-DEBUG] Blocked: Subscription inactive');
-      return toast.error('Account Inactive. Recharge to resume', { icon: '\uD83D\uDEA8' });
+      return toast.error('Account Inactive. Recharge to resume');
     }
 
     if (statusLoading) {
@@ -307,9 +306,7 @@ const VendorDashboard = () => {
 
     try {
       await api.patch(`/bookings/${id}/status`, { action: 'complete', paymentType });
-      toast.success('Booking marked as completed', {
-        icon: '✅'
-      });
+      toast.success('Booking marked as completed');
       fetchDashboard(true);
     } catch (err) {
       toast.error('Update failed');
@@ -482,12 +479,12 @@ return (
             key={action.label}
             onClick={() => {
               if (data && !data.subscription?.isActive && action.label !== 'Wallet') {
-                toast.error('Recharge to enable this feature', { icon: '🚨' });
+                toast.error('Recharge to enable this feature');
                 navigate('/vendor/wallet');
                 return;
               }
               if (action.locked) {
-                toast('Only for shop partners', { icon: '🔒' });
+                toast('Only for shop partners');
                 return;
               }
               if (action.onClick) {

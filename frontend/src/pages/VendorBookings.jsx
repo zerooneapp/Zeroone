@@ -103,7 +103,6 @@ const VendorBookings = () => {
       setActionLoadingId(id);
       await api.patch(`/bookings/${id}/status`, { action, reason, paymentType });
       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`, {
-        icon: action === 'complete' ? '✅' : '❌',
         style: {
           borderRadius: '12px',
           background: '#00246b',

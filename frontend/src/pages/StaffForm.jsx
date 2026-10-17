@@ -88,7 +88,7 @@ const StaffForm = () => {
       try {
         const vendorRes = await api.get('/vendor/profile');
         if ((vendorRes.data?.serviceMode || 'shop') === 'home') {
-          toast('Only for shop partners', { icon: '🔒' });
+          toast('Only for shop partners');
           navigate('/vendor/dashboard', { replace: true });
         }
       } catch (err) {

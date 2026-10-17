@@ -49,7 +49,6 @@ const StaffDashboard = () => {
       try {
          await api.patch(`/bookings/${bookingId}/status`, { action, paymentType });
          toast.success(`Booking updated successfully!`, {
-            icon: action === 'complete' ? '✅' : '🚀',
             style: {
                borderRadius: '12px',
                background: '#00246b',

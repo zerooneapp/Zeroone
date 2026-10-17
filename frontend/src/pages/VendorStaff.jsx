@@ -29,7 +29,7 @@ const VendorStaff = () => {
   const handleHomeServiceGuard = () => {
     if (hasRedirectedHomeVendor) return;
     setHasRedirectedHomeVendor(true);
-    toast('Only for shop partners', { icon: '🔒' });
+    toast('Only for shop partners');
     navigate('/vendor/dashboard', { replace: true });
   };
 

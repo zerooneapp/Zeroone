@@ -20,7 +20,6 @@ const PaymentMethods = () => {
   const handleAddMethod = () => {
     toast('Available in future updates', {
         id: 'future-update-toast',
-        icon: '🚀',
         style: {
             borderRadius: '1rem',
             background: '#00246b',
