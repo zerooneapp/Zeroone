@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { useThemeStore } from '../store/themeStore';
 import dayjs from 'dayjs';
 import { motion, AnimatePresence } from 'framer-motion';
 import useNotificationStore from '../store/notificationStore';
@@ -51,8 +52,9 @@ const StaffDashboard = () => {
          toast.success(`Booking updated successfully!`, {
             style: {
                borderRadius: '12px',
-               background: '#00246b',
-               color: '#fff',
+               background: useThemeStore.getState().isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.9)',
+               color: useThemeStore.getState().isDarkMode ? '#fff' : '#00246b',
+               border: useThemeStore.getState().isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,36,107,0.12)',
                fontSize: '10px',
                fontWeight: '900',
                textTransform: 'uppercase',

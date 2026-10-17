@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { ArrowLeft, CreditCard, Wallet, Smartphone, Landmark, Plus, ArrowRight, ShieldCheck, MoreVertical } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useThemeStore } from '../store/themeStore';
 
 const PaymentMethods = () => {
   const navigate = useNavigate();
@@ -22,8 +23,9 @@ const PaymentMethods = () => {
         id: 'future-update-toast',
         style: {
             borderRadius: '1rem',
-            background: '#00246b',
-            color: '#fff',
+            background: useThemeStore.getState().isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.9)',
+            color: useThemeStore.getState().isDarkMode ? '#fff' : '#00246b',
+            border: useThemeStore.getState().isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,36,107,0.12)',
             fontSize: '11px',
             fontWeight: 'bold',
             letterSpacing: '0.05em',
