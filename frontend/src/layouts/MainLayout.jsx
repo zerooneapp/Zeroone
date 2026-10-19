@@ -2,6 +2,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Navbar from './Navbar';
+import SiteFooter from '../components/SiteFooter';
 import ReviewPopup from '../components/ReviewPopup';
 import NotificationDrawer from '../components/NotificationDrawer';
 import { useAuthStore } from '../store/authStore';
@@ -40,6 +41,7 @@ const MainLayout = () => {
           <Outlet />
         </Suspense>
       </main>
+      {(location.pathname === '/' || location.pathname === '/nearby') && <SiteFooter />}
       <Navbar />
       <NotificationDrawer
         isOpen={showNotifications}

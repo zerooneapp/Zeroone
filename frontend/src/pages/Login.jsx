@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, ArrowRight, ChevronLeft, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -308,13 +308,13 @@ const CustomerAuth = () => {
       {/* Footer Branding */}
       {step === 'phone' && (
         <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 max-w-[320px]">
             <button 
               onClick={() => {
                 navigate(location.pathname, { state: { phone, step }, replace: true });
                 navigate('/privacy-policy');
               }}
-              className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
+              className="text-xs font-medium text-slate-500 dark:text-gray-400 hover:text-[#00246b] dark:hover:text-white normal-case tracking-normal transition-colors whitespace-nowrap"
             >
               Privacy &amp; Policy
             </button>
@@ -324,10 +324,24 @@ const CustomerAuth = () => {
                 navigate(location.pathname, { state: { phone, step }, replace: true });
                 navigate('/contact-support');
               }}
-              className="text-[9px] font-black text-[#00246b]/40 dark:text-gray-600 hover:text-[#00246b] dark:hover:text-white uppercase tracking-[0.2em] transition-colors"
+              className="text-xs font-medium text-slate-500 dark:text-gray-400 hover:text-[#00246b] dark:hover:text-white normal-case tracking-normal transition-colors whitespace-nowrap"
             >
               Contact &amp; Support
             </button>
+            <span className="text-[#00246b]/20 dark:text-gray-800">•</span>
+            <Link
+              to="/terms-and-conditions"
+              className="text-xs font-medium text-slate-500 dark:text-gray-400 hover:text-[#00246b] dark:hover:text-white normal-case tracking-normal transition-colors whitespace-nowrap"
+            >
+              Terms &amp; Conditions
+            </Link>
+            <span className="text-[#00246b]/20 dark:text-gray-800">•</span>
+            <Link
+              to="/refund-cancellation"
+              className="text-xs font-medium text-slate-500 dark:text-gray-400 hover:text-[#00246b] dark:hover:text-white normal-case tracking-normal transition-colors whitespace-nowrap"
+            >
+              Refunds &amp; Cancellations
+            </Link>
           </div>
         </div>
       )}

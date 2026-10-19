@@ -24,6 +24,8 @@ const SecuritySettings = lazy(() => import('./pages/SecuritySettings'));
 const Preferences = lazy(() => import('./pages/Preferences'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsAndConditions = lazy(() => import('./pages/TermsAndConditions'));
+const RefundCancellationPolicy = lazy(() => import('./pages/RefundCancellationPolicy'));
 const VendorPrivacyPolicy = lazy(() => import('./pages/VendorPrivacyPolicy'));
 const ContactSupport = lazy(() => import('./pages/ContactSupport'));
 const VendorContactSupport = lazy(() => import('./pages/VendorContactSupport'));
@@ -215,6 +217,8 @@ function App() {
         <Routes>
         {/* FULLY PUBLIC ROUTES — No auth required */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/refund-cancellation" element={<RefundCancellationPolicy />} />
         <Route path="/vendor-privacy-policy" element={<VendorPrivacyPolicy />} />
         <Route path="/contact-support" element={<ContactSupport />} />
         <Route path="/vendor-contact-support" element={<VendorContactSupport />} />
