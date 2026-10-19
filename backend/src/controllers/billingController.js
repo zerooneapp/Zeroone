@@ -10,10 +10,10 @@ const {
   activateMonthlySubscription
 } = require('../services/walletService');
 const {
-  getRazorpayConfig,
-  createRazorpayOrder,
-  verifyRazorpaySignature
-} = require('../services/razorpayService');
+  getPaymentGatewaySettings,
+  createGatewayOrder,
+  verifyGatewayPayment
+} = require('../services/paymentGatewayService');
 
 const buildRazorpayReceipt = (prefix, vendorId) => {
   const compactTimestamp = Date.now().toString(36);
@@ -24,7 +24,9 @@ const buildRazorpayReceipt = (prefix, vendorId) => {
 const getOrderCreationStatusCode = (message = '') => {
   if (
     message.includes('Razorpay is not configured') ||
+    message.includes('Cashfree is not configured') ||
     message.includes('Failed to create Razorpay order') ||
+    message.includes('Failed to create Cashfree order') ||
     message.includes('receipt') ||
     message.includes('amount')
   ) {
@@ -44,7 +46,7 @@ const getVendorWalletOverview = async (req, res) => {
       getSubscriptionPlanForVendor('daily', serviceLevel),
       getSubscriptionPlanForVendor('monthly', serviceLevel)
     ]);
-    const razorpay = getRazorpayConfig();
+    const paymentGateway = await getPaymentGatewaySettings();
     const dailyBase = dailyPlan.price || 0;
     const dailyGstAmount = dailyPlan.gstPercent ? (dailyBase * dailyPlan.gstPercent) / 100 : 0;
     const dailyTotal = dailyBase + dailyGstAmount;
@@ -68,10 +70,9 @@ const getVendorWalletOverview = async (req, res) => {
       freeTrialDays: settings.freeTrialDays || 7,
       minWithdrawalAmount: settings.minWithdrawalAmount || 100,
       currency: 'INR',
-      razorpay: {
-        enabled: razorpay.enabled,
-        keyId: razorpay.keyId || ''
-      },
+      paymentGateway,
+      razorpay: paymentGateway.razorpay,
+      cashfree: paymentGateway.cashfree,
       subscription: {
         ...subscriptionState,
         serviceLevel,
@@ -133,13 +134,21 @@ const createWalletTopupOrder = async (req, res) => {
     }
 
     const receipt = buildRazorpayReceipt('topup', vendor._id);
-    const order = await createRazorpayOrder({
+    const order = await createGatewayOrder({
       amount,
       receipt,
       notes: {
         vendorId: String(vendor._id),
         purpose: 'wallet_topup'
-      }
+      },
+      customer: {
+        customerId: vendor.ownerId,
+        name: req.user?.name,
+        phone: req.user?.phone,
+        email: req.user?.email
+      },
+      orderNote: 'ZeroOne vendor wallet top-up',
+      notifyUrl: process.env.CASHFREE_WEBHOOK_URL
     });
 
     const transaction = await createWalletTransaction({
@@ -150,20 +159,21 @@ const createWalletTopupOrder = async (req, res) => {
       reason: 'wallet_topup',
       category: 'wallet_topup',
       status: 'pending',
-      paymentGateway: 'razorpay',
-      paymentMethod: 'razorpay',
-      gatewayOrderId: order.id,
+      paymentGateway: order.gateway,
+      paymentMethod: order.gateway,
+      gatewayOrderId: order.orderId,
       referenceId: receipt.toUpperCase(),
       description: 'Vendor wallet top-up initiated',
       metadata: {
-        razorpayOrderId: order.id
+        gateway: order.gateway,
+        paymentSessionId: order.paymentSessionId || '',
+        razorpayOrderId: order.gateway === 'razorpay' ? order.orderId : ''
       }
     });
 
     res.status(201).json({
-      order,
-      transactionId: transaction._id,
-      keyId: getRazorpayConfig().keyId
+      ...order,
+      transactionId: transaction._id
     });
   } catch (error) {
     res.status(getOrderCreationStatusCode(error.message)).json({ message: error.message });
@@ -173,19 +183,18 @@ const createWalletTopupOrder = async (req, res) => {
 const verifyWalletTopup = async (req, res) => {
   try {
     const vendor = req.vendor;
-    const {
-      razorpay_order_id: orderId,
-      razorpay_payment_id: paymentId,
-      razorpay_signature: signature
-    } = req.body || {};
+    const body = req.body || {};
+    const requestedGateway = String(body.gateway || '').toLowerCase();
+    const submittedOrderId = body.razorpay_order_id || body.order_id || body.orderId;
+    const submittedPaymentId = body.razorpay_payment_id || body.cf_payment_id || body.paymentId;
 
-    if (!orderId || !paymentId || !signature) {
-      return res.status(400).json({ message: 'Missing payment verification fields' });
+    if (!submittedOrderId) {
+      return res.status(400).json({ message: 'Missing payment order id' });
     }
 
     const transaction = await WalletTransaction.findOne({
       vendorId: vendor._id,
-      gatewayOrderId: orderId,
+      gatewayOrderId: submittedOrderId,
       category: 'wallet_topup'
     });
 
@@ -201,18 +210,21 @@ const verifyWalletTopup = async (req, res) => {
       });
     }
 
-    const isValid = verifyRazorpaySignature({
-      orderId,
-      paymentId,
-      signature
+    const gateway = transaction.paymentGateway || requestedGateway || 'razorpay';
+    const verification = await verifyGatewayPayment({
+      gateway,
+      orderId: submittedOrderId,
+      paymentId: submittedPaymentId,
+      signature: body.razorpay_signature || body.signature,
+      expectedAmount: transaction.amount
     });
 
-    if (!isValid) {
+    if (!verification.verified) {
       transaction.status = 'failed';
-      transaction.gatewayPaymentId = paymentId;
-      transaction.gatewaySignature = signature;
+      transaction.gatewayPaymentId = verification.paymentId || submittedPaymentId || '';
+      transaction.gatewaySignature = body.razorpay_signature || body.signature || '';
       await transaction.save();
-      return res.status(400).json({ message: 'Invalid payment signature' });
+      return res.status(400).json({ message: verification.message || 'Payment verification failed' });
     }
 
     await addFunds(vendor, transaction.amount, 'wallet_topup', {
@@ -220,11 +232,11 @@ const verifyWalletTopup = async (req, res) => {
       initiatedByUserId: vendor.ownerId,
       category: 'wallet_topup',
       status: 'completed',
-      paymentGateway: 'razorpay',
-      paymentMethod: 'razorpay',
-      gatewayOrderId: orderId,
-      gatewayPaymentId: paymentId,
-      gatewaySignature: signature,
+      paymentGateway: gateway,
+      paymentMethod: gateway,
+      gatewayOrderId: submittedOrderId,
+      gatewayPaymentId: verification.paymentId || submittedPaymentId || '',
+      gatewaySignature: body.razorpay_signature || body.signature || '',
       referenceId: transaction.referenceId,
       description: 'Vendor wallet top-up completed',
       metadata: {
@@ -248,14 +260,22 @@ const createMonthlySubscriptionOrder = async (req, res) => {
     const vendor = req.vendor;
     const monthlyPlan = await getSubscriptionPlanForVendor('monthly', vendor.serviceLevel);
     const receipt = buildRazorpayReceipt('monthly', vendor._id);
-    const order = await createRazorpayOrder({
+    const order = await createGatewayOrder({
       amount: monthlyPlan.price,
       receipt,
       notes: {
         vendorId: String(vendor._id),
         purpose: 'monthly_subscription',
         serviceLevel: getNormalizedServiceLevel(vendor.serviceLevel)
-      }
+      },
+      customer: {
+        customerId: vendor.ownerId,
+        name: req.user?.name,
+        phone: req.user?.phone,
+        email: req.user?.email
+      },
+      orderNote: `${getNormalizedServiceLevel(vendor.serviceLevel)} monthly subscription`,
+      notifyUrl: process.env.CASHFREE_WEBHOOK_URL
     });
 
     const transaction = await createWalletTransaction({
@@ -266,21 +286,21 @@ const createMonthlySubscriptionOrder = async (req, res) => {
       reason: 'monthly_subscription',
       category: 'monthly_subscription',
       status: 'pending',
-      paymentGateway: 'razorpay',
-      paymentMethod: 'razorpay',
-      gatewayOrderId: order.id,
+      paymentGateway: order.gateway,
+      paymentMethod: order.gateway,
+      gatewayOrderId: order.orderId,
       referenceId: receipt.toUpperCase(),
       description: `${getNormalizedServiceLevel(vendor.serviceLevel)} monthly subscription initiated`,
       metadata: {
-        razorpayOrderId: order.id,
+        gateway: order.gateway,
+        paymentSessionId: order.paymentSessionId || '',
         serviceLevel: getNormalizedServiceLevel(vendor.serviceLevel)
       }
     });
 
     res.status(201).json({
-      order,
+      ...order,
       transactionId: transaction._id,
-      keyId: getRazorpayConfig().keyId,
       amount: monthlyPlan.price,
       serviceLevel: getNormalizedServiceLevel(vendor.serviceLevel)
     });
@@ -292,19 +312,17 @@ const createMonthlySubscriptionOrder = async (req, res) => {
 const verifyMonthlySubscription = async (req, res) => {
   try {
     const vendor = req.vendor;
-    const {
-      razorpay_order_id: orderId,
-      razorpay_payment_id: paymentId,
-      razorpay_signature: signature
-    } = req.body || {};
+    const body = req.body || {};
+    const submittedOrderId = body.razorpay_order_id || body.order_id || body.orderId;
+    const submittedPaymentId = body.razorpay_payment_id || body.cf_payment_id || body.paymentId;
 
-    if (!orderId || !paymentId || !signature) {
-      return res.status(400).json({ message: 'Missing payment verification fields' });
+    if (!submittedOrderId) {
+      return res.status(400).json({ message: 'Missing payment order id' });
     }
 
     const transaction = await WalletTransaction.findOne({
       vendorId: vendor._id,
-      gatewayOrderId: orderId,
+      gatewayOrderId: submittedOrderId,
       category: 'monthly_subscription'
     });
 
@@ -320,29 +338,32 @@ const verifyMonthlySubscription = async (req, res) => {
       });
     }
 
-    const isValid = verifyRazorpaySignature({
-      orderId,
-      paymentId,
-      signature
+    const gateway = transaction.paymentGateway || String(body.gateway || 'razorpay').toLowerCase();
+    const verification = await verifyGatewayPayment({
+      gateway,
+      orderId: submittedOrderId,
+      paymentId: submittedPaymentId,
+      signature: body.razorpay_signature || body.signature,
+      expectedAmount: transaction.amount
     });
 
-    if (!isValid) {
+    if (!verification.verified) {
       transaction.status = 'failed';
-      transaction.gatewayPaymentId = paymentId;
-      transaction.gatewaySignature = signature;
+      transaction.gatewayPaymentId = verification.paymentId || submittedPaymentId || '';
+      transaction.gatewaySignature = body.razorpay_signature || body.signature || '';
       await transaction.save();
-      return res.status(400).json({ message: 'Invalid payment signature' });
+      return res.status(400).json({ message: verification.message || 'Payment verification failed' });
     }
 
     await activateMonthlySubscription(vendor, {
       existingTransaction: transaction,
       initiatedByUserId: vendor.ownerId,
       status: 'completed',
-      paymentGateway: 'razorpay',
-      paymentMethod: 'razorpay',
-      gatewayOrderId: orderId,
-      gatewayPaymentId: paymentId,
-      gatewaySignature: signature,
+      paymentGateway: gateway,
+      paymentMethod: gateway,
+      gatewayOrderId: submittedOrderId,
+      gatewayPaymentId: verification.paymentId || submittedPaymentId || '',
+      gatewaySignature: body.razorpay_signature || body.signature || '',
       referenceId: transaction.referenceId,
       metadata: {
         ...(transaction.metadata || {}),

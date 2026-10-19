@@ -3,15 +3,12 @@ const UserMembership = require('../models/UserMembership');
 const Vendor = require('../models/Vendor');
 const Service = require('../models/Service');
 const User = require('../models/User');
-const Razorpay = require('razorpay');
+const WalletTransaction = require('../models/WalletTransaction');
 const crypto = require('crypto');
 const NotificationService = require('../services/notificationService');
 const GlobalSettings = require('../models/GlobalSettings');
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const { createGatewayOrder, verifyGatewayPayment } = require('../services/paymentGatewayService');
+const { createWalletTransaction } = require('../services/walletService');
 
 // --- Vendor Actions ---
 
@@ -234,76 +231,67 @@ exports.createPurchaseOrder = async (req, res) => {
     const plan = await VendorMembershipPlan.findById(planId);
     if (!plan) return res.status(404).json({ message: 'Plan not found' });
 
-    // 🛡️ RESTRICTION: Check if user already has an active or pending membership for the SAME plan
+    const now = new Date();
+    await UserMembership.updateMany(
+      { userId: req.user._id, planId, status: 'pending', paymentExpiresAt: { $lte: now } },
+      { $set: { status: 'cancelled' } }
+    );
+
     const existingActiveOrPending = await UserMembership.findOne({
       userId: req.user._id,
-      planId: planId,
+      planId,
       status: { $in: ['active', 'pending'] },
-      endDate: { $gt: new Date() }
+      $or: [
+        { status: 'active', endDate: { $gt: now } },
+        {
+          status: 'pending',
+          $or: [
+            { paymentExpiresAt: { $gt: now } },
+            { paymentExpiresAt: { $exists: false } },
+            { paymentExpiresAt: null }
+          ]
+        }
+      ]
     });
 
     if (existingActiveOrPending) {
       const statusText = existingActiveOrPending.status === 'active' ? 'active' : 'pending';
-      return res.status(400).json({ 
-        message: `You already have an ${statusText} membership for this plan.` 
+      return res.status(400).json({
+        message: `You already have an ${statusText} membership for this plan.`
       });
     }
 
-    const options = {
-      amount: Math.round(plan.price * 100), // amount in paise
-      currency: 'INR',
-      receipt: `membership_${Date.now()}`,
-    };
+    const receipt = `membership_${String(plan._id).slice(-8)}_${Date.now().toString(36)}`.slice(0, 45);
+    const order = await createGatewayOrder({
+      amount: plan.price,
+      receipt,
+      notes: {
+        planId: plan._id,
+        purpose: 'membership_purchase',
+        userId: req.user._id
+      },
+      customer: {
+        customerId: req.user._id,
+        name: req.user.name,
+        phone: req.user.phone,
+        email: req.user.email
+      },
+      orderNote: `ZeroOne membership: ${plan.name}`,
+      notifyUrl: process.env.CASHFREE_WEBHOOK_URL
+    });
 
-    const order = await razorpay.orders.create(options);
-    res.status(200).json({ order, keyId: process.env.RAZORPAY_KEY_ID });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.verifyPurchase = async (req, res) => {
-  try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
-      razorpay_signature,
-      planId 
-    } = req.body;
-
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).json({ message: "Missing required payment fields" });
-    }
-
-    const sign = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSign = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(sign.toString())
-      .digest("hex");
-
-    console.log('[PAYMENT VERIFY] Received:', { razorpay_order_id, razorpay_payment_id, razorpay_signature });
-    console.log('[PAYMENT VERIFY] Expected:', expectedSign);
-
-    if (razorpay_signature !== expectedSign) {
-      return res.status(400).json({ message: "Invalid payment signature. Verification failed." });
-    }
-
-    const plan = await VendorMembershipPlan.findById(planId);
-    if (!plan) return res.status(404).json({ message: 'Plan not found' });
-
-    // Calculate end date
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + plan.durationDays);
-
+    const paymentExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
     const membership = await UserMembership.create({
       userId: req.user._id,
       vendorId: plan.vendorId,
       planId: plan._id,
-      startDate: new Date(),
-      endDate,
-      razorpayOrderId: razorpay_order_id,
-      razorpayPaymentId: razorpay_payment_id,
-      status: 'active',
+      startDate: now,
+      endDate: new Date(now.getTime() + Number(plan.durationDays || 0) * 24 * 60 * 60 * 1000),
+      paymentGateway: order.gateway,
+      gatewayOrderId: order.orderId,
+      razorpayOrderId: order.gateway === 'razorpay' ? order.orderId : undefined,
+      paymentExpiresAt,
+      status: 'pending',
       usage: plan.services.map(s => ({
         serviceId: s.serviceId,
         usedCount: 0,
@@ -311,25 +299,93 @@ exports.verifyPurchase = async (req, res) => {
       }))
     });
 
-    // Notify Vendor and Record Transaction (Without adding to wallet balance)
-    const vendor = await Vendor.findById(plan.vendorId);
+    res.status(200).json({
+      ...order,
+      planId: plan._id,
+      membershipId: membership._id,
+      amount: plan.price
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.verifyPurchase = async (req, res) => {
+  try {
+    const body = req.body || {};
+    const submittedOrderId = body.razorpay_order_id || body.order_id || body.orderId;
+    const submittedPaymentId = body.razorpay_payment_id || body.cf_payment_id || body.paymentId;
+
+    if (!submittedOrderId) {
+      return res.status(400).json({ message: 'Missing payment order id' });
+    }
+
+    const membership = await UserMembership.findOne({
+      userId: req.user._id,
+      gatewayOrderId: submittedOrderId
+    });
+    if (!membership) return res.status(404).json({ message: 'Pending membership payment not found' });
+
+    if (membership.status === 'active') {
+      return res.status(200).json({ message: 'Membership already activated', membership });
+    }
+
+    const plan = await VendorMembershipPlan.findById(membership.planId);
+    if (!plan) return res.status(404).json({ message: 'Plan not found' });
+
+    const gateway = membership.paymentGateway || String(body.gateway || 'razorpay').toLowerCase();
+    const verification = await verifyGatewayPayment({
+      gateway,
+      orderId: submittedOrderId,
+      paymentId: submittedPaymentId,
+      signature: body.razorpay_signature || body.signature,
+      expectedAmount: plan.price
+    });
+
+    if (!verification.verified) {
+      return res.status(400).json({ message: verification.message || 'Payment verification failed' });
+    }
+
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + plan.durationDays);
+
+    membership.status = 'active';
+    membership.startDate = startDate;
+    membership.endDate = endDate;
+    membership.paymentExpiresAt = undefined;
+    membership.gatewayPaymentId = verification.paymentId || submittedPaymentId || '';
+    membership.gatewaySignature = body.razorpay_signature || body.signature || '';
+    membership.razorpayPaymentId = gateway === 'razorpay'
+      ? (verification.paymentId || submittedPaymentId || '')
+      : undefined;
+    membership.ticketId = 'ZO-' + require('crypto').randomBytes(3).toString('hex').toUpperCase();
+    await membership.save();
+
+    const vendor = await Vendor.findById(membership.vendorId);
     if (vendor) {
-      const { createWalletTransaction } = require('../services/walletService');
-      await createWalletTransaction({
-        vendorId: vendor._id,
-        initiatedByUserId: req.user._id,
-        amount: plan.price,
-        type: 'credit',
-        reason: 'membership_purchase',
-        category: 'membership_revenue',
-        paymentGateway: 'razorpay',
-        paymentMethod: 'razorpay',
-        gatewayOrderId: razorpay_order_id,
-        gatewayPaymentId: razorpay_payment_id,
-        gatewaySignature: razorpay_signature,
-        description: `Membership purchase: "${plan.name}" by ${req.user.name || 'customer'} (External Payment)`,
-        referenceId: `MEMB_BUY_${membership._id}`
-      });
+      await WalletTransaction.findOneAndUpdate(
+        { referenceId: `MEMB_BUY_${membership._id}` },
+        {
+          $setOnInsert: {
+            vendorId: vendor._id,
+            initiatedByUserId: req.user._id,
+            amount: plan.price,
+            type: 'credit',
+            reason: 'membership_purchase',
+            category: 'membership_revenue',
+            status: 'completed',
+            paymentGateway: gateway,
+            paymentMethod: gateway,
+            gatewayOrderId: submittedOrderId,
+            gatewayPaymentId: verification.paymentId || submittedPaymentId || '',
+            gatewaySignature: body.razorpay_signature || body.signature || '',
+            description: `Membership purchase: "${plan.name}" by ${req.user.name || 'customer'} (External Payment)`,
+            referenceId: `MEMB_BUY_${membership._id}`
+          }
+        },
+        { upsert: true, new: true }
+      );
 
       NotificationService.sendNotification({
         userIds: vendor.ownerId,
@@ -337,12 +393,16 @@ exports.verifyPurchase = async (req, res) => {
         type: 'MEMBERSHIP_PURCHASED',
         title: 'New Membership Purchased! 👑',
         message: `${req.user.name || 'A customer'} has purchased your "${plan.name}" membership plan for ₹${plan.price}.`,
-        data: { membershipId: membership._id }
+        data: { membershipId: membership._id },
+        referenceId: `MEMB_NOTIFY_${membership._id}`
       });
     }
 
     res.status(200).json({ message: 'Membership activated successfully', membership });
   } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(200).json({ message: 'Membership payment already processed' });
+    }
     res.status(500).json({ message: error.message });
   }
 };
@@ -455,7 +515,6 @@ exports.updateMembershipStatus = async (req, res) => {
 
       // Record Transaction (Without adding to wallet balance - Offline collection)
       if (vendor && plan) {
-        const { createWalletTransaction } = require('../services/walletService');
         await createWalletTransaction({
           vendorId: vendor._id,
           initiatedByUserId: req.user._id, // Approved by vendor

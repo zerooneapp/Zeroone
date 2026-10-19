@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
+import { openGatewayCheckout } from '../services/paymentService';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
@@ -398,67 +399,40 @@ const VendorProfile = () => {
       }
    };
 
-   // --- TEMPORARILY COMMENTED: Razorpay integration for Promotions ---
-   /*
    const handlePurchasePromotion = async () => {
       if (!promoDays || promoDays < 1) return toast.error('Minimum 1 day required');
 
       try {
          setLoading(true);
-
-         // 1. Create order on backend
          const { data: orderData } = await api.post('/promotions/vendor/create-order', { days: promoDays });
-
-         const options = {
-            key: orderData.key_id,
-            amount: orderData.amount,
-            currency: orderData.currency,
-            name: "ZeroOne Promotion",
+         await openGatewayCheckout({
+            orderResponse: orderData,
+            name: 'ZeroOne Promotion',
             description: `Boost Profile Visibility for ${promoDays} days`,
-            order_id: orderData.orderId,
-            handler: async (response) => {
-               try {
-                  setLoading(true);
-                  // 2. Verify payment on backend
-                  await api.post('/promotions/vendor/verify-payment', {
-                     razorpay_order_id: response.razorpay_order_id,
-                     razorpay_payment_id: response.razorpay_payment_id,
-                     razorpay_signature: response.razorpay_signature,
-                     days: promoDays,
-                     amountPaid: orderData.totalAmount
-                  });
-
-                  toast.success('Payment successful! Promotion request sent.');
-                  fetchPlans(); // Refresh status immediately
-               } catch (err) {
-                  toast.error(err.response?.data?.message || 'Verification failed');
-               } finally {
-                  setLoading(false);
-               }
-            },
             prefill: {
-               name: data.shopName || useAuthStore.getState().user?.ownerName,
-               contact: useAuthStore.getState().user?.phone,
-               email: useAuthStore.getState().user?.email
+               name: data.shopName || user?.name || '',
+               contact: user?.phone || '',
+               email: user?.email || ''
             },
-            theme: {
-               color: "#2D2F6F",
+            onSuccess: async (response) => {
+               await api.post('/promotions/vendor/verify-payment', {
+                  ...response,
+                  days: promoDays,
+                  amountPaid: orderData.totalAmount
+               });
+               toast.success('Payment successful! Promotion request sent.');
+               await fetchPlans();
             },
-         };
-
-         const rzp = new window.Razorpay(options);
-         rzp.on('payment.failed', (response) => {
-            toast.error('Payment failed: ' + response.error.description);
+            onFailure: (error) => {
+               if (error?.message) toast.error(error.message);
+            }
          });
-         rzp.open();
-
       } catch (err) {
-         toast.error(err.response?.data?.message || 'Failed to initialize payment');
+         toast.error(err.response?.data?.message || err.message || 'Payment failed');
       } finally {
          setLoading(false);
       }
    };
-   */
 
    const menuItems = [
       {
@@ -494,7 +468,7 @@ const VendorProfile = () => {
          iconColor: 'text-yellow-500',
          path: '/vendor/reviews',
       },
-      /* TEMPORARILY COMMENTED - PROMOTIONS & MEMBERSHIP (RAZORPAY)
+
       {
          key: 'promotions',
          label: 'Promotions',
@@ -503,6 +477,8 @@ const VendorProfile = () => {
          iconBg: 'bg-indigo-500/10',
          iconColor: 'text-indigo-500',
       },
+      /* Membership management remains hidden until its existing approval flow is enabled. */
+      /*
       {
          key: 'memberships',
          label: 'Membership Plan',
@@ -593,7 +569,6 @@ const VendorProfile = () => {
          const totalEarning = data.data.reduce((sum, item) => sum + item.totalEarning, 0);
          const totalBookings = data.data.reduce((sum, item) => sum + item.totalBookings, 0);
          const totalHalfDays = data.data.reduce((sum, item) => sum + (item.halfDays || 0), 0);
-
 
          doc.setFontSize(12);
          doc.setTextColor(0, 36, 107);
@@ -796,8 +771,6 @@ const VendorProfile = () => {
                      ))}
                   </motion.div>
                )}
-
-
 
                {/* ── BASIC INFO SECTION ── */}
                {activeSection === 'basic' && (
@@ -1210,7 +1183,6 @@ const VendorProfile = () => {
                      className="bg-white dark:bg-gray-900 rounded-xl p-3 sm:p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
                   >
 
-
                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
                         <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-2.5">
                            <input
@@ -1327,7 +1299,6 @@ const VendorProfile = () => {
                      transition={{ duration: 0.18 }}
                      className="bg-white dark:bg-gray-900 rounded-xl p-3 sm:p-4 shadow-sm border border-slate-100 dark:border-gray-800 space-y-4"
                   >
-
 
                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full bg-slate-50/50 dark:bg-gray-900 p-1.5 rounded-2xl border border-slate-200/40 dark:border-gray-800 shadow-sm">
                         <div className="w-full relative bg-white dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-800 overflow-hidden flex flex-col px-3 py-2.5">
@@ -1454,8 +1425,8 @@ const VendorProfile = () => {
                   </motion.section>
                )}
 
-               {/* --- TEMPORARILY DISABLED: Promotions Section (Uses Razorpay) --- */}
-               {false && activeSection === 'promotions' && (
+               {/* PROFILE PROMOTION PAYMENT */}
+               {activeSection === 'promotions' && (
                   <motion.section
                      key="promotions"
                      initial={{ opacity: 0, x: 24 }}
@@ -1936,7 +1907,7 @@ const VendorProfile = () => {
                       onClick={() => setIsSwitchBottomSheetOpen(false)}
                       className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
                    />
-                   
+
                    {/* Bottom Sheet Panel */}
                    <motion.div
                       initial={{ y: '100%' }}
@@ -1947,7 +1918,7 @@ const VendorProfile = () => {
                    >
                       {/* Drag Indicator Handle */}
                       <div className="w-12 h-1 bg-slate-200 dark:bg-gray-800 rounded-full mx-auto my-3.5" />
-                      
+
                       <div className="px-6 pb-6 pt-2 space-y-4">
                          <div className="flex items-center justify-between pb-3 border-b border-slate-50 dark:border-gray-800/50">
                             <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.15em]">Switch Account</h3>
@@ -1958,7 +1929,7 @@ const VendorProfile = () => {
                                Close
                             </button>
                          </div>
-                         
+
                          {/* Shop list */}
                          <div className="space-y-1.5 max-h-80 overflow-y-auto no-scrollbar">
                             {user?.shops?.map((shop) => {
@@ -2007,7 +1978,7 @@ const VendorProfile = () => {
                                );
                             })}
                          </div>
-                         
+
                          {/* Add Account Option */}
                          <button
                             onClick={() => {
@@ -2031,7 +2002,6 @@ const VendorProfile = () => {
       </div>
    );
 };
-
 
 // ── CUSTOM TIME PICKER OVERLAY ──
 const TimePickerOverlay = ({ type = 'open', value, onChange, onClose, pickerRef }) => {

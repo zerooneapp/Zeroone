@@ -32,6 +32,22 @@ const userMembershipSchema = new mongoose.Schema({
   razorpayPaymentId: {
     type: String
   },
+  paymentGateway: {
+    type: String,
+    enum: ['razorpay', 'cashfree']
+  },
+  gatewayOrderId: {
+    type: String
+  },
+  gatewayPaymentId: {
+    type: String
+  },
+  gatewaySignature: {
+    type: String
+  },
+  paymentExpiresAt: {
+    type: Date
+  },
   status: {
     type: String,
     enum: ['pending', 'active', 'rejected', 'expired', 'cancelled'],

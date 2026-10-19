@@ -24,6 +24,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import dayjs from 'dayjs';
 import api from '../services/api';
+import { openGatewayCheckout } from '../services/paymentService';
 import toast from 'react-hot-toast';
 import { useVendorStore } from '../store/vendorStore';
 
@@ -170,69 +171,45 @@ const VendorWallet = () => {
   const isLowBalance = useMemo(() => wallet?.subscription?.currentPlan === 'daily' && (wallet?.walletBalance || 0) < (wallet?.minimumWalletThreshold || 0), [wallet]);
   const monthlyPlan = useMemo(() => wallet?.plans?.monthly, [wallet]);
   const dailyPlan = useMemo(() => wallet?.plans?.daily, [wallet]);
-  // --- TEMPORARILY COMMENTED: Razorpay disabled on Vendor Wallet ---
-  // const canUseRazorpay = useMemo(() => Boolean(wallet?.razorpay?.enabled && wallet?.razorpay?.keyId), [wallet]);
-  const canUseRazorpay = false;
+  const activePaymentGateway = wallet?.paymentGateway?.active || 'razorpay';
+  const activeGatewayConfig = wallet?.paymentGateway?.[activePaymentGateway];
+  const canUsePayment = Boolean(activeGatewayConfig?.enabled);
   const requiredBalanceToday = useMemo(() => wallet?.requiredBalanceToday || ((wallet?.minimumWalletThreshold || 0) + (dailyPlan?.price || 0)), [wallet, dailyPlan]);
   const shortfallToResume = useMemo(() => wallet?.shortfallToResume || Math.max(requiredBalanceToday - (wallet?.walletBalance || 0), 0), [wallet, requiredBalanceToday]);
   const recommendedTopup = useMemo(() => wallet?.recommendedTopup || (shortfallToResume > 0 ? shortfallToResume : (dailyPlan?.price || 0)), [wallet, shortfallToResume, dailyPlan]);
   const needsWalletAction = useMemo(() => wallet?.subscription?.currentPlan === 'daily' && shortfallToResume > 0, [wallet, shortfallToResume]);
   const engagement = useMemo(() => dashboard?.engagement || {}, [dashboard]);
 
-  // --- TEMPORARILY COMMENTED: Razorpay Payment Flow ---
   const startPaymentFlow = async ({ orderResponse, verifyPath, successMessage, description }) => {
-    /*
     try {
-      if (!canUseRazorpay) {
-        setSubmitting(false);
-        toast.error('Razorpay keys are not configured yet');
-        return;
-      }
-
-      await loadRazorpayScript();
-
-      const razorpay = new window.Razorpay({
-        key: orderResponse.keyId || wallet?.razorpay?.keyId,
-        amount: orderResponse.order.amount,
-        currency: orderResponse.order.currency,
+      await openGatewayCheckout({
+        orderResponse,
         name: dashboard?.shopName || 'ZeroOne',
         description,
-        order_id: orderResponse.order.id,
-        theme: { color: '#111827' },
-        handler: async (response) => {
-          try {
-            setSubmitting(true);
-            await api.post(verifyPath, response);
-            toast.success(successMessage);
-            setIsTopupOpen(false);
-            setTopupAmount('');
-            await fetchData();
-          } catch (error) {
-            toast.error(error.response?.data?.message || 'Payment verification failed');
-          } finally {
-            setSubmitting(false);
-          }
+        prefill: {
+          name: dashboard?.shopName || '',
+          contact: useVendorStore.getState().user?.phone || ''
         },
-        modal: {
-          ondismiss: () => {
-            setSubmitting(false);
-            toast.error('Payment cancelled or failed');
-          }
+        onSuccess: async (response) => {
+          setSubmitting(true);
+          await api.post(verifyPath, response);
+          toast.success(successMessage);
+          setIsTopupOpen(false);
+          setTopupAmount('');
+          await fetchData(true);
+        },
+        onFailure: (error) => {
+          if (error?.message) toast.error(error.message);
         }
       });
-
-      razorpay.open();
     } catch (error) {
+      toast.error(error.response?.data?.message || error.message || 'Payment failed');
+    } finally {
       setSubmitting(false);
-      toast.error(error.message || 'Unable to start Razorpay');
     }
-    */
-    setSubmitting(false);
-    toast.error('Razorpay payment gateway is temporarily disabled');
   };
 
   const handleTopup = async () => {
-    /*
     const amount = Number(topupAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
       toast.error('Enter a valid top-up amount');
@@ -249,15 +226,12 @@ const VendorWallet = () => {
         description: 'Wallet recharge'
       });
     } catch (error) {
-      setSubmitting(false);
       toast.error(error.response?.data?.message || 'Unable to create top-up order');
+      setSubmitting(false);
     }
-    */
-    toast.error('Razorpay wallet top-up is temporarily disabled');
   };
 
   const handleMonthlyPurchase = async () => {
-    /*
     try {
       setSubmitting(true);
       const { data } = await api.post('/vendor/wallet/subscription/order');
@@ -268,11 +242,9 @@ const VendorWallet = () => {
         description: `${prettifyLabel(wallet?.plans?.serviceLevel || '')} monthly subscription`
       });
     } catch (error) {
-      setSubmitting(false);
       toast.error(error.response?.data?.message || 'Unable to start monthly subscription');
+      setSubmitting(false);
     }
-    */
-    toast.error('Razorpay subscription purchase is temporarily disabled');
   };
 
   const openRecommendedTopup = () => {
@@ -469,8 +441,8 @@ const VendorWallet = () => {
               </button>
               <button
                 onClick={handleMonthlyPurchase}
-                disabled={submitting || !canUseRazorpay}
-                className={`h-11 rounded-xl font-black text-[8px] uppercase tracking-[0.18em] transition-all ${submitting || !canUseRazorpay ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-slate-200/70 dark:border-gray-700 shadow-sm active:scale-[0.98]'}`}
+                disabled={submitting || !canUsePayment}
+                className={`h-11 rounded-xl font-black text-[8px] uppercase tracking-[0.18em] transition-all ${submitting || !canUsePayment ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-slate-200/70 dark:border-gray-700 shadow-sm active:scale-[0.98]'}`}
               >
                 Buy Monthly
               </button>
@@ -602,7 +574,7 @@ const VendorWallet = () => {
                    ) : (
                      <button
                        onClick={handleMonthlyPurchase}
-                       disabled={submitting || !canUseRazorpay}
+                       disabled={submitting || !canUsePayment}
                        className="px-2.5 py-1 bg-[#00246b] text-white rounded-lg text-[7px] font-black uppercase tracking-widest shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all"
                      >
                        {submitting ? 'Processing...' : 'Buy Monthly Plan'}
@@ -814,10 +786,10 @@ const VendorWallet = () => {
 
               <button
                 onClick={handleTopup}
-                disabled={submitting || !canUseRazorpay}
-                className={`w-full h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all ${submitting || !canUseRazorpay ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-[#00246b] text-white shadow-lg shadow-[#00246b]/20 active:scale-[0.98]'}`}
+                disabled={submitting || !canUsePayment}
+                className={`w-full h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all ${submitting || !canUsePayment ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-[#00246b] text-white shadow-lg shadow-[#00246b]/20 active:scale-[0.98]'}`}
               >
-                {canUseRazorpay ? (submitting ? 'Processing...' : 'Continue with Razorpay') : 'Awaiting Razorpay Setup'}
+                {canUsePayment ? (submitting ? 'Processing...' : `Continue with ${prettifyLabel(activePaymentGateway)}`) : `Awaiting ${prettifyLabel(activePaymentGateway)} Setup`}
               </button>
             </motion.div>
           </>

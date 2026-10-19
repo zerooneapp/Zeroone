@@ -23,6 +23,7 @@ const promotionRoutes = require('./routes/promotionRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
@@ -34,7 +35,14 @@ app.use(cors({
   credentials: true
 }));
 app.use(morgan('dev'));
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({
+  limit: '50mb',
+  verify: (req, res, buffer) => {
+    if (req.originalUrl.startsWith('/api/payments/webhook/')) {
+      req.rawBody = buffer.toString('utf8');
+    }
+  }
+}));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Base Route
@@ -62,6 +70,7 @@ app.use('/api/promotions', promotionRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api', publicRoutes);
 
 // Error Handling

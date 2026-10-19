@@ -39,6 +39,19 @@ const vendorPromotionSchema = new mongoose.Schema({
   razorpayOrderId: {
     type: String
   },
+  paymentGateway: {
+    type: String,
+    enum: ['razorpay', 'cashfree']
+  },
+  gatewayOrderId: {
+    type: String
+  },
+  gatewayPaymentId: {
+    type: String
+  },
+  gatewaySignature: {
+    type: String
+  },
   approvalDate: {
     type: Date
   }

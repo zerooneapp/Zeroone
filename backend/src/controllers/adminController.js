@@ -82,7 +82,7 @@ const getGlobalSettings = async (req, res) => {
 
 const getSharedSettings = async (req, res) => {
   try {
-    let settings = await GlobalSettings.findOne().select('supportWhatsApp supportPhone discoveryRadius freeTrialDays promotionPricePerDay features');
+    let settings = await GlobalSettings.findOne().select('supportWhatsApp supportPhone discoveryRadius freeTrialDays promotionPricePerDay features paymentGateway');
 
     if (!settings) {
       return res.status(200).json({
@@ -91,13 +91,17 @@ const getSharedSettings = async (req, res) => {
         discoveryRadius: 10,
         freeTrialDays: 7,
         promotionPricePerDay: 10,
-        features: { membershipActive: true, subscriptionActive: true }
+        features: { membershipActive: true, subscriptionActive: true },
+        paymentGateway: { active: 'razorpay' }
       });
     }
 
     const response = settings.toObject();
     if (!response.features) {
       response.features = { membershipActive: true, subscriptionActive: true };
+    }
+    if (!response.paymentGateway) {
+      response.paymentGateway = { active: 'razorpay' };
     }
 
     res.status(200).json(response);
@@ -107,6 +111,10 @@ const getSharedSettings = async (req, res) => {
 const updateGlobalSettings = async (req, res) => {
   try {
     const updateData = { ...req.body };
+    const activeGateway = updateData.paymentGateway?.active;
+    if (activeGateway !== undefined && !['razorpay', 'cashfree'].includes(activeGateway)) {
+      return res.status(400).json({ message: 'Invalid payment gateway' });
+    }
     delete updateData._id;
     delete updateData.__v;
     delete updateData.createdAt;

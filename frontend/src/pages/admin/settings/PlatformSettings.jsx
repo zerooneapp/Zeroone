@@ -3,7 +3,7 @@ import {
   Settings, ShieldAlert, Wallet, BellRing,
   Save, RefreshCw, ToggleLeft, ToggleRight,
   Info, ShieldCheck, Zap, AlertCircle, MapPin, MessageCircle,
-  IndianRupee, Phone
+  IndianRupee, Phone, CreditCard
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../services/api';
@@ -22,7 +22,8 @@ const PlatformSettings = () => {
       reminderAlerts: true
     },
     supportWhatsApp: "",
-    supportPhone: ""
+    supportPhone: "",
+    paymentGateway: { active: 'razorpay' }
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -163,6 +164,38 @@ const PlatformSettings = () => {
 
         {/* 💬 SUPPORT INFRASTRUCTURE */}
         <div className="space-y-5">
+          <SettingsCard title="Payment Gateway" icon={CreditCard}>
+            <div className="space-y-3">
+              <p className="text-[11px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">
+                New online payments will use the selected gateway.
+              </p>
+              {['razorpay', 'cashfree'].map((gateway) => {
+                const isActive = (settings.paymentGateway?.active || 'razorpay') === gateway;
+                return (
+                  <button
+                    key={gateway}
+                    type="button"
+                    onClick={() => handleUpdate({ paymentGateway: { ...(settings.paymentGateway || {}), active: gateway } })}
+                    disabled={saving}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${isActive
+                      ? 'border-primary bg-primary/5 text-primary dark:text-white'
+                      : 'border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-800/40 text-slate-500'}`}
+                  >
+                    <div className="text-left">
+                      <p className="text-[13px] font-black capitalize">{gateway}</p>
+                      <p className="text-[10px] font-bold opacity-70">
+                        {isActive ? 'Active for new payments' : 'Available as fallback option'}
+                      </p>
+                    </div>
+                    <span className={`w-5 h-5 rounded-full border-4 ${isActive ? 'border-primary bg-white' : 'border-slate-300 dark:border-gray-600'}`} />
+                  </button>
+                );
+              })}
+              <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                Existing pending orders continue with the gateway that created them.
+              </p>
+            </div>
+          </SettingsCard>
           <SettingsCard title="Support Infrastructure" icon={MessageCircle}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SettingInput

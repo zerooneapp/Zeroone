@@ -16,6 +16,13 @@ const globalSettingsSchema = new mongoose.Schema({
   features: {
     membershipActive: { type: Boolean, default: true },
     subscriptionActive: { type: Boolean, default: true }
+  },
+  paymentGateway: {
+    active: {
+      type: String,
+      enum: ['razorpay', 'cashfree'],
+      default: 'razorpay'
+    }
   }
 }, { timestamps: true });
 

@@ -4,15 +4,9 @@ const Vendor = require('../models/Vendor');
 const WalletTransaction = require('../models/WalletTransaction');
 const NotificationService = require('../services/notificationService');
 const WalletService = require('../services/walletService');
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
+const { createGatewayOrder, verifyGatewayPayment } = require('../services/paymentGatewayService');
 
 const GlobalSettings = require('../models/GlobalSettings');
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
 
 // --- ADMIN CONTROLLERS ---
 
@@ -157,30 +151,49 @@ exports.createOrder = async (req, res) => {
     const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
-    // Check if any promotion is active or pending
     const existingPromo = await VendorPromotion.findOne({
       vendorId: vendor._id,
       status: { $in: ['active', 'pending'] }
     });
 
     if (existingPromo) {
-      return res.status(400).json({ 
-        message: 'You already have an active or pending promotion plan.' 
+      return res.status(400).json({
+        message: 'You already have an active or pending promotion plan.'
       });
     }
 
-    const options = {
-      amount: totalAmount * 100, // razorpay works in paise
-      currency: "INR",
-      receipt: `promo_${Date.now()}`,
-    };
+    const receipt = `promo_${String(vendor._id).slice(-8)}_${Date.now().toString(36)}`.slice(0, 45);
+    const order = await createGatewayOrder({
+      amount: totalAmount,
+      receipt,
+      notes: {
+        vendorId: vendor._id,
+        purpose: 'promotion_payment',
+        days
+      },
+      customer: {
+        customerId: vendor.ownerId,
+        name: req.user?.name,
+        phone: req.user?.phone,
+        email: req.user?.email
+      },
+      orderNote: `ZeroOne profile promotion for ${days} days`,
+      notifyUrl: process.env.CASHFREE_WEBHOOK_URL
+    });
 
-    const order = await razorpay.orders.create(options);
+    const promotion = await VendorPromotion.create({
+      vendorId: vendor._id,
+      durationDays: days,
+      amountPaid: totalAmount,
+      paymentGateway: order.gateway,
+      gatewayOrderId: order.orderId,
+      razorpayOrderId: order.gateway === 'razorpay' ? order.orderId : undefined,
+      status: 'pending'
+    });
+
     res.status(200).json({
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key_id: process.env.RAZORPAY_KEY_ID,
+      ...order,
+      promotionId: promotion._id,
       pricePerDay,
       totalAmount
     });
@@ -191,80 +204,87 @@ exports.createOrder = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
   try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
-      razorpay_signature,
-      days,
-      amountPaid
-    } = req.body;
+    const body = req.body || {};
+    const submittedOrderId = body.razorpay_order_id || body.order_id || body.orderId;
+    const submittedPaymentId = body.razorpay_payment_id || body.cf_payment_id || body.paymentId;
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
-      .digest("hex");
-
-    const isAuthentic = expectedSignature === razorpay_signature;
-
-    if (isAuthentic) {
-      const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
-      const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
-      if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
-
-      // Check again to prevent race conditions
-      const existingPromo = await VendorPromotion.findOne({
-        vendorId: vendor._id,
-        status: { $in: ['active', 'pending'] }
-      });
-
-      if (existingPromo) {
-        return res.status(400).json({ 
-          message: 'You already have an active or pending promotion plan.' 
-        });
-      }
-
-      const promotion = await VendorPromotion.create({
-        vendorId: vendor._id,
-        durationDays: days,
-        amountPaid: amountPaid,
-        paymentId: razorpay_payment_id,
-        razorpayOrderId: razorpay_order_id,
-        status: 'pending'
-      });
-
-      // Create transaction record for Platform Revenue
-      await WalletTransaction.create({
-        vendorId: vendor._id,
-        initiatedByUserId: req.user._id,
-        amount: amountPaid,
-        type: 'credit',
-        reason: 'promotion_payment',
-        category: 'promotion_payment',
-        status: 'completed',
-        paymentGateway: 'razorpay',
-        gatewayOrderId: razorpay_order_id,
-        gatewayPaymentId: razorpay_payment_id,
-        gatewaySignature: razorpay_signature,
-        description: `Profile Boost Promotion: ${days} days`,
-        referenceId: `PROMO_${promotion._id}`
-      });
-
-      // Notify Admin
-      NotificationService.notifyAdmins({
-        type: 'PROMOTION_REQUEST',
-        title: 'New Promotion Request',
-        message: `${vendor.shopName} has requested a profile promotion for ${days} days.`,
-        data: { requestId: promotion._id }
-      });
-
-      res.status(201).json({ 
-        message: 'Payment verified and promotion requested successfully.', 
-        promotion 
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid payment signature' });
+    if (!submittedOrderId) {
+      return res.status(400).json({ message: 'Missing payment order id' });
     }
+
+    const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
+    const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
+
+    const promotion = await VendorPromotion.findOne({
+      vendorId: vendor._id,
+      gatewayOrderId: submittedOrderId
+    });
+
+    if (!promotion) {
+      return res.status(404).json({ message: 'Pending promotion payment not found' });
+    }
+
+    if (promotion.paymentId || promotion.status !== 'pending') {
+      return res.status(200).json({
+        message: 'Promotion payment already processed',
+        promotion
+      });
+    }
+
+    const verification = await verifyGatewayPayment({
+      gateway: promotion.paymentGateway || String(body.gateway || 'razorpay').toLowerCase(),
+      orderId: submittedOrderId,
+      paymentId: submittedPaymentId,
+      signature: body.razorpay_signature || body.signature,
+      expectedAmount: promotion.amountPaid
+    });
+
+    if (!verification.verified) {
+      return res.status(400).json({ message: verification.message || 'Payment verification failed' });
+    }
+
+    const gateway = promotion.paymentGateway || String(body.gateway || 'razorpay').toLowerCase();
+    promotion.paymentId = verification.paymentId || submittedPaymentId || '';
+    promotion.gatewayPaymentId = verification.paymentId || submittedPaymentId || '';
+    promotion.gatewaySignature = body.razorpay_signature || body.signature || '';
+    promotion.status = 'pending';
+    await promotion.save();
+
+    await WalletTransaction.findOneAndUpdate(
+      { referenceId: `PROMO_${promotion._id}` },
+      {
+        $setOnInsert: {
+          vendorId: vendor._id,
+          initiatedByUserId: req.user._id,
+          amount: promotion.amountPaid,
+          type: 'credit',
+          reason: 'promotion_payment',
+          category: 'promotion_payment',
+          status: 'completed',
+          paymentGateway: gateway,
+          paymentMethod: gateway,
+          gatewayOrderId: submittedOrderId,
+          gatewayPaymentId: verification.paymentId || submittedPaymentId || '',
+          gatewaySignature: body.razorpay_signature || body.signature || '',
+          description: `Profile Boost Promotion: ${promotion.durationDays} days`,
+          referenceId: `PROMO_${promotion._id}`
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    NotificationService.notifyAdmins({
+      type: 'PROMOTION_REQUEST',
+      title: 'New Promotion Request',
+      message: `${vendor.shopName} has requested a profile promotion for ${promotion.durationDays} days.`,
+      data: { requestId: promotion._id }
+    });
+
+    res.status(201).json({
+      message: 'Payment verified and promotion requested successfully.',
+      promotion
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
