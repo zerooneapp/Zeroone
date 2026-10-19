@@ -46,7 +46,9 @@ const updateProfile = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id;
+    if (!userId) return res.status(403).json({ message: 'Only a user account can be deleted' });
+    if (['admin', 'super_admin'].includes(req.user.role)) return res.status(403).json({ message: 'Admin accounts must be managed from the admin panel' });
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 

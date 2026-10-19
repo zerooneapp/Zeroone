@@ -264,6 +264,10 @@ const sendOTP = async (req, res) => {
     let user = await User.findOne({ phone });
     let staff = await Staff.findOne({ phone });
 
+    if (user?.isDeleted) {
+      return res.status(403).json({ message: 'This account has been deleted' });
+    }
+
     // 🛡️ Pre-OTP Role Validation
     if (portal === 'vendor') {
       if (user && user.role === 'customer' && user.name && (!staff || staff.isOwner)) {
@@ -355,6 +359,7 @@ const verifyOTP = async (req, res) => {
     let finalAccount = isRegularStaff ? staff : (user || staff);
 
     if (!finalAccount) return res.status(404).json({ message: 'Account not found' });
+    if (finalAccount.isDeleted) return res.status(403).json({ message: 'This account has been deleted' });
     if (user && isAdminRole(user.role)) {
       return res.status(403).json({ message: 'Admins must use the secure admin login' });
     }

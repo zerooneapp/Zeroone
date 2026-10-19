@@ -21,6 +21,23 @@ const Account = () => {
   }, [role, navigate]);
 
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleting(true);
+      await api.delete('/users/profile');
+      setShowDeleteConfirm(false);
+      toast.success('Account deleted successfully');
+      await logout();
+      navigate('/login', { replace: true });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Account deletion failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -33,7 +50,7 @@ const Account = () => {
   const menuItems = [
     { icon: User, label: 'Personal Information', sub: 'Name, phone, and DOB', path: '/account/info', color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { icon: MapPin, label: 'Saved Addresses', sub: 'Home, office, and more', path: '/account/addresses', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { icon: Shield, label: 'Security', sub: 'Delete Account', path: '/account/security', color: 'text-teal-500', bg: 'bg-teal-500/10' },
+    { icon: Shield, label: 'Security', sub: 'Password and account security', path: '/account/security', color: 'text-teal-500', bg: 'bg-teal-500/10' },
     { icon: Crown, label: 'My Memberships', sub: 'Active plans & benefits', path: '/account/memberships', color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { icon: Settings, label: 'Preferences', sub: 'Theme', path: '/account/preferences', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
     { icon: HelpCircle, label: 'Help Desk', sub: 'Contact Support & Tickets', path: '/account/helpdesk', color: 'text-rose-500', bg: 'bg-rose-500/10' },
@@ -71,7 +88,7 @@ const Account = () => {
         {menuItems.map((item, i) => (
           <div
             key={item.label}
-            onClick={() => item.path && navigate(item.path)}
+            onClick={() => item.action ? item.action() : item.path && navigate(item.path)}
             className="group bg-white dark:bg-gray-900 py-2 px-3.5 rounded-xl border border-[#00246b]/10 dark:border-gray-800 flex items-center gap-3.5 active:scale-[0.98] transition-all shadow-sm cursor-pointer"
           >
             <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center transition-colors ${item.bg} ${item.color}`}>
@@ -95,10 +112,58 @@ const Account = () => {
           <LogOut size={16} strokeWidth={3} />
           Log Out of Account
         </button>
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-red-600/40 dark:border-red-500/40 text-red-600 dark:text-red-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
+        >
+          <Trash2 size={16} strokeWidth={3} />
+          Delete Account
+        </button>
       </div>
 
 
       <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !deleting && setShowDeleteConfirm(false)}
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl relative z-10 p-5 text-center border border-red-500/20"
+            >
+              <div className="w-12 h-12 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <AlertTriangle size={21} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Delete Account?</h3>
+              <p className="text-[12px] text-slate-500 dark:text-gray-400 mt-2 leading-relaxed">
+                Your profile and account access will be permanently removed. This action cannot be undone.
+              </p>
+              <div className="flex gap-2.5 mt-6">
+                <button
+                  disabled={deleting}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-3 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 rounded-xl font-bold text-[11px] active:scale-95 transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={deleting}
+                  onClick={handleDeleteAccount}
+                  className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold text-[11px] shadow-lg shadow-red-500/20 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
         {showLogoutConfirm && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
             <motion.div

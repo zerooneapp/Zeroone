@@ -12,6 +12,7 @@ const protect = async (req, res, next) => {
       // 1. Check User
       const user = await User.findById(decoded.id).select('-password');
       if (user) {
+        if (user.isDeleted) return res.status(403).json({ message: 'User account has been deleted' });
         if (user.isBlocked) return res.status(403).json({ message: 'User account is blocked' });
         req.user = user;
         return next();
