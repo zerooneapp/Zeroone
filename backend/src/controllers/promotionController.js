@@ -153,7 +153,16 @@ exports.createOrder = async (req, res) => {
 
     const existingPromo = await VendorPromotion.findOne({
       vendorId: vendor._id,
-      status: { $in: ['active', 'pending'] }
+      $or: [
+        { status: 'active' },
+        {
+          status: 'pending',
+          $or: [
+            { paymentId: { $exists: true, $nin: [null, ''] } },
+            { gatewayPaymentId: { $exists: true, $nin: [null, ''] } }
+          ]
+        }
+      ]
     });
 
     if (existingPromo) {

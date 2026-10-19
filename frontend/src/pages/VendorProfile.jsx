@@ -82,6 +82,11 @@ const VendorProfile = () => {
    const [promoDays, setPromoDays] = useState(30);
    const [promoPricePerDay, setPromoPricePerDay] = useState(10);
    const [globalFeatures, setGlobalFeatures] = useState({ membershipActive: true, subscriptionActive: true });
+   const hasActivePromotion = myPromotions.some(promo => promo.status === 'active');
+   const hasPaidPendingPromotion = myPromotions.some(
+      promo => promo.status === 'pending' && Boolean(promo.paymentId || promo.gatewayPaymentId)
+   );
+   const hasBlockingPromotion = hasActivePromotion || hasPaidPendingPromotion;
 
    const handleFetchLocation = () => {
       if (!navigator.geolocation) return toast.error('GPS not supported');
@@ -1607,7 +1612,7 @@ const VendorProfile = () => {
                                                 ) : (
                                                    <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
                                                       <Clock size={9} />
-                                                      Payment Done • Waiting for Admin Approval
+                                                      {promo.paymentId || promo.gatewayPaymentId ? 'Payment Done • Waiting for Admin Approval' : 'Payment Pending • Complete payment to continue'}
                                                    </p>
                                                 )}
 
@@ -1620,7 +1625,7 @@ const VendorProfile = () => {
                                              <div className="text-right">
                                                 <p className="text-[12px] font-black text-slate-800 dark:text-white">₹{promo.amountPaid}</p>
                                                 <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">
-                                                   {promo.status === 'rejected' ? 'Refunded' : 'Order Verified'}
+                                                   {promo.status === 'rejected' ? 'Refunded' : (promo.paymentId || promo.gatewayPaymentId ? 'Order Verified' : 'Payment Pending')}
                                                 </p>
                                              </div>
                                           </div>
@@ -1666,10 +1671,10 @@ const VendorProfile = () => {
                                           </div>
                                           <button
                                              onClick={handlePurchasePromotion}
-                                             disabled={loading || myPromotions.some(p => p.status === 'active' || p.status === 'pending')}
+                                             disabled={loading || hasBlockingPromotion}
                                              className="px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-400 disabled:shadow-none"
                                           >
-                                             {loading ? 'Wait...' : myPromotions.some(p => p.status === 'active' || p.status === 'pending') ? 'Active' : 'Pay Now'}
+                                             {loading ? 'Wait...' : hasActivePromotion ? 'Active' : hasPaidPendingPromotion ? 'Pending' : 'Pay Now'}
                                           </button>
                                        </div>
                                     </div>
