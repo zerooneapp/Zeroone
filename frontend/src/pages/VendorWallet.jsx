@@ -299,13 +299,13 @@ const VendorWallet = () => {
             >
                <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
             </button>
-            <button
+            {false && <button
               onClick={() => setIsTopupOpen(true)}
               className="p-2.5 bg-[#00246b] text-white rounded-xl shadow-md shadow-[#00246b]/20 active:scale-95 transition-all"
               title="Add Money"
             >
               <Plus size={18} />
-            </button>
+            </button>}
             <button
               onClick={() => setIsWithdrawOpen(true)}
               className="p-2.5 bg-white dark:bg-gray-800 text-[#00246b] dark:text-white rounded-xl shadow-md border border-slate-200 dark:border-gray-700 active:scale-95 transition-all"
@@ -433,13 +433,13 @@ const VendorWallet = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <button
+              <button hidden
                 onClick={openRecommendedTopup}
                 className="h-11 rounded-xl bg-[#00246b] text-white font-black text-[8px] uppercase tracking-[0.18em] shadow-lg shadow-[#00246b]/10 active:scale-[0.98] transition-all"
               >
                 Top Up {moneyFormatter.format(recommendedTopup)}
               </button>
-              <button
+              <button hidden
                 onClick={handleMonthlyPurchase}
                 disabled={submitting || !canUsePayment}
                 className={`h-11 rounded-xl font-black text-[8px] uppercase tracking-[0.18em] transition-all ${submitting || !canUsePayment ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-slate-200/70 dark:border-gray-700 shadow-sm active:scale-[0.98]'}`}
@@ -572,7 +572,7 @@ const VendorWallet = () => {
                         <span className="text-[7.5px] font-black uppercase leading-none">{wallet?.subscription?.currentPlan === 'trial' ? 'Trial Active' : 'Monthly Active'}</span>
                      </div>
                    ) : (
-                     <button
+                     false && <button
                        onClick={handleMonthlyPurchase}
                        disabled={submitting || !canUsePayment}
                        className="px-2.5 py-1 bg-[#00246b] text-white rounded-lg text-[7px] font-black uppercase tracking-widest shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all"
