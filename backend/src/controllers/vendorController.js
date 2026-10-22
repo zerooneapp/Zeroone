@@ -1331,7 +1331,12 @@ const getVendorDashboardBundle = async (req, res) => {
       getBillingSettings(),
       getSubscriptionPlanForVendor('daily', vendor.serviceLevel),
       getSubscriptionPlanForVendor('monthly', vendor.serviceLevel),
-      Notification.countDocuments({ userId: new mongoose.Types.ObjectId(vendor.ownerId), isRead: false, role: 'vendor' }),
+      Notification.countDocuments({
+        userId: new mongoose.Types.ObjectId(vendor.ownerId),
+        isRead: false,
+        role: 'vendor',
+        vendorId: { $in: [vendor._id, null] }
+      }),
       
       Booking.aggregate([
         { $match: { vendorId: new mongoose.Types.ObjectId(vendor._id), status: 'completed' } },

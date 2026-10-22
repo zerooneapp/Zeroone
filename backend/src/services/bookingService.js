@@ -333,7 +333,7 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null, payme
       type: 'BOOKING_COMPLETED_REPORT',
       title: 'Service Completed',
       message: `Staff ${staffName} has completed the service for ${customerName}.`,
-      data: { bookingId: booking._id },
+      data: { bookingId: booking._id, vendorId: booking.vendorId?._id || booking.vendorId },
       referenceId: `${booking._id}_COMPLETE_V`
     });
   }
@@ -465,7 +465,7 @@ const cancelBooking = async (userId, bookingId, role, reason = '', actorStaffId 
     type: 'BOOKING_CANCELLED_INFO',
     title: 'Booking Cancelled',
     message: internalMessage,
-    data: { bookingId: booking._id, reason: booking.cancelReason, isActionable: false },
+    data: { bookingId: booking._id, vendorId: booking.vendorId?._id || booking.vendorId, reason: booking.cancelReason, isActionable: false },
     referenceId: `${booking._id}_CANCEL_EVENT`
   });
 
@@ -555,7 +555,7 @@ const emergencyCancelBooking = async (vendorUserId, bookingId, reason = '', clos
       type: 'BOOKING_CANCELLED_INFO',
       title: 'Booking Cancelled',
       message: `Booking for ${bookingTime} was cancelled due to an emergency closure.`,
-      data: { bookingId: booking._id, reason: booking.cancelReason, isActionable: false },
+      data: { bookingId: booking._id, vendorId: booking.vendorId?._id || booking.vendorId, reason: booking.cancelReason, isActionable: false },
       referenceId: `${booking._id}_EMERGENCY_CANCEL_VENDOR`
     }
   ];
@@ -717,7 +717,7 @@ const rescheduleBooking = async (userId, actorRole, bookingId, newStartTime, new
     type: 'BOOKING_RESCHEDULED',
     title: 'Booking Rescheduled',
     message: rescheduleMsg,
-    data: { bookingId: booking._id },
+    data: { bookingId: booking._id, vendorId: booking.vendorId?._id || booking.vendorId },
     referenceId: `${booking._id}_RESCHED_EVENT`
   });
 
@@ -855,7 +855,7 @@ const systemCompleteBooking = async (bookingId) => {
       type: 'BOOKING_COMPLETED_REPORT',
       title: 'Service Completed',
       message: `Staff ${staffName} has completed the service for ${customerName}.`,
-      data: { bookingId: booking._id },
+      data: { bookingId: booking._id, vendorId: booking.vendorId?._id || booking.vendorId },
       referenceId: `${booking._id}_COMPLETE_V`
     });
   }

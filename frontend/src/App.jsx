@@ -99,7 +99,7 @@ import ScrollToTop from './components/ScrollToTop';
 import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
-import { requestForToken, onMessageListener } from './config/firebase';
+import { requestForToken, onMessageListener, showForegroundNotification } from './config/firebase';
 import { saveTokenToBackend } from './services/fcmService';
 import useSocket from './hooks/useSocket';
 
@@ -131,13 +131,20 @@ function App() {
     // ✅ FIX: onMessageListener now takes a callback and returns a cleanup fn
     // Old .then() approach only fired for the FIRST notification, then stopped
     const unsubscribe = onMessageListener((payload) => {
-      if (!payload?.notification) return;
+      const notification = payload?.notification || payload?.data || {};
+      const title = notification.title || 'ZeroOne';
+      const body = notification.body || '';
+      if (!title && !body) return;
       console.log('[App.jsx] Foreground notification:', payload);
+
+      // Firebase delivers foreground messages to onMessage only; the service
+      // worker's background handler is not invoked in this state.
+      void showForegroundNotification(payload);
 
       toast.success(
         <div>
-          <b>{payload.notification.title}</b>
-          <p className="text-sm">{payload.notification.body}</p>
+          <b>{title}</b>
+          <p className="text-sm">{body}</p>
         </div>,
         { duration: 5000 }
       );

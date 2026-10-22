@@ -29,7 +29,7 @@ const getNotifications = async (req, res) => {
     if (userRole === 'vendor') {
       const activeVendorId = req.headers['x-vendor-id'] || req.query.vendorId || (req.user ? req.user.lastActiveVendorId : null);
       if (activeVendorId) {
-        query.vendorId = activeVendorId;
+        query.vendorId = { $in: [activeVendorId, null] };
       }
     }
 
@@ -58,7 +58,7 @@ const markAsRead = async (req, res) => {
     if (userRole === 'vendor') {
       const activeVendorId = req.headers['x-vendor-id'] || req.query.vendorId || (req.user ? req.user.lastActiveVendorId : null);
       if (activeVendorId) {
-        roleFilter.vendorId = activeVendorId;
+        roleFilter.vendorId = { $in: [activeVendorId, null] };
       }
     }
 
@@ -102,7 +102,7 @@ const getUnreadCount = async (req, res) => {
     if (userRole === 'vendor') {
       const activeVendorId = req.headers['x-vendor-id'] || req.query.vendorId || (req.user ? req.user.lastActiveVendorId : null);
       if (activeVendorId) {
-        query.vendorId = activeVendorId;
+        query.vendorId = { $in: [activeVendorId, null] };
       }
     }
 

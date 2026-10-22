@@ -61,7 +61,10 @@ class NotificationService {
    */
   static async _dispatchPush(userId, payload) {
     try {
-      if (admin.apps.length === 0) return;
+      if (admin.apps.length === 0) {
+        console.warn('[PUSH-SKIP] Firebase Admin is not initialized; check FIREBASE_* environment variables.');
+        return;
+      }
 
       // 🛡️ 1. Generate a Stable, Content-Aware Deduplication Key
       // This prevents duplicates even if a stable ID is missing by hashing core content

@@ -769,7 +769,7 @@ const adminCancelBooking = async (req, res) => {
         type: 'BOOKING_CANCELLED_INFO',
         title: 'Booking Cancelled',
         message: `Booking scheduled for ${bookingTime} was cancelled by the admin team. Reason: ${cancellationReason}.`,
-        data: { bookingId: booking._id, reason: cancellationReason, isActionable: false },
+        data: { bookingId: booking._id, vendorId: hydratedBooking.vendorId?._id || hydratedBooking.vendorId, reason: cancellationReason, isActionable: false },
         referenceId: `${booking._id}_ADMIN_CANCEL_VENDOR`
       }),
       hydratedBooking.staffId ? safeSendNotification({
@@ -1096,6 +1096,7 @@ const toggleBlockVendor = async (req, res) => {
       message: vendor.status === 'blocked'
         ? 'Your partner account has been restricted by the admin team. Please contact support for details.'
         : 'Your partner account has been restored and is available again.',
+      data: { vendorId: vendor._id },
       referenceId: `VENDOR_${vendor.status === 'blocked' ? 'BLOCK' : 'UNBLOCK'}_${vendor._id}_${Date.now()}`
     });
 
@@ -1121,6 +1122,7 @@ const toggleVendorActive = async (req, res) => {
       message: vendor.isActive
         ? 'Your partner profile is active again and visible on ZeroOne.'
         : 'Your partner profile has been deactivated by the admin team.',
+      data: { vendorId: vendor._id },
       referenceId: `VENDOR_ACTIVE_${vendor._id}_${Date.now()}`
     });
 
@@ -1173,6 +1175,7 @@ const extendVendorFreeTrial = async (req, res) => {
       type: 'TRIAL_EXTENDED',
       title: 'Free Trial Extended',
       message: `Your free trial has been extended by ${extensionDays} day${extensionDays > 1 ? 's' : ''} and is now active until ${moment(nextExpiry).format('D MMMM YYYY')}.`,
+      data: { vendorId: vendor._id },
       referenceId: `TRIAL_EXTEND_${vendor._id}_${Date.now()}`
     });
 
@@ -1745,6 +1748,7 @@ const processWithdrawalRequest = async (req, res) => {
       message: status === 'approved'
         ? `Your withdrawal request of ₹${request.amount} has been approved and processed.`
         : `Your withdrawal request of ₹${request.amount} was rejected. Reason: ${rejectionReason}`,
+      data: { vendorId: request.vendorId?._id || request.vendorId },
       referenceId: `WITHDRAW_NOTIFY_${request._id}`
     });
 

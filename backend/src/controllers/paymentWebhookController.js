@@ -78,7 +78,7 @@ const settleMembership = async ({ membership, paymentId, signature }) => {
     type: 'MEMBERSHIP_PURCHASED',
     title: 'New Membership Purchased! 👑',
     message: `A customer has purchased your "${plan.name}" membership plan for ₹${plan.price}.`,
-    data: { membershipId: membership._id },
+    data: { membershipId: membership._id, vendorId: vendor._id },
     referenceId: `MEMB_NOTIFY_${membership._id}`
   });
 };

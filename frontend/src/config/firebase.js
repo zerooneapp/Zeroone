@@ -13,6 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 let messagingInstance = null;
+const shownForegroundNotificationIds = new Set();
 
 export const VAPID_KEY = "BNy5bN5SPbw3fkzBFO289YDCB2cnVzfYPKXURnNMd3AV0sYxBBHz3y5InxZXtDaK4ER9e0Poqk0tqkdQPRWnWfU";
 
@@ -33,7 +34,7 @@ const getMessagingInstance = async () => {
 const waitForServiceWorkerActive = (registration) => {
     return new Promise((resolve) => {
         // Already active — return immediately
-        if (registration.active) {
+        if (registration.active && !registration.installing && !registration.waiting) {
             resolve(registration);
             return;
         }
@@ -67,6 +68,10 @@ const registerMessagingServiceWorker = async () => {
             registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
             console.log('[FCM] Service worker registered for messaging.');
         }
+
+        await registration.update().catch((err) => {
+            console.log('[FCM] Service worker update check failed:', err);
+        });
 
         // ✅ FIX: Wait for SW to be fully active before returning
         // Firebase getToken() requires an ACTIVE service worker, not just registered
@@ -136,6 +141,55 @@ export const onMessageListener = (callback) => {
 
     // Return cleanup function for useEffect
     return () => unsubscribe();
+};
+
+// FCM does not automatically create a browser notification while the app is
+// in the foreground. Show it explicitly so foreground and background pushes
+// have the same user-visible behaviour.
+export const showForegroundNotification = async (payload) => {
+    if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') {
+        return false;
+    }
+
+    const notification = payload?.notification || {};
+    const data = payload?.data || {};
+    const title = notification.title || data.title || 'ZeroOne';
+    const body = notification.body || data.body || '';
+    const dedupeId = data.id || data.notificationId || payload?.referenceId || payload?._id;
+
+    if (dedupeId && shownForegroundNotificationIds.has(String(dedupeId))) {
+        return false;
+    }
+    if (dedupeId) {
+        const id = String(dedupeId);
+        shownForegroundNotificationIds.add(id);
+        setTimeout(() => shownForegroundNotificationIds.delete(id), 30000);
+    }
+
+    const options = {
+        body,
+        icon: '/logo.jpeg',
+        badge: '/logo.jpeg',
+        data,
+        tag: dedupeId ? String(dedupeId) : undefined,
+        renotify: Boolean(dedupeId)
+    };
+
+    try {
+        const registration = 'serviceWorker' in navigator
+            ? await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js')
+            : null;
+
+        if (registration?.showNotification) {
+            await registration.showNotification(title, options);
+        } else {
+            new Notification(title, options);
+        }
+        return true;
+    } catch (err) {
+        console.log('[FCM] Foreground notification display failed:', err);
+        return false;
+    }
 };
 
 export const removeFCMToken = async () => {

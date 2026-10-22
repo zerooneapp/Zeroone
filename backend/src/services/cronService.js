@@ -273,7 +273,7 @@ const initCronJobs = () => {
               type: 'BOOKING_ATTENTION',
               title: 'Bookings Need Attention ⚠️',
               message: `${pendingCount} booking${pendingCount > 1 ? 's' : ''} need${pendingCount === 1 ? 's' : ''} your attention. Please complete or mark them.`,
-              data: { isActionable: true }
+              data: { vendorId: vendor._id, isActionable: true }
             });
             console.log(`[CRON-EXPIRED] Notified vendor ${vendor.shopName} (${vendor._id}) about ${pendingCount} pending attention bookings`);
           }
@@ -341,7 +341,7 @@ const initCronJobs = () => {
             type: 'BOOKING_CANCELLED_INFO',
             title: 'Booking Auto-Cancelled',
             message: `Booking for ${moment(booking.startTime).tz('Asia/Kolkata').format('hh:mm A')} was auto-cancelled as it was not marked complete by midnight.`,
-            data: { bookingId: booking._id, isActionable: false }
+            data: { bookingId: booking._id, vendorId: booking.vendorId?._id || booking.vendorId, isActionable: false }
           }).catch(err => console.error('[CRON-MIDNIGHT-CANCEL-NOTIFY-ERROR]', err.message));
         }
       }

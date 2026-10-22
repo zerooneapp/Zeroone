@@ -393,7 +393,7 @@ exports.verifyPurchase = async (req, res) => {
         type: 'MEMBERSHIP_PURCHASED',
         title: 'New Membership Purchased! 👑',
         message: `${req.user.name || 'A customer'} has purchased your "${plan.name}" membership plan for ₹${plan.price}.`,
-        data: { membershipId: membership._id },
+        data: { membershipId: membership._id, vendorId: vendor._id },
         referenceId: `MEMB_NOTIFY_${membership._id}`
       });
     }
@@ -465,7 +465,7 @@ exports.requestManualPurchase = async (req, res) => {
         type: 'MEMBERSHIP_REQUESTED',
         title: 'New Membership Request 👑',
         message: `${req.user.name || 'A customer'} has requested to buy your "${plan.name}" membership plan for ₹${plan.price}.`,
-        data: { membershipId: membership._id }
+        data: { membershipId: membership._id, vendorId: vendor._id }
       });
     }
 

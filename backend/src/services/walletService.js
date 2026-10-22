@@ -363,6 +363,7 @@ const processDailyDeduction = async (vendor) => {
       type: 'LOW_BALANCE',
       title: 'Wallet Balance Low',
       message: `Keep at least ${formatInr(state.totalRequired)} (Threshold + Daily Fees) in your wallet to stay live. Current balance: ${formatInr(vendor.walletBalance)}. Add ${formatInr(shortfall)} to resume.`,
+      data: { vendorId: vendor._id },
       referenceId: `LOW_BAL_${vendor._id}_${today}`
     });
   }
@@ -401,6 +402,7 @@ const addFunds = async (vendor, amount, reason = 'admin_topup', options = {}) =>
     type: 'WALLET_TOPUP',
     title: 'Wallet Top-up',
     message: `${formatInr(amount)} has been credited to your wallet. Current balance: ${formatInr(vendor.walletBalance)}.`,
+    data: { vendorId: vendor._id },
     referenceId: options.notificationReferenceId || `TOPUP_NOTIFY_${vendor._id}_${Date.now()}`
   });
 
@@ -453,6 +455,7 @@ const activateMonthlySubscription = async (vendor, options = {}) => {
     type: 'SUBSCRIPTION_ACTIVE',
     title: 'Monthly Subscription Activated',
     message: `Your ${getNormalizedServiceLevel(vendor.serviceLevel)} monthly plan is active until ${moment(vendor.expiryDate).format('D MMMM YYYY')}. Daily wallet deductions are paused until then.`,
+    data: { vendorId: vendor._id },
     referenceId: options.notificationReferenceId || `MONTHLY_NOTIFY_${vendor._id}_${Date.now()}`
   });
 

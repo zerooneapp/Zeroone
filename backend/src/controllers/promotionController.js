@@ -72,6 +72,7 @@ exports.approvePromotion = async (req, res) => {
          type: 'PROMOTION_APPROVED',
          title: 'Profile Boost Activated!',
          message: `Your profile promotion for ${duration} days has been approved and is now live.`,
+         data: { vendorId: vendor._id },
          referenceId: `PROMO_APPROVE_${request._id}`
        });
     }
@@ -115,6 +116,7 @@ exports.rejectPromotion = async (req, res) => {
          type: 'PROMOTION_REJECTED',
          title: 'Promotion Request Update',
          message: `Your promotion request was rejected. Amount ₹${request.amountPaid} has been refunded to your wallet. Reason: ${reason || 'Not specified'}`,
+         data: { vendorId: vendor._id },
          referenceId: `PROMO_REJECT_${request._id}`
        });
     }

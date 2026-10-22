@@ -270,6 +270,7 @@ const approveReview = async (req, res) => {
         type: 'REVIEW_APPROVED',
         title: 'New Review Published',
         message: `A new customer review for ${vendor.shopName || 'your shop'} is now visible on your profile.`,
+        data: { vendorId: vendor._id },
         referenceId: `REVIEW_APPROVED_VENDOR_${review._id}`
       }) : null,
       staffUserId ? NotificationService.sendNotification({
