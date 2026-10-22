@@ -1,5 +1,19 @@
 import axios from 'axios';
 
+const configuredApiUrl = String(import.meta.env.VITE_API_URL || '').trim();
+const isLocalApiUrl = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(configuredApiUrl);
+
+// Never let a production build call the visitor's own localhost. If the
+// frontend and API share a domain, /api is the correct production fallback;
+// otherwise VITE_API_URL must be set to the deployed backend URL.
+const apiBaseUrl = import.meta.env.PROD && isLocalApiUrl
+  ? '/api'
+  : configuredApiUrl || '/api';
+
+if (import.meta.env.PROD && isLocalApiUrl) {
+  console.error('[API-CONFIG] Production build contains a localhost VITE_API_URL. Falling back to /api. Set VITE_API_URL to the live backend URL.');
+}
+
 const getStoredRole = () => {
   try {
     const authStorage = localStorage.getItem('auth-storage');
@@ -28,7 +42,7 @@ const buildLoginRedirect = () => {
 };
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },

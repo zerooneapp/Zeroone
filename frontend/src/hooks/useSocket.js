@@ -14,8 +14,14 @@ const getSocketUrl = () => {
     const parsedApiUrl = new URL(apiUrl, window.location.origin);
     const isLocalFrontend = ['localhost', '127.0.0.1'].includes(parsedApiUrl.hostname)
       && parsedApiUrl.port === '3000';
-    if (isLocalFrontend) {
+    if (isLocalFrontend && import.meta.env.DEV) {
       return parsedApiUrl.protocol + '//' + parsedApiUrl.hostname + ':5003';
+    }
+
+    // A localhost value must never be used by the deployed site. Use the
+    // current origin when no production socket URL was configured.
+    if (isLocalFrontend && import.meta.env.PROD) {
+      return window.location.origin;
     }
 
     // In local Vite development, API requests go through the /api proxy on

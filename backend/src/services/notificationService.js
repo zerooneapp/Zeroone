@@ -337,9 +337,11 @@ class NotificationService {
         // ⚡ 2. Dispatch Real-time (Socket.io)
         emitNotification(recipient.userId, notif);
 
-        // 📲 3. Dispatch Push (Async/Non-blocking)
+        // 📲 3. Dispatch Push and await the result. The booking request must
+        // not finish before FCM has read the current token list; otherwise a
+        // short-lived/serverless process can drop the push silently.
         if (!isSilent) {
-          this._dispatchPush(recipient.userId, {
+          await this._dispatchPush(recipient.userId, {
             title: pushTitle,
             message,
             data: payloadData,

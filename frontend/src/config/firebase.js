@@ -13,6 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 let messagingInstance = null;
+let tokenRequestPromise = null;
 const shownForegroundNotificationIds = new Set();
 
 export const VAPID_KEY = "BNy5bN5SPbw3fkzBFO289YDCB2cnVzfYPKXURnNMd3AV0sYxBBHz3y5InxZXtDaK4ER9e0Poqk0tqkdQPRWnWfU";
@@ -85,13 +86,18 @@ const registerMessagingServiceWorker = async () => {
 };
 
 
-export const requestForToken = async () => {
+const requestForTokenInternal = async () => {
     try {
         const messaging = await getMessagingInstance();
         if (!messaging) return null;
 
+        if (typeof Notification === 'undefined') return null;
+
         console.log('[FCM] Requesting notification permission...');
-        const permission = await Notification.requestPermission();
+        // Do not repeatedly prompt users during periodic token re-sync.
+        const permission = Notification.permission === 'default'
+            ? await Notification.requestPermission()
+            : Notification.permission;
         console.log('[FCM] Notification permission status:', permission);
 
         if (permission !== 'granted') {
@@ -122,6 +128,19 @@ export const requestForToken = async () => {
         console.log('[FCM] An error occurred while retrieving token: ', err);
         return null;
     }
+};
+
+// Share concurrent token requests from auth restoration, StrictMode, and
+// visibility/online recovery events.
+export const requestForToken = () => {
+    if (tokenRequestPromise) return tokenRequestPromise;
+
+    const request = requestForTokenInternal();
+    tokenRequestPromise = request;
+    request.finally(() => {
+        if (tokenRequestPromise === request) tokenRequestPromise = null;
+    });
+    return request;
 };
 
 // ✅ FIX: Persistent listener — registers a callback that fires for EVERY notification

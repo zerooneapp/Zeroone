@@ -44,9 +44,17 @@ const saveFcmToken = async (req, res) => {
         // Use an atomic update instead of document.save(). Multiple tabs or
         // React StrictMode can register the same FCM token simultaneously;
         // document.save() then races on the User version and returns 500.
+        //
+        // Only the newest web token is used by the push service. Replacing the
+        // web array prevents an expired browser token from remaining the
+        // selected token after a browser/service-worker token rotation.
+        const tokenUpdate = tokenField === 'fcmTokens'
+            ? { $set: { fcmTokens: [normalizedToken] } }
+            : { $addToSet: { fcmTokenMobile: normalizedToken } };
+
         await entity.constructor.updateOne(
             { _id: entity._id },
-            { $addToSet: { [tokenField]: normalizedToken } }
+            tokenUpdate
         );
 
         console.log('[FCM-DEBUG] Token saved successfully for:', actor._id, tokenField);

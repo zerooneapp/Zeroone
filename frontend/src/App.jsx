@@ -160,18 +160,45 @@ function App() {
 
   // Handle Notifications Setup
   useEffect(() => {
-    const setupNotifications = async () => {
-      if (!isInitialized) return;
+    if (!isInitialized || !isAuthenticated) return undefined;
 
-      if (isAuthenticated) {
+    let disposed = false;
+    let syncInFlight = null;
+
+    const syncNotifications = () => {
+      if (disposed) return Promise.resolve(false);
+      if (syncInFlight) return syncInFlight;
+
+      syncInFlight = (async () => {
         const token = await requestForToken();
-        if (token) {
-          await saveTokenToBackend(token);
-        }
-      }
+        if (disposed || !token) return false;
+        return saveTokenToBackend(token);
+      })().finally(() => {
+        syncInFlight = null;
+      });
+
+      return syncInFlight;
     };
 
-    setupNotifications();
+    // Re-register after the browser wakes/reconnects and while the session
+    // remains open, because FCM browser tokens can rotate in the background.
+    syncNotifications();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') syncNotifications();
+    };
+    const handleOnline = () => syncNotifications();
+    const refreshInterval = window.setInterval(syncNotifications, 15 * 60 * 1000);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      disposed = true;
+      window.clearInterval(refreshInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+    };
   }, [isAuthenticated, isInitialized]);
 
   useEffect(() => {
