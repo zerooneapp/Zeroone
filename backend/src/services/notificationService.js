@@ -145,12 +145,17 @@ class NotificationService {
       // the latest web browser. Mobile users can have more than two devices,
       // and array position alone cannot tell us which device is currently
       // active. Invalid/expired tokens are removed below after FCM responds.
+      const normalizeTokens = (values = []) => [...new Set(
+        values
+          .map((token) => typeof token === 'string' ? token.trim() : '')
+          .filter(Boolean)
+      )];
       const mobileTokens = normalizedTargetPlatform === 'web'
         ? []
-        : (entity.fcmTokenMobile || []);
+        : normalizeTokens(entity.fcmTokenMobile || []);
       const webTokens = normalizedTargetPlatform === 'mobile'
         ? []
-        : (entity.fcmTokens || []).slice(-1);
+        : normalizeTokens((entity.fcmTokens || []).slice(-1));
       
       // Combine and deduplicate to prevent sending the same message twice to the same token
       const tokens = [...new Set([...webTokens, ...mobileTokens])].filter(Boolean);
@@ -227,9 +232,16 @@ class NotificationService {
       });
 
       if (invalidTokens.length) {
-        entity.fcmTokens = (entity.fcmTokens || []).filter((token) => !invalidTokens.includes(token));
-        entity.fcmTokenMobile = (entity.fcmTokenMobile || []).filter((token) => !invalidTokens.includes(token));
-        await entity.save();
+        await entity.constructor.updateOne(
+          { _id: entity._id },
+          {
+            $pull: {
+              fcmTokens: { $in: invalidTokens },
+              fcmTokenMobile: { $in: invalidTokens }
+            }
+          }
+        );
+        console.log('[PUSH-CLEANUP] Removed ' + invalidTokens.length + ' invalid token(s) for user ' + userId);
       }
 
       console.log(`[PUSH-SENT] Delivered to ${response.successCount} devices for user ${userId}`);
@@ -338,6 +350,7 @@ class NotificationService {
 
         // 🏠 1. Create In-App Notifications (MongoDB) - Use upsert for idempotency
         let notif;
+        let notificationAlreadyExists = false;
         if (referenceId) {
           // If referenceId exists, try to find existing or create new (upsert)
           const result = await Notification.findOneAndUpdate(
@@ -356,10 +369,11 @@ class NotificationService {
             { upsert: true, returnDocument: 'after', rawResult: true }
           );
           
-          // Only proceed if it was newly inserted
+          // Keep in-app notifications idempotent, but still attempt push delivery
+          // when an earlier attempt created the in-app record and then failed.
           if (result.lastErrorObject?.updatedExisting) {
             console.log(`[Notification-Skip] Duplicate suppressed for user ${recipient.userId} (Ref: ${referenceId})`);
-            continue; 
+            notificationAlreadyExists = true;
           }
           notif = result.value || result;
         } else {
@@ -380,18 +394,29 @@ class NotificationService {
         notifications.push(notif);
 
         // ⚡ 2. Dispatch Real-time (Socket.io)
-        emitNotification(recipient.userId, notif);
+        if (!notificationAlreadyExists) {
+          emitNotification(recipient.userId, notif);
+        }
 
         // 📲 3. Dispatch Push and await the result. The booking request must
         // not finish before FCM has read the current token list; otherwise a
         // short-lived/serverless process can drop the push silently.
         if (!isSilent) {
-          await this._dispatchPush(recipient.userId, {
+          const pushResult = await this._dispatchPush(recipient.userId, {
             title: pushTitle,
             message,
             data: payloadData,
             role: recipient.role // Pass role to distinguish target app
           });
+          if (!pushResult || pushResult.successCount < 1) {
+            console.error('[PUSH-DELIVERY-FAILED]', {
+              userId: String(recipient.userId),
+              role: recipient.role,
+              type,
+              tokenCount: pushResult?.tokenCount || 0,
+              error: pushResult?.error || 'FCM returned no successful delivery'
+            });
+          }
         }
       } catch (error) {
         if (error.code === 11000) {
