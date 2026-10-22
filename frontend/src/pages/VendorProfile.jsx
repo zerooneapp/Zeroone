@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
    ArrowLeft, Store, Camera, Video, MapPin, Loader2,
    Save, Plus, X, CheckCircle2, XCircle, ChevronRight, ChevronDown, LayoutGrid, Sun, Moon, LogOut,
-   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, HelpCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone, Ticket, ClipboardList
+   History, Calendar, Clock, UserRound, IndianRupee, Wallet, Trash2, AlertTriangle, ShieldCheck, Shield, MessageCircle, HelpCircle, Heart, Zap, Crown, TrendingUp, FileDown, Info, Star, Smartphone, Ticket, ClipboardList, BellRing
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -30,6 +30,7 @@ const VendorProfile = () => {
    const pickerRef = useRef(null);
    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+   const [testNotificationLoading, setTestNotificationLoading] = useState('');
    const [deleting, setDeleting] = useState(false);
    const [historyLoading, setHistoryLoading] = useState(false);
    const [historyBookings, setHistoryBookings] = useState([]);
@@ -465,6 +466,14 @@ const VendorProfile = () => {
          iconColor: 'text-emerald-500',
       },
       {
+         key: 'notification_test',
+         label: 'Test Notifications',
+         subtitle: 'Verify web and mobile push delivery',
+         icon: BellRing,
+         iconBg: 'bg-cyan-500/10',
+         iconColor: 'text-cyan-500',
+      },
+      {
          key: 'reviews',
          label: 'Reviews & Ratings',
          subtitle: 'View client feedback & stars',
@@ -651,6 +660,27 @@ const VendorProfile = () => {
       }
    };
 
+   const handleTestNotification = async (platform) => {
+      try {
+         setTestNotificationLoading(platform);
+         const response = await api.post('/fcm-tokens/test', { platform });
+         const result = response.data || {};
+         const label = platform === 'mobile' ? 'Mobile' : 'Web';
+         const successCount = result.successCount || 0;
+         const failureCount = result.failureCount || 0;
+
+         if (successCount > 0) {
+            toast.success(label + ' test sent: ' + successCount + ' delivered' + (failureCount ? ', ' + failureCount + ' failed' : '') + '.');
+         } else {
+            toast.error(label + ' test failed. Check the backend push log.');
+         }
+      } catch (error) {
+         toast.error(error.response?.data?.message || ('Failed to send ' + platform + ' test notification'));
+      } finally {
+         setTestNotificationLoading('');
+      }
+   };
+
    return (
       <div className="bg-slate-50 dark:bg-gray-950 pb-6 overflow-x-hidden no-scrollbar">
          {/* Header */}
@@ -684,7 +714,7 @@ const VendorProfile = () => {
                    </button>
                 ) : (
                    <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
-                      {activeSection === 'switch_shop' ? 'Switch Shop' : activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : activeSection === 'live_report' ? 'Live Report' : 'Account Settings'}
+                      {activeSection === 'switch_shop' ? 'Switch Shop' : activeSection === 'shop_details' ? 'Partner Management' : activeSection === 'basic' ? 'Basic Info' : activeSection === 'media' ? 'Partner Media' : activeSection === 'promotions' ? 'Boost Visibility' : activeSection === 'history' ? 'Booking History' : activeSection === 'transactions' ? 'Transaction History' : activeSection === 'notification_test' ? 'Test Notifications' : activeSection === 'theme' ? 'Appearance' : activeSection === 'security' ? 'Security' : activeSection === 'live_report' ? 'Live Report' : 'Account Settings'}
                    </h1>
                 )}
                <button
@@ -740,6 +770,33 @@ const VendorProfile = () => {
                )}
 
                {/* ── SHOP DETAILS SUBMENU ── */}
+               {activeSection === 'notification_test' && (
+                  <motion.section key='notification_test' className='space-y-4'>
+                     <div className='rounded-2xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-5 shadow-sm'>
+                        <div className='flex items-start gap-3'>
+                           <div className='w-11 h-11 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0'>
+                              <BellRing size={22} />
+                           </div>
+                           <div>
+                              <h2 className='text-base font-black text-slate-800 dark:text-white'>Push Notification Test</h2>
+                              <p className='text-xs font-medium text-slate-400 dark:text-gray-500 mt-1 leading-relaxed'>
+                                 Select a device type to send a test notification to its saved FCM token.
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+                     <div className='grid gap-3 sm:grid-cols-2'>
+                        <button type='button' onClick={() => handleTestNotification('web')} disabled={Boolean(testNotificationLoading)} className='w-full rounded-2xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-4 text-left shadow-sm disabled:opacity-60'>
+                           <span className='text-sm font-black text-slate-800 dark:text-white'>{testNotificationLoading === 'web' ? 'Sending...' : 'Test Web Push'}</span>
+                           <span className='block text-[10px] font-medium text-slate-400 mt-1'>Send to this browser</span>
+                        </button>
+                        <button type='button' onClick={() => handleTestNotification('mobile')} disabled={Boolean(testNotificationLoading)} className='w-full rounded-2xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 p-4 text-left shadow-sm disabled:opacity-60'>
+                           <span className='text-sm font-black text-slate-800 dark:text-white'>{testNotificationLoading === 'mobile' ? 'Sending...' : 'Test Mobile Push'}</span>
+                           <span className='block text-[10px] font-medium text-slate-400 mt-1'>Send to saved mobile tokens</span>
+                        </button>
+                     </div>
+                  </motion.section>
+               )}
                {activeSection === 'shop_details' && (
                   <motion.div
                      key="shop_details_menu"

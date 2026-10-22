@@ -59,18 +59,29 @@ class NotificationService {
   /**
    * Send Push Notification through FCM (Production-Ready & Duplicate-Safe)
    */
-  static async _dispatchPush(userId, payload) {
+  static async _dispatchPush(userId, payload, targetPlatform = 'all') {
     try {
+      const normalizedTargetPlatform = ['web', 'mobile', 'all'].includes(targetPlatform)
+        ? targetPlatform
+        : 'all';
+
       if (admin.apps.length === 0) {
         console.warn('[PUSH-SKIP] Firebase Admin is not initialized; check FIREBASE_* environment variables.');
-        return;
+        return {
+          targetPlatform: normalizedTargetPlatform,
+          tokenCount: 0,
+          successCount: 0,
+          failureCount: 1,
+          error: 'Firebase Admin is not initialized'
+        };
       }
 
       // 🛡️ 1. Generate a Stable, Content-Aware Deduplication Key
       // This prevents duplicates even if a stable ID is missing by hashing core content
       const eventId = payload.data?.bookingId || payload.data?.id || 'GLOBAL';
       const contentHash = `${payload.title}_${payload.message || payload.body}`.replace(/\s+/g, '').slice(0, 32);
-      const notificationId = `${userId}_${payload.data?.type || 'GEN'}_${eventId}_${contentHash}`;
+      const platformSuffix = normalizedTargetPlatform === 'all' ? '' : '_' + normalizedTargetPlatform;
+      const notificationId = userId + platformSuffix + '_' + (payload.data?.type || 'GEN') + '_' + eventId + '_' + contentHash;
 
       // 🧠 2. Immediate Memory Lock (L0 - Prevents race conditions in cluster/parallel calls)
       if (!global.notificationLock) global.notificationLock = new Set();
@@ -130,9 +141,16 @@ class NotificationService {
         }
       }
 
-      // 🔄 4. Balanced Token Selection: Pick latest 2 Mobile and 1 Web token
-      const mobileTokens = (entity.fcmTokenMobile || []).slice(-2);
-      const webTokens = (entity.fcmTokens || []).slice(-1);
+      // 🔄 4. Token Selection: Send to every registered mobile device and
+      // the latest web browser. Mobile users can have more than two devices,
+      // and array position alone cannot tell us which device is currently
+      // active. Invalid/expired tokens are removed below after FCM responds.
+      const mobileTokens = normalizedTargetPlatform === 'web'
+        ? []
+        : (entity.fcmTokenMobile || []);
+      const webTokens = normalizedTargetPlatform === 'mobile'
+        ? []
+        : (entity.fcmTokens || []).slice(-1);
       
       // Combine and deduplicate to prevent sending the same message twice to the same token
       const tokens = [...new Set([...webTokens, ...mobileTokens])].filter(Boolean);
@@ -215,9 +233,36 @@ class NotificationService {
       }
 
       console.log(`[PUSH-SENT] Delivered to ${response.successCount} devices for user ${userId}`);
+      return {
+        targetPlatform: normalizedTargetPlatform,
+        tokenCount: tokens.length,
+        successCount: response.successCount,
+        failureCount: response.failureCount
+      };
     } catch (error) {
       console.error('[PUSH-ERROR]', error.message);
+      return {
+        targetPlatform,
+        tokenCount: 0,
+        successCount: 0,
+        failureCount: 1,
+        error: error.message
+      };
     }
+  }
+
+  static sendTestPush(userId, targetPlatform) {
+    const platform = ['web', 'mobile'].includes(targetPlatform) ? targetPlatform : 'web';
+    return this._dispatchPush(userId, {
+      title: 'ZeroOne Test Notification',
+      message: 'Test ' + platform + ' push notification received successfully.',
+      data: {
+        type: 'TEST_NOTIFICATION',
+        id: 'TEST_NOTIFICATION_' + platform + '_' + Date.now(),
+        platform
+      },
+      role: 'vendor'
+    }, platform);
   }
 
   /**

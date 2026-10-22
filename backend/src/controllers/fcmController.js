@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Staff = require('../models/Staff');
+const NotificationService = require('../services/notificationService');
 
 const saveFcmToken = async (req, res) => {
     try {
@@ -92,4 +93,40 @@ const removeFcmToken = async (req, res) => {
     }
 };
 
-module.exports = { saveFcmToken, removeFcmToken };
+const sendTestFcmNotification = async (req, res) => {
+    try {
+        const actor = req.user || req.staff;
+        const platform = String(req.body?.platform || 'web').trim().toLowerCase();
+
+        if (!actor) return res.status(401).json({ message: 'Unauthorized' });
+        if (!['web', 'mobile'].includes(platform)) {
+            return res.status(400).json({ message: 'Platform must be web or mobile' });
+        }
+
+        const entity = await User.findById(actor._id).select('fcmTokens fcmTokenMobile');
+        const tokens = platform === 'mobile'
+            ? (entity?.fcmTokenMobile || [])
+            : (entity?.fcmTokens || []);
+
+        if (!tokens.length) {
+            return res.status(404).json({
+                message: 'No ' + platform + ' FCM token is saved for this account',
+                platform,
+                tokenCount: 0
+            });
+        }
+
+        const result = await NotificationService.sendTestPush(actor._id, platform);
+        return res.status(200).json({
+            message: platform + ' test notification processed',
+            platform,
+            tokenCount: tokens.length,
+            ...(result || {})
+        });
+    } catch (error) {
+        console.error('[FCM-TEST-ERROR]', error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { saveFcmToken, removeFcmToken, sendTestFcmNotification };
