@@ -108,6 +108,11 @@ class NotificationService {
       if (!entity) {
         entity = await Staff.findById(userId);
       }
+      // Booking targets may use Staff.userId, while a staff login saves the
+      // mobile token on the Staff document. Resolve that linked record too.
+      if (!entity) {
+        entity = await Staff.findOne({ userId });
+      }
 
       if (!entity) return;
 
@@ -165,7 +170,14 @@ class NotificationService {
         return;
       }
       
-      console.log(`[PUSH-DEBUG] Sending to ${tokens.length} tokens for user ${userId}. Target Role: ${payload.role || 'N/A'}`);
+      // Keep the platform split in the log. A successful multicast can still
+      // hide the fact that only the browser token was delivered.
+      const webTokenSet = new Set(webTokens);
+      console.log(
+        `[PUSH-DEBUG] Sending to ${tokens.length} tokens for user ${userId}. ` +
+        `Web: ${webTokens.length}, Mobile: ${mobileTokens.length}, ` +
+        `Target Role: ${payload.role || 'N/A'}`
+      );
 
       // 🚀 5. Multicast Send
       const response = await admin.messaging().sendEachForMulticast({
@@ -184,7 +196,8 @@ class NotificationService {
           notification: {
             channelId: 'high_importance_channel',
             priority: 'high',
-            sound: 'default'
+            sound: 'default',
+            clickAction: 'FLUTTER_NOTIFICATION_CLICK'
           }
         },
         apns: {
@@ -201,7 +214,13 @@ class NotificationService {
       console.log(`[PUSH-RESULT] User: ${userId}, Success: ${response.successCount}, Failure: ${response.failureCount}`);
       if (response.failureCount > 0) {
         response.responses.forEach((resp, idx) => {
-          if (!resp.success) console.log(`[PUSH-ERROR] Token: ${tokens[idx].slice(-10)}, Error: ${resp.error?.message}`);
+          if (!resp.success) {
+            const platform = webTokenSet.has(tokens[idx]) ? 'web' : 'mobile';
+            console.log(
+              `[PUSH-ERROR] Platform: ${platform}, Token: ${tokens[idx].slice(-10)}, ` +
+              `Code: ${resp.error?.code || 'unknown'}, Error: ${resp.error?.message}`
+            );
+          }
         });
       }
 
@@ -341,11 +360,19 @@ class NotificationService {
     const notifications = [];
     for (const recipient of resolvedRecipients) {
       try {
+        // Keep both names for native clients that use either notification
+        // field when routing booking events.
+        const notificationType = data.notificationType || data.type || type;
         const payloadData = {
           ...data,
-          type: data.type || type,
+          type: notificationType,
+          notificationType,
           id: data.id || referenceId || Date.now(),
-          vendorId: finalVendorId
+          referenceId,
+          title,
+          body: message,
+          vendorId: finalVendorId,
+          ...(data.bookingId ? { bookingId: data.bookingId } : {})
         };
 
         // 🏠 1. Create In-App Notifications (MongoDB) - Use upsert for idempotency
