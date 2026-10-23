@@ -63,18 +63,28 @@ const useSocket = (userId) => {
       console.log('[SOCKET] New notification received:', notification);
       addNotification(notification);
       
-      // Visual Toast
-      toast(notification.title || 'New Notification', {
-        style: {
-          borderRadius: '12px',
-          background: '#00246b',
-          color: '#fff',
-          fontSize: '12px',
-          fontWeight: 'bold'
-        }
-      });
+      const notificationType = String(notification?.type || '').toUpperCase();
+      const notificationText = [notification?.title, notification?.message]
+        .filter(Boolean)
+        .join(' ');
+      const isBookingConfirmation =
+        notificationType === 'BOOKING_CONFIRMED' ||
+        notificationType === 'BOOKING_RESCHEDULED' ||
+        /booking\s+(confirmed|rescheduled)/i.test(notificationText);
 
-      // Dispatch a Global Event for Components to React
+      // Booking confirmation is already shown on the success screen.
+      if (!isBookingConfirmation) {
+        toast(notification.title || 'New Notification', {
+          style: {
+            borderRadius: '12px',
+            color: '#fff',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          }
+        });
+      }
+
+      // Keep the notification store and live list updates active.
       window.dispatchEvent(new CustomEvent('new-socket-notification', { detail: notification }));
 
       // Play Sound

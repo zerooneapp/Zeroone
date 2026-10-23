@@ -131,7 +131,8 @@ function App() {
     // ✅ FIX: onMessageListener now takes a callback and returns a cleanup fn
     // Old .then() approach only fired for the FIRST notification, then stopped
     const unsubscribe = onMessageListener((payload) => {
-      const notification = payload?.notification || payload?.data || {};
+      const notificationData = payload?.data || {};
+      const notification = payload?.notification || notificationData;
       const title = notification.title || 'ZeroOne';
       const body = notification.body || '';
       if (!title && !body) return;

@@ -64,7 +64,6 @@ const PersonalInformation = () => {
       toast.success('Profile updated successfully!', {
         style: {
           borderRadius: '1rem',
-          background: '#1e293b',
           color: '#fff',
           fontSize: '12px',
           fontWeight: 'bold'
