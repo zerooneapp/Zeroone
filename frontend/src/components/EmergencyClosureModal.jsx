@@ -85,7 +85,6 @@ const EmergencyClosureModal = ({ isOpen, onClose, onCreated }) => {
     
     if (end.isBefore(start) || end.isSame(start)) {
       return toast.error('End time must be after Start time', {
-        icon: '⏰',
         id: 'time-validation'
       });
     }

@@ -53,7 +53,7 @@ const VendorStaffProfile = () => {
     try {
       setSavingNote(true);
       await api.patch(`/staff/${id}`, { note: noteText });
-      toast.success('Note saved successfully 📝');
+      toast.success('Note saved successfully');
       // Refresh details
       fetchStaffDetails();
     } catch (err) {

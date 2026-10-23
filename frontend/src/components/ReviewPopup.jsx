@@ -41,7 +41,7 @@ const ReviewPopup = ({ booking, onClose }) => {
         rating,
         comment: isManual ? comment : comment
       });
-      toast.success('Your feedback makes us better! ❤️');
+      toast.success('Your feedback makes us better!');
       onClose();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to submit review');

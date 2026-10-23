@@ -23,7 +23,6 @@ const Preferences = () => {
   const showFutureUpdate = () => {
     toast('Available in future updates', {
         id: 'future-update-toast',
-        icon: '🚀',
         style: {
             borderRadius: '1rem',
             background: '#00246b',
@@ -42,7 +41,6 @@ const Preferences = () => {
       const res = await api.patch('/users/profile', { preferences: prefs });
       updateUser(res.data);
       toast.success('Preferences saved!', {
-          icon: '✅',
           style: { borderRadius: '1rem', fontSize: '11px', fontWeight: 'bold' }
       });
       navigate(-1);

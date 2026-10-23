@@ -606,7 +606,7 @@ const ServiceDetail = () => {
       console.log(`[MEMBERSHIP] Sending purchase request for plan: ${plan._id}`);
       
       const res = await api.post('/memberships/request', { planId: plan._id });
-      toast.success(res.data.message || "Request sent to vendor! ⏳");
+      toast.success(res.data.message || "Request sent to vendor!");
       
       // Refresh memberships
       const mRes = await api.get('/memberships/my-memberships');

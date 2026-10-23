@@ -41,7 +41,7 @@ const BroadcastSystem = () => {
             message: formData.message,
             targetRole: formData.targetAudience
          });
-         toast.success(res.data.message || 'Transmission Successful 📡');
+         toast.success(res.data.message || 'Transmission Successful');
          setFormData({ title: '', message: '', targetAudience: 'all' });
       } catch (err) {
          toast.error(err.response?.data?.message || 'Transmission Failure: Check Infrastructure');

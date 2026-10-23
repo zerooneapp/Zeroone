@@ -176,7 +176,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
         serviceIds: formData.serviceIds,
         startTime,
       });
-      toast.success('Appointment Scheduled! 📅');
+      toast.success('Appointment Scheduled!');
       onRefresh?.();
       onClose();
     } catch (err) {

@@ -87,7 +87,7 @@ const MembershipPlans = () => {
     try {
       setActionLoadingId(requestId);
       await api.patch(`/memberships/status/${requestId}`, { status });
-      toast.success(status === 'active' ? 'Membership approved! 🎉' : 'Request rejected');
+      toast.success(status === 'active' ? 'Membership approved!' : 'Request rejected');
       fetchData(false);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
@@ -112,7 +112,7 @@ const MembershipPlans = () => {
     try {
       setToggleLoadingId(id);
       await api.patch(`/memberships/vendor/plans/${id}`, { isActive });
-      toast.success(isActive ? 'Plan activated ✨' : 'Plan paused');
+      toast.success(isActive ? 'Plan activated' : 'Plan paused');
     } catch (err) {
       setPlans(original);
       toast.error('Failed to update status');

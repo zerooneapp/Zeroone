@@ -65,7 +65,6 @@ const useSocket = (userId) => {
       
       // Visual Toast
       toast(notification.title || 'New Notification', {
-        icon: '🔔',
         style: {
           borderRadius: '12px',
           background: '#00246b',

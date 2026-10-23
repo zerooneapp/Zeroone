@@ -51,7 +51,7 @@ const SubscriptionPlans = () => {
       await Promise.all(levelPlans.map(p =>
         api.patch(`/admin/plans/${p._id}`, { price: p.price, gstPercent: p.gstPercent || 0 })
       ));
-      toast.success(`${level.toUpperCase()} Pricing & Tax Updated 💰`);
+      toast.success(`${level.toUpperCase()} Pricing & Tax Updated`);
     } catch (err) {
       toast.error(`Failed to update ${level} plans`);
       fetchPlans();

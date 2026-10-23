@@ -42,7 +42,7 @@ const AdminBookingDetail = () => {
          setBooking(prev => ({ ...prev, status: 'cancelled' }));
 
          await api.patch(`/admin/bookings/${id}/cancel`, { reason: 'Force cancelled by SuperAdmin' });
-         toast.success('Platform Override Successful ✅');
+         toast.success('Platform Override Successful');
          // Refresh
          const res = await api.get(`/admin/bookings/${id}`);
          setBooking(res.data);

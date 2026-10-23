@@ -30,7 +30,6 @@ const NotificationSettings = () => {
       const res = await api.patch('/users/profile', { notificationSettings: settings });
       updateUser(res.data);
       toast.success('Notification settings saved!', {
-          icon: '🔔',
           style: {
               borderRadius: '1rem',
               background: '#00246b',

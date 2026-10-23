@@ -618,7 +618,7 @@ const VendorProfile = () => {
          document.body.removeChild(link);
          setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
 
-         toast.success('Report downloaded successfully! 📄');
+         toast.success('Report downloaded successfully!');
       } catch (error) {
          console.error(error);
          toast.error('Failed to generate report');

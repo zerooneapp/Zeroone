@@ -169,7 +169,7 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
     try {
       setLoading(true);
       await api.post('/vendor/manual-booking', { ...formData, startTime });
-      toast.success('Appointment Scheduled! 📅');
+      toast.success('Appointment Scheduled!');
       onRefresh?.();
       onClose();
     } catch (err) {

@@ -53,7 +53,7 @@ const VendorOffers = () => {
     try {
       setToggleLoadingId(id);
       await api.patch(`/offers/${id}`, { isActive });
-      toast.success(isActive ? 'Offer activated 🎁' : 'Offer paused');
+      toast.success(isActive ? 'Offer activated' : 'Offer paused');
     } catch (err) {
       setOffers(original);
       toast.error('Failed to update status');

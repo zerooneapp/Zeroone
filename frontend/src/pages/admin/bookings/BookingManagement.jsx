@@ -76,7 +76,7 @@ const BookingManagement = () => {
 
     try {
       await api.patch(`/admin/bookings/${id}/cancel`, { reason: 'Force cancelled by Admin' });
-      toast.success('Booking Overridden: CANCELLED 🛡️');
+      toast.success('Booking Overridden: CANCELLED');
     } catch (err) {
       setBookings(previousBookings);
       toast.error(err.response?.data?.message || 'Failed to cancel booking');

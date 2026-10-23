@@ -49,7 +49,7 @@ const PartnerMembership = () => {
       // Auto-save
       setSaving(true);
       await api.patch('/admin/settings', newSettings);
-      toast.success('Membership system status updated! ✨');
+      toast.success('Membership system status updated!');
     } catch (err) {
       toast.error('Failed to update settings');
       // Revert optimistic update
@@ -63,7 +63,7 @@ const PartnerMembership = () => {
     try {
       setSaving(true);
       await api.patch('/admin/settings', settings);
-      toast.success('Settings synchronized! ✨');
+      toast.success('Settings synchronized!');
     } catch (err) {
       toast.error('Failed to update settings');
     } finally {

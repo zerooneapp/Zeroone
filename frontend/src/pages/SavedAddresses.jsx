@@ -91,7 +91,7 @@ const SavedAddresses = () => {
           setSelectedLocation(locationPayload);
           await persistAddress(readableAddress, locationPayload, 'Current location updated!');
           return;
-          toast.success('Location fetched!', { icon: '📍' });
+          toast.success('Location fetched!');
         } catch (err) {
           toast.error('Failed to resolve address');
         } finally {

@@ -77,12 +77,12 @@ const CategoryManagement = () => {
         setCategories(prev => prev.map(c => c._id === editingCategory._id ? { ...c, ...formData } : c));
         setIsModalOpen(false);
         await api.patch(`/admin/categories/${editingCategory._id}`, formData);
-        toast.success('Category updated 🏷️');
+        toast.success('Category updated');
       } else {
         const res = await api.post('/admin/categories', formData);
         setCategories(prev => [...prev, res.data]);
         setIsModalOpen(false);
-        toast.success('Category created 🚀');
+        toast.success('Category created');
       }
     } catch (err) {
       setCategories(previousCategories);
@@ -98,7 +98,7 @@ const CategoryManagement = () => {
 
     try {
       await api.delete(`/admin/categories/${id}`);
-      toast.success('Category deleted 🗑️');
+      toast.success('Category deleted');
     } catch (err) {
       setCategories(previousCategories);
       toast.error(err.response?.data?.message || 'Delete failed');

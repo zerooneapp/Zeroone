@@ -131,7 +131,7 @@ const VendorSignup = () => {
         });
       }
 
-      toast.success('Your application is under verification! 🛡️', { duration: 5000 });
+      toast.success('Your application is under verification!', { duration: 5000 });
       reset();
       navigate('/vendor-verification', { replace: true });
     } catch (err) {
@@ -350,7 +350,7 @@ const VendorSignup = () => {
                             if (data.display_name) {
                               setFormData(prev => ({ ...prev, address: data.display_name }));
                             }
-                            toast.success('Location Locked 📍', { id: 'geo' });
+                            toast.success('Location Locked', { id: 'geo' });
                           } catch (err) {
                             toast.success('GPS Locked!', { id: 'geo' });
                           }

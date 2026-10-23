@@ -122,15 +122,15 @@ const StaffForm = () => {
     // 🛡️ VALIDATION: Indian Phone Number Regex
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(formData.phone)) {
-      return toast.error('Enter a valid 10-digit Indian phone number 🇮🇳');
+      return toast.error('Enter a valid 10-digit Indian phone number');
     }
 
     if (formData.services.length === 0) {
-      return toast.error('Please select at least one skill/service ✂️');
+      return toast.error('Please select at least one skill/service');
     }
 
     if (!isEdit && !image) {
-      return toast.error('Staff photo is required to create a profile 📸');
+      return toast.error('Staff photo is required to create a profile');
     }
 
     const data = new FormData();

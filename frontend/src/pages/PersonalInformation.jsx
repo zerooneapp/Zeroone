@@ -62,7 +62,6 @@ const PersonalInformation = () => {
       const res = await api.patch('/users/profile', formData);
       updateUser(res.data);
       toast.success('Profile updated successfully!', {
-        icon: '🚀',
         style: {
           borderRadius: '1rem',
           background: '#1e293b',

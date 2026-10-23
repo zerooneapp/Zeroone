@@ -96,7 +96,6 @@ const CustomerAuth = () => {
         if (role !== 'customer') {
           toast.error(`You are already registered as a Partner. Please use another number for Customer account.`, {
             duration: 6000,
-            icon: '⛔'
           });
           return;
         }

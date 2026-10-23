@@ -48,7 +48,7 @@ const PlatformSettings = () => {
     try {
       setSaving(true);
       await api.patch('/admin/settings', settings);
-      toast.success('System Parameters Synchronized ⚙️');
+      toast.success('System Parameters Synchronized');
     } catch (err) {
       toast.error('Configuration Sync Failed');
       fetchSettings();
