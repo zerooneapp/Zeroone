@@ -185,7 +185,7 @@ const VendorBookings = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <button
-              onClick={() => navigate('/vendor/dashboard')}
+              onClick={() => navigate(-1)}
               className="p-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
             >
               <ArrowLeft size={18} />

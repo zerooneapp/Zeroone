@@ -41,25 +41,6 @@ const VendorLayout = () => {
     return () => clearInterval(refreshTimer);
   }, [user, role, fetchNotifications]);
 
-  // Handle hardware back button — navigate to Home instead of Exit App
-  useEffect(() => {
-    const handlePopState = () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      if (searchParams.has('phone')) {
-        return;
-      }
-      const currentPath = window.location.pathname;
-      if (currentPath !== '/vendor/dashboard' && currentPath.startsWith('/vendor')) {
-        navigate('/vendor/dashboard', { replace: true });
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [navigate]);
-
   const isIOS = React.useMemo(() => {
     return typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
   }, []);

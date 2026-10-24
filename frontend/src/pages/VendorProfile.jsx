@@ -483,7 +483,6 @@ const VendorProfile = () => {
          path: '/vendor/reviews',
       },
 
-      /*
       {
          key: 'promotions',
          label: 'Promotions',
@@ -492,9 +491,6 @@ const VendorProfile = () => {
          iconBg: 'bg-indigo-500/10',
          iconColor: 'text-indigo-500',
       },
-      */
-      /* Membership management remains hidden until its existing approval flow is enabled. */
-      /*
       {
          key: 'memberships',
          label: 'Membership Plan',
@@ -504,7 +500,6 @@ const VendorProfile = () => {
          iconColor: 'text-amber-500',
          path: '/vendor/membership',
       },
-      */
       {
          key: 'offers',
          label: 'Offers',
@@ -697,7 +692,7 @@ const VendorProfile = () => {
                      } else if (activeSection) {
                         setSearchParams({});
                      } else {
-                        navigate('/vendor/dashboard');
+                        navigate(-1);
                      }
                   }}
                   className="p-2 rounded-xl active:scale-90 transition-all"
@@ -1728,13 +1723,13 @@ const VendorProfile = () => {
                                              <p className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Pay</p>
                                              <p className="text-lg font-black text-[#00246b] dark:text-white mt-0.5">₹{promoDays * promoPricePerDay}</p>
                                           </div>
-                                          {false && <button
+                                          <button
                                              onClick={handlePurchasePromotion}
                                              disabled={loading || hasBlockingPromotion}
                                              className="px-4 py-2 bg-[#00246b] dark:bg-[#00246b] text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-400 disabled:shadow-none"
                                           >
                                              {loading ? 'Wait...' : hasActivePromotion ? 'Active' : hasPaidPendingPromotion ? 'Pending' : 'Pay Now'}
-                                          </button>}
+                                          </button>
                                        </div>
                                     </div>
                                  </div>

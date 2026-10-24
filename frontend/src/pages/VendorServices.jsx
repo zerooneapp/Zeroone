@@ -119,7 +119,7 @@ const VendorServices = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/vendor/profile?section=shop_details')}
+              onClick={() => navigate(-1)}
               className="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200/60 dark:border-gray-800 active:scale-90 transition-all font-bold"
             >
               <ArrowLeft size={18} />
