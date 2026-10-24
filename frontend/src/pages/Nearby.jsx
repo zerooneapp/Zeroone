@@ -5,13 +5,18 @@ import VendorCard from '../components/VendorCard';
 import { VendorSkeleton } from '../components/Skeleton';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import {
+  DEFAULT_LOCATION,
+  getBrowserLocation,
+  getUserCoordinates
+} from '../services/locationService';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAuthStore } from '../store/authStore';
 
 const Nearby = () => {
   const navigate = useNavigate();
   const observer = useRef();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated, role } = useAuthStore();
   
   const [categories, setCategories] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -24,29 +29,35 @@ const Nearby = () => {
   
   const [search, setSearch] = useState('');
   const [selectedCats, setSelectedCats] = useState([]);
-  // Default to User's saved location or Bhopal [lng, lat]
-  const [location, setLocation] = useState({ 
-    lng: user?.location?.coordinates?.[0] || 77.4126, 
-    lat: user?.location?.coordinates?.[1] || 23.2599 
+  const [location, setLocation] = useState(() => {
+    const savedLocation = getUserCoordinates(user);
+    return savedLocation || DEFAULT_LOCATION;
   });
 
-  // 📍 SMART LOCATION FALLBACK: Browser GPS -> Saved Address -> Default
+  // Customer location is requested after authentication; guests use the safe default.
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setLocation({ lng: pos.coords.longitude, lat: pos.coords.latitude }),
-        (err) => {
-          console.log('Location access denied, falling back to profile address.');
-          if (user?.location?.coordinates?.[0] && user?.location?.coordinates?.[0] !== 0) {
-            setLocation({ 
-              lng: user.location.coordinates[0], 
-              lat: user.location.coordinates[1] 
-            });
-          }
-        }
-      );
+    let active = true;
+    const savedLocation = getUserCoordinates(user);
+
+    if (!isAuthenticated || role !== 'customer') {
+      if (active && savedLocation) setLocation(savedLocation);
+      return () => {
+        active = false;
+      };
     }
-  }, [user]);
+
+    getBrowserLocation()
+      .then((browserLocation) => {
+        if (active) setLocation(browserLocation);
+      })
+      .catch(() => {
+        if (active && savedLocation) setLocation(savedLocation);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user, isAuthenticated, role]);
 
   const debouncedSearch = useDebounce(search, 300);
 
