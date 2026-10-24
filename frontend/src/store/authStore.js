@@ -246,7 +246,9 @@ export const useAuthStore = create(
           token: data.token,
           role: data.role,
           user: data.user,
-          isAuthenticated: true
+          isAuthenticated: true,
+          // Explicit login/registration is already a ready session.
+          isInitialized: true
         });
         localStorage.setItem('token', data.token);
       }

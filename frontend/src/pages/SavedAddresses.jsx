@@ -5,6 +5,7 @@ import { ArrowLeft, MapPin, Search, Navigation, Save } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';
+import { getBrowserLocation, reverseGeocode } from '../services/locationService';
 
 const getInitialLocation = (user) => {
   const coordinates = user?.location?.coordinates;
@@ -67,43 +68,30 @@ const SavedAddresses = () => {
     toast.success(successMessage);
   };
 
-  const handleFetchCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      return toast.error('Geolocation not supported');
-    }
-
+  const handleFetchCurrentLocation = async () => {
     setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
-          );
-          const data = await response.json();
-          const readableAddress = data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
-          setManualAddress(readableAddress);
-          const locationPayload = {
-            type: 'Point',
-            coordinates: [longitude, latitude]
-          };
-          setSelectedLocation(locationPayload);
-          await persistAddress(readableAddress, locationPayload, 'Current location updated!');
-          return;
-          toast.success('Location fetched!');
-        } catch (err) {
-          toast.error('Failed to resolve address');
-        } finally {
-          setLoading(false);
-        }
-      },
-      () => {
-        setLoading(false);
-        toast.error('Location access denied');
-      },
-      { enableHighAccuracy: true }
-    );
+    try {
+      const { lat, lng } = await getBrowserLocation();
+      const readableAddress = await reverseGeocode(lat, lng);
+      const locationPayload = {
+        type: 'Point',
+        coordinates: [lng, lat]
+      };
+
+      setManualAddress(readableAddress);
+      setSelectedLocation(locationPayload);
+      await persistAddress(readableAddress, locationPayload, 'Current location updated!');
+    } catch (error) {
+      const message = error?.code === 1
+        ? 'Location permission allow karke dobara try karein.'
+        : error?.message === 'Location access requires HTTPS'
+          ? 'Location ke liye HTTPS connection zaroori hai.'
+          : 'Location fetch nahi ho saki.';
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveAddress = async () => {

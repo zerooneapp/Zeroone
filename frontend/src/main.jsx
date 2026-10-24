@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import api from './services/api'
+import { DEFAULT_LOCATION, getUserCoordinates } from './services/locationService'
 
 // Initialize the global prefetch cache
 window.__PREFETCHED_DATA__ = {
@@ -106,9 +107,9 @@ try {
   const authStorage = localStorage.getItem('auth-storage');
   if (authStorage) {
     const parsed = JSON.parse(authStorage);
-    const coords = parsed?.state?.user?.location?.coordinates;
-    if (coords && coords[0] && coords[1]) {
-      prefetchVendors(coords[1], coords[0]);
+    const savedLocation = getUserCoordinates(parsed?.state?.user);
+    if (savedLocation) {
+      prefetchVendors(savedLocation.lat, savedLocation.lng);
       locationPrefetched = true;
     }
   }
@@ -116,20 +117,10 @@ try {
   console.warn('[Prefetch] Coordinates parsing failed', e.message);
 }
 
-// Fallback to browser geolocation or default Bhopal location
+// Do not request GPS on the login screen. Customer location sync starts
+// after successful authentication in AddressPopup.
 if (!locationPrefetched) {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        prefetchVendors(pos.coords.latitude, pos.coords.longitude);
-      },
-      () => {
-        prefetchVendors(23.2599, 77.4126); // Default Bhopal
-      }
-    );
-  } else {
-    prefetchVendors(23.2599, 77.4126); // Default Bhopal
-  }
+  prefetchVendors(DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lng);
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

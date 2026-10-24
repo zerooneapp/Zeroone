@@ -7,13 +7,18 @@ import Button from '../components/Button';
 import { VendorSkeleton } from '../components/Skeleton';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import {
+  DEFAULT_LOCATION,
+  getBrowserLocation,
+  getUserCoordinates
+} from '../services/locationService';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated, role } = useAuthStore();
   const [categories, setCategories] = useState(() => window.__PREFETCHED_DATA__?.categories || []);
   const [vendors, setVendors] = useState(() => window.__PREFETCHED_DATA__?.vendors?.vendors || []);
   const [totalPages, setTotalPages] = useState(() => window.__PREFETCHED_DATA__?.vendors?.totalPages || 1);
@@ -34,18 +39,11 @@ const Home = () => {
     { id: 'home', label: 'Home' }
   ];
 
-  // 📍 SMART INITIALIZATION: Use Prefetched location, Saved Profile Location or Bhopal [lng, lat]
   const [location, setLocation] = useState(() => {
-    if (window.__PREFETCHED_DATA__?.location) {
-      return {
-        lng: window.__PREFETCHED_DATA__.location.lng,
-        lat: window.__PREFETCHED_DATA__.location.lat
-      };
-    }
-    return {
-      lng: user?.location?.coordinates?.[0] || 77.4126,
-      lat: user?.location?.coordinates?.[1] || 23.2599
-    };
+    const prefetchedLocation = window.__PREFETCHED_DATA__?.location;
+    const savedLocation = getUserCoordinates(user);
+
+    return prefetchedLocation || savedLocation || DEFAULT_LOCATION;
   });
 
   const debouncedSearch = useDebounce(search, 300);
@@ -59,25 +57,30 @@ const Home = () => {
   }));
 
   const filteredHomeCards = homeCards;
-
-  // 📍 SMART LOCATION SYNC: Browser GPS -> Saved Address -> Default
+  // Customer location is requested after authentication; guests use the safe default.
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setLocation({ lng: pos.coords.longitude, lat: pos.coords.latitude }),
-        (err) => {
-          console.log('Location access denied, falling back to profile address.');
-          if (user?.location?.coordinates?.[0] && user?.location?.coordinates?.[0] !== 0) {
-            setLocation({
-              lng: user.location.coordinates[0],
-              lat: user.location.coordinates[1]
-            });
-          }
-        }
-      );
-    }
-  }, [user]);
+    let active = true;
+    const savedLocation = getUserCoordinates(user);
 
+    if (!isAuthenticated || role !== 'customer') {
+      if (active && savedLocation) setLocation(savedLocation);
+      return () => {
+        active = false;
+      };
+    }
+
+    getBrowserLocation()
+      .then((browserLocation) => {
+        if (active) setLocation(browserLocation);
+      })
+      .catch(() => {
+        if (active && savedLocation) setLocation(savedLocation);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user, isAuthenticated, role]);
   // 2. Fetch Categories
   useEffect(() => {
     // If prefetch data is available and we haven't set categories yet, use it
