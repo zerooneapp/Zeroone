@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { getBrowserLocation, reverseGeocode } from '../services/locationService';
-import { getBrowserLocation, reverseGeocode } from '../services/locationService';
 
 const getInitialLocation = (user) => {
   const coordinates = user?.location?.coordinates;
@@ -70,7 +69,6 @@ const SavedAddresses = () => {
   };
 
   const handleFetchCurrentLocation = async () => {
-    const handleFetchCurrentLocation = async () => {
       setLoading(true);
 
       try {

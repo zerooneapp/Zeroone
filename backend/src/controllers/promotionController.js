@@ -8,6 +8,20 @@ const { createGatewayOrder, verifyGatewayPayment } = require('../services/paymen
 
 const GlobalSettings = require('../models/GlobalSettings');
 
+const getOrderCreationStatusCode = (message = '') => {
+  if (
+    message.includes('is not configured') ||
+    message.includes('receipt') ||
+    message.includes('amount') ||
+    message.includes('customer') ||
+    message.includes('order')
+  ) {
+    return 400;
+  }
+
+  return 502;
+};
+
 // --- ADMIN CONTROLLERS ---
 
 exports.createPlan = async (req, res) => {
@@ -141,8 +155,10 @@ exports.getAvailablePlans = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { days } = req.body;
-    if (!days || days < 1) return res.status(400).json({ message: 'Minimum 1 day required' });
+    const days = Number(req.body?.days);
+    if (!Number.isInteger(days) || days < 1) {
+      return res.status(400).json({ message: 'Minimum 1 day required' });
+    }
 
     let settings = await GlobalSettings.findOne();
     if (!settings) settings = await GlobalSettings.create({});
@@ -178,9 +194,9 @@ exports.createOrder = async (req, res) => {
       amount: totalAmount,
       receipt,
       notes: {
-        vendorId: vendor._id,
+        vendorId: String(vendor._id),
         purpose: 'promotion_payment',
-        days
+        days: String(days)
       },
       customer: {
         customerId: vendor.ownerId,
@@ -209,7 +225,8 @@ exports.createOrder = async (req, res) => {
       totalAmount
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Create Promotion Order Error:', error);
+    res.status(getOrderCreationStatusCode(error.message)).json({ message: error.message });
   }
 };
 
