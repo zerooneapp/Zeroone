@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import {
+  getBrowserLocation,
+  reverseGeocode
+} from '../services/locationService';
 import {
   getBrowserLocation,
   reverseGeocode
@@ -13,7 +18,40 @@ const AddressPopup = () => {
   const attemptedRef = useRef(false);
   const lastUserIdRef = useRef(null);
 
+  const { user, role, isAuthenticated, isInitialized, updateUser } = useAuthStore();
+  const [, setLoading] = useState(false);
+  const attemptedRef = useRef(false);
+  const lastUserIdRef = useRef(null);
+
   useEffect(() => {
+    const userId = user?._id ? String(user._id) : null;
+
+    // Wait for a real authenticated customer before requesting browser location.
+    // This avoids firing the request during auth hydration or on the login screen.
+    if (!isAuthenticated || role !== 'customer' || !userId) {
+      attemptedRef.current = false;
+      lastUserIdRef.current = null;
+      return;
+    }
+
+    // A different customer in the same browser gets a fresh location attempt.
+    if (lastUserIdRef.current !== userId) {
+      lastUserIdRef.current = userId;
+      attemptedRef.current = false;
+    }
+
+    // Fetch once when this authenticated customer enters the app, including
+    // after a full refresh. The ref prevents duplicate calls in one session.
+    if (
+      isInitialized &&
+      !attemptedRef.current
+    ) {
+      attemptedRef.current = true;
+      void handleAutoFetchLocation();
+    }
+  }, [isAuthenticated, isInitialized, role, user?._id]);
+
+  const handleAutoFetchLocation = async () => {
     const userId = user?._id ? String(user._id) : null;
 
     // Wait for a real authenticated customer before requesting browser location.
