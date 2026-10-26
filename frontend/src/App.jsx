@@ -100,7 +100,7 @@ import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { requestForToken, onMessageListener, showForegroundNotification } from './config/firebase';
-import { saveTokenToBackend } from './services/fcmService';
+import { saveTokenToBackend, getNativeFcmToken } from './services/fcmService';
 import useSocket from './hooks/useSocket';
 
 function App() {
@@ -171,6 +171,12 @@ function App() {
       if (syncInFlight) return syncInFlight;
 
       syncInFlight = (async () => {
+        // Native app token (if the wrapper provides one) goes to fcmTokenMobile.
+        const nativeToken = await getNativeFcmToken();
+        if (nativeToken) {
+          if (disposed) return false;
+          return saveTokenToBackend(nativeToken, 'mobile');
+        }
         const token = await requestForToken();
         if (disposed || !token) return false;
         return saveTokenToBackend(token);
@@ -189,6 +195,16 @@ function App() {
       if (document.visibilityState === 'visible') syncNotifications();
     };
     const handleOnline = () => syncNotifications();
+    // Native wrapper can fire this once its FCM token is ready (after login).
+    const handleNativeToken = (e) => {
+      const t = e?.detail?.token || e?.detail;
+      if (typeof t === 'string' && t.trim()) {
+        try { localStorage.setItem('native_fcm_token', t.trim()); } catch { /* ignore */ }
+        window.nativeFcmToken = t.trim();
+      }
+      syncNotifications();
+    };
+    window.addEventListener('nativeFcmToken', handleNativeToken);
     const refreshInterval = window.setInterval(syncNotifications, 15 * 60 * 1000);
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -199,6 +215,7 @@ function App() {
       window.clearInterval(refreshInterval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
+      window.removeEventListener('nativeFcmToken', handleNativeToken);
     };
   }, [isAuthenticated, isInitialized]);
 

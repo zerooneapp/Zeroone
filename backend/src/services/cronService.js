@@ -135,7 +135,7 @@ const initCronJobs = () => {
     try {
       const Booking = require('../models/Booking');
       const NotificationService = require('./notificationService');
-      const NotificationLog = require('../models/NotificationLog');
+      const Notification = require('../models/Notification');
 
       const now = moment().tz('Asia/Kolkata');
       const windowStart = now.clone().add(25, 'minutes').toDate();
@@ -152,7 +152,11 @@ const initCronJobs = () => {
         const referenceId = `${booking._id}_30MIN_REMINDER`;
         
         // Ensure reminder is not sent twice
-        const alreadySent = await NotificationLog.exists({ referenceId });
+        const alreadySent = await Notification.exists({
+          userId: booking.userId,
+          type: 'BOOKING_REMINDER',
+          referenceId
+        });
         if (alreadySent) continue;
 
         await NotificationService.sendNotification({
@@ -162,7 +166,9 @@ const initCronJobs = () => {
           title: 'Upcoming Service Reminder ⏰',
           message: `Reminder: Your service is scheduled in 30 minutes. See you soon!`,
           data: { bookingId: booking._id, isActionable: false },
-          referenceId
+          referenceId,
+          // If another cron instance already created this reminder, do not push again.
+          sendPushWhenExisting: false
         });
         console.log(`[CRON-REMINDER] Sent 30-min reminder for booking: ${booking._id}`);
       }

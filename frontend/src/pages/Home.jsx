@@ -231,7 +231,7 @@ const Home = () => {
 
 
   return (
-    <div className="pb-24 bg-transparent min-h-screen">
+    <div className="pb-24 bg-transparent min-h-screen overflow-x-hidden">
       {/* Premium Search Bar HUD (Vibrant Glassmorphism) */}
       <div className="px-4 py-1.5">
         <div className="relative group w-full mx-auto">
@@ -247,7 +247,7 @@ const Home = () => {
               placeholder="Search salon, beauty parlour..."
               value={search}
               onChange={(e) => setSearch(e.target.value.trimStart())}
-              className="w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-gray-900 dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-gray-400 dark:focus:border-[#00246b]/30 transition-all duration-500 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-400 placeholder:font-semibold"
+              className="box-border w-full h-[37px] pl-14 pr-12 bg-white dark:bg-gray-950/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-[14px] text-[14px] font-bold text-gray-900 dark:text-white shadow-[0_12px_24px_-8px_rgba(0,0,0,0.06),0_4px_10px_rgba(0,0,0,0.02)] focus:border-gray-400 dark:focus:border-[#00246b]/30 transition-all duration-500 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-400 placeholder:font-semibold"
             />
 
           </div>
@@ -257,8 +257,8 @@ const Home = () => {
       {/* Modern Category Pill Filters */}
 
       <div className="px-0 mb-1">
-        <div className="overflow-x-auto no-scrollbar scroll-smooth">
-          <div className="flex gap-2.5 items-center min-w-max pt-0 pb-1.5 px-4">
+        <div className="overflow-x-auto no-scrollbar scroll-smooth px-1">
+          <div className="flex gap-2.5 items-center min-w-max pt-1 pb-2 px-3">
             {categories.map((cat) => {
               const isActive = selectedCats.includes(cat._id);
               return (
@@ -266,7 +266,7 @@ const Home = () => {
                   key={cat._id}
                   onClick={() => toggleCategory(cat._id)}
                   className={`relative px-4 py-2 rounded-xl whitespace-nowrap text-[13px] font-black tracking-tight transition-all duration-300 active:scale-95 flex-shrink-0 outline-none border ${isActive
-                    ? 'bg-white dark:bg-gray-900 border-[#00246b] text-gray-600 dark:text-blue-400 shadow-[0_10px_25px_-4px_rgba(28,44,78,0.15)] scale-105'
+                    ? 'bg-white dark:bg-gray-900 border-[#00246b] text-gray-600 dark:text-blue-400 shadow-[0_10px_25px_-4px_rgba(28,44,78,0.15)]'
                     : 'bg-white dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 shadow-sm'
                     }`}
                 >

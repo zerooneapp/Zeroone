@@ -309,7 +309,10 @@ class NotificationService {
     data = {},
     referenceId = '',
     isSilent = false,
-    vendorId = null
+    vendorId = null,
+    // Most notifications may retry push delivery when an in-app record exists.
+    // Reminder jobs can disable that retry to guarantee one push per event.
+    sendPushWhenExisting = true
   }) {
     let resolvedRecipients = [];
 
@@ -428,7 +431,7 @@ class NotificationService {
         // 📲 3. Dispatch Push and await the result. The booking request must
         // not finish before FCM has read the current token list; otherwise a
         // short-lived/serverless process can drop the push silently.
-        if (!isSilent) {
+        if (!isSilent && (!notificationAlreadyExists || sendPushWhenExisting)) {
           const pushResult = await this._dispatchPush(recipient.userId, {
             title: pushTitle,
             message,

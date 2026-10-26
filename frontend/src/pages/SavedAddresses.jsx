@@ -84,10 +84,10 @@ const SavedAddresses = () => {
       await persistAddress(readableAddress, locationPayload, 'Current location updated!');
     } catch (error) {
       const message = error?.code === 1
-        ? 'Location permission allow karke dobara try karein.'
+        ? 'Please allow location permission and try again.'
         : error?.message === 'Location access requires HTTPS'
-          ? 'Location ke liye HTTPS connection zaroori hai.'
-          : 'Location fetch nahi ho saki.';
+          ? 'Location access requires an HTTPS connection.'
+          : 'Unable to fetch your location.';
       toast.error(message);
     } finally {
       setLoading(false);

@@ -70,10 +70,10 @@ const AddressPopup = () => {
     } catch (error) {
       console.warn('[Location] Auto fetch failed:', error);
       const message = error?.code === 1
-        ? 'Location permission allow karke dobara try karein.'
+        ? 'Please allow location permission and try again.'
         : error?.message === 'Location access requires HTTPS'
-          ? 'Location ke liye HTTPS connection zaroori hai.'
-          : 'Location fetch nahi ho saki. Saved Addresses se dobara try karein.';
+          ? 'Location access requires an HTTPS connection.'
+          : 'Unable to fetch your location. Please try again from Saved Addresses.';
       toast.error(message, { id: 'location-fetch-failed' });
     } finally {
       setLoading(false);
