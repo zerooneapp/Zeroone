@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Calendar as CalendarIcon, ChevronRight, ChevronLeft, AlertTriangle, Clock3, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -16,7 +16,14 @@ import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentMod
 
 const VendorBookings = () => {
   const navigate = useNavigate();
-  const [status, setStatus] = useState('confirmed');
+  // Keep the selected tab in the URL so coming back from a booking/customer
+  // detail page restores it instead of resetting to Upcoming.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const status = ['confirmed', 'completed', 'cancelled'].includes(tabParam) ? tabParam : 'confirmed';
+  const setStatus = (nextStatus) => {
+    setSearchParams({ tab: nextStatus }, { replace: true });
+  };
   const [currentPage, setCurrentPage] = useState(1);
 
   const {

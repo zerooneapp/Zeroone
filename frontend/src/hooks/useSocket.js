@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import useNotificationStore from '../store/notificationStore';
 import toast from 'react-hot-toast';
+import { getNativeFcmToken } from '../services/fcmService';
 
 const getSocketUrl = () => {
   const configuredSocketUrl = import.meta.env.VITE_SOCKET_URL;
@@ -88,8 +89,20 @@ const useSocket = (userId) => {
     });
 
     // Listen for Force Logout Events
-    socket.on('FORCE_LOGOUT', () => {
+    socket.on('FORCE_LOGOUT', async (payload) => {
       console.log('[SOCKET] Force logout event received');
+
+      // Sent when another device logs in: the device whose push token is
+      // `exceptToken` is the new one and must stay logged in.
+      const exceptToken = payload?.exceptToken;
+      if (exceptToken) {
+        let ownToken = null;
+        try {
+          ownToken = (await getNativeFcmToken()) || localStorage.getItem('fcm_token');
+        } catch { /* ignore */ }
+        if (ownToken && ownToken === exceptToken) return;
+      }
+
       window.dispatchEvent(new CustomEvent('auth-unauthorized'));
     });
 
