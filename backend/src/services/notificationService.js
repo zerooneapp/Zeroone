@@ -318,7 +318,7 @@ class NotificationService {
   }
 
   static sendTestPush(userId, targetPlatform) {
-    const platform = ['web', 'mobile'].includes(targetPlatform) ? targetPlatform : 'web';
+    const platform = ['web', 'mobile', 'all'].includes(targetPlatform) ? targetPlatform : 'web';
     return this._dispatchPush(userId, {
       title: 'ZeroOne Test Notification',
       message: 'Test ' + platform + ' push notification received successfully.',

@@ -15,9 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useNotificationStore from '../store/notificationStore';
 import useSocket from '../hooks/useSocket';
 import Navbar from '../layouts/Navbar';
-import NotificationDrawer from '../components/NotificationDrawer';
-import { getNativeFcmToken } from '../services/fcmService';
-import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import NotificationDrawer from '../components/NotificationDrawer';import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentModal';
 import RevenueBreakdownModal from '../components/RevenueBreakdownModal';
 import StaffCreateBookingModal from '../components/StaffCreateBookingModal';
@@ -43,13 +41,15 @@ const StaffDashboard = () => {
    const handleTestPush = async () => {
       try {
          setTestingPush(true);
-         const platform = (await getNativeFcmToken()) ? 'mobile' : 'web';
-         const { data } = await api.post('/fcm-tokens/test', { platform });
+         // Send to every saved token (browser + app) and report how many of each
+         // exist, so a missing app token is visible right away.
+         const { data } = await api.post('/fcm-tokens/test', { platform: 'all' });
          const failed = data.failureCount || 0;
+         const counts = `Saved tokens - web: ${data.webTokenCount ?? 0}, app: ${data.mobileTokenCount ?? 0}`;
          if ((data.successCount || 0) > 0) {
-            toast.success(`Test push sent (${platform}): ${data.successCount} delivered${failed ? `, ${failed} failed` : ''}`);
+            toast.success(`Test push: ${data.successCount} delivered${failed ? `, ${failed} failed` : ''}. ${counts}`, { duration: 6000 });
          } else {
-            toast.error(`Test push failed (${platform}). ${data.error || 'Check backend push log.'}`);
+            toast.error(`Test push failed. ${data.error || 'Check backend push log.'} ${counts}`, { duration: 6000 });
          }
       } catch (error) {
          toast.error(error.response?.data?.message || 'Failed to send test push');

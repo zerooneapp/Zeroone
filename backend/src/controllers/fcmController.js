@@ -100,23 +100,29 @@ const sendTestFcmNotification = async (req, res) => {
         const platform = String(req.body?.platform || 'web').trim().toLowerCase();
 
         if (!actor) return res.status(401).json({ message: 'Unauthorized' });
-        if (!['web', 'mobile'].includes(platform)) {
-            return res.status(400).json({ message: 'Platform must be web or mobile' });
+        if (!['web', 'mobile', 'all'].includes(platform)) {
+            return res.status(400).json({ message: 'Platform must be web, mobile or all' });
         }
 
         // Staff logins keep their token on the Staff document, vendors on User.
         const entity = req.staff
             ? await Staff.findById(actor._id).select('fcmTokens fcmTokenMobile')
             : await User.findById(actor._id).select('fcmTokens fcmTokenMobile');
+        const webTokenCount = (entity?.fcmTokens || []).length;
+        const mobileTokenCount = (entity?.fcmTokenMobile || []).length;
         const tokens = platform === 'mobile'
             ? (entity?.fcmTokenMobile || [])
-            : (entity?.fcmTokens || []);
+            : platform === 'web'
+                ? (entity?.fcmTokens || [])
+                : [...(entity?.fcmTokens || []), ...(entity?.fcmTokenMobile || [])];
 
         if (!tokens.length) {
             return res.status(404).json({
-                message: 'No ' + platform + ' FCM token is saved for this account',
+                message: 'No ' + platform + ' FCM token is saved for this account (web: ' + webTokenCount + ', app: ' + mobileTokenCount + ')',
                 platform,
-                tokenCount: 0
+                tokenCount: 0,
+                webTokenCount,
+                mobileTokenCount
             });
         }
 
@@ -125,6 +131,8 @@ const sendTestFcmNotification = async (req, res) => {
             message: platform + ' test notification processed',
             platform,
             tokenCount: tokens.length,
+            webTokenCount,
+            mobileTokenCount,
             ...(result || {})
         });
     } catch (error) {
