@@ -15,7 +15,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useNotificationStore from '../store/notificationStore';
 import useSocket from '../hooks/useSocket';
 import Navbar from '../layouts/Navbar';
-import NotificationDrawer from '../components/NotificationDrawer';import GlassConfirmationModal from '../components/GlassConfirmationModal';
+import NotificationDrawer from '../components/NotificationDrawer';
+import { getNativeBridgeInfo } from '../services/fcmService';import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentModal';
 import RevenueBreakdownModal from '../components/RevenueBreakdownModal';
 import StaffCreateBookingModal from '../components/StaffCreateBookingModal';
@@ -43,9 +44,15 @@ const StaffDashboard = () => {
          setTestingPush(true);
          // Send to every saved token (browser + app) and report how many of each
          // exist, so a missing app token is visible right away.
+         const bridge = await getNativeBridgeInfo();
+         console.log('[PUSH-TEST] Native bridge info:', bridge);
          const { data } = await api.post('/fcm-tokens/test', { platform: 'all' });
          const failed = data.failureCount || 0;
-         const counts = `Saved tokens - web: ${data.webTokenCount ?? 0}, app: ${data.mobileTokenCount ?? 0}`;
+         const counts = `Saved tokens - web: ${data.webTokenCount ?? 0}, app: ${data.mobileTokenCount ?? 0}. ` +
+            `Bridge: ${bridge.tokenResolved ? 'native token found' : 'NO native token'} ` +
+            `(webView:${bridge.webView ? 'y' : 'n'}, pwa:${bridge.standalonePwa ? 'y' : 'n'}, ` +
+            `android:${bridge.androidGetFcmToken ? 'y' : 'n'}, flutter:${bridge.flutterHandler ? 'y' : 'n'}, ` +
+            `global:${bridge.windowToken ? 'y' : 'n'}, ls:${bridge.localStorageToken ? 'y' : 'n'})`;
          if ((data.successCount || 0) > 0) {
             toast.success(`Test push: ${data.successCount} delivered${failed ? `, ${failed} failed` : ''}. ${counts}`, { duration: 6000 });
          } else {

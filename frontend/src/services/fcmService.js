@@ -30,6 +30,26 @@ export const getNativeFcmToken = async () => {
     }
 };
 
+// Debug helper: reports what the native wrapper exposes to this page, so a
+// missing app token can be traced to the exact bridge that is not wired up.
+export const getNativeBridgeInfo = async () => {
+    if (typeof window === 'undefined') return {};
+    const ua = navigator.userAgent || '';
+    let storedToken = false;
+    try { storedToken = Boolean(localStorage.getItem('native_fcm_token')); } catch { /* ignore */ }
+    const iface = window.AndroidInterface || window.Android;
+    return {
+        webView: /\bwv\b|; wv\)|WebView/i.test(ua),
+        standalonePwa: window.matchMedia?.('(display-mode: standalone)')?.matches || false,
+        windowToken: Boolean(window.nativeFcmToken || window.fcmToken),
+        androidInterface: Boolean(iface),
+        androidGetFcmToken: typeof iface?.getFcmToken === 'function',
+        flutterHandler: typeof window.flutter_inappwebview?.callHandler === 'function',
+        localStorageToken: storedToken,
+        tokenResolved: Boolean(await getNativeFcmToken())
+    };
+};
+
 export const saveTokenToBackend = async (token, platform = 'web') => {
     if (!token) return false;
 
