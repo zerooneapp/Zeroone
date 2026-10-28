@@ -166,17 +166,22 @@ function App() {
     let disposed = false;
     let syncInFlight = null;
 
+    // Native app token (if the wrapper provides one) goes to fcmTokenMobile.
+    // Kept separate from the web flow below: requestForToken() can hang inside
+    // a WebView (service worker / permission wait) and must never block the
+    // native token from being saved.
+    const syncNativeToken = async () => {
+      const nativeToken = await getNativeFcmToken();
+      if (!nativeToken || disposed) return false;
+      return saveTokenToBackend(nativeToken, 'mobile');
+    };
+
     const syncNotifications = () => {
       if (disposed) return Promise.resolve(false);
       if (syncInFlight) return syncInFlight;
 
       syncInFlight = (async () => {
-        // Native app token (if the wrapper provides one) goes to fcmTokenMobile.
-        const nativeToken = await getNativeFcmToken();
-        if (nativeToken) {
-          if (disposed) return false;
-          return saveTokenToBackend(nativeToken, 'mobile');
-        }
+        if (await syncNativeToken()) return true;
         const token = await requestForToken();
         if (disposed || !token) return false;
         return saveTokenToBackend(token);
@@ -202,9 +207,18 @@ function App() {
         try { localStorage.setItem('native_fcm_token', t.trim()); } catch { /* ignore */ }
         window.nativeFcmToken = t.trim();
       }
-      syncNotifications();
+      syncNativeToken();
     };
     window.addEventListener('nativeFcmToken', handleNativeToken);
+
+    // The wrapper may inject its token a few seconds after login. Retry for a
+    // minute instead of waiting for the 15 minute refresh.
+    let nativeAttempts = 0;
+    const nativeRetry = window.setInterval(async () => {
+      nativeAttempts += 1;
+      const saved = await syncNativeToken();
+      if (saved || nativeAttempts >= 20) window.clearInterval(nativeRetry);
+    }, 3000);
     const refreshInterval = window.setInterval(syncNotifications, 15 * 60 * 1000);
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -213,6 +227,7 @@ function App() {
     return () => {
       disposed = true;
       window.clearInterval(refreshInterval);
+      window.clearInterval(nativeRetry);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('nativeFcmToken', handleNativeToken);
