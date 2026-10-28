@@ -237,7 +237,9 @@ function App() {
   useEffect(() => {
     const handleUnauthorized = () => {
       if (isAuthenticated) {
-        logout();
+        // Forced: another device or the server ended this session, so the
+        // account's tokens may belong to the new device and must be kept.
+        logout({ forced: true });
         toast.error('Session expired, please log in again.', { id: 'session-expired' });
       }
     };

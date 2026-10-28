@@ -36,6 +36,7 @@ export const useAuthStore = create(
           });
 
           localStorage.setItem('token', token);
+          localStorage.removeItem('activeVendorId');
 
           // If vendor, immediately sync status
           if (role === 'vendor') {
@@ -64,6 +65,7 @@ export const useAuthStore = create(
           });
 
           localStorage.setItem('token', token);
+          localStorage.removeItem('activeVendorId');
           return { success: true, role };
         } catch (err) {
           return { success: false, message: err.response?.data?.message || 'Admin login failed' };
@@ -100,6 +102,8 @@ export const useAuthStore = create(
             localStorage.setItem('token', token);
             if (res.data.lastActiveVendorId) {
               localStorage.setItem('activeVendorId', res.data.lastActiveVendorId);
+            } else {
+              localStorage.removeItem('activeVendorId');
             }
             if (role === 'vendor' && !needsRegistration) await get().syncVendorStatus();
           }
@@ -112,13 +116,31 @@ export const useAuthStore = create(
         }
       },
 
-      logout: async () => {
+      // options.forced = true when another device took over the session. Then the
+      // account's tokens now belong to that device and must not be cleared.
+      logout: async (options) => {
+        const forced = options?.forced === true;
         // ✅ FIX STEP 1: Remove FCM token from backend FIRST (auth token still valid in localStorage)
         // This ensures the API call succeeds before we wipe the session
         try {
           const { removeFCMToken } = await import('../config/firebase');
           if (removeFCMToken) {
             await removeFCMToken();
+          }
+
+          // removeFCMToken only knows the browser token. The native app token
+          // (fcmTokenMobile) must be removed too, or this device keeps getting
+          // the logged-out account's notifications.
+          const { getNativeFcmToken, removeTokenFromBackend } = await import('../services/fcmService');
+          const nativeToken = await getNativeFcmToken();
+          if (nativeToken) {
+            await removeTokenFromBackend(nativeToken);
+          }
+
+          // Safety net for a user-initiated logout: clear every token of this
+          // account even if the device could not report its own.
+          if (!forced) {
+            await api.delete('/fcm-tokens/remove', { data: { all: true } }).catch(() => {});
           }
         } catch (e) {
           console.log('[Auth] FCM token removal during logout failed (non-critical):', e?.message);
@@ -139,6 +161,12 @@ export const useAuthStore = create(
         });
         localStorage.removeItem('token');
         localStorage.removeItem('auth-storage');
+        // The next account must not inherit this account's shop: api.js sends
+        // activeVendorId as x-vendor-id on every request.
+        localStorage.removeItem('activeVendorId');
+        import('./vendorStore').then((module) => {
+          module.useVendorStore.setState(module.useVendorStore.getInitialState(), true);
+        }).catch(() => {});
 
         // Clear notifications
         import('./notificationStore').then((module) => {

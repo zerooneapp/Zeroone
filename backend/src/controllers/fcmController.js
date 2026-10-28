@@ -80,7 +80,21 @@ const saveFcmToken = async (req, res) => {
 
 const removeFcmToken = async (req, res) => {
     try {
-        const { token } = req.body;
+        const { token, all } = req.body;
+        const actor = req.user || req.staff;
+
+        // Explicit logout: drop every push token of the logged-in account, so a
+        // token the client could not report (native bridge missing, app closed
+        // mid-logout) cannot keep delivering this account's notifications.
+        if (all === true && actor) {
+            await actor.constructor.updateOne(
+                { _id: actor._id },
+                { $set: { fcmTokens: [], fcmTokenMobile: [] } }
+            );
+            console.log('[FCM-DEBUG] All tokens cleared on logout for:', actor._id);
+            if (!token) return res.status(200).json({ message: 'All tokens removed successfully' });
+        }
+
         if (!token) return res.status(400).json({ message: 'Token is required' });
 
         console.log('[FCM-DEBUG] Received remove token request for token:', token.slice(0, 15) + '...');
