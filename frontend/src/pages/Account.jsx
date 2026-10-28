@@ -3,10 +3,8 @@ import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import {
   User, Mail, Phone, MapPin, LogOut,
-  ChevronRight, ArrowLeft, Shield, CreditCard, Bell, Settings, Trash2, AlertTriangle, Crown, HelpCircle
+  ChevronRight, ArrowLeft, Shield, CreditCard, Bell, Settings, Crown, HelpCircle
 } from 'lucide-react';
-import api from '../services/api';
-import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../components/Button';
 
@@ -21,23 +19,6 @@ const Account = () => {
   }, [role, navigate]);
 
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
-  const [deleting, setDeleting] = React.useState(false);
-
-  const handleDeleteAccount = async () => {
-    try {
-      setDeleting(true);
-      await api.delete('/users/profile');
-      setShowDeleteConfirm(false);
-      toast.success('Account deleted successfully');
-      await logout();
-      navigate('/login', { replace: true });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Account deletion failed');
-    } finally {
-      setDeleting(false);
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -112,58 +93,10 @@ const Account = () => {
           <LogOut size={16} strokeWidth={3} />
           Log Out of Account
         </button>
-        <button
-          onClick={() => setShowDeleteConfirm(true)}
-          className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-red-600/40 dark:border-red-500/40 text-red-600 dark:text-red-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
-        >
-          <Trash2 size={16} strokeWidth={3} />
-          Delete Account
-        </button>
       </div>
 
 
       <AnimatePresence>
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !deleting && setShowDeleteConfirm(false)}
-              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-[300px] bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl relative z-10 p-5 text-center border border-red-500/20"
-            >
-              <div className="w-12 h-12 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <AlertTriangle size={21} strokeWidth={2.5} />
-              </div>
-              <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">Delete Account?</h3>
-              <p className="text-[12px] text-slate-500 dark:text-gray-400 mt-2 leading-relaxed">
-                Your profile and account access will be permanently removed. This action cannot be undone.
-              </p>
-              <div className="flex gap-2.5 mt-6">
-                <button
-                  disabled={deleting}
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-3 bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 rounded-xl font-bold text-[11px] active:scale-95 transition-all disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={deleting}
-                  onClick={handleDeleteAccount}
-                  className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold text-[11px] shadow-lg shadow-red-500/20 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  {deleting ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
         {showLogoutConfirm && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
             <motion.div

@@ -3,7 +3,7 @@ import {
    ClipboardList, CheckCircle, Clock,
    ShieldCheck, User, CheckCircle2,
    RefreshCw, Phone, Sun, Moon, Bell,
-   Lock, Play, LogOut, MapPin, CalendarPlus, Calendar, Package
+   Lock, Play, LogOut, MapPin, CalendarPlus, Calendar, Package, BellRing
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -16,6 +16,7 @@ import useNotificationStore from '../store/notificationStore';
 import useSocket from '../hooks/useSocket';
 import Navbar from '../layouts/Navbar';
 import NotificationDrawer from '../components/NotificationDrawer';
+import { getNativeFcmToken } from '../services/fcmService';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import CompleteBookingPaymentModal from '../components/CompleteBookingPaymentModal';
 import RevenueBreakdownModal from '../components/RevenueBreakdownModal';
@@ -30,6 +31,7 @@ const StaffDashboard = () => {
    const bookings = [...(myBookings || [])].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
    const [loading, setLoading] = useState(myBookings.length === 0 && !user);
    const [showNotifications, setShowNotifications] = useState(false);
+   const [testingPush, setTestingPush] = useState(false);
    const [confirmModal, setConfirmModal] = useState({ isOpen: false, bookingId: null });
    const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
    const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
@@ -37,6 +39,24 @@ const StaffDashboard = () => {
       (booking) => booking.status === 'confirmed' || booking.status === 'assigned' || booking.status === 'pending' || booking.status === 'pending_completion'
    );
    const upcomingBookings = activeBookings.slice(1, 4);
+
+   const handleTestPush = async () => {
+      try {
+         setTestingPush(true);
+         const platform = (await getNativeFcmToken()) ? 'mobile' : 'web';
+         const { data } = await api.post('/fcm-tokens/test', { platform });
+         const failed = data.failureCount || 0;
+         if ((data.successCount || 0) > 0) {
+            toast.success(`Test push sent (${platform}): ${data.successCount} delivered${failed ? `, ${failed} failed` : ''}`);
+         } else {
+            toast.error(`Test push failed (${platform}). ${data.error || 'Check backend push log.'}`);
+         }
+      } catch (error) {
+         toast.error(error.response?.data?.message || 'Failed to send test push');
+      } finally {
+         setTestingPush(false);
+      }
+   };
 
    const handleStatusUpdate = async (bookingId, action) => {
       if (action === 'complete') {
@@ -141,6 +161,14 @@ const StaffDashboard = () => {
 
                <div className="flex items-center gap-1.5">
 
+                  <button
+                     onClick={handleTestPush}
+                     disabled={testingPush}
+                     title="Send test push notification"
+                     className="p-2 text-slate-700 dark:text-gray-400 transition-all active:scale-90 disabled:opacity-40"
+                  >
+                     <BellRing size={17} strokeWidth={3} className={testingPush ? 'animate-pulse' : ''} />
+                  </button>
                   <button onClick={() => setShowNotifications(true)} className="relative p-2 text-slate-700 dark:text-gray-400 transition-all active:scale-90">
                      <Bell size={17} strokeWidth={3} />
                      {unreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-950 shadow-sm animate-pulse" />}

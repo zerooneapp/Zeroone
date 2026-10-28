@@ -46,11 +46,12 @@ const saveFcmToken = async (req, res) => {
         // React StrictMode can register the same FCM token simultaneously;
         // document.save() then races on the User version and returns 500.
         //
-        // Only the newest web token is used by the push service. Replacing the
-        // web array prevents an expired browser token from remaining the
-        // selected token after a browser/service-worker token rotation.
+        // Keep the few newest web tokens: one per browser/origin (e.g. the live
+        // site and localhost open at the same time for one account). The token
+        // was pulled above, so $push cannot create duplicates; old/expired
+        // tokens are dropped by $slice and by FCM-failure cleanup.
         const tokenUpdate = tokenField === 'fcmTokens'
-            ? { $set: { fcmTokens: [normalizedToken] } }
+            ? { $push: { fcmTokens: { $each: [normalizedToken], $slice: -3 } } }
             : { $addToSet: { fcmTokenMobile: normalizedToken } };
 
         await entity.constructor.updateOne(
@@ -103,7 +104,10 @@ const sendTestFcmNotification = async (req, res) => {
             return res.status(400).json({ message: 'Platform must be web or mobile' });
         }
 
-        const entity = await User.findById(actor._id).select('fcmTokens fcmTokenMobile');
+        // Staff logins keep their token on the Staff document, vendors on User.
+        const entity = req.staff
+            ? await Staff.findById(actor._id).select('fcmTokens fcmTokenMobile')
+            : await User.findById(actor._id).select('fcmTokens fcmTokenMobile');
         const tokens = platform === 'mobile'
             ? (entity?.fcmTokenMobile || [])
             : (entity?.fcmTokens || []);

@@ -97,6 +97,11 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+ 
+/* Keep the Home category pill border and shadow inside the horizontal scroller. */
+.overflow-x-auto.no-scrollbar.scroll-smooth {
+  padding-block: 0;
+}
 
 /* Hide number input spinners */
 input[type="number"]::-webkit-inner-spin-button,

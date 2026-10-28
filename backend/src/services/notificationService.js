@@ -104,20 +104,20 @@ class NotificationService {
       }
 
       // 🔄 4. Token Collection
-      let entity = await User.findById(userId);
-      if (!entity) {
-        entity = await Staff.findById(userId);
-      }
-      // Booking targets may use Staff.userId, while a staff login saves the
-      // mobile token on the Staff document. Resolve that linked record too.
-      if (!entity) {
-        entity = await Staff.findOne({ userId });
-      }
+      // A staff member can exist as a User (Staff.userId) AND as a Staff doc.
+      // Booking targets use Staff.userId, but a staff-panel login saves the
+      // FCM token on the Staff document. Resolve every linked record so the
+      // token is found no matter which one it was stored on.
+      const entities = [];
+      const userDoc = await User.findById(userId);
+      if (userDoc) entities.push(userDoc);
+      const staffDocs = await Staff.find({ $or: [{ _id: userId }, { userId }] });
+      entities.push(...staffDocs);
 
-      if (!entity) return;
+      if (!entities.length) return;
 
       // 🛡️ 4.1 Check Notification Settings (Respect User Preferences)
-      const settings = entity.notificationSettings;
+      const settings = entities.find((e) => e.notificationSettings)?.notificationSettings;
       if (settings) {
         // Global push toggle applies to everyone (Customer, Vendor, Staff)
         if (settings.push === false) {
@@ -150,18 +150,24 @@ class NotificationService {
       // the latest web browser. Mobile users can have more than two devices,
       // and array position alone cannot tell us which device is currently
       // active. Invalid/expired tokens are removed below after FCM responds.
+      // Booking reminders use only the latest mobile token so stale tokens
+      // from previous app installs cannot multiply one reminder.
       const normalizeTokens = (values = []) => [...new Set(
         values
           .map((token) => typeof token === 'string' ? token.trim() : '')
           .filter(Boolean)
       )];
+      const isBookingReminder = String(payload.data?.type || payload.type || '').toUpperCase() === 'BOOKING_REMINDER';
+      const mobileTokenValues = entities.flatMap((entity) => isBookingReminder
+        ? (entity.fcmTokenMobile || []).slice(-1)
+        : (entity.fcmTokenMobile || []));
       const mobileTokens = normalizedTargetPlatform === 'web'
         ? []
-        : normalizeTokens(entity.fcmTokenMobile || []);
+        : normalizeTokens(mobileTokenValues);
       const webTokens = normalizedTargetPlatform === 'mobile'
         ? []
-        : normalizeTokens((entity.fcmTokens || []).slice(-1));
-      
+        : normalizeTokens(entities.flatMap((entity) => (entity.fcmTokens || []).slice(-3)));
+
       // Combine and deduplicate to prevent sending the same message twice to the same token
       const tokens = [...new Set([...webTokens, ...mobileTokens])].filter(Boolean);
 
@@ -180,22 +186,43 @@ class NotificationService {
       );
 
       // 🚀 5. Multicast Send
-      const response = await admin.messaging().sendEachForMulticast({
-        tokens,
+      const pushTitleText = payload.title;
+      const pushBodyText = payload.message || payload.body;
+      const baseData = toFcmSafeData({
+        ...payload.data,
+        notificationId,
+        click_action: "FLUTTER_NOTIFICATION_CLICK" // Standard for many mobile frameworks
+      });
+
+      // Web browsers get a DATA-ONLY message. With a `notification` key the
+      // FCM SDK auto-displays it AND our own handlers (service worker /
+      // foreground) display it again -> the same booking shows twice. Data-only
+      // means exactly one display, rendered by firebase-messaging-sw.js (or
+      // showForegroundNotification) using the same tag.
+      const webResponse = webTokens.length
+        ? await admin.messaging().sendEachForMulticast({
+          tokens: webTokens,
+          data: { ...baseData, title: String(pushTitleText || ''), body: String(pushBodyText || '') },
+          webpush: { headers: { Urgency: 'high' } }
+        })
+        : { successCount: 0, failureCount: 0, responses: [] };
+
+      const mobileOnlyTokens = mobileTokens.filter((token) => !webTokenSet.has(token));
+      const mobileResponse = mobileOnlyTokens.length ? await admin.messaging().sendEachForMulticast({
+        tokens: mobileOnlyTokens,
         notification: {
-          title: payload.title,
-          body: payload.message || payload.body
+          title: pushTitleText,
+          body: pushBodyText
         },
-        data: toFcmSafeData({
-          ...payload.data,
-          notificationId,
-          click_action: "FLUTTER_NOTIFICATION_CLICK" // Standard for many mobile frameworks
-        }),
+        data: baseData,
         android: {
           priority: 'high',
           notification: {
             channelId: 'high_importance_channel',
             priority: 'high',
+            // Re-delivery of the same booking reminder replaces the existing
+            // Android notification instead of creating another tray item.
+            tag: notificationId,
             sound: 'default',
             clickAction: 'FLUTTER_NOTIFICATION_CLICK'
           }
@@ -209,7 +236,15 @@ class NotificationService {
             }
           }
         }
-      });
+      }) : { successCount: 0, failureCount: 0, responses: [] };
+
+      // `tokens` is [...webTokens, ...mobileTokens] (a token present in both
+      // lists is dropped from the mobile side), so responses line up by index.
+      const response = {
+        successCount: webResponse.successCount + mobileResponse.successCount,
+        failureCount: webResponse.failureCount + mobileResponse.failureCount,
+        responses: [...webResponse.responses, ...mobileResponse.responses]
+      };
 
       console.log(`[PUSH-RESULT] User: ${userId}, Success: ${response.successCount}, Failure: ${response.failureCount}`);
       if (response.failureCount > 0) {
@@ -251,7 +286,7 @@ class NotificationService {
       });
 
       if (invalidTokens.length) {
-        await entity.constructor.updateOne(
+        await Promise.all(entities.map((entity) => entity.constructor.updateOne(
           { _id: entity._id },
           {
             $pull: {
@@ -259,7 +294,7 @@ class NotificationService {
               fcmTokenMobile: { $in: invalidTokens }
             }
           }
-        );
+        )));
         console.log('[PUSH-CLEANUP] Removed ' + invalidTokens.length + ' invalid token(s) for user ' + userId);
       }
 

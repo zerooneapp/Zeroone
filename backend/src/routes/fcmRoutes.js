@@ -8,6 +8,6 @@ router.use(protect);
 
 router.post('/save', saveFcmToken);
 router.delete('/remove', removeFcmToken);
-router.post('/test', authorize('vendor'), sendTestFcmNotification);
+router.post('/test', authorize('vendor', 'staff'), sendTestFcmNotification);
 
 module.exports = router;

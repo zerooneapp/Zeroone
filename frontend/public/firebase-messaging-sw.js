@@ -25,10 +25,9 @@ const shownNotifications = new Set();
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
-    // Messages containing a notification payload are displayed automatically
-    // by the browser/FCM. Calling showNotification here would display the
-    // same push a second time. Keep manual rendering only for data-only
-    // messages.
+    // The backend sends web pushes as data-only messages, so this handler is
+    // the single place that displays them. Legacy messages that still carry a
+    // `notification` payload are auto-displayed by FCM; skip those.
     if (payload.notification) {
         console.log('[firebase-messaging-sw.js] Notification payload will be displayed automatically.');
         return;
@@ -47,6 +46,7 @@ messaging.onBackgroundMessage((payload) => {
     const notificationOptions = {
         body: notification.body || data.body || '',
         icon: '/logo.jpeg',
+        badge: '/logo.jpeg',
         data,
         tag: id || undefined,
         renotify: Boolean(id)
@@ -57,4 +57,15 @@ messaging.onBackgroundMessage((payload) => {
     return self.registration.showNotification(notificationTitle, notificationOptions)
         .then(() => console.log('[firebase-messaging-sw.js] Notification shown:', notificationTitle))
         .catch((err) => console.error('[firebase-messaging-sw.js] showNotification failed:', err));
+});
+
+// Data-only pushes are rendered manually, so clicking must be handled here.
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+            const existing = clients.find((c) => 'focus' in c);
+            return existing ? existing.focus() : self.clients.openWindow('/');
+        })
+    );
 });

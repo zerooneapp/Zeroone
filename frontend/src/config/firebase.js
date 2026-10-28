@@ -174,7 +174,7 @@ export const showForegroundNotification = async (payload) => {
     const data = payload?.data || {};
     const title = notification.title || data.title || 'ZeroOne';
     const body = notification.body || data.body || '';
-    const dedupeId = data.id || data.notificationId || payload?.referenceId || payload?._id;
+    const dedupeId = data.notificationId || data.id || payload?.referenceId || payload?._id;
 
     if (dedupeId && shownForegroundNotificationIds.has(String(dedupeId))) {
         return false;

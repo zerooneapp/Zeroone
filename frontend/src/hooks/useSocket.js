@@ -74,14 +74,9 @@ const useSocket = (userId) => {
 
       // Booking confirmation is already shown on the success screen.
       if (!isBookingConfirmation) {
-        toast(notification.title || 'New Notification', {
-          style: {
-            borderRadius: '12px',
-            color: '#fff',
-            fontSize: '12px',
-            fontWeight: 'bold'
-          }
-        });
+        // Let the global Toaster style control the background and text color.
+        // A local white text override made the default white toast unreadable.
+        toast(notification.title || 'New Notification');
       }
 
       // Keep the notification store and live list updates active.

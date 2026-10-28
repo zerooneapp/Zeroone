@@ -17,11 +17,12 @@ const SecuritySettings = () => {
     try {
       setDeleting(true);
       await api.delete('/users/profile');
+      setShowDeleteConfirm(false);
       toast.success('Account deleted successfully');
-      logout();
+      await logout();
       navigate('/login', { replace: true });
-    } catch (err) {
-      toast.error('Deletion failed');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Account deletion failed');
     } finally {
       setDeleting(false);
     }
