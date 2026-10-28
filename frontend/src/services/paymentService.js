@@ -31,23 +31,42 @@ export const loadCashfreeScript = () => loadScript(
   'Failed to load Cashfree'
 );
 
-// The Cashfree modal is a full-screen fixed iframe injected into <body>. Inside
-// the app it starts at y=0 and sits under the phone status bar. Push it down by
-// the same safe-area offset the rest of the app uses.
-const offsetCashfreeModal = () => {
-  const root = document.documentElement;
-  if (!root.classList.contains('is-app')) return () => {};
+// The Cashfree modal is a full-screen fixed iframe injected into <body>. On
+// phones it starts at y=0 and sits under the status bar, so give it top
+// padding. Any iframe added while checkout is open is treated as Cashfree's,
+// which avoids depending on its src or class names.
+// The iframe is cross-origin, so its header cannot be restyled. Instead the
+// strip above it is filled with the header colour so the header looks like it
+// extends under the status bar. Sandbox uses Cashfree's default purple;
+// production uses the ZeroOne branded navy header.
+const CASHFREE_HEADER_COLORS = { sandbox: '#6b2fc9', production: '#1b2559' };
+
+const offsetCashfreeModal = (mode = 'sandbox') => {
+  const isPhoneLike = document.documentElement.classList.contains('is-app') || window.innerWidth <= 768;
+  if (!isPhoneLike) return () => {};
+
+  const existingFrames = new Set(document.querySelectorAll('iframe'));
+  const topOffset = 'max(var(--safe-header-top, 0px), env(safe-area-inset-top, 0px), 36px)';
+
+  const statusBarFill = document.createElement('div');
+  statusBarFill.style.cssText = [
+    'position:fixed', 'top:0', 'left:0', 'right:0', `height:${topOffset}`,
+    `background:${CASHFREE_HEADER_COLORS[mode] || CASHFREE_HEADER_COLORS.sandbox}`,
+    'z-index:2147483647', 'pointer-events:none'
+  ].join(';');
+  document.body.appendChild(statusBarFill);
 
   const apply = () => {
-    document.querySelectorAll('body > * iframe, body > iframe').forEach((frame) => {
-      if (!String(frame.src || '').includes('cashfree')) return;
+    document.querySelectorAll('iframe').forEach((frame) => {
+      if (existingFrames.has(frame)) return;
 
       let node = frame;
       while (node.parentElement && node.parentElement !== document.body) node = node.parentElement;
 
       [node, frame].forEach((el) => {
-        el.style.setProperty('top', 'var(--safe-header-top)', 'important');
-        el.style.setProperty('height', 'calc(100% - var(--safe-header-top))', 'important');
+        el.style.setProperty('top', topOffset, 'important');
+        el.style.setProperty('height', `calc(100% - ${topOffset})`, 'important');
+        el.style.setProperty('max-height', `calc(100% - ${topOffset})`, 'important');
       });
     });
   };
@@ -55,7 +74,10 @@ const offsetCashfreeModal = () => {
   const observer = new MutationObserver(apply);
   observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
   apply();
-  return () => observer.disconnect();
+  return () => {
+    observer.disconnect();
+    statusBarFill.remove();
+  };
 };
 
 export const openGatewayCheckout = async ({
@@ -71,7 +93,7 @@ export const openGatewayCheckout = async ({
     if (!window.Cashfree) throw new Error('Cashfree checkout is unavailable');
 
     const cashfree = window.Cashfree({ mode: orderResponse.mode || 'sandbox' });
-    const stopOffset = offsetCashfreeModal();
+    const stopOffset = offsetCashfreeModal(orderResponse.mode || 'sandbox');
     let result;
     try {
       result = await cashfree.checkout({
