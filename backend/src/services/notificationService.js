@@ -247,6 +247,16 @@ class NotificationService {
       };
 
       console.log(`[PUSH-RESULT] User: ${userId}, Success: ${response.successCount}, Failure: ${response.failureCount}`);
+      // One line per FCM message so a duplicate on the phone can be traced:
+      // two different messageIds for one booking = the server sent it twice,
+      // one messageId = the duplicate is created inside the app.
+      console.log('[PUSH-TRACE]', JSON.stringify({
+        user: String(userId),
+        type: payload.data?.type || null,
+        booking: payload.data?.bookingId ? String(payload.data.bookingId) : null,
+        notificationId,
+        messageIds: response.responses.map((r) => r.messageId || null)
+      }));
       if (response.failureCount > 0) {
         response.responses.forEach((resp, idx) => {
           if (!resp.success) {
