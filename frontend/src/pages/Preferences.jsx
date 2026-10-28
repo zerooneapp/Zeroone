@@ -25,7 +25,6 @@ const Preferences = () => {
         id: 'future-update-toast',
         style: {
             borderRadius: '1rem',
-            color: '#fff',
             fontSize: '11px',
             fontWeight: 'bold',
             letterSpacing: '0.05em',

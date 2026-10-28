@@ -31,6 +31,33 @@ export const loadCashfreeScript = () => loadScript(
   'Failed to load Cashfree'
 );
 
+// The Cashfree modal is a full-screen fixed iframe injected into <body>. Inside
+// the app it starts at y=0 and sits under the phone status bar. Push it down by
+// the same safe-area offset the rest of the app uses.
+const offsetCashfreeModal = () => {
+  const root = document.documentElement;
+  if (!root.classList.contains('is-app')) return () => {};
+
+  const apply = () => {
+    document.querySelectorAll('body > * iframe, body > iframe').forEach((frame) => {
+      if (!String(frame.src || '').includes('cashfree')) return;
+
+      let node = frame;
+      while (node.parentElement && node.parentElement !== document.body) node = node.parentElement;
+
+      [node, frame].forEach((el) => {
+        el.style.setProperty('top', 'var(--safe-header-top)', 'important');
+        el.style.setProperty('height', 'calc(100% - var(--safe-header-top))', 'important');
+      });
+    });
+  };
+
+  const observer = new MutationObserver(apply);
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  apply();
+  return () => observer.disconnect();
+};
+
 export const openGatewayCheckout = async ({
   orderResponse,
   name = 'ZeroOne',
@@ -44,10 +71,16 @@ export const openGatewayCheckout = async ({
     if (!window.Cashfree) throw new Error('Cashfree checkout is unavailable');
 
     const cashfree = window.Cashfree({ mode: orderResponse.mode || 'sandbox' });
-    const result = await cashfree.checkout({
-      paymentSessionId: orderResponse.paymentSessionId,
-      redirectTarget: '_modal'
-    });
+    const stopOffset = offsetCashfreeModal();
+    let result;
+    try {
+      result = await cashfree.checkout({
+        paymentSessionId: orderResponse.paymentSessionId,
+        redirectTarget: '_modal'
+      });
+    } finally {
+      stopOffset();
+    }
 
     if (result?.error) {
       onFailure?.(result.error);

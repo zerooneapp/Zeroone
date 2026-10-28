@@ -60,7 +60,6 @@ const AddressPopup = () => {
 
       toast.success('Service Location Set: ' + readableAddress.split(',')[0], {
         style: {
-          color: '#fff',
           fontSize: '12px',
           fontWeight: '900',
           borderRadius: '1rem',

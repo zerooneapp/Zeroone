@@ -32,7 +32,6 @@ const NotificationSettings = () => {
       toast.success('Notification settings saved!', {
           style: {
               borderRadius: '1rem',
-              color: '#fff',
               fontSize: '12px',
               fontWeight: 'bold'
           }
