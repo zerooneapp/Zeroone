@@ -17,19 +17,36 @@ window.__PREFETCHED_DATA__ = {
   cartData: null,    // Prefetched slots & staff for cart page
 };
 
+// The prefetches below feed customer screens only. A logged-in vendor, staff
+// member or admin never uses them, so skip them (they were ~25 wasted requests
+// on every partner app load: categories, bookings, nearby shops and each nearby
+// shop's services and membership plans).
+let persistedRole = null;
+try {
+  persistedRole = JSON.parse(localStorage.getItem('auth-storage'))?.state?.role || null;
+} catch (e) {}
+const isCustomerContext = !persistedRole || persistedRole === 'customer';
+
 // Start prefetching categories immediately on load
-api.get('/categories')
+if (isCustomerContext) api.get('/categories')
   .then(res => {
     window.__PREFETCHED_DATA__.categories = res.data;
   })
   .catch(err => console.warn('[Prefetch] Categories failed', err.message));
 
 // Start prefetching shared settings immediately on load
-api.get('/settings/shared')
+// The promise is kept so the vendor store can reuse this request instead of
+// sending a second identical one.
+window.__PREFETCHED_DATA__.sharedSettingsPromise = api.get('/settings/shared');
+window.__PREFETCHED_DATA__.sharedSettingsPromise
   .then(res => {
     window.__PREFETCHED_DATA__.sharedSettings = res.data;
   })
-  .catch(err => console.warn('[Prefetch] Shared settings failed', err.message));
+  .catch(err => {
+    // A failed prefetch must not be reused; the store then fetches normally.
+    window.__PREFETCHED_DATA__.sharedSettingsPromise = null;
+    console.warn('[Prefetch] Shared settings failed', err.message);
+  });
 
 // Start prefetching bookings and memberships if user is fully logged in
 const token = localStorage.getItem('token');
@@ -39,7 +56,7 @@ try {
   isAuthenticated = authState?.state?.isAuthenticated;
 } catch (e) {}
 
-if (token && isAuthenticated) {
+if (token && isAuthenticated && isCustomerContext) {
   api.get('/bookings/my')
     .then(res => {
       window.__PREFETCHED_DATA__.bookings = res.data;
@@ -108,7 +125,7 @@ try {
   if (authStorage) {
     const parsed = JSON.parse(authStorage);
     const savedLocation = getUserCoordinates(parsed?.state?.user);
-    if (savedLocation) {
+    if (savedLocation && isCustomerContext) {
       prefetchVendors(savedLocation.lat, savedLocation.lng);
       locationPrefetched = true;
     }
@@ -119,7 +136,7 @@ try {
 
 // Do not request GPS on the login screen. Customer location sync starts
 // after successful authentication in AddressPopup.
-if (!locationPrefetched) {
+if (!locationPrefetched && isCustomerContext) {
   prefetchVendors(DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lng);
 }
 

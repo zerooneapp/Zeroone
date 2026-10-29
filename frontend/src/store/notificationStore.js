@@ -1,24 +1,35 @@
 import { create } from 'zustand';
 import api from '../services/api';
 
+let notificationsInFlight = null;
+
+const fetchNotificationsOnce = async (set) => {
+  try {
+    set({ loading: true });
+    const activeVendorId = localStorage.getItem('activeVendorId');
+    const params = activeVendorId ? { vendorId: activeVendorId } : {};
+
+    const { data } = await api.get('/notifications', { params });
+    const unreadCount = data.filter(n => !n.isRead).length;
+    set({ notifications: data, unreadCount, loading: false });
+  } catch (error) {
+    console.error('Failed to fetch notifications:', error);
+    set({ loading: false });
+  }
+};
+
 const useNotificationStore = create((set, get) => ({
   notifications: [],
   unreadCount: 0,
   loading: false,
 
+  // Several components (layout, header, drawer) ask for notifications at the
+  // same moment; share one in-flight request instead of sending duplicates.
   fetchNotifications: async () => {
-    try {
-      set({ loading: true });
-      const activeVendorId = localStorage.getItem('activeVendorId');
-      const params = activeVendorId ? { vendorId: activeVendorId } : {};
-      
-      const { data } = await api.get('/notifications', { params });
-      const unreadCount = data.filter(n => !n.isRead).length;
-      set({ notifications: data, unreadCount, loading: false });
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-      set({ loading: false });
-    }
+    if (notificationsInFlight) return notificationsInFlight;
+    notificationsInFlight = fetchNotificationsOnce(set)
+      .finally(() => { notificationsInFlight = null; });
+    return notificationsInFlight;
   },
 
   clearNotifications: () => set({ notifications: [], unreadCount: 0 }),

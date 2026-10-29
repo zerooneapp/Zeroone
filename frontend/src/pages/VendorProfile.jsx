@@ -10,6 +10,8 @@ import dayjs from 'dayjs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
+import { getSharedSettings } from '../services/sharedSettings';
+import { useVendorStore } from '../store/vendorStore';
 import { openGatewayCheckout } from '../services/paymentService';
 import Button from '../components/Button';
 import toast from 'react-hot-toast';
@@ -120,7 +122,8 @@ const VendorProfile = () => {
    useEffect(() => {
       const fetchProfile = async () => {
          try {
-            const res = await api.get('/vendor/profile');
+            const profile = await useVendorStore.getState().fetchVendorProfile();
+            const res = { data: profile };
             setData({
                shopName: res.data.shopName,
                address: res.data.address,
@@ -136,7 +139,7 @@ const VendorProfile = () => {
       };
       const fetchSharedSettings = async () => {
          try {
-            const res = await api.get('/settings/shared');
+            const res = await getSharedSettings();
             setSupportNumber(res.data.supportWhatsApp || '');
             setPromoPricePerDay(res.data.promotionPricePerDay || 10);
             if (res.data.features) setGlobalFeatures(res.data.features);

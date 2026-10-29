@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Info, Crown, IndianRupee, Calendar, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
+import { getSharedSettings } from '../services/sharedSettings';
 import toast from 'react-hot-toast';
 
 const MembershipPlanForm = () => {
@@ -26,7 +27,7 @@ const MembershipPlanForm = () => {
     const init = async () => {
       try {
         // Check global status
-        const settingsRes = await api.get('/settings/shared');
+        const settingsRes = await getSharedSettings();
         if (settingsRes.data?.features?.membershipActive === false) {
           toast.error('Membership system is currently disabled');
           navigate('/vendor/dashboard');

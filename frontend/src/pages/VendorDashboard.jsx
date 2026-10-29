@@ -150,32 +150,28 @@ const VendorDashboard = () => {
     }
   };
 
+  // Runs once on mount. It used to depend on [socket], which changes from null
+  // to the connection right after mount and fetched the dashboard twice.
   useEffect(() => {
     handleFetch();
 
-    // 📡 Real-time Refresh: Listen for socket notifications to update dashboard data
+    // 📡 Real-time Refresh: Listen for socket notifications to update dashboard data.
+    // Debounced, and only the dashboard bundle + bookings are refreshed: a burst
+    // of notifications used to trigger a full reload of every section each time.
+    let refreshTimer = null;
     const handleRealtimeUpdate = (event) => {
       const notification = event.detail;
       // Refresh dashboard if it's a booking related notification
       if (['NEW_BOOKING', 'BOOKING_CANCELLED', 'BOOKING_RESCHEDULED', 'STAFF_ASSIGNED'].includes(notification.type)) {
         console.log('[DASHBOARD-REFRESH] Refreshing due to notification:', notification.type);
-        handleFetch(true);
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => {
+          useVendorStore.getState().refreshDashboardAndBookings();
+        }, 1500);
       }
     };
 
     window.addEventListener('new-socket-notification', handleRealtimeUpdate);
-
-    // 📡 Real-time Status Sync
-    if (socket) {
-      socket.on('SHOP_STATUS_UPDATED', (data) => {
-        if (data.isShopOpen !== undefined) {
-          useVendorStore.getState().setShopStatus(data.isShopOpen);
-          toast(data.isShopOpen ? 'Shop is now ONLINE' : 'Shop is now OFFLINE', {
-            id: 'shop-status-sync'
-          });
-        }
-      });
-    }
 
     const timer = setInterval(() => {
       setShowWalletValue((prev) => !prev);
@@ -183,9 +179,27 @@ const VendorDashboard = () => {
 
     return () => {
       window.removeEventListener('new-socket-notification', handleRealtimeUpdate);
-      if (socket) socket.off('SHOP_STATUS_UPDATED');
+      clearTimeout(refreshTimer);
       clearInterval(timer);
     };
+  }, []);
+
+  // 📡 Real-time Status Sync. The socket is shared app-wide, so remove only this
+  // component's handler, not every SHOP_STATUS_UPDATED listener.
+  useEffect(() => {
+    if (!socket) return undefined;
+
+    const handleShopStatus = (data) => {
+      if (data.isShopOpen !== undefined) {
+        useVendorStore.getState().setShopStatus(data.isShopOpen);
+        toast(data.isShopOpen ? 'Shop is now ONLINE' : 'Shop is now OFFLINE', {
+          id: 'shop-status-sync'
+        });
+      }
+    };
+
+    socket.on('SHOP_STATUS_UPDATED', handleShopStatus);
+    return () => socket.off('SHOP_STATUS_UPDATED', handleShopStatus);
   }, [socket]);
 
   useEffect(() => {

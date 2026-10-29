@@ -57,14 +57,9 @@ const VendorBookings = () => {
   const handleFetch = async (force = false) => {
     try {
       const params = { status };
-      let finalForce = force;
-      if (!force && lastBookingParams) {
-        const isParamsEqual = JSON.stringify(params) === JSON.stringify(lastBookingParams);
-        if (isParamsEqual) {
-          finalForce = 'silent';
-        }
-      }
-      await fetchBookings(params, finalForce);
+      // Non-forced: for the same list the store refreshes silently (no loader)
+      // and skips the request while the cached list is still fresh.
+      await fetchBookings(params, force);
     } catch (err) {
       toast.error('Failed to load bookings');
     }

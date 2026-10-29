@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, MessageSquare, Trash2, AlertTriangle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
+import { getSharedSettings } from '../services/sharedSettings';
 import toast from 'react-hot-toast';
 import Loader from '../components/Loader';
 import { useAuthStore } from '../store/authStore';
@@ -23,7 +24,7 @@ const VendorSupport = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await api.get('/settings/shared');
+        const res = await getSharedSettings();
         setSupportSettings({
           supportWhatsApp: res.data?.supportWhatsApp || '',
           supportPhone: res.data?.supportPhone || ''

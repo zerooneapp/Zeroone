@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import VendorLoader from '../components/VendorLoader';
 import NotificationDrawer from '../components/NotificationDrawer';
 import { cn } from '../utils/cn';
-import { useVendorStore } from '../store/vendorStore';
+import { useVendorStore, runWhenIdle } from '../store/vendorStore';
 import useNotificationStore from '../store/notificationStore';
 
 import useSocket from '../hooks/useSocket';
@@ -27,19 +27,26 @@ const VendorLayout = () => {
 
   useSocket(user?._id);
 
+  // The loyal-customers list is large (~200KB) and no layout element needs it
+  // at first paint, so warm it up only once the page is idle.
   useEffect(() => {
     if (role === 'vendor') {
-      fetchClients().catch(() => {});
+      runWhenIdle(() => { fetchClients().catch(() => {}); });
     }
   }, [role, fetchClients]);
 
+  // Depend on the user id, not the user object: /auth/me replaces the object
+  // with an identical user, which re-ran this effect and fetched again.
+  const userId = user?._id;
   useEffect(() => {
-    if (!user || role !== 'vendor') return undefined;
+    if (!userId || role !== 'vendor') return undefined;
 
     fetchNotifications();
-    const refreshTimer = setInterval(fetchNotifications, 30000);
+    // New notifications arrive in real time over the socket; this poll is only
+    // a safety net (e.g. after a dropped connection), so 2 minutes is enough.
+    const refreshTimer = setInterval(fetchNotifications, 2 * 60 * 1000);
     return () => clearInterval(refreshTimer);
-  }, [user, role, fetchNotifications]);
+  }, [userId, role, fetchNotifications]);
 
   const isIOS = React.useMemo(() => {
     return typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);

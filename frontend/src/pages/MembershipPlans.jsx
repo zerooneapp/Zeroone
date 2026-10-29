@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Crown, Calendar, Info, Users, Phone, ShieldCheck, Clock, CheckCircle2, XCircle, Trash2, AlertTriangle, Share2, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
+import { getSharedSettings } from '../services/sharedSettings';
 import toast from 'react-hot-toast';
 import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import { useAuthStore } from '../store/authStore';
@@ -59,7 +60,7 @@ const MembershipPlans = () => {
       if (showLoading) setLoading(true);
       
       // Check global status
-      const settingsRes = await api.get('/settings/shared');
+      const settingsRes = await getSharedSettings();
       const isMembActive = settingsRes.data?.features?.membershipActive !== false;
       setGlobalMembershipActive(isMembActive);
 

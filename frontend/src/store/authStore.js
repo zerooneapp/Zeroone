@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '../services/api';
 
+let restoreSessionInFlight = null;
+
 export const useAuthStore = create(
   persist(
     (set, get) => ({
@@ -231,7 +233,11 @@ export const useAuthStore = create(
         }
       },
 
+      // Concurrent calls share one run, so /auth/me and the vendor status sync
+      // are not requested twice when two callers restore at the same time.
       restoreSession: async () => {
+        if (restoreSessionInFlight) return restoreSessionInFlight;
+        restoreSessionInFlight = (async () => {
         const { token, user } = get();
         if (!token) {
           set({ isInitialized: true, loading: false });
@@ -261,6 +267,8 @@ export const useAuthStore = create(
         } finally {
           set({ loading: false, isInitialized: true });
         }
+        })().finally(() => { restoreSessionInFlight = null; });
+        return restoreSessionInFlight;
       },
 
       updateUser: (updatedUser) => {
