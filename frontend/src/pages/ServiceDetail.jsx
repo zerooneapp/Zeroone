@@ -171,15 +171,14 @@ const ServiceDetail = () => {
     }
     const imgs = [
       vendor.shopImage,
-      ...(vendor.gallery || []),
-      ...(services.flatMap(s => s.images || []))
+      ...(vendor.gallery || [])
     ].filter(Boolean);
     const uniqueImgs = Array.from(new Set(imgs));
     uniqueImgs.slice(0, 10).forEach(img => {
       list.push({ type: 'image', url: img });
     });
     return list;
-  }, [vendor, services]);
+  }, [vendor]);
 
   const handleLightboxScroll = (e) => {
     const scrollLeft = e.target.scrollLeft;

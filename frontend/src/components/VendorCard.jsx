@@ -15,6 +15,7 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
     vendor.serviceType === 'home' ||
     vendor.serviceType === 'both' ||
     (vendor.services || []).some((service) => service.type === 'home' || service.type === 'both');
+  const cardImage = vendor.featuredImage || vendor.shopImage || vendor.galleryImages?.[0] || vendor.gallery?.[0] || '';
 
   return (
     <Card
@@ -25,9 +26,9 @@ const VendorCard = ({ vendor, variant = 'full' }) => {
     >
       {/* Top: Image HUB */}
       <div className="relative w-full aspect-[16/5.2] min-h-[110px] overflow-hidden bg-slate-100 dark:bg-gray-800/80 flex items-center justify-center">
-        {(vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage) ? (
+        {cardImage ? (
           <img
-            src={vendor.featuredImage || vendor.serviceImage || vendor.images?.[0] || vendor.shopImage}
+            src={cardImage}
             alt={vendor.shopName}
             className="w-full h-full object-cover opacity-90 transition-transform duration-700"
             onError={(e) => { e.target.style.display = 'none'; }}

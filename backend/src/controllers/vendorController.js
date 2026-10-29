@@ -30,6 +30,15 @@ const getOperationalShopOpen = async (vendor) => (
   vendor.isShopOpen || await hasLegacyShopOfflineClosure(vendor._id)
 );
 
+const getPublicFeaturedImage = (vendor) => {
+  const vendorImages = [
+    vendor.shopImage,
+    ...(vendor.galleryImages || [])
+  ].filter(Boolean);
+
+  return vendorImages.includes(vendor.featuredImage) ? vendor.featuredImage : '';
+};
+
 const buildPublicVendorResponse = (vendor, extra = {}) => {
   return {
     _id: vendor._id,
@@ -38,7 +47,7 @@ const buildPublicVendorResponse = (vendor, extra = {}) => {
     location: vendor.location,
     address: vendor.address,
     shopImage: vendor.shopImage,
-    featuredImage: vendor.featuredImage || '',
+    featuredImage: getPublicFeaturedImage(vendor),
     galleryImages: vendor.galleryImages || [],
     gallery: vendor.galleryImages || [],
     shopVideo: vendor.shopVideo || '',
@@ -421,7 +430,7 @@ const getNearbyVendors = async (req, res) => {
         price: mainPrice,
         discountedPrice: discountedPrice < mainPrice ? Math.round(discountedPrice) : null,
         offerLabel,
-        serviceImage: v.featuredImage || primaryService?.image || primaryService?.images?.[0] || v.shopImage || '',
+        serviceImage: getPublicFeaturedImage(v) || v.shopImage || v.galleryImages?.[0] || '',
         serviceType: primaryService?.type || 'shop',
         serviceCount: allServices.length,
         services: allServices
