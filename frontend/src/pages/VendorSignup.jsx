@@ -12,6 +12,7 @@ import Input from '../components/Input';
 import toast from 'react-hot-toast';
 
 import { useSignupStore } from '../store/signupStore';
+import { compressImage } from '../utils/compressImage';
 
 const VendorSignup = () => {
   const navigate = useNavigate();
@@ -101,12 +102,19 @@ const VendorSignup = () => {
         localStorage.setItem('activeVendorId', newVendorId);
       }
 
-      // 3. Upload Media
+      // 3. Upload Media (compressed first: raw camera photos can exceed the
+      // upload size limits and fail the whole request)
+      const [shopImage, vendorPhoto, aadhaarFront, aadhaarBack] = await Promise.all([
+        files.shopImage && formData.serviceMode === 'shop' ? compressImage(files.shopImage) : null,
+        files.vendorPhoto ? compressImage(files.vendorPhoto) : null,
+        files.aadhaarFront ? compressImage(files.aadhaarFront) : null,
+        files.aadhaarBack ? compressImage(files.aadhaarBack) : null
+      ]);
       const mediaData = new FormData();
-      if (files.shopImage && formData.serviceMode === 'shop') mediaData.append('shopImage', files.shopImage);
-      if (files.vendorPhoto) mediaData.append('vendorPhoto', files.vendorPhoto);
-      if (files.aadhaarFront) mediaData.append('aadhaarFront', files.aadhaarFront);
-      if (files.aadhaarBack) mediaData.append('aadhaarBack', files.aadhaarBack);
+      if (shopImage) mediaData.append('shopImage', shopImage);
+      if (vendorPhoto) mediaData.append('vendorPhoto', vendorPhoto);
+      if (aadhaarFront) mediaData.append('aadhaarFront', aadhaarFront);
+      if (aadhaarBack) mediaData.append('aadhaarBack', aadhaarBack);
 
       await api.post('/vendor/upload-docs', mediaData, {
         headers: { 

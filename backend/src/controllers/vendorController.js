@@ -118,6 +118,100 @@ const registerVendor = async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+const VENDOR_MEDIA_LABELS = {
+  aadhaarFront: 'Aadhaar Front', aadhaarBack: 'Aadhaar Back', vendorPhoto: 'Profile Photo',
+  shopImage: 'Shop Image', panCard: 'PAN Card', gstCertificate: 'GST Certificate',
+  shopRegistration: 'Shop Registration', gallery: 'Gallery', video: 'Video'
+};
+
+const uploadToCloudinary = (fileBuffer, isVideo = false) => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      folder: 'zerone/vendors',
+      resource_type: isVideo ? 'video' : 'auto'
+    };
+    const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) reject(error); else resolve(result.secure_url);
+    });
+    uploadStream.end(fileBuffer);
+  });
+};
+
+// Uploads multer files to Cloudinary and writes the URLs onto the vendor
+// (not saved here). Shared by the partner's own upload and the admin upload.
+// Returns the files that failed so the caller can report them.
+const applyVendorMediaUploads = async (vendor, files) => {
+  const uploadTasks = [];
+  const singleFileKeys = ['aadhaarFront', 'aadhaarBack', 'panCard', 'gstCertificate', 'shopRegistration', 'shopImage', 'vendorPhoto'];
+
+  // Each task carries its field name so a failure can be reported per file.
+  singleFileKeys.forEach(key => {
+    if (files[key]) {
+      uploadTasks.push({
+        key,
+        promise: uploadToCloudinary(files[key][0].buffer).then(url => {
+          vendor[key] = url;
+        })
+      });
+    }
+  });
+
+  if (files.gallery) {
+    uploadTasks.push({
+      key: 'gallery',
+      promise: Promise.all(
+        files.gallery.map(file => uploadToCloudinary(file.buffer))
+      ).then(urls => {
+        vendor.galleryImages = [...(vendor.galleryImages || []), ...urls];
+      })
+    });
+  }
+
+  if (files.video) {
+    uploadTasks.push({
+      key: 'video',
+      promise: uploadToCloudinary(files.video[0].buffer, true).then(url => {
+        vendor.shopVideo = url;
+      })
+    });
+  }
+
+  // allSettled instead of all: one failed file (e.g. over Cloudinary's size
+  // limit) used to discard every other successfully uploaded document.
+  const results = await Promise.allSettled(uploadTasks.map(task => task.promise));
+  const failedUploads = results
+    .map((result, index) => ({ result, key: uploadTasks[index].key }))
+    .filter(({ result }) => result.status === 'rejected')
+    .map(({ result, key }) => ({ key, error: result.reason?.message || 'Upload failed' }));
+
+  if (failedUploads.length) {
+    console.error('[UploadDocsError] Partial upload failure for vendor', String(vendor._id), failedUploads);
+  }
+
+  return failedUploads;
+};
+
+const hasRequiredVendorMedia = (vendor) => {
+  const requiresShopImage = (vendor.serviceMode || 'shop') === 'shop';
+  return Boolean(
+    vendor.aadhaarFront &&
+    vendor.aadhaarBack &&
+    vendor.vendorPhoto &&
+    (!requiresShopImage || vendor.shopImage)
+  );
+};
+
+const sendUploadResult = (res, vendor, failedUploads) => {
+  if (failedUploads.length) {
+    return res.status(422).json({
+      message: `Upload failed for: ${failedUploads.map(f => VENDOR_MEDIA_LABELS[f.key] || f.key).join(', ')}. Please try again with a smaller image.`,
+      failed: failedUploads,
+      vendor
+    });
+  }
+  return res.status(200).json(vendor);
+};
+
 const uploadDocs = async (req, res) => {
   try {
     if (!req.user) {
@@ -134,61 +228,9 @@ const uploadDocs = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
     if (!req.files) return res.status(400).json({ message: 'No files' });
 
-    const uploadToCloudinary = (fileBuffer, isVideo = false) => {
-      return new Promise((resolve, reject) => {
-        const options = {
-          folder: 'zerone/vendors',
-          resource_type: isVideo ? 'video' : 'auto'
-        };
-        const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
-          if (error) reject(error); else resolve(result.secure_url);
-        });
-        uploadStream.end(fileBuffer);
-      });
-    };
+    const failedUploads = await applyVendorMediaUploads(vendor, req.files);
 
-    const files = req.files;
-    const uploadTasks = [];
-
-    const singleFileKeys = ['aadhaarFront', 'aadhaarBack', 'panCard', 'gstCertificate', 'shopRegistration', 'shopImage', 'vendorPhoto'];
-    
-    singleFileKeys.forEach(key => {
-      if (files[key]) {
-        uploadTasks.push(
-          uploadToCloudinary(files[key][0].buffer).then(url => {
-            vendor[key] = url;
-          })
-        );
-      }
-    });
-
-    if (files.gallery) {
-      const galleryTask = Promise.all(
-        files.gallery.map(file => uploadToCloudinary(file.buffer))
-      ).then(urls => {
-        vendor.galleryImages = [...(vendor.galleryImages || []), ...urls];
-      });
-      uploadTasks.push(galleryTask);
-    }
-
-    if (files.video) {
-      uploadTasks.push(
-        uploadToCloudinary(files.video[0].buffer, true).then(url => {
-          vendor.shopVideo = url;
-        })
-      );
-    }
-
-    await Promise.all(uploadTasks);
-
-    const requiresShopImage = (vendor.serviceMode || 'shop') === 'shop';
-    const hasRequiredMedia = 
-      vendor.aadhaarFront && 
-      vendor.aadhaarBack && 
-      vendor.vendorPhoto && 
-      (!requiresShopImage || vendor.shopImage);
-
-    if (hasRequiredMedia && !vendor.isProfileComplete) {
+    if (hasRequiredVendorMedia(vendor) && !vendor.isProfileComplete) {
       vendor.isProfileComplete = true;
       
       // Update role and notify admins ONLY when profile is first completed
@@ -209,10 +251,35 @@ const uploadDocs = async (req, res) => {
     }
 
     await vendor.save();
-    res.status(200).json(vendor);
-  } catch (error) { 
+    return sendUploadResult(res, vendor, failedUploads);
+  } catch (error) {
     console.error('[UploadDocsError]', error);
     res.status(500).json({ message: error.message }); 
+  }
+};
+
+// Admin uploads/replaces a partner's documents (e.g. when the partner's own
+// upload failed during signup). No admin notification: the admin did it.
+const adminUploadVendorDocs = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.params.id).populate('ownerId', 'name phone image');
+    if (!vendor) return res.status(404).json({ message: 'Partner not found' });
+    if (!req.files || !Object.keys(req.files).length) return res.status(400).json({ message: 'No files' });
+
+    const failedUploads = await applyVendorMediaUploads(vendor, req.files);
+
+    if (hasRequiredVendorMedia(vendor) && !vendor.isProfileComplete) {
+      vendor.isProfileComplete = true;
+      const ownerId = vendor.ownerId?._id || vendor.ownerId;
+      if (ownerId) await User.findByIdAndUpdate(ownerId, { role: 'vendor' });
+    }
+
+    await vendor.save();
+    console.log('[AdminUploadDocs] Admin', String(req.user?._id), 'updated documents for vendor', String(vendor._id));
+    return sendUploadResult(res, vendor, failedUploads);
+  } catch (error) {
+    console.error('[AdminUploadDocsError]', error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -1608,6 +1675,7 @@ const getVendorDashboardBundle = async (req, res) => {
 module.exports = {
   registerVendor,
   uploadDocs,
+  adminUploadVendorDocs,
   getVendorProfile,
   getNearbyVendors,
   updateShopStatus,

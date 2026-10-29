@@ -18,6 +18,8 @@ const {
   getAdminReviews, approveReview, approveAllReviews, deleteReview
 } = require('../controllers/reviewController');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
+const { adminUploadVendorDocs } = require('../controllers/vendorController');
 
 const router = express.Router();
 
@@ -37,6 +39,19 @@ router.patch('/vendors/:id/block', toggleBlockVendor);
 router.patch('/vendors/:id/toggle-active', toggleVendorActive);
 router.patch('/vendors/:id/add-balance', addBalance);
 router.patch('/vendors/:id/extend-trial', extendVendorFreeTrial);
+router.post(
+  '/vendors/:id/documents',
+  upload.fields([
+    { name: 'aadhaarFront', maxCount: 1 },
+    { name: 'aadhaarBack', maxCount: 1 },
+    { name: 'vendorPhoto', maxCount: 1 },
+    { name: 'shopImage', maxCount: 1 },
+    { name: 'panCard', maxCount: 1 },
+    { name: 'gstCertificate', maxCount: 1 },
+    { name: 'shopRegistration', maxCount: 1 }
+  ]),
+  adminUploadVendorDocs
+);
 router.delete('/vendors/:id', deleteVendor);
 
 // Withdrawal Management

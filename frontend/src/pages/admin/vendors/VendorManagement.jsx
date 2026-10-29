@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search, RefreshCw, ChevronRight, ChevronDown, Store, User, MapPin,
   CreditCard, Wallet, Zap, Shield, CheckCircle, XCircle, Ban,
-  Plus, History, TrendingUp, Eye, MousePointer2, AlertCircle, Trash2
+  Plus, History, TrendingUp, Eye, MousePointer2, AlertCircle, Trash2, Upload, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
 import { cn } from '../../../utils/cn';
+import { compressImage } from '../../../utils/compressImage';
 import dayjs from 'dayjs';
 
 const VendorManagement = () => {
@@ -17,6 +18,7 @@ const VendorManagement = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [minimumWalletThreshold, setMinimumWalletThreshold] = useState(100);
   const [freeTrialDays, setFreeTrialDays] = useState(7);
+  const [uploadingDoc, setUploadingDoc] = useState('');
   const [vendorInsights, setVendorInsights] = useState(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insightsRange, setInsightsRange] = useState(() => {
@@ -104,6 +106,40 @@ const VendorManagement = () => {
       setSelectedVendor(nextVendor || fallbackVendor || null);
     } catch {
       setSelectedVendor(fallbackVendor || null);
+    }
+  };
+
+  // Admin uploads/replaces one partner document (e.g. when the partner's own
+  // upload failed during signup).
+  const handleDocUpload = async (field, file) => {
+    if (!file || !selectedVendor?._id) return;
+    const vendorId = selectedVendor._id;
+    const docFields = ['aadhaarFront', 'aadhaarBack', 'vendorPhoto', 'shopImage', 'panCard', 'gstCertificate', 'shopRegistration', 'isProfileComplete'];
+    const applyVendorDocs = (updated) => {
+      if (!updated) return;
+      const patch = docFields.reduce((acc, key) => {
+        if (updated[key] !== undefined) acc[key] = updated[key];
+        return acc;
+      }, {});
+      setSelectedVendor((prev) => (prev?._id === vendorId ? { ...prev, ...patch } : prev));
+      setVendors((prev) => prev.map((v) => (v._id === vendorId ? { ...v, ...patch } : v)));
+    };
+
+    try {
+      setUploadingDoc(field);
+      const formData = new FormData();
+      formData.append(field, await compressImage(file));
+      const res = await api.post(`/admin/vendors/${vendorId}/documents`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      applyVendorDocs(res.data);
+      toast.success('Document uploaded');
+    } catch (error) {
+      // 422 = some file failed, but the response still carries the saved vendor.
+      applyVendorDocs(error.response?.data?.vendor);
+      toast.error(error.response?.data?.message || 'Document upload failed');
+    } finally {
+      setUploadingDoc('');
     }
   };
 
@@ -591,8 +627,12 @@ const VendorManagement = () => {
                     {selectedVendor.panCard && <DocumentTile title="PAN Card" src={selectedVendor.panCard} />}
                     {selectedVendor.gstCertificate && <DocumentTile title="GST Certificate" src={selectedVendor.gstCertificate} />}
                     {selectedVendor.shopRegistration && <DocumentTile title="Shop Registration" src={selectedVendor.shopRegistration} />}
-                    <DocumentTile title="Aadhaar Front" src={selectedVendor.aadhaarFront} />
-                    <DocumentTile title="Aadhaar Back" src={selectedVendor.aadhaarBack} />
+                    <DocumentTile title="Aadhaar Front" src={selectedVendor.aadhaarFront} field="aadhaarFront" onUpload={handleDocUpload} uploading={uploadingDoc === 'aadhaarFront'} />
+                    <DocumentTile title="Aadhaar Back" src={selectedVendor.aadhaarBack} field="aadhaarBack" onUpload={handleDocUpload} uploading={uploadingDoc === 'aadhaarBack'} />
+                    <DocumentTile title="Profile Photo" src={selectedVendor.vendorPhoto} field="vendorPhoto" onUpload={handleDocUpload} uploading={uploadingDoc === 'vendorPhoto'} />
+                    {(selectedVendor.serviceMode || 'shop') === 'shop' && (
+                      <DocumentTile title="Shop Image" src={selectedVendor.shopImage} field="shopImage" onUpload={handleDocUpload} uploading={uploadingDoc === 'shopImage'} />
+                    )}
                   </div>
                 </Section>
 
@@ -765,13 +805,49 @@ const ActionButton = ({ icon: Icon, label, color, onClick, active, disabled, too
   );
 };
 
-const DocumentTile = ({ title, src }) => {
+// Upload / replace control shown when the tile has an onUpload handler.
+const DocumentUploadButton = ({ title, field, onUpload, uploading, hasFile }) => (
+  <label
+    className={cn(
+      'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all',
+      uploading
+        ? 'opacity-60 cursor-wait border-slate-200 dark:border-gray-700 text-slate-400'
+        : 'cursor-pointer border-primary/20 text-primary dark:text-white dark:border-gray-600 hover:bg-primary/5 active:scale-95'
+    )}
+    title={`${hasFile ? 'Replace' : 'Upload'} ${title}`}
+  >
+    {uploading ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} strokeWidth={3} />}
+    {uploading ? 'Uploading' : hasFile ? 'Replace' : 'Upload'}
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      disabled={uploading}
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        e.target.value = ''; // allow choosing the same file again
+        if (file) onUpload(field, file);
+      }}
+    />
+  </label>
+);
+
+const DocumentTile = ({ title, src, field, onUpload, uploading = false }) => {
+  const header = (
+    <div className="flex items-center justify-between gap-2 px-1">
+      <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest">{title}</p>
+      {onUpload && (
+        <DocumentUploadButton title={title} field={field} onUpload={onUpload} uploading={uploading} hasFile={Boolean(src)} />
+      )}
+    </div>
+  );
+
   if (!src) {
     return (
       <div className="space-y-2">
-        <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1">{title}</p>
+        {header}
         <div className="h-40 bg-slate-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-slate-200 dark:border-gray-700 flex items-center justify-center text-[10px] font-black text-slate-400 capitalize leading-tight text-center p-4">
-          {title} Missing
+          {uploading ? 'Uploading...' : `${title} Missing`}
         </div>
       </div>
     );
@@ -779,7 +855,7 @@ const DocumentTile = ({ title, src }) => {
 
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-black text-slate-500 capitalize tracking-widest px-1">{title}</p>
+      {header}
       <a href={src} target="_blank" rel="noreferrer" className="block h-40 bg-slate-50 dark:bg-gray-800 rounded-xl border border-slate-100 dark:border-gray-700 overflow-hidden group relative active:scale-[0.98] transition-all">
         <img src={src} alt={title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
         <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
