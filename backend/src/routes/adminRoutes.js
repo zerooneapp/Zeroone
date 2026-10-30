@@ -102,10 +102,10 @@ router.post('/broadcast', broadcastNotification);
 router.post('/notify-low-balance', notifyLowBalance);
 
 // Super Admin & Admin Access Management
-router.get('/admins', authorize('super_admin'), getAdminAccounts);
-router.post('/admins', authorize('super_admin'), createAdminAccount);
-router.patch('/admins/:id/block', authorize('super_admin'), toggleAdminAccountBlock);
-router.delete('/admins/:id', authorize('super_admin'), deleteAdminAccount);
+router.get('/admins', authorize('admin', 'super_admin'), getAdminAccounts);
+router.post('/admins', authorize('admin', 'super_admin'), createAdminAccount);
+router.patch('/admins/:id/block', authorize('admin', 'super_admin'), toggleAdminAccountBlock);
+router.delete('/admins/:id', authorize('admin', 'super_admin'), deleteAdminAccount);
 router.patch('/profile', updateAdminProfile);
 
 module.exports = router;

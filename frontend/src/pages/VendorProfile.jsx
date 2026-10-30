@@ -69,7 +69,8 @@ const VendorProfile = () => {
       workingHours: { start: '09:00 AM', end: '09:00 PM' },
       weeklyOff: [],
       location: null,
-      featuredImage: ''
+      featuredImage: '',
+      publicContactNumber: ''
    });
    const [locationLoading, setLocationLoading] = useState(false);
    const [currentMedia, setCurrentMedia] = useState(null);
@@ -128,7 +129,8 @@ const VendorProfile = () => {
                serviceMode: res.data.serviceMode || 'shop',
                workingHours: res.data.workingHours || { start: '09:00 AM', end: '09:00 PM' },
                weeklyOff: res.data.weeklyOff || [],
-               location: res.data.location
+               location: res.data.location,
+               publicContactNumber: res.data.publicContactNumber || ''
             });
             setCurrentMedia(res.data);
          } catch (err) {
@@ -842,6 +844,22 @@ const VendorProfile = () => {
                               className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-[#00246b]/10"
                               placeholder="Enter shop name"
                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                           <label className="text-[9px] font-black capitalize text-gray-400 ml-1 tracking-widest">Customer/Reception Contact Number</label>
+                           <input
+                              type="tel"
+                              inputMode="numeric"
+                              maxLength={10}
+                              value={data.publicContactNumber}
+                              onChange={(e) => setData({ ...data, publicContactNumber: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                              className="w-full py-2 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-900 dark:text-white shadow-sm transition-all focus:ring-2 focus:ring-[#00246b]/10"
+                              placeholder="10-digit number shown to customers"
+                           />
+                           <p className="text-[8px] font-semibold text-slate-400 ml-1">
+                              Only this number will be visible to customers; staff and owner numbers stay private.
+                           </p>
                         </div>
 
                         <div className="space-y-1.5">

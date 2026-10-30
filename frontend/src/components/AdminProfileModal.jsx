@@ -5,8 +5,18 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 
+const SUB_ADMIN_TYPES = [
+  { value: 'general', label: 'General Admin' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'support', label: 'Support' },
+  { value: 'content', label: 'Content' },
+  { value: 'marketing', label: 'Marketing' }
+];
+
 const AdminProfileModal = ({ isOpen, onClose }) => {
   const { user, setUser } = useAuthStore();
+  const canCreateAdmin = ['admin', 'super_admin'].includes(user?.role);
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'create'
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +33,8 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
     name: '',
     phone: '',
     password: '',
-    email: ''
+    email: '',
+    adminType: 'general'
   });
 
   const handlePhoneChange = (type, value) => {
@@ -65,11 +76,28 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
 
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
+
+    if (!canCreateAdmin) {
+      return toast.error('Only admins can create admin accounts');
+    }
+
+    const name = adminData.name.trim();
+    const phone = adminData.phone.trim();
+    if (!name || !/^\d{10}$/.test(phone) || adminData.password.length < 8) {
+      return toast.error('Name, 10-digit phone, and 8+ character password are required');
+    }
+
     try {
       setLoading(true);
-      await api.post('/admin/admins', adminData);
+      await api.post('/admin/admins', {
+        ...adminData,
+        name,
+        phone,
+        email: adminData.email.trim(),
+        adminType: adminData.adminType
+      });
       toast.success('New Admin created successfully');
-      setAdminData({ name: '', phone: '', password: '', email: '' });
+      setAdminData({ name: '', phone: '', password: '', email: '', adminType: 'general' });
       setActiveTab('profile');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Creation failed');
@@ -133,21 +161,23 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
               <User size={12} />
               Profile
             </button>
-            <button
-              onClick={() => setActiveTab('create')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
-                activeTab === 'create'
-                  ? 'bg-white dark:bg-gray-900 text-primary shadow-sm dark:text-white border border-gray-100/50 dark:border-gray-700/50'
-                  : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              <UserPlus size={12} />
-              New Admin
-            </button>
+            {canCreateAdmin && (
+              <button
+                onClick={() => setActiveTab('create')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                  activeTab === 'create'
+                    ? 'bg-white dark:bg-gray-900 text-primary shadow-sm dark:text-white border border-gray-100/50 dark:border-gray-700/50'
+                    : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                <UserPlus size={12} />
+                New Admin
+              </button>
+            )}
           </div>
 
           <div className="p-5 pt-0">
-            {activeTab === 'profile' ? (
+            {activeTab === 'profile' || !canCreateAdmin ? (
               <form onSubmit={handleUpdateProfile} className="space-y-3">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Full Name</label>
@@ -220,7 +250,7 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleCreateAdmin} className="space-y-3">
+              <form onSubmit={handleCreateAdmin} noValidate className="space-y-3">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Full Name</label>
                   <div className="relative">
@@ -234,6 +264,19 @@ const AdminProfileModal = ({ isOpen, onClose }) => {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1 tracking-widest">Sub-admin Type</label>
+                  <select
+                    value={adminData.adminType}
+                    onChange={(e) => setAdminData({ ...adminData, adminType: e.target.value })}
+                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-none rounded-xl py-2.5 px-4 text-[13px] font-bold focus:ring-2 focus:ring-primary/20 dark:text-white transition-all outline-none"
+                  >
+                    {SUB_ADMIN_TYPES.map((type) => (
+                      <option key={type.value} value={type.value}>{type.label}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-1">

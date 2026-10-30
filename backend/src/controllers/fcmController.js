@@ -1,7 +1,6 @@
 const User = require('../models/User');
 const Staff = require('../models/Staff');
 const NotificationService = require('../services/notificationService');
-const { getIO } = require('../services/socketService');
 
 const saveFcmToken = async (req, res) => {
     try {
@@ -43,32 +42,21 @@ const saveFcmToken = async (req, res) => {
             ? 'fcmTokenMobile'
             : 'fcmTokens';
 
-        // Use an atomic update instead of document.save(). Multiple tabs or
-        // React StrictMode can register the same FCM token simultaneously;
-        // document.save() then races on the User version and returns 500.
-        //
-        // Single active device per account: the newest token replaces every
-        // older one (web and mobile), so a push can only reach one device and
-        // a stale token can never produce a duplicate notification.
+        // Keep web and mobile tokens independently. A user can be signed in
+        // on the website and the native app at the same time, so registering
+        // one platform must not remove the other platform's token.
+        // Use an atomic update because multiple tabs/retries can register the
+        // same token simultaneously.
         const otherField = tokenField === 'fcmTokens' ? 'fcmTokenMobile' : 'fcmTokens';
-        const hadOtherDevice = [...(entity.fcmTokens || []), ...(entity.fcmTokenMobile || [])]
-            .some((existing) => existing && existing !== normalizedToken);
-
         await entity.constructor.updateOne(
             { _id: entity._id },
-            { $set: { [tokenField]: [normalizedToken], [otherField]: [] } }
-        );
-
-        // Log the previous device out. The new device gets the same event, so
-        // the payload names the token that must stay logged in.
-        if (hadOtherDevice) {
-            try {
-                getIO().to(String(actor._id)).emit('FORCE_LOGOUT', { exceptToken: normalizedToken });
-                console.log('[FCM-DEBUG] Previous device logged out for:', actor._id);
-            } catch (socketError) {
-                console.log('[FCM-DEBUG] Could not emit FORCE_LOGOUT:', socketError.message);
+            {
+                $addToSet: { [tokenField]: normalizedToken },
+                // A token belongs to only one platform field. This also
+                // repairs records created by the old replacement logic.
+                $pull: { [otherField]: normalizedToken }
             }
-        }
+        );
 
         console.log('[FCM-DEBUG] Token saved successfully for:', actor._id, tokenField);
         res.status(200).json({ message: 'Token saved successfully', platform: tokenField });

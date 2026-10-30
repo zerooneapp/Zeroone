@@ -168,9 +168,15 @@ const BookingStatusDetails = () => {
               </div>
             </div>
 
-            {booking.canContact && (
-              <div className="flex gap-2">
-                <a href={`tel:${booking.staffId?.phone}`} className="p-2.5 bg-[#00246b]/10 text-[#00246b] rounded-xl border border-[#00246b]/20 shadow-sm active:scale-90 transition-all">
+            {booking.canContact && booking.vendorId?.publicContactNumber && (
+              <div className="flex items-center gap-2">
+                <div className="text-right leading-none">
+                  <p className="text-[7px] font-black uppercase tracking-widest text-slate-400">Reception</p>
+                  <a href={`tel:${booking.vendorId.publicContactNumber}`} className="text-[10px] font-black text-[#00246b] dark:text-blue-400 tracking-tight">
+                    +91 {booking.vendorId.publicContactNumber}
+                  </a>
+                </div>
+                <a href={`tel:${booking.vendorId.publicContactNumber}`} aria-label="Call reception" className="p-2.5 bg-[#00246b]/10 text-[#00246b] rounded-xl border border-[#00246b]/20 shadow-sm active:scale-90 transition-all">
                   <Phone size={16} strokeWidth={3} />
                 </a>
               </div>

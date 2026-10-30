@@ -75,8 +75,6 @@ const VendorSignup = () => {
       // Fallback: If address is entered manually without GPS detection, assign default Indore coordinates to prevent blocking submission.
       formData.location = { type: 'Point', coordinates: [75.8577, 22.7196] };
     }
-    if (!files.vendorPhoto) return toast.error('Please upload partner profile photo');
-
     setLoading(true);
     try {
       // 1. Register User Record & Get Token
@@ -423,7 +421,7 @@ const VendorSignup = () => {
                 )}
 
                 <div className="space-y-1.5">
-                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Partner Profile Photo</p>
+                  <p className="px-1 text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Partner Profile Photo <span className="text-gray-300">(Optional)</span></p>
                   <label className="h-20 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-100 dark:border-white/40 flex items-center justify-between px-4 cursor-pointer transition-all shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 overflow-hidden">
                       {files.vendorPhoto ? (
@@ -435,7 +433,7 @@ const VendorSignup = () => {
                           <Upload className="text-gray-300" size={18} />
                         </div>
                       )}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{files.vendorPhoto ? 'PHOTO READY' : 'ADD OWNER PHOTO'}</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{files.vendorPhoto ? 'PHOTO READY' : 'ADD OWNER PHOTO (OPTIONAL)'}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300" />
                     <input type="file" className="hidden" onChange={(e) => setFile('vendorPhoto', e.target.files[0])} accept=".jpg,.jpeg,.png" />

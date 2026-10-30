@@ -25,7 +25,27 @@ try {
   console.error('[NOTIFICATION-SERVICE-FATAL] Firebase Admin initialization failed:', error.message);
 }
 
-const VALID_ROLES = new Set(['customer', 'vendor', 'staff', 'admin']);
+const VALID_ROLES = new Set(['customer', 'vendor', 'staff', 'admin', 'super_admin']);
+
+// Keep database/FCM work bounded while avoiding the old one-recipient-at-a-time
+// bottleneck used by broadcasts. The returned array preserves input order.
+const mapWithConcurrency = async (items, worker, limit = 20) => {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(limit, items.length);
+
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (true) {
+        const index = nextIndex++;
+        if (index >= items.length) return;
+        results[index] = await worker(items[index], index);
+      }
+    })
+  );
+
+  return results;
+};
 
 const toFcmSafeData = (data = {}) =>
   Object.entries(data).reduce((acc, [key, value]) => {
@@ -54,6 +74,25 @@ const toFcmSafeData = (data = {}) =>
     acc[key] = JSON.stringify(value);
     return acc;
   }, {});
+
+const PUSH_REQUEST_TIMEOUT_MS = 10000;
+const withTimeout = (promise, timeoutMs, label) => new Promise((resolve, reject) => {
+  const timer = setTimeout(
+    () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
+    timeoutMs
+  );
+
+  Promise.resolve(promise).then(
+    (value) => {
+      clearTimeout(timer);
+      resolve(value);
+    },
+    (error) => {
+      clearTimeout(timer);
+      reject(error);
+    }
+  );
+});
 
 class NotificationService {
   /**
@@ -199,16 +238,16 @@ class NotificationService {
       // foreground) display it again -> the same booking shows twice. Data-only
       // means exactly one display, rendered by firebase-messaging-sw.js (or
       // showForegroundNotification) using the same tag.
-      const webResponse = webTokens.length
-        ? await admin.messaging().sendEachForMulticast({
+      const webResponseTask = webTokens.length
+        ? withTimeout(admin.messaging().sendEachForMulticast({
           tokens: webTokens,
           data: { ...baseData, title: String(pushTitleText || ''), body: String(pushBodyText || '') },
           webpush: { headers: { Urgency: 'high' } }
-        })
-        : { successCount: 0, failureCount: 0, responses: [] };
+        }), PUSH_REQUEST_TIMEOUT_MS, 'Web FCM request')
+        : Promise.resolve({ successCount: 0, failureCount: 0, responses: [] });
 
       const mobileOnlyTokens = mobileTokens.filter((token) => !webTokenSet.has(token));
-      const mobileResponse = mobileOnlyTokens.length ? await admin.messaging().sendEachForMulticast({
+      const mobileResponseTask = mobileOnlyTokens.length ? withTimeout(admin.messaging().sendEachForMulticast({
         tokens: mobileOnlyTokens,
         notification: {
           title: pushTitleText,
@@ -236,7 +275,12 @@ class NotificationService {
             }
           }
         }
-      }) : { successCount: 0, failureCount: 0, responses: [] };
+      }), PUSH_REQUEST_TIMEOUT_MS, 'Mobile FCM request') : Promise.resolve({ successCount: 0, failureCount: 0, responses: [] });
+
+      const [webResponse, mobileResponse] = await Promise.all([
+        webResponseTask,
+        mobileResponseTask
+      ]);
 
       // `tokens` is [...webTokens, ...mobileTokens] (a token present in both
       // lists is dropped from the mobile side), so responses line up by index.
@@ -357,7 +401,10 @@ class NotificationService {
     vendorId = null,
     // Most notifications may retry push delivery when an in-app record exists.
     // Reminder jobs can disable that retry to guarantee one push per event.
-    sendPushWhenExisting = true
+    sendPushWhenExisting = true,
+    // Broadcasts persist in-app notifications first and let push delivery run
+    // in the background so the admin request is not held open for every user.
+    awaitPush = true
   }) {
     let resolvedRecipients = [];
 
@@ -405,8 +452,8 @@ class NotificationService {
       }
     }
 
-    const notifications = [];
-    for (const recipient of resolvedRecipients) {
+    const backgroundPushJobs = [];
+    const processRecipient = async (recipient) => {
       try {
         // Keep both names for native clients that use either notification
         // field when routing booking events.
@@ -466,43 +513,69 @@ class NotificationService {
           });
         }
         
-        notifications.push(notif);
-
         // ⚡ 2. Dispatch Real-time (Socket.io)
         if (!notificationAlreadyExists) {
           emitNotification(recipient.userId, notif);
         }
 
-        // 📲 3. Dispatch Push and await the result. The booking request must
-        // not finish before FCM has read the current token list; otherwise a
-        // short-lived/serverless process can drop the push silently.
+        // 📲 3. Dispatch Push. Normal notifications await FCM so the caller
+        // can observe delivery; broadcasts queue this work in the background.
         if (!isSilent && (!notificationAlreadyExists || sendPushWhenExisting)) {
-          const pushResult = await this._dispatchPush(recipient.userId, {
-            title: pushTitle,
-            message,
-            data: payloadData,
-            role: recipient.role // Pass role to distinguish target app
-          });
-          if (!pushResult || pushResult.successCount < 1) {
-            console.error('[PUSH-DELIVERY-FAILED]', {
-              userId: String(recipient.userId),
-              role: recipient.role,
-              type,
-              tokenCount: pushResult?.tokenCount || 0,
-              error: pushResult?.error || 'FCM returned no successful delivery'
+          const reportPushResult = (pushResult) => {
+            if (!pushResult || pushResult.successCount < 1) {
+              console.error('[PUSH-DELIVERY-FAILED]', {
+                userId: String(recipient.userId),
+                role: recipient.role,
+                type,
+                tokenCount: pushResult?.tokenCount || 0,
+                error: pushResult?.error || 'FCM returned no successful delivery'
+              });
+            }
+          };
+
+          if (awaitPush) {
+            reportPushResult(await this._dispatchPush(recipient.userId, {
+              title: pushTitle,
+              message,
+              data: payloadData,
+              role: recipient.role // Pass role to distinguish target app
+            }));
+          } else {
+            backgroundPushJobs.push(async () => {
+              try {
+                const pushResult = await this._dispatchPush(recipient.userId, {
+                  title: pushTitle,
+                  message,
+                  data: payloadData,
+                  role: recipient.role // Pass role to distinguish target app
+                });
+                reportPushResult(pushResult);
+              } catch (error) {
+                console.error('[PUSH-BACKGROUND-ERROR]', error.message);
+              }
             });
           }
         }
+
+        return notif;
       } catch (error) {
         if (error.code === 11000) {
           console.log(`[Notification-Skip] Unique constraint hit for user ${recipient.userId}`);
         } else {
           console.error('[NotificationService-Error]', error.message);
         }
+        return null;
       }
-    }
+    };
 
-    return notifications;
+    const notifications = await mapWithConcurrency(resolvedRecipients, processRecipient);
+    if (!awaitPush && backgroundPushJobs.length > 0) {
+      // Do not hold the broadcast HTTP response open for FCM. Keep the push
+      // fan-out bounded so a large audience does not overload Mongo/FCM.
+      mapWithConcurrency(backgroundPushJobs, (job) => job(), 20)
+        .catch((error) => console.error('[PUSH-BACKGROUND-QUEUE-ERROR]', error.message));
+    }
+    return notifications.filter(Boolean);
   }
 
   /**

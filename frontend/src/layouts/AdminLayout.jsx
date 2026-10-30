@@ -24,6 +24,7 @@ const AdminLayout = () => {
   const { unreadCount, fetchNotifications } = useNotificationStore();
   const currentAdmin = user || admin;
   const isSuperAdmin = currentAdmin?.role === 'super_admin';
+  const canAccessAdminManagement = ['admin', 'super_admin'].includes(currentAdmin?.role);
   const adminRoutes = [
     { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Partners", path: "/admin/vendors", icon: Store },
@@ -39,7 +40,7 @@ const AdminLayout = () => {
     { name: "Tickets", path: "/admin/tickets", icon: HelpCircle },
     { name: "Reviews", path: "/admin/reviews", icon: Star },
     { name: "Broadcast", path: "/admin/notifications/broadcast", icon: Send },
-    ...(isSuperAdmin ? [{ name: "Admin Access", path: "/admin/access", icon: Shield }] : []),
+    ...(canAccessAdminManagement ? [{ name: "Admin Access", path: "/admin/access", icon: Shield }] : []),
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 
@@ -110,8 +111,11 @@ const AdminLayout = () => {
 
         <div className="p-4 border-t border-gray-100 dark:border-gray-800">
           <button
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              const confirmed = window.confirm('Are you sure you want to logout from the admin panel?');
+              if (!confirmed) return;
+
+              await logout();
               navigate('/admin-login');
             }}
             className="w-full flex items-center gap-4 px-4 py-3.5 text-red-500 font-black text-sm capitalize tracking-wide hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all"
@@ -201,7 +205,7 @@ const AdminLayout = () => {
               <div className="text-right">
                 <p className="text-sm font-black dark:text-white capitalize group-hover:text-primary dark:group-hover:text-white transition-colors">{currentAdmin?.name || 'Admin'}</p>
                 <span className="text-[11px] font-black text-primary dark:text-white capitalize bg-primary/10 dark:bg-primary/25 px-2 py-0.5 rounded-full border border-primary/20 shadow-sm group-hover:shadow-md transition-all">
-                  {isSuperAdmin ? 'Super Admin' : 'Admin'}
+                  {isSuperAdmin ? 'Super Admin' : 'Sub Admin'}
                 </span>
               </div>
               <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center text-primary dark:text-white font-black border border-primary/10 text-base shadow-sm group-hover:bg-primary group-hover:text-white transition-all">

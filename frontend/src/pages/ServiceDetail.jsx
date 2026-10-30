@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Star, MapPin, Clock, Tag, Plus, Minus,
+  ArrowLeft, Star, MapPin, Clock, Tag, Plus, Minus, Search,
   Heart, Play, Verified, ShieldCheck, X,
   Calendar, CheckCircle2, ChevronRight, ChevronLeft, Info, AlertCircle, Share2, Loader2, Crown
 } from 'lucide-react';
@@ -102,6 +102,8 @@ const ServiceDetail = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = React.useRef(null);
   const [selectedCat, setSelectedCat] = useState('All');
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [isServiceSearchOpen, setIsServiceSearchOpen] = useState(false);
   const [categories, setCategories] = useState(() => {
     const prefetchedServices = window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.services || [];
     const prefetchedPlans = window.__PREFETCHED_DATA__?.vendorDetails?.[id]?.plans || [];
@@ -803,10 +805,19 @@ const ServiceDetail = () => {
     setIsMouseDown(false);
   };
   const filteredServices = useMemo(() => {
-    return selectedCat === 'All'
+    const categoryServices = selectedCat === 'All'
       ? services
       : services.filter((service) => normalizeCategoryValue(service.category) === normalizeCategoryValue(selectedCat));
-  }, [services, selectedCat]);
+
+    const searchValue = serviceSearch.trim().toLowerCase();
+    if (!searchValue) return categoryServices;
+
+    return categoryServices.filter((service) =>
+      [service.name, service.category]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(searchValue))
+    );
+  }, [services, selectedCat, serviceSearch]);
 
   const hasItemsFromThisVendor = cartVendor?._id === vendor?._id;
 
@@ -911,7 +922,7 @@ const ServiceDetail = () => {
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="h-48 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
+            className="h-64 sm:h-72 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
           >
             {slides.length > 0 ? (
               slides.map((slide, idx) => (
@@ -1101,7 +1112,49 @@ const ServiceDetail = () => {
       {/* Selected Services Section */}
       {selectedCat !== 'Plans' && (
         <div className="px-3 mt-4 space-y-2">
-          <SectionTitle title="Selected Services" className="mb-1" />
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <h2 className="text-[15px] font-extrabold text-[#1F2C4E] dark:text-white leading-tight">
+              Selected Services
+            </h2>
+            {isServiceSearchOpen ? (
+              <div className="relative w-[132px] shrink-0">
+                <Search
+                  size={13}
+                  strokeWidth={2.5}
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                />
+                <input
+                  autoFocus
+                  type="search"
+                  value={serviceSearch}
+                  onChange={(e) => setServiceSearch(e.target.value)}
+                  placeholder="Search service"
+                  aria-label="Search services"
+                  className="w-full h-8 pl-8 pr-7 rounded-xl bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 text-[9px] font-bold text-[#0B1222] dark:text-white outline-none focus:ring-2 focus:ring-[#00246b]/10 placeholder:text-slate-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServiceSearch('');
+                    setIsServiceSearchOpen(false);
+                  }}
+                  aria-label="Close service search"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                >
+                  <X size={12} strokeWidth={3} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsServiceSearchOpen(true)}
+                aria-label="Open service search"
+                className="w-8 h-8 shrink-0 rounded-xl bg-white dark:bg-gray-900 border border-[#00246b]/10 dark:border-gray-800 text-[#00246b] dark:text-white flex items-center justify-center shadow-sm active:scale-95 transition-transform"
+              >
+                <Search size={15} strokeWidth={2.5} />
+              </button>
+            )}
+          </div>
           {cartItems.length > 0 && hasItemsFromThisVendor ? 
             cartItems.map((item) => {
               const cartServiceEntry = (cartPricing?.services || []).find(
@@ -1350,6 +1403,13 @@ const ServiceDetail = () => {
                 </div>
               );
             })}
+            {filteredServices.length === 0 ? (
+              <p className="py-3 text-center text-[9px] font-bold text-slate-400">
+                {serviceSearch ? 'No matching services found' : 'No services available'}
+              </p>
+            ) : filteredServices.every((service) => cartItems.some((item) => item._id === service._id)) ? (
+              <p className="py-3 text-center text-[9px] font-bold text-slate-400">All services selected</p>
+            ) : null}
           </div>
         </div>
       )}

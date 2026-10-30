@@ -24,8 +24,10 @@ const UserMembership = require('../models/UserMembership');
 const VendorMembershipPlan = require('../models/VendorMembershipPlan');
 
 const BROADCAST_TARGETS = new Set(['all', 'customer', 'vendor', 'staff', 'admin']);
-const getStaffNotificationTarget = (staff) => staff?._id || null;
+const getStaffNotificationTarget = (staff) => staff?.userId || staff?._id || null;
 const ADMIN_ROLES = new Set(['admin', 'super_admin']);
+const ADMIN_TYPES = new Set(['general', 'operations', 'finance', 'support', 'content', 'marketing']);
+const DEFAULT_ADMIN_TYPE = 'general';
 
 const safeSendNotification = (payload) => {
   try {
@@ -45,6 +47,7 @@ const sanitizeAdminAccount = (admin) => ({
   email: admin.email,
   image: admin.image,
   role: admin.role,
+  adminType: admin.adminType || DEFAULT_ADMIN_TYPE,
   isBlocked: admin.isBlocked,
   createdAt: admin.createdAt,
   updatedAt: admin.updatedAt
@@ -147,7 +150,11 @@ const broadcastNotification = async (req, res) => {
     const recipients = [];
 
     if (targetRole === 'all' || ['customer', 'vendor', 'admin'].includes(targetRole)) {
-      const userRoles = targetRole === 'all' ? ['customer', 'vendor', 'admin'] : [targetRole];
+      const userRoles = targetRole === 'all'
+        ? ['customer', 'vendor', 'admin', 'super_admin']
+        : targetRole === 'admin'
+          ? ['admin', 'super_admin']
+          : [targetRole];
       const users = await User.find({ role: { $in: userRoles } }).select('_id role');
       recipients.push(...users.map((user) => ({
         userId: user._id,
@@ -177,17 +184,25 @@ const broadcastNotification = async (req, res) => {
       ).values()
     );
 
-    await NotificationService.sendNotification({
+    const persistedNotifications = await NotificationService.sendNotification({
       recipients: uniqueRecipients,
       type: 'BROADCAST',
       title: title.trim(),
       message: message.trim(),
-      referenceId: `BROADCAST_${Date.now()}`
+      referenceId: `BROADCAST_${Date.now()}`,
+      // Persist in-app notifications immediately; push delivery continues in
+      // the background so a large audience does not keep the admin request open.
+      awaitPush: false
     });
 
+    if (!persistedNotifications.length) {
+      return res.status(500).json({ message: 'Broadcast could not be persisted for any recipient' });
+    }
+
     res.status(200).json({
-      message: `Broadcast sent to ${uniqueRecipients.length} recipients`,
-      count: uniqueRecipients.length
+      message: `Broadcast queued for ${persistedNotifications.length} of ${uniqueRecipients.length} recipients`,
+      count: persistedNotifications.length,
+      requested: uniqueRecipients.length
     });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -222,7 +237,6 @@ const approveVendor = async (req, res) => {
       if (!vendor.aadhaarFront) missing.push('aadhaarFront');
       if (!vendor.aadhaarBack) missing.push('aadhaarBack');
       if ((vendor.serviceMode || 'shop') === 'shop' && !vendor.shopImage) missing.push('shopImage');
-      if (!vendor.vendorPhoto) missing.push('vendorPhoto');
       console.log('[DEBUG] Approval FAILED. isProfileComplete is FALSE. Missing:', missing.join(', '));
       return res.status(400).json({
         message: 'Incomplete profile',
@@ -1318,9 +1332,9 @@ const getVendorInsights = async (req, res) => {
 
 const getAdminAccounts = async (req, res) => {
   try {
-    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can manage admin access' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Only admins can view admin access' });
 
-    const { search = '', status = 'all' } = req.query;
+    const { search = '', status = 'all', adminType = 'all' } = req.query;
     const filter = { role: { $in: ['admin', 'super_admin'] } };
 
     if (search) {
@@ -1333,6 +1347,9 @@ const getAdminAccounts = async (req, res) => {
 
     if (status === 'blocked') filter.isBlocked = true;
     if (status === 'active') filter.isBlocked = false;
+    if (ADMIN_TYPES.has(adminType)) {
+      filter.adminType = adminType;
+    }
 
     const admins = await User.find(filter)
       .select('-password -otp -otpExpires')
@@ -1346,9 +1363,11 @@ const getAdminAccounts = async (req, res) => {
 
 const createAdminAccount = async (req, res) => {
   try {
-    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Unauthorized' });
+    if (!hasAdminAccess(req)) {
+      return res.status(403).json({ message: 'Only admins can create admin accounts' });
+    }
 
-    const { name, phone, password, email } = req.body || {};
+    const { name, phone, password, email, adminType = DEFAULT_ADMIN_TYPE } = req.body || {};
     if (!name?.trim() || !phone?.trim() || !password) {
       return res.status(400).json({ message: 'Name, phone and password are required' });
     }
@@ -1359,6 +1378,10 @@ const createAdminAccount = async (req, res) => {
 
     if (String(password).length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    if (!ADMIN_TYPES.has(adminType)) {
+      return res.status(400).json({ message: 'Invalid sub-admin type' });
     }
 
     const existingUser = await User.findOne({ phone: phone.trim() });
@@ -1372,6 +1395,7 @@ const createAdminAccount = async (req, res) => {
       email: email?.trim() || undefined,
       password,
       role: 'admin',
+      adminType,
       isBlocked: false
     });
 
@@ -1415,7 +1439,7 @@ const updateAdminProfile = async (req, res) => {
 
 const toggleAdminAccountBlock = async (req, res) => {
   try {
-    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can update admin access' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Only admins can update admin access' });
 
     const admin = await User.findById(req.params.id);
     if (!admin || !ADMIN_ROLES.has(admin.role)) {
@@ -1444,7 +1468,7 @@ const toggleAdminAccountBlock = async (req, res) => {
 
 const deleteAdminAccount = async (req, res) => {
   try {
-    if (!isSuperAdmin(req)) return res.status(403).json({ message: 'Only super admins can delete admin accounts' });
+    if (!hasAdminAccess(req)) return res.status(403).json({ message: 'Only admins can delete admin accounts' });
 
     const admin = await User.findById(req.params.id);
     if (!admin || !ADMIN_ROLES.has(admin.role)) {

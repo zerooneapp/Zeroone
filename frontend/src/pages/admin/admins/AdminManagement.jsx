@@ -9,13 +9,26 @@ const emptyForm = {
   name: '',
   phone: '',
   email: '',
-  password: ''
+  password: '',
+  adminType: 'general'
 };
+
+const ADMIN_TYPES = [
+  { value: 'general', label: 'General Admin' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'support', label: 'Support' },
+  { value: 'content', label: 'Content' },
+  { value: 'marketing', label: 'Marketing' }
+];
+
+const getAdminTypeLabel = (value) =>
+  ADMIN_TYPES.find((type) => type.value === value)?.label || 'General Admin';
 
 const AdminManagement = () => {
   const { user } = useAuthStore();
   const [admins, setAdmins] = useState([]);
-  const [filters, setFilters] = useState({ search: '', status: 'all' });
+  const [filters, setFilters] = useState({ search: '', status: 'all', adminType: 'all' });
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -35,7 +48,7 @@ const AdminManagement = () => {
 
   useEffect(() => {
     fetchAdmins();
-  }, [filters.search, filters.status]);
+  }, [filters.search, filters.status, filters.adminType]);
 
   const counts = useMemo(() => ({
     total: admins.length,
@@ -55,7 +68,8 @@ const AdminManagement = () => {
         name: form.name.trim(),
         phone: form.phone.trim(),
         email: form.email.trim(),
-        password: form.password
+        password: form.password,
+        adminType: form.adminType
       });
       setAdmins((prev) => [res.data, ...prev]);
       setForm(emptyForm);
@@ -96,10 +110,10 @@ const AdminManagement = () => {
     }
   };
 
-  if (user?.role !== 'super_admin') {
+  if (!['admin', 'super_admin'].includes(user?.role)) {
     return (
       <div className="rounded-3xl border border-slate-200/60 dark:border-gray-800 bg-white dark:bg-gray-900 p-10 text-center">
-        <p className="text-sm font-black uppercase tracking-[0.18em] text-slate-500">Super Admin Access Required</p>
+        <p className="text-sm font-black uppercase tracking-[0.18em] text-slate-500">Admin Access Required</p>
       </div>
     );
   }
@@ -110,7 +124,7 @@ const AdminManagement = () => {
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Admin Access</h1>
           <p className="mt-2 text-[12px] font-black uppercase tracking-[0.18em] text-slate-500">
-            Create, block, and remove platform admins
+            Create and review platform sub-admin accounts
           </p>
         </div>
         <div className="grid grid-cols-3 gap-2 w-full md:w-auto">
@@ -136,7 +150,7 @@ const AdminManagement = () => {
             <div>
               <h2 className="text-lg font-black text-slate-900 dark:text-white">Create Admin</h2>
               <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500">
-                New admins will get all admin powers except admin creation
+                Choose a type for the new sub-admin account
               </p>
             </div>
           </div>
@@ -149,17 +163,33 @@ const AdminManagement = () => {
               className="w-full rounded-2xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none"
             />
             <input
+              type="tel"
+              name="phone"
+              autoComplete="tel"
+              inputMode="numeric"
               value={form.phone}
               onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
               placeholder="Phone number"
               className="w-full rounded-2xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none"
             />
             <input
+              type="email"
+              name="email"
+              autoComplete="email"
               value={form.email}
               onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
               placeholder="Email (optional)"
               className="w-full rounded-2xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none"
             />
+            <select
+              value={form.adminType}
+              onChange={(e) => setForm((prev) => ({ ...prev, adminType: e.target.value }))}
+              className="w-full rounded-2xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none"
+            >
+              {ADMIN_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>{type.label}</option>
+              ))}
+            </select>
             <input
               type="password"
               value={form.password}
@@ -200,6 +230,16 @@ const AdminManagement = () => {
               <option value="active">Active</option>
               <option value="blocked">Blocked</option>
             </select>
+            <select
+              value={filters.adminType}
+              onChange={(e) => setFilters((prev) => ({ ...prev, adminType: e.target.value }))}
+              className="rounded-2xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none"
+            >
+              <option value="all">All Types</option>
+              {ADMIN_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>{type.label}</option>
+              ))}
+            </select>
           </div>
 
           <div className="mt-5 space-y-3">
@@ -215,6 +255,8 @@ const AdminManagement = () => {
               admins.map((admin) => {
                 const isSelf = admin._id === user?._id;
                 const isSuper = admin.role === 'super_admin';
+                const canManageAccess = ['admin', 'super_admin'].includes(user?.role);
+                const canDeleteAccess = canManageAccess;
                 return (
                   <div
                     key={admin._id}
@@ -230,13 +272,16 @@ const AdminManagement = () => {
                               ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300'
                               : 'bg-primary/10 text-primary dark:text-white'
                           )}>
-                            {isSuper ? 'Super Admin' : 'Admin'}
+                            {isSuper ? 'Super Admin' : 'Sub Admin'}
                           </span>
                           {isSelf && (
                             <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300">
                               You
                             </span>
                           )}
+                          <span className="rounded-full bg-slate-200/70 dark:bg-gray-800 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-600 dark:text-slate-300">
+                            {isSuper ? 'Primary Access' : getAdminTypeLabel(admin.adminType)}
+                          </span>
                         </div>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
                           <span>{admin.phone}</span>
@@ -246,7 +291,7 @@ const AdminManagement = () => {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {!isSuper && (
+                        {canManageAccess && !isSelf && !isSuper && (
                           <button
                             onClick={() => handleToggleBlock(admin)}
                             disabled={actionId === admin._id}
@@ -261,7 +306,7 @@ const AdminManagement = () => {
                             {admin.isBlocked ? 'Unblock' : 'Block'}
                           </button>
                         )}
-                        {!isSelf && !isSuper && (
+                        {canDeleteAccess && !isSelf && !isSuper && (
                           <button
                             onClick={() => handleDeleteAdmin(admin)}
                             disabled={actionId === admin._id}

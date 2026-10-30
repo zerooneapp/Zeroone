@@ -11,7 +11,7 @@ const {
   upsertStaffAvailabilityForDate,
   createStaffManualBooking
 } = require('../controllers/staffController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, authorize, optionalProtect } = require('../middleware/authMiddleware');
 const { isApprovedVendor } = require('../middleware/vendorMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -27,8 +27,8 @@ router.get('/profile', protect, authorize('staff'), getStaffProfile);
 router.get('/history', protect, authorize('staff'), getStaffHistory);
 router.get('/reviews', protect, authorize('staff'), getMyStaffReviews);
 router.post('/manual-booking', protect, authorize('staff'), createStaffManualBooking);
-router.get('/', listStaff);
-router.get('/:id', getStaffById);
+router.get('/', optionalProtect, listStaff);
+router.get('/:id', optionalProtect, getStaffById);
 
 // Protected routes (Vendor management)
 router.use(protect, isApprovedVendor);

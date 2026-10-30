@@ -138,8 +138,59 @@ const getVendorStaff = async (vendorId, includeInactive = false) => {
 };
 
 const updateStaff = async (vendorId, staffId, updateData) => {
+  const existingStaff = await Staff.findOne({ _id: staffId, vendorId });
+  if (!existingStaff) return null;
+
+  let linkedUser = null;
+  const nextUpdate = { ...updateData };
+
+  // Staff phone numbers are also used for staff login. Keep the Staff and
+  // User records synchronized so an edit is not overwritten on the next
+  // owner reconciliation and the staff can still log in with the new number.
+  if (nextUpdate.phone !== undefined) {
+    const normalizedPhone = String(nextUpdate.phone).replace(/\D/g, '').slice(-10);
+    if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
+      throw new Error('Enter a valid 10-digit Indian phone number');
+    }
+    nextUpdate.phone = normalizedPhone;
+
+    if (normalizedPhone !== existingStaff.phone) {
+      const duplicateStaff = await Staff.findOne({
+        _id: { $ne: staffId },
+        vendorId,
+        phone: normalizedPhone,
+        isDeleted: { $ne: true }
+      }).select('_id name');
+      if (duplicateStaff) {
+        throw new Error('This phone number is already used by another staff member');
+      }
+
+      const User = require('../models/User');
+      linkedUser = existingStaff.userId
+        ? await User.findById(existingStaff.userId)
+        : await User.findOne({ phone: existingStaff.phone });
+
+      // Older owner records may not have userId linked. Resolve the owner
+      // through the vendor so their login phone is updated as well.
+      if (!linkedUser && existingStaff.isOwner) {
+        const vendor = await Vendor.findById(vendorId).select('ownerId');
+        if (vendor?.ownerId) linkedUser = await User.findById(vendor.ownerId);
+      }
+
+      if (linkedUser) {
+        const duplicateUser = await User.findOne({
+          _id: { $ne: linkedUser._id },
+          phone: normalizedPhone
+        }).select('_id');
+        if (duplicateUser) {
+          throw new Error('This phone number is already registered to another account');
+        }
+      }
+    }
+  }
+
   // 🛡️ If staff is being re-enabled, end any active closures
-  if (updateData.isActive === true) {
+  if (nextUpdate.isActive === true) {
     const StaffClosure = require('../models/StaffClosure');
     const now = new Date();
     const activeClosures = await StaffClosure.find({
@@ -159,17 +210,22 @@ const updateStaff = async (vendorId, staffId, updateData) => {
 
   const staff = await Staff.findOneAndUpdate(
     { _id: staffId, vendorId },
-    updateData,
-    { returnDocument: 'after', runValidators: true }
+    nextUpdate,
+    { new: true, runValidators: true }
   );
 
+  if (staff && linkedUser && nextUpdate.phone !== existingStaff.phone) {
+    linkedUser.phone = nextUpdate.phone;
+    await linkedUser.save();
+  }
+
   // 🔄 Sync image to User account so staff app displays it
-  if (staff && updateData.image) {
+  if (staff && nextUpdate.image) {
     const User = require('../models/User');
     if (staff.userId) {
-      await User.findByIdAndUpdate(staff.userId, { image: updateData.image });
+      await User.findByIdAndUpdate(staff.userId, { image: nextUpdate.image });
     } else {
-      await User.findOneAndUpdate({ phone: staff.phone }, { image: updateData.image });
+      await User.findOneAndUpdate({ phone: staff.phone }, { image: nextUpdate.image });
     }
   }
 

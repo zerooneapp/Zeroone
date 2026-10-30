@@ -56,6 +56,7 @@ const buildPublicVendorResponse = (vendor, extra = {}) => {
     totalReviews: vendor.totalReviews,
     serviceLevel: vendor.serviceLevel,
     serviceMode: vendor.serviceMode || 'shop',
+    publicContactNumber: vendor.publicContactNumber || '',
     isShopOpen: vendor.isShopOpen,
     isClosedToday: vendor.isClosedToday,
     offers: vendor.offers || [],
@@ -205,7 +206,6 @@ const hasRequiredVendorMedia = (vendor) => {
   return Boolean(
     vendor.aadhaarFront &&
     vendor.aadhaarBack &&
-    vendor.vendorPhoto &&
     (!requiresShopImage || vendor.shopImage)
   );
 };
@@ -811,7 +811,7 @@ const getVendorDetail = async (req, res) => {
 
 const updateShopProfile = async (req, res) => {
   try {
-    const { workingHours, shopName, address, location, featuredImage, weeklyOff } = req.body;
+    const { workingHours, shopName, address, location, featuredImage, weeklyOff, publicContactNumber } = req.body;
     const vendor = req.vendor;
     if (!vendor) return res.status(404).json({ message: 'Partner not found' });
 
@@ -823,6 +823,17 @@ const updateShopProfile = async (req, res) => {
     if (location) vendor.location = location;
     if (featuredImage !== undefined) vendor.featuredImage = featuredImage;
     if (weeklyOff !== undefined) vendor.weeklyOff = weeklyOff;
+    if (publicContactNumber !== undefined) {
+      let normalizedPublicContact = String(publicContactNumber).replace(/\D/g, '');
+      if ((normalizedPublicContact.startsWith('91') || normalizedPublicContact.startsWith('0')) && normalizedPublicContact.length > 10) {
+        normalizedPublicContact = normalizedPublicContact.slice(-10);
+      }
+      normalizedPublicContact = normalizedPublicContact.slice(0, 10);
+      if (normalizedPublicContact && normalizedPublicContact.length !== 10) {
+        return res.status(400).json({ message: 'Reception contact must be a valid 10-digit number' });
+      }
+      vendor.publicContactNumber = normalizedPublicContact;
+    }
 
     await vendor.save();
     res.status(200).json(vendor);

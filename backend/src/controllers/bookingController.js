@@ -59,6 +59,15 @@ const formatBookingResponse = (booking, role) => {
 
   b.canContact = b.status === 'confirmed' && !isPastEnd;
 
+  if (role === 'customer') {
+    // Customers may contact the partner only through the partner-selected
+    // reception number. Never return a staff/owner personal phone number.
+    b.canContact = b.canContact && Boolean(b.vendorId?.publicContactNumber);
+    if (b.staffId && typeof b.staffId === 'object') {
+      delete b.staffId.phone;
+    }
+  }
+
   if ((role === 'staff' || role === 'vendor') && b.type !== 'home') {
     b.serviceAddress = undefined;
   }
@@ -101,7 +110,9 @@ const createBooking = async (req, res) => {
 
     const booking = await finalizeBooking(req.user._id, vendorId, staffId, serviceIds, startTime, serviceAddress, membershipId);
     // Reload to get populated staff for the response
-    const populated = await Booking.findById(booking._id).populate('staffId', 'name phone');
+    const populated = await Booking.findById(booking._id)
+      .populate('staffId', 'name image')
+      .populate('vendorId', 'shopName address publicContactNumber');
     res.status(201).json(formatBookingResponse(populated, getActorRole(req)));
   } catch (error) {
     if (error.message === 'Slot occupied') {
@@ -133,7 +144,7 @@ const getMyBookings = async (req, res) => {
 
     const bookings = await Booking.find(filter)
       .populate('userId', 'name phone image')
-      .populate('vendorId', 'shopName address')
+      .populate('vendorId', 'shopName address publicContactNumber')
       .populate('staffId', 'name phone isOwner')
       .populate('services.serviceId', 'price')
       .sort({ startTime: -1 });

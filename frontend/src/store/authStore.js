@@ -125,24 +125,24 @@ export const useAuthStore = create(
         // ✅ FIX STEP 1: Remove FCM token from backend FIRST (auth token still valid in localStorage)
         // This ensures the API call succeeds before we wipe the session
         try {
-          const { removeFCMToken } = await import('../config/firebase');
-          if (removeFCMToken) {
-            await removeFCMToken();
-          }
-
-          // removeFCMToken only knows the browser token. The native app token
-          // (fcmTokenMobile) must be removed too, or this device keeps getting
-          // the logged-out account's notifications.
-          const { getNativeFcmToken, removeTokenFromBackend } = await import('../services/fcmService');
-          const nativeToken = await getNativeFcmToken();
-          if (nativeToken) {
-            await removeTokenFromBackend(nativeToken);
-          }
-
-          // Safety net for a user-initiated logout: clear every token of this
-          // account even if the device could not report its own.
           if (!forced) {
-            await api.delete('/fcm-tokens/remove', { data: { all: true } }).catch(() => {});
+            const { removeFCMToken } = await import('../config/firebase');
+            if (removeFCMToken) {
+              await removeFCMToken();
+            }
+
+            // removeFCMToken only knows the browser token. The native app token
+            // (fcmTokenMobile) must be removed too, or this device keeps getting
+            // the logged-out account's notifications.
+            const { getNativeFcmToken, removeTokenFromBackend } = await import('../services/fcmService');
+            const nativeToken = await getNativeFcmToken();
+            if (nativeToken) {
+              await removeTokenFromBackend(nativeToken);
+            }
+
+            // Do not clear every token here. The same account may still be
+            // signed in on the other platform; remove only this device's
+            // reported web/app token(s).
           }
         } catch (e) {
           console.log('[Auth] FCM token removal during logout failed (non-critical):', e?.message);

@@ -19,6 +19,21 @@ const { getPricingPreviewForServiceIds } = require('../services/offerPricingServ
 
 const getStaffNotificationTarget = (staff) => staff?._id || null;
 
+const sanitizePublicStaff = (staff) => {
+  const staffObject = typeof staff?.toObject === 'function' ? staff.toObject() : { ...staff };
+  const {
+    phone,
+    password,
+    fcmTokens,
+    fcmTokenMobile,
+    otp,
+    otpExpires,
+    userId,
+    ...publicStaff
+  } = staffObject;
+  return publicStaff;
+};
+
 const rejectHomeServicePartnerStaffAccess = (req, res) => {
   if (req.vendor && (req.vendor.serviceMode || 'shop') === 'home') {
     res.status(403).json({ message: 'Only shop partners can manage staff' });
@@ -168,7 +183,8 @@ const listStaff = async (req, res) => {
       };
     });
 
-    res.status(200).json(finalizedStaff);
+    const isPartnerRequest = req.vendor || req.user?.role === 'vendor';
+    res.status(200).json(isPartnerRequest ? finalizedStaff : finalizedStaff.map(sanitizePublicStaff));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -266,7 +282,8 @@ const getStaffById = async (req, res) => {
     staffObj.totalEarnings = earningsResult[0]?.total || 0;
     staffObj.activeClosure = activeClosure || null;
 
-    res.status(200).json(staffObj);
+    const isPartnerRequest = req.vendor || req.user?.role === 'vendor';
+    res.status(200).json(isPartnerRequest ? staffObj : sanitizePublicStaff(staffObj));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

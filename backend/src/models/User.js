@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema({
   image: { type: String },
   password: { type: String },
   role: { type: String, enum: ['super_admin', 'admin', 'vendor', 'staff', 'customer'], default: 'customer' },
+  adminType: {
+    type: String,
+    enum: ['general', 'operations', 'finance', 'support', 'content', 'marketing'],
+    default: 'general'
+  },
   isBlocked: { type: Boolean, default: false },
   isDeleted: { type: Boolean, default: false },
   location: {

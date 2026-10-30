@@ -129,10 +129,6 @@ const StaffForm = () => {
       return toast.error('Please select at least one skill/service');
     }
 
-    if (!isEdit && !image) {
-      return toast.error('Staff photo is required to create a profile');
-    }
-
     const data = new FormData();
     data.append('name', formData.name);
     data.append('phone', formData.phone);
@@ -143,14 +139,12 @@ const StaffForm = () => {
     try {
       setLoading(true);
       if (isEdit) {
-        await api.patch(`/staff/${id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        // Let Axios/browser set the multipart boundary automatically.
+        // Manually setting this header can make multer receive an empty body.
+        await api.patch(`/staff/${id}`, data);
         toast.success('Staff profile updated');
       } else {
-        await api.post('/staff', data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/staff', data);
         toast.success('Staff onboarded successfully');
       }
       navigate('/vendor/staff');
@@ -230,6 +224,7 @@ const StaffForm = () => {
               )}
             </div>
             <input id="image-upload" type="file" hidden onChange={handleImageChange} accept="image/*" />
+            <p className="mt-2 text-[9px] font-bold uppercase tracking-widest text-slate-400">Profile photo (optional)</p>
           </section>
 
           <div className="space-y-4">

@@ -20,6 +20,9 @@ const vendorSchema = new mongoose.Schema({
   shopVideo: { type: String }, // Video URL
   featuredImage: { type: String }, // User-selected image for Discovery Page
   vendorPhoto: { type: String },
+  // Customer-facing reception/contact number. Never expose staff/owner phone
+  // numbers to customers; partners explicitly control this public number.
+  publicContactNumber: { type: String, default: '' },
   serviceMode: { type: String, enum: ['shop', 'home'], default: 'shop' },
   workingHours: {
     start: { type: String, default: '09:00 AM' },
