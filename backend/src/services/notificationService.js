@@ -153,6 +153,19 @@ class NotificationService {
       const staffDocs = await Staff.find({ $or: [{ _id: userId }, { userId }] });
       entities.push(...staffDocs);
 
+      // Staff can authenticate through a linked User account. Broadcasts may
+      // target either the Staff _id or the User _id, so include both records
+      // when collecting mobile/web FCM tokens.
+      const linkedUserIds = [...new Set(
+        staffDocs
+          .map((staff) => staff.userId?.toString())
+          .filter(Boolean)
+      )];
+      if (linkedUserIds.length) {
+        const linkedUsers = await User.find({ _id: { $in: linkedUserIds } });
+        entities.push(...linkedUsers);
+      }
+
       if (!entities.length) return;
 
       // 🛡️ 4.1 Check Notification Settings (Respect User Preferences)
@@ -402,10 +415,17 @@ class NotificationService {
     // Most notifications may retry push delivery when an in-app record exists.
     // Reminder jobs can disable that retry to guarantee one push per event.
     sendPushWhenExisting = true,
-    // Broadcasts persist in-app notifications first and let push delivery run
-    // in the background so the admin request is not held open for every user.
-    awaitPush = true
+    // Callers may disable waiting for push delivery for non-critical fan-out;
+    // broadcasts keep it enabled so the response reflects the FCM attempt.
+    awaitPush = true,
+    returnPushSummary = false
   }) {
+    const pushSummary = {
+      recipientCount: 0,
+      tokenCount: 0,
+      successCount: 0,
+      failureCount: 0
+    };
     let resolvedRecipients = [];
 
     if (Array.isArray(recipients) && recipients.length > 0) {
@@ -522,6 +542,12 @@ class NotificationService {
         // can observe delivery; broadcasts queue this work in the background.
         if (!isSilent && (!notificationAlreadyExists || sendPushWhenExisting)) {
           const reportPushResult = (pushResult) => {
+            if (pushResult) {
+              pushSummary.recipientCount += 1;
+              pushSummary.tokenCount += pushResult.tokenCount || 0;
+              pushSummary.successCount += pushResult.successCount || 0;
+              pushSummary.failureCount += pushResult.failureCount || 0;
+            }
             if (!pushResult || pushResult.successCount < 1) {
               console.error('[PUSH-DELIVERY-FAILED]', {
                 userId: String(recipient.userId),
@@ -575,7 +601,10 @@ class NotificationService {
       mapWithConcurrency(backgroundPushJobs, (job) => job(), 20)
         .catch((error) => console.error('[PUSH-BACKGROUND-QUEUE-ERROR]', error.message));
     }
-    return notifications.filter(Boolean);
+    const persistedNotifications = notifications.filter(Boolean);
+    return returnPushSummary
+      ? { notifications: persistedNotifications, pushSummary }
+      : persistedNotifications;
   }
 
   /**

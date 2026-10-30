@@ -158,12 +158,20 @@ const broadcastNotification = async (req, res) => {
       const users = await User.find({ role: { $in: userRoles } }).select('_id role');
       recipients.push(...users.map((user) => ({
         userId: user._id,
-        role: user.role
+        // Notifications use the shared admin channel; super_admin is an
+        // auth role, not a separate Notification schema role.
+        role: user.role === 'super_admin' ? 'admin' : user.role
       })));
     }
 
     if (targetRole === 'all' || targetRole === 'staff') {
-      const staffMembers = await Staff.find({ isActive: true }).select('_id userId');
+      // Owners have a Staff profile for scheduling, but Staff Only must
+      // target actual staff members and exclude the shop owner profile.
+      const staffMembers = await Staff.find({
+        isActive: true,
+        isDeleted: { $ne: true },
+        isOwner: { $ne: true }
+      }).select('_id userId');
       recipients.push(
         ...staffMembers
           .map((staff) => ({
@@ -184,25 +192,29 @@ const broadcastNotification = async (req, res) => {
       ).values()
     );
 
-    const persistedNotifications = await NotificationService.sendNotification({
+    const broadcastResult = await NotificationService.sendNotification({
       recipients: uniqueRecipients,
       type: 'BROADCAST',
       title: title.trim(),
       message: message.trim(),
       referenceId: `BROADCAST_${Date.now()}`,
-      // Persist in-app notifications immediately; push delivery continues in
-      // the background so a large audience does not keep the admin request open.
-      awaitPush: false
+      // Wait for FCM delivery before confirming the broadcast. Background
+      // promises can be terminated by the hosting platform after the HTTP
+      // response, which made the in-app record arrive without an app push.
+      awaitPush: true,
+      returnPushSummary: true
     });
+    const persistedNotifications = broadcastResult.notifications;
 
     if (!persistedNotifications.length) {
       return res.status(500).json({ message: 'Broadcast could not be persisted for any recipient' });
     }
 
     res.status(200).json({
-      message: `Broadcast queued for ${persistedNotifications.length} of ${uniqueRecipients.length} recipients`,
+      message: `Broadcast sent for ${persistedNotifications.length} of ${uniqueRecipients.length} recipients`,
       count: persistedNotifications.length,
-      requested: uniqueRecipients.length
+      requested: uniqueRecipients.length,
+      push: broadcastResult.pushSummary
     });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
