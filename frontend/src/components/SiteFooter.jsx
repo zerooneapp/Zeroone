@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const SiteFooter = () => (
-  <footer className="max-w-4xl mx-auto px-4 pt-8 pb-28">
+  <footer className="hidden md:block max-w-4xl mx-auto px-4 pt-8 pb-28">
     <div className="rounded-3xl border border-slate-200 bg-white px-5 py-6 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <p className="text-base font-semibold text-[#00246b] dark:text-white">ZeroOne</p>
       <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">Book trusted services from local professionals.</p>

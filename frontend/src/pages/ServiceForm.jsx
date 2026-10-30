@@ -68,14 +68,6 @@ const ServiceForm = () => {
       }
    }, [id, isEdit]);
 
-   const handleNumberChange = (field, value) => {
-      let val = value.replace(/\D/g, '');
-      if (val.length > 1 && val.startsWith('0')) {
-         val = val.replace(/^0+/, '');
-      }
-      setFormData(prev => ({ ...prev, [field]: val }));
-   };
-
    const handleImageChange = (index, e) => {
       const file = e.target.files[0];
       if (file) {
@@ -246,10 +238,9 @@ const ServiceForm = () => {
                         <input
                            required
                            type="text"
-                           inputMode="numeric"
                            placeholder="500"
                            value={formData.price}
-                           onChange={(e) => handleNumberChange('price', e.target.value)}
+                           onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                            className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all"
                         />
                      </div>
