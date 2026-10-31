@@ -119,9 +119,10 @@ const StaffForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🛡️ VALIDATION: Indian Phone Number Regex
+    // 🛡️ VALIDATION: Phone is optional, but if provided it must be valid.
+    // Staff without a phone cannot log in until a number is added later.
     const phoneRegex = /^[6-9]\d{9}$/;
-    if (!phoneRegex.test(formData.phone)) {
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
       return toast.error('Enter a valid 10-digit Indian phone number');
     }
 
@@ -246,12 +247,11 @@ const StaffForm = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-light text-slate-400 uppercase tracking-widest px-0.5">Phone Number</label>
+                <label className="text-[10px] font-light text-slate-400 uppercase tracking-widest px-0.5">Phone Number (Optional)</label>
                 <div className={`relative flex items-center bg-white dark:bg-gray-900 rounded-xl border px-4 focus-within:ring-2 focus-within:ring-primary/10 transition-all shadow-sm ${formData.phone.length > 0 ? 'border-[#00246b] dark:border-[#00246b]' : 'border-slate-200/60 dark:border-gray-800'}`}>
                   <Phone size={14} className="text-gray-400 mr-2" />
                   <span className="text-sm font-bold text-gray-400 border-r border-slate-100 dark:border-gray-800 pr-2 mr-2">+91</span>
                   <input
-                    required
                     type="tel"
                     placeholder="9876543210"
                     value={formData.phone}
@@ -266,6 +266,9 @@ const StaffForm = () => {
                     className="flex-1 py-3 bg-transparent border-none font-bold text-sm outline-none dark:text-white placeholder:text-gray-300"
                   />
                 </div>
+                <p className="text-[10px] font-medium text-slate-400 px-0.5">
+                  No number = staff can't log in. Add a number now or later to enable their login.
+                </p>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-light text-slate-400 uppercase tracking-widest px-0.5">Designation</label>

@@ -5,10 +5,8 @@
 **/.DS_Store
 
 # Environment files
-**/.env
 **/.env.local
 **/.env.*.local
-.env
 
 # Logs
 **/npm-debug.log*
@@ -16,7 +14,6 @@
 **/yarn-error.log*
 
 # IDE / Editor
-**/.vscode
 **/.idea
 **/*.swp
 **/*.swo
@@ -36,3 +33,4 @@ branch_structure.json
 temp_auto_push.bat
 temp_interactive_push.bat
 
+config.bat

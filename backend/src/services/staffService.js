@@ -90,8 +90,22 @@ const onboardStaff = async (vendorId, staffData) => {
   const User = require('../models/User');
   const { name, phone, ...rest } = staffData;
 
+  // Phone is optional. A staff member without a phone has no login account and
+  // cannot sign in to the staff panel until a phone is added later.
+  const normalizedPhone = phone ? String(phone).replace(/\D/g, '').slice(-10) : '';
+
+  if (!normalizedPhone) {
+    const staff = await Staff.create({ ...rest, name, vendorId });
+    await invalidateSlotCache(vendorId);
+    return staff;
+  }
+
+  if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
+    throw new Error('Enter a valid 10-digit Indian phone number');
+  }
+
   // 🛡️ PREVENT DUPLICATE STAFF: Check if this phone is already a staff member for ANY vendor
-  const existingStaff = await Staff.findOne({ phone });
+  const existingStaff = await Staff.findOne({ phone: normalizedPhone });
   if (existingStaff) {
     const Vendor = require('../models/Vendor');
     const v = await Vendor.findById(existingStaff.vendorId);
@@ -99,13 +113,13 @@ const onboardStaff = async (vendorId, staffData) => {
   }
 
   // 🛡️ AUTH LINKING: Ensure a User account exists for this staff member
-  let user = await User.findOne({ phone });
-  
+  let user = await User.findOne({ phone: normalizedPhone });
+
   if (!user) {
     // Create new staff user if doesn't exist
     user = await User.create({
       name,
-      phone,
+      phone: normalizedPhone,
       image: staffData.image, // 📸 SYNC IMAGE
       role: 'staff',
       isVerified: true
@@ -119,12 +133,12 @@ const onboardStaff = async (vendorId, staffData) => {
     await user.save();
   }
 
-  const staff = await Staff.create({ 
-    ...rest, 
-    name, 
-    phone, 
+  const staff = await Staff.create({
+    ...rest,
+    name,
+    phone: normalizedPhone,
     userId: user._id,
-    vendorId 
+    vendorId
   });
 
   await invalidateSlotCache(vendorId);
@@ -147,46 +161,80 @@ const updateStaff = async (vendorId, staffId, updateData) => {
   // Staff phone numbers are also used for staff login. Keep the Staff and
   // User records synchronized so an edit is not overwritten on the next
   // owner reconciliation and the staff can still log in with the new number.
+  let userToCreate = null; // set when a phone is added to a staff that had none
+  let clearPhone = false;  // set when an existing phone is being removed
   if (nextUpdate.phone !== undefined) {
-    const normalizedPhone = String(nextUpdate.phone).replace(/\D/g, '').slice(-10);
-    if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
-      throw new Error('Enter a valid 10-digit Indian phone number');
-    }
-    nextUpdate.phone = normalizedPhone;
+    const User = require('../models/User');
+    const rawPhone = nextUpdate.phone === null ? '' : String(nextUpdate.phone);
+    const normalizedPhone = rawPhone ? rawPhone.replace(/\D/g, '').slice(-10) : '';
 
-    if (normalizedPhone !== existingStaff.phone) {
-      const duplicateStaff = await Staff.findOne({
-        _id: { $ne: staffId },
-        vendorId,
-        phone: normalizedPhone,
-        isDeleted: { $ne: true }
-      }).select('_id name');
-      if (duplicateStaff) {
-        throw new Error('This phone number is already used by another staff member');
+    // Clearing the phone disables the staff login but keeps the staff record.
+    if (!normalizedPhone) {
+      delete nextUpdate.phone;
+      clearPhone = true;
+    } else {
+      if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
+        throw new Error('Enter a valid 10-digit Indian phone number');
       }
+      nextUpdate.phone = normalizedPhone;
 
-      const User = require('../models/User');
-      linkedUser = existingStaff.userId
-        ? await User.findById(existingStaff.userId)
-        : await User.findOne({ phone: existingStaff.phone });
+      if (normalizedPhone !== existingStaff.phone) {
+        const duplicateStaff = await Staff.findOne({
+          _id: { $ne: staffId },
+          vendorId,
+          phone: normalizedPhone,
+          isDeleted: { $ne: true }
+        }).select('_id name');
+        if (duplicateStaff) {
+          throw new Error('This phone number is already used by another staff member');
+        }
 
-      // Older owner records may not have userId linked. Resolve the owner
-      // through the vendor so their login phone is updated as well.
-      if (!linkedUser && existingStaff.isOwner) {
-        const vendor = await Vendor.findById(vendorId).select('ownerId');
-        if (vendor?.ownerId) linkedUser = await User.findById(vendor.ownerId);
-      }
+        linkedUser = existingStaff.userId
+          ? await User.findById(existingStaff.userId)
+          : (existingStaff.phone ? await User.findOne({ phone: existingStaff.phone }) : null);
 
-      if (linkedUser) {
-        const duplicateUser = await User.findOne({
-          _id: { $ne: linkedUser._id },
-          phone: normalizedPhone
-        }).select('_id');
-        if (duplicateUser) {
-          throw new Error('This phone number is already registered to another account');
+        // Older owner records may not have userId linked. Resolve the owner
+        // through the vendor so their login phone is updated as well.
+        if (!linkedUser && existingStaff.isOwner) {
+          const vendor = await Vendor.findById(vendorId).select('ownerId');
+          if (vendor?.ownerId) linkedUser = await User.findById(vendor.ownerId);
+        }
+
+        if (linkedUser) {
+          const duplicateUser = await User.findOne({
+            _id: { $ne: linkedUser._id },
+            phone: normalizedPhone
+          }).select('_id');
+          if (duplicateUser) {
+            throw new Error('This phone number is already registered to another account');
+          }
+        } else {
+          // Staff had no login account yet. Link an existing user with this
+          // phone (promoting a customer) or create a fresh staff login, so the
+          // staff can now sign in to the staff panel.
+          const existingUser = await User.findOne({ phone: normalizedPhone });
+          if (existingUser) {
+            if (existingUser.role === 'customer') existingUser.role = 'staff';
+            linkedUser = existingUser;
+            nextUpdate.userId = existingUser._id;
+          } else {
+            userToCreate = {
+              name: nextUpdate.name || existingStaff.name,
+              phone: normalizedPhone,
+              image: nextUpdate.image || existingStaff.image,
+              role: 'staff',
+              isVerified: true
+            };
+          }
         }
       }
     }
+  }
+
+  if (userToCreate) {
+    const User = require('../models/User');
+    const created = await User.create(userToCreate);
+    nextUpdate.userId = created._id;
   }
 
   // 🛡️ If staff is being re-enabled, end any active closures
@@ -208,14 +256,16 @@ const updateStaff = async (vendorId, staffId, updateData) => {
     }
   }
 
+  const updateOp = clearPhone ? { ...nextUpdate, $unset: { phone: '' } } : nextUpdate;
   const staff = await Staff.findOneAndUpdate(
     { _id: staffId, vendorId },
-    nextUpdate,
+    updateOp,
     { new: true, runValidators: true }
   );
 
-  if (staff && linkedUser && nextUpdate.phone !== existingStaff.phone) {
+  if (staff && linkedUser && !clearPhone && nextUpdate.phone && nextUpdate.phone !== existingStaff.phone) {
     linkedUser.phone = nextUpdate.phone;
+    if (linkedUser.role === 'customer') linkedUser.role = 'staff';
     await linkedUser.save();
   }
 
