@@ -32,6 +32,7 @@ const VendorBookings = () => {
     fetchBookings,
     lastBookingParams,
     fetchDashboard,
+    refreshDashboardAndBookings,
     fetchClosures,
     closuresData: closures,
     closuresLoading,
@@ -94,17 +95,22 @@ const VendorBookings = () => {
     await executeAction(id, action, reason);
   };
 
-  const executeAction = async (id, action, reason = '', paymentType = null) => {
+  const executeAction = async (id, action, reason = '', paymentType = null, finalPrice = null) => {
     const originalBookings = [...bookings];
     setBookings(prev => prev.map(b =>
       b._id === id
-        ? { ...b, status: action === 'complete' ? 'completed' : 'cancelled' }
+        ? {
+          ...b,
+          status: action === 'complete' ? 'completed' : 'cancelled',
+          ...(action === 'complete' && finalPrice !== null ? { totalPrice: finalPrice } : {})
+        }
         : b
     ));
 
     try {
       setActionLoadingId(id);
-      await api.patch(`/bookings/${id}/status`, { action, reason, paymentType });
+      await api.patch(`/bookings/${id}/status`, { action, reason, paymentType, finalPrice });
+      await refreshDashboardAndBookings();
       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`, {
         style: {
           borderRadius: '12px',
@@ -397,8 +403,9 @@ const VendorBookings = () => {
       {completeBookingModal.isOpen && (
         <CompleteBookingPaymentModal
           isOpen={completeBookingModal.isOpen}
+          basePrice={bookings.find((booking) => booking._id === completeBookingModal.bookingId)?.totalPrice || 0}
           onClose={() => setCompleteBookingModal({ isOpen: false, bookingId: null })}
-          onConfirm={(paymentType) => executeAction(completeBookingModal.bookingId, 'complete', '', paymentType)}
+          onConfirm={(paymentType, finalPrice) => executeAction(completeBookingModal.bookingId, 'complete', '', paymentType, finalPrice)}
           title="Complete Booking"
           message="Are you sure this booking is fully completed? Please select the payment method:"
         />

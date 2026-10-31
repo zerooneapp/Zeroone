@@ -158,7 +158,7 @@ const getMyBookings = async (req, res) => {
 
 const updateBookingStatus = async (req, res) => {
   try {
-    const { action, reason, paymentType } = req.body;
+    const { action, reason, paymentType, finalPrice } = req.body;
     const bookingId = req.params.id;
     const actorRole = getActorRole(req);
     const actorUserId = getActorUserId(req);
@@ -166,7 +166,7 @@ const updateBookingStatus = async (req, res) => {
 
     let result;
     if (action === 'complete') {
-      result = await markBookingComplete(actorUserId, bookingId, actorStaffId, paymentType);
+      result = await markBookingComplete(actorUserId, bookingId, actorStaffId, paymentType, finalPrice);
     } else if (action === 'cancel') {
       result = await cancelBooking(actorUserId, bookingId, actorRole, reason, actorStaffId);
     } else {

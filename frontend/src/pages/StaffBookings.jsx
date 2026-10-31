@@ -111,7 +111,7 @@ const StaffBookings = () => {
   }, [filteredBookings, currentPage]);
 
 
-  const handleStatusUpdate = async (bookingId, action, reason = '', paymentType = null) => {
+  const handleStatusUpdate = async (bookingId, action, reason = '', paymentType = null, finalPrice = null) => {
     if (action === 'cancel' && !reason) {
       setSelectedBookingId(bookingId);
       setIsCancelModalOpen(true);
@@ -119,7 +119,7 @@ const StaffBookings = () => {
     }
     try {
       setActionLoadingId(bookingId);
-      await api.patch(`/bookings/${bookingId}/status`, { action, reason, paymentType });
+      await api.patch(`/bookings/${bookingId}/status`, { action, reason, paymentType, finalPrice });
       toast.success(`Booking ${action === 'complete' ? 'completed' : 'cancelled'}`);
       fetchBookings();
     } catch (err) {
@@ -258,12 +258,13 @@ const StaffBookings = () => {
 
       <CompleteBookingPaymentModal
         isOpen={isCompleteModalOpen}
+        basePrice={bookings.find((booking) => booking._id === selectedBookingId)?.totalPrice || 0}
         onClose={() => {
           setIsCompleteModalOpen(false);
           setSelectedBookingId(null);
         }}
-        onConfirm={(paymentType) => {
-          handleStatusUpdate(selectedBookingId, 'complete', '', paymentType);
+        onConfirm={(paymentType, finalPrice) => {
+          handleStatusUpdate(selectedBookingId, 'complete', '', paymentType, finalPrice);
           setIsCompleteModalOpen(false);
         }}
         title="Complete Booking"

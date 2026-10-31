@@ -14,6 +14,8 @@ const normalizeServiceCategory = (value = '') =>
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
 
+const isDigitsOnly = (value) => /^\d*$/.test(value);
+
 const ServiceForm = () => {
    const navigate = useNavigate();
    const { id } = useParams();
@@ -106,9 +108,19 @@ const ServiceForm = () => {
          return toast.error('Main service image is required');
       }
 
+      const rawPrice = String(formData.price).trim();
+      if (!/^\d+$/.test(rawPrice)) {
+         return toast.error('Price must contain numbers only');
+      }
+
+      const price = Number(rawPrice);
+      if (!Number.isSafeInteger(price)) {
+         return toast.error('Please enter a valid price');
+      }
+
       const submitData = {
          ...formData,
-         price: Number(formData.price) || 0
+         price
       };
 
       const data = new FormData();
@@ -238,9 +250,21 @@ const ServiceForm = () => {
                         <input
                            required
                            type="text"
+                           inputMode="numeric"
+                           pattern="[0-9]*"
                            placeholder="500"
                            value={formData.price}
-                           onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                           onKeyDown={(e) => {
+                              const controlKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+                              if (!controlKeys.includes(e.key) && !e.ctrlKey && !e.metaKey && !/^\d$/.test(e.key)) {
+                                 e.preventDefault();
+                              }
+                           }}
+                           onChange={(e) => {
+                              if (isDigitsOnly(e.target.value)) {
+                                 setFormData(prev => ({ ...prev, price: e.target.value }));
+                              }
+                           }}
                            className="w-full py-3 px-4 bg-white dark:bg-gray-800 border border-slate-200/60 dark:border-gray-800 rounded-xl text-sm font-bold text-gray-900 dark:text-white shadow-sm dark:shadow-none transition-all"
                         />
                      </div>

@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CreditCard, Banknote, HelpCircle } from 'lucide-react';
 
-const CompleteBookingPaymentModal = ({ isOpen, onClose, onConfirm, title = "Complete Booking", message = "Select payment method to complete the booking:" }) => {
+const isDigitsOnly = (value) => /^\d*$/.test(value);
+
+const CompleteBookingPaymentModal = ({ isOpen, onClose, onConfirm, basePrice = 0, title = "Complete Booking", message = "Select payment method to complete the booking:" }) => {
   const [selectedMethod, setSelectedMethod] = useState('offline'); // default to offline (Cash)
+  const [finalPrice, setFinalPrice] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      setFinalPrice('');
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -53,6 +57,32 @@ const CompleteBookingPaymentModal = ({ isOpen, onClose, onConfirm, title = "Comp
                 {message}
               </p>
 
+              <div className="mt-3 text-left">
+                <label className="text-[9px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">
+                  Final Amount (Optional)
+                </label>
+                <p className="text-[9px] font-bold text-slate-400 dark:text-gray-500 mt-1">
+                  Booked amount: ₹{basePrice}. Leave blank to keep it.
+                </p>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder={String(basePrice)}
+                  value={finalPrice}
+                  onKeyDown={(e) => {
+                    const controlKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+                    if (!controlKeys.includes(e.key) && !e.ctrlKey && !e.metaKey && !/^\d$/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(e) => {
+                    if (isDigitsOnly(e.target.value)) setFinalPrice(e.target.value);
+                  }}
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/70 px-3 py-2.5 text-sm font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-[#00246b]/20"
+                />
+              </div>
+
               {/* Payment Methods Selection */}
               <div className="grid grid-cols-2 gap-2.5 mt-3">
                 <button
@@ -94,7 +124,7 @@ const CompleteBookingPaymentModal = ({ isOpen, onClose, onConfirm, title = "Comp
                 </button>
                 <button
                   onClick={() => {
-                    onConfirm(selectedMethod);
+                    onConfirm(selectedMethod, finalPrice === '' ? null : Number(finalPrice));
                     onClose();
                   }}
                   className="py-2.5 bg-[#00246b] text-white rounded-xl font-black text-[9px] uppercase tracking-wider shadow-lg shadow-[#00246b]/20 active:scale-95 transition-all"

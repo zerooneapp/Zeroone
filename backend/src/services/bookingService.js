@@ -215,7 +215,20 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
   return booking;
 };
 
-const markBookingComplete = async (userId, bookingId, actorStaffId = null, paymentType = null) => {
+const normalizeFinalPrice = (value) => {
+  if (value === undefined || value === null || value === '') return null;
+
+  if (typeof value === 'number') {
+    return Number.isSafeInteger(value) && value >= 0 ? value : null;
+  }
+
+  if (typeof value !== 'string' || !/^\d+$/.test(value.trim())) return null;
+
+  const price = Number(value.trim());
+  return Number.isSafeInteger(price) ? price : null;
+};
+
+const markBookingComplete = async (userId, bookingId, actorStaffId = null, paymentType = null, finalPrice = null) => {
   const booking = await Booking.findById(bookingId).populate('vendorId staffId');
   if (!booking) throw new Error('Booking not found');
 
@@ -235,10 +248,18 @@ const markBookingComplete = async (userId, bookingId, actorStaffId = null, payme
     throw new Error(`Only confirmed, pending, or pending_completion bookings can be completed (Current: ${booking.status})`);
   }
 
+  const normalizedFinalPrice = normalizeFinalPrice(finalPrice);
+  if (finalPrice !== undefined && finalPrice !== null && finalPrice !== '' && normalizedFinalPrice === null) {
+    throw new Error('Final amount must contain numbers only');
+  }
+
   // 1. Atomic Status Update
   const completionTime = new Date();
   booking.status = 'completed';
   booking.completedAt = completionTime;
+  if (normalizedFinalPrice !== null) {
+    booking.totalPrice = normalizedFinalPrice;
+  }
   if (paymentType) {
     booking.paymentType = paymentType;
   }

@@ -162,7 +162,7 @@ const VendorDashboard = () => {
     const handleRealtimeUpdate = (event) => {
       const notification = event.detail;
       // Refresh dashboard if it's a booking related notification
-      if (['NEW_BOOKING', 'BOOKING_CANCELLED', 'BOOKING_RESCHEDULED', 'STAFF_ASSIGNED'].includes(notification.type)) {
+      if (['NEW_BOOKING', 'BOOKING_CANCELLED', 'BOOKING_COMPLETED', 'BOOKING_COMPLETED_REPORT', 'BOOKING_RESCHEDULED', 'STAFF_ASSIGNED'].includes(notification.type)) {
         console.log('[DASHBOARD-REFRESH] Refreshing due to notification:', notification.type);
         clearTimeout(refreshTimer);
         refreshTimer = setTimeout(() => {
@@ -314,14 +314,14 @@ const VendorDashboard = () => {
     setCompleteBookingModal({ isOpen: true, bookingId: id });
   };
 
-  const executeCompleteBooking = async (paymentType = null) => {
+  const executeCompleteBooking = async (paymentType = null, finalPrice = null) => {
     const id = completeBookingModal.bookingId;
     if (!id) return;
 
     try {
-      await api.patch(`/bookings/${id}/status`, { action: 'complete', paymentType });
+      await api.patch(`/bookings/${id}/status`, { action: 'complete', paymentType, finalPrice });
       toast.success('Booking marked as completed');
-      fetchDashboard(true);
+      await fetchDashboard(true);
     } catch (err) {
       toast.error('Update failed');
     }
@@ -778,8 +778,9 @@ return (
     {completeBookingModal.isOpen && (
       <CompleteBookingPaymentModal
         isOpen={completeBookingModal.isOpen}
+        basePrice={data?.schedule?.find((item) => String(item.id) === String(completeBookingModal.bookingId))?.totalPrice || 0}
         onClose={() => setCompleteBookingModal({ isOpen: false, bookingId: null })}
-        onConfirm={(paymentType) => executeCompleteBooking(paymentType)}
+        onConfirm={(paymentType, finalPrice) => executeCompleteBooking(paymentType, finalPrice)}
         title="Complete Booking"
         message="Are you sure this booking is fully completed? Please select the payment method:"
       />

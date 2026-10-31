@@ -604,13 +604,16 @@ const getVendorDashboard = async (req, res) => {
       .populate('staffId', 'name isOwner')
       .sort({ startTime: 1 });
 
-    const todayEarnings = todayBookings
-      .filter(b => b.status === 'completed')
-      .reduce((sum, b) => sum + b.totalPrice, 0);
+    const todayCompletedBookings = await Booking.find({
+      vendorId: vendor._id,
+      status: 'completed',
+      completedAt: { $gte: todayStart, $lt: todayEnd }
+    }).select('totalPrice');
+    const todayEarnings = todayCompletedBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
     const weekBookings = await Booking.find({
       vendorId: vendor._id,
-      startTime: { $gte: weekStart, $lt: todayEnd },
+      completedAt: { $gte: weekStart, $lt: todayEnd },
       status: 'completed'
     });
     const weekEarnings = weekBookings.reduce((sum, b) => sum + b.totalPrice, 0);
@@ -701,13 +704,13 @@ const getVendorDashboard = async (req, res) => {
           {
             $match: {
               vendorId: vendor._id,
-              startTime: { $gte: sevenDaysAgo },
+              completedAt: { $gte: sevenDaysAgo },
               status: 'completed'
             }
           },
           {
             $group: {
-              _id: { $dateToString: { format: "%Y-%m-%d", date: "$startTime", timezone: "Asia/Kolkata" } },
+              _id: { $dateToString: { format: "%Y-%m-%d", date: "$completedAt", timezone: "Asia/Kolkata" } },
               revenue: { $sum: "$totalPrice" }
             }
           },
@@ -1432,21 +1435,18 @@ const getVendorDashboardBundle = async (req, res) => {
 
       // Use Aggregation for all stats in one go - MUCH FASTER
       Booking.aggregate([
-        { 
-          $match: { 
-            vendorId: new mongoose.Types.ObjectId(vendor._id), 
-            startTime: { $gte: weekStart, $lt: todayEnd }, 
-            status: { $ne: 'cancelled' } 
-          } 
+        {
+          $match: {
+            vendorId: new mongoose.Types.ObjectId(vendor._id),
+            status: 'completed',
+            completedAt: { $gte: weekStart, $lt: todayEnd }
+          }
         },
         {
           $group: {
             _id: null,
-            todayBookings: { 
-              $sum: { $cond: [{ $and: [{ $gte: ['$startTime', todayStart] }, { $lt: ['$startTime', todayEnd] }] }, 1, 0] }
-            },
             todayEarnings: {
-              $sum: { $cond: [{ $and: [{ $eq: ['$status', 'completed'] }, { $gte: ['$startTime', todayStart] }, { $lt: ['$startTime', todayEnd] }] }, '$totalPrice', 0] }
+              $sum: { $cond: [{ $and: [{ $gte: ['$completedAt', todayStart] }, { $lt: ['$completedAt', todayEnd] }] }, '$totalPrice', 0] }
             },
             weekEarnings: {
               $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$totalPrice', 0] }
@@ -1461,6 +1461,7 @@ const getVendorDashboardBundle = async (req, res) => {
     // 2. Secondary Data Fetch (Dependent on initial data or just bulky)
     const [
       todayBookings,
+      todayCompletedBookings,
       activeStaffMembers,
       subscriptionState,
       todayMembershipTransactions,
@@ -1474,6 +1475,14 @@ const getVendorDashboardBundle = async (req, res) => {
         .populate('userId', 'name image phone')
         .populate('staffId', 'name isOwner')
         .sort({ startTime: 1 })
+        .lean(),
+
+      Booking.find({
+        vendorId: new mongoose.Types.ObjectId(vendor._id),
+        status: 'completed',
+        completedAt: { $gte: todayStart, $lt: todayEnd }
+      })
+        .select('totalPrice paymentType')
         .lean(),
       
       Staff.find({ vendorId: new mongoose.Types.ObjectId(vendor._id), isActive: true })
@@ -1500,8 +1509,7 @@ const getVendorDashboardBundle = async (req, res) => {
         .lean()
     ]);
 
-    const todayServiceRevenue = todayBookings
-      .filter(b => b.status === 'completed')
+    const todayServiceRevenue = todayCompletedBookings
       .reduce((acc, b) => acc + (b.totalPrice || 0), 0);
 
     const todayMembershipRevenue = (todayMembershipTransactions || [])
@@ -1556,12 +1564,12 @@ const getVendorDashboardBundle = async (req, res) => {
     const totalServiceOnlyEarnings = totalEarnings - totalMembershipEarnings;
     const totalServiceEarnings = totalEarnings;
 
-    const todayOnlineEarnings = todayBookings
-      .filter(b => b.status === 'completed' && b.paymentType === 'online')
+    const todayOnlineEarnings = todayCompletedBookings
+      .filter(b => b.paymentType === 'online')
       .reduce((acc, b) => acc + (b.totalPrice || 0), 0);
 
-    const todayOfflineEarnings = todayBookings
-      .filter(b => b.status === 'completed' && b.paymentType !== 'online')
+    const todayOfflineEarnings = todayCompletedBookings
+      .filter(b => b.paymentType !== 'online')
       .reduce((acc, b) => acc + (b.totalPrice || 0), 0);
 
     console.log(`[DASHBOARD-STATS] Vendor: ${vendor.shopName}, TodayServices: ₹${todayServiceRevenue}, TodayMemberships: ₹${todayMembershipRevenue}, TodayProducts: ₹${todayProductEarnings}, TodayOnline: ₹${todayOnlineEarnings}, TodayOffline: ₹${todayOfflineEarnings}`);

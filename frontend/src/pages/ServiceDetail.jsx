@@ -900,29 +900,29 @@ const ServiceDetail = () => {
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-32 no-scrollbar overflow-y-auto">
       {/* Redesigned Secondary Navbar (Fixed) */}
-      <div className="bg-white text-[#00246b] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[var(--safe-header-top)] pb-2 md:pb-2.5">
+      <div className="bg-white text-[#00246b] dark:text-white fixed top-0 left-0 right-0 z-[60] border-b border-slate-100 dark:bg-gray-950 dark:border-gray-800 pt-[var(--safe-header-top)] pb-1.5">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button onClick={() => navigate(-1)} className="active:scale-90 transition-all p-1">
-              <ArrowLeft size={20} strokeWidth={3} />
+              <ArrowLeft size={18} strokeWidth={3} />
             </button>
-            <h2 className="text-[15px] font-black tracking-tight truncate max-w-[200px]">
+            <h2 className="text-[14px] font-black tracking-tight truncate max-w-[200px]">
               {vendor.shopName}
             </h2>
           </div>
-          <button onClick={handleWhatsAppShare} className="w-[42px] h-[42px] flex items-center justify-center active:scale-90 transition-all">
-            <Share2 size={24} strokeWidth={2} />
+          <button onClick={handleWhatsAppShare} className="w-[34px] h-[34px] flex items-center justify-center active:scale-90 transition-all">
+            <Share2 size={20} strokeWidth={2} />
           </button>
         </div>
       </div>
 
-      <div className="pt-[calc(var(--safe-header-top)+44px)] relative bg-white dark:bg-gray-950 overflow-hidden">
+      <div className="pt-[calc(var(--safe-header-top)+38px)] relative bg-white dark:bg-gray-950 overflow-hidden">
         <div className="relative group">
           {/* Elite Swipeable Carousel */}
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="h-64 sm:h-72 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
+            className="h-48 sm:h-56 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-100 dark:bg-gray-900 border-b border-gray-100/50 relative"
           >
             {slides.length > 0 ? (
               slides.map((slide, idx) => (
@@ -1435,7 +1435,7 @@ const ServiceDetail = () => {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed left-2 right-2 bg-[#0B1222] dark:bg-gray-950 backdrop-blur-3xl py-2 px-4 z-50 border border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-[24px]"
+            className="fixed left-2 right-2 bg-[#00246b] dark:bg-[#00246b] backdrop-blur-3xl py-2 px-4 z-50 border border-[#00246b]/20 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-[24px]"
             style={{ bottom: 'calc(env(safe-area-inset-bottom) + 48px)' }}
           >
             <div className="flex items-center justify-between max-w-lg mx-auto">
@@ -1455,9 +1455,9 @@ const ServiceDetail = () => {
                 disabled={cartItems.length === 0 || loading || !vendor.isShopOpen}
                 className={cn(
                   "px-5 py-2 rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-xl transition-all active:scale-95 border-b-[2px] flex items-center justify-center min-w-[100px]",
-                  !vendor.isShopOpen 
+                  !vendor.isShopOpen
                     ? "bg-rose-500 text-white border-rose-600 shadow-rose-500/20 cursor-not-allowed"
-                    : "bg-[#00246b] dark:bg-[#00246b] text-white border-[#00246b] shadow-lg shadow-[#00246b]/20 disabled:opacity-30 disabled:grayscale"
+                    : "bg-white text-[#00246b] border-slate-200 shadow-lg disabled:opacity-30 disabled:grayscale"
                 )}
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : (!vendor.isShopOpen ? 'Closed Temporarily' : 'Book Now')}

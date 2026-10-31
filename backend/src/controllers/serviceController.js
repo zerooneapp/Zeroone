@@ -22,9 +22,26 @@ const normalizeRetainedImages = (value) => {
   return parsed.filter((item) => typeof item === 'string' && item.trim()).slice(0, 4);
 };
 
+const normalizePrice = (value) => {
+  if (typeof value === 'number') {
+    return Number.isSafeInteger(value) && value >= 0 ? value : null;
+  }
+
+  if (typeof value !== 'string' || !/^\d+$/.test(value.trim())) {
+    return null;
+  }
+
+  const price = Number(value.trim());
+  return Number.isSafeInteger(price) ? price : null;
+};
+
 const addService = async (req, res) => {
   try {
     const { name, description, price, duration, bufferTime, type, category, showOnHome } = req.body;
+    const normalizedPrice = normalizePrice(price);
+    if (normalizedPrice === null) {
+      return res.status(400).json({ message: 'Price must contain numbers only' });
+    }
     
     let imageUrls = [];
     if (req.files && req.files.length > 0) {
@@ -46,7 +63,7 @@ const addService = async (req, res) => {
     const service = await createService(req.vendor._id, {
       name,
       description,
-      price,
+      price: normalizedPrice,
       duration,
       bufferTime,
       type,
@@ -96,6 +113,13 @@ const listServices = async (req, res) => {
 const patchService = async (req, res) => {
   try {
     const updateData = { ...req.body };
+    if (Object.prototype.hasOwnProperty.call(updateData, 'price')) {
+      const normalizedPrice = normalizePrice(updateData.price);
+      if (normalizedPrice === null) {
+        return res.status(400).json({ message: 'Price must contain numbers only' });
+      }
+      updateData.price = normalizedPrice;
+    }
     const retainedImages = normalizeRetainedImages(updateData.retainedImages);
     const hasRetainedImagesPayload = Object.prototype.hasOwnProperty.call(updateData, 'retainedImages');
     delete updateData.retainedImages;
