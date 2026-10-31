@@ -17,6 +17,10 @@ const { getAdminTransactions } = require('../controllers/transactionController')
 const {
   getAdminReviews, approveReview, approveAllReviews, deleteReview
 } = require('../controllers/reviewController');
+const {
+  getDeveloperSections, clearDeveloperSection, getProtectedVendors, updateProtectedVendors,
+  resetDashboardRevenue
+} = require('../controllers/developerController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const { adminUploadVendorDocs } = require('../controllers/vendorController');
@@ -107,5 +111,12 @@ router.post('/admins', authorize('admin', 'super_admin'), createAdminAccount);
 router.patch('/admins/:id/block', authorize('admin', 'super_admin'), toggleAdminAccountBlock);
 router.delete('/admins/:id', authorize('admin', 'super_admin'), deleteAdminAccount);
 router.patch('/profile', updateAdminProfile);
+
+// Developer Settings (database clean-up)
+router.get('/developer/sections', authorize('admin', 'super_admin'), getDeveloperSections);
+router.delete('/developer/sections/:key', authorize('admin', 'super_admin'), clearDeveloperSection);
+router.get('/developer/protected-vendors', authorize('admin', 'super_admin'), getProtectedVendors);
+router.put('/developer/protected-vendors', authorize('admin', 'super_admin'), updateProtectedVendors);
+router.post('/developer/reset-revenue', authorize('admin', 'super_admin'), resetDashboardRevenue);
 
 module.exports = router;

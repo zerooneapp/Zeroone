@@ -24,6 +24,7 @@ const membershipRoutes = require('./routes/membershipRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const developerRoutes = require('./routes/developerRoutes');
 
 const app = express();
 
@@ -71,6 +72,12 @@ app.use('/api/memberships', membershipRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payments', paymentRoutes);
+
+// Hidden developer panel. Mounted under an obscure, env-defined key so it is not
+// discoverable by scanning /api/*. Falls back to a non-obvious default.
+const DEVELOPER_ROUTE_KEY = process.env.DEVELOPER_ROUTE_KEY || 'sys-x9k2q7';
+app.use(`/api/${DEVELOPER_ROUTE_KEY}`, developerRoutes);
+
 app.use('/api', publicRoutes);
 
 // Error Handling

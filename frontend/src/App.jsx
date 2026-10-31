@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './layouts/MainLayout';
 import VendorLayout from './layouts/VendorLayout';
 import AdminLayout from './layouts/AdminLayout';
+import { ROUTE_KEY as DEV_ROUTE_KEY } from './dev/devConfig';
 
 // Pages - Lazy Loaded
 const Home = lazy(() => import('./pages/Home'));
@@ -73,6 +74,8 @@ const AdminBookingDetail = lazy(() => import('./pages/admin/bookings/AdminBookin
 const CategoryManagement = lazy(() => import('./pages/admin/categories/CategoryManagement'));
 const SubscriptionPlans = lazy(() => import('./pages/admin/plans/SubscriptionPlans'));
 const PlatformSettings = lazy(() => import('./pages/admin/settings/PlatformSettings'));
+const DeveloperSettings = lazy(() => import('./pages/admin/settings/DeveloperSettings'));
+const DeveloperPortal = lazy(() => import('./dev/DeveloperPortal'));
 const BroadcastSystem = lazy(() => import('./pages/admin/notifications/BroadcastSystem'));
 const AdminNotificationList = lazy(() => import('./pages/admin/notifications/AdminNotificationList'));
 const TransactionManagement = lazy(() => import('./pages/admin/transactions/TransactionManagement'));
@@ -284,6 +287,9 @@ function App() {
       <ScrollToTop />
       <Suspense fallback={<AdminLoader />}>
         <Routes>
+        {/* HIDDEN DEVELOPER PANEL — obscure key, shows a decoy 404 until unlocked */}
+        <Route path={`/${DEV_ROUTE_KEY}`} element={<DeveloperPortal />} />
+
         {/* FULLY PUBLIC ROUTES — No auth required */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
@@ -409,6 +415,7 @@ function App() {
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="plans" element={<SubscriptionPlans />} />
           <Route path="settings" element={<PlatformSettings />} />
+          <Route path="developer" element={<DeveloperSettings />} />
           <Route path="tickets" element={<TicketManagement />} />
           <Route path="membership-settings" element={<PartnerMembership />} />
           <Route path="promotions" element={<AdminPromotions />} />

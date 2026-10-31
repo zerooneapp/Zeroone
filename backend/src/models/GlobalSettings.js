@@ -23,7 +23,11 @@ const globalSettingsSchema = new mongoose.Schema({
       enum: ['razorpay', 'cashfree'],
       default: 'razorpay'
     }
-  }
+  },
+  // Vendors (and all their linked data) that Developer Settings clean-up never deletes
+  protectedVendorIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' }],
+  // Admin dashboard revenue only counts transactions after this date
+  revenueResetAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('GlobalSettings', globalSettingsSchema);

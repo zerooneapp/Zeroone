@@ -122,6 +122,9 @@ const updateGlobalSettings = async (req, res) => {
     delete updateData.__v;
     delete updateData.createdAt;
     delete updateData.updatedAt;
+    // Managed only from Developer Settings
+    delete updateData.protectedVendorIds;
+    delete updateData.revenueResetAt;
 
     const settings = await GlobalSettings.findOneAndUpdate(
       {}, 
@@ -873,6 +876,10 @@ const getAdminDashboard = async (req, res) => {
         ]
       }
     };
+
+    // Revenue recorded before a Developer Settings reset is left out of the dashboard
+    const { revenueResetAt } = (await GlobalSettings.findOne().select('revenueResetAt').lean()) || {};
+    if (revenueResetAt) platformRevenueFilter.$and = [{ timestamp: { $gte: revenueResetAt } }];
 
     const [
       todayRevenue,

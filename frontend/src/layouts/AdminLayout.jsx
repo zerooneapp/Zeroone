@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Store, Users, CalendarRange,
   Tag, CreditCard, Wallet, Star, Bell, Send,
   Menu, X, Sun, Moon, LogOut, ChevronRight, Settings, Shield,
-  ArrowDownLeft, Crown, Zap, HelpCircle
+  ArrowDownLeft, Crown, Zap, HelpCircle, Code
 } from 'lucide-react';
 import { useAdminStore } from '../store/useAdminStore';
 import { useAuthStore } from '../store/authStore';
@@ -42,6 +42,7 @@ const AdminLayout = () => {
     { name: "Broadcast", path: "/admin/notifications/broadcast", icon: Send },
     ...(canAccessAdminManagement ? [{ name: "Admin Access", path: "/admin/access", icon: Shield }] : []),
     { name: "Settings", path: "/admin/settings", icon: Settings },
+    ...(canAccessAdminManagement ? [{ name: "Developer Settings", path: "/admin/developer", icon: Code }] : []),
   ];
 
   useSocket(currentAdmin?._id);
