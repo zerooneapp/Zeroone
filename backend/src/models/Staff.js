@@ -4,7 +4,9 @@ const staffSchema = new mongoose.Schema({
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional for now
   name: { type: String, required: true },
-  phone: { type: String, required: true },
+  // Optional: a staff member with no phone cannot log in to the staff panel.
+  // Adding/updating a phone later enables their login.
+  phone: { type: String },
   password: { type: String },
   role: { type: String, default: 'staff' },
   designation: { type: String, default: 'Staff' },
@@ -30,7 +32,7 @@ const staffSchema = new mongoose.Schema({
 // Hash password and normalize phone before saving
 staffSchema.pre('save', async function () {
   // Normalize Phone
-  if (this.isModified('phone') && !this.phone.startsWith('DEL_')) {
+  if (this.isModified('phone') && this.phone && !this.phone.startsWith('DEL_')) {
     let val = this.phone.replace(/\D/g, '');
     if ((val.startsWith('91') || val.startsWith('0')) && val.length > 10) {
       val = val.slice(-10);
@@ -48,11 +50,16 @@ staffSchema.pre('save', async function () {
 
 // Compare password
 staffSchema.methods.comparePassword = async function (enteredPassword) {
+  if (!this.password || !enteredPassword) return false;
   const bcrypt = require('bcryptjs');
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-staffSchema.index({ phone: 1, vendorId: 1 }, { unique: true });
+// Unique per vendor only when a phone exists, so multiple phone-less staff are allowed.
+staffSchema.index(
+  { phone: 1, vendorId: 1 },
+  { unique: true, partialFilterExpression: { phone: { $type: 'string' } } }
+);
 staffSchema.index({ vendorId: 1 });
 staffSchema.index({ vendorId: 1, isOwner: 1 }, { unique: true, partialFilterExpression: { isOwner: true } });
 
