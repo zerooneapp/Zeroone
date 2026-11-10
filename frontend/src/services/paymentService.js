@@ -118,12 +118,14 @@ export const openGatewayCheckout = async ({
       return;
     }
 
-    if (result?.redirect) {
-      onFailure?.(new Error('Cashfree payment was redirected. Please wait for confirmation.'));
-      return;
-    }
-
-    onFailure?.(new Error('Cashfree payment status is unavailable'));
+    // UPI / app-switch flows often close the modal without paymentDetails even
+    // though the payment went through. The server checks the real status with
+    // Cashfree by order id, so always ask it instead of giving up.
+    await onSuccess?.({
+      gateway: 'cashfree',
+      order_id: orderResponse.orderId,
+      cf_payment_id: ''
+    });
     return;
   }
 

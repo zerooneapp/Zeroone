@@ -23,7 +23,7 @@ const PlatformSettings = () => {
     },
     supportWhatsApp: "",
     supportPhone: "",
-    paymentGateway: { active: 'razorpay' }
+    paymentGateway: { active: 'cashfree' }
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -169,8 +169,8 @@ const PlatformSettings = () => {
               <p className="text-[11px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">
                 New online payments will use the selected gateway.
               </p>
-              {['razorpay', 'cashfree'].map((gateway) => {
-                const isActive = (settings.paymentGateway?.active || 'razorpay') === gateway;
+              {['cashfree'].map((gateway) => {
+                const isActive = true;
                 return (
                   <button
                     key={gateway}
@@ -184,7 +184,7 @@ const PlatformSettings = () => {
                     <div className="text-left">
                       <p className="text-[13px] font-black capitalize">{gateway}</p>
                       <p className="text-[10px] font-bold opacity-70">
-                        {isActive ? 'Active for new payments' : 'Available as fallback option'}
+                        Active for all new payments
                       </p>
                     </div>
                     <span className={`w-5 h-5 rounded-full border-4 ${isActive ? 'border-primary bg-white' : 'border-slate-300 dark:border-gray-600'}`} />

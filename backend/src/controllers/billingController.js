@@ -5,10 +5,13 @@ const {
   getNormalizedServiceLevel,
   getSubscriptionPlanForVendor,
   getVendorSubscriptionState,
-  createWalletTransaction,
-  addFunds,
-  activateMonthlySubscription
+  createWalletTransaction
 } = require('../services/walletService');
+const Vendor = require('../models/Vendor');
+const {
+  settleVerifiedTransaction,
+  reconcilePendingPayments
+} = require('../services/paymentSettlementService');
 const {
   getPaymentGatewaySettings,
   createGatewayOrder,
@@ -38,7 +41,21 @@ const getOrderCreationStatusCode = (message = '') => {
 
 const getVendorWalletOverview = async (req, res) => {
   try {
-    const vendor = req.vendor;
+    let vendor = req.vendor;
+
+    // Self-heal: credit any payment that succeeded at the gateway but whose
+    // verify/webhook never reached us. Never block or fail the wallet screen.
+    try {
+      const recovered = await Promise.race([
+        reconcilePendingPayments({ vendorId: vendor._id, limit: 10 }),
+        new Promise((resolve) => setTimeout(() => resolve(null), 8000))
+      ]);
+      if (recovered && recovered.settled > 0) {
+        vendor = (await Vendor.findById(vendor._id)) || vendor;
+      }
+    } catch (reconcileError) {
+      console.warn('[WALLET-RECONCILE]', reconcileError.message);
+    }
     const settings = await getBillingSettings();
     const subscriptionState = await getVendorSubscriptionState(vendor);
     const serviceLevel = getNormalizedServiceLevel(vendor.serviceLevel);
@@ -220,6 +237,14 @@ const verifyWalletTopup = async (req, res) => {
     });
 
     if (!verification.verified) {
+      if (gateway === 'cashfree') {
+        // Payment may still be processing at the gateway. Keep it pending; the
+        // webhook / reconcile job credits it automatically once it succeeds.
+        return res.status(202).json({
+          pending: true,
+          message: 'Payment is still being confirmed. Your wallet will update automatically in a few minutes.'
+        });
+      }
       transaction.status = 'failed';
       transaction.gatewayPaymentId = verification.paymentId || submittedPaymentId || '';
       transaction.gatewaySignature = body.razorpay_signature || body.signature || '';
@@ -227,28 +252,21 @@ const verifyWalletTopup = async (req, res) => {
       return res.status(400).json({ message: verification.message || 'Payment verification failed' });
     }
 
-    await addFunds(vendor, transaction.amount, 'wallet_topup', {
-      existingTransaction: transaction,
-      initiatedByUserId: vendor.ownerId,
-      category: 'wallet_topup',
-      status: 'completed',
-      paymentGateway: gateway,
-      paymentMethod: gateway,
-      gatewayOrderId: submittedOrderId,
-      gatewayPaymentId: verification.paymentId || submittedPaymentId || '',
-      gatewaySignature: body.razorpay_signature || body.signature || '',
-      referenceId: transaction.referenceId,
-      description: 'Vendor wallet top-up completed',
-      metadata: {
-        ...(transaction.metadata || {}),
-        verifiedAt: new Date().toISOString()
-      }
+    await settleVerifiedTransaction(transaction, {
+      gateway,
+      paymentId: verification.paymentId || submittedPaymentId || '',
+      signature: body.razorpay_signature || body.signature || '',
+      source: 'verify'
     });
+
+    // Re-read: the credit is applied on a fresh vendor document.
+    const refreshedVendor = await Vendor.findById(vendor._id).select('walletBalance');
+    const refreshedTransaction = await WalletTransaction.findById(transaction._id);
 
     res.status(200).json({
       message: 'Wallet recharged successfully',
-      walletBalance: vendor.walletBalance,
-      transaction
+      walletBalance: refreshedVendor ? refreshedVendor.walletBalance : vendor.walletBalance,
+      transaction: refreshedTransaction || transaction
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -348,6 +366,14 @@ const verifyMonthlySubscription = async (req, res) => {
     });
 
     if (!verification.verified) {
+      if (gateway === 'cashfree') {
+        // Payment may still be processing at the gateway. Keep it pending; the
+        // webhook / reconcile job credits it automatically once it succeeds.
+        return res.status(202).json({
+          pending: true,
+          message: 'Payment is still being confirmed. Your wallet will update automatically in a few minutes.'
+        });
+      }
       transaction.status = 'failed';
       transaction.gatewayPaymentId = verification.paymentId || submittedPaymentId || '';
       transaction.gatewaySignature = body.razorpay_signature || body.signature || '';
@@ -355,25 +381,18 @@ const verifyMonthlySubscription = async (req, res) => {
       return res.status(400).json({ message: verification.message || 'Payment verification failed' });
     }
 
-    await activateMonthlySubscription(vendor, {
-      existingTransaction: transaction,
-      initiatedByUserId: vendor.ownerId,
-      status: 'completed',
-      paymentGateway: gateway,
-      paymentMethod: gateway,
-      gatewayOrderId: submittedOrderId,
-      gatewayPaymentId: verification.paymentId || submittedPaymentId || '',
-      gatewaySignature: body.razorpay_signature || body.signature || '',
-      referenceId: transaction.referenceId,
-      metadata: {
-        ...(transaction.metadata || {}),
-        verifiedAt: new Date().toISOString()
-      }
+    await settleVerifiedTransaction(transaction, {
+      gateway,
+      paymentId: verification.paymentId || submittedPaymentId || '',
+      signature: body.razorpay_signature || body.signature || '',
+      source: 'verify'
     });
+
+    const refreshedVendor = await Vendor.findById(vendor._id).select('expiryDate');
 
     res.status(200).json({
       message: 'Monthly subscription activated successfully',
-      expiryDate: vendor.expiryDate,
+      expiryDate: refreshedVendor ? refreshedVendor.expiryDate : vendor.expiryDate,
       transaction
     });
   } catch (error) {

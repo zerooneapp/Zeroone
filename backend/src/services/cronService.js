@@ -8,6 +8,16 @@ const moment = require('moment-timezone');
  * Centrally manages all recurring system tasks (Crons)
  */
 const initCronJobs = () => {
+  // 0. Recover gateway-paid but uncredited wallet top-ups / subscriptions (Every 2 minutes)
+  cron.schedule('*/2 * * * *', async () => {
+    try {
+      const { reconcilePendingPayments } = require('./paymentSettlementService');
+      await reconcilePendingPayments({ minAgeMs: 60 * 1000, limit: 100 });
+    } catch (error) {
+      console.error('[CRON-PAYMENT-RECONCILE-ERROR]', error.message);
+    }
+  });
+
   // 1. Complete elapsed emergency booking windows (Every minute)
   cron.schedule('* * * * *', async () => {
     try {

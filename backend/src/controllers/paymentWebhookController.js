@@ -9,10 +9,7 @@ const {
   verifyGatewayWebhookSignature,
   verifyGatewayPayment
 } = require('../services/paymentGatewayService');
-const {
-  addFunds,
-  activateMonthlySubscription
-} = require('../services/walletService');
+const { settleVerifiedTransaction } = require('../services/paymentSettlementService');
 
 const getWebhookOrderData = (payload = {}) => ({
   orderId: payload?.data?.order?.order_id || payload?.data?.order_id || payload?.order_id || '',
@@ -130,41 +127,8 @@ const settlePayment = async ({ gateway, orderId, paymentId, signature, amount })
       throw new Error('Webhook amount does not match transaction amount');
     }
 
-    if (transaction.category === 'wallet_topup') {
-      const vendor = await Vendor.findById(transaction.vendorId);
-      if (!vendor) throw new Error('Vendor not found for wallet payment');
-      await addFunds(vendor, transaction.amount, 'wallet_topup', {
-        existingTransaction: transaction,
-        initiatedByUserId: transaction.initiatedByUserId || vendor.ownerId,
-        category: 'wallet_topup',
-        status: 'completed',
-        paymentGateway: gateway,
-        paymentMethod: gateway,
-        gatewayOrderId: orderId,
-        gatewayPaymentId: paymentId,
-        gatewaySignature: signature || '',
-        referenceId: transaction.referenceId,
-        description: 'Vendor wallet top-up completed',
-        metadata: { ...(transaction.metadata || {}), verifiedAt: new Date().toISOString(), source: 'webhook' }
-      });
-      return;
-    }
-
-    if (transaction.category === 'monthly_subscription') {
-      const vendor = await Vendor.findById(transaction.vendorId);
-      if (!vendor) throw new Error('Vendor not found for subscription payment');
-      await activateMonthlySubscription(vendor, {
-        existingTransaction: transaction,
-        initiatedByUserId: transaction.initiatedByUserId || vendor.ownerId,
-        status: 'completed',
-        paymentGateway: gateway,
-        paymentMethod: gateway,
-        gatewayOrderId: orderId,
-        gatewayPaymentId: paymentId,
-        gatewaySignature: signature || '',
-        referenceId: transaction.referenceId,
-        metadata: { ...(transaction.metadata || {}), verifiedAt: new Date().toISOString(), source: 'webhook' }
-      });
+    if (transaction.category === 'wallet_topup' || transaction.category === 'monthly_subscription') {
+      await settleVerifiedTransaction(transaction, { gateway, paymentId, signature, source: 'webhook' });
       return;
     }
   }

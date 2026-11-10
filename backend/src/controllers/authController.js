@@ -13,6 +13,36 @@ const generateTemporaryPassword = () => crypto.randomBytes(24).toString('hex');
 const sanitizePublicRole = (role) => (role === 'vendor' ? 'vendor' : 'customer');
 const isAdminRole = (role) => ['admin', 'super_admin'].includes(role);
 
+// Self-heal: a vendor owner has an owner Staff record (isOwner: true) but their
+// User document is missing. Without a User the login falls back to the Staff
+// record and the owner lands on the staff dashboard. Recreate the User using the
+// vendor's ownerId so existing links (Vendor.ownerId, Staff.userId) stay valid.
+const restoreOwnerUser = async (staff) => {
+  try {
+    if (!staff || !staff.isOwner || !staff.vendorId) return null;
+    const Vendor = require('../models/Vendor');
+    const vendor = await Vendor.findById(staff.vendorId).select('ownerId');
+    if (!vendor || !vendor.ownerId) return null;
+
+    // Never overwrite an existing account (by id or phone).
+    const existing = await User.findOne({ $or: [{ _id: vendor.ownerId }, { phone: staff.phone }] });
+    if (existing) return null;
+
+    const restored = await User.create({
+      _id: vendor.ownerId,
+      phone: staff.phone,
+      name: staff.name,
+      image: staff.image,
+      role: 'vendor'
+    });
+    console.warn(`[AUTH-SELF-HEAL] Restored missing owner User ${restored._id} for vendor ${staff.vendorId}`);
+    return restored;
+  } catch (error) {
+    console.error('[AUTH-SELF-HEAL-ERROR]', error.message);
+    return null;
+  }
+};
+
 // @desc    Login user / vendor / staff / admin
 // @route   POST /api/auth/login
 // @access  Public
@@ -264,6 +294,8 @@ const sendOTP = async (req, res) => {
     let user = await User.findOne({ phone });
     let staff = await Staff.findOne({ phone });
 
+    if (!user && staff?.isOwner) user = await restoreOwnerUser(staff) || user;
+
     if (user?.isDeleted) {
       return res.status(403).json({ message: 'This account has been deleted' });
     }
@@ -353,6 +385,8 @@ const verifyOTP = async (req, res) => {
     // Find User or Staff
     let user = await User.findOne({ phone });
     let staff = await Staff.findOne({ phone });
+
+    if (!user && staff?.isOwner) user = await restoreOwnerUser(staff) || user;
 
     // If they exist in Staff and are not the owner, treat them as Staff
     const isRegularStaff = staff && !staff.isOwner;

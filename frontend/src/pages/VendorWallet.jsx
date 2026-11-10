@@ -192,8 +192,12 @@ const VendorWallet = () => {
         },
         onSuccess: async (response) => {
           setSubmitting(true);
-          await api.post(verifyPath, response);
-          toast.success(successMessage);
+          const { data: verifyData } = await api.post(verifyPath, response);
+          if (verifyData?.pending) {
+            toast(verifyData.message || 'Payment is being confirmed. Wallet will update shortly.', { icon: '⏳' });
+          } else {
+            toast.success(successMessage);
+          }
           setIsTopupOpen(false);
           setTopupAmount('');
           await fetchData(true);
