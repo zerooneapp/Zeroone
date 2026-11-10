@@ -9,6 +9,7 @@ import GlassConfirmationModal from '../components/GlassConfirmationModal';
 import { useAuthStore } from '../store/authStore';
 import dayjs from 'dayjs';
 import { cn } from '../utils/cn';
+import { toWhatsAppNumber } from '../utils/phone';
 import { useVendorStore } from '../store/vendorStore';
 
 const MembershipPlans = () => {
@@ -144,8 +145,7 @@ const MembershipPlans = () => {
       (plan.description ? `📝 ${plan.description}\n\n` : '') +
       `Join our exclusive membership and enjoy premium services! 🎉`;
 
-    const raw = (client.phone || '').replace(/\D/g, '');
-    const phone = raw.startsWith('91') ? raw : `91${raw}`;
+    const phone = toWhatsAppNumber(client.phone);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     setSharingPlan(null);
   };

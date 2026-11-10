@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import { useVendorStore } from '../store/vendorStore';
 import toast from 'react-hot-toast';
+import { toWhatsAppNumber } from '../utils/phone';
 
 const toPascalCase = (str = '') =>
   str
@@ -249,7 +250,7 @@ const LoyalCustomers = () => {
                 <Phone size={13} />
               </a>
               <a 
-                href={`https://wa.me/${selectedCustomer.phone.replace(/\D/g, '')}`} 
+                href={`https://wa.me/${toWhatsAppNumber(selectedCustomer.phone)}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 transition-all border border-emerald-100 dark:border-emerald-900/30"
@@ -700,7 +701,7 @@ const LoyalCustomers = () => {
                   )}
                   {selectedCustomer.phone && (
                     <a 
-                      href={`https://wa.me/${selectedCustomer.phone.replace(/\D/g, '')}`} 
+                      href={`https://wa.me/${toWhatsAppNumber(selectedCustomer.phone)}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="p-2 bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 transition-all border border-emerald-100 dark:border-emerald-900/30"

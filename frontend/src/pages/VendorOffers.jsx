@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import OfferCard from '../components/OfferCard';
 import toast from 'react-hot-toast';
+import { toWhatsAppNumber } from '../utils/phone';
 import { useVendorStore } from '../store/vendorStore';
 
 const VendorOffers = () => {
@@ -102,8 +103,7 @@ const VendorOffers = () => {
       `✂️ *${services}*\n\n` +
       `Don't miss out! Book now and save big. 🔥`;
 
-    const raw = (client.phone || '').replace(/\D/g, '');
-    const phone = raw.startsWith('91') ? raw : `91${raw}`;
+    const phone = toWhatsAppNumber(client.phone);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     setSharingOffer(null);
   };
