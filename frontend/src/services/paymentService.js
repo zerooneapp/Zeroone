@@ -85,6 +85,7 @@ export const openGatewayCheckout = async ({
   name = 'ZeroOne',
   description = 'Online payment',
   prefill = {},
+  pollStatus,
   onSuccess,
   onFailure
 }) => {
@@ -94,14 +95,72 @@ export const openGatewayCheckout = async ({
 
     const cashfree = window.Cashfree({ mode: orderResponse.mode || 'sandbox' });
     const stopOffset = offsetCashfreeModal(orderResponse.mode || 'sandbox');
+    const framesBefore = new Set(document.querySelectorAll('iframe'));
     let result;
+    let stopPolling = () => {};
     try {
-      result = await cashfree.checkout({
+      const checkoutPromise = cashfree.checkout({
         paymentSessionId: orderResponse.paymentSessionId,
         redirectTarget: '_modal'
       });
+      checkoutPromise.catch(() => {});
+
+      // After a UPI app-switch the browser suspends the page, so the Cashfree
+      // modal never learns the payment finished and stays on the payment
+      // options screen. Ask our server for the real status while the modal is
+      // open (and again when the user returns to the tab); once paid, close the
+      // modal ourselves instead of waiting for Cashfree.
+      const pollPromise = typeof pollStatus === 'function'
+        ? new Promise((resolve) => {
+            let busy = false;
+            let startTimer;
+            let intervalTimer;
+            const check = async () => {
+              if (busy) return;
+              busy = true;
+              try {
+                if (await pollStatus()) resolve({ polledPaid: true });
+              } catch (_) {
+                // keep waiting; the next tick retries
+              } finally {
+                busy = false;
+              }
+            };
+            const onReturn = () => { if (!document.hidden) check(); };
+            startTimer = setTimeout(() => { intervalTimer = setInterval(check, 3000); }, 4000);
+            document.addEventListener('visibilitychange', onReturn);
+            window.addEventListener('focus', onReturn);
+            stopPolling = () => {
+              clearTimeout(startTimer);
+              clearInterval(intervalTimer);
+              document.removeEventListener('visibilitychange', onReturn);
+              window.removeEventListener('focus', onReturn);
+            };
+          })
+        : new Promise(() => {});
+
+      result = await Promise.race([checkoutPromise, pollPromise]);
+
+      if (result?.polledPaid) {
+        document.querySelectorAll('iframe').forEach((frame) => {
+          if (framesBefore.has(frame)) return;
+          let node = frame;
+          while (node.parentElement && node.parentElement !== document.body) node = node.parentElement;
+          node.remove();
+        });
+      }
     } finally {
+      stopPolling();
       stopOffset();
+    }
+
+    if (result?.polledPaid) {
+      await onSuccess?.({
+        gateway: 'cashfree',
+        order_id: orderResponse.orderId,
+        cf_payment_id: ''
+      });
+      return;
     }
 
     if (result?.error) {

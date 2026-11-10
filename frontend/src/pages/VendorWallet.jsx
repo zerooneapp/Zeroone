@@ -190,6 +190,16 @@ const VendorWallet = () => {
           name: dashboard?.shopName || '',
           contact: useVendorStore.getState().user?.phone || ''
         },
+        // True once the server confirms the payment (used to auto-close the
+        // gateway modal after a UPI app-switch).
+        pollStatus: async () => {
+          if (orderResponse?.gateway !== 'cashfree') return false;
+          const { data: statusData } = await api.post(verifyPath, {
+            gateway: 'cashfree',
+            order_id: orderResponse.orderId
+          });
+          return !statusData?.pending;
+        },
         onSuccess: async (response) => {
           setSubmitting(true);
           const { data: verifyData } = await api.post(verifyPath, response);
