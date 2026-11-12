@@ -63,6 +63,12 @@
     color-scheme: light;
     --safe-header-top: 12px;
     --safe-main-top: calc(56px + var(--safe-header-top));
+    /* Bottom inset (3-button nav bar / gesture bar). --native-safe-bottom is
+       set by the mobile app through window.__setSafeInsets(); env() covers
+       browsers and WebViews that already report the inset themselves. The
+       larger of the two wins, so the bar is never overlapped or double-padded. */
+    --native-safe-bottom: 0px;
+    --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px));
   }
 
   html.dark {

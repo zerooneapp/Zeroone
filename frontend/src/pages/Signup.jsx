@@ -209,7 +209,7 @@ const Signup = () => {
       </div>
 
       {/* Safety Buffer for Navigation Bar */}
-      <div className="pb-[env(safe-area-inset-bottom)]" />
+      <div className="pb-[var(--safe-bottom)]" />
     </div>
   );
 };

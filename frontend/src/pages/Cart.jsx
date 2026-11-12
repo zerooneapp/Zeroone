@@ -647,7 +647,7 @@ const Cart = () => {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.2 }}
           className="fixed left-4 right-4 bg-[#00246b] dark:bg-[#00246b] py-2 px-5 rounded-2xl shadow-2xl z-50 border border-[#00246b]/20 backdrop-blur-xl"
-          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 48px)' }}
+          style={{ bottom: 'calc(var(--safe-bottom) + 48px)' }}
         >
         <div className="flex items-center justify-between">
           <div className="leading-none">

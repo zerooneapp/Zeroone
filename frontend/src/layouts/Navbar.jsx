@@ -102,8 +102,8 @@ const Navbar = () => {
           isIOS
             ? "-mb-[88px] pb-0"
             : isOldAndroid
-              ? "pb-5"   // 20px fixed fallback for Android < 10 system nav bar
-              : "pb-[env(safe-area-inset-bottom,0px)]"
+              ? "pb-[max(var(--safe-bottom),20px)]"   // 20px minimum for Android < 10 where env() returns 0
+              : "pb-[var(--safe-bottom)]"
         )}
       >
         <div className={cn("flex items-center justify-between max-w-lg mx-auto", isStaff ? "h-[50px] max-w-4xl" : "h-[44px]")}>
