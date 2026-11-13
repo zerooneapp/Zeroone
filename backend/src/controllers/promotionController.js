@@ -44,9 +44,23 @@ exports.getPlansAdmin = async (req, res) => {
   }
 };
 
+// A promotion row is created as soon as the vendor starts checkout, so a
+// 'pending' row without a payment id is just an abandoned/unpaid order.
+const isPromotionPaid = (promotion) =>
+  Boolean(String(promotion?.paymentId || '').trim() || String(promotion?.gatewayPaymentId || '').trim());
+
 exports.getPromotionRequests = async (req, res) => {
   try {
-    const requests = await VendorPromotion.find()
+    const requests = await VendorPromotion.find({
+      $or: [
+        // Unpaid checkouts must never reach the admin.
+        { status: 'pending', $or: [
+          { paymentId: { $exists: true, $nin: [null, ''] } },
+          { gatewayPaymentId: { $exists: true, $nin: [null, ''] } }
+        ] },
+        { status: { $ne: 'pending' } }
+      ]
+    })
       .populate('vendorId', 'shopName ownerName')
       .populate('planId')
       .sort({ createdAt: -1 });
@@ -61,6 +75,13 @@ exports.approvePromotion = async (req, res) => {
     const { id } = req.params;
     const request = await VendorPromotion.findById(id);
     if (!request) return res.status(404).json({ message: 'Request not found' });
+
+    if (request.status !== 'pending') {
+      return res.status(400).json({ message: `Request is already ${request.status}` });
+    }
+    if (!isPromotionPaid(request)) {
+      return res.status(400).json({ message: 'Payment not completed for this request. It cannot be approved.' });
+    }
 
     const duration = request.durationDays || 30; // Fallback for legacy
     const startDate = new Date();
@@ -107,6 +128,13 @@ exports.rejectPromotion = async (req, res) => {
     const request = await VendorPromotion.findById(id);
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
+    if (request.status !== 'pending') {
+      return res.status(400).json({ message: `Request is already ${request.status}` });
+    }
+
+    // Only refund money that was actually paid. An unpaid checkout has nothing to refund.
+    const wasPaid = isPromotionPaid(request);
+
     request.status = 'rejected';
     request.rejectionReason = reason;
     await request.save();
@@ -114,7 +142,7 @@ exports.rejectPromotion = async (req, res) => {
     // Notify Vendor & Refund
     const vendor = await Vendor.findById(request.vendorId);
     if (vendor) {
-       // Refund to wallet
+       if (wasPaid) {
         await WalletService.addFunds(
           vendor,
           request.amountPaid,
@@ -124,13 +152,16 @@ exports.rejectPromotion = async (req, res) => {
             description: `Refund: Promotion request rejected: ${reason || 'N/A'}`
           }
         );
+       }
 
        await NotificationService.sendNotification({
          userIds: vendor.ownerId,
          role: 'vendor',
          type: 'PROMOTION_REJECTED',
          title: 'Promotion Request Update',
-         message: `Your promotion request was rejected. Amount ₹${request.amountPaid} has been refunded to your wallet. Reason: ${reason || 'Not specified'}`,
+         message: wasPaid
+           ? `Your promotion request was rejected. Amount ₹${request.amountPaid} has been refunded to your wallet. Reason: ${reason || 'Not specified'}`
+           : `Your promotion request was rejected. Reason: ${reason || 'Not specified'}`,
          data: { vendorId: vendor._id },
          referenceId: `PROMO_REJECT_${request._id}`
        });
