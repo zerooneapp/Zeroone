@@ -44,6 +44,19 @@ const getErrorMessage = (error, fallback) => (
   fallback
 );
 
+// Cashfree rejects the checkout ("Invalid Phone Number") unless customer_phone is
+// a valid Indian mobile: 10 digits starting 6-9. Placeholder/test accounts
+// (e.g. 1234567890) fail that, so normalise it and fall back to a valid number.
+// Set CASHFREE_FALLBACK_PHONE to override the fallback; in production no
+// fallback is used unless it is configured.
+const toCashfreePhone = (phone, environment) => {
+  const digits = String(phone || '').replace(/[^0-9]/g, '').slice(-10);
+  if (/^[6-9][0-9]{9}$/.test(digits)) return digits;
+  const fallback = String(process.env.CASHFREE_FALLBACK_PHONE || '').replace(/[^0-9]/g, '').slice(-10);
+  if (/^[6-9][0-9]{9}$/.test(fallback)) return fallback;
+  return environment === 'sandbox' ? '9876543210' : undefined;
+};
+
 const createCashfreeOrder = async ({
   amount,
   orderId,
@@ -62,7 +75,7 @@ const createCashfreeOrder = async ({
       customer_id: String(customer.customerId || customer.id || 'zeroone_user'),
       customer_name: customer.name || undefined,
       customer_email: customer.email || undefined,
-      customer_phone: customer.phone || undefined
+      customer_phone: toCashfreePhone(customer.phone, config.environment)
     },
     order_note: orderNote,
     order_tags: Object.entries(orderTags || {})

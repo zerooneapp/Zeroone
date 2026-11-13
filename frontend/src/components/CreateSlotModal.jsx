@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   X, Calendar, Clock, User, Phone, CheckCircle2,
-  ChevronRight, Scissors, AlertCircle, Loader2, Save
+  ChevronRight, Scissors, AlertCircle, Loader2, Save, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -29,6 +29,21 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [servicePricing, setServicePricing] = useState({});
   const [pricingPreview, setPricingPreview] = useState(null);
+
+  // Service search (icon in the "Select Services" header opens the search bar)
+  const [serviceSearchOpen, setServiceSearchOpen] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const normalizedServiceSearch = serviceSearch.trim().toLowerCase();
+  const visibleServices = normalizedServiceSearch
+    ? services.filter((s) => String(s.name || '').toLowerCase().includes(normalizedServiceSearch))
+    : services;
+  const closeServiceSearch = () => {
+    setServiceSearchOpen(false);
+    setServiceSearch('');
+  };
+  useEffect(() => {
+    if (!isOpen) closeServiceSearch();
+  }, [isOpen]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -274,9 +289,35 @@ const CreateSlotModal = ({ isOpen, onClose, onRefresh }) => {
                   <label className="text-[9px] font-black capitalize text-gray-400 tracking-widest flex items-center gap-1.5">
                     <Scissors size={12} /> Select Services
                   </label>
+                  <button
+                    type="button"
+                    aria-label={serviceSearchOpen ? 'Close service search' : 'Search services'}
+                    onClick={() => (serviceSearchOpen ? closeServiceSearch() : setServiceSearchOpen(true))}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-[#00246b] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-800 transition-all"
+                  >
+                    {serviceSearchOpen ? <X size={14} /> : <Search size={14} />}
+                  </button>
                 </div>
+                {serviceSearchOpen && (
+                  <div className="relative px-0.5">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      autoFocus
+                      type="text"
+                      value={serviceSearch}
+                      onChange={(e) => setServiceSearch(e.target.value)}
+                      placeholder="Search service..."
+                      className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl pl-9 pr-3 py-2.5 text-xs font-bold text-gray-900 dark:text-white shadow-sm focus:shadow-none transition-all caret-[#00246b] dark:caret-white placeholder:text-slate-400/70 dark:placeholder:text-gray-500/70"
+                    />
+                  </div>
+                )}
+                {visibleServices.length === 0 && normalizedServiceSearch && (
+                  <p className="text-center text-[10px] font-bold text-slate-400 py-4">
+                    No service found for "{serviceSearch.trim()}"
+                  </p>
+                )}
                 <div className="grid grid-cols-2 gap-1.5 p-0.5">
-                  {services.map(s => (
+                  {visibleServices.map(s => (
                     <button
                       key={s._id}
                       onClick={() => toggleService(s._id)}

@@ -2,6 +2,8 @@ const WalletTransaction = require('../models/WalletTransaction');
 const Vendor = require('../models/Vendor');
 const { verifyGatewayPayment } = require('./paymentGatewayService');
 const { addFunds, activateMonthlySubscription } = require('./walletService');
+const VendorPromotion = require('../models/VendorPromotion');
+const { settlePromotionPayment } = require('./promotionService');
 
 const SETTLE_LOCK_MS = 2 * 60 * 1000;
 const RECONCILABLE_CATEGORIES = ['wallet_topup', 'monthly_subscription'];
@@ -130,7 +132,39 @@ const reconcilePendingPayments = async ({ vendorId, minAgeMs = 15 * 1000, maxAge
     }
   }
 
-  return { checked: pending.length, settled: settledCount };
+  // Profile-boost payments: the promotion row exists from checkout start, so a
+  // paid-but-unverified one (webhook missed, UPI app-switch) is still
+  // 'pending' with no payment id. Confirm it with Cashfree and settle it.
+  const promoFilter = {
+    status: 'pending',
+    paymentGateway: 'cashfree',
+    gatewayOrderId: { $exists: true, $ne: '' },
+    $or: [{ paymentId: { $exists: false } }, { paymentId: null }, { paymentId: '' }],
+    createdAt: { $gte: new Date(now - maxAgeMs), $lte: new Date(now - minAgeMs) }
+  };
+  if (vendorId) promoFilter.vendorId = vendorId;
+
+  const pendingPromotions = await VendorPromotion.find(promoFilter).sort({ createdAt: 1 }).limit(limit);
+  for (const promotion of pendingPromotions) {
+    try {
+      const verification = await verifyGatewayPayment({
+        gateway: promotion.paymentGateway,
+        orderId: promotion.gatewayOrderId,
+        expectedAmount: promotion.amountPaid
+      });
+      if (!verification.verified) continue;
+
+      const result = await settlePromotionPayment({ promotion, paymentId: verification.paymentId });
+      if (result.settled) {
+        settledCount += 1;
+        console.log(`[PAYMENT-RECONCILE] Settled promotion ${promotion.gatewayOrderId} (vendor ${promotion.vendorId})`);
+      }
+    } catch (error) {
+      console.warn(`[PAYMENT-RECONCILE] promotion ${promotion.gatewayOrderId}: ${error.message}`);
+    }
+  }
+
+  return { checked: pending.length + pendingPromotions.length, settled: settledCount };
 };
 
 module.exports = { settleVerifiedTransaction, reconcilePendingPayments };

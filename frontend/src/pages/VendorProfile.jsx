@@ -406,13 +406,32 @@ const VendorProfile = () => {
                contact: user?.phone || '',
                email: user?.email || ''
             },
+            // True once the server confirms the payment. Lets the gateway modal
+            // close itself after a UPI app-switch instead of staying stuck on
+            // the payment options screen.
+            pollStatus: async () => {
+               if (orderData?.gateway !== 'cashfree') return false;
+               const { data: statusData } = await api.post('/promotions/vendor/verify-payment', {
+                  gateway: 'cashfree',
+                  order_id: orderData.orderId
+               });
+               return !statusData?.pending;
+            },
             onSuccess: async (response) => {
-               await api.post('/promotions/vendor/verify-payment', {
+               const { data: verifyData } = await api.post('/promotions/vendor/verify-payment', {
                   ...response,
                   days: promoDays,
                   amountPaid: orderData.totalAmount
                });
-               toast.success('Payment successful! Promotion request sent.');
+               setPromoTab('pending');
+               if (verifyData?.pending) {
+                  // Payment still confirming at the gateway; the server settles
+                  // it automatically, so keep refreshing until it shows up.
+                  toast(verifyData.message || 'Payment is being confirmed. Your request will appear shortly.', { icon: '⏳', duration: 5000 });
+                  [8000, 25000, 60000, 120000].forEach((delay) => setTimeout(() => { fetchPlans(); }, delay));
+               } else {
+                  toast.success('Payment successful! Your boost request has been sent for admin approval.', { duration: 5000 });
+               }
                await fetchPlans();
             },
             onFailure: (error) => {

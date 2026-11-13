@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const Vendor = require('../models/Vendor');
 const WalletTransaction = require('../models/WalletTransaction');
 const VendorPromotion = require('../models/VendorPromotion');
+const { settlePromotionPayment } = require('../services/promotionService');
 const UserMembership = require('../models/UserMembership');
 const VendorMembershipPlan = require('../models/VendorMembershipPlan');
 const NotificationService = require('../services/notificationService');
@@ -82,41 +83,7 @@ const settleMembership = async ({ membership, paymentId, signature }) => {
 
 const settlePromotion = async ({ promotion, paymentId, signature }) => {
   if (!promotion) return;
-  if (promotion.paymentId) return;
-  if (promotion.status !== 'pending') return;
-  promotion.paymentId = paymentId;
-  promotion.gatewayPaymentId = paymentId;
-  promotion.gatewaySignature = signature || '';
-  await promotion.save();
-
-  const existingTransaction = await WalletTransaction.findOne({ referenceId: `PROMO_${promotion._id}` });
-  if (!existingTransaction) {
-    await WalletTransaction.create({
-      vendorId: promotion.vendorId,
-      amount: promotion.amountPaid,
-      type: 'credit',
-      reason: 'promotion_payment',
-      category: 'promotion_payment',
-      status: 'completed',
-      paymentGateway: promotion.paymentGateway,
-      paymentMethod: promotion.paymentGateway,
-      gatewayOrderId: promotion.gatewayOrderId,
-      gatewayPaymentId: paymentId,
-      gatewaySignature: signature || '',
-      description: `Profile Boost Promotion: ${promotion.durationDays} days`,
-      referenceId: `PROMO_${promotion._id}`
-    });
-  }
-
-  const vendor = await Vendor.findById(promotion.vendorId);
-  if (vendor) {
-    await NotificationService.notifyAdmins({
-      type: 'PROMOTION_REQUEST',
-      title: 'New Promotion Request',
-      message: `${vendor.shopName} has requested a profile promotion for ${promotion.durationDays} days.`,
-      data: { requestId: promotion._id }
-    });
-  }
+  await settlePromotionPayment({ promotion, paymentId, signature });
 };
 
 const settlePayment = async ({ gateway, orderId, paymentId, signature, amount }) => {

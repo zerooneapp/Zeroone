@@ -369,9 +369,11 @@ const initCronJobs = () => {
   // 9. Expire profile boosts whose paid duration has ended (Every 5 minutes)
   cron.schedule('*/5 * * * *', async () => {
     try {
-      const { expireDuePromotions } = require('./promotionService');
+      const { expireDuePromotions, cleanupAbandonedPromotions } = require('./promotionService');
       const count = await expireDuePromotions();
       if (count) console.log(`[CRON-PROMOTION-EXPIRY] Expired ${count} profile boost(s).`);
+      const removed = await cleanupAbandonedPromotions();
+      if (removed) console.log(`[CRON-PROMOTION-CLEANUP] Removed ${removed} abandoned unpaid checkout(s).`);
     } catch (error) {
       console.error('[CRON-PROMOTION-EXPIRY-ERROR]', error.message);
     }

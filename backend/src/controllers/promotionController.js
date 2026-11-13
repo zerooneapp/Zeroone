@@ -4,7 +4,7 @@ const Vendor = require('../models/Vendor');
 const WalletTransaction = require('../models/WalletTransaction');
 const NotificationService = require('../services/notificationService');
 const WalletService = require('../services/walletService');
-const { expireDuePromotions } = require('../services/promotionService');
+const { expireDuePromotions, settlePromotionPayment } = require('../services/promotionService');
 const { createGatewayOrder, verifyGatewayPayment } = require('../services/paymentGatewayService');
 
 const GlobalSettings = require('../models/GlobalSettings');
@@ -279,7 +279,7 @@ exports.verifyPayment = async (req, res) => {
     const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
-    const promotion = await VendorPromotion.findOne({
+    let promotion = await VendorPromotion.findOne({
       vendorId: vendor._id,
       gatewayOrderId: submittedOrderId
     });
@@ -304,45 +304,24 @@ exports.verifyPayment = async (req, res) => {
     });
 
     if (!verification.verified) {
+      if ((promotion.paymentGateway || String(body.gateway || '')).toLowerCase() === 'cashfree') {
+        // Payment may still be processing at the gateway (UPI app-switch etc).
+        // Keep it pending; the webhook / reconcile job settles it automatically.
+        return res.status(202).json({
+          pending: true,
+          message: 'Payment is still being confirmed. Your request will appear shortly.'
+        });
+      }
       return res.status(400).json({ message: verification.message || 'Payment verification failed' });
     }
 
-    const gateway = promotion.paymentGateway || String(body.gateway || 'razorpay').toLowerCase();
-    promotion.paymentId = verification.paymentId || submittedPaymentId || '';
-    promotion.gatewayPaymentId = verification.paymentId || submittedPaymentId || '';
-    promotion.gatewaySignature = body.razorpay_signature || body.signature || '';
-    promotion.status = 'pending';
-    await promotion.save();
-
-    await WalletTransaction.findOneAndUpdate(
-      { referenceId: `PROMO_${promotion._id}` },
-      {
-        $setOnInsert: {
-          vendorId: vendor._id,
-          initiatedByUserId: req.user._id,
-          amount: promotion.amountPaid,
-          type: 'credit',
-          reason: 'promotion_payment',
-          category: 'promotion_payment',
-          status: 'completed',
-          paymentGateway: gateway,
-          paymentMethod: gateway,
-          gatewayOrderId: submittedOrderId,
-          gatewayPaymentId: verification.paymentId || submittedPaymentId || '',
-          gatewaySignature: body.razorpay_signature || body.signature || '',
-          description: `Profile Boost Promotion: ${promotion.durationDays} days`,
-          referenceId: `PROMO_${promotion._id}`
-        }
-      },
-      { upsert: true, new: true }
-    );
-
-    NotificationService.notifyAdmins({
-      type: 'PROMOTION_REQUEST',
-      title: 'New Promotion Request',
-      message: `${vendor.shopName} has requested a profile promotion for ${promotion.durationDays} days.`,
-      data: { requestId: promotion._id }
+    const result = await settlePromotionPayment({
+      promotion,
+      paymentId: verification.paymentId || submittedPaymentId || '',
+      signature: body.razorpay_signature || body.signature || '',
+      initiatedByUserId: req.user._id
     });
+    if (result.promotion) promotion = result.promotion;
 
     res.status(201).json({
       message: 'Payment verified and promotion requested successfully.',
@@ -361,7 +340,16 @@ exports.getVendorPromotions = async (req, res) => {
 
     await expireDuePromotions(vendor._id).catch((err) => console.error('[PROMO-EXPIRE-ERROR]', err.message));
 
-    const promotions = await VendorPromotion.find({ vendorId: vendor._id })
+    // A row is created the moment checkout starts. Unpaid 'pending' rows are just
+    // abandoned/failed payments, so they must not appear as requests.
+    const promotions = await VendorPromotion.find({
+      vendorId: vendor._id,
+      $or: [
+        { status: { $ne: 'pending' } },
+        { paymentId: { $exists: true, $nin: [null, ''] } },
+        { gatewayPaymentId: { $exists: true, $nin: [null, ''] } }
+      ]
+    })
       .populate('planId')
       .sort({ createdAt: -1 });
     res.status(200).json(promotions);
