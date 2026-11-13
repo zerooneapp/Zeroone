@@ -341,6 +341,18 @@ const getNearbyVendors = async (req, res) => {
         }
       },
       {
+        // Only boosts that have not expired rank first, even if the expiry cron
+        // has not flipped isPromoted yet.
+        $addFields: {
+          isPromoted: {
+            $and: [
+              { $eq: ['$isPromoted', true] },
+              { $gt: ['$promotionExpiry', new Date()] }
+            ]
+          }
+        }
+      },
+      {
         $sort: { isPromoted: -1, "dist.calculated": 1 }
       }
     ];

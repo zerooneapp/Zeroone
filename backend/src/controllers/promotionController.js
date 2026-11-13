@@ -4,6 +4,7 @@ const Vendor = require('../models/Vendor');
 const WalletTransaction = require('../models/WalletTransaction');
 const NotificationService = require('../services/notificationService');
 const WalletService = require('../services/walletService');
+const { expireDuePromotions } = require('../services/promotionService');
 const { createGatewayOrder, verifyGatewayPayment } = require('../services/paymentGatewayService');
 
 const GlobalSettings = require('../models/GlobalSettings');
@@ -169,6 +170,9 @@ exports.createOrder = async (req, res) => {
     const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
 
+    // An elapsed boost must not block buying a new one.
+    await expireDuePromotions(vendor._id).catch((err) => console.error('[PROMO-EXPIRE-ERROR]', err.message));
+
     const existingPromo = await VendorPromotion.findOne({
       vendorId: vendor._id,
       $or: [
@@ -323,6 +327,8 @@ exports.getVendorPromotions = async (req, res) => {
     const activeVendorId = req.headers['x-vendor-id'] || req.user?.lastActiveVendorId;
     const vendor = await Vendor.findOne({ _id: activeVendorId, ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor profile not found' });
+
+    await expireDuePromotions(vendor._id).catch((err) => console.error('[PROMO-EXPIRE-ERROR]', err.message));
 
     const promotions = await VendorPromotion.find({ vendorId: vendor._id })
       .populate('planId')

@@ -366,6 +366,17 @@ const initCronJobs = () => {
     }
   });
 
+  // 9. Expire profile boosts whose paid duration has ended (Every 5 minutes)
+  cron.schedule('*/5 * * * *', async () => {
+    try {
+      const { expireDuePromotions } = require('./promotionService');
+      const count = await expireDuePromotions();
+      if (count) console.log(`[CRON-PROMOTION-EXPIRY] Expired ${count} profile boost(s).`);
+    } catch (error) {
+      console.error('[CRON-PROMOTION-EXPIRY-ERROR]', error.message);
+    }
+  });
+
   console.log('[CRON-SERVICE] All system tasks initialized.');
 };
 
