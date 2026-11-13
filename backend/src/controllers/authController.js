@@ -5,6 +5,11 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { sendOtpSms } = require('../services/smsService');
 
+const { checkAndRecordOtpSend, MAX_VERIFY_ATTEMPTS } = require('../utils/otpThrottle');
+
+// Fixed-OTP (123456) test accounts. Keep this list minimal.
+const TEST_OTP_NUMBERS = ['1234567890', '8817921168', '9669002380'];
+
 const shouldExposeOtpInResponse = false;
 const shouldLogOtpToConsole = true;
 
@@ -312,7 +317,7 @@ const sendOTP = async (req, res) => {
     }
 
     // 🛡️ TESTING BYPASS: Fix OTP to 123456 for test numbers
-    const isTestNumber = ['1234567890', '9999999999', '7987588804', '8856666666', '8817921168', '9669002380'].includes(phone);
+    const isTestNumber = TEST_OTP_NUMBERS.includes(phone);
     const otp = isTestNumber ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins for test buffer
 
@@ -320,22 +325,41 @@ const sendOTP = async (req, res) => {
       return res.status(403).json({ message: 'Admins must use the secure admin login' });
     }
 
+    // Throttle OTP sends per number (SMS spam / brute-force protection).
+    // Test numbers use a fixed OTP and send no SMS, so they are exempt.
+    if (!isTestNumber) {
+      const throttle = checkAndRecordOtpSend(phone);
+      if (!throttle.allowed) {
+        res.set('Retry-After', String(throttle.retryAfterSec));
+        return res.status(429).json({
+          message: throttle.reason === 'cooldown'
+            ? `Please wait ${throttle.retryAfterSec} seconds before requesting another OTP.`
+            : 'Too many OTP requests. Please try again later.',
+          retryAfterSec: throttle.retryAfterSec
+        });
+      }
+    }
+
     const isRegularStaff = staff && !staff.isOwner;
 
+    // A fresh OTP always starts with a fresh attempt counter.
     if (isRegularStaff) {
       staff.otp = otp;
       staff.otpExpires = otpExpires;
+      staff.otpAttempts = 0;
       await staff.save();
     } else if (user) {
       user.otp = otp;
       user.otpExpires = otpExpires;
+      user.otpAttempts = 0;
       await user.save();
     } else if (staff) {
       staff.otp = otp;
       staff.otpExpires = otpExpires;
+      staff.otpAttempts = 0;
       await staff.save();
     } else {
-      await User.create({ phone, otp, otpExpires, role: 'customer' });
+      await User.create({ phone, otp, otpExpires, otpAttempts: 0, role: 'customer' });
     }
 
     // Skip real SMS for test number
@@ -399,14 +423,38 @@ const verifyOTP = async (req, res) => {
     }
 
     // Check OTP
-    const isDefaultAuth = ['1234567890', '7987588804', '8856666666', '8817921168', '9669002380'].includes(phone) && otp === '123456';
-    if (!isDefaultAuth && (finalAccount.otp !== otp || new Date() > finalAccount.otpExpires)) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    const isDefaultAuth = TEST_OTP_NUMBERS.includes(phone) && otp === '123456';
+    if (!isDefaultAuth) {
+      // Too many wrong guesses: the OTP is burned, a new one must be requested.
+      if ((finalAccount.otpAttempts || 0) >= MAX_VERIFY_ATTEMPTS) {
+        finalAccount.otp = undefined;
+        finalAccount.otpExpires = undefined;
+        await finalAccount.save();
+        return res.status(429).json({ message: 'Too many incorrect attempts. Please request a new OTP.' });
+      }
+
+      if (!finalAccount.otp || String(finalAccount.otp) !== String(otp) || new Date() > finalAccount.otpExpires) {
+        // Atomic increment so parallel guesses cannot dodge the counter.
+        const updated = await finalAccount.constructor.findByIdAndUpdate(
+          finalAccount._id,
+          { $inc: { otpAttempts: 1 } },
+          { new: true }
+        ).select('otpAttempts');
+        if ((updated?.otpAttempts || 0) >= MAX_VERIFY_ATTEMPTS) {
+          await finalAccount.constructor.updateOne(
+            { _id: finalAccount._id },
+            { $unset: { otp: '', otpExpires: '' } }
+          );
+          return res.status(429).json({ message: 'Too many incorrect attempts. Please request a new OTP.' });
+        }
+        return res.status(400).json({ message: 'Invalid or expired OTP' });
+      }
     }
 
     // Clear OTP
     finalAccount.otp = undefined;
     finalAccount.otpExpires = undefined;
+    finalAccount.otpAttempts = 0;
     await finalAccount.save();
 
     // Determine if registration is complete (User should have a name)

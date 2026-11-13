@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema({
   },
   otp: { type: String },
   otpExpires: { type: Date },
+  otpAttempts: { type: Number, default: 0 },
   lastActiveVendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', default: null }
 }, { timestamps: true });
 
@@ -71,5 +72,7 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 };
 
 userSchema.index({ location: '2dsphere' });
+
+userSchema.index({ role: 1 });
 
 module.exports = mongoose.model('User', userSchema);

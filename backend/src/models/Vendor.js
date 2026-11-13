@@ -79,4 +79,10 @@ vendorSchema.pre('save', async function () {
 
 vendorSchema.index({ location: '2dsphere' });
 
+// Query-path indexes (ownerId lookups, admin pending lists, discovery filters)
+vendorSchema.index({ ownerId: 1, isDeleted: 1 });
+vendorSchema.index({ status: 1, isProfileComplete: 1 });
+vendorSchema.index({ status: 1, isActive: 1, isProfileComplete: 1 });
+vendorSchema.index({ category: 1 });
+
 module.exports = mongoose.model('Vendor', vendorSchema);

@@ -26,6 +26,7 @@ const staffSchema = new mongoose.Schema({
   fcmTokenMobile: [String], // For Android/iOS
   otp: { type: String },
   otpExpires: { type: Date },
+  otpAttempts: { type: Number, default: 0 },
   note: { type: String, default: '' }
 }, { timestamps: true });
 
@@ -62,5 +63,7 @@ staffSchema.index(
 );
 staffSchema.index({ vendorId: 1 });
 staffSchema.index({ vendorId: 1, isOwner: 1 }, { unique: true, partialFilterExpression: { isOwner: true } });
+
+staffSchema.index({ userId: 1 });
 
 module.exports = mongoose.model('Staff', staffSchema);

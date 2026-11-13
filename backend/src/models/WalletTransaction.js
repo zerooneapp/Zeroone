@@ -31,4 +31,7 @@ transactionSchema.index({ vendorId: 1, timestamp: -1 });
 transactionSchema.index({ gatewayOrderId: 1 });
 transactionSchema.index({ referenceId: 1 }, { unique: true, sparse: true });
 
+// Promotion/other category listings
+transactionSchema.index({ category: 1, createdAt: -1 });
+
 module.exports = mongoose.model('WalletTransaction', transactionSchema);

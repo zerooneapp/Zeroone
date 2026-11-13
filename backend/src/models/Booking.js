@@ -39,4 +39,8 @@ bookingSchema.index({ vendorId: 1, startTime: 1 });
 bookingSchema.index({ vendorId: 1, status: 1 });
 bookingSchema.index({ userId: 1 });
 
+// Cron sweeps (status + startTime), customer history and reminders
+bookingSchema.index({ status: 1, startTime: 1 });
+bookingSchema.index({ userId: 1, startTime: -1 });
+
 module.exports = mongoose.model('Booking', bookingSchema);

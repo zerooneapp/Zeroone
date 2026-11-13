@@ -25,4 +25,7 @@ const withdrawalRequestSchema = new mongoose.Schema({
   referenceId: { type: String, unique: true }
 }, { timestamps: true });
 
+withdrawalRequestSchema.index({ vendorId: 1, status: 1 });
+withdrawalRequestSchema.index({ status: 1, createdAt: -1 });
+
 module.exports = mongoose.model('WithdrawalRequest', withdrawalRequestSchema);

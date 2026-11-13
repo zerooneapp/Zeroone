@@ -18,4 +18,7 @@ const notificationSchema = new mongoose.Schema({
 notificationSchema.index({ userId: 1, type: 1, referenceId: 1 }, { unique: true });
 notificationSchema.index({ userId: 1, isRead: 1 });
 
+// Notification lists are always newest-first per user
+notificationSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Notification', notificationSchema);

@@ -16,4 +16,6 @@ const cartSchema = new mongoose.Schema({
 // Auto clear cart if inactive for 24 hours
 cartSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 86400 });
 
+cartSchema.index({ userId: 1, vendorId: 1 });
+
 module.exports = mongoose.model('Cart', cartSchema);

@@ -84,4 +84,8 @@ const userMembershipSchema = new mongoose.Schema({
 // Index for quick lookup of active memberships for a user at a specific vendor
 userMembershipSchema.index({ userId: 1, vendorId: 1, status: 1 });
 
+userMembershipSchema.index({ gatewayOrderId: 1 });
+userMembershipSchema.index({ status: 1, endDate: 1 });
+userMembershipSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('UserMembership', userMembershipSchema);
