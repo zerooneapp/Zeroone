@@ -67,6 +67,12 @@ const createCashfreeOrder = async ({
   notifyUrl
 }) => {
   const config = assertConfigured();
+  const customerPhone = toCashfreePhone(customer.phone, config.environment);
+  if (!customerPhone) {
+    // Cashfree requires a valid Indian mobile; fail early with a clear message
+    // instead of a raw gateway error.
+    throw new Error('Your registered mobile number is not valid for online payment. Please update it or contact support.');
+  }
   const payload = {
     order_id: orderId,
     order_amount: Number(Number(amount).toFixed(2)),
@@ -75,7 +81,7 @@ const createCashfreeOrder = async ({
       customer_id: String(customer.customerId || customer.id || 'zeroone_user'),
       customer_name: customer.name || undefined,
       customer_email: customer.email || undefined,
-      customer_phone: toCashfreePhone(customer.phone, config.environment)
+      customer_phone: customerPhone
     },
     order_note: orderNote,
     order_tags: Object.entries(orderTags || {})

@@ -8,7 +8,7 @@ const { sendOtpSms } = require('../services/smsService');
 const { checkAndRecordOtpSend, MAX_VERIFY_ATTEMPTS } = require('../utils/otpThrottle');
 
 // Fixed-OTP (123456) test accounts. Keep this list minimal.
-const TEST_OTP_NUMBERS = ['1234567890', '8817921168', '9669002380'];
+const TEST_OTP_NUMBERS = ['1234567890', '8817921168', '9669002380', '7879363299'];
 
 const shouldExposeOtpInResponse = false;
 const shouldLogOtpToConsole = true;
