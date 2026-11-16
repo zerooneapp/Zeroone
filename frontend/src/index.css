@@ -69,6 +69,11 @@
        larger of the two wins, so the bar is never overlapped or double-padded. */
     --native-safe-bottom: 0px;
     --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px));
+    /* Bottom padding of the bottom navigation bars only. Capped so a large inset
+       (e.g. applied by both the app and the WebView) cannot leave a big empty
+       strip under the nav. Raise/remove the cap if the nav ever gets covered by
+       the system buttons on an edge-to-edge phone. */
+    --nav-bottom-pad: min(var(--safe-bottom), 16px);
   }
 
   html.dark {
