@@ -330,34 +330,21 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
     return null;
   }
 
-  const vendorClosureWindows = await getVendorClosureWindows(vendorId, start, end);
+  // Independent lookups run together (same checks, same order of decisions).
+  const [vendorClosureWindows, staffMembers] = await Promise.all([
+    getVendorClosureWindows(vendorId, start, end),
+    getEligibleStaffMembers(vendorId, serviceIds)
+  ]);
   if (hasVendorClosureOverlap(start, end, vendorClosureWindows)) {
     return null;
   }
 
-  const staffMembers = await getEligibleStaffMembers(vendorId, serviceIds);
   if (staffMembers.length === 0) return null;
 
   const staffIds = staffMembers.map((staff) => staff._id);
   
   // 🛡️ Staff Closure Check
   const StaffClosure = require('../models/StaffClosure');
-  const staffClosureRecords = await StaffClosure.find({
-    staffId: { $in: staffIds },
-    status: 'active',
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
-  }).lean();
-
-  const staffAvailabilityMap = await getStaffAvailabilityMap(staffIds, targetDate);
-
-  const bookings = await Booking.find({
-    staffId: { $in: staffIds },
-    status: { $ne: 'cancelled' },
-    _id: { $ne: excludeBookingId },
-    startTime: { $lt: end.toDate() },
-    endTime: { $gt: start.toDate() }
-  });
 
   const lockFilter = {
     staffId: { $in: staffIds },
@@ -371,7 +358,23 @@ const findFirstAvailableStaff = async (vendorId, serviceIds, startTime, endTime,
     lockFilter.userId = { $ne: excludeUserId };
   }
 
-  const slotLocks = await SlotLock.find(lockFilter);
+  const [staffClosureRecords, staffAvailabilityMap, bookings, slotLocks] = await Promise.all([
+    StaffClosure.find({
+      staffId: { $in: staffIds },
+      status: 'active',
+      startTime: { $lt: end.toDate() },
+      endTime: { $gt: start.toDate() }
+    }).lean(),
+    getStaffAvailabilityMap(staffIds, targetDate),
+    Booking.find({
+      staffId: { $in: staffIds },
+      status: { $ne: 'cancelled' },
+      _id: { $ne: excludeBookingId },
+      startTime: { $lt: end.toDate() },
+      endTime: { $gt: start.toDate() }
+    }),
+    SlotLock.find(lockFilter)
+  ]);
 
   const busyStaffIds = new Set([
     ...bookings.map((booking) => booking.staffId.toString()),

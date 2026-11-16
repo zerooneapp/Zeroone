@@ -87,38 +87,50 @@ const buildSlotConflictError = async (message, vendorId, serviceIds, start) => {
 };
 
 const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime, serviceAddress, membershipId = null) => {
+  const timingStart = Date.now();
   const start = moment(startTime).tz('Asia/Kolkata').seconds(0).milliseconds(0);
 
   // 🛡️ SECURITY GUARD: Block bookings if vendor is not active
-  const vendor = await Vendor.findById(vendorId);
+  const [vendor, serviceDetails] = await Promise.all([
+    Vendor.findById(vendorId),
+    Service.find({ _id: { $in: serviceIds }, vendorId })
+  ]);
   const { getUpdatedStatus } = require('./walletService');
   const liveStatus = vendor ? await getUpdatedStatus(vendor) : 'inactive';
   if (!vendor || liveStatus !== 'active' || vendor.isActive === false) {
     throw new Error('Partner is currently not accepting new bookings (Account Inactive)');
   }
-
-  const serviceDetails = await Service.find({ _id: { $in: serviceIds }, vendorId });
+  const timingVendorChecked = Date.now();
 
   if (serviceDetails.length !== serviceIds.length) throw new Error('Services unavailable');
 
-  const pricingPreview = await calculatePricingPreview(vendorId, serviceDetails, userId, membershipId);
-  const { bookingType, resolvedServiceAddress } = resolveBookingMode(serviceDetails, serviceAddress);
-  const totalPrice = pricingPreview.finalTotal;
   const totalDuration = serviceDetails.reduce((acc, s) => acc + (s.duration || 0) + (s.bufferTime || 0), 0);
   const end = start.clone().add(totalDuration, 'minutes');
-  const closureWindows = await getActiveClosureWindows(vendorId, start, end);
+
+  // Pricing and the slot checks do not depend on each other; run them together
+  // and then apply the same checks in the same order as before.
+  const [pricingPreview, closureWindows, existingBooking, lock] = await Promise.all([
+    calculatePricingPreview(vendorId, serviceDetails, userId, membershipId),
+    getActiveClosureWindows(vendorId, start, end),
+    findOverlappingBooking({ staffId, start, end }),
+    SlotLock.findOne({ userId, vendorId, staffId, startTime: start.toDate() })
+  ]);
+  const { bookingType, resolvedServiceAddress } = resolveBookingMode(serviceDetails, serviceAddress);
+  const totalPrice = pricingPreview.finalTotal;
 
   if (hasClosureOverlap(start, end, closureWindows)) {
     throw new Error('Shop is temporarily closed for the selected time');
   }
 
-  const existingBooking = await findOverlappingBooking({ staffId, start, end });
   if (existingBooking) {
     throw await buildSlotConflictError('Slot occupied', vendorId, serviceIds, start);
   }
 
-  const lock = await SlotLock.findOne({ userId, vendorId, staffId, startTime: start.toDate() });
   if (!lock) throw new Error('Booking session timed out. Please select the slot again.');
+  const timingValidated = Date.now();
+
+  // Needed only for the notification below; load it while the booking is saved.
+  const staffPromise = Staff.findById(staffId);
 
   const booking = await Booking.create({
     userId,
@@ -147,8 +159,9 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
   });
 
   await SlotLock.deleteOne({ _id: lock._id });
+  const timingSaved = Date.now();
 
-  const staff = await Staff.findById(staffId);
+  const staff = await staffPromise;
 
   const notificationTargets = new Map();
   const addTarget = (uid, payload) => {
@@ -202,15 +215,27 @@ const finalizeBooking = async (userId, vendorId, staffId, serviceIds, startTime,
     });
   }
 
-  await sendRoleNotifications(Array.from(notificationTargets.values()));
+  // The booking is already saved. Push delivery (FCM + several DB lookups per
+  // recipient, 10s timeout each) must not hold up the response, so run it in
+  // the background. Failures are logged and never affect the booking.
+  const notifyStartedAt = Date.now();
+  sendRoleNotifications(Array.from(notificationTargets.values()))
+    .then(() => console.log(`[BOOKING-TIMING] ${booking._id} notifications finished in ${Date.now() - notifyStartedAt}ms (background)`))
+    .catch((error) => console.error('[BOOKING-NOTIFY-ERROR]', booking._id?.toString(), error.message));
 
   // 4. Notify Admins for Dashboard Sync (Silent)
-  NotificationService.notifyAdmins({
+  Promise.resolve(NotificationService.notifyAdmins({
     type: 'NEW_BOOKING',
     title: 'New Booking on Platform',
     message: `A new booking has been confirmed at ${vendor.shopName}.`,
     data: { bookingId: booking._id }
-  });
+  })).catch((error) => console.error('[BOOKING-ADMIN-NOTIFY-ERROR]', error.message));
+
+  console.log(
+    `[BOOKING-TIMING] ${booking._id} responded in ${Date.now() - timingStart}ms ` +
+    `(vendorCheck ${timingVendorChecked - timingStart}ms, validate ${timingValidated - timingVendorChecked}ms, ` +
+    `save ${timingSaved - timingValidated}ms, prepare ${Date.now() - timingSaved}ms)`
+  );
 
   return booking;
 };

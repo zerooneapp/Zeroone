@@ -78,18 +78,21 @@ const lockSlot = async (req, res) => {
     }
 
     // 1. User Restriction: One active lock per user per vendor (CLEAR BEFORE CHECKING)
-    await SlotLock.deleteMany({ userId: actorId, vendorId });
-
+    // The staff lookup already ignores this user's own locks, so clearing them
+    // and searching can run together; both finish before the new lock is created.
     // 2. Identify a free staff member for this specific slot
-    const staff = await findFirstAvailableStaff(
-      vendorId, 
-      services, 
-      normalizedStart.toDate(), 
-      end.toDate(),
-      staffId,
-      excludeBookingId,
-      actorId // Pass current user to exclude their own locks
-    );
+    const [, staff] = await Promise.all([
+      SlotLock.deleteMany({ userId: actorId, vendorId }),
+      findFirstAvailableStaff(
+        vendorId, 
+        services, 
+        normalizedStart.toDate(), 
+        end.toDate(),
+        staffId,
+        excludeBookingId,
+        actorId // Pass current user to exclude their own locks
+      )
+    ]);
 
     if (!staff) {
       return res.status(400).json({ message: 'Slot is no longer available' });
