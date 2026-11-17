@@ -69,11 +69,15 @@
        larger of the two wins, so the bar is never overlapped or double-padded. */
     --native-safe-bottom: 0px;
     --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px));
-    /* Bottom padding of the bottom navigation bars only. Capped so a large inset
-       (e.g. applied by both the app and the WebView) cannot leave a big empty
-       strip under the nav. Raise/remove the cap if the nav ever gets covered by
-       the system buttons on an edge-to-edge phone. */
-    --nav-bottom-pad: min(var(--safe-bottom), 16px);
+    /* Bottom padding of the bottom navigation bars. In the apps the page is drawn
+       under the system bar (edge-to-edge), so this padding is the space the
+       3-button / gesture bar occupies. It must be the full inset: capping it made
+       the nav sit under the system buttons. */
+    --nav-bottom-pad: var(--safe-bottom);
+    /* Bottom padding for footers on full-screen pages (login). Always clears the
+       system bar; in the apps it keeps a floor because the inset is not always
+       reported to the WebView. */
+    --footer-bottom-pad: calc(var(--safe-bottom) + 16px);
   }
 
   html.dark {
@@ -90,6 +94,7 @@
   html.is-app {
     --safe-header-top: max(46px, env(safe-area-inset-top, 46px));
     --safe-main-top: calc(58px + var(--safe-header-top));
+    --footer-bottom-pad: max(calc(var(--safe-bottom) + 16px), 64px);
   }
 }
 
