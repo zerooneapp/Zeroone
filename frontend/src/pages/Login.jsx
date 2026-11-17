@@ -306,7 +306,7 @@ const CustomerAuth = () => {
 
       {/* Footer Branding */}
       {step === 'phone' && (
-        <div className="pb-4 flex flex-col items-center justify-center gap-4 relative z-10">
+        <div className="pb-[var(--footer-bottom-pad)] flex flex-col items-center justify-center gap-4 relative z-10">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 max-w-[320px]">
             <button 
               onClick={() => {
