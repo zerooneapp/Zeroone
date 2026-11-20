@@ -259,6 +259,12 @@ class NotificationService {
         }), PUSH_REQUEST_TIMEOUT_MS, 'Web FCM request')
         : Promise.resolve({ successCount: 0, failureCount: 0, responses: [] });
 
+      // Quiet types must not use the high-importance (ring/alert) channel.
+      // Omitting channelId lets Android use the default FCM channel.
+      const QUIET_PUSH_TYPES = new Set(['NEW_REVIEW']);
+      const pushType = String(payload.data?.type || payload.type || '').toUpperCase();
+      const isQuietPush = QUIET_PUSH_TYPES.has(pushType);
+
       const mobileOnlyTokens = mobileTokens.filter((token) => !webTokenSet.has(token));
       const mobileResponseTask = mobileOnlyTokens.length ? withTimeout(admin.messaging().sendEachForMulticast({
         tokens: mobileOnlyTokens,
@@ -270,7 +276,7 @@ class NotificationService {
         android: {
           priority: 'high',
           notification: {
-            channelId: 'high_importance_channel',
+            ...(isQuietPush ? {} : { channelId: 'high_importance_channel' }),
             priority: 'high',
             // Re-delivery of the same booking reminder replaces the existing
             // Android notification instead of creating another tray item.
