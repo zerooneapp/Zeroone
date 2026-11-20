@@ -76,7 +76,7 @@ const getGlobalSettings = async (req, res) => {
       settings = await GlobalSettings.create({});
     } else if (!settings.features) {
       // Ensure features object exists for older documents
-      settings.features = { membershipActive: true, subscriptionActive: true };
+      settings.features = { membershipActive: true, subscriptionActive: true, showVendorBilling: true };
       await settings.save();
     }
     res.status(200).json(settings);

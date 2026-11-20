@@ -179,6 +179,8 @@ const VendorWallet = () => {
   const recommendedTopup = useMemo(() => wallet?.recommendedTopup || (shortfallToResume > 0 ? shortfallToResume : (dailyPlan?.price || 0)), [wallet, shortfallToResume, dailyPlan]);
   const needsWalletAction = useMemo(() => wallet?.subscription?.currentPlan === 'daily' && shortfallToResume > 0, [wallet, shortfallToResume]);
   const engagement = useMemo(() => dashboard?.engagement || {}, [dashboard]);
+  // Admin toggle: hide plan/billing cards during free trial (backend decides)
+  const showBilling = wallet?.showBilling !== false;
 
   const startPaymentFlow = async ({ orderResponse, verifyPath, successMessage, description }) => {
     try {
@@ -379,6 +381,21 @@ const VendorWallet = () => {
           </motion.div>
         )}
 
+        {!showBilling && (
+          <div className="p-3 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl shadow-md flex items-center justify-between">
+            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase border bg-green-50/50 dark:bg-emerald-500/20 border-green-100 dark:border-emerald-500/30 text-green-600 dark:text-emerald-400">
+              Free Trial Active
+            </span>
+            <div className="text-right">
+              <p className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Trial Ends</p>
+              <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase">
+                {wallet?.subscription?.planExpiry ? dayjs(wallet.subscription.planExpiry).format('DD MMM YYYY') : 'N/A'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {showBilling && (
         <div className="p-3 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl shadow-md space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -428,8 +445,9 @@ const VendorWallet = () => {
             </div>
           )}
         </div>
+        )}
 
-        {needsWalletAction && (
+        {needsWalletAction && showBilling && (
           <section className="p-3 bg-gradient-to-br from-red-50 to-amber-50 dark:from-red-500/10 dark:to-amber-500/10 border border-red-100/80 dark:border-red-500/20 rounded-xl shadow-sm space-y-3">
             <div className="flex items-start gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
@@ -527,6 +545,7 @@ const VendorWallet = () => {
         </section>
 
         {/* 📋 BILLING CONTROLS */}
+        {showBilling && (
         <section className="space-y-3">
           <h2 className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 px-1">
             <Calendar size={12} /> Billing Controls
@@ -602,6 +621,7 @@ const VendorWallet = () => {
             </div>
           </div>
         </section>
+        )}
 
         <section className="space-y-3">
           <div className="flex flex-col gap-3 px-1">

@@ -85,6 +85,9 @@ const getVendorWalletOverview = async (req, res) => {
       recommendedTopup,
       isLowBalanceWarning,
       freeTrialDays: settings.freeTrialDays || 7,
+      // Admin can hide plan/billing cards, but only while the free trial is
+      // active. Once the trial ends, billing is always shown so the vendor can pay.
+      showBilling: !(settings.features?.showVendorBilling === false && subscriptionState.isTrialActive),
       minWithdrawalAmount: settings.minWithdrawalAmount || 100,
       currency: 'INR',
       paymentGateway,

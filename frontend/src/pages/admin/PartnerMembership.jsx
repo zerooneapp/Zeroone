@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Crown, ShieldCheck, Zap, Info, 
   Settings, Save, RefreshCw, AlertCircle,
-  ToggleLeft, ToggleRight, CheckCircle2
+  ToggleLeft, ToggleRight, CheckCircle2, Wallet
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
@@ -49,7 +49,7 @@ const PartnerMembership = () => {
       // Auto-save
       setSaving(true);
       await api.patch('/admin/settings', newSettings);
-      toast.success('Membership system status updated!');
+      toast.success('System status updated!');
     } catch (err) {
       toast.error('Failed to update settings');
       // Revert optimistic update
@@ -81,6 +81,7 @@ const PartnerMembership = () => {
 
   const membershipActive = settings?.features?.membershipActive ?? true;
   const subscriptionActive = settings?.features?.subscriptionActive ?? true;
+  const showVendorBilling = settings?.features?.showVendorBilling ?? true;
 
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-500">
@@ -170,7 +171,62 @@ const PartnerMembership = () => {
           </div>
         </motion.div>
 
+        {/* VENDOR BILLING VISIBILITY TOGGLE CARD */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(
+            "p-8 rounded-[2.5rem] border-2 transition-all relative overflow-hidden group",
+            showVendorBilling
+              ? "bg-white dark:bg-gray-900 border-primary/20 shadow-xl shadow-primary/5"
+              : "bg-slate-50 dark:bg-gray-900/40 border-slate-200 dark:border-gray-800"
+          )}
+        >
+          <div className="flex items-center justify-between relative z-10">
+            <div className={cn(
+              "p-4 rounded-2xl border flex items-center justify-center transition-colors",
+              showVendorBilling
+                ? "bg-primary/10 border-primary/20 text-primary"
+                : "bg-slate-100 border-slate-200 text-slate-500 dark:text-white dark:bg-gray-800 dark:border-gray-700"
+            )}>
+              <Wallet size={32} strokeWidth={2.5} />
+            </div>
+            <button
+              onClick={() => handleToggle('showVendorBilling')}
+              className={cn(
+                "w-16 h-8 rounded-full relative transition-all duration-500",
+                showVendorBilling ? "bg-primary" : "bg-slate-300 dark:bg-gray-800"
+              )}
+            >
+              <div className={cn(
+                "absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-500",
+                showVendorBilling ? "left-9" : "left-1"
+              )} />
+            </button>
+          </div>
 
+          <div className="mt-8 space-y-3 relative z-10">
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Vendor Plan & Billing</h3>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-500 leading-relaxed">
+              Show plan and billing cards on the vendor wallet page.
+              If disabled, vendors on a free trial only see their trial end date.
+              Billing automatically reappears once the trial ends.
+            </p>
+          </div>
+
+          <div className="mt-8 pt-8 border-t border-slate-100 dark:border-gray-800 flex items-center gap-3">
+            <div className={cn(
+              "w-2.5 h-2.5 rounded-full",
+              showVendorBilling ? "bg-emerald-500 animate-pulse" : "bg-red-500"
+            )} />
+            <span className={cn(
+              "text-[10px] font-black uppercase tracking-widest",
+              showVendorBilling ? "text-emerald-600" : "text-red-500"
+            )}>
+              {showVendorBilling ? "Visible to Vendors" : "Hidden During Trial"}
+            </span>
+          </div>
+        </motion.div>
 
       </div>
 

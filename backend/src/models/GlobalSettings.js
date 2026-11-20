@@ -15,7 +15,9 @@ const globalSettingsSchema = new mongoose.Schema({
   promotionPricePerDay: { type: Number, default: 10 },
   features: {
     membershipActive: { type: Boolean, default: true },
-    subscriptionActive: { type: Boolean, default: true }
+    subscriptionActive: { type: Boolean, default: true },
+    // When false, vendors on an active free trial don't see plan/billing cards
+    showVendorBilling: { type: Boolean, default: true }
   },
   paymentGateway: {
     active: {
