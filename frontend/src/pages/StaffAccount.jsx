@@ -158,7 +158,7 @@ const StaffAccount = () => {
             <Package size={18} strokeWidth={2.5} />
           </div>
           <div className="flex-1 leading-none">
-            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">STOCK MANAGEMENT</p>
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">Stock Management</p>
             <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none">Manage inventory stock</p>
           </div>
           <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
@@ -173,7 +173,7 @@ const StaffAccount = () => {
             <Calendar size={18} strokeWidth={2.5} />
           </div>
           <div className="flex-1 leading-none">
-            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">HISTORY</p>
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">History</p>
             <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none">View bookings & earnings history</p>
           </div>
           <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
@@ -188,7 +188,7 @@ const StaffAccount = () => {
             <Star size={18} strokeWidth={2.5} />
           </div>
           <div className="flex-1 leading-none">
-            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">REVIEWS</p>
+            <p className="text-[14px] font-black text-[#00246b] dark:text-white tracking-tight leading-none">Reviews</p>
             <p className="text-[10px] font-black text-[#00246b]/40 dark:text-slate-400 tracking-tight mt-1.5 truncate leading-none">View customer feedback & ratings</p>
           </div>
           <ChevronRight size={14} strokeWidth={3} className="text-slate-200 dark:text-gray-700 transition-colors" />
@@ -201,7 +201,7 @@ const StaffAccount = () => {
             className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-red-500/30 dark:border-red-500/30 text-red-500 dark:text-red-400 font-black tracking-widest text-[11px] active:scale-95 transition-all shadow-sm"
           >
             <LogOut size={16} strokeWidth={3} />
-            SIGN OUT
+            Sign Out
           </button>
         </div>
       </div>
