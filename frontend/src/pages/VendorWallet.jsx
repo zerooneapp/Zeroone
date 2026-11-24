@@ -356,11 +356,13 @@ const VendorWallet = () => {
                 {prettifyLabel(wallet?.plans?.serviceLevel || 'standard')}
               </span>
             </div>
-            <p className="text-[7px] font-bold text-white/30 uppercase leading-relaxed max-w-[220px]">
-              {wallet?.subscription?.currentPlan === 'trial' 
-                ? `You are on free trial. Maintain ${moneyFormatter.format(wallet?.minimumWalletThreshold || 0)} balance after trial ends to stay live.`
-                : `Maintain at least ${moneyFormatter.format(wallet?.minimumWalletThreshold || 0)} to keep bookings active on daily mode.`}
-            </p>
+            {showBilling && (
+              <p className="text-[7px] font-bold text-white/30 uppercase leading-relaxed max-w-[220px]">
+                {wallet?.subscription?.currentPlan === 'trial'
+                  ? `You are on free trial. Maintain ${moneyFormatter.format(wallet?.minimumWalletThreshold || 0)} balance after trial ends to stay live.`
+                  : `Maintain at least ${moneyFormatter.format(wallet?.minimumWalletThreshold || 0)} to keep bookings active on daily mode.`}
+              </p>
+            )}
           </div>
           <Wallet size={80} className="absolute -right-4 -bottom-4 text-white/5 -rotate-12" />
         </div>
@@ -379,20 +381,6 @@ const VendorWallet = () => {
               </p>
             </div>
           </motion.div>
-        )}
-
-        {!showBilling && (
-          <div className="p-3 bg-white dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl shadow-md flex items-center justify-between">
-            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase border bg-green-50/50 dark:bg-emerald-500/20 border-green-100 dark:border-emerald-500/30 text-green-600 dark:text-emerald-400">
-              Free Trial Active
-            </span>
-            <div className="text-right">
-              <p className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Trial Ends</p>
-              <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase">
-                {wallet?.subscription?.planExpiry ? dayjs(wallet.subscription.planExpiry).format('DD MMM YYYY') : 'N/A'}
-              </p>
-            </div>
-          </div>
         )}
 
         {showBilling && (
