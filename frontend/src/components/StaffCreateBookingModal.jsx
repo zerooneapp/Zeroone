@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   X, Calendar, Clock, User, CheckCircle2,
-  ChevronRight, Scissors, Loader2, Save, Phone
+  ChevronRight, Scissors, Loader2, Save, Phone, Search
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
@@ -30,6 +30,21 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [servicePricing, setServicePricing] = useState({});
   const [pricingPreview, setPricingPreview] = useState(null);
+
+  // Service search (icon in the "Select Services" header opens the search bar)
+  const [serviceSearchOpen, setServiceSearchOpen] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const normalizedServiceSearch = serviceSearch.trim().toLowerCase();
+  const visibleServices = normalizedServiceSearch
+    ? services.filter((s) => String(s.name || '').toLowerCase().includes(normalizedServiceSearch))
+    : services;
+  const closeServiceSearch = () => {
+    setServiceSearchOpen(false);
+    setServiceSearch('');
+  };
+  useEffect(() => {
+    if (!isOpen) closeServiceSearch();
+  }, [isOpen]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -81,6 +96,7 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
 
   const resetForm = () => {
     setStep(1);
+    closeServiceSearch();
     setAvailableSlots([]);
     setPricingPreview(null);
     setFormData({
@@ -282,46 +298,76 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
 
               {/* Services */}
               <div className="space-y-2">
-                <label className="text-[9px] font-black capitalize text-gray-400 tracking-widest flex items-center gap-1.5 px-1">
-                  <Scissors size={12} /> Select Services *
-                </label>
+                <div className="flex items-center justify-between px-1">
+                  <label className="text-[9px] font-black capitalize text-gray-400 tracking-widest flex items-center gap-1.5">
+                    <Scissors size={12} /> Select Services *
+                  </label>
+                  {services.length > 0 && (
+                    <button
+                      type="button"
+                      aria-label={serviceSearchOpen ? 'Close service search' : 'Search services'}
+                      onClick={() => (serviceSearchOpen ? closeServiceSearch() : setServiceSearchOpen(true))}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-[#00246b] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-800 transition-all"
+                    >
+                      {serviceSearchOpen ? <X size={14} /> : <Search size={14} />}
+                    </button>
+                  )}
+                </div>
+                {serviceSearchOpen && (
+                  <div className="relative px-0.5">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      autoFocus
+                      type="text"
+                      value={serviceSearch}
+                      onChange={(e) => setServiceSearch(e.target.value)}
+                      placeholder="Search service..."
+                      className="w-full bg-slate-50/50 dark:bg-gray-900 border border-slate-200/60 dark:border-gray-800 rounded-xl pl-9 pr-3 py-2.5 text-xs font-bold text-gray-900 dark:text-white shadow-sm focus:shadow-none transition-all caret-[#00246b] dark:caret-white placeholder:text-slate-400/70 dark:placeholder:text-gray-500/70"
+                    />
+                  </div>
+                )}
+                {visibleServices.length === 0 && normalizedServiceSearch && (
+                  <p className="text-center text-[10px] font-bold text-slate-400 py-4">
+                    No service found for "{serviceSearch.trim()}"
+                  </p>
+                )}
                 {services.length === 0 ? (
                   <div className="p-6 text-center text-gray-400 text-[9px] font-black bg-slate-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-slate-200 dark:border-gray-800">
                     No services assigned to you
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2 p-1.5">
-                    {services.map(s => (
-                      <button
-                        key={s._id}
-                        onClick={() => toggleService(s._id)}
-                        className={`py-1.5 px-2.5 pr-7 rounded-xl border transition-all flex flex-col gap-0.5 text-left active:scale-[0.97] relative ${
-                          formData.serviceIds.includes(s._id)
-                            ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white shadow-sm'
-                            : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
-                        }`}
-                      >
-                        <span className={`text-[10px] font-black capitalize ${
-                          formData.serviceIds.includes(s._id) ? 'text-[#00246b] dark:text-white' : 'text-gray-900 dark:text-white'
-                        }`}>
-                          {s.name}
-                        </span>
-                        <p className="text-[8.5px] font-black text-slate-400 capitalize tracking-[0.15em]">
-                          {servicePricing[String(s._id)]?.hasOffer ? (
-                            <>
-                              <span className="line-through mr-1 text-red-500 opacity-70">₹{s.price}</span>
-                              <span className="text-emerald-500 dark:text-emerald-400 font-extrabold">₹{servicePricing[String(s._id)].finalPrice}</span>
-                            </>
-                          ) : (
-                            `₹${s.price}`
-                          )}
-                          {` · ${s.duration}m`}
-                        </p>
-                        {formData.serviceIds.includes(s._id) && (
-                          <CheckCircle2 size={11} className="absolute bottom-1.5 right-2.5 text-[#00246b] dark:text-white" />
-                        )}
-                      </button>
-                    ))}
+                    {
+                        visibleServices.map(s => (
+                          <button
+                            key={s._id}
+                            onClick={() => toggleService(s._id)}
+                            className={`py-1.5 px-2.5 pr-7 rounded-xl border transition-all flex flex-col gap-0.5 text-left active:scale-[0.97] relative ${formData.serviceIds.includes(s._id)
+                                ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white shadow-sm'
+                                : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 shadow-sm'
+                              }`}
+                          >
+                            <span className={`text-[10px] font-black capitalize ${formData.serviceIds.includes(s._id) ? 'text-[#00246b] dark:text-white' : 'text-gray-900 dark:text-white'
+                              }`}>
+                              {s.name}
+                            </span>
+                            <p className="text-[8.5px] font-black text-slate-400 capitalize tracking-[0.15em]">
+                              {servicePricing[String(s._id)]?.hasOffer ? (
+                                <>
+                                  <span className="line-through mr-1 text-red-500 opacity-70">₹{s.price}</span>
+                                  <span className="text-emerald-500 dark:text-emerald-400 font-extrabold">₹{servicePricing[String(s._id)].finalPrice}</span>
+                                </>
+                              ) : (
+                                `₹${s.price}`
+                              )}
+                              {` · ${s.duration}m`}
+                            </p>
+                            {formData.serviceIds.includes(s._id) && (
+                              <CheckCircle2 size={11} className="absolute bottom-1.5 right-2.5 text-[#00246b] dark:text-white" />
+                            )}
+                          </button>
+                        ))
+                      }
                   </div>
                 )}
               </div>
@@ -377,13 +423,12 @@ const StaffCreateBookingModal = ({ isOpen, onClose, onRefresh }) => {
                           key={slot.time}
                           disabled={isBooked}
                           onClick={() => !isBooked && setFormData({ ...formData, time: slot.time })}
-                          className={`py-2.5 rounded-lg text-[10px] font-black border transition-all ${
-                            isBooked
+                          className={`py-2.5 rounded-lg text-[10px] font-black border transition-all ${isBooked
                               ? 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 cursor-not-allowed opacity-60'
                               : formData.time === slot.time
-                              ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white text-[#00246b] dark:text-white shadow-md active:scale-95'
-                              : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm active:scale-95'
-                          }`}
+                                ? 'bg-slate-50 dark:bg-blue-500/10 border-[#00246b] dark:border-white text-[#00246b] dark:text-white shadow-md active:scale-95'
+                                : 'bg-white dark:bg-gray-900 border-slate-200/60 dark:border-gray-800 text-gray-500 shadow-sm active:scale-95'
+                            }`}
                         >
                           {format12Hr(slot.time)}
                         </button>
